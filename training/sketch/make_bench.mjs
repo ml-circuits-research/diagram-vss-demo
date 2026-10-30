@@ -17,7 +17,7 @@ mkdirSync(here("../../docs/bench/"), { recursive: true });
 function rows(file, limit) {
   const out = [];
   for (const line of readFileSync(here(file), "utf8").split("\n").filter(Boolean)) {
-    const r = JSON.parse(line), { tokens, info } = normalize(C, lex, r.text);
+    const r = JSON.parse(line), { tokens, info } = normalize(C, lex, r.text, r.names);
     const ctx = { names: r.names, last: [] };
     const { nodes } = toNodes(readingFromGold(r, tokens, verbs), info, ctx, { s: 0, m: 0 });
     const main = nodes[nodes.length - 1]; if (!main) continue;

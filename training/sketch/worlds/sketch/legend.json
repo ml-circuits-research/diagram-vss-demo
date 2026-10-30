@@ -92,6 +92,14 @@
   {
    "id": "depth",
    "question": "to the front or to the back?"
+  },
+  {
+   "id": "superlative",
+   "question": "which extreme?"
+  },
+  {
+   "id": "comparison",
+   "question": "bigger or smaller than the other?"
   }
  ],
  "events": [
@@ -475,7 +483,8 @@
     "object",
     "color",
     "relation",
-    "landmark"
+    "landmark",
+    "comparison"
    ],
    "required": [
     "object"
@@ -509,6 +518,50 @@
    "required": [
     "object"
    ]
+  },
+  {
+   "id": "extreme",
+   "verbs": [
+    "extreme_q"
+   ],
+   "roles": [
+    "object",
+    "superlative"
+   ],
+   "required": []
+  },
+  {
+   "id": "nearest",
+   "verbs": [
+    "nearest_q"
+   ],
+   "roles": [
+    "object",
+    "landmark",
+    "superlative"
+   ],
+   "required": []
+  },
+  {
+   "id": "connected",
+   "verbs": [
+    "connected_q"
+   ],
+   "roles": [
+    "object",
+    "landmark"
+   ],
+   "required": []
+  },
+  {
+   "id": "degree",
+   "verbs": [
+    "degree_q"
+   ],
+   "roles": [
+    "object"
+   ],
+   "required": []
   }
  ],
  "operators": [

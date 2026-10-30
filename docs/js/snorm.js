@@ -9,12 +9,13 @@ export function compile(T) {
     T, lead: T.lead_strip.map(split).sort((a, b) => b.length - a.length), open: T.openers.map(([a, b]) => [split(a), split(b)]),
     mwe: T.mwe.map(([a, b]) => [split(a), split(b)]).sort((a, b) => b[0].length - a[0].length), syn: T.synonyms, num: T.number_words,
     noNum: new Set(T.number_word_exceptions), punct: T.punctuation, follow: new Set(T.article_followers), before: new Set(T.name_before),
+    rewrites: T.rewrites || [], qverbs: new Set(T.question_verbs || []),
   };
 }
 const eq = (a, b, i) => b.every((x, k) => a[i + k] === x);
 
-export function normalize(C, lexicon, text) {
-  const info = { texts: {}, names: {}, numbers: {} };
+export function normalize(C, lexicon, text, names = []) {
+  const info = { texts: {}, names: {}, numbers: {} }, known = new Set(names.map((n) => String(n).toLowerCase()));
   let s = text.replace(/"([^"]*)"|“([^”]*)”|(?<![A-Za-z0-9])'([^']+)'(?![A-Za-z0-9])/g, (m, a, b, c) => {
     const v = a ?? b ?? c, tok = "t_" + slug(v); info.texts[tok] = v; return ` ${tok} `;
   });
@@ -24,7 +25,9 @@ export function normalize(C, lexicon, text) {
     if (!C.follow.has(nxt.toLowerCase().replace(/[^a-z-]/g, "")) || C.before.has(prev)) parts[i] = "N_A_NAME";
   }
   s = parts.join(" ");
-  const originals = new Map(); for (const w of s.match(/[A-Za-z_][\w-]*/g) || []) if (!originals.has(w.toLowerCase())) originals.set(w.toLowerCase(), w);
+  s = s.replace(/\b(\d+)(px|pixels?)\b/g, "$1 $2").replace(/(?<=[A-Za-z0-9])['\u2019]s\b/g, "");
+  const originals = new Map(), capital = new Set(), words = s.match(/[A-Za-z_][\w-]*/g) || [];
+  words.forEach((w, k) => { if (!originals.has(w.toLowerCase())) originals.set(w.toLowerCase(), w); if (k > 0 && w[0] >= "A" && w[0] <= "Z" && w !== "I") capital.add(w.toLowerCase()); });
   s = s.toLowerCase();
   for (const [a, b] of Object.entries(C.T.contractions)) s = s.replace(new RegExp("(?<![a-z])" + esc(a) + "(?![a-z])", "g"), b);
   s = s.replace(new RegExp("([" + esc(C.punct) + "])(?=\\s|$)", "g"), " $1 ").replace(/,(?=\d)/g, " , ");
@@ -56,7 +59,10 @@ export function normalize(C, lexicon, text) {
   for (const t of out) {
     if (t === "n_a_name") { info.names.n_a = "A"; res.push("n_a"); continue; }
     if (lexicon.has(t) || /^\d+$/.test(t) || C.punct.includes(t) || t.startsWith("t_") || /^[^a-z0-9_]+$/.test(t)) { res.push(t); continue; }
-    const n = "n_" + slug(t); info.names[n] = originals.get(t) || t; res.push(n);
+    if (known.has(t) || capital.has(t)) { const n = "n_" + slug(t); info.names[n] = originals.get(t) || t; res.push(n); }
+    else res.push(t);                                                    // unknown word: kind 'unknown' for the reader
   }
+  for (const r of C.rewrites) if (res.length && r.first.includes(res[0]) && r.all.every((alts) => alts.some((w) => res.includes(w)))) { res[0] = r.set; break; }
+  if (res.length && C.qverbs.has(res[0])) for (let i = 1; i < res.length; i++) if (res[i] === "is" || res[i] === "are") res[i] = "be";
   return { tokens: res, info };
 }

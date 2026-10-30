@@ -50,14 +50,16 @@ EVENTS = {   # event -> verbs as the normalizer writes them (pseudo-verbs for qu
     "align": ["align"], "arrange": ["arrange"], "distribute": ["distribute", "space"], "toFront": ["bring"], "toBack": ["send"], "undo": ["undo"], "redo": ["redo"], "forget": ["forget"],
     "count": ["how_many"], "exists": ["is_there"], "list": ["which"], "property": ["what_color", "what_shape", "where_is", "how_big", "what_says"],
     "describe": ["describe"], "neighbors": ["neigh_q"], "path": ["path_q"], "reachable": ["reach_q"], "cycle": ["cycle_q"],
-    "check": ["is_q"], "fact": ["is"], "rule": ["from_now_on"]}
+    "check": ["is_q"], "fact": ["is"], "rule": ["from_now_on"],
+    "extreme": ["extreme_q"], "nearest": ["nearest_q"], "connected": ["connected_q"], "degree": ["degree_q"]}
 ROLES = [("object", "which shape or shapes?"), ("shape", "which kind of shape?"), ("color", "which colour?"), ("size", "which size?"),
          ("name", "what is it called?"), ("text", "what text is written on it?"), ("relation", "where, relative to another shape?"),
          ("landmark", "relative to which shape?"), ("landmark2", "and which second shape?"), ("region", "where on the canvas?"),
          ("direction", "in which direction?"), ("amount", "how far?"), ("quantity", "how many?"), ("axis", "along which axis?"),
          ("layout", "in which arrangement?"), ("source", "from which shape?"), ("target", "to which shape?"), ("style", "with which line style?"),
          ("arrow", "which way does the line point?"), ("edge", "with which line?"), ("pairing", "connected how among themselves?"),
-         ("notcolor", "which colour must they not have?"), ("depth", "to the front or to the back?")]
+         ("notcolor", "which colour must they not have?"), ("depth", "to the front or to the back?"),
+         ("superlative", "which extreme?"), ("comparison", "bigger or smaller than the other?")]
 
 KINDS = {}
 for s, p in SHAPES.items(): KINDS[s] = "SHAPE"; KINDS[p] = "SHAPE"
@@ -76,6 +78,10 @@ for w in ["chain", "next", "each_other"]: KINDS[w] = "PAIR"
 for w in COLORS: KINDS["not_" + w] = "NOTCOLOR"
 for w in ["front", "back"]: KINDS[w] = "DEPTH"
 for w in ["newest", "oldest"]: KINDS[w] = "RECENT"
+SUPERS = ["biggest", "smallest", "leftmost", "rightmost", "topmost", "bottommost", "mostconnected", "leastconnected", "closest", "farthest"]
+for w in SUPERS: KINDS[w] = "SUPER"
+for w in ["connected", "linked", "joined", "attached"]: KINDS[w] = "connected"
+for w in ["than", "be", "most", "one", "has", "have", "does", "connection"]: KINDS.setdefault(w, w)
 KINDS["evenly"] = "evenly"
 for vs in EVENTS.values():
     for v in vs: KINDS[v] = "VERB"
@@ -230,7 +236,7 @@ def cn(g):
         elif kind == "line" and g.coin(0.4): ew.append("plain"); roles["arrow"] = "plain"
         if style: ew.append(style); roles["style"] = style
         ew.append(kind); roles["edge"] = {"head": kind}
-        if kind == "line" and "arrow" not in roles: roles["arrow"] = "plain"
+        pass  # a plain line needs no arrow role: the adapter reads edge head "line" as no arrowhead
         if g.coin(0.3): t = g.pick(g.texts); ew += ["labeled", f'"{t}"']; roles["text"] = "t_" + slug(t)
         words += ew
     return words, roles
@@ -358,6 +364,42 @@ def qk(g):
     rel = g.pick(list(REL_SURF)); m = g.name()
     while m == n: m = g.name()
     return ["is", n] + g.pick(REL_SURF[rel]).split() + [m, "?"], {"object": {"head": "n_" + n.lower()}, "relation": rel, "landmark": {"head": "n_" + m.lower()}}
+@T("extreme", 1.2)
+def qx(g):
+    sup = g.pick(["biggest", "smallest", "leftmost", "rightmost", "topmost", "bottommost", "mostconnected", "leastconnected"])
+    surf = {"biggest": g.pick(["the biggest", "the largest"]), "smallest": "the smallest", "leftmost": "the leftmost", "rightmost": "the rightmost",
+            "topmost": g.pick(["the topmost", "the highest"]), "bottommost": g.pick(["the bottommost", "the lowest"]),
+            "mostconnected": "the most connections", "leastconnected": g.pick(["the fewest connections", "the least connections"])}[sup]
+    s = g.pick(list(SHAPES) + ["shape", "shape"]); spec = {"head": s}; w = []
+    if g.coin(0.3): c = g.pick(COLORS); w.append(c); spec["attr"] = c
+    w.append(g.sname(s) if s in SHAPES else "shape")
+    verb = ["has"] if "connections" in surf else ["is"]
+    tail = [] if "connections" in surf or g.coin(0.6) else ["one"]
+    return ["which"] + w + verb + surf.split() + tail + ["?"], {"object": spec, "superlative": sup}
+@T("nearest", 1)
+def qne(g):
+    sup = g.pick(["closest", "farthest"]); n = g.name(); s = g.pick(list(SHAPES) + ["shape"]); spec = {"head": s}; w = []
+    if g.coin(0.3): c = g.pick(COLORS); w.append(c); spec["attr"] = c
+    w.append(g.sname(s) if s in SHAPES else "shape")
+    sw = {"closest": g.pick(["closest", "nearest"]), "farthest": g.pick(["farthest", "furthest"])}[sup]
+    return ["which"] + w + ["is", sw, g.pick(["to", "from"]), n, "?"], {"object": spec, "superlative": sup, "landmark": {"head": "n_" + n.lower()}}
+@T("connected", 1)
+def qcn(g):
+    a, b = g.name(), g.name()
+    while b == a: b = g.name()
+    f = g.pick(["are {a} and {b} connected ?", "is {a} connected to {b} ?", "is {a} linked to {b} ?", "are {a} and {b} linked ?", "is {a} attached to {b} ?"])
+    return f.format(a=a, b=b).split(), {"object": {"head": "n_" + a.lower()}, "landmark": {"head": "n_" + b.lower()}}
+@T("degree", 0.8)
+def qdg(g):
+    n = g.name(); f = g.pick(["how many connections does {n} have ?", "how many arrows does {n} have ?", "how many connections has {n} got ?"])
+    return f.format(n=n).split(), {"object": {"head": "n_" + n.lower()}}
+@T("check", 0.8)
+def qcmp(g):
+    a, b = g.name(), g.name()
+    while b == a: b = g.name()
+    c = g.pick(["bigger", "smaller"]); cw = {"bigger": g.pick(["bigger", "larger"]), "smaller": "smaller"}[c]
+    return ["is", a, cw, "than", b, "?"], {"object": {"head": "n_" + a.lower()}, "comparison": c, "landmark": {"head": "n_" + b.lower()}}
+
 @T("fact", 1)
 def fa(g):
     n = g.name()
@@ -413,11 +455,11 @@ def wires_for(ev, roles, text, template, ids):
 def realise(g, ev, tid, f, prefix):
     words, roles = f(g)
     pid, ptxt = prefix
-    if ev in ("count", "exists", "list", "property", "describe", "neighbors", "path", "reachable", "cycle", "check", "fact", "rule"): pid, ptxt = "bare", ""
+    if ev in ("count", "exists", "list", "property", "describe", "neighbors", "path", "reachable", "cycle", "check", "fact", "rule", "extreme", "nearest", "connected", "degree"): pid, ptxt = "bare", ""
     surface = (ptxt + " " if ptxt else "") + " ".join(words)
     surface = surface.replace(" ?", "?").replace(" ,", ",")
     if g.coin(0.15) and not surface.endswith("?"): surface += "."
-    toks, info = normalize(surface, LEXICON)
+    toks, info = normalize(surface, LEXICON, g.names)
     return surface, " ".join(toks), roles, f"{ev}.{tid}.{pid}", info
 
 

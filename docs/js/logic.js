@@ -427,7 +427,7 @@ const corePlugin = {
 const historyPlugin = {
   name: 'history', title: 'History',
   description: 'Undo and redo. Every turn is one transaction, so undo reverts a whole sentence.',
-  legend: { action: { ask: 'What should happen?', kind: 'enum', values: { undo: ['undo', 'revert'], redo: ['redo'] } } },
+  legend: { action: { ask: 'What should happen?', kind: 'enum', values: { undo: ['undo', 'revert'], redo: ['redo', 'reapply', 're-apply'] } } },
   handlers: [
     { type: 'command', when: { action: 'undo' }, run(a, ctx) { const n = Math.max(1, +a.count || 1); for (let i = 0; i < n; i++) ctx.world.undo(); return { notes: [`reverted ${n} turn${n > 1 ? 's' : ''}`] }; } },
     { type: 'command', when: { action: 'redo' }, run(a, ctx) { const n = Math.max(1, +a.count || 1); for (let i = 0; i < n; i++) ctx.world.redo(); return { notes: [`re-applied ${n} turn${n > 1 ? 's' : ''}`] }; } }
@@ -440,7 +440,7 @@ const shapesPlugin = {
   name: 'shapes', title: 'Shapes',
   description: 'Create, delete, move, restyle, rename, label, duplicate and swap shapes.',
   legend: {
-    action: { values: { create: ['draw', 'create', 'add', 'make', 'put', 'place', 'insert', 'sketch', 'build', 'spawn'], delete: ['delete', 'remove', 'erase', 'drop', 'clear', 'wipe', 'reset', 'get rid of'], move: ['move', 'shift', 'drag', 'push', 'nudge', 'slide', 'reposition'], set: ['set', 'change', 'turn', 'color', 'colour', 'paint', 'fill', 'give', 'recolor', 'recolour'], resize: ['resize', 'grow', 'enlarge', 'shrink', 'scale'], rename: ['rename', 'call'], label: ['label', 'title', 'caption', 'write'], duplicate: ['duplicate', 'copy', 'clone'], swap: ['swap', 'exchange'] } },
+    action: { values: { create: ['draw', 'create', 'add', 'make', 'put', 'place', 'insert', 'sketch', 'build', 'spawn', 'throw', 'slap', 'pop', 'stick', 'plonk'], delete: ['delete', 'remove', 'erase', 'drop', 'clear', 'wipe', 'reset', 'get rid of', 'kill', 'trash', 'axe', 'ditch', 'zap', 'banish', 'nuke'], move: ['move', 'shift', 'drag', 'push', 'nudge', 'slide', 'reposition', 'relocate', 'scoot', 'shove', 'park', 'tuck'], set: ['set', 'change', 'turn', 'color', 'colour', 'paint', 'fill', 'give', 'recolor', 'recolour'], resize: ['resize', 'grow', 'enlarge', 'shrink', 'scale'], rename: ['rename', 'call'], label: ['label', 'title', 'caption', 'write', 'inscribe', 'stamp', 'tag'], duplicate: ['duplicate', 'copy', 'clone', 'replicate', 'dupe'], swap: ['swap', 'exchange', 'trade', 'switch places', 'trade places'] } },
     shape: { ask: 'What kind of shape?', kind: 'enum', values: SHAPE_VALUES },
     color: { ask: 'What color is it?', kind: 'enum', values: COLOR_VALUES },
     outline: { ask: 'What color is its outline?', kind: 'enum', values: OUTLINE_VALUES },
@@ -554,7 +554,7 @@ const connectionsPlugin = {
   name: 'connections', title: 'Connections',
   description: 'Arrows and lines between shapes, with style, direction, color and label.',
   legend: {
-    action: { values: { connect: ['connect', 'link', 'join', 'wire', 'attach', 'hook'], disconnect: ['disconnect', 'unlink', 'detach', 'separate', 'cut'] } },
+    action: { values: { connect: ['connect', 'link', 'join', 'wire', 'attach', 'hook', 'tie'], disconnect: ['disconnect', 'unlink', 'detach', 'separate', 'cut', 'unhook', 'sever', 'snip'] } },
     from: { ask: 'Where does the connection start?', kind: 'names' },
     to: { ask: 'Where does the connection end?', kind: 'names' },
     style: { ask: 'Is the line solid, dashed or dotted?', kind: 'enum', values: { solid: [], dashed: ['dash'], dotted: ['dot'] } },
@@ -604,7 +604,7 @@ const layoutPlugin = {
   name: 'layout', title: 'Layout',
   description: 'Align shapes along an axis, or arrange many shapes as a row, column, grid or circle.',
   legend: {
-    action: { values: { align: ['align', 'line up'], arrange: ['arrange', 'layout', 'lay out', 'organize', 'organise', 'tidy'], distribute: ['distribute', 'space', 'spread'], toFront: ['bring'], toBack: ['send'] } },
+    action: { values: { align: ['align', 'line up'], arrange: ['arrange', 'layout', 'lay out', 'organize', 'organise', 'tidy'], distribute: ['distribute', 'space', 'spread'], toFront: ['bring', 'raise'], toBack: ['send'] } },
     axis: { ask: 'Along which axis?', kind: 'enum', values: { horizontal: ['horizontally', 'in a row'], vertical: ['vertically', 'in a column'] } },
     layout: { ask: 'In what pattern?', kind: 'enum', values: { row: ['row', 'line'], column: ['column', 'stack'], grid: ['grid', 'tidy'], circle: ['circle', 'ring'] } }
   },
@@ -662,7 +662,7 @@ const queriesPlugin = {
     property: { ask: 'Which property is asked about?', kind: 'enum', values: { color: ['colour'], size: ['how big'], shape: [], label: ['text'], position: ['where', 'location'], outline: ['border'] } },
     kind: { ask: 'Shapes, or connections?', kind: 'enum', values: { shape: [], edge: ['arrows', 'connections', 'links', 'edges', 'lines'] } },
     comparison: { ask: 'Compared how?', kind: 'enum', values: { bigger: ['larger'], smaller: [] } },
-    superlative: { ask: 'Which extreme?', kind: 'enum', values: { biggest: ['largest'], smallest: ['tiniest'], leftmost: [], rightmost: [], topmost: ['highest'], bottommost: ['lowest'], closest: ['nearest'], farthest: ['furthest'], mostConnected: ['most connections'], leastConnected: ['fewest connections'] } }
+    superlative: { ask: 'Which extreme?', kind: 'enum', values: { biggest: ['largest'], smallest: ['tiniest'], leftmost: [], rightmost: [], topmost: ['highest'], bottommost: ['lowest'], closest: ['nearest'], farthest: ['furthest'], mostConnected: ['most connections', 'most links'], leastConnected: ['fewest connections', 'least connections', 'fewest links'] } }
   },
   handlers: [
     { type: 'question', when: { ask: 'count' }, run(a, ctx) {
@@ -931,7 +931,7 @@ const reasoningPlugin = {
 const rulesPlugin = {
   name: 'rules', title: 'Default rules',
   description: 'Rules such as "from now on circles are orange" fill in answers the user leaves out when creating shapes.',
-  legend: { action: { values: { forget: ['forget'] } }, ask: { values: { rules: ['what rules'] } } },
+  legend: { action: { values: { forget: ['forget', 'discard', 'disregard'] } }, ask: { values: { rules: ['what rules'] } } },
   handlers: [
     { type: 'rule', run(a, ctx) {
       const W = ctx.world, r = { id: 'r' + (++W.state.ruleSeq), shape: a.shape && a.shape !== 'any' ? a.shape : null, color: a.color || null, size: a.size || null, outline: a.outline && a.outline !== 'none' ? a.outline : null };

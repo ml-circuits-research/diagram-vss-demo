@@ -42,7 +42,7 @@ export function info() {
 
 /** one clause -> { nodes, notes, reading, vss } */
 export function readClause(src, ctx, seq) {
-  const { tokens, info: ninfo } = normalize(state.table, state.lexicon, src);
+  const { tokens, info: ninfo } = normalize(state.table, state.lexicon, src, (ctx.names || []).concat([...(ctx.refs ? ctx.refs.keys() : [])]));
   const text = tokens.join(" ");
   const r = state.vss.read(text);
   const verb = tokens.find((t) => state.verbEvent.has(t)) || r.frame.lemma || null;
@@ -73,7 +73,7 @@ export async function formalize(text, ctx, rulesFormalize) {
 }
 
 export function goldNodes(row, ctx) {
-  const { tokens, info: ninfo } = normalize(state.table, state.lexicon, row.text);
+  const { tokens, info: ninfo } = normalize(state.table, state.lexicon, row.text, row.names || []);
   return toNodes(readingFromGold(row, tokens, state.verbs), ninfo, ctx, { s: 0, m: 0 }).nodes;
 }
 

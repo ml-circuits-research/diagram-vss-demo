@@ -12,7 +12,7 @@ import { canon } from "../../docs/js/bench-canon.js";
 const require = createRequire(import.meta.url);
 const K = require("../../docs/js/logic.js");
 const argv = process.argv.slice(2), verbose = argv.includes("-v"), dumpAt = argv.indexOf("--dump");
-const dirs = argv.filter((a, i) => !a.startsWith("-") && i !== dumpAt + 1);
+const dirs = argv.filter((a, i) => !a.startsWith("-") && (dumpAt < 0 || i !== dumpAt + 1));
 const dir = new URL("../../docs/model/sketch/", import.meta.url);
 const readFile = async (n) => { const b = readFileSync(new URL(n, dir)); return n.endsWith(".json") ? b.toString("utf8") : b.buffer.slice(b.byteOffset, b.byteOffset + b.length); };
 const vss = await load(null, { readFile, sentenceCandidates: true });
@@ -24,7 +24,7 @@ const sys = K.createSystem();
 function vssFormalize(text, ctx) {
   const cut = sys.formalize(text, ctx), seq = { s: 0, m: 0 }, c = { names: ctx.names, last: [], refs: new Map() }, nodes = [];
   for (const seg of cut.segments) {
-    const { tokens, info: ni } = normalize(C, lex, seg.src), r = vss.read(tokens.join(" "));
+    const { tokens, info: ni } = normalize(C, lex, seg.src, c.names.concat([...c.refs.keys()])), r = vss.read(tokens.join(" "));
     const verb = tokens.find((t) => verbEvent.has(t)) || null;
     const reading = r.status === "unknown-event" || r.status === "no-sense" ? null : readingFromWires(r.wires, verb);
     const out = reading ? toNodes(reading, ni, c, seq) : { nodes: [] };

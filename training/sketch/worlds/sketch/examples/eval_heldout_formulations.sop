@@ -1,5 +1,5 @@
 !world sketch
-!legend sha256:9a92ad4aa726b9a8c43f7650f831ffe4b7e0bb5aae12e8fcfb0fa3103fb05c68
+!legend sha256:ecd34967af65d57cb90a3b12797d96d492d19e19b139d2676fcee71367854e53
 !generated training/sketch/generate.py seed 0
 
 @w1 create
@@ -19,7 +19,7 @@ attr=lime
 _text=connect the teal star to n_done with a arrow
 _world=sketch
 _source=generator
-_template=connect.cn.could
+_template=connect.cn.want
 _mood=command
 source=$w4
 target=$w5
@@ -36,4469 +36,4416 @@ head=n_done
 @w6 entity
 head=arrow
 
-@w7 undo
-_text=undo
-_world=sketch
-_source=generator
-_template=undo.ud.could
-_mood=command
-
-@w8 connect
-_text=connect newest orange hexagon to the purple star with a plain dashed line
-_world=sketch
-_source=generator
-_template=connect.cn.could
-_mood=command
-source=$w9
-target=$w10
-style=dashed
-arrow=plain
-edge=$w11
-
-@w9 entity
-head=hexagon
-attr=orange
-det=newest
-
-@w10 entity
-head=star
-attr=purple
-det=the
-
-@w11 entity
-head=line
-
-@w12 set
-_text=make the ellipses not_purple red
-_world=sketch
-_source=generator
-_template=set.st_not.now
-_mood=command
-object=$w13
-color=red
-notcolor=not_purple
-
-@w13 entity
-head=ellipses
-det=the
-
-@w14 distribute
-_text=space everything evenly horizontally
-_world=sketch
-_source=generator
-_template=distribute.dsb.now
-_mood=command
-object=$w15
-axis=horizontally
-
-@w15 entity
-head=everything
-
-@w16 create
-_text=draw a tiny lime star named n_internet labeled t_back below n_delta
-_world=sketch
-_source=generator
-_template=create.cr.can
-_mood=command
-object=$w17
-size=tiny
-name=n_internet
-text=t_back
-relation=below
-landmark=$w18
-
-@w17 entity
-head=star
-attr=lime
-
-@w18 entity
-head=n_delta
-
-@w19 move
-_text=move n_main above n_valid
-_world=sketch
-_source=generator
-_template=move.mv_place.could
-_mood=command
-object=$w20
-relation=above
-landmark=$w21
-
-@w20 entity
-head=n_main
-
-@w21 entity
-head=n_valid
-
-@w22 disconnect
-_text=disconnect n_door to n_firewall
-_world=sketch
-_source=generator
-_template=disconnect.dc.lets
-_mood=command
-source=$w23
-target=$w24
-
-@w23 entity
-head=n_door
-
-@w24 entity
-head=n_firewall
-
-@w25 move
-_text=move n_printer between n_cloud and n_beta
-_world=sketch
-_source=generator
-_template=move.mv_place.could
-_mood=command
-object=$w26
-relation=between
-landmark=$w27
-landmark2=$w28
-
-@w26 entity
-head=n_printer
-
-@w27 entity
-head=n_cloud
-
-@w28 entity
-head=n_beta
-
-@w29 connect
-_text=connect n_router to the hexagon
-_world=sketch
-_source=generator
-_template=connect.cn.want
-_mood=command
-source=$w30
-target=$w31
-
-@w30 entity
-head=n_router
-
-@w31 entity
-head=hexagon
-det=the
-
-@w32 connect
-_text=connect n_backup to the rectangle with a arrow .
-_world=sketch
-_source=generator
-_template=connect.cn.could
-_mood=command
-source=$w33
-target=$w34
-edge=$w35
-
-@w33 entity
-head=n_backup
-
-@w34 entity
-head=rectangle
-det=the
-
-@w35 entity
-head=arrow
-
-@w36 connect
-_text=connect the orange star to n_form
-_world=sketch
-_source=generator
-_template=connect.cn.want
-_mood=command
-source=$w37
-target=$w38
-
-@w37 entity
-head=star
-attr=orange
-det=the
-
-@w38 entity
-head=n_form
-
-@w39 list
-_text=which green rectangles ?
-_world=sketch
-_source=generator
-_template=list.ql.bare
-_mood=command
-object=$w40
-
-@w40 entity
-head=rectangles
-attr=green
-
-@w41 connect
-_text=connect it to n_hub
-_world=sketch
-_source=generator
-_template=connect.cn.could
-_mood=command
-source=$w42
-target=$w43
-
-@w42 entity
-head=it
-
-@w43 entity
-head=n_hub
-
-@w44 rename
-_text=rename n_api n_internet
-_world=sketch
-_source=generator
-_template=rename.rn.now
-_mood=command
-object=$w45
-name=n_internet
-
-@w45 entity
-head=n_api
-
-@w46 path
-_text=path_q from n_ball to n_tree ?
-_world=sketch
-_source=generator
-_template=path.qpa.bare
-_mood=command
-source=$w47
-target=$w48
-
-@w47 entity
-head=n_ball
-
-@w48 entity
-head=n_tree
-
-@w49 connect
-_text=connect oldest purple circle with the navy diamond
-_world=sketch
-_source=generator
-_template=connect.cn.want
-_mood=command
-source=$w50
-target=$w51
-
-@w50 entity
-head=circle
-attr=purple
-det=oldest
-
-@w51 entity
-head=diamond
-attr=navy
-det=the
-
-@w52 duplicate
-_text=duplicate n_box1
-_world=sketch
-_source=generator
-_template=duplicate.dp.could
-_mood=command
-object=$w53
-
-@w53 entity
-head=n_box1
-
-@w54 move
-_text=move the star bottom_right
-_world=sketch
-_source=generator
-_template=move.mv_place.could
-_mood=command
-object=$w55
-region=bottom_right
-
-@w55 entity
-head=star
-det=the
-
-@w56 path
-_text=path_q from n_d to n_hub ?
-_world=sketch
-_source=generator
-_template=path.qpa.bare
-_mood=command
-source=$w57
-target=$w58
-
-@w57 entity
-head=n_d
-
-@w58 entity
-head=n_hub
-
-@w59 fact
-_text=n_printer is teal
-_world=sketch
-_source=generator
-_template=fact.fa.bare
-_mood=command
-object=$w60
-color=teal
-
-@w60 entity
-head=n_printer
-
-@w61 distribute
-_text=space the lime ellipses evenly vertically
-_world=sketch
-_source=generator
-_template=distribute.dsb.want
-_mood=command
-object=$w62
-axis=vertically
-
-@w62 entity
-head=ellipses
-attr=lime
-det=the
-
-@w63 move
-_text=move n_cache left_of the star
-_world=sketch
-_source=generator
-_template=move.mv_place.could
-_mood=command
-object=$w64
-relation=left_of
-landmark=$w65
-
-@w64 entity
-head=n_cache
-
-@w65 entity
-head=star
-det=the
-
-@w66 forget
+@w7 forget
 _text=forget rules
 _world=sketch
 _source=generator
 _template=forget.fg.could
 _mood=command
-object=$w67
+object=$w8
 
-@w67 entity
+@w8 entity
 head=rules
 
-@w68 list
-_text=which black diamonds ?
+@w9 connect
+_text=connect newest orange hexagon to the purple star with a plain dashed line
+_world=sketch
+_source=generator
+_template=connect.cn.could
+_mood=command
+source=$w10
+target=$w11
+style=dashed
+arrow=plain
+edge=$w12
+
+@w10 entity
+head=hexagon
+attr=orange
+det=newest
+
+@w11 entity
+head=star
+attr=purple
+det=the
+
+@w12 entity
+head=line
+
+@w13 set
+_text=make the ellipses not_purple red
+_world=sketch
+_source=generator
+_template=set.st_not.want
+_mood=command
+object=$w14
+color=red
+notcolor=not_purple
+
+@w14 entity
+head=ellipses
+det=the
+
+@w15 distribute
+_text=space everything evenly horizontally
+_world=sketch
+_source=generator
+_template=distribute.dsb.want
+_mood=command
+object=$w16
+axis=horizontally
+
+@w16 entity
+head=everything
+
+@w17 create
+_text=draw a tiny lime star named n_internet labeled t_back below n_delta
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w18
+size=tiny
+name=n_internet
+text=t_back
+relation=below
+landmark=$w19
+
+@w18 entity
+head=star
+attr=lime
+
+@w19 entity
+head=n_delta
+
+@w20 set
+_text=make n_main small .
+_world=sketch
+_source=generator
+_template=set.st_size.want
+_mood=command
+object=$w21
+size=small
+
+@w21 entity
+head=n_main
+
+@w22 list
+_text=which all rectangles be there ?
 _world=sketch
 _source=generator
 _template=list.ql.bare
 _mood=command
-object=$w69
+object=$w23
 
-@w69 entity
+@w23 entity
+head=rectangles
+
+@w24 create
+_text=draw a small triangle next_to n_leaf
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w25
+size=small
+relation=next_to
+landmark=$w26
+
+@w25 entity
+head=triangle
+
+@w26 entity
+head=n_leaf
+
+@w27 toFront
+_text=bring n_d front .
+_world=sketch
+_source=generator
+_template=toFront.tf.please
+_mood=command
+object=$w28
+depth=front
+
+@w28 entity
+head=n_d
+
+@w29 degree
+_text=degree_q connection does n_queue have ?
+_world=sketch
+_source=generator
+_template=degree.qdg.bare
+_mood=command
+object=$w30
+
+@w30 entity
+head=n_queue
+
+@w31 connect
+_text=connect dotted arrow from n_server to n_leaf .
+_world=sketch
+_source=generator
+_template=connect.cn_draw.can
+_mood=command
+source=$w32
+target=$w33
+style=dotted
+edge=$w34
+
+@w32 entity
+head=n_server
+
+@w33 entity
+head=n_leaf
+
+@w34 entity
+head=arrow
+
+@w35 create
+_text=draw a huge yellow rectangle right_side
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w36
+size=huge
+region=right_side
+
+@w36 entity
+head=rectangle
+attr=yellow
+
+@w37 count
+_text=how_many squares below n_internet do we have ?
+_world=sketch
+_source=generator
+_template=count.qc.bare
+_mood=command
+object=$w38
+relation=below
+landmark=$w39
+
+@w38 entity
+head=squares
+
+@w39 entity
+head=n_internet
+
+@w40 create
+_text=draw a red square
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w41
+
+@w41 entity
+head=square
+attr=red
+
+@w42 undo
+_text=undo
+_world=sketch
+_source=generator
+_template=undo.ud.please
+_mood=command
+
+@w43 cycle
+_text=cycle_q ?
+_world=sketch
+_source=generator
+_template=cycle.qy.bare
+_mood=command
+
+@w44 distribute
+_text=space the diamonds evenly vertically
+_world=sketch
+_source=generator
+_template=distribute.dsb.want
+_mood=command
+object=$w45
+axis=vertically
+
+@w45 entity
 head=diamonds
-attr=black
+det=the
 
-@w70 create
-_text=draw a lime star named n_d labeled t_approve top_right
+@w46 duplicate
+_text=duplicate n_process
+_world=sketch
+_source=generator
+_template=duplicate.dp.could
+_mood=command
+object=$w47
+
+@w47 entity
+head=n_process
+
+@w48 toBack
+_text=send n_laptop back .
+_world=sketch
+_source=generator
+_template=toBack.tb.want
+_mood=command
+object=$w49
+depth=back
+
+@w49 entity
+head=n_laptop
+
+@w50 list
+_text=which all diamonds below n_api ?
+_world=sketch
+_source=generator
+_template=list.ql.bare
+_mood=command
+object=$w51
+relation=below
+landmark=$w52
+
+@w51 entity
+head=diamonds
+
+@w52 entity
+head=n_api
+
+@w53 create
+_text=draw a navy hexagon named n_printer labeled t_close
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w71
-name=n_d
-text=t_approve
-region=top_right
+object=$w54
+name=n_printer
+text=t_close
 
-@w71 entity
-head=star
-attr=lime
+@w54 entity
+head=hexagon
+attr=navy
 
-@w72 connect
-_text=connect n_laptop to the purple hexagon with a two_way dotted arrow labeled t_enter_password
+@w55 toBack
+_text=send n_output back
 _world=sketch
 _source=generator
-_template=connect.cn.want
+_template=toBack.tb.can
 _mood=command
-text=t_enter_password
-source=$w73
-target=$w74
-style=dotted
-arrow=two_way
-edge=$w75
+object=$w56
+depth=back
 
-@w73 entity
-head=n_laptop
+@w56 entity
+head=n_output
 
-@w74 entity
-head=hexagon
-attr=purple
-det=the
+@w57 create
+_text=top_left , draw a lime diamond
+_world=sketch
+_source=generator
+_template=create.cr_loc_first.now
+_mood=command
+object=$w58
+region=top_left
 
-@w75 entity
-head=arrow
+@w58 entity
+head=diamond
+attr=lime
 
-@w76 connect
-_text=connect the rectangles chain .
+@w59 connect
+_text=connect the triangles chain
 _world=sketch
 _source=generator
 _template=connect.cn_pair.want
 _mood=command
-source=$w77
+source=$w60
 pairing=chain
 
-@w77 entity
-head=rectangles
+@w60 entity
+head=triangles
 det=the
 
-@w78 move
+@w61 count
+_text=how_many stars above n_ended do we have ?
+_world=sketch
+_source=generator
+_template=count.qc.bare
+_mood=command
+object=$w62
+relation=above
+landmark=$w63
+
+@w62 entity
+head=stars
+
+@w63 entity
+head=n_ended
+
+@w64 move
+_text=move n_side right_of n_d
+_world=sketch
+_source=generator
+_template=move.mv_place.could
+_mood=command
+object=$w65
+relation=right_of
+landmark=$w66
+
+@w65 entity
+head=n_side
+
+@w66 entity
+head=n_d
+
+@w67 create
+_text=draw a large yellow square
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w68
+size=large
+
+@w68 entity
+head=square
+attr=yellow
+
+@w69 connect
+_text=connect n_tree to the lime star
+_world=sketch
+_source=generator
+_template=connect.cn.could
+_mood=command
+source=$w70
+target=$w71
+
+@w70 entity
+head=n_tree
+
+@w71 entity
+head=star
+attr=lime
+det=the
+
+@w72 delete
+_text=delete all hexagons not_white .
+_world=sketch
+_source=generator
+_template=delete.de_not.please
+_mood=command
+object=$w73
+notcolor=not_white
+
+@w73 entity
+head=hexagons
+det=the
+
+@w74 move
 _text=move n_d above n_top1
 _world=sketch
 _source=generator
 _template=move.mv_place.could
 _mood=command
-object=$w79
+object=$w75
 relation=above
-landmark=$w80
+landmark=$w76
 
-@w79 entity
+@w75 entity
 head=n_d
 
-@w80 entity
+@w76 entity
 head=n_top1
 
-@w81 move
+@w77 move
 _text=move n_ended top_right
 _world=sketch
 _source=generator
 _template=move.mv_place.could
 _mood=command
-object=$w82
+object=$w78
 region=top_right
 
-@w82 entity
+@w78 entity
 head=n_ended
 
-@w83 move
-_text=move n_ball next_to n_backup
+@w79 move
+_text=move circle next_to n_backup
 _world=sketch
 _source=generator
 _template=move.mv_place.could
 _mood=command
-object=$w84
+object=$w80
 relation=next_to
-landmark=$w85
+landmark=$w81
 
-@w84 entity
+@w80 entity
 head=n_ball
 
-@w85 entity
+@w81 entity
 head=n_backup
 
-@w86 connect
+@w82 connect
 _text=connect dashed arrow from n_box1 to n_ended
 _world=sketch
 _source=generator
-_template=connect.cn_draw.please
+_template=connect.cn_draw.can
 _mood=command
-source=$w87
-target=$w88
+source=$w83
+target=$w84
 style=dashed
-edge=$w89
+edge=$w85
 
-@w87 entity
+@w83 entity
 head=n_box1
 
-@w88 entity
+@w84 entity
 head=n_ended
 
-@w89 entity
+@w85 entity
 head=arrow
 
-@w90 move
+@w86 move
 _text=move the gold circle between n_firewall and n_form
 _world=sketch
 _source=generator
 _template=move.mv_place.could
 _mood=command
-object=$w91
+object=$w87
 relation=between
-landmark=$w92
-landmark2=$w93
+landmark=$w88
+landmark2=$w89
 
-@w91 entity
+@w87 entity
 head=circle
 attr=gold
 det=the
 
-@w92 entity
+@w88 entity
 head=n_firewall
 
-@w93 entity
+@w89 entity
 head=n_form
 
-@w94 list
-_text=which gold triangles are there ?
+@w90 list
+_text=which gold triangles be there ?
 _world=sketch
 _source=generator
 _template=list.ql.bare
 _mood=command
-object=$w95
+object=$w91
 
-@w95 entity
+@w91 entity
 head=triangles
 attr=gold
 
-@w96 delete
+@w92 delete
 _text=delete all squares not_brown
 _world=sketch
 _source=generator
 _template=delete.de_not.please
 _mood=command
-object=$w97
+object=$w93
 notcolor=not_brown
 
-@w97 entity
+@w93 entity
 head=squares
 det=the
 
-@w98 distribute
+@w94 distribute
 _text=space everything evenly vertically
 _world=sketch
 _source=generator
-_template=distribute.dsb.now
+_template=distribute.dsb.want
 _mood=command
-object=$w99
+object=$w95
 axis=vertically
 
-@w99 entity
+@w95 entity
 head=everything
 
-@w100 create
+@w96 create
 _text=below n_output , draw a diamond
 _world=sketch
 _source=generator
 _template=create.cr_loc_first.now
 _mood=command
-object=$w101
+object=$w97
 relation=below
-landmark=$w102
+landmark=$w98
 
-@w101 entity
+@w97 entity
 head=diamond
 
-@w102 entity
+@w98 entity
 head=n_output
 
-@w103 connect
+@w99 connect
 _text=connect n_ended to the ellipse .
 _world=sketch
 _source=generator
 _template=connect.cn.could
 _mood=command
-source=$w104
-target=$w105
+source=$w100
+target=$w101
 
-@w104 entity
+@w100 entity
 head=n_ended
 
-@w105 entity
+@w101 entity
 head=ellipse
 det=the
 
-@w106 move
+@w102 move
 _text=move n_gate bottom
 _world=sketch
 _source=generator
 _template=move.mv_place.could
 _mood=command
-object=$w107
+object=$w103
 region=bottom
 
-@w107 entity
+@w103 entity
 head=n_gate
 
-@w108 connect
+@w104 connect
 _text=connect the hexagon to the diamond
 _world=sketch
 _source=generator
 _template=connect.cn.could
 _mood=command
-source=$w109
-target=$w110
+source=$w105
+target=$w106
 
-@w109 entity
+@w105 entity
 head=hexagon
 det=the
 
-@w110 entity
+@w106 entity
 head=diamond
 det=the
 
-@w111 create
-_text=draw a small white ellipse
+@w107 create
+_text=left_of n_x , draw a medium lime square
+_world=sketch
+_source=generator
+_template=create.cr_loc_first.now
+_mood=command
+object=$w108
+size=medium
+relation=left_of
+landmark=$w109
+
+@w108 entity
+head=square
+attr=lime
+
+@w109 entity
+head=n_x
+
+@w110 create
+_text=draw 3 navy hexagons right_of the indigo star
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w112
-size=small
+object=$w111
+relation=right_of
+landmark=$w112
+quantity=3
+
+@w111 entity
+head=hexagons
+attr=navy
 
 @w112 entity
-head=ellipse
-attr=white
+head=star
+attr=indigo
+det=the
 
-@w113 create
-_text=draw a red rectangle labeled t_save
+@w113 fact
+_text=n_beta is next_to n_router
 _world=sketch
 _source=generator
-_template=create.cr.can
+_template=fact.fa.bare
 _mood=command
 object=$w114
-text=t_save
+relation=next_to
+landmark=$w115
 
 @w114 entity
-head=rectangle
-attr=red
+head=n_beta
 
-@w115 toBack
-_text=send n_cloud back
+@w115 entity
+head=n_router
+
+@w116 set
+_text=make it tiny
+_world=sketch
+_source=generator
+_template=set.st_size.want
+_mood=command
+object=$w117
+size=tiny
+
+@w117 entity
+head=it
+
+@w118 count
+_text=how_many circles do we have ?
+_world=sketch
+_source=generator
+_template=count.qc.bare
+_mood=command
+object=$w119
+
+@w119 entity
+head=circles
+
+@w120 connect
+_text=connect dotted arrow from n_main to n_core
+_world=sketch
+_source=generator
+_template=connect.cn_draw.please
+_mood=command
+source=$w121
+target=$w122
+style=dotted
+edge=$w123
+
+@w121 entity
+head=n_main
+
+@w122 entity
+head=n_core
+
+@w123 entity
+head=arrow
+
+@w124 create
+_text=draw a medium ellipse labeled t_enter_password below n_earth
+_world=sketch
+_source=generator
+_template=create.cr.now
+_mood=command
+object=$w125
+size=medium
+text=t_enter_password
+relation=below
+landmark=$w126
+
+@w125 entity
+head=ellipse
+
+@w126 entity
+head=n_earth
+
+@w127 path
+_text=path_q from n_beta to n_core ?
+_world=sketch
+_source=generator
+_template=path.qpa.bare
+_mood=command
+source=$w128
+target=$w129
+
+@w128 entity
+head=n_beta
+
+@w129 entity
+head=n_core
+
+@w130 list
+_text=which stars
+_world=sketch
+_source=generator
+_template=list.ql.bare
+_mood=command
+object=$w131
+
+@w131 entity
+head=stars
+
+@w132 toBack
+_text=send the navy triangle back
 _world=sketch
 _source=generator
 _template=toBack.tb.want
 _mood=command
-object=$w116
+object=$w133
 depth=back
 
-@w116 entity
-head=n_cloud
-
-@w117 connect
-_text=connect n_gate to n_printer with a two_way dashed arrow labeled t_pay
-_world=sketch
-_source=generator
-_template=connect.cn.could
-_mood=command
-text=t_pay
-source=$w118
-target=$w119
-style=dashed
-arrow=two_way
-edge=$w120
-
-@w118 entity
-head=n_gate
-
-@w119 entity
-head=n_printer
-
-@w120 entity
-head=arrow
-
-@w121 connect
-_text=connect the star to the magenta diamond
-_world=sketch
-_source=generator
-_template=connect.cn.want
-_mood=command
-source=$w122
-target=$w123
-
-@w122 entity
-head=star
-det=the
-
-@w123 entity
-head=diamond
-attr=magenta
-det=the
-
-@w124 connect
-_text=connect n_gamma with n_leaf with a dotted arrow
-_world=sketch
-_source=generator
-_template=connect.cn.want
-_mood=command
-source=$w125
-target=$w126
-style=dotted
-edge=$w127
-
-@w125 entity
-head=n_gamma
-
-@w126 entity
-head=n_leaf
-
-@w127 entity
-head=arrow
-
-@w128 create
-_text=draw 4 black hexagons
-_world=sketch
-_source=generator
-_template=create.cr.can
-_mood=command
-object=$w129
-quantity=4
-
-@w129 entity
-head=hexagons
-attr=black
-
-@w130 toBack
-_text=send the navy triangle back
-_world=sketch
-_source=generator
-_template=toBack.tb.can
-_mood=command
-object=$w131
-depth=back
-
-@w131 entity
+@w133 entity
 head=triangle
 attr=navy
 det=the
 
-@w132 connect
+@w134 connect
 _text=connect the triangle to n_printer with a arrow labeled t_save
 _world=sketch
 _source=generator
 _template=connect.cn.could
 _mood=command
 text=t_save
-source=$w133
-target=$w134
-edge=$w135
+source=$w135
+target=$w136
+edge=$w137
 
-@w133 entity
+@w135 entity
 head=triangle
 det=the
 
-@w134 entity
+@w136 entity
 head=n_printer
 
-@w135 entity
+@w137 entity
 head=arrow
 
-@w136 move
+@w138 move
 _text=move n_door below n_sun
 _world=sketch
 _source=generator
 _template=move.mv_place.could
 _mood=command
-object=$w137
+object=$w139
 relation=below
-landmark=$w138
+landmark=$w140
 
-@w137 entity
+@w139 entity
 head=n_door
 
-@w138 entity
+@w140 entity
 head=n_sun
 
-@w139 list
+@w141 list
 _text=which pink hexagons
 _world=sketch
 _source=generator
 _template=list.ql.bare
 _mood=command
-object=$w140
+object=$w142
 
-@w140 entity
+@w142 entity
 head=hexagons
 attr=pink
 
-@w141 move
+@w143 move
 _text=move n_ceo left_side .
 _world=sketch
 _source=generator
 _template=move.mv_place.could
 _mood=command
-object=$w142
+object=$w144
 region=left_side
 
-@w142 entity
+@w144 entity
 head=n_ceo
 
-@w143 fact
+@w145 fact
 _text=n_cache is gray
 _world=sketch
 _source=generator
 _template=fact.fa.bare
 _mood=command
-object=$w144
+object=$w146
 color=gray
 
-@w144 entity
-head=n_cache
-
-@w145 rename
-_text=rename n_laptop to n_tree
-_world=sketch
-_source=generator
-_template=rename.rn.now
-_mood=command
-object=$w146
-name=n_tree
-
 @w146 entity
-head=n_laptop
-
-@w147 fact
-_text=n_error is magenta
-_world=sketch
-_source=generator
-_template=fact.fa.bare
-_mood=command
-object=$w148
-color=magenta
-
-@w148 entity
-head=n_error
-
-@w149 count
-_text=how_many brown stars left_side are there ?
-_world=sketch
-_source=generator
-_template=count.qc.bare
-_mood=command
-object=$w150
-region=left_side
-
-@w150 entity
-head=stars
-attr=brown
-
-@w151 path
-_text=path_q from n_sun to n_cloud ?
-_world=sketch
-_source=generator
-_template=path.qpa.bare
-_mood=command
-source=$w152
-target=$w153
-
-@w152 entity
-head=n_sun
-
-@w153 entity
-head=n_cloud
-
-@w154 set
-_text=make n_cache bigger
-_world=sketch
-_source=generator
-_template=set.st_size.want
-_mood=command
-object=$w155
-size=bigger
-
-@w155 entity
 head=n_cache
 
-@w156 connect
-_text=connect n_ceo to n_node2 .
-_world=sketch
-_source=generator
-_template=connect.cn.want
-_mood=command
-source=$w157
-target=$w158
-
-@w157 entity
-head=n_ceo
-
-@w158 entity
-head=n_node2
-
-@w159 move
-_text=move n_gate below the diamond
-_world=sketch
-_source=generator
-_template=move.mv_place.could
-_mood=command
-object=$w160
-relation=below
-landmark=$w161
-
-@w160 entity
-head=n_gate
-
-@w161 entity
-head=diamond
-det=the
-
-@w162 create
-_text=draw a large diamond labeled t_step_1 left_of n_ball
-_world=sketch
-_source=generator
-_template=create.cr.can
-_mood=command
-object=$w163
-size=large
-text=t_step_1
-relation=left_of
-landmark=$w164
-
-@w163 entity
-head=diamond
-
-@w164 entity
-head=n_ball
-
-@w165 list
-_text=which all circles not_green
-_world=sketch
-_source=generator
-_template=list.ql.bare
-_mood=command
-object=$w166
-notcolor=not_green
-
-@w166 entity
-head=circles
-
-@w167 move
-_text=move the brown square next_to the diamond
-_world=sketch
-_source=generator
-_template=move.mv_place.could
-_mood=command
-object=$w168
-relation=next_to
-landmark=$w169
-
-@w168 entity
-head=square
-attr=brown
-det=the
-
-@w169 entity
-head=diamond
-det=the
-
-@w170 toBack
-_text=send the gold rectangle back
-_world=sketch
-_source=generator
-_template=toBack.tb.want
-_mood=command
-object=$w171
-depth=back
-
-@w171 entity
-head=rectangle
-attr=gold
-det=the
-
-@w172 distribute
-_text=distribute everything evenly
-_world=sketch
-_source=generator
-_template=distribute.dsb.now
-_mood=command
-object=$w173
-
-@w173 entity
-head=everything
-
-@w174 duplicate
-_text=duplicate n_start 3 times
+@w147 duplicate
+_text=duplicate n_laptop
 _world=sketch
 _source=generator
 _template=duplicate.dp.could
 _mood=command
-object=$w175
-quantity=3
+object=$w148
 
-@w175 entity
-head=n_start
+@w148 entity
+head=n_laptop
 
-@w176 connect
-_text=connect n_start to n_internet
+@w149 set
+_text=make n_box1 bigger
+_world=sketch
+_source=generator
+_template=set.st_size.want
+_mood=command
+object=$w150
+size=bigger
+
+@w150 entity
+head=n_box1
+
+@w151 create
+_text=draw an orange rectangle
+_world=sketch
+_source=generator
+_template=create.cr.now
+_mood=command
+object=$w152
+
+@w152 entity
+head=rectangle
+attr=orange
+
+@w153 set
+_text=make n_b tiny
+_world=sketch
+_source=generator
+_template=set.st_size.want
+_mood=command
+object=$w154
+size=tiny
+
+@w154 entity
+head=n_b
+
+@w155 connect
+_text=connect n_root with the rectangle
 _world=sketch
 _source=generator
 _template=connect.cn.want
 _mood=command
-source=$w177
-target=$w178
+source=$w156
+target=$w157
 
-@w177 entity
-head=n_start
+@w156 entity
+head=n_root
 
-@w178 entity
-head=n_internet
-
-@w179 create
-_text=left_of n_node2 , draw a white rectangle
-_world=sketch
-_source=generator
-_template=create.cr_loc_first.now
-_mood=command
-object=$w180
-relation=left_of
-landmark=$w181
-
-@w180 entity
+@w157 entity
 head=rectangle
-attr=white
+det=the
 
-@w181 entity
-head=n_node2
-
-@w182 toBack
-_text=send n_ball back
+@w158 list
+_text=which triangles be there ?
 _world=sketch
 _source=generator
-_template=toBack.tb.want
+_template=list.ql.bare
 _mood=command
-object=$w183
-depth=back
+object=$w159
 
-@w183 entity
-head=n_ball
+@w159 entity
+head=triangles
 
-@w184 create
-_text=draw 5 medium yellow rectangles labeled t_ok left_of n_db
+@w160 create
+_text=draw a large magenta hexagon named n_ceo center
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w185
-size=medium
-text=t_ok
-relation=left_of
-landmark=$w186
-quantity=5
+object=$w161
+size=large
+name=n_ceo
+region=center
 
-@w185 entity
-head=rectangles
-attr=yellow
+@w161 entity
+head=hexagon
+attr=magenta
 
-@w186 entity
-head=n_db
-
-@w187 create
-_text=draw a navy square named n_internet .
+@w162 list
+_text=which all teal stars bottom_left
 _world=sketch
 _source=generator
-_template=create.cr.now
+_template=list.ql.bare
 _mood=command
-object=$w188
-name=n_internet
+object=$w163
+region=bottom_left
 
-@w188 entity
-head=square
-attr=navy
+@w163 entity
+head=stars
+attr=teal
 
-@w189 rule
-_text=from_now_on rectangles are tiny
-_world=sketch
-_source=generator
-_template=rule.ru.bare
-_mood=command
-object=$w190
-size=tiny
-
-@w190 entity
-head=rectangles
-
-@w191 fact
-_text=n_a is magenta
-_world=sketch
-_source=generator
-_template=fact.fa.bare
-_mood=command
-object=$w192
-color=magenta
-
-@w192 entity
-head=n_a
-
-@w193 connect
-_text=connect arrow from n_node2 to n_tree .
-_world=sketch
-_source=generator
-_template=connect.cn_draw.can
-_mood=command
-source=$w194
-target=$w195
-edge=$w196
-
-@w194 entity
-head=n_node2
-
-@w195 entity
-head=n_tree
-
-@w196 entity
-head=arrow
-
-@w197 move
-_text=move n_gamma center
+@w164 move
+_text=move the diamond left_side
 _world=sketch
 _source=generator
 _template=move.mv_place.could
 _mood=command
-object=$w198
-region=center
+object=$w165
+region=left_side
 
-@w198 entity
-head=n_gamma
+@w165 entity
+head=diamond
+det=the
 
-@w199 create
-_text=draw 5 tiny magenta stars
+@w166 list
+_text=which circles ?
 _world=sketch
 _source=generator
-_template=create.cr.can
+_template=list.ql.bare
 _mood=command
-object=$w200
-size=tiny
-quantity=5
+object=$w167
 
-@w200 entity
-head=stars
-attr=magenta
+@w167 entity
+head=circles
 
-@w201 create
-_text=draw a tiny triangle named n_a labeled t_user below the black rectangle .
+@w168 create
+_text=draw a red hexagon named n_queue
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w202
-size=tiny
-name=n_a
-text=t_user
-relation=below
-landmark=$w203
+object=$w169
+name=n_queue
 
-@w202 entity
+@w169 entity
+head=hexagon
+attr=red
+
+@w170 disconnect
+_text=let delete the arrow from n_gamma to n_start
+_world=sketch
+_source=generator
+_template=disconnect.dc.lets
+_mood=command
+source=$w171
+target=$w172
+
+@w171 entity
+head=n_gamma
+
+@w172 entity
+head=n_start
+
+@w173 list
+_text=which hexagons ?
+_world=sketch
+_source=generator
+_template=list.ql.bare
+_mood=command
+object=$w174
+
+@w174 entity
+head=hexagons
+
+@w175 fact
+_text=n_db is pink
+_world=sketch
+_source=generator
+_template=fact.fa.bare
+_mood=command
+object=$w176
+color=pink
+
+@w176 entity
+head=n_db
+
+@w177 count
+_text=how_many lime hexagons be there ?
+_world=sketch
+_source=generator
+_template=count.qc.bare
+_mood=command
+object=$w178
+
+@w178 entity
+head=hexagons
+attr=lime
+
+@w179 connect
+_text=connect dashed arrow from n_core to n_c .
+_world=sketch
+_source=generator
+_template=connect.cn_draw.can
+_mood=command
+source=$w180
+target=$w181
+style=dashed
+edge=$w182
+
+@w180 entity
+head=n_core
+
+@w181 entity
+head=n_c
+
+@w182 entity
+head=arrow
+
+@w183 move
+_text=move n_api top
+_world=sketch
+_source=generator
+_template=move.mv_place.could
+_mood=command
+object=$w184
+region=top
+
+@w184 entity
+head=n_api
+
+@w185 create
+_text=draw a large square named n_login between n_home and n_ended
+_world=sketch
+_source=generator
+_template=create.cr.now
+_mood=command
+object=$w186
+size=large
+name=n_login
+relation=between
+landmark=$w187
+landmark2=$w188
+
+@w186 entity
+head=square
+
+@w187 entity
+head=n_home
+
+@w188 entity
+head=n_ended
+
+@w189 create
+_text=below n_api , draw a navy hexagon
+_world=sketch
+_source=generator
+_template=create.cr_loc_first.now
+_mood=command
+object=$w190
+relation=below
+landmark=$w191
+
+@w190 entity
+head=hexagon
+attr=navy
+
+@w191 entity
+head=n_api
+
+@w192 create
+_text=draw a large triangle .
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w193
+size=large
+
+@w193 entity
 head=triangle
 
-@w203 entity
-head=rectangle
-attr=black
-det=the
+@w194 disconnect
+_text=let delete the arrow from n_mars to n_earth
+_world=sketch
+_source=generator
+_template=disconnect.dc.lets
+_mood=command
+source=$w195
+target=$w196
 
-@w204 distribute
-_text=distribute all purple ellipses
+@w195 entity
+head=n_mars
+
+@w196 entity
+head=n_earth
+
+@w197 create
+_text=draw a yellow ellipse named n_earth labeled t_error .
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w198
+name=n_earth
+text=t_error
+
+@w198 entity
+head=ellipse
+attr=yellow
+
+@w199 distribute
+_text=space everything horizontally
 _world=sketch
 _source=generator
 _template=distribute.dsb.now
 _mood=command
-object=$w205
+object=$w200
+axis=horizontally
+
+@w200 entity
+head=everything
+
+@w201 path
+_text=path_q from n_router to n_b ?
+_world=sketch
+_source=generator
+_template=path.qpa.bare
+_mood=command
+source=$w202
+target=$w203
+
+@w202 entity
+head=n_router
+
+@w203 entity
+head=n_b
+
+@w204 connect
+_text=connect dashed arrow from n_queue to n_hub
+_world=sketch
+_source=generator
+_template=connect.cn_draw.can
+_mood=command
+source=$w205
+target=$w206
+style=dashed
+edge=$w207
 
 @w205 entity
+head=n_queue
+
+@w206 entity
+head=n_hub
+
+@w207 entity
+head=arrow
+
+@w208 create
+_text=draw a large gold rectangle named n_hub left_side .
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w209
+size=large
+name=n_hub
+region=left_side
+
+@w209 entity
+head=rectangle
+attr=gold
+
+@w210 distribute
+_text=distribute all purple ellipses
+_world=sketch
+_source=generator
+_template=distribute.dsb.want
+_mood=command
+object=$w211
+
+@w211 entity
 head=ellipses
 attr=purple
 det=all
 
-@w206 connect
+@w212 connect
 _text=connect the orange square to newest white ellipse with a arrow .
 _world=sketch
 _source=generator
 _template=connect.cn.could
 _mood=command
-source=$w207
-target=$w208
-edge=$w209
+source=$w213
+target=$w214
+edge=$w215
 
-@w207 entity
+@w213 entity
 head=square
 attr=orange
 det=the
 
-@w208 entity
+@w214 entity
 head=ellipse
 attr=white
 det=newest
 
-@w209 entity
+@w215 entity
 head=arrow
 
-@w210 connect
+@w216 connect
 _text=connect the diamond to the teal star with a plain dotted line labeled t_ok
 _world=sketch
 _source=generator
 _template=connect.cn.want
 _mood=command
 text=t_ok
-source=$w211
-target=$w212
+source=$w217
+target=$w218
 style=dotted
 arrow=plain
-edge=$w213
+edge=$w219
 
-@w211 entity
+@w217 entity
 head=diamond
 det=the
 
-@w212 entity
+@w218 entity
 head=star
 attr=teal
 det=the
 
-@w213 entity
+@w219 entity
 head=line
 
-@w214 create
+@w220 create
 _text=draw 4 diamonds below n_idle
 _world=sketch
 _source=generator
 _template=create.cr.can
 _mood=command
-object=$w215
+object=$w221
 relation=below
-landmark=$w216
+landmark=$w222
 quantity=4
 
-@w215 entity
+@w221 entity
 head=diamonds
 
-@w216 entity
+@w222 entity
 head=n_idle
 
-@w217 duplicate
+@w223 duplicate
 _text=duplicate the ellipse
 _world=sketch
 _source=generator
 _template=duplicate.dp.could
 _mood=command
-object=$w218
+object=$w224
 
-@w218 entity
+@w224 entity
 head=ellipse
 det=the
 
-@w219 rename
-_text=rename n_ceo n_side .
+@w225 duplicate
+_text=duplicate n_ceo .
 _world=sketch
 _source=generator
-_template=rename.rn.now
+_template=duplicate.dp.could
 _mood=command
-object=$w220
-name=n_side
+object=$w226
 
-@w220 entity
+@w226 entity
 head=n_ceo
 
-@w221 delete
+@w227 delete
 _text=delete all diamonds not_magenta
 _world=sketch
 _source=generator
 _template=delete.de_not.please
 _mood=command
-object=$w222
+object=$w228
 notcolor=not_magenta
 
-@w222 entity
+@w228 entity
 head=diamonds
 det=the
 
-@w223 connect
+@w229 connect
 _text=connect n_ended to the star
 _world=sketch
 _source=generator
 _template=connect.cn.could
 _mood=command
-source=$w224
-target=$w225
+source=$w230
+target=$w231
 
-@w224 entity
+@w230 entity
 head=n_ended
 
-@w225 entity
+@w231 entity
 head=star
 det=the
 
-@w226 list
+@w232 list
 _text=which gray ellipses ?
 _world=sketch
 _source=generator
 _template=list.ql.bare
 _mood=command
-object=$w227
+object=$w233
 
-@w227 entity
+@w233 entity
 head=ellipses
 attr=gray
 
-@w228 list
-_text=which rectangles are there ?
+@w234 list
+_text=which rectangles be there ?
 _world=sketch
 _source=generator
 _template=list.ql.bare
 _mood=command
-object=$w229
+object=$w235
 
-@w229 entity
+@w235 entity
 head=rectangles
 
-@w230 create
+@w236 create
 _text=draw a star named n_door labeled t_step_1 next_to n_hub .
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w231
+object=$w237
 name=n_door
 text=t_step_1
 relation=next_to
-landmark=$w232
+landmark=$w238
 
-@w231 entity
+@w237 entity
 head=star
 
-@w232 entity
+@w238 entity
 head=n_hub
 
-@w233 connect
+@w239 connect
 _text=connect the ellipse to n_valid
 _world=sketch
 _source=generator
 _template=connect.cn.could
 _mood=command
-source=$w234
-target=$w235
+source=$w240
+target=$w241
 
-@w234 entity
+@w240 entity
 head=ellipse
 det=the
 
-@w235 entity
+@w241 entity
 head=n_valid
 
-@w236 rename
+@w242 rename
 _text=rename n_mars as n_cache
 _world=sketch
 _source=generator
 _template=rename.rn.now
 _mood=command
-object=$w237
+object=$w243
 name=n_cache
 
-@w237 entity
+@w243 entity
 head=n_mars
 
-@w238 create
+@w244 create
 _text=draw 2 medium gray stars left_side
 _world=sketch
 _source=generator
 _template=create.cr.can
 _mood=command
-object=$w239
+object=$w245
 size=medium
 region=left_side
 quantity=2
 
-@w239 entity
+@w245 entity
 head=stars
 attr=gray
 
-@w240 path
-_text=path_q from n_server to n_process ?
+@w246 cycle
+_text=cycle_q ?
 _world=sketch
 _source=generator
-_template=path.qpa.bare
+_template=cycle.qy.bare
 _mood=command
-source=$w241
-target=$w242
 
-@w241 entity
-head=n_server
-
-@w242 entity
-head=n_process
-
-@w243 set
-_text=make the squares not_orange gold
-_world=sketch
-_source=generator
-_template=set.st_not.now
-_mood=command
-object=$w244
-color=gold
-notcolor=not_orange
-
-@w244 entity
-head=squares
-det=the
-
-@w245 connect
-_text=connect dotted arrow from n_laptop to n_top1
-_world=sketch
-_source=generator
-_template=connect.cn_draw.can
-_mood=command
-source=$w246
-target=$w247
-style=dotted
-edge=$w248
-
-@w246 entity
-head=n_laptop
-
-@w247 entity
-head=n_top1
-
-@w248 entity
-head=arrow
-
-@w249 connect
-_text=connect the star to n_firewall with a dashed arrow
-_world=sketch
-_source=generator
-_template=connect.cn.want
-_mood=command
-source=$w250
-target=$w251
-style=dashed
-edge=$w252
-
-@w250 entity
-head=star
-det=the
-
-@w251 entity
-head=n_firewall
-
-@w252 entity
-head=arrow
-
-@w253 create
-_text=draw a large star
+@w247 create
+_text=draw an orange square labeled t_step_1
 _world=sketch
 _source=generator
 _template=create.cr.can
 _mood=command
-object=$w254
-size=large
+object=$w248
+text=t_step_1
 
-@w254 entity
-head=star
+@w248 entity
+head=square
+attr=orange
 
-@w255 set
-_text=make the ellipses not_red indigo
-_world=sketch
-_source=generator
-_template=set.st_not.now
-_mood=command
-object=$w256
-color=indigo
-notcolor=not_red
-
-@w256 entity
-head=ellipses
-det=the
-
-@w257 connect
-_text=connect arrow from n_c to n_output
-_world=sketch
-_source=generator
-_template=connect.cn_draw.can
-_mood=command
-source=$w258
-target=$w259
-edge=$w260
-
-@w258 entity
-head=n_c
-
-@w259 entity
-head=n_output
-
-@w260 entity
-head=arrow
-
-@w261 move
-_text=move n_d left_of the circle .
-_world=sketch
-_source=generator
-_template=move.mv_place.could
-_mood=command
-object=$w262
-relation=left_of
-landmark=$w263
-
-@w262 entity
-head=n_d
-
-@w263 entity
-head=circle
-det=the
-
-@w264 disconnect
-_text=disconnect n_db from n_server .
-_world=sketch
-_source=generator
-_template=disconnect.dc.lets
-_mood=command
-source=$w265
-target=$w266
-
-@w265 entity
-head=n_db
-
-@w266 entity
-head=n_server
-
-@w267 fact
-_text=n_router is left_of n_db
-_world=sketch
-_source=generator
-_template=fact.fa.bare
-_mood=command
-object=$w268
-relation=left_of
-landmark=$w269
-
-@w268 entity
-head=n_router
-
-@w269 entity
-head=n_db
-
-@w270 connect
-_text=connect n_api with n_cloud
-_world=sketch
-_source=generator
-_template=connect.cn.want
-_mood=command
-source=$w271
-target=$w272
-
-@w271 entity
-head=n_api
-
-@w272 entity
-head=n_cloud
-
-@w273 list
-_text=which all indigo hexagons ?
-_world=sketch
-_source=generator
-_template=list.ql.bare
-_mood=command
-object=$w274
-
-@w274 entity
-head=hexagons
-attr=indigo
-
-@w275 distribute
-_text=space the purple stars evenly horizontally
-_world=sketch
-_source=generator
-_template=distribute.dsb.now
-_mood=command
-object=$w276
-axis=horizontally
-
-@w276 entity
-head=stars
-attr=purple
-det=the
-
-@w277 connect
-_text=connect arrow from n_output to n_box1
-_world=sketch
-_source=generator
-_template=connect.cn_draw.can
-_mood=command
-source=$w278
-target=$w279
-edge=$w280
-
-@w278 entity
-head=n_output
-
-@w279 entity
-head=n_box1
-
-@w280 entity
-head=arrow
-
-@w281 connect
-_text=connect n_side with n_x with a dashed arrow
+@w249 connect
+_text=connect oldest yellow diamond to the ellipse with a two_way dashed arrow
 _world=sketch
 _source=generator
 _template=connect.cn.could
 _mood=command
-source=$w282
-target=$w283
+source=$w250
+target=$w251
 style=dashed
-edge=$w284
+arrow=two_way
+edge=$w252
 
-@w282 entity
-head=n_side
+@w250 entity
+head=diamond
+attr=yellow
+det=oldest
 
-@w283 entity
-head=n_x
+@w251 entity
+head=ellipse
+det=the
 
-@w284 entity
+@w252 entity
 head=arrow
 
-@w285 disconnect
-_text=disconnect n_core from n_cache .
+@w253 degree
+_text=degree_q connection has n_worker got ?
 _world=sketch
 _source=generator
-_template=disconnect.dc.lets
+_template=degree.qdg.bare
 _mood=command
-source=$w286
-target=$w287
+object=$w254
 
-@w286 entity
-head=n_core
-
-@w287 entity
-head=n_cache
-
-@w288 rename
-_text=rename n_valid as n_delta
-_world=sketch
-_source=generator
-_template=rename.rn.now
-_mood=command
-object=$w289
-name=n_delta
-
-@w289 entity
-head=n_valid
-
-@w290 fact
-_text=n_worker is white
-_world=sketch
-_source=generator
-_template=fact.fa.bare
-_mood=command
-object=$w291
-color=white
-
-@w291 entity
+@w254 entity
 head=n_worker
 
-@w292 count
-_text=how_many shapes do we have ?
+@w255 create
+_text=draw a large triangle next_to the circle
 _world=sketch
 _source=generator
-_template=count.qc.bare
+_template=create.cr.can
 _mood=command
-object=$w293
+object=$w256
+size=large
+relation=next_to
+landmark=$w257
 
-@w293 entity
-head=shapes
+@w256 entity
+head=triangle
 
-@w294 connect
-_text=connect all rectangles each_other
+@w257 entity
+head=circle
+det=the
+
+@w258 distribute
+_text=space everything evenly horizontally
+_world=sketch
+_source=generator
+_template=distribute.dsb.want
+_mood=command
+object=$w259
+axis=horizontally
+
+@w259 entity
+head=everything
+
+@w260 create
+_text=draw an ellipse labeled t_back bottom
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w261
+text=t_back
+region=bottom
+
+@w261 entity
+head=ellipse
+
+@w262 connect
+_text=connect the ellipse with n_check
+_world=sketch
+_source=generator
+_template=connect.cn.could
+_mood=command
+source=$w263
+target=$w264
+
+@w263 entity
+head=ellipse
+det=the
+
+@w264 entity
+head=n_check
+
+@w265 rule
+_text=from_now_on hexagons should be tiny
+_world=sketch
+_source=generator
+_template=rule.ru.bare
+_mood=command
+object=$w266
+size=tiny
+
+@w266 entity
+head=hexagons
+
+@w267 connect
+_text=connect each red star to next
 _world=sketch
 _source=generator
 _template=connect.cn_pair.want
 _mood=command
-source=$w295
-pairing=each_other
+source=$w268
+pairing=next
 
-@w295 entity
-head=rectangles
-det=all
+@w268 entity
+head=star
+attr=red
+det=each
 
-@w296 fact
-_text=n_tree is above n_leaf
+@w269 fact
+_text=n_gate is gold
 _world=sketch
 _source=generator
 _template=fact.fa.bare
 _mood=command
-object=$w297
-relation=above
-landmark=$w298
+object=$w270
+color=gold
 
-@w297 entity
-head=n_tree
+@w270 entity
+head=n_gate
 
-@w298 entity
-head=n_leaf
-
-@w299 count
-_text=how_many diamonds above n_db are there ?
+@w271 disconnect
+_text=let disconnect n_cache from n_check
 _world=sketch
 _source=generator
-_template=count.qc.bare
+_template=disconnect.dc.lets
 _mood=command
-object=$w300
-relation=above
-landmark=$w301
+source=$w272
+target=$w273
 
-@w300 entity
-head=diamonds
+@w272 entity
+head=n_cache
 
-@w301 entity
-head=n_db
+@w273 entity
+head=n_check
 
-@w302 set
-_text=make the triangles not_brown magenta
+@w274 create
+_text=draw a large brown square named n_x
 _world=sketch
 _source=generator
-_template=set.st_not.want
+_template=create.cr.now
 _mood=command
-object=$w303
-color=magenta
-notcolor=not_brown
+object=$w275
+size=large
+name=n_x
 
-@w303 entity
-head=triangles
+@w275 entity
+head=square
+attr=brown
+
+@w276 connect
+_text=connect the star with n_hub
+_world=sketch
+_source=generator
+_template=connect.cn.could
+_mood=command
+source=$w277
+target=$w278
+
+@w277 entity
+head=star
 det=the
 
-@w304 path
+@w278 entity
+head=n_hub
+
+@w279 list
+_text=which ellipses
+_world=sketch
+_source=generator
+_template=list.ql.bare
+_mood=command
+object=$w280
+
+@w280 entity
+head=ellipses
+
+@w281 connect
+_text=connect n_backup to the rectangle
+_world=sketch
+_source=generator
+_template=connect.cn.want
+_mood=command
+source=$w282
+target=$w283
+
+@w282 entity
+head=n_backup
+
+@w283 entity
+head=rectangle
+det=the
+
+@w284 path
 _text=path_q from n_side to n_core ?
 _world=sketch
 _source=generator
 _template=path.qpa.bare
 _mood=command
-source=$w305
-target=$w306
+source=$w285
+target=$w286
 
-@w305 entity
+@w285 entity
 head=n_side
 
-@w306 entity
+@w286 entity
 head=n_core
 
-@w307 create
+@w287 create
 _text=draw a large ellipse labeled t_close below the lime star
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w308
+object=$w288
 size=large
 text=t_close
 relation=below
-landmark=$w309
+landmark=$w289
 
-@w308 entity
+@w288 entity
 head=ellipse
 
-@w309 entity
+@w289 entity
 head=star
 attr=lime
 det=the
 
-@w310 connect
+@w290 connect
 _text=connect dotted arrow from n_cloud to n_earth
 _world=sketch
 _source=generator
 _template=connect.cn_draw.please
 _mood=command
-source=$w311
-target=$w312
+source=$w291
+target=$w292
 style=dotted
-edge=$w313
+edge=$w293
 
-@w311 entity
+@w291 entity
 head=n_cloud
 
-@w312 entity
+@w292 entity
 head=n_earth
 
-@w313 entity
+@w293 entity
 head=arrow
 
-@w314 connect
-_text=connect n_top1 to n_process with a plain dashed line
+@w294 connect
+_text=connect dotted arrow from n_roof to n_laptop .
+_world=sketch
+_source=generator
+_template=connect.cn_draw.please
+_mood=command
+source=$w295
+target=$w296
+style=dotted
+edge=$w297
+
+@w295 entity
+head=n_roof
+
+@w296 entity
+head=n_laptop
+
+@w297 entity
+head=arrow
+
+@w298 set
+_text=make the triangles not_navy navy
+_world=sketch
+_source=generator
+_template=set.st_not.want
+_mood=command
+object=$w299
+color=navy
+notcolor=not_navy
+
+@w299 entity
+head=triangles
+det=the
+
+@w300 connect
+_text=connect the teal triangles chain
+_world=sketch
+_source=generator
+_template=connect.cn_pair.want
+_mood=command
+source=$w301
+pairing=chain
+
+@w301 entity
+head=triangles
+attr=teal
+det=the
+
+@w302 connect
+_text=connect the cyan square to oldest ellipse
 _world=sketch
 _source=generator
 _template=connect.cn.want
 _mood=command
-source=$w315
-target=$w316
-style=dashed
-arrow=plain
-edge=$w317
+source=$w303
+target=$w304
 
-@w315 entity
-head=n_top1
+@w303 entity
+head=square
+attr=cyan
+det=the
 
-@w316 entity
-head=n_process
+@w304 entity
+head=ellipse
+det=oldest
 
-@w317 entity
-head=line
-
-@w318 create
-_text=draw a star next_to n_process
+@w305 list
+_text=which green diamonds bottom_left ?
 _world=sketch
 _source=generator
-_template=create.cr.now
+_template=list.ql.bare
 _mood=command
-object=$w319
-relation=next_to
-landmark=$w320
+object=$w306
+region=bottom_left
 
-@w319 entity
-head=star
+@w306 entity
+head=diamonds
+attr=green
 
-@w320 entity
-head=n_process
+@w307 create
+_text=top_right , draw a small triangle
+_world=sketch
+_source=generator
+_template=create.cr_loc_first.now
+_mood=command
+object=$w308
+size=small
+region=top_right
 
-@w321 connect
-_text=connect the green ellipse with n_process with a two_way dotted arrow labeled t_db
+@w308 entity
+head=triangle
+
+@w309 connect
+_text=connect dotted arrow from n_y to n_ceo
+_world=sketch
+_source=generator
+_template=connect.cn_draw.can
+_mood=command
+source=$w310
+target=$w311
+style=dotted
+edge=$w312
+
+@w310 entity
+head=n_y
+
+@w311 entity
+head=n_ceo
+
+@w312 entity
+head=arrow
+
+@w313 list
+_text=which diamonds not_green ?
+_world=sketch
+_source=generator
+_template=list.ql.bare
+_mood=command
+object=$w314
+notcolor=not_green
+
+@w314 entity
+head=diamonds
+
+@w315 distribute
+_text=space the ellipses
+_world=sketch
+_source=generator
+_template=distribute.dsb.want
+_mood=command
+object=$w316
+
+@w316 entity
+head=ellipses
+det=the
+
+@w317 connect
+_text=connect the cyan rectangle to the star .
 _world=sketch
 _source=generator
 _template=connect.cn.could
 _mood=command
-text=t_db
-source=$w322
-target=$w323
-style=dotted
-arrow=two_way
-edge=$w324
+source=$w318
+target=$w319
 
-@w322 entity
-head=ellipse
-attr=green
+@w318 entity
+head=rectangle
+attr=cyan
 det=the
 
-@w323 entity
-head=n_process
+@w319 entity
+head=star
+det=the
 
-@w324 entity
-head=arrow
-
-@w325 distribute
-_text=space everything evenly horizontally
+@w320 connect
+_text=connect n_core to n_sun
 _world=sketch
 _source=generator
-_template=distribute.dsb.now
+_template=connect.cn.could
+_mood=command
+source=$w321
+target=$w322
+
+@w321 entity
+head=n_core
+
+@w322 entity
+head=n_sun
+
+@w323 create
+_text=draw 3 small green ellipses
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w324
+size=small
+quantity=3
+
+@w324 entity
+head=ellipses
+attr=green
+
+@w325 create
+_text=draw a cyan circle bottom
+_world=sketch
+_source=generator
+_template=create.cr.now
 _mood=command
 object=$w326
-axis=horizontally
+region=bottom
 
 @w326 entity
-head=everything
+head=circle
+attr=cyan
 
 @w327 connect
-_text=connect the green triangle to the triangle
+_text=connect the white hexagon with n_door with a dotted arrow .
 _world=sketch
 _source=generator
 _template=connect.cn.want
 _mood=command
 source=$w328
 target=$w329
+style=dotted
+edge=$w330
 
 @w328 entity
-head=triangle
-attr=green
-det=the
-
-@w329 entity
-head=triangle
-det=the
-
-@w330 toBack
-_text=send n_queue back
-_world=sketch
-_source=generator
-_template=toBack.tb.can
-_mood=command
-object=$w331
-depth=back
-
-@w331 entity
-head=n_queue
-
-@w332 connect
-_text=connect the cyan diamond to oldest triangle .
-_world=sketch
-_source=generator
-_template=connect.cn.could
-_mood=command
-source=$w333
-target=$w334
-
-@w333 entity
-head=diamond
-attr=cyan
-det=the
-
-@w334 entity
-head=triangle
-det=oldest
-
-@w335 connect
-_text=connect n_roof to n_check
-_world=sketch
-_source=generator
-_template=connect.cn.could
-_mood=command
-source=$w336
-target=$w337
-
-@w336 entity
-head=n_roof
-
-@w337 entity
-head=n_check
-
-@w338 create
-_text=draw 4 small navy rectangles
-_world=sketch
-_source=generator
-_template=create.cr.can
-_mood=command
-object=$w339
-size=small
-quantity=4
-
-@w339 entity
-head=rectangles
-attr=navy
-
-@w340 create
-_text=draw a gray star bottom
-_world=sketch
-_source=generator
-_template=create.cr.now
-_mood=command
-object=$w341
-region=bottom
-
-@w341 entity
-head=star
-attr=gray
-
-@w342 connect
-_text=connect the white hexagon with n_door with a dotted arrow .
-_world=sketch
-_source=generator
-_template=connect.cn.want
-_mood=command
-source=$w343
-target=$w344
-style=dotted
-edge=$w345
-
-@w343 entity
 head=hexagon
 attr=white
 det=the
 
-@w344 entity
+@w329 entity
 head=n_door
 
-@w345 entity
+@w330 entity
 head=arrow
 
-@w346 forget
-_text=forget rules
+@w331 count
+_text=how_many squares do we have ?
 _world=sketch
 _source=generator
-_template=forget.fg.could
+_template=count.qc.bare
 _mood=command
-object=$w347
+object=$w332
 
-@w347 entity
-head=rules
+@w332 entity
+head=squares
 
-@w348 create
-_text=draw a red star labeled t_cancel left_of the yellow square .
+@w333 connect
+_text=connect n_side with n_alpha with a two_way arrow
 _world=sketch
 _source=generator
-_template=create.cr.now
+_template=connect.cn.could
 _mood=command
-object=$w349
-text=t_cancel
-relation=left_of
-landmark=$w350
+source=$w334
+target=$w335
+arrow=two_way
+edge=$w336
 
-@w349 entity
-head=star
-attr=red
+@w334 entity
+head=n_side
 
-@w350 entity
-head=square
-attr=yellow
-det=the
+@w335 entity
+head=n_alpha
 
-@w351 create
-_text=above n_delta , draw a navy triangle .
+@w336 entity
+head=arrow
+
+@w337 create
+_text=draw a lime hexagon labeled t_start .
 _world=sketch
 _source=generator
-_template=create.cr_loc_first.now
+_template=create.cr.can
 _mood=command
-object=$w352
-relation=above
-landmark=$w353
+object=$w338
+text=t_start
 
-@w352 entity
-head=triangle
-attr=navy
+@w338 entity
+head=hexagon
+attr=lime
 
-@w353 entity
-head=n_delta
-
-@w354 create
+@w339 create
 _text=draw 3 gray diamonds right_of the cyan triangle
 _world=sketch
 _source=generator
 _template=create.cr.can
 _mood=command
-object=$w355
+object=$w340
 relation=right_of
-landmark=$w356
+landmark=$w341
 quantity=3
 
-@w355 entity
+@w340 entity
 head=diamonds
 attr=gray
 
-@w356 entity
+@w341 entity
 head=triangle
 attr=cyan
 det=the
 
-@w357 move
+@w342 move
 _text=move the purple star left_of n_internet
 _world=sketch
 _source=generator
 _template=move.mv_place.could
 _mood=command
-object=$w358
+object=$w343
 relation=left_of
-landmark=$w359
+landmark=$w344
 
-@w358 entity
+@w343 entity
 head=star
 attr=purple
 det=the
 
-@w359 entity
+@w344 entity
 head=n_internet
 
-@w360 connect
+@w345 connect
 _text=connect the ellipse to n_c with a dotted arrow labeled t_admin .
 _world=sketch
 _source=generator
 _template=connect.cn.want
 _mood=command
 text=t_admin
-source=$w361
-target=$w362
+source=$w346
+target=$w347
 style=dotted
-edge=$w363
+edge=$w348
 
-@w361 entity
+@w346 entity
 head=ellipse
 det=the
 
-@w362 entity
+@w347 entity
 head=n_c
 
-@w363 entity
+@w348 entity
 head=arrow
 
-@w364 disconnect
-_text=disconnect n_valid to n_leaf
+@w349 disconnect
+_text=let delete the arrow from n_valid to n_leaf
 _world=sketch
 _source=generator
 _template=disconnect.dc.lets
 _mood=command
-source=$w365
-target=$w366
+source=$w350
+target=$w351
 
-@w365 entity
+@w350 entity
 head=n_valid
 
-@w366 entity
+@w351 entity
 head=n_leaf
 
-@w367 create
+@w352 create
 _text=draw a large green hexagon bottom_right
 _world=sketch
 _source=generator
-_template=create.cr.can
+_template=create.cr.now
 _mood=command
-object=$w368
+object=$w353
 size=large
 region=bottom_right
 
-@w368 entity
+@w353 entity
 head=hexagon
 attr=green
 
-@w369 list
+@w354 list
 _text=which green squares ?
 _world=sketch
 _source=generator
 _template=list.ql.bare
 _mood=command
-object=$w370
+object=$w355
 
-@w370 entity
+@w355 entity
 head=squares
 attr=green
 
-@w371 create
+@w356 create
 _text=draw a hexagon
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w372
+object=$w357
 
-@w372 entity
+@w357 entity
 head=hexagon
 
-@w373 toBack
-_text=send n_x back .
+@w358 undo
+_text=undo
 _world=sketch
 _source=generator
-_template=toBack.tb.want
+_template=undo.ud.please
 _mood=command
-object=$w374
-depth=back
 
-@w374 entity
-head=n_x
-
-@w375 create
-_text=draw a star labeled t_no center .
+@w359 create
+_text=draw a tiny diamond labeled t_ship top_right
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w376
-text=t_no
-region=center
+object=$w360
+size=tiny
+text=t_ship
+region=top_right
 
-@w376 entity
-head=star
+@w360 entity
+head=diamond
 
-@w377 connect
-_text=connect all rectangles chain
-_world=sketch
-_source=generator
-_template=connect.cn_pair.want
-_mood=command
-source=$w378
-pairing=chain
-
-@w378 entity
-head=rectangles
-det=all
-
-@w379 set
-_text=make n_a small
+@w361 set
+_text=make it bigger
 _world=sketch
 _source=generator
 _template=set.st_size.want
 _mood=command
-object=$w380
-size=small
+object=$w362
+size=bigger
 
-@w380 entity
-head=n_a
+@w362 entity
+head=it
 
-@w381 connect
-_text=connect arrow from n_firewall to n_db
-_world=sketch
-_source=generator
-_template=connect.cn_draw.please
-_mood=command
-source=$w382
-target=$w383
-edge=$w384
-
-@w382 entity
-head=n_firewall
-
-@w383 entity
-head=n_db
-
-@w384 entity
-head=arrow
-
-@w385 create
-_text=draw a tiny brown hexagon between n_internet and n_gamma .
-_world=sketch
-_source=generator
-_template=create.cr.can
-_mood=command
-object=$w386
-size=tiny
-relation=between
-landmark=$w387
-landmark2=$w388
-
-@w386 entity
-head=hexagon
-attr=brown
-
-@w387 entity
-head=n_internet
-
-@w388 entity
-head=n_gamma
-
-@w389 move
-_text=move n_db top_left .
+@w363 move
+_text=move n_box1 below n_mars
 _world=sketch
 _source=generator
 _template=move.mv_place.could
 _mood=command
-object=$w390
-region=top_left
+object=$w364
+relation=below
+landmark=$w365
 
-@w390 entity
-head=n_db
+@w364 entity
+head=n_box1
 
-@w391 count
-_text=how_many diamonds do we have ?
-_world=sketch
-_source=generator
-_template=count.qc.bare
-_mood=command
-object=$w392
+@w365 entity
+head=n_mars
 
-@w392 entity
-head=diamonds
-
-@w393 list
-_text=which teal squares center ?
-_world=sketch
-_source=generator
-_template=list.ql.bare
-_mood=command
-object=$w394
-region=center
-
-@w394 entity
-head=squares
-attr=teal
-
-@w395 fact
-_text=n_core is purple
-_world=sketch
-_source=generator
-_template=fact.fa.bare
-_mood=command
-object=$w396
-color=purple
-
-@w396 entity
-head=n_core
-
-@w397 duplicate
-_text=duplicate n_delta
-_world=sketch
-_source=generator
-_template=duplicate.dp.could
-_mood=command
-object=$w398
-
-@w398 entity
-head=n_delta
-
-@w399 connect
-_text=connect all the blue rectangles chain
+@w366 connect
+_text=connect all hexagons each_other
 _world=sketch
 _source=generator
 _template=connect.cn_pair.want
 _mood=command
-source=$w400
-pairing=chain
+source=$w367
+pairing=each_other
 
-@w400 entity
-head=rectangles
-attr=blue
+@w367 entity
+head=hexagons
 det=all
 
-@w401 count
-_text=how_many red diamonds above n_cloud do we have ?
+@w368 create
+_text=draw a yellow circle between n_gamma and n_db .
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w369
+relation=between
+landmark=$w370
+landmark2=$w371
+
+@w369 entity
+head=circle
+attr=yellow
+
+@w370 entity
+head=n_gamma
+
+@w371 entity
+head=n_db
+
+@w372 set
+_text=make n_router small
+_world=sketch
+_source=generator
+_template=set.st_size.want
+_mood=command
+object=$w373
+size=small
+
+@w373 entity
+head=n_router
+
+@w374 create
+_text=draw a white square named n_cloud bottom_left
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w375
+name=n_cloud
+region=bottom_left
+
+@w375 entity
+head=square
+attr=white
+
+@w376 move
+_text=move circle above n_tree
+_world=sketch
+_source=generator
+_template=move.mv_place.could
+_mood=command
+object=$w377
+relation=above
+landmark=$w378
+
+@w377 entity
+head=n_ball
+
+@w378 entity
+head=n_tree
+
+@w379 delete
+_text=delete all the diamonds not_blue
+_world=sketch
+_source=generator
+_template=delete.de_not.please
+_mood=command
+object=$w380
+notcolor=not_blue
+
+@w380 entity
+head=diamonds
+det=the
+
+@w381 connect
+_text=connect all gold rectangles chain
+_world=sketch
+_source=generator
+_template=connect.cn_pair.want
+_mood=command
+source=$w382
+pairing=chain
+
+@w382 entity
+head=rectangles
+attr=gold
+det=all
+
+@w383 count
+_text=how_many hexagons above n_api be there ?
 _world=sketch
 _source=generator
 _template=count.qc.bare
 _mood=command
-object=$w402
+object=$w384
 relation=above
-landmark=$w403
+landmark=$w385
 
-@w402 entity
-head=diamonds
-attr=red
+@w384 entity
+head=hexagons
 
-@w403 entity
-head=n_cloud
+@w385 entity
+head=n_api
 
-@w404 create
-_text=draw a teal circle named n_db top_left
+@w386 set
+_text=make the circles not_teal pink
+_world=sketch
+_source=generator
+_template=set.st_not.want
+_mood=command
+object=$w387
+color=pink
+notcolor=not_teal
+
+@w387 entity
+head=circles
+det=the
+
+@w388 create
+_text=draw a huge white ellipse named n_walls right_side
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w405
-name=n_db
-region=top_left
+object=$w389
+size=huge
+name=n_walls
+region=right_side
 
-@w405 entity
-head=circle
-attr=teal
+@w389 entity
+head=ellipse
+attr=white
 
-@w406 duplicate
-_text=duplicate n_internet 2 times
+@w390 fact
+_text=n_valid is below n_hub
 _world=sketch
 _source=generator
-_template=duplicate.dp.could
+_template=fact.fa.bare
 _mood=command
-object=$w407
-quantity=2
+object=$w391
+relation=below
+landmark=$w392
 
-@w407 entity
-head=n_internet
+@w391 entity
+head=n_valid
 
-@w408 toBack
-_text=send it back
-_world=sketch
-_source=generator
-_template=toBack.tb.can
-_mood=command
-object=$w409
-depth=back
+@w392 entity
+head=n_hub
 
-@w409 entity
-head=it
-
-@w410 connect
+@w393 connect
 _text=connect the green triangle with the white star
 _world=sketch
 _source=generator
 _template=connect.cn.want
 _mood=command
-source=$w411
-target=$w412
+source=$w394
+target=$w395
 
-@w411 entity
+@w394 entity
 head=triangle
 attr=green
 det=the
 
-@w412 entity
+@w395 entity
 head=star
 attr=white
 det=the
 
-@w413 create
+@w396 create
 _text=draw a pink square named n_firewall right_of n_cloud
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w414
+object=$w397
 name=n_firewall
 relation=right_of
-landmark=$w415
+landmark=$w398
 
-@w414 entity
+@w397 entity
 head=square
 attr=pink
 
-@w415 entity
+@w398 entity
 head=n_cloud
 
-@w416 create
+@w399 create
 _text=draw a magenta hexagon named n_root labeled t_admin next_to the rectangle
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w417
+object=$w400
 name=n_root
 text=t_admin
 relation=next_to
-landmark=$w418
+landmark=$w401
 
-@w417 entity
+@w400 entity
 head=hexagon
 attr=magenta
 
-@w418 entity
+@w401 entity
 head=rectangle
 det=the
 
-@w419 create
+@w402 create
 _text=draw 3 pink triangles
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w420
+object=$w403
 quantity=3
 
-@w420 entity
+@w403 entity
 head=triangles
 attr=pink
 
-@w421 create
+@w404 create
 _text=draw a tiny magenta square named n_cloud
 _world=sketch
 _source=generator
 _template=create.cr.can
 _mood=command
-object=$w422
+object=$w405
 size=tiny
 name=n_cloud
 
-@w422 entity
+@w405 entity
 head=square
 attr=magenta
 
-@w423 count
+@w406 count
 _text=how_many circles center do we have ?
 _world=sketch
 _source=generator
 _template=count.qc.bare
 _mood=command
-object=$w424
+object=$w407
 region=center
 
-@w424 entity
+@w407 entity
 head=circles
 
-@w425 rule
+@w408 rule
 _text=from_now_on ellipses are cyan .
 _world=sketch
 _source=generator
 _template=rule.ru.bare
 _mood=command
-object=$w426
+object=$w409
 color=cyan
 
-@w426 entity
+@w409 entity
 head=ellipses
 
-@w427 rule
+@w410 rule
 _text=from_now_on hexagons are small
 _world=sketch
 _source=generator
 _template=rule.ru.bare
 _mood=command
-object=$w428
+object=$w411
 size=small
 
-@w428 entity
+@w411 entity
 head=hexagons
 
-@w429 create
+@w412 create
 _text=draw an indigo square bottom .
 _world=sketch
 _source=generator
 _template=create.cr.can
 _mood=command
-object=$w430
+object=$w413
 region=bottom
 
-@w430 entity
+@w413 entity
 head=square
 attr=indigo
 
-@w431 connect
+@w414 connect
 _text=connect n_laptop to n_beta
+_world=sketch
+_source=generator
+_template=connect.cn.could
+_mood=command
+source=$w415
+target=$w416
+
+@w415 entity
+head=n_laptop
+
+@w416 entity
+head=n_beta
+
+@w417 set
+_text=make the triangles not_yellow purple
+_world=sketch
+_source=generator
+_template=set.st_not.want
+_mood=command
+object=$w418
+color=purple
+notcolor=not_yellow
+
+@w418 entity
+head=triangles
+det=the
+
+@w419 undo
+_text=undo
+_world=sketch
+_source=generator
+_template=undo.ud.please
+_mood=command
+
+@w420 count
+_text=how_many navy shapes be there ?
+_world=sketch
+_source=generator
+_template=count.qc.bare
+_mood=command
+object=$w421
+
+@w421 entity
+head=shapes
+attr=navy
+
+@w422 connect
+_text=connect n_cloud with n_leaf
+_world=sketch
+_source=generator
+_template=connect.cn.want
+_mood=command
+source=$w423
+target=$w424
+
+@w423 entity
+head=n_cloud
+
+@w424 entity
+head=n_leaf
+
+@w425 rename
+_text=rename n_api to n_laptop
+_world=sketch
+_source=generator
+_template=rename.rn.now
+_mood=command
+object=$w426
+name=n_laptop
+
+@w426 entity
+head=n_api
+
+@w427 distribute
+_text=space all triangles evenly horizontally
+_world=sketch
+_source=generator
+_template=distribute.dsb.now
+_mood=command
+object=$w428
+axis=horizontally
+
+@w428 entity
+head=triangles
+det=all
+
+@w429 list
+_text=which all ellipses be there
+_world=sketch
+_source=generator
+_template=list.ql.bare
+_mood=command
+object=$w430
+
+@w430 entity
+head=ellipses
+
+@w431 connect
+_text=connect n_gamma to the cyan star with a two_way dashed arrow
 _world=sketch
 _source=generator
 _template=connect.cn.could
 _mood=command
 source=$w432
 target=$w433
+style=dashed
+arrow=two_way
+edge=$w434
 
 @w432 entity
-head=n_laptop
+head=n_gamma
 
 @w433 entity
-head=n_beta
+head=star
+attr=cyan
+det=the
 
-@w434 set
-_text=make the triangles not_yellow purple
+@w434 entity
+head=arrow
+
+@w435 set
+_text=make the circles not_green teal
 _world=sketch
 _source=generator
 _template=set.st_not.want
 _mood=command
-object=$w435
-color=purple
-notcolor=not_yellow
+object=$w436
+color=teal
+notcolor=not_green
 
-@w435 entity
-head=triangles
+@w436 entity
+head=circles
 det=the
 
-@w436 toBack
-_text=send n_firewall back
-_world=sketch
-_source=generator
-_template=toBack.tb.can
-_mood=command
-object=$w437
-depth=back
-
-@w437 entity
-head=n_firewall
-
-@w438 connect
-_text=connect dotted arrow from n_queue to n_leaf
-_world=sketch
-_source=generator
-_template=connect.cn_draw.can
-_mood=command
-source=$w439
-target=$w440
-style=dotted
-edge=$w441
-
-@w439 entity
-head=n_queue
-
-@w440 entity
-head=n_leaf
-
-@w441 entity
-head=arrow
-
-@w442 connect
-_text=connect n_router with n_leaf
+@w437 connect
+_text=connect the diamond to n_a with a line
 _world=sketch
 _source=generator
 _template=connect.cn.want
 _mood=command
-source=$w443
-target=$w444
+source=$w438
+target=$w439
+edge=$w440
 
-@w443 entity
-head=n_router
-
-@w444 entity
-head=n_leaf
-
-@w445 set
-_text=make the hexagons not_magenta orange
-_world=sketch
-_source=generator
-_template=set.st_not.want
-_mood=command
-object=$w446
-color=orange
-notcolor=not_magenta
-
-@w446 entity
-head=hexagons
-det=the
-
-@w447 rename
-_text=rename n_login to n_input
-_world=sketch
-_source=generator
-_template=rename.rn.now
-_mood=command
-object=$w448
-name=n_input
-
-@w448 entity
-head=n_login
-
-@w449 connect
-_text=connect every pink diamond to next
-_world=sketch
-_source=generator
-_template=connect.cn_pair.want
-_mood=command
-source=$w450
-pairing=next
-
-@w450 entity
+@w438 entity
 head=diamond
-attr=pink
-det=every
-
-@w451 list
-_text=which triangles
-_world=sketch
-_source=generator
-_template=list.ql.bare
-_mood=command
-object=$w452
-
-@w452 entity
-head=triangles
-
-@w453 connect
-_text=connect n_ended to newest cyan circle
-_world=sketch
-_source=generator
-_template=connect.cn.could
-_mood=command
-source=$w454
-target=$w455
-
-@w454 entity
-head=n_ended
-
-@w455 entity
-head=circle
-attr=cyan
-det=newest
-
-@w456 connect
-_text=connect the hexagons chain
-_world=sketch
-_source=generator
-_template=connect.cn_pair.want
-_mood=command
-source=$w457
-pairing=chain
-
-@w457 entity
-head=hexagons
 det=the
 
-@w458 set
-_text=make the stars not_blue white
+@w439 entity
+head=n_a
+
+@w440 entity
+head=line
+
+@w441 set
+_text=make the rectangles not_pink orange
 _world=sketch
 _source=generator
 _template=set.st_not.could
 _mood=command
-object=$w459
-color=white
-notcolor=not_blue
+object=$w442
+color=orange
+notcolor=not_pink
 
-@w459 entity
-head=stars
+@w442 entity
+head=rectangles
 det=the
 
-@w460 undo
-_text=undo
-_world=sketch
-_source=generator
-_template=undo.ud.please
-_mood=command
-
-@w461 connect
-_text=connect the circle with the yellow hexagon
+@w443 connect
+_text=connect n_main to the square with a plain dashed line
 _world=sketch
 _source=generator
 _template=connect.cn.want
 _mood=command
-source=$w462
-target=$w463
+source=$w444
+target=$w445
+style=dashed
+arrow=plain
+edge=$w446
 
-@w462 entity
-head=circle
+@w444 entity
+head=n_main
+
+@w445 entity
+head=square
 det=the
 
-@w463 entity
-head=hexagon
-attr=yellow
-det=the
+@w446 entity
+head=line
 
-@w464 set
-_text=make the diamonds not_navy navy
+@w447 connect
+_text=connect the blue diamond with n_alpha
 _world=sketch
 _source=generator
-_template=set.st_not.now
+_template=connect.cn.could
 _mood=command
-object=$w465
-color=navy
-notcolor=not_navy
+source=$w448
+target=$w449
 
-@w465 entity
-head=diamonds
+@w448 entity
+head=diamond
+attr=blue
 det=the
 
-@w466 disconnect
-_text=disconnect n_login and n_sun
+@w449 entity
+head=n_alpha
+
+@w450 connect
+_text=connect arrow from n_leaf to n_core
+_world=sketch
+_source=generator
+_template=connect.cn_draw.can
+_mood=command
+source=$w451
+target=$w452
+edge=$w453
+
+@w451 entity
+head=n_leaf
+
+@w452 entity
+head=n_core
+
+@w453 entity
+head=arrow
+
+@w454 disconnect
+_text=let disconnect n_internet from n_side
 _world=sketch
 _source=generator
 _template=disconnect.dc.lets
 _mood=command
-source=$w467
-target=$w468
+source=$w455
+target=$w456
 
-@w467 entity
-head=n_login
+@w455 entity
+head=n_internet
 
-@w468 entity
-head=n_sun
+@w456 entity
+head=n_side
 
-@w469 list
-_text=which orange shapes right_of n_output
+@w457 count
+_text=how_many gold ellipses below n_mars do we have ?
 _world=sketch
 _source=generator
-_template=list.ql.bare
+_template=count.qc.bare
 _mood=command
-object=$w470
-relation=right_of
-landmark=$w471
+object=$w458
+relation=below
+landmark=$w459
 
-@w470 entity
-head=shapes
-attr=orange
+@w458 entity
+head=ellipses
+attr=gold
 
-@w471 entity
-head=n_output
+@w459 entity
+head=n_mars
 
-@w472 create
-_text=draw a purple hexagon labeled t_retry left_side
+@w460 create
+_text=draw 4 large magenta diamonds labeled t_error left_side
 _world=sketch
 _source=generator
-_template=create.cr.now
+_template=create.cr.can
 _mood=command
-object=$w473
-text=t_retry
+object=$w461
+size=large
+text=t_error
 region=left_side
+quantity=4
 
-@w473 entity
-head=hexagon
-attr=purple
+@w461 entity
+head=diamonds
+attr=magenta
 
-@w474 distribute
-_text=distribute all the navy hexagons evenly vertically
-_world=sketch
-_source=generator
-_template=distribute.dsb.want
-_mood=command
-object=$w475
-axis=vertically
-
-@w475 entity
-head=hexagons
-attr=navy
-det=all
-
-@w476 connect
-_text=connect all red rectangles chain
-_world=sketch
-_source=generator
-_template=connect.cn_pair.want
-_mood=command
-source=$w477
-pairing=chain
-
-@w477 entity
-head=rectangles
-attr=red
-det=all
-
-@w478 set
+@w462 set
 _text=make the squares not_orange navy
 _world=sketch
 _source=generator
 _template=set.st_not.now
 _mood=command
-object=$w479
+object=$w463
 color=navy
 notcolor=not_orange
 
-@w479 entity
+@w463 entity
 head=squares
 det=the
 
-@w480 create
+@w464 create
 _text=draw a cyan circle top_left
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w481
+object=$w465
 region=top_left
 
-@w481 entity
+@w465 entity
 head=circle
 attr=cyan
 
-@w482 connect
+@w466 connect
 _text=connect n_top1 to n_form
 _world=sketch
 _source=generator
 _template=connect.cn.want
 _mood=command
-source=$w483
-target=$w484
+source=$w467
+target=$w468
 
-@w483 entity
+@w467 entity
 head=n_top1
 
-@w484 entity
+@w468 entity
 head=n_form
 
-@w485 create
+@w469 create
 _text=draw a teal diamond right_side .
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w486
+object=$w470
 region=right_side
 
-@w486 entity
+@w470 entity
 head=diamond
 attr=teal
 
-@w487 create
+@w471 create
 _text=draw 5 large navy triangles between n_queue and n_roof
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w488
+object=$w472
 size=large
 relation=between
-landmark=$w489
-landmark2=$w490
+landmark=$w473
+landmark2=$w474
 quantity=5
 
-@w488 entity
+@w472 entity
 head=triangles
 attr=navy
 
-@w489 entity
+@w473 entity
 head=n_queue
 
-@w490 entity
+@w474 entity
 head=n_roof
 
-@w491 create
+@w475 create
 _text=next_to the ellipse , draw a medium diamond
 _world=sketch
 _source=generator
 _template=create.cr_loc_first.now
 _mood=command
-object=$w492
+object=$w476
 size=medium
 relation=next_to
-landmark=$w493
+landmark=$w477
 
-@w492 entity
+@w476 entity
 head=diamond
 
-@w493 entity
+@w477 entity
 head=ellipse
 det=the
 
-@w494 create
+@w478 create
 _text=draw a navy diamond .
 _world=sketch
 _source=generator
 _template=create.cr.can
 _mood=command
-object=$w495
+object=$w479
 
-@w495 entity
+@w479 entity
 head=diamond
 attr=navy
 
-@w496 count
+@w480 count
 _text=how_many rectangles do we have ?
 _world=sketch
 _source=generator
 _template=count.qc.bare
 _mood=command
-object=$w497
+object=$w481
 
-@w497 entity
+@w481 entity
 head=rectangles
 
-@w498 rule
+@w482 rule
 _text=from_now_on stars should be blue
 _world=sketch
 _source=generator
 _template=rule.ru.bare
 _mood=command
-object=$w499
+object=$w483
 color=blue
 
-@w499 entity
+@w483 entity
 head=stars
 
-@w500 move
-_text=move the indigo rectangle between n_home and n_earth
-_world=sketch
-_source=generator
-_template=move.mv_place.could
-_mood=command
-object=$w501
-relation=between
-landmark=$w502
-landmark2=$w503
-
-@w501 entity
-head=rectangle
-attr=indigo
-det=the
-
-@w502 entity
-head=n_home
-
-@w503 entity
-head=n_earth
-
-@w504 distribute
-_text=distribute all pink circles evenly vertically
-_world=sketch
-_source=generator
-_template=distribute.dsb.want
-_mood=command
-object=$w505
-axis=vertically
-
-@w505 entity
-head=circles
-attr=pink
-det=all
-
-@w506 fact
-_text=n_box1 is left_of n_gate
-_world=sketch
-_source=generator
-_template=fact.fa.bare
-_mood=command
-object=$w507
-relation=left_of
-landmark=$w508
-
-@w507 entity
-head=n_box1
-
-@w508 entity
-head=n_gate
-
-@w509 list
-_text=which all shapes above n_server
-_world=sketch
-_source=generator
-_template=list.ql.bare
-_mood=command
-object=$w510
-relation=above
-landmark=$w511
-
-@w510 entity
-head=shapes
-
-@w511 entity
-head=n_server
-
-@w512 rule
-_text=from_now_on rectangles are brown
-_world=sketch
-_source=generator
-_template=rule.ru.bare
-_mood=command
-object=$w513
-color=brown
-
-@w513 entity
-head=rectangles
-
-@w514 create
-_text=draw an indigo triangle labeled t_open .
-_world=sketch
-_source=generator
-_template=create.cr.can
-_mood=command
-object=$w515
-text=t_open
-
-@w515 entity
-head=triangle
-attr=indigo
-
-@w516 connect
-_text=connect the lime rectangle to the diamond
-_world=sketch
-_source=generator
-_template=connect.cn.want
-_mood=command
-source=$w517
-target=$w518
-
-@w517 entity
-head=rectangle
-attr=lime
-det=the
-
-@w518 entity
-head=diamond
-det=the
-
-@w519 set
-_text=make n_leaf small
+@w484 set
+_text=make the indigo rectangle medium
 _world=sketch
 _source=generator
 _template=set.st_size.want
 _mood=command
-object=$w520
-size=small
+object=$w485
+size=medium
 
-@w520 entity
-head=n_leaf
-
-@w521 create
-_text=draw a gold hexagon bottom
-_world=sketch
-_source=generator
-_template=create.cr.now
-_mood=command
-object=$w522
-region=bottom
-
-@w522 entity
-head=hexagon
-attr=gold
-
-@w523 create
-_text=draw a tiny blue triangle next_to n_api
-_world=sketch
-_source=generator
-_template=create.cr.can
-_mood=command
-object=$w524
-size=tiny
-relation=next_to
-landmark=$w525
-
-@w524 entity
-head=triangle
-attr=blue
-
-@w525 entity
-head=n_api
-
-@w526 create
-_text=draw a lime triangle named n_ball
-_world=sketch
-_source=generator
-_template=create.cr.now
-_mood=command
-object=$w527
-name=n_ball
-
-@w527 entity
-head=triangle
-attr=lime
-
-@w528 path
-_text=path_q from n_internet to n_node2 ?
-_world=sketch
-_source=generator
-_template=path.qpa.bare
-_mood=command
-source=$w529
-target=$w530
-
-@w529 entity
-head=n_internet
-
-@w530 entity
-head=n_node2
-
-@w531 create
-_text=draw a square right_of the black square
-_world=sketch
-_source=generator
-_template=create.cr.can
-_mood=command
-object=$w532
-relation=right_of
-landmark=$w533
-
-@w532 entity
-head=square
-
-@w533 entity
-head=square
-attr=black
+@w485 entity
+head=rectangle
+attr=indigo
 det=the
 
+@w486 create
+_text=draw a medium blue star labeled t_enter_password
+_world=sketch
+_source=generator
+_template=create.cr.now
+_mood=command
+object=$w487
+size=medium
+text=t_enter_password
+
+@w487 entity
+head=star
+attr=blue
+
+@w488 create
+_text=draw a square top_right
+_world=sketch
+_source=generator
+_template=create.cr.now
+_mood=command
+object=$w489
+region=top_right
+
+@w489 entity
+head=square
+
+@w490 move
+_text=move the triangle next_to n_done .
+_world=sketch
+_source=generator
+_template=move.mv_place.could
+_mood=command
+object=$w491
+relation=next_to
+landmark=$w492
+
+@w491 entity
+head=triangle
+det=the
+
+@w492 entity
+head=n_done
+
+@w493 list
+_text=which all magenta circles be there
+_world=sketch
+_source=generator
+_template=list.ql.bare
+_mood=command
+object=$w494
+
+@w494 entity
+head=circles
+attr=magenta
+
+@w495 create
+_text=draw a hexagon named n_valid
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w496
+name=n_valid
+
+@w496 entity
+head=hexagon
+
+@w497 connect
+_text=connect dashed arrow from n_earth to n_server
+_world=sketch
+_source=generator
+_template=connect.cn_draw.please
+_mood=command
+source=$w498
+target=$w499
+style=dashed
+edge=$w500
+
+@w498 entity
+head=n_earth
+
+@w499 entity
+head=n_server
+
+@w500 entity
+head=arrow
+
+@w501 distribute
+_text=space everything evenly vertically
+_world=sketch
+_source=generator
+_template=distribute.dsb.now
+_mood=command
+object=$w502
+axis=vertically
+
+@w502 entity
+head=everything
+
+@w503 count
+_text=how_many teal hexagons be there ?
+_world=sketch
+_source=generator
+_template=count.qc.bare
+_mood=command
+object=$w504
+
+@w504 entity
+head=hexagons
+attr=teal
+
+@w505 connect
+_text=connect the purple rectangle to n_door with a two_way dotted arrow
+_world=sketch
+_source=generator
+_template=connect.cn.want
+_mood=command
+source=$w506
+target=$w507
+style=dotted
+arrow=two_way
+edge=$w508
+
+@w506 entity
+head=rectangle
+attr=purple
+det=the
+
+@w507 entity
+head=n_door
+
+@w508 entity
+head=arrow
+
+@w509 set
+_text=make the stars not_green teal
+_world=sketch
+_source=generator
+_template=set.st_not.now
+_mood=command
+object=$w510
+color=teal
+notcolor=not_green
+
+@w510 entity
+head=stars
+det=the
+
+@w511 move
+_text=move n_cloud left_side
+_world=sketch
+_source=generator
+_template=move.mv_place.could
+_mood=command
+object=$w512
+region=left_side
+
+@w512 entity
+head=n_cloud
+
+@w513 connect
+_text=connect dotted arrow from n_valid to n_y
+_world=sketch
+_source=generator
+_template=connect.cn_draw.can
+_mood=command
+source=$w514
+target=$w515
+style=dotted
+edge=$w516
+
+@w514 entity
+head=n_valid
+
+@w515 entity
+head=n_y
+
+@w516 entity
+head=arrow
+
+@w517 connect
+_text=connect the circle with newest square with a arrow labeled t_back
+_world=sketch
+_source=generator
+_template=connect.cn.could
+_mood=command
+text=t_back
+source=$w518
+target=$w519
+edge=$w520
+
+@w518 entity
+head=circle
+det=the
+
+@w519 entity
+head=square
+det=newest
+
+@w520 entity
+head=arrow
+
+@w521 cycle
+_text=cycle_q ?
+_world=sketch
+_source=generator
+_template=cycle.qy.bare
+_mood=command
+
+@w522 connect
+_text=connect n_b to the green hexagon with a dotted arrow
+_world=sketch
+_source=generator
+_template=connect.cn.want
+_mood=command
+source=$w523
+target=$w524
+style=dotted
+edge=$w525
+
+@w523 entity
+head=n_b
+
+@w524 entity
+head=hexagon
+attr=green
+det=the
+
+@w525 entity
+head=arrow
+
+@w526 create
+_text=bottom_right , draw a white diamond
+_world=sketch
+_source=generator
+_template=create.cr_loc_first.now
+_mood=command
+object=$w527
+region=bottom_right
+
+@w527 entity
+head=diamond
+attr=white
+
+@w528 list
+_text=which gold rectangles .
+_world=sketch
+_source=generator
+_template=list.ql.bare
+_mood=command
+object=$w529
+
+@w529 entity
+head=rectangles
+attr=gold
+
+@w530 create
+_text=draw a circle between n_door and n_firewall .
+_world=sketch
+_source=generator
+_template=create.cr.now
+_mood=command
+object=$w531
+relation=between
+landmark=$w532
+landmark2=$w533
+
+@w531 entity
+head=circle
+
+@w532 entity
+head=n_door
+
+@w533 entity
+head=n_firewall
+
 @w534 rule
-_text=from_now_on hexagons should be green .
+_text=from_now_on ellipses are small
 _world=sketch
 _source=generator
 _template=rule.ru.bare
 _mood=command
 object=$w535
-color=green
+size=small
 
 @w535 entity
-head=hexagons
+head=ellipses
 
-@w536 move
-_text=move n_gamma top
-_world=sketch
-_source=generator
-_template=move.mv_place.could
-_mood=command
-object=$w537
-region=top
-
-@w537 entity
-head=n_gamma
-
-@w538 delete
-_text=delete the stars not_black
-_world=sketch
-_source=generator
-_template=delete.de_not.please
-_mood=command
-object=$w539
-notcolor=not_black
-
-@w539 entity
-head=stars
-det=the
-
-@w540 list
-_text=which white diamonds are there ?
-_world=sketch
-_source=generator
-_template=list.ql.bare
-_mood=command
-object=$w541
-
-@w541 entity
-head=diamonds
-attr=white
-
-@w542 create
-_text=draw a triangle
-_world=sketch
-_source=generator
-_template=create.cr.can
-_mood=command
-object=$w543
-
-@w543 entity
-head=triangle
-
-@w544 rename
-_text=rename n_start n_process
-_world=sketch
-_source=generator
-_template=rename.rn.now
-_mood=command
-object=$w545
-name=n_process
-
-@w545 entity
-head=n_start
-
-@w546 fact
-_text=n_ended is gray
-_world=sketch
-_source=generator
-_template=fact.fa.bare
-_mood=command
-object=$w547
-color=gray
-
-@w547 entity
-head=n_ended
-
-@w548 create
+@w536 create
 _text=left_side , draw a white rectangle .
 _world=sketch
 _source=generator
 _template=create.cr_loc_first.now
 _mood=command
-object=$w549
+object=$w537
 region=left_side
 
-@w549 entity
+@w537 entity
 head=rectangle
 attr=white
 
-@w550 connect
+@w538 connect
 _text=connect dashed arrow from n_y to n_d
 _world=sketch
 _source=generator
 _template=connect.cn_draw.can
 _mood=command
-source=$w551
-target=$w552
+source=$w539
+target=$w540
 style=dashed
-edge=$w553
+edge=$w541
 
-@w551 entity
+@w539 entity
 head=n_y
 
-@w552 entity
+@w540 entity
 head=n_d
 
-@w553 entity
+@w541 entity
 head=arrow
 
-@w554 set
+@w542 set
 _text=make the diamonds not_gray lime
 _world=sketch
 _source=generator
 _template=set.st_not.could
 _mood=command
-object=$w555
+object=$w543
 color=lime
 notcolor=not_gray
 
-@w555 entity
+@w543 entity
 head=diamonds
 det=the
 
-@w556 distribute
+@w544 distribute
 _text=distribute the stars evenly horizontally
 _world=sketch
 _source=generator
 _template=distribute.dsb.now
 _mood=command
-object=$w557
+object=$w545
 axis=horizontally
 
-@w557 entity
+@w545 entity
 head=stars
 det=the
 
-@w558 create
+@w546 create
 _text=draw a white diamond named n_mars between n_earth and n_done
 _world=sketch
 _source=generator
 _template=create.cr.can
 _mood=command
-object=$w559
+object=$w547
 name=n_mars
 relation=between
-landmark=$w560
-landmark2=$w561
+landmark=$w548
+landmark2=$w549
 
-@w559 entity
+@w547 entity
 head=diamond
 attr=white
 
-@w560 entity
+@w548 entity
 head=n_earth
 
-@w561 entity
+@w549 entity
 head=n_done
 
-@w562 rename
+@w550 rename
 _text=rename the indigo ellipse to n_laptop
 _world=sketch
 _source=generator
 _template=rename.rn.now
 _mood=command
-object=$w563
+object=$w551
 name=n_laptop
 
-@w563 entity
+@w551 entity
 head=ellipse
 attr=indigo
 det=the
 
-@w564 fact
+@w552 fact
 _text=n_gate is next_to n_idle
 _world=sketch
 _source=generator
 _template=fact.fa.bare
 _mood=command
-object=$w565
+object=$w553
 relation=next_to
-landmark=$w566
+landmark=$w554
 
-@w565 entity
+@w553 entity
 head=n_gate
 
-@w566 entity
+@w554 entity
 head=n_idle
 
-@w567 fact
+@w555 fact
 _text=n_door is left_of n_idle
 _world=sketch
 _source=generator
 _template=fact.fa.bare
 _mood=command
-object=$w568
+object=$w556
 relation=left_of
-landmark=$w569
+landmark=$w557
 
-@w568 entity
+@w556 entity
 head=n_door
 
-@w569 entity
+@w557 entity
 head=n_idle
 
-@w570 list
+@w558 list
 _text=which cyan shapes top_right
 _world=sketch
 _source=generator
 _template=list.ql.bare
 _mood=command
-object=$w571
+object=$w559
 region=top_right
 
-@w571 entity
+@w559 entity
 head=shapes
 attr=cyan
 
-@w572 fact
+@w560 fact
 _text=n_cache is orange
 _world=sketch
 _source=generator
 _template=fact.fa.bare
 _mood=command
-object=$w573
+object=$w561
 color=orange
 
-@w573 entity
+@w561 entity
 head=n_cache
 
-@w574 fact
+@w562 fact
 _text=n_output is yellow
 _world=sketch
 _source=generator
 _template=fact.fa.bare
 _mood=command
-object=$w575
+object=$w563
 color=yellow
 
-@w575 entity
+@w563 entity
 head=n_output
 
-@w576 connect
+@w564 connect
 _text=connect n_check to the cyan diamond
 _world=sketch
 _source=generator
 _template=connect.cn.could
 _mood=command
-source=$w577
-target=$w578
+source=$w565
+target=$w566
 
-@w577 entity
+@w565 entity
 head=n_check
 
-@w578 entity
+@w566 entity
 head=diamond
 attr=cyan
 det=the
 
-@w579 rename
-_text=rename n_backup n_main
+@w567 duplicate
+_text=duplicate n_backup
 _world=sketch
 _source=generator
-_template=rename.rn.now
+_template=duplicate.dp.could
 _mood=command
-object=$w580
-name=n_main
+object=$w568
 
-@w580 entity
+@w568 entity
 head=n_backup
 
-@w581 connect
-_text=connect each lime triangle to next
+@w569 disconnect
+_text=let disconnect n_walls from n_b
 _world=sketch
 _source=generator
-_template=connect.cn_pair.want
+_template=disconnect.dc.lets
 _mood=command
-source=$w582
-pairing=next
+source=$w570
+target=$w571
 
-@w582 entity
-head=triangle
-attr=lime
-det=each
+@w570 entity
+head=n_walls
 
-@w583 move
-_text=move n_idle left_of n_gamma
+@w571 entity
+head=n_b
+
+@w572 connect
+_text=connect the white square to n_home with a arrow labeled t_enter_password .
 _world=sketch
 _source=generator
-_template=move.mv_place.could
+_template=connect.cn.want
 _mood=command
-object=$w584
-relation=left_of
-landmark=$w585
+text=t_enter_password
+source=$w573
+target=$w574
+edge=$w575
 
-@w584 entity
-head=n_idle
-
-@w585 entity
-head=n_gamma
-
-@w586 create
-_text=draw a white triangle labeled t_ok center
-_world=sketch
-_source=generator
-_template=create.cr.can
-_mood=command
-object=$w587
-text=t_ok
-region=center
-
-@w587 entity
-head=triangle
+@w573 entity
+head=square
 attr=white
+det=the
 
-@w588 distribute
-_text=space everything evenly .
+@w574 entity
+head=n_home
+
+@w575 entity
+head=arrow
+
+@w576 set
+_text=make the triangles not_red magenta
 _world=sketch
 _source=generator
-_template=distribute.dsb.want
+_template=set.st_not.could
 _mood=command
-object=$w589
+object=$w577
+color=magenta
+notcolor=not_red
 
-@w589 entity
-head=everything
+@w577 entity
+head=triangles
+det=the
 
-@w590 set
-_text=make n_error medium .
+@w578 connect
+_text=connect it with n_core with a arrow
 _world=sketch
 _source=generator
-_template=set.st_size.want
+_template=connect.cn.want
 _mood=command
-object=$w591
-size=medium
+source=$w579
+target=$w580
+edge=$w581
 
-@w591 entity
-head=n_error
+@w579 entity
+head=it
 
-@w592 connect
-_text=connect n_core to n_sun
+@w580 entity
+head=n_core
+
+@w581 entity
+head=arrow
+
+@w582 list
+_text=which rectangles be there ?
+_world=sketch
+_source=generator
+_template=list.ql.bare
+_mood=command
+object=$w583
+
+@w583 entity
+head=rectangles
+
+@w584 connect
+_text=connect n_error to circle with a dotted arrow labeled t_send
 _world=sketch
 _source=generator
 _template=connect.cn.could
 _mood=command
-source=$w593
-target=$w594
+text=t_send
+source=$w585
+target=$w586
+style=dotted
+edge=$w587
 
-@w593 entity
-head=n_core
+@w585 entity
+head=n_error
 
-@w594 entity
-head=n_sun
+@w586 entity
+head=n_ball
 
-@w595 forget
-_text=forget rules
+@w587 entity
+head=arrow
+
+@w588 connect
+_text=connect arrow from n_main to n_process
 _world=sketch
 _source=generator
-_template=forget.fg.could
+_template=connect.cn_draw.please
 _mood=command
-object=$w596
+source=$w589
+target=$w590
+edge=$w591
 
-@w596 entity
-head=rules
+@w589 entity
+head=n_main
 
-@w597 create
+@w590 entity
+head=n_process
+
+@w591 entity
+head=arrow
+
+@w592 create
 _text=above n_main , draw a huge ellipse
 _world=sketch
 _source=generator
 _template=create.cr_loc_first.now
 _mood=command
-object=$w598
+object=$w593
 size=huge
 relation=above
-landmark=$w599
+landmark=$w594
 
-@w598 entity
+@w593 entity
 head=ellipse
 
-@w599 entity
+@w594 entity
 head=n_main
 
-@w600 fact
+@w595 fact
 _text=n_alpha is navy
 _world=sketch
 _source=generator
 _template=fact.fa.bare
 _mood=command
-object=$w601
+object=$w596
 color=navy
 
-@w601 entity
+@w596 entity
 head=n_alpha
 
-@w602 connect
+@w597 connect
 _text=connect the teal diamonds chain
 _world=sketch
 _source=generator
 _template=connect.cn_pair.want
 _mood=command
-source=$w603
+source=$w598
 pairing=chain
 
-@w603 entity
+@w598 entity
 head=diamonds
 attr=teal
 det=the
 
-@w604 connect
+@w599 connect
 _text=connect arrow from n_box1 to n_server
 _world=sketch
 _source=generator
 _template=connect.cn_draw.please
 _mood=command
-source=$w605
-target=$w606
-edge=$w607
+source=$w600
+target=$w601
+edge=$w602
 
-@w605 entity
+@w600 entity
 head=n_box1
 
-@w606 entity
+@w601 entity
 head=n_server
 
-@w607 entity
+@w602 entity
 head=arrow
 
-@w608 connect
+@w603 connect
 _text=connect the navy ellipse to n_idle
 _world=sketch
 _source=generator
 _template=connect.cn.want
 _mood=command
-source=$w609
-target=$w610
+source=$w604
+target=$w605
 
-@w609 entity
+@w604 entity
 head=ellipse
 attr=navy
 det=the
 
-@w610 entity
+@w605 entity
 head=n_idle
 
-@w611 connect
+@w606 connect
 _text=connect n_b to n_mars with a dotted arrow labeled t_core
 _world=sketch
 _source=generator
 _template=connect.cn.could
 _mood=command
 text=t_core
-source=$w612
-target=$w613
+source=$w607
+target=$w608
 style=dotted
-edge=$w614
+edge=$w609
 
-@w612 entity
+@w607 entity
 head=n_b
 
-@w613 entity
+@w608 entity
 head=n_mars
 
-@w614 entity
+@w609 entity
 head=arrow
 
-@w615 connect
-_text=connect the purple ellipses chain
+@w610 disconnect
+_text=let cut the connect between n_beta and n_box1
 _world=sketch
 _source=generator
-_template=connect.cn_pair.want
+_template=disconnect.dc.lets
 _mood=command
-source=$w616
-pairing=chain
+source=$w611
+target=$w612
 
-@w616 entity
-head=ellipses
-attr=purple
+@w611 entity
+head=n_beta
+
+@w612 entity
+head=n_box1
+
+@w613 move
+_text=move it below the circle
+_world=sketch
+_source=generator
+_template=move.mv_place.could
+_mood=command
+object=$w614
+relation=below
+landmark=$w615
+
+@w614 entity
+head=it
+
+@w615 entity
+head=circle
 det=the
 
-@w617 create
-_text=draw a circle bottom_left
+@w616 connect
+_text=connect dashed arrow from n_firewall to n_core
 _world=sketch
 _source=generator
-_template=create.cr.can
+_template=connect.cn_draw.please
 _mood=command
-object=$w618
-region=bottom_left
+source=$w617
+target=$w618
+style=dashed
+edge=$w619
+
+@w617 entity
+head=n_firewall
 
 @w618 entity
-head=circle
+head=n_core
 
-@w619 connect
-_text=connect n_ended to the blue square with a line labeled t_step_1
-_world=sketch
-_source=generator
-_template=connect.cn.want
-_mood=command
-text=t_step_1
-source=$w620
-target=$w621
-arrow=plain
-edge=$w622
-
-@w620 entity
-head=n_ended
-
-@w621 entity
-head=square
-attr=blue
-det=the
-
-@w622 entity
-head=line
-
-@w623 delete
-_text=delete all the circles not_magenta
-_world=sketch
-_source=generator
-_template=delete.de_not.please
-_mood=command
-object=$w624
-notcolor=not_magenta
-
-@w624 entity
-head=circles
-det=the
-
-@w625 create
-_text=right_of the star , draw a lime rectangle
-_world=sketch
-_source=generator
-_template=create.cr_loc_first.now
-_mood=command
-object=$w626
-relation=right_of
-landmark=$w627
-
-@w626 entity
-head=rectangle
-attr=lime
-
-@w627 entity
-head=star
-det=the
-
-@w628 rename
-_text=rename n_main n_idle
-_world=sketch
-_source=generator
-_template=rename.rn.now
-_mood=command
-object=$w629
-name=n_idle
-
-@w629 entity
-head=n_main
-
-@w630 fact
-_text=n_a is black
-_world=sketch
-_source=generator
-_template=fact.fa.bare
-_mood=command
-object=$w631
-color=black
-
-@w631 entity
-head=n_a
-
-@w632 create
-_text=draw a diamond
-_world=sketch
-_source=generator
-_template=create.cr.now
-_mood=command
-object=$w633
-
-@w633 entity
-head=diamond
-
-@w634 connect
-_text=connect dashed arrow from n_ball to n_api
-_world=sketch
-_source=generator
-_template=connect.cn_draw.please
-_mood=command
-source=$w635
-target=$w636
-style=dashed
-edge=$w637
-
-@w635 entity
-head=n_ball
-
-@w636 entity
-head=n_api
-
-@w637 entity
+@w619 entity
 head=arrow
 
-@w638 connect
-_text=connect n_queue to n_start with a dotted arrow labeled t_pay .
-_world=sketch
-_source=generator
-_template=connect.cn.could
-_mood=command
-text=t_pay
-source=$w639
-target=$w640
-style=dotted
-edge=$w641
-
-@w639 entity
-head=n_queue
-
-@w640 entity
-head=n_start
-
-@w641 entity
-head=arrow
-
-@w642 connect
-_text=connect arrow from n_input to n_a
-_world=sketch
-_source=generator
-_template=connect.cn_draw.please
-_mood=command
-source=$w643
-target=$w644
-edge=$w645
-
-@w643 entity
-head=n_input
-
-@w644 entity
-head=n_a
-
-@w645 entity
-head=arrow
-
-@w646 connect
-_text=connect arrow from n_server to n_start .
+@w620 connect
+_text=connect dotted arrow from n_c to n_roof
 _world=sketch
 _source=generator
 _template=connect.cn_draw.can
 _mood=command
-source=$w647
-target=$w648
-edge=$w649
+source=$w621
+target=$w622
+style=dotted
+edge=$w623
 
-@w647 entity
-head=n_server
+@w621 entity
+head=n_c
 
-@w648 entity
-head=n_start
+@w622 entity
+head=n_roof
 
-@w649 entity
+@w623 entity
 head=arrow
 
-@w650 connect
-_text=connect the pink triangle to n_api with a dashed arrow
+@w624 fact
+_text=n_earth is cyan
 _world=sketch
 _source=generator
-_template=connect.cn.want
+_template=fact.fa.bare
 _mood=command
-source=$w651
-target=$w652
-style=dashed
-edge=$w653
+object=$w625
+color=cyan
 
-@w651 entity
-head=triangle
-attr=pink
-det=the
+@w625 entity
+head=n_earth
 
-@w652 entity
-head=n_api
-
-@w653 entity
-head=arrow
-
-@w654 create
-_text=draw a huge purple star
+@w626 create
+_text=draw a blue square named n_tree right_of n_router
 _world=sketch
 _source=generator
 _template=create.cr.now
 _mood=command
-object=$w655
-size=huge
+object=$w627
+name=n_tree
+relation=right_of
+landmark=$w628
 
-@w655 entity
-head=star
-attr=purple
+@w627 entity
+head=square
+attr=blue
 
-@w656 connect
-_text=connect all squares each_other
+@w628 entity
+head=n_router
+
+@w629 move
+_text=move the navy rectangle right_of n_main
 _world=sketch
 _source=generator
-_template=connect.cn_pair.want
+_template=move.mv_place.could
 _mood=command
-source=$w657
-pairing=each_other
+object=$w630
+relation=right_of
+landmark=$w631
 
-@w657 entity
-head=squares
-det=all
+@w630 entity
+head=rectangle
+attr=navy
+det=the
 
-@w658 connect
-_text=connect n_valid to n_idle with a arrow
+@w631 entity
+head=n_main
+
+@w632 path
+_text=path_q from n_c to n_api ?
+_world=sketch
+_source=generator
+_template=path.qpa.bare
+_mood=command
+source=$w633
+target=$w634
+
+@w633 entity
+head=n_c
+
+@w634 entity
+head=n_api
+
+@w635 rename
+_text=rename n_idle as n_core
+_world=sketch
+_source=generator
+_template=rename.rn.now
+_mood=command
+object=$w636
+name=n_core
+
+@w636 entity
+head=n_idle
+
+@w637 path
+_text=path_q from n_input to n_c ?
+_world=sketch
+_source=generator
+_template=path.qpa.bare
+_mood=command
+source=$w638
+target=$w639
+
+@w638 entity
+head=n_input
+
+@w639 entity
+head=n_c
+
+@w640 connect
+_text=connect the orange ellipse to n_done with a plain dashed line labeled t_retry .
 _world=sketch
 _source=generator
 _template=connect.cn.want
 _mood=command
-source=$w659
-target=$w660
-edge=$w661
+text=t_retry
+source=$w641
+target=$w642
+style=dashed
+arrow=plain
+edge=$w643
+
+@w641 entity
+head=ellipse
+attr=orange
+det=the
+
+@w642 entity
+head=n_done
+
+@w643 entity
+head=line
+
+@w644 count
+_text=how_many gold shapes do we have ?
+_world=sketch
+_source=generator
+_template=count.qc.bare
+_mood=command
+object=$w645
+
+@w645 entity
+head=shapes
+attr=gold
+
+@w646 cycle
+_text=cycle_q ?
+_world=sketch
+_source=generator
+_template=cycle.qy.bare
+_mood=command
+
+@w647 create
+_text=draw a tiny ellipse named n_output left_side .
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w648
+size=tiny
+name=n_output
+region=left_side
+
+@w648 entity
+head=ellipse
+
+@w649 connect
+_text=connect n_beta with oldest star
+_world=sketch
+_source=generator
+_template=connect.cn.want
+_mood=command
+source=$w650
+target=$w651
+
+@w650 entity
+head=n_beta
+
+@w651 entity
+head=star
+det=oldest
+
+@w652 connect
+_text=connect n_form with n_login
+_world=sketch
+_source=generator
+_template=connect.cn.want
+_mood=command
+source=$w653
+target=$w654
+
+@w653 entity
+head=n_form
+
+@w654 entity
+head=n_login
+
+@w655 fact
+_text=n_laptop is red
+_world=sketch
+_source=generator
+_template=fact.fa.bare
+_mood=command
+object=$w656
+color=red
+
+@w656 entity
+head=n_laptop
+
+@w657 connect
+_text=connect n_laptop to the ellipse
+_world=sketch
+_source=generator
+_template=connect.cn.could
+_mood=command
+source=$w658
+target=$w659
+
+@w658 entity
+head=n_laptop
 
 @w659 entity
-head=n_valid
+head=ellipse
+det=the
 
-@w660 entity
-head=n_idle
+@w660 distribute
+_text=space all squares vertically
+_world=sketch
+_source=generator
+_template=distribute.dsb.now
+_mood=command
+object=$w661
+axis=vertically
 
 @w661 entity
-head=arrow
+head=squares
+det=all
 
-@w662 undo
+@w662 fact
+_text=n_cloud is red
+_world=sketch
+_source=generator
+_template=fact.fa.bare
+_mood=command
+object=$w663
+color=red
+
+@w663 entity
+head=n_cloud
+
+@w664 create
+_text=draw a huge teal hexagon left_side
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w665
+size=huge
+region=left_side
+
+@w665 entity
+head=hexagon
+attr=teal
+
+@w666 fact
+_text=n_y is right_of n_hub
+_world=sketch
+_source=generator
+_template=fact.fa.bare
+_mood=command
+object=$w667
+relation=right_of
+landmark=$w668
+
+@w667 entity
+head=n_y
+
+@w668 entity
+head=n_hub
+
+@w669 create
+_text=draw a large gold circle named n_output labeled t_ship .
+_world=sketch
+_source=generator
+_template=create.cr.now
+_mood=command
+object=$w670
+size=large
+name=n_output
+text=t_ship
+
+@w670 entity
+head=circle
+attr=gold
+
+@w671 list
+_text=which shapes ?
+_world=sketch
+_source=generator
+_template=list.ql.bare
+_mood=command
+object=$w672
+
+@w672 entity
+head=shapes
+
+@w673 create
+_text=draw a teal circle
+_world=sketch
+_source=generator
+_template=create.cr.now
+_mood=command
+object=$w674
+
+@w674 entity
+head=circle
+attr=teal
+
+@w675 undo
 _text=undo
 _world=sketch
 _source=generator
 _template=undo.ud.please
 _mood=command
 
-@w663 create
-_text=draw a gray ellipse next_to the ellipse .
+@w676 create
+_text=draw a gold square named n_node2 labeled t_save top_right
 _world=sketch
 _source=generator
 _template=create.cr.now
-_mood=command
-object=$w664
-relation=next_to
-landmark=$w665
-
-@w664 entity
-head=ellipse
-attr=gray
-
-@w665 entity
-head=ellipse
-det=the
-
-@w666 set
-_text=make the circles not_red white
-_world=sketch
-_source=generator
-_template=set.st_not.want
-_mood=command
-object=$w667
-color=white
-notcolor=not_red
-
-@w667 entity
-head=circles
-det=the
-
-@w668 duplicate
-_text=duplicate the teal triangle
-_world=sketch
-_source=generator
-_template=duplicate.dp.could
-_mood=command
-object=$w669
-
-@w669 entity
-head=triangle
-attr=teal
-det=the
-
-@w670 set
-_text=make the ellipses not_black orange
-_world=sketch
-_source=generator
-_template=set.st_not.now
-_mood=command
-object=$w671
-color=orange
-notcolor=not_black
-
-@w671 entity
-head=ellipses
-det=the
-
-@w672 create
-_text=draw a green square named n_root .
-_world=sketch
-_source=generator
-_template=create.cr.now
-_mood=command
-object=$w673
-name=n_root
-
-@w673 entity
-head=square
-attr=green
-
-@w674 list
-_text=which pink squares are there .
-_world=sketch
-_source=generator
-_template=list.ql.bare
-_mood=command
-object=$w675
-
-@w675 entity
-head=squares
-attr=pink
-
-@w676 fact
-_text=n_y is indigo
-_world=sketch
-_source=generator
-_template=fact.fa.bare
 _mood=command
 object=$w677
-color=indigo
+name=n_node2
+text=t_save
+region=top_right
 
 @w677 entity
-head=n_y
-
-@w678 duplicate
-_text=duplicate n_earth 2 times
-_world=sketch
-_source=generator
-_template=duplicate.dp.could
-_mood=command
-object=$w679
-quantity=2
-
-@w679 entity
-head=n_earth
-
-@w680 connect
-_text=connect the gold circle with the gold square with a plain dashed line .
-_world=sketch
-_source=generator
-_template=connect.cn.want
-_mood=command
-source=$w681
-target=$w682
-style=dashed
-arrow=plain
-edge=$w683
-
-@w681 entity
-head=circle
-attr=gold
-det=the
-
-@w682 entity
 head=square
 attr=gold
-det=the
 
-@w683 entity
-head=line
-
-@w684 create
-_text=draw a purple rectangle named n_home right_of the diamond
+@w678 connect
+_text=connect dotted arrow from n_top1 to n_queue
 _world=sketch
 _source=generator
-_template=create.cr.now
+_template=connect.cn_draw.can
 _mood=command
-object=$w685
-name=n_home
-relation=right_of
-landmark=$w686
+source=$w679
+target=$w680
+style=dotted
+edge=$w681
 
-@w685 entity
-head=rectangle
-attr=purple
+@w679 entity
+head=n_top1
 
-@w686 entity
-head=diamond
-det=the
+@w680 entity
+head=n_queue
 
-@w687 create
-_text=draw a pink ellipse named n_b .
-_world=sketch
-_source=generator
-_template=create.cr.now
-_mood=command
-object=$w688
-name=n_b
-
-@w688 entity
-head=ellipse
-attr=pink
-
-@w689 connect
-_text=connect it with the gold diamond with a two_way arrow
-_world=sketch
-_source=generator
-_template=connect.cn.could
-_mood=command
-source=$w690
-target=$w691
-arrow=two_way
-edge=$w692
-
-@w690 entity
-head=it
-
-@w691 entity
-head=diamond
-attr=gold
-det=the
-
-@w692 entity
+@w681 entity
 head=arrow
 
-@w693 delete
-_text=delete all the hexagons not_white
+@w682 create
+_text=draw a diamond above n_queue
 _world=sketch
 _source=generator
-_template=delete.de_not.please
+_template=create.cr.now
 _mood=command
-object=$w694
-notcolor=not_white
+object=$w683
+relation=above
+landmark=$w684
 
-@w694 entity
-head=hexagons
-det=the
+@w683 entity
+head=diamond
 
-@w695 connect
-_text=connect the yellow rectangle to n_worker
+@w684 entity
+head=n_queue
+
+@w685 distribute
+_text=space everything horizontally
 _world=sketch
 _source=generator
-_template=connect.cn.could
+_template=distribute.dsb.want
 _mood=command
-source=$w696
-target=$w697
+object=$w686
+axis=horizontally
 
-@w696 entity
-head=rectangle
-attr=yellow
-det=the
+@w686 entity
+head=everything
 
-@w697 entity
-head=n_worker
+@w687 connect
+_text=connect dotted arrow from n_mars to n_ended
+_world=sketch
+_source=generator
+_template=connect.cn_draw.please
+_mood=command
+source=$w688
+target=$w689
+style=dotted
+edge=$w690
 
-@w698 create
-_text=draw 4 rectangles next_to the black circle
+@w688 entity
+head=n_mars
+
+@w689 entity
+head=n_ended
+
+@w690 entity
+head=arrow
+
+@w691 create
+_text=draw an ellipse left_of the teal circle
 _world=sketch
 _source=generator
 _template=create.cr.can
 _mood=command
-object=$w699
-relation=next_to
-landmark=$w700
-quantity=4
+object=$w692
+relation=left_of
+landmark=$w693
 
-@w699 entity
-head=rectangles
+@w692 entity
+head=ellipse
 
-@w700 entity
+@w693 entity
 head=circle
-attr=black
+attr=teal
 det=the
 
-@w701 connect
-_text=connect n_cloud to the blue star with a dashed arrow labeled t_reject .
+@w694 cycle
+_text=cycle_q ?
+_world=sketch
+_source=generator
+_template=cycle.qy.bare
+_mood=command
+
+@w695 degree
+_text=degree_q connection does n_printer have ?
+_world=sketch
+_source=generator
+_template=degree.qdg.bare
+_mood=command
+object=$w696
+
+@w696 entity
+head=n_printer
+
+@w697 set
+_text=make the circles not_blue brown
+_world=sketch
+_source=generator
+_template=set.st_not.could
+_mood=command
+object=$w698
+color=brown
+notcolor=not_blue
+
+@w698 entity
+head=circles
+det=the
+
+@w699 connect
+_text=connect dashed arrow from n_ceo to n_printer .
+_world=sketch
+_source=generator
+_template=connect.cn_draw.please
+_mood=command
+source=$w700
+target=$w701
+style=dashed
+edge=$w702
+
+@w700 entity
+head=n_ceo
+
+@w701 entity
+head=n_printer
+
+@w702 entity
+head=arrow
+
+@w703 create
+_text=draw a triangle next_to n_node2
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w704
+relation=next_to
+landmark=$w705
+
+@w704 entity
+head=triangle
+
+@w705 entity
+head=n_node2
+
+@w706 connect
+_text=connect the triangle with n_door
 _world=sketch
 _source=generator
 _template=connect.cn.want
 _mood=command
-text=t_reject
-source=$w702
-target=$w703
-style=dashed
-edge=$w704
-
-@w702 entity
-head=n_cloud
-
-@w703 entity
-head=star
-attr=blue
-det=the
-
-@w704 entity
-head=arrow
-
-@w705 disconnect
-_text=disconnect n_walls from n_alpha
-_world=sketch
-_source=generator
-_template=disconnect.dc.lets
-_mood=command
-source=$w706
-target=$w707
-
-@w706 entity
-head=n_walls
+source=$w707
+target=$w708
 
 @w707 entity
-head=n_alpha
+head=triangle
+det=the
 
-@w708 list
-_text=which orange hexagons ?
+@w708 entity
+head=n_door
+
+@w709 connect
+_text=connect n_check to n_a with a dotted arrow
+_world=sketch
+_source=generator
+_template=connect.cn.could
+_mood=command
+source=$w710
+target=$w711
+style=dotted
+edge=$w712
+
+@w710 entity
+head=n_check
+
+@w711 entity
+head=n_a
+
+@w712 entity
+head=arrow
+
+@w713 list
+_text=which orange squares ?
 _world=sketch
 _source=generator
 _template=list.ql.bare
 _mood=command
-object=$w709
+object=$w714
 
-@w709 entity
-head=hexagons
+@w714 entity
+head=squares
 attr=orange
 
-@w710 count
-_text=how_many indigo shapes are there ?
+@w715 count
+_text=how_many indigo shapes be there ?
 _world=sketch
 _source=generator
 _template=count.qc.bare
 _mood=command
-object=$w711
+object=$w716
 
-@w711 entity
+@w716 entity
 head=shapes
 attr=indigo
 
-@w712 toBack
+@w717 toBack
 _text=send n_printer back
 _world=sketch
 _source=generator
-_template=toBack.tb.can
+_template=toBack.tb.want
 _mood=command
-object=$w713
+object=$w718
 depth=back
 
-@w713 entity
+@w718 entity
 head=n_printer
 
-@w714 rename
+@w719 rename
 _text=rename n_start n_door
 _world=sketch
 _source=generator
 _template=rename.rn.now
 _mood=command
-object=$w715
+object=$w720
 name=n_door
 
-@w715 entity
+@w720 entity
 head=n_start
 
-@w716 undo
+@w721 undo
 _text=undo
 _world=sketch
 _source=generator
-_template=undo.ud.please
+_template=undo.ud.could
 _mood=command
 
-@w717 count
-_text=how_many shapes are there ?
+@w722 count
+_text=how_many shapes be there ?
 _world=sketch
 _source=generator
 _template=count.qc.bare
 _mood=command
-object=$w718
+object=$w723
 
-@w718 entity
+@w723 entity
 head=shapes
 
-@w719 create
+@w724 create
 _text=above the circle , draw a black star
 _world=sketch
 _source=generator
 _template=create.cr_loc_first.now
 _mood=command
-object=$w720
+object=$w725
 relation=above
-landmark=$w721
+landmark=$w726
 
-@w720 entity
+@w725 entity
 head=star
 attr=black
 
-@w721 entity
+@w726 entity
 head=circle
 det=the
 
-@w722 list
-_text=which all black rectangles below n_sun
-_world=sketch
-_source=generator
-_template=list.ql.bare
-_mood=command
-object=$w723
-relation=below
-landmark=$w724
-
-@w723 entity
-head=rectangles
-attr=black
-
-@w724 entity
-head=n_sun
-
-@w725 create
-_text=draw an orange diamond named n_backup
-_world=sketch
-_source=generator
-_template=create.cr.can
-_mood=command
-object=$w726
-name=n_backup
-
-@w726 entity
-head=diamond
-attr=orange
-
-@w727 create
-_text=draw a black star labeled t_yes
-_world=sketch
-_source=generator
-_template=create.cr.can
-_mood=command
-object=$w728
-text=t_yes
-
-@w728 entity
-head=star
-attr=black
-
-@w729 set
-_text=make the circles not_black navy
-_world=sketch
-_source=generator
-_template=set.st_not.could
-_mood=command
-object=$w730
-color=navy
-notcolor=not_black
-
-@w730 entity
-head=circles
-det=the
-
-@w731 path
-_text=path_q from n_earth to n_core ?
+@w727 path
+_text=path_q from n_valid to n_box1 ?
 _world=sketch
 _source=generator
 _template=path.qpa.bare
 _mood=command
-source=$w732
-target=$w733
+source=$w728
+target=$w729
 
-@w732 entity
-head=n_earth
+@w728 entity
+head=n_valid
 
-@w733 entity
-head=n_core
+@w729 entity
+head=n_box1
 
-@w734 create
-_text=draw a gold square named n_side bottom
+@w730 create
+_text=draw 3 yellow stars
 _world=sketch
 _source=generator
 _template=create.cr.can
 _mood=command
+object=$w731
+quantity=3
+
+@w731 entity
+head=stars
+attr=yellow
+
+@w732 create
+_text=draw a triangle labeled t_enter_password
+_world=sketch
+_source=generator
+_template=create.cr.now
+_mood=command
+object=$w733
+text=t_enter_password
+
+@w733 entity
+head=triangle
+
+@w734 create
+_text=draw 4 medium stars below n_b
+_world=sketch
+_source=generator
+_template=create.cr.now
+_mood=command
 object=$w735
+size=medium
+relation=below
+landmark=$w736
+quantity=4
+
+@w735 entity
+head=stars
+
+@w736 entity
+head=n_b
+
+@w737 create
+_text=draw a huge indigo diamond named n_side bottom
+_world=sketch
+_source=generator
+_template=create.cr.can
+_mood=command
+object=$w738
+size=huge
 name=n_side
 region=bottom
 
-@w735 entity
-head=square
-attr=gold
+@w738 entity
+head=diamond
+attr=indigo
 
-@w736 list
+@w739 list
 _text=which cyan squares ?
 _world=sketch
 _source=generator
 _template=list.ql.bare
 _mood=command
-object=$w737
+object=$w740
 
-@w737 entity
+@w740 entity
 head=squares
 attr=cyan
 
-@w738 distribute
+@w741 distribute
 _text=distribute all rectangles evenly vertically .
 _world=sketch
 _source=generator
 _template=distribute.dsb.now
 _mood=command
-object=$w739
+object=$w742
 axis=vertically
 
-@w739 entity
+@w742 entity
 head=rectangles
 det=all
 
-@w740 move
+@w743 move
 _text=move n_done below n_cloud
 _world=sketch
 _source=generator
 _template=move.mv_place.could
 _mood=command
-object=$w741
+object=$w744
 relation=below
-landmark=$w742
+landmark=$w745
 
-@w741 entity
+@w744 entity
 head=n_done
 
-@w742 entity
+@w745 entity
 head=n_cloud
 
-@w743 fact
+@w746 fact
 _text=n_backup is right_of n_ceo
 _world=sketch
 _source=generator
 _template=fact.fa.bare
 _mood=command
-object=$w744
+object=$w747
 relation=right_of
-landmark=$w745
+landmark=$w748
 
-@w744 entity
+@w747 entity
 head=n_backup
 
-@w745 entity
+@w748 entity
 head=n_ceo
 
-@w746 rename
+@w749 rename
 _text=rename n_laptop to n_done
 _world=sketch
 _source=generator
 _template=rename.rn.now
 _mood=command
-object=$w747
+object=$w750
 name=n_done
 
-@w747 entity
+@w750 entity
 head=n_laptop
 
-@w748 connect
+@w751 connect
 _text=connect it to the lime circle with a dotted arrow
 _world=sketch
 _source=generator
 _template=connect.cn.want
 _mood=command
-source=$w749
-target=$w750
+source=$w752
+target=$w753
 style=dotted
-edge=$w751
+edge=$w754
 
-@w749 entity
+@w752 entity
 head=it
 
-@w750 entity
+@w753 entity
 head=circle
 attr=lime
 det=the
 
-@w751 entity
+@w754 entity
 head=arrow
 
-@w752 rule
+@w755 rule
 _text=from_now_on diamonds are lime .
 _world=sketch
 _source=generator
 _template=rule.ru.bare
 _mood=command
-object=$w753
+object=$w756
 color=lime
 
-@w753 entity
+@w756 entity
 head=diamonds
 
-@w754 toFront
-_text=bring n_y front
+@w757 toBack
+_text=send n_y back
 _world=sketch
 _source=generator
-_template=toFront.tf.please
+_template=toBack.tb.want
 _mood=command
-object=$w755
-depth=front
+object=$w758
+depth=back
 
-@w755 entity
+@w758 entity
 head=n_y
 
-@w756 fact
+@w759 fact
 _text=n_worker is teal
 _world=sketch
 _source=generator
 _template=fact.fa.bare
 _mood=command
-object=$w757
+object=$w760
 color=teal
 
-@w757 entity
+@w760 entity
 head=n_worker
 
-@w758 connect
+@w761 connect
 _text=connect the star to n_backup with a dotted line labeled t_admin
 _world=sketch
 _source=generator
 _template=connect.cn.could
 _mood=command
 text=t_admin
-source=$w759
-target=$w760
+source=$w762
+target=$w763
 style=dotted
-arrow=plain
-edge=$w761
+edge=$w764
 
-@w759 entity
+@w762 entity
 head=star
 det=the
 
-@w760 entity
+@w763 entity
 head=n_backup
 
-@w761 entity
+@w764 entity
 head=line
 
-@w762 set
+@w765 set
 _text=make the circles not_gold orange
 _world=sketch
 _source=generator
-_template=set.st_not.could
+_template=set.st_not.now
 _mood=command
-object=$w763
+object=$w766
 color=orange
 notcolor=not_gold
 
-@w763 entity
+@w766 entity
 head=circles
 det=the
-
-@w764 create
-_text=draw a blue ellipse above n_form
-_world=sketch
-_source=generator
-_template=create.cr.now
-_mood=command
-object=$w765
-relation=above
-landmark=$w766
-
-@w765 entity
-head=ellipse
-attr=blue
-
-@w766 entity
-head=n_form
-
-@w767 create
-_text=draw 3 medium black squares .
-_world=sketch
-_source=generator
-_template=create.cr.now
-_mood=command
-object=$w768
-size=medium
-quantity=3
-
-@w768 entity
-head=squares
-attr=black
-
-@w769 move
-_text=move n_gate top_right
-_world=sketch
-_source=generator
-_template=move.mv_place.could
-_mood=command
-object=$w770
-region=top_right
-
-@w770 entity
-head=n_gate

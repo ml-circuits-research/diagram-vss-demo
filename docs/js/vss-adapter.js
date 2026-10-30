@@ -9,7 +9,8 @@ const SHAPES = { circle: "circle", circles: "circle", square: "square", squares:
 const PLURAL = new Set(["circles", "squares", "rectangles", "triangles", "diamonds", "ellipses", "hexagons", "stars", "shapes"]);
 const PROPERTY = { what_color: "color", where_is: "position", how_big: "size", what_shape: "shape", what_says: "label" };
 const COMMANDS = new Set(["create", "delete", "move", "set", "resize", "rename", "label", "duplicate", "swap", "connect", "disconnect", "align", "arrange", "distribute", "toFront", "toBack", "undo", "redo", "forget"]);
-const QUESTIONS = new Set(["count", "exists", "list", "property", "describe", "neighbors", "path", "reachable", "cycle", "check"]);
+const QUESTIONS = new Set(["count", "exists", "list", "property", "describe", "neighbors", "path", "reachable", "cycle", "check", "extreme", "nearest", "connected", "degree"]);
+const SUPER = { biggest: "biggest", smallest: "smallest", leftmost: "leftmost", rightmost: "rightmost", topmost: "topmost", bottommost: "bottommost", mostconnected: "mostConnected", leastconnected: "leastConnected", closest: "closest", farthest: "farthest" };
 
 /** VSS wires -> { event, roles, verb }; roles: role -> string | {head, attr, det} */
 export function readingFromWires(wires, verb) {
@@ -136,8 +137,18 @@ export function toNodes(reading, info, ctx, seq) {
     case "check": case "fact": {
       args.target = ref(obj); if (R.color) args.color = R.color; if (R.size) args.size = R.size; if (R.shape) args.shape = R.shape;
       if (R.notcolor && !negUsed) args.notColor = String(R.notcolor).replace(/^not_/, "");
-      place(args); break;
+      if (R.comparison) { args.comparison = R.comparison; if (R.landmark) args.anchor = ref(R.landmark); }
+      else place(args);
+      break;
     }
+    case "extreme": case "nearest": {
+      if (obj) { const s = shapeOf(obj); if (s) args.shape = s; if (obj.attr) args.color = obj.attr; }
+      if (R.superlative) args.superlative = SUPER[R.superlative] || R.superlative;
+      if (ev === "nearest" && R.landmark) args.anchor = ref(R.landmark);
+      break;
+    }
+    case "connected": args.target = ref(obj); if (R.landmark) args.anchor = ref(R.landmark); break;
+    case "degree": args.target = ref(obj); break;
     case "rule": { const s = shapeOf(obj); if (s) args.shape = s; if (R.color) args.color = R.color; if (R.size) args.size = R.size; break; }
     default: break;
   }

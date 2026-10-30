@@ -23,7 +23,7 @@ const sys = K.createSystem();
 function vssFormalize(text, ctx) {
   const cut = sys.formalize(text, ctx), seq = { s: 0, m: 0 }, c = { names: ctx.names, last: [], refs: new Map() }, nodes = [], info = [];
   for (const seg of cut.segments) {
-    const { tokens, info: ni } = normalize(C, lex, seg.src), r = vss.read(tokens.join(" "));
+    const { tokens, info: ni } = normalize(C, lex, seg.src, c.names.concat([...c.refs.keys()])), r = vss.read(tokens.join(" "));
     const verb = tokens.find((t) => verbEvent.has(t)) || null;
     const reading = r.status === "unknown-event" || r.status === "no-sense" ? null : readingFromWires(r.wires, verb);
     const out = reading ? toNodes(reading, ni, c, seq) : { nodes: [] };

@@ -1,2000 +1,2000 @@
-how big is Beta?
+what is reachable from Beta?
 could you make a star saying "reject" left of the diamond
-let's exchange Firewall and Login
-could you grow Worker
-send Ball to the back
-I want you to create a large hexagon to the left of Side
-can you organize everything in a grid
-could you connect all the diamonds one after the other
-connect all the magenta squares in sequence
-connect Alpha to Router with a two-way dashed arrow
-please attach Db with the purple diamond
-please paint Valid gold
-what is reachable from Tree?
-how big is Y?
-attach Node2 with Input with a dashed arrow labeled "step 1"
-how many yellow triangles do we have?
-can you lay out the hexagons in a circle
-from now on rectangles are large
-now make Node2 blue
-let's enlarge Box1
-is there a route from Output to Idle?
-now make D a square.
-please turn all black diamonds green
-is there a path from A to Server?
-make the rectangles that are not teal indigo
-what are the neighbours of Delta?
-can you redo
-please place Input to the left of Door
-please make the hexagons black
-is Mars below C?
-can you get rid of it
-please redo
-make D large
-let's put Process in the bottom left
-could you label Firewall "login"
-can you put Api in the middle
-I want you to drag Input in the top right
-could you connect all the diamonds to each other
-is there a yellow rectangle?
-now connect Earth with Login
-which white shapes?
-how many hexagons on the left do we have?
-can I get from Worker to Door?
-how many squares do we have?
-please erase Api
-is Laptop beside Check?
-please connect the blue hexagons in a chain.
-what links to Start?
-list brown hexagons?
-make all the hexagons indigo
-how many diamonds are there?
-could you label Process "next"
-make Api small
-is there a path from Roof to Box1?
-let's send the red triangle behind the others
-I want you to redo
-is Internet brown?
-send Hub behind the others
-how many cyan triangles are there?
-let's shift the diamond up by 50 pixels
-now make Api an oval
-I want you to shift Door to the left.
-are there any stars?
-let's join Form to Api with a dotted line labeled "open"
-please line up everything vertically
-push CEO to the right by 120 px
-could you draw two triangles labelled "ok?" on the left
-I want you to delete the dot
-now connect every magenta star to the next
-remove Server.
-can you label it "close"
-can you paint Roof lime
-how many rectangles do we have?
-enlarge Check
-could you connect the dots one after the other
-Form is orange
-let's make the squares that are not gold magenta.
-are there any shapes that are not gold?
-now revert
-colour Idle black
-list all shapes are there
-is there a route from Queue to C?
-can you shift the teal diamond at the top
-how many pink stars are there?
-what can be reached from Process?
-can I get from Start to Root?
-could you erase the indigo circle
-let's align the indigo squares vertically
-now make Y huge.
-can you get rid of Router
-can you color it gray
-let's shift Check to the left of Idle
-I want you to place the purple star next to Db
-list all ellipses which are not lime
-could you remove the arrow from Db to Main
-please make B an oval
-now label it "retry".
-please remove the arrow from CEO to Start.
-I want you to create a large gray box called Internet in the top left corner
-let's make the navy hexagon twice as big
-turn Ball black
-could you turn the newest diamond yellow.
-where is Check?
-could you add a medium brown triangle in the bottom left
-turn Alpha blue
-what can be reached from Queue?
-is there a cycle?
-is Alpha over Beta?
-now drag Ball near the pink diamond
-can you swap Idle and Main
-now push it down by 10 px
-now swap Worker and Y
-what can be reached from A?
-what links to Beta?
-could you enlarge the box.
-put Printer to the left of the black diamond
-please join the ellipse to Ball
-is Ball on top of Roof?
-can you connect the new hexagon to Core
-could you move Idle down by 10 px
-can you move the cyan oval in the top right.
-how many triangles are there?
-can you connect every navy ellipse to the next one
-is there a path from Leaf to Idle?
-let's link the star with the teal square
-how many shapes are there?
-I want you to label Login "retry"
-I want you to draw a blue diamond
-turn Sun brown
-grow Backup
-what can be reached from Output?
-connect the red triangle to Login
-from now on, stars are tiny
-what is reachable from Check?
-please make a navy square named B
-I want you to draw a dashed arrow from C to Sun
-how big is Error?
-colour Router teal
-by default stars are gray
-could you paint the pink oval lime.
-by default, circles are blue
-is Gamma red?
-Cloud is gray
-I want you to delete Cache
-now join Home with Output
-can you delete all the magenta ellipses
-draw 4 orange circles
-let's shift the navy circle down by 100 px
-attach the last indigo hexagon to the gold square
-I want you to undo
-now make Worker a rectangle
-let's make all black diamonds green
-can you paint the green diamonds pink
-now link Server to Laptop
-please add a star saying "reject" at the bottom
-what color is Box1?
-can you link Api with Home
-distribute the brown triangles evenly vertically
-let's make Door a diamond
-please link the purple triangle to the lime triangle
-let's delete Cloud
-could you colour Check pink
-let's join it with Mars
-shift Valid next to Idle
-could you distribute everything
-can you on the right, draw a blue triangle
-now remove the circles that are not cyan.
-what is reachable from Y?
-now connect each yellow triangle to the next one
-from now on squares are large
-what can be reached from C?
-is there a cyan circle?
-are there cycles?
-could you erase all circles
-which shapes are connected to Start?
-please put the latest diamond to the left of Root
-is Backup indigo?
-space all diamonds evenly vertically
-let's connect Walls to Beta
-are there cycles?
-describe Box1
-is there a path from A to Beta?
-what comes after Check?
-could you add a navy triangle named Check
-can you align all magenta ellipses vertically
-I want you to colour the white triangle pink
-put a yellow diamond saying "ship" between Top1 and Error
-insert four diamonds at the bottom
-undo
-is Door yellow?
-could you make a black triangle in the bottom left
-undo
-I want you to insert a medium orange diamond named CEO under Alpha.
-now make Check a hexagon
-is B left of Error?
-can you grow the triangle
-is there a path from Earth to Core?
-I want you to color Hub pink
-can you drag Home right of Printer
-in the center, draw a medium green triangle
-I want you to color the pink diamond teal
-make a tiny diamond above Beta.
-show lime stars near Side
-could you make 3 purple hexagons beneath Api.
-now push Mars down by 25 px.
-delete Idle
-colour the blue box navy
-could you send it to the back.
-could you make Router lime
-I want you to place Beta left of Mars
-let's delete the ellipses which are not lime
-is Root yellow?
-could you remove all diamonds that are not red.
-please join D to the hexagon
-what is connected to Leaf?
-please shift B to the right by 60 pixels
-what are the neighbours of Ball?
-color Start gray
-connect every magenta diamond to the next.
-can you connect each purple star to the next one
-what are the neighbours of Done?
-how many indigo shapes are there?
-what does Login say?
-please exchange Valid and Router
-Api is next to D
-could you put an orange square
-paint the navy box red.
-is there a route from Queue to Start?
-describe everything.
-can I get from Walls to Door?
-Queue is navy
-describe Walls
-please drag the diamond beneath the diamond
-now delete the lime diamond
-let's remove all red ovals
-now attach the blue rectangle with the gold star with a arrow
-make five purple ellipses with the text "step 2" between Process and A
-can you duplicate Idle
-please turn Ball into a triangle
-can you shift Check to the left of Process
-now put the green star next to the square
-how many squares which are not brown are there?
-what is reachable from Done?
-could you align the squares vertically.
-can you redo
-please arrange all black circles in a row
-what can be reached from Y?
-what is on the canvas?
-please put a triangle saying "start" between Output and Box1.
-now get rid of the hexagons
-now bring it to the front.
-are there any shapes at the bottom?
-how many cyan rectangles are there?
-I want you to write "admin" on it
-remove the ellipses which are not lime
-I want you to erase it
-is Api beneath Done?
-now move Login on the left
-can you distribute everything horizontally
-please draw a gray triangle called Roof
-I want you to at the top, add a purple dot
-I want you to lay out everything in a row
-can you erase Queue
-can you make Start an ellipse
-please turn Login into a star.
-I want you to shift Error right of C
-I want you to insert an orange circle with the text "pay" right of CEO.
-I want you to move Error to the left by 75 px
-can you colour Input teal
-could you shift Idle down by 10 pixels
-which shapes are connected to Side?
-what comes after Gamma?
-I want you to call Node2 Cloud.
-can you shrink the hexagon
-I want you to arrange everything in a row.
-please attach Roof to Roof
-can you connect Leaf with Node2 with a plain dotted line labeled "done"
-make a purple hexagon
-let's turn Tree into an ellipse
-list all squares?
-please join it to the yellow rectangle with a dotted line labeled "yes"
-please swap Login and Internet
-now duplicate the gray square three times
-please on the right, draw a medium star
-is Login gray?
-I want you to add a yellow square named Tree with the text "reject" in the lower right.
-what are the neighbours of Check?
-could you make it orange
-could you put a large star
-let's in the top left corner, add a tiny pink circle
-could you draw a box called Cache
-list all pink shapes in the lower right.
-let's remove the rectangles which are not teal.
-let's attach Backup with Tree
-is Roof gold?
-what shape is Server?
-how many gray ellipses do we have?
-let's make Ball twice as big.
-can you delete all ellipses which are not teal
-let's connect the triangles in sequence
-can you above the rectangle, add a medium ellipse
-is Sun lime?
-is there a route from Tree to Roof?
-CEO is beside Node2.
-make the oldest pink circle a bit smaller
-what can be reached from Cache?
-can you in the center, add a white oval
-how many ellipses are there?
-now arrange everything in a row
-connect all squares to each other
-I want you to insert a huge gray triangle called Backup labeled "error"
-could you draw a hexagon in the top left corner.
-can you get rid of it
-how many diamonds at the bottom are there?
-attach the gold triangle to Cloud
-I want you to shift it down by 100 px.
-now shift Alpha in the top right
-please unlink Login from C
-let's insert a gray hexagon
-erase all triangles.
-now lay out everything in a grid
-let's make an orange triangle called X labeled "save".
-I want you to paint Api gray
-how many shapes that are not navy are there?
-let's remove all green ellipses
-I want you to move the pink hexagon to the right.
-is Start below Cloud?
-where is Root?
-please join Input with the yellow star with a two-way dashed arrow labeled "Enter password".
-how many yellow triangles do we have?
-attach Worker to the black circle.
-now connect the ovals in sequence
-can you color it magenta
-delete all stars
-could you make Roof bigger
-is Queue purple?
-forget the defaults
-please get rid of the hexagon.
-make Router red
-could you connect the black dots one after the other
-is there a route from Home to Beta?
-how big is Gamma?
-is there a route from Valid to Cloud?
-put Form beneath Api
-please remove the hexagon
-can I get from Backup to Top1?
-how many squares do we have?
-is there a triangle that are not white?
-now grow the hexagon
-let's paint Queue cyan
-show lime shapes are there
-how many lime triangles are there?
-move Delta between Backup and Login
-let's connect the white circles one after the other
-where is Printer?
-please put a blue box in the top left
-could you in the top right, draw a pink oval
-I want you to insert a blue circle called Error on top of the rectangle
-can you label Beta "back"
-let's rename Process as Server
-please to the right of the brown star, draw a blue diamond
-I want you to put four large yellow stars on the left
-now line up everything horizontally
-could you insert a small triangle called Mars with the text "start"
-move it in the middle
-let's make Router a dot.
-what can be reached from Walls?
-please move Printer to the left
-how many indigo stars do we have?
-let's make Error a hexagon
-add a cyan rectangle called Laptop on the left
-I want you to shift Root down
-what is connected to Hub?
-I want you to rename Cloud to Firewall
-let's erase the squares
-let's create a yellow star in the top right
-now take that back.
-I want you to draw a black square called Gamma under Cloud
-remove it
-could you insert a gold star called Valid next to the purple hexagon
-can you remove it
-let's rename CEO to Alpha
-could you paint Y gray.
-how many blue hexagons do we have?
-from now on rectangles are small
-connect Main with Firewall
-please attach Alpha to Idle with a two way dotted arrow labeled "save"
-could you organize everything in a grid
-are there any rectangles?
-let's shift Queue in the center.
-I want you to insert a star labelled "send" on top of the lime box
-let's move Form in the bottom left.
-now link the white oval with Printer
-now disconnect A from Done
-how many lime shapes do we have?
-please paint Laptop lime.
-describe the canvas
-now align everything horizontally
-erase it
-I want you to get rid of the diamond
-I want you to get rid of Start
-now undo
-please move Tree to the left of the latest indigo box.
-how many indigo stars to the left of Side are there?
-draw a medium purple dot beside Process
-move Server to the right
-what comes after A?
-please erase it.
-list all black shapes are there
-I want you to delete all hexagons
-make Idle teal
-can you label Idle "step 2"
-could you shrink the magenta hexagon
-is Side teal?
-could you rename Beta as Firewall
-let's make a square to the left of Cloud
-list circles are there
-can you enlarge the first diamond
-can you on the left, draw a medium magenta rectangle.
-let's lay out the cyan stars in a grid
-could you arrange the hexagons in a grid
-let's enlarge the square
-how many stars do we have?
-put a huge brown hexagon
-now duplicate Firewall
-how many gray squares above Walls are there?
-please organize everything in a column
-let's send Mars behind the others
-I want you to put a green diamond named Internet beside Hub
-now remove the arrow between Door and X
-now delete all rectangles which are not orange.
-let's get rid of all boxes
-could you put a yellow box to the right of the ellipse.
-erase all cyan ellipses
-can you space out all gold squares evenly horizontally.
-can you colour the new oval purple
-from now on, triangles should be black
-please drag the diamond at the top
-please drag Gamma in the center
-let's join the last navy square to Beta
-let's rename the black diamond as Check
-please write "ship" on C
-is Delta to the right of Hub?
-is there a route from Queue to Printer?
-erase them
-what is reachable from Server?
-can you shift Walls at the top
-now remove the triangles that are not black
-let's link the navy star to the triangle
-by default, diamonds should be large.
-are there any hexagons?
-list all gray hexagons are there?
-now make the black box twice as big
-let's put C between Start and Idle.
-from now on circles should be brown
-I want you to swap Cloud and Ended
-is B right of Router?
-now undo.
-how many ellipses that are not teal do we have?
-draw a dashed arrow from Input to B
-what links to Door?
-could you turn Node2 cyan
-let's draw a medium oval named Form
-let's enlarge Firewall
-how big is Login?
-let's connect all orange stars to each other
-what is connected to Core?
-let's connect Output to X with a dashed line
-I want you to shrink Side
-what are the neighbours of Done?
-now exchange X and B
-please rename the oval as Backup.
-paint them white
-can you push the latest diamond to the right by 20 pixels
-let's push Done down by 150 pixels
-please attach Done with Api
-can you remove the arrow from Valid to Cache
-now unlink Ball from Home
-is Backup below Hub?
-what can be reached from Db?
-is Y next to Error?
-now connect the cyan hexagons in sequence
-how many navy shapes do we have?
-please connect the stars to each other
-I want you to forget the rules
-I want you to redo
-could you make Roof a bit smaller
-can you grow Y
-please insert a medium cyan ellipse named Tree in the center
-how many brown shapes on top of Walls do we have?
-please move Cloud left of Core
-let's copy Home
-can you turn Server navy
-are there any shapes?
-let's connect the hexagons in a chain
-make Root a triangle
-make a tiny magenta dot left of Y
-which shapes are connected to Login?
-I want you to delete all red diamonds
-where is Worker?
-I want you to add a large oval.
-let's put a lime star labeled "Validate" to the left of Idle
-please remove them
-let's make an oval called Queue in the top right.
-I want you to create a large lime diamond named Cache saying "Dashboard" between Root and Mars.
-I want you to revert
-now move C above Node2
-are there any squares which are not orange?
-I want you to make a triangle called Done
-by default stars should be huge
-could you get rid of it
-is Leaf red?
-can you make Hub larger
-I want you to add a small hexagon called Mars beside the black hexagon.
-I want you to erase the ovals
-let's paint Gate gold
-please cut the link between Core and D
-is Gate to the left of Done?
-colour the last triangle magenta
-I want you to push the black star to the left by 30 pixels
-I want you to delete all squares which are not pink
-let's colour the star orange
-is there a hexagon that are not orange?
-let's shift Router in the center.
-create a tiny purple box over Delta
-now enlarge Door
-link Root with the oldest purple star
-is there a loop?
-shift the star up by 80 px
-could you move Side down
-where is Start?
-let's label D "retry"
-let's remove them
-I want you to make Side a star
-can you make Ball twice as big
-what color is Queue?
-can you make Start a triangle.
-please turn Cache pink
-exchange Error and Output
-what does Printer say?
-let's put a large magenta triangle named Core on the left
-how big is Firewall?
-can you turn the blue boxes gold
-now shrink the diamond
-please make the hexagons that are not pink black.
-place Ended below Node2
-I want you to draw an arrow from Queue to Root
-please shift Worker next to the triangle
-could you cut the link between Api and Beta
-I want you to turn Main teal.
-can you undo
-please turn Router cyan
-are there any squares?
-now copy Leaf
-now make all purple ellipses indigo
-what comes after Firewall?
-can you delete all triangles which are not teal
-is Queue red?
-is Output left of Roof?
-drag Alpha at the top.
-what shape is Firewall?
-now link the first pink star to the navy circle
-now link it with Laptop
-is there a route from A to Earth?
-how many orange hexagons are there?
-is there a route from Door to Check?
-could you turn Server into a hexagon.
-create an orange dot under D
-what links to Worker?
-please copy Internet
-let's place Earth on top of the circle.
-please delete the cyan rectangles
-please remove Queue
-is there a hexagon?
-what is on the canvas?
-is there a path from Output to Server?
-is there a route from A to D?
-please in the lower right, draw a blue hexagon.
-can you link the black star with Form with a dashed arrow
-please link Form to Server
-could you right of the rectangle, add a teal star
-is Error left of Beta?
-could you color all yellow ovals navy
-let's make the ellipses that are not blue lime
-let's colour the star purple
-now send Beta behind the others
-please space everything vertically
-can you colour it gray
-let's delete Router.
-let's insert a medium magenta rectangle between Alpha and Top1
-what is connected to Box1?
-now duplicate Start 3 times
-I want you to make a medium oval on top of D
-please rename CEO to Node2.
-paint Check indigo
-which shapes are connected to Check?
-let's move Earth left of Laptop
-please turn A into a star
-attach Leaf with Box1.
-which rectangles?
-I want you to shrink Y.
-let's line up all magenta diamonds vertically
-can you shift the square on top of Error
-is Node2 red?
-show shapes on the right?
-let's put Main to the right of the star
-can you place Done in the bottom left
-please on top of Earth, add a small hexagon
-make the circles that are not orange navy
-now line up everything horizontally
-is Y pink?
-let's place the green diamond below the new purple oval.
-is Ended gray?
-now copy the ellipse
-let's color the ellipse indigo
-list squares are there?
-could you unlink Sun from Home
-now connect every teal star to the next one.
-call Delta Api
-could you send C to the back.
-attach the box with the oldest lime square
-could you organize everything in a column
-could you insert a box named Root beneath the blue triangle
-is there a cycle?
-can you call Door Check
-what is reachable from Hub?
-could you exchange Login and Server
-could you rename Box1 as Root
-now erase the gold rectangles
-could you paint Worker white
-let's undo.
-now move Door between Server and Done
-what is on the canvas?
-please rename Error as Sun
-space the ovals vertically
-Server is next to Leaf
-I want you to arrange everything in a circle
-is there a cycle?
-now move Process on the left
-I want you to grow Walls
-is there a blue circle?
-let's undo
-could you colour Core pink
-can you make the rectangles that are not teal white
-can you push the dot up by 20 pixels
-I want you to rename D to Printer
-now connect the triangle with the purple diamond
-could you label it "Dashboard"
-please insert a green rectangle to the right of Gate
-space all purple squares
-can you remove the arrow between Done and CEO
-paint Cache green
-what links to Ball?
-can you attach the indigo diamond with A with a plain dashed line
-let's turn D into an ellipse
-now place it between B and Cache
-what comes after Laptop?
-is Laptop beside Ended?
-now delete Error
-draw a dashed arrow from Top1 to Main.
-what is connected to Worker?
-please exchange C and Hub
-can you label Queue "step 2"
-now color Cloud magenta
-is Earth green?
-now label Walls "end"
-now make Server huge
-please in the center, add a indigo triangle
-now make the purple ellipse bigger
-let's drag Worker in the bottom right
-can I get from Earth to Beta?
-connect Output to the orange triangle
-swap Start and Beta
-which gold squares left of Done
-please delete B
-are there any circles?
-could you put a large hexagon called Cache in the bottom left
-let's join Internet to the star
-I want you to write "error" on Login
-could you remove Side.
-I want you to paint the black ellipse teal
-please align all diamonds horizontally
-show shapes are there
-how many indigo ellipses are there?
-describe Input
-can you color it teal
-are there any cycles?
-can you distribute the dots evenly horizontally
-now turn all gray stars brown
-list brown circles on top of Side
-please move Form to the left.
-please push Ball up by 20 pixels
-can you connect each orange triangle to the next
-I want you to add a large navy diamond called Laptop.
-I want you to color Laptop purple.
-please make it huge
-please exchange Tree and Check
-please join B with Roof.
-I want you to turn Hub into a triangle
-I want you to move the pink triangle up
-could you make the star larger
-let's move the box on the right
-now write "login" on Roof
-is Printer orange?
-can you connect all teal hexagons to each other
-are there any cyan diamonds?
-is there a purple star?
-could you push Process up by 20 px
-attach Cache to Tree
-connect each cyan triangle to the next one
-I want you to make Printer a box
-I want you to put 2 green stars
-remove the squares which are not pink
-please align all ovals horizontally
-grow Door
-please make Process a rectangle
-redo
-are there any squares under Main?
-please put Root below the circle.
-let's connect the magenta stars to each other
-can you bring X to the front
-now attach the ellipse with the white circle
-now redo.
-could you distribute everything evenly vertically
-which shapes are connected to Check?
-let's connect the purple oval with the indigo square with a plain dashed line
-can you make the circles that are not green indigo
-let's swap Mars and Earth
-add 5 medium ellipses in the bottom left.
-now link the teal triangle to Process
-could you put a gold box left of the box
-can you paint the cyan triangle lime
-please insert a large black square in the top left
-is Done blue?
-can you link Process with B
-now remove the triangles which are not teal
-let's color Firewall yellow
-now turn Error pink
-are there any shapes?
-could you space out all the teal triangles evenly vertically
-describe the canvas
-can you make Walls tiny
-connect the blue dots one after the other
-where is Worker?
-could you add a cyan diamond called Root with the text "open"
-what is reachable from Done?
-could you make Roof gold
-now colour Door navy
-please move Sun to the left by 30 px.
-which shapes are connected to Backup?
-show black shapes
-put a gray square called Gamma next to the navy square
-could you send it behind the others
-can you align all the teal ellipses vertically.
-please drag Alpha under Leaf
-please rename Input to Roof
-let's turn the purple box blue
-what is connected to Y?
-please delete Ended
-now color Form brown
-now make it lime
-I want you to add a cyan diamond called Top1 labelled "open" in the top right
-please colour the yellow diamond green
-can you delete Check
-can you place Tree under the last dot
-let's turn the triangle into a square.
-let's connect every black circle to the next
-please move Printer in the top right
-please make Beta a triangle
-is there a route from Core to Queue?
-let's connect each diamond to the next one
-could you remove all the circles which are not gray
-what is reachable from Router?
-bring the yellow circle on top of the others
-is Login lime?
-can you label Printer "error"
-now grow Root
-I want you to disconnect Login from Queue
-now connect the triangles in a chain
-I want you to remove the arrow from Firewall to Tree
-what is reachable from Earth?
-what can be reached from Gamma?
-now redo.
-let's connect every ellipse to the next
-call Core Y
-now place Main over Form
-is Valid gray?
-clone Mars
-what color is X?
-could you insert a magenta triangle called Output
-I want you to shift Earth up
-Api is above Input
-how many magenta rectangles to the right of Valid do we have?
-can you undo
-make Root a circle
-what are the neighbours of Top1?
-what links to C?
-what comes after Roof?
-please label Walls "Dashboard".
-could you lay out everything in a circle
-describe everything
-let's connect the orange ellipses to each other.
-now link Backup to Api
-could you create a small purple box labelled "end" to the right of the dot
-please drag Output on the left
-how many circles do we have?
-can you turn Leaf into a dot.
-could you connect every orange square to the next one
-let's draw a navy diamond called Internet beneath the red triangle.
-bring Queue on top of the others
-could you make Ended cyan
-now turn Queue into a circle
-list cyan shapes in the top left
-let's label the box "retry"
-let's place Firewall in the top right
-what are the neighbours of Db?
-can you connect all green rectangles one after the other
-could you delete the circles that are not blue
-could you rename A to Hub
-could you make a white square called Cloud labeled "db" in the bottom left
-let's move Alpha up
-please remove the arrow between Gate and Side.
-can I get from Mars to Output?
-let's line up everything horizontally
-please link it to Tree.
-now shift Earth up
-add a triangle.
-please insert a medium lime ellipse on the left
-let's redo
-let's exchange Earth and A
-please make Delta cyan
-I want you to create an oval called Y saying "start" to the left of D
-could you push Home to the right by 100 pixels
-could you make Laptop tiny
-is there a loop?
-what can be reached from Home?
-are there any hexagons that are not blue?
-let's grow Delta.
-please left of the gray star, draw a cyan diamond
-how many cyan diamonds do we have?
-is Delta near Login?
-can you duplicate the indigo triangle two times
-I want you to push CEO up by 25 pixels
-please join the last rectangle with Tree with a dotted arrow
-can you drag Queue on the right
-redo
-from now on, squares should be huge.
-let's draw a huge teal square with the text "login" on the right.
-I want you to put Firewall on top of the oldest purple triangle
-can you move the square to the left
-now get rid of A
-list squares
-describe Form.
-let's paint all rectangles black
-could you color all the gray triangles pink
-unlink Door from CEO
-are there any black circles?
-show brown hexagons to the left of Internet
-now move the first oval left of the orange triangle
-is CEO beneath Side?
-can you link the navy star with Check
-is Roof red?
-now line up the squares vertically
-can you connect Laptop to the rectangle.
-link the diamond with Sun
-join Core with the green square
-can you connect all navy rectangles one after the other
-please attach the brown ellipse to the teal square with a two-way arrow
-now link Printer to Api
-please move the lime oval to the left by 150 px
-show pink circles above Door?
-let's duplicate Queue three times
-is there a rectangle that are not blue?
-what does Mars say?
-is D left of Gamma?
-cut the link between Gate and Input
-Main is left of D
-connect all diamonds to each other
-now connect the indigo triangle to Leaf with a plain dotted line
-create a large gray dot called Backup left of Idle
-can you put Main above Output
-let's write "pay" on the gold diamond
-Error is left of Alpha
-drag the diamond in the bottom right
-is Leaf red?
-turn Start into a diamond
-what color is Printer?
-by default, rectangles are teal.
-let's put a tiny circle
-now lay out the hexagons in a column
-please insert a large box labeled "ok?" to the left of Alpha
-are there any cycles?
-can you move the purple circle in the middle
-now drag Core left of the yellow diamond.
-please shift D down by 50 px
-which shapes are connected to Cloud?
-please connect each navy triangle to the next one
-let's create a purple triangle named Tree.
-is Alpha on top of Roof?
-can you label the pink hexagon "next"
-let's turn Y into a diamond
-draw a dotted arrow from Internet to Y
-let's move Internet near the diamond.
-can you connect every yellow square to the next
-now remove all the squares which are not cyan
-what is reachable from Door?
-get rid of it
-could you draw a small purple oval named Cloud labelled "end" in the top left
-could you add a triangle at the top
-please cut the link between Printer and Laptop.
-what are the neighbours of Error?
-which lime squares.
-please make a huge cyan triangle named Backup to the left of the yellow diamond
-grow Valid
-how many triangles right of Door do we have?
-describe everything.
-let's make a medium navy square called B
-now label Server "user"
-now delete all the diamonds which are not black.
-what are the neighbours of Check?
-please disconnect A from Api
-is there a diamond that are not red?
-are there any hexagons?
-let's add a white square named A in the center
-can you make Side bigger
-align all navy rectangles horizontally
-now make the dot gray
-lay out everything in a circle.
-is Worker cyan?
-can you bring Walls to the front.
-can I get from Hub to CEO?
-how many triangles are there?
-could you draw 3 diamonds next to Delta
-now connect Door with the brown hexagon
-can you revert
-describe B
-place Idle between C and Cache
-now move Internet above the blue triangle
-link Node2 to Hub with a two-way arrow labeled "error".
-make a blue hexagon near B
-I want you to remove the triangle
-now connect the triangles one after the other
-can you delete all ovals
-let's make Router white
-I want you to place C to the left of Server.
-how many stars below Output do we have?
-can you swap Alpha and Root
-what comes after Top1?
-Main is pink.
-organize everything in a column.
-shift Cloud to the left by 50 px
-let's get rid of the gray box
-I want you to paint the squares lime
-is Main beside Box1?
-what color is Root?
-make the diamonds that are not gray green
-I want you to take that back
-what can be reached from Mars?
-now attach Printer to Box1 with a arrow.
-could you label Internet "done"
-make a large circle
-could you draw a magenta oval called Main with the text "core" beside Box1
-now send Output behind the others
-could you grow the square
-how many diamonds beside Hub are there?
-grow Gamma
-can you shift D above the hexagon
-I want you to redo
-could you turn CEO into an ellipse
-I want you to drag Internet on the right.
-I want you to make Home a diamond
-please forget all rules
-is there a path from Form to Queue?
-describe Cache
-describe everything
-could you draw a navy triangle named A on the right
-what can be reached from D?
-is Mars blue?
-please add an oval called Root between Sun and Done.
-is there a path from Earth to Leaf?
-I want you to label the hexagon "done"
-now line up the gold triangles horizontally.
-write "Dashboard" on Internet
-I want you to turn Input pink
-could you rename the gold triangle to Start
-can you drag it on the right
-I want you to erase Home
-how many shapes are there?
-I want you to arrange everything in a column
-could you colour X gray
-drag Leaf beneath Gate
-what shape is Mars?
-can you make the ellipses that are not magenta white.
-can you make B gold
-what links to Cloud?
-can you make all the orange circles brown
-list rectangles on the right
-clone Firewall
-now enlarge Start.
-describe Ball
-create a magenta hexagon called Hub.
-I want you to paint Main green
-let's attach Ended to Walls
-can you attach the rectangle to Home
-I want you to line up all the triangles horizontally
-Mars is blue
-let's label X "error"
-which shapes are connected to Cloud?
-now connect each diamond to the next
-could you distribute everything evenly horizontally
-what can be reached from D?
-now color the square navy
-how many squares are there?
-what comes after Check?
-by default rectangles are large.
-now unlink Home from D
-remove all the hexagons that are not purple.
-is there a path from Top1 to Done?
-remove the arrow between Side and Node2
-let's delete all the ellipses that are not cyan
-describe the canvas
-can you bring Ended to the front
-let's copy Leaf.
-remove all ellipses which are not black
-please shrink Ended
-I want you to remove all triangles
-I want you to take that back
-can you connect all the diamonds one after the other
-I want you to create 2 huge indigo triangles on the left
-please to the right of Server, draw a large gray diamond
-list all white triangles
-can you move Router up by 80 px
-how many cyan circles over Hub do we have?
-send Api behind the others
-let's add a small green hexagon named Top1 at the bottom
-let's delete it
-could you at the top, draw a orange diamond.
-how many magenta stars are there?
-duplicate Alpha
-Beta is cyan
-from now on, squares are large
-let's shift Valid between Roof and Check
-could you push it down by 120 pixels
-let's erase Firewall
-I want you to paint all red ovals gold
-could you put a gold diamond
-get rid of Server
-I want you to delete all navy hexagons
-create a gray star between Side and Home
-please turn Done pink
-can you cut the link between Roof and CEO.
-I want you to make it blue
-now connect Process to Cache
-now draw an arrow from Ended to Backup.
-I want you to shrink B
-could you write "error" on it
-now remove Router.
-what comes after Beta?
-could you make Home a hexagon
-now send the ellipse to the back
-please join Mars to the oval with a plain dotted line labeled "core"
-please connect every rectangle to the next
-shift C under the indigo oval.
-can I get from Server to Root?
-can you put Cloud to the right of Leaf.
-can you space out everything
-let's link Firewall to Mars.
-let's attach it with the square with a arrow
-what comes after Root?
-make the red hexagon smaller.
-rename the oldest magenta diamond as X.
-what does Earth say?
-could you remove all ellipses
-can you move Roof to the left of Core
-please erase Leaf.
-let's attach B to the lime oval with a plain dashed line
-let's create a cyan triangle called Mars
-is there a cycle?
-now make Gate smaller
-are there any black shapes?
-is there a cycle?
-what are the neighbours of Cloud?
-can you enlarge Leaf
-let's insert a gray star
-add a huge teal box
-let's call Internet Beta
-describe Input
-let's join it to Db with a two way dotted arrow.
-now shift it on top of the star
-forget the rules.
-let's rename Gate to Backup
-could you draw a dotted arrow from Db to Sun.
-what are the neighbours of Cloud?
-make a yellow circle called Check under Earth
-now delete the circles which are not magenta
-can you place Top1 near Idle
-now connect every circle to the next
-please arrange all diamonds in a column.
-make a small orange box
-label Output "Enter password"
-is there a green circle?
-could you exchange Walls and A
-could you insert a magenta triangle named B labelled "no"
-I want you to label Server "back"
-connect every triangle to the next
-let's make the red diamonds orange
-how many red hexagons are there?
-let's move the magenta box on top of Node2
-could you remove the square
-let's draw a dotted arrow from Core to Door
-let's space everything
-let's paint the ellipses green
-is Beta pink?
-please make Input a hexagon
-let's line up all stars horizontally
-shift Y up
-list green circles are there?
-can you colour it pink
-let's shift Root down
-could you remove the arrow from A to Idle
-can you connect all the orange triangles to each other
-is there a loop?
-is there a loop?
-lay out everything in a circle
-now unlink Gamma from Cloud
-let's paint Router cyan
-can you shift Alpha to the right
-make Server a diamond
-how many ellipses are there?
-could you put a hexagon called Ended next to the indigo circle
-put a blue star
-let's rename Gate as Form.
-is Server on top of Beta?
-now redo
-let's exchange Laptop and X
-let's make Firewall huge.
-could you shrink Box1
-bring Roof to the front
-could you rename Walls to Gamma
-I want you to paint all blue triangles purple
-put a medium black ellipse called Root on the right
-let's rename Hub to Delta
-shift it between Db and Done
-now make the dots navy
-I want you to arrange the hexagons in a grid.
-is Core cyan?
-where is Node2?
-can you move Door up
-how many yellow hexagons do we have?
-by default rectangles are brown
-I want you to drag Core right of Firewall.
-is there a path from Core to Backup?
-by default, squares are blue
-link Tree with Ended with a dotted line
-please add five tiny blue stars with the text "cancel" beneath the cyan box.
-can you connect it to the lime triangle
-now get rid of Process
-can you distribute all ovals evenly horizontally
-I want you to add an indigo circle called Server in the top right
-can you attach the diamond to Core.
-what comes after Worker?
-list all ellipses at the top
-what color is Process?
-please above A, add a small gold oval
-I want you to draw a dashed arrow from Roof to Done
-now move the rectangle up by 25 pixels
-please shift Internet down
+now link the brown diamond to the white hexagon.
+can you make it yellow.
+connect the brown hexagons to each other
+let's join the new white diamond to Earth
+let's align all the magenta squares vertically
+let's link Gamma to Backup with a arrow
+could you draw an arrow from Db to Input
+which oval is the highest?
+bring Api to the front
 describe the diagram
-what does Queue say?
-I want you to beneath Backup, add a orange rectangle
-let's remove the rectangles that are not lime
-please place it on the right
-I want you to insert three white circles below Mars
-how many blue circles on the right are there?
-label Error "Enter password"
-could you redo
-can you bring Check to the front
-put the black ellipse to the right of Start
-what can be reached from Check?
-connect all the teal stars to each other
-how many black shapes in the bottom left are there?
-line up everything horizontally.
-please join CEO with Cache with a two-way dotted arrow labeled "Enter password"
-how big is Internet?
-get rid of it
-I want you to delete all diamonds which are not yellow
-could you swap Check and Cloud
-by default circles should be gold
-make D twice as big
-let's color all rectangles yellow
-please make all squares blue
-can you call Door Api
-can you remove all diamonds which are not magenta
-I want you to put a tiny red circle named A
-can you color all rectangles navy.
-please get rid of Error
-now write "login" on the brown star
-list cyan hexagons in the bottom left?
-what can be reached from Login?
-I want you to draw a dashed arrow from Printer to C
-let's draw an arrow from Queue to Worker.
-please make Tree an oval
-please connect every green triangle to the next one
-let's align all ovals vertically
-I want you to remove all circles that are not navy.
-let's connect Hub to the triangle with a arrow
-how many rectangles in the bottom right do we have?
-list all lime rectangles are there?
-let's move it over Error
-let's link the navy rectangle to Error
-now make Backup large
-let's undo
-lay out the teal boxes in a row
-I want you to put a brown oval named Door saying "ok?" on the left
-is Process right of Home?
-what does Output say?
-could you distribute all stars evenly vertically
-Process is magenta
-let's enlarge the ellipse
-can you paint Node2 purple
-could you create a large navy circle saying "load" left of CEO
-now move the orange hexagon up by 10 pixels
-I want you to move Top1 right of Laptop
-now delete the stars that are not brown
-please duplicate Printer
-could you put a cyan star to the right of Node2
-can you forget the defaults
-please remove Leaf
-describe the diagram
-please attach the brown dot to the white square with a arrow labeled "start"
-what does Form say?
-what are the neighbours of Beta?
-can you get rid of Worker.
-what are the neighbours of CEO?
-please link the black diamond with the indigo circle
-can you link Start to the lime triangle with a dotted line labeled "start"
-now draw a dashed arrow from A to Valid
-now duplicate the square two times.
-please erase Done
-space the diamonds horizontally
-I want you to put a cyan circle between Firewall and Node2.
-color the pink circles gold
-attach Check to Valid
-is there a black rectangle below Done?
-can you remove all circles which are not cyan
-let's connect the yellow triangle to the star
-let's undo
-let's delete all triangles
-could you redo
-add a purple diamond
-please shift the star up
-now copy Walls
-let's exchange CEO and Valid
-now remove all squares which are not pink.
-is Y yellow?
-can you connect the cyan dots in sequence.
-now colour Start lime.
-please draw an orange dot in the bottom left
-I want you to enlarge Node2
-is there a loop?
-what is reachable from Alpha?
-describe Node2.
-how many green stars do we have?
-let's beside the diamond, draw a lime hexagon.
-please paint Api pink
-now redo
-please erase it
-can you distribute the black ellipses evenly
-what can be reached from D?
-now make Start large
-could you connect all the stars one after the other.
-connect each brown hexagon to the next
-can you grow Queue
-where is Core?
-is B brown?
-can you label Y "approve"
-can you forget all rules
-could you connect every lime circle to the next one
-is there a path from Delta to Router?
-is there a loop?
-which stars are there
-now make the latest teal circle a rectangle
-please put it below the diamond
-I want you to shift Valid left of Process
-could you colour C purple
-let's place Box1 in the center.
-let's connect all pink stars in sequence.
-I want you to make Cloud orange
-is there a cycle?
-organize everything in a grid
-can you place the green square under Done
-now turn CEO brown
-please link Login to Valid
-I want you to draw an oval named Output saying "retry"
+I want you to grow the diamond
+let's link the green hexagon to Ball.
+is Valid smaller than Input?
+how many shapes are there?
+by default squares should be tiny
+could you turn Tree into a rectangle
+could you write "no" on Done
+is Form attached to Main?
+I want you to enlarge Y.
+now paint the navy triangles red
+is Api bigger than A?
+could you call Error Hub
+which hexagon is farthest to Tree?
+I want you to add a medium oval named X
+please grow Done
+is D attached to Start?
 let's erase it
-please join Printer to Printer
-drag Laptop right of Internet
-now connect every ellipse to the next
-I want you to place it right of the gold diamond
-are there any cycles?
+let's line up all pink hexagons vertically
+please shift Process down by 40 px
+now connect the black ellipse to the square
+how many arrows does Input have?
+which shapes are connected to Hub?
+connect all the squares to each other
+shift Router between Db and Done.
+add a tiny pink diamond under the star
+could you distribute everything horizontally
+is there a path from Main to Start?
+please shift the purple star up.
+what does Server say?
+please link the pink hexagon to Gamma
+can you drag it to the left of Tree
+now connect the new magenta box to Gate with a dashed arrow
+Backup is gray
+could you draw a dotted arrow from Ball to Root
+please colour it brown
+exchange Cache and Valid
+can you exchange Main and Worker
+can you call Leaf Input
+now get rid of the squares
+which shapes are connected to X?
+are there any squares?
+label Main "Dashboard"
+could you remove all circles which are not black
+please lay out everything in a circle
+can you make the hexagons that are not yellow gray
+I want you to make a lime square left of the oval
+is Earth lime?
+now turn Api into a box.
+I want you to forget the defaults
+what comes after Queue?
+let's push CEO to the right by 120 px
+let's draw two triangles labelled "ok?" on the left
+I want you to remove all stars which are not indigo
+where is B?
+could you cut the link between Queue and Tree
+could you color Worker indigo
+draw a dashed arrow from Home to Gate
+can you link the red ellipse to Ball
+can you write "send" on Box1
+D is near Gate
+can you connect the latest diamond with Y
+I want you to move Gate in the top right
+list all orange stars in the bottom left?
+which diamond is nearest from Valid?
+where is Mars?
 what color is Laptop?
-by default, squares should be medium.
-which shapes are connected to Ended?
-which shapes are connected to Y?
-how many shapes are there?
-which shapes are connected to Process?
-let's below the hexagon, draw a small white ellipse
-let's draw a dashed arrow from Cloud to Internet
-make a medium blue square right of Check
-how big is Home?
-please unlink Leaf from Error
-which purple rectangles are there?
-can you remove Ball
-what links to X?
-now attach Valid with the circle
-could you line up the pink squares vertically.
-please link B to Queue with a dotted arrow labeled "load"
-what are the neighbours of Valid?
-let's attach Leaf with Ball with a arrow labeled "approve"
-now remove all the stars that are not orange
-I want you to add a blue diamond named Door under the lime circle
-please paint the hexagon red.
-how many blue diamonds above Valid do we have?
+can you duplicate Hub
+could you turn the gold triangle brown
+what color is Laptop?
+could you make a navy square below Gamma
+which diamond is farthest from Delta?
+let's remove the squares that are not magenta.
+could you turn Y navy.
+let's remove Roof
+I want you to colour it brown
+could you move Backup to the left
+are there any shapes?
+attach the brown star to Beta
+could you put a star called Core
+could you create a small orange hexagon named Firewall with the text "db" on the left.
+what can be reached from Gamma?
+can you turn the gold circle purple
+please rename Box1 as D
+list rectangles on top of Valid
+let's turn the newest diamond yellow.
 are there any cycles?
-could you remove the triangle
-push Idle up by 100 pixels
-can you attach Y to the triangle
-let's copy Check
-please turn the circle brown
-please drag Start on the left
-can you erase it
-please put an indigo square in the bottom left
-please grow Worker
-can I get from Tree to Alpha?
-are there any cycles?
-please organize the yellow diamonds in a row.
-please delete Ball
-could you move the brown diamond up
-could you on the left, draw a medium oval
-what is reachable from Earth?
-is Walls purple?
-please rename Internet as Alpha
-connect the magenta triangles in sequence
-please remove the arrow between Api and Leaf
-which gold rectangles at the bottom?
-what is reachable from Cloud?
-exchange Gate and A.
-let's connect all diamonds to each other
-is there a path from Ended to Main?
-let's connect the triangles in a chain
-by default squares should be brown.
-how many magenta shapes are there?
-let's move the square above Box1
-please create a tiny yellow oval above Main
-is there a cycle?
-please make the squares that are not red cyan
-please duplicate Internet three times
-could you draw a circle under Laptop
-could you add a square named Input labeled "next" on the left
-let's attach it to Sun
-could you turn Process into a square
-let's label Error "close".
-please erase all the orange squares.
-color Roof gold
-describe everything
-I want you to put Idle left of Node2
-now connect each hexagon to the next one
-where is Login?
-now remove all the triangles that are not magenta.
-what comes after Worker?
-now label Queue "Validate"
-rename CEO to B
-how many gray shapes are there?
-list hexagons to the right of Cache?
-please put a circle called Top1
-let's make a lime ellipse named X
-can you label Cache "step 2"
-could you shrink Ball
-could you delete all circles that are not lime
-show rectangles are there
-I want you to copy Home
-how many white triangles are there?
-please make Queue huge.
-could you shift Node2 to the left by 75 pixels
-list all teal diamonds in the top right?
-is there a ellipse?
-let's make Main smaller
-let's beside Queue, draw a lime diamond
-can you rename the last ellipse to Leaf
-Alpha is lime
-remove Cloud
-can you line up everything vertically.
-are there any shapes which are not pink?
-list all brown rectangles?
-move Gate on top of the yellow star
-what can be reached from Server?
-what can be reached from Ended?
-let's undo
-connect the stars one after the other
-let's rename Walls to Delta
-please send Y to the back
-put Output in the center
-are there any magenta shapes?
-now copy the white hexagon
-attach Valid with B with a dashed arrow
-now connect Y to Queue
-please color all white hexagons indigo.
-I want you to lay out everything in a circle
-can you move the pink square in the top left corner
-how many magenta circles do we have?
-Ball is purple.
-what shape is Queue?
-please copy the hexagon
-now shift Alpha up by 50 pixels
-can you make it purple
-I want you to delete all stars that are not white
-can you paint it navy.
-exchange Core and Done
-could you bring the gold star on top of the others
-from now on diamonds should be black
-I want you to draw a hexagon called Router
-is there a gray square?
-can you distribute all lime stars evenly vertically
-let's move Process to the right
-show hexagons are there?
-please call Laptop Roof
-how big is C?
-now bring Error to the front.
-describe everything
-please arrange everything in a row
-add a medium square near the square
-describe Beta.
-delete all the diamonds that are not red
-what are the neighbours of Worker?
-Valid is gold
-let's join the yellow diamond to Output with a arrow.
-let's put a medium teal triangle named Top1 in the bottom left
-could you put a medium lime box called D in the bottom left
-describe the canvas
-I want you to add a tiny indigo hexagon labeled "Validate" right of the gold square
-join it to Root
-please create three green squares
-make a huge black oval
-please move Roof at the top.
-which shapes are connected to Check?
-can you line up everything horizontally
-what is connected to Form?
-which shapes are connected to Side?
-what shape is Sun?
-let's connect all boxes to each other
-is C right of Valid?
-let's rename Ball as Internet
-can you place the ellipse at the top.
-I want you to draw a dashed arrow from Tree to Main
-could you write "end" on it.
-please insert a brown diamond next to X
-please add a triangle named Backup below Cache
-I want you to duplicate the triangle 2 times.
-can you put Gate right of the ellipse
-list all shapes?
-is there a route from Printer to Start?
-now bring Gate on top of the others
-is there a cyan ellipse?
-please move it to the left.
-what is connected to Login?
-I want you to create a cyan triangle called Server left of Login
-please call Internet Output
-please make the diamonds that are not blue cyan
-let's attach Earth with the diamond
-could you in the top right, draw a tiny navy square
-now colour all teal hexagons brown
-what shape is Db?
-now shift the gray square near Sun.
-shift the star left of the indigo diamond
-let's grow Delta
-can you duplicate Mars 2 times
-please link the cyan square to Main
-can you shift Earth on the right
-let's draw a circle named Mars with the text "step 1" on top of Top1
-could you line up all hexagons horizontally
-in the top right, draw a purple ellipse
-now color it blue
-now grow Idle
-now copy CEO
-now remove the diamond
-can you remove Internet
-how big is Sun?
-I want you to make Api a rectangle
-how big is Start?
-please erase Router
-how many shapes are there?
-please make a large yellow star called Internet
-can you organize everything in a circle
-could you bring Process to the front.
-let's duplicate Home
-please exchange Start and Input
-I want you to bring Node2 to the front
-can you rename C to Gate
-I want you to remove the arrow from Worker to Queue
-please remove the arrow from Db to Laptop
-I want you to write "next" on it
-are there cycles?
-please remove Router
-what comes after CEO?
-can you turn Ended white
-put a tiny white star named Input
+connect it to Ended with a two-way arrow
+I want you to enlarge Internet
+which hexagon is the leftmost one?
+is Queue above Input?
+can I get from D to Beta?
+I want you to drag Ball near the pink diamond
+now attach the blue square to Done
+could you turn Worker magenta
+can you connect the diamonds to each other
+could you space all the lime rectangles
+is Tree to the left of C?
+now move Sun up
+can you get rid of C
+could you draw an arrow from D to Roof
+could you connect the white diamonds one after the other
+how big is Hub?
+by default, squares should be navy
+please shift Check up by 75 px
+can you connect each circle to the next one
+let's connect the dots one after the other.
+Output is under Gate
+enlarge the diamond
+please move the diamond in the top right
+which hexagon is furthest to Worker?
+let's line up everything vertically
+please join the latest white square to Queue with a dotted line
+can you turn Node2 green
+I want you to organize the pink triangles in a circle
+let's put B right of Output
+please line up everything vertically
+please delete all the squares.
+please put a diamond labelled "Dashboard"
 what color is C?
-how many gold hexagons do we have?
-let's draw an arrow from Gate to Error.
-can you connect all gray hexagons to each other
-duplicate Ended
-please insert five pink rectangles in the middle
-rename the cyan star to Gate
-let's add a pink box
-I want you to add a medium triangle called Node2 on the right
-please move Box1 to the right by 80 pixels
-now organize all triangles in a row
-could you connect all purple ellipses in a chain
-please organize the circles in a circle
+I want you to rename the gold diamond as Valid
+can you enlarge the star
+please attach the indigo hexagon to the pink hexagon with a dotted line labeled "error"
+let's grow Roof.
+I want you to get rid of the green oval
+let's join Sun to CEO
+is CEO larger than Y?
+can you erase all lime hexagons
+put 2 indigo circles in the top right
+is there a path from Beta to Walls?
+are there any cycles?
+let's distribute all gold ovals evenly
+put Start left of Top1
+by default triangles are teal
 which shapes are connected to Home?
-could you connect the rectangles in a chain
-now connect the stars to each other
-I want you to drag Alpha between Backup and Y.
-now link Queue with CEO
-I want you to color Printer green.
-make a red circle called Idle next to the diamond
-draw a dotted arrow from Leaf to Laptop
-let's put Mars in the top left corner
-create a diamond in the bottom left
-put a large star labeled "ok?"
-which stars at the top?
-let's connect all squares one after the other
-is Gamma lime?
-describe Gate
-please send the purple star to the back
-please delete the triangles
-please forget the defaults
-which shapes are connected to Internet?
-can you enlarge Top1
-please link it with Printer with a dotted arrow
-now connect every ellipse to the next one
-please link the hexagon to the latest rectangle.
-now paint it green.
-now make X a bit smaller
-please move the dot to the right
-can you shrink Check
-is there a yellow square?
-could you erase the hexagons
-I want you to rename Printer to A
-I want you to to the right of Alpha, draw a yellow box
-now move Delta down.
-now drag Sun beneath Laptop
-delete all stars which are not green
-how many navy triangles do we have?
-what shape is Printer?
-I want you to add a large teal triangle called A right of the indigo hexagon.
-by default, shapes should be white
-describe Cache.
-I want you to make Root black
-I want you to rename the square as Worker
-could you colour all triangles red
-list stars are there?
-could you arrange the rectangles in a grid.
-describe everything.
-could you rename Home to Y
-let's line up the dots horizontally
-can you rename Sun as Ball
-can you color the box cyan
-let's make Side smaller
-please drag the star right of Mars
-let's connect the rectangles one after the other
-I want you to undo
-let's create four stars between Idle and Gamma
-how many navy ellipses next to Home do we have?
-let's rename Gate to Backup
-let's create 3 large blue squares on the left
-let's push Delta to the left by 60 pixels
-could you create a medium cyan ellipse named Printer at the bottom
-Walls is next to Home
-can you paint Input cyan
-let's color Firewall red
-is Mars yellow?
-could you grow C
-can you move it to the right
-I want you to move Alpha between Db and Login
-can you make Login a star
-I want you to insert a gold diamond to the right of D
-please get rid of Output
-please create a dot called Router saying "back"
-join the gold diamond with the newest cyan diamond with a dashed arrow.
-space the purple hexagons evenly vertically
-let's make Cache green
-how many orange diamonds do we have?
-how many triangles that are not lime are there?
-what color is Backup?
-how many lime hexagons do we have?
-let's color them red
-now duplicate Home
-what is connected to Core?
-can you label the indigo oval "step 1"
-how many white shapes do we have?
-connect the hexagon with Gamma
-let's turn the lime square red
-let's connect Home to Ball
-now connect each red hexagon to the next
-describe the canvas.
-I want you to make X a triangle
-where is Backup?
-can you attach the triangle with the diamond
-let's delete the stars that are not blue
-from now on diamonds should be small
-organize everything in a row
-now get rid of the indigo circles
-can you remove the ellipses.
-let's color it orange.
-please move the hexagon under Api
-what shape is D?
-what can be reached from Router?
-is Db navy?
-now lay out everything in a row
-let's draw a dotted arrow from Beta to Mars
-what is connected to Node2?
-can you get rid of the ovals.
-show circles that are not gold are there?
-is there a star?
-please call Delta Alpha
-now get rid of Mars
-list all triangles at the bottom
-let's color the box green
-from now on, diamonds should be large
-could you connect all gold circles to each other.
-what color is Input?
-let's make Mars purple.
-connect all the cyan diamonds one after the other
-make A a triangle
-now erase the dots
-duplicate Top1 2 times.
-please add a tiny orange square named Form labelled "step 1" beside the purple hexagon
-Roof is left of Delta.
-shift C down by 25 pixels
-I want you to create two lime squares saying "ship" at the top
-now make Form purple
-is there a path from Queue to Backup?
-paint all squares pink
-I want you to put an orange oval left of Idle
-could you remove it
-let's in the top right, add a small square
-please paint the orange hexagons white.
-let's undo
-can you make Core bigger
-can you shift the diamond in the middle.
-now remove all the triangles that are not black
-I want you to insert a teal ellipse named Top1 labeled "start" to the left of Tree
-could you remove all the hexagons which are not purple
-can you connect each rectangle to the next
-let's take that back
-what is reachable from Cloud?
-now color Walls magenta
-are there any stars that are not brown?
-can you lay out all red hexagons in a column
-I want you to shift Idle to the left
-please join the gray rectangle with the white hexagon
-let's connect all ovals to each other.
-can you make the green oval red.
-list triangles
-please add a small gold diamond above Delta
-let's forget the defaults
-how many magenta ellipses do we have?
-please swap Ended and Worker
-let's colour Door blue
-what is on the canvas?
-let's put a star called Done in the lower right
-could you rename Delta as Tree
-I want you to write "open" on D
-now colour all triangles black
+can you make the orange box a bit smaller
 forget the rules
-Error is black
+describe everything
+can you forget the defaults
+please disconnect Laptop from Earth
+can you space out everything
+now draw a dotted arrow from Api to Door.
+let's shift Top1 to the right
+could you connect the pink triangles in a chain
+what is reachable from Top1?
+how many stars are there?
+can you label Cloud "back"
+could you draw a dotted arrow from Router to X
 how big is Valid?
-can you rename Internet to Form
-please remove the arrow from Output to Check
-please join B to the yellow dot.
-can you organize the ellipses in a circle
-draw a dotted arrow from Node2 to Sun
-I want you to color Db navy
-how many indigo shapes left of Start do we have?
-shift Box1 on top of Db
-please make them yellow
-I want you to remove all yellow squares
-is there a square right of C?
-can you connect all circles to each other
-what links to Mars?
-can you connect all triangles one after the other
-I want you to insert a small indigo ellipse called Tree saying "error" to the right of Gate
-could you make the teal oval orange
-I want you to rename the white box to Input
-let's make C tiny.
-is there a route from Side to A?
-let's connect all triangles one after the other
-what is reachable from Backup?
-let's rename Router as Y
-could you remove them
-please in the bottom left, add a green rectangle
-could you label it "end"
-I want you to duplicate X three times
-please color Done magenta
-can you shrink Internet
-what color is Box1?
-is Db pink?
-let's insert a small triangle named Printer next to Ended
-now join the yellow circle to the newest black star
-let's line up the boxes horizontally
-from now on, ellipses are purple
-I want you to delete Login
-how many circles are there?
-let's move Laptop beneath Earth
-what links to Delta?
-I want you to colour them magenta
+is Router brown?
+now send Cloud to the back
+please colour it black
+what shape is Idle?
+how many arrows does Firewall have?
+insert 3 medium ovals
+could you add a magenta square called C above Router
+I want you to rename Main to Start
+remove all triangles that are not black
+move Tree left of Delta.
+which shape is the smallest one?
+which cyan star is the smallest?
+I want you to forget the defaults
+let's make Worker small
+can you line up everything vertically
+let's turn Sun pink.
+could you remove all squares that are not pink.
+Idle is on top of Ball
+bring Side on top of the others
+now connect the navy hexagons in sequence
+is there a path from C to Error?
+I want you to put an oval
+which star is the topmost one?
+is B linked to Firewall?
+drag it at the bottom
+show squares?
+now duplicate Queue
+what comes after X?
+how big is X?
+make a large box called Leaf on the right.
+could you get rid of Ball.
+what shape is Login?
+can you connect the box to Printer with a dotted line
+now join Tree to Delta
+I want you to insert a medium orange diamond named CEO under Alpha.
+let's make the circles that are not yellow yellow
+add a black star named Idle to the right of Db
+let's make Start gold
+can you turn Core orange
+can you connect the first navy diamond to Earth
+could you make Delta large
+I want you to at the bottom, add a hexagon.
+could you move Top1 up
+connect all the squares in sequence
+put a cyan square named Input saying "send"
+connect all diamonds in a chain
+I want you to insert a tiny green circle called Core labeled "yes" at the top
+please get rid of Form
+please attach Door to Internet.
+I want you to remove all red ellipses
+let's get rid of Box1
+is Main magenta?
+is Valid black?
+can you organize everything in a circle
+let's enlarge Delta
+write "step 2" on the diamond
+is Hub indigo?
+is there a black ellipse?
+how big is Router?
+please join the gray hexagon to Internet with a two-way dotted arrow labeled "reject".
+could you make them black
+delete Door
+which triangle is closest to Firewall?
+now unlink Ended from Server
+let's attach the gray square to CEO
+is B connected to Login?
+could you make a medium oval in the top right
+can I get from Cloud to Idle?
+now grow Ended.
+is Start bigger than Api?
+duplicate Queue
 what is on the canvas?
-swap Node2 and Check.
-can you connect every lime square to the next one
-please below Walls, add a triangle
-can you arrange everything in a column
-is C yellow?
-is Roof indigo?
-Hub is beneath Check
-now attach Roof to the white square with a two way dotted arrow labeled "send"
-let's attach the gray circle to Gamma with a plain dotted line
-is Process under Done?
-now make it medium
-lay out the dots in a circle
+is there a route from Firewall to Mars?
+let's distribute everything vertically
+is there a ellipse?
+are there any yellow shapes?
+is Gamma cyan?
+is there a navy rectangle at the top?
+could you color Box1 pink
+can you move the blue star to the right.
+please label the new star "ok?".
+is there a brown ellipse left of Door?
+can you connect the purple square with the triangle
+how many yellow squares do we have?
+could you remove all the triangles that are not purple
+let's exchange D and Node2
+which shape is nearest from Node2?
+lay out everything in a circle
+let's duplicate the yellow circle 3 times.
+get rid of Leaf
+what is connected to Cache?
+from now on circles are tiny
+how many connections has Router got?
+how many circles do we have?
+is Login gold?
+could you make 5 red squares with the text "Dashboard" at the top
+is Api above Valid?
 where is CEO?
-I want you to drag B in the top right
-which diamonds?
-is there a gold star?
-I want you to draw a dotted arrow from Beta to Alpha
-are there any triangles?
-can you link it with the orange square
-please shrink Check
-please delete Cloud
-let's put a tiny gold circle next to the square
-I want you to put five large indigo diamonds
-please erase all the triangles
-now drag Leaf right of the red box
-colour the cyan triangles pink
-could you swap X and Output
-draw a dotted arrow from Cache to Core.
-can you space out all ellipses evenly
-please join Roof to the square.
-from now on rectangles are yellow.
-let's make Worker a circle
-now link the diamond to Idle
-can you make Backup huge
-from now on, hexagons should be small
-draw an arrow from Tree to Top1
-now lay out everything in a grid
-could you get rid of them
-what does Db say?
-what can be reached from Worker?
-which yellow shapes?
-please place Input over the ellipse
-now connect every magenta star to the next
-align the ovals vertically.
-join the gray rectangle to Top1 with a dashed arrow
-draw a dashed arrow from Input to Sun.
-I want you to make Cache a diamond.
-make Cloud a diamond.
-which circles that are not gray?
-please place Process left of Router
-let's get rid of Cache
-connect it to the purple dot
-now link Output to Check with a line labeled "done"
-let's put 3 lime triangles labelled "close" between Worker and Error
-connect all the hexagons to each other
-could you bring Output on top of the others
-is there a path from Cache to Input?
-connect all pink triangles in sequence
-could you move Hub up
-please put a teal diamond labeled "save" in the bottom left
-now connect the green rectangle to Firewall with a dashed arrow
-please exchange Hub and X
-please place Roof to the left of Cache
-to the left of Db, add a oval
-is Gate next to Process?
-redo
-can you link the blue triangle with the circle
-what is reachable from Delta?
-can you line up all the gray stars horizontally.
-now put Queue in the bottom left
-can you make Sun a star
-is Core beneath Idle?
-now shift Firewall to the left by 10 pixels
-D is left of Mars
-now undo
-describe the canvas
-attach Box1 with Output
-which shapes are connected to Tree?
-let's enlarge Api.
-describe the diagram
-let's move Check next to Api
-could you call B Idle
-could you create a huge red square
-could you color Printer teal
-let's make Box1 smaller.
-please drag Api to the right of the triangle
-I want you to get rid of Roof
-can you redo
-connect all circles one after the other
-is Mars yellow?
-can you arrange all the dots in a circle
-how many indigo shapes do we have?
-what does Main say?
-please connect every green diamond to the next one
-I want you to delete all the hexagons that are not blue
-add a magenta box below the star
-get rid of Db.
-can you label Output "ok?"
+now connect the pink triangle with the lime oval
+what is connected to Form?
+I want you to place Db in the middle
+now make them cyan
+how many lime stars do we have?
+I want you to remove the arrow from Ended to Side.
+align the stars horizontally
+please get rid of it
+I want you to erase Process
+I want you to unlink Login from Gamma
+how many ellipses do we have?
+I want you to shift Alpha on the left
+could you delete the rectangles
+is there a route from C to Internet?
 what can be reached from Start?
-get rid of Ended
-list stars on the left
-now align the gold stars horizontally
-please attach Process to the lime triangle
-cut the link between Alpha and D
-delete all the hexagons which are not red
-I want you to make a large green star called Gamma at the top
-what can be reached from Form?
+can you make C a triangle
+please remove Core.
+could you color the red squares blue
+now link the green triangle to Box1.
+let's draw a green circle
+I want you to put a huge pink box named Check in the bottom right.
+now draw a dotted arrow from Alpha to Input
+let's line up all purple stars vertically
+how many yellow shapes in the lower right are there?
+let's bring it to the front
+are there any rectangles?
+enlarge Ball
+let's place the gold oval in the top right
+could you make Api bigger
+let's rename Check as Ended.
+let's move Side up
+is Delta linked to Top1?
+I want you to erase Api
+connect Alpha with X with a arrow.
+let's remove all squares that are not blue
+let's delete all squares which are not red
+could you make Gamma a bit smaller
+let's make it orange
+could you put a large star
+please erase all blue circles
+could you draw a box called Cache
+which shapes are connected to Worker?
+can you delete Earth
+now grow Done.
+let's connect every star to the next one
+could you call Beta Gamma
+could you color Side navy
+please rename Db as Laptop
+I want you to remove them
+space out everything
+get rid of the star.
+is there a route from Side to Login?
+I want you to make the rectangle a hexagon
+could you draw a white star named Main.
+from now on, hexagons should be large
+which green oval is nearest to Ball?
+can you move Door beneath the lime diamond
+let's shift Alpha up by 50 pixels
+I want you to call B Core.
+please connect A with Sun
+could you put a large dot called Top1 with the text "Validate" in the bottom right.
+can you link the brown ellipse to Valid
+please make Form large
+could you push Cloud to the left by 30 pixels.
+let's put five orange squares with the text "reject" right of Top1
+draw a dashed arrow from Process to Gamma
+please lay out the cyan triangles in a row
+let's place the gold circle in the top right
+let's add a medium cyan triangle labeled "save".
+make the star tiny
+connect the squares in a chain
+now remove all the squares which are not gold
+please make the gray rectangle a bit bigger.
+let's make Roof a rectangle
+forget the defaults
+please make the ellipses that are not red brown
+colour Core black
+shift Delta to the left by 20 px
+add a hexagon labelled "load".
+which cyan hexagon is closest to A?
+could you on top of Form, add a pink dot.
+let's line up all the white diamonds horizontally
+can you align everything horizontally
+now enlarge Idle
+is Queue connected to Input?
+how many shapes which are not magenta are there?
+which yellow triangle is the lowest?
+rename Start to Check
+please delete Door
+can you on top of the latest gold star, draw a lime star
+describe everything
+can you get rid of the box
+which diamond is the rightmost one?
+by default shapes should be small
+could you insert a small brown star
+now turn the rectangle into a diamond
+write "login" on Top1
+where is Earth?
+I want you to duplicate Gamma two times
+let's label Main "db"
+move C up
+let's make it large
+how many shapes are there?
+is there a magenta square?
+now remove all ellipses that are not yellow
+now join Hub to the circle
+let's connect all triangles in sequence
+I want you to rename Beta as Roof
+could you make a huge star called Laptop above the navy ellipse.
+put a large yellow diamond named Idle with the text "open" to the right of the purple rectangle
+I want you to make Y a box
+I want you to make a teal rectangle called Error.
+arrange everything in a circle
+can you link Check to the star
+could you create a teal triangle over Start
+I want you to put a medium black triangle named Cloud saying "ship" to the right of Input
+is Hub left of Db?
+now join Beta to Main
+is there a path from Idle to Error?
+shift Process near the blue hexagon
+could you delete the ellipses which are not gold
+now drag it at the top
+please line up the cyan hexagons horizontally.
+now label it "back".
+what is connected to Y?
+label B "close"
+please connect the white square to Door with a two-way arrow.
+draw an arrow from Server to Laptop
+let's paint Top1 lime
+can you attach the orange dot to Top1
+draw a dashed arrow from Root to Walls
+let's link the gray hexagon to Worker
+please make a teal triangle in the center
+could you bring the magenta dot to the front
+let's in the bottom left, add a yellow diamond
+what shape is Internet?
+can you erase it
+are there any shapes?
+let's align the brown circles vertically.
+now connect all hexagons one after the other
+can you connect the triangle with D
+turn the hexagon blue.
+now move it down.
+space the triangles evenly
+I want you to insert a tiny green oval under Delta
+is Idle next to Input?
+now move Tree to the left of the latest indigo box.
+how big is Cache?
+now delete all the ellipses
+can you enlarge Roof
+can I get from Ended to Top1?
+let's add two medium purple hexagons
+which cyan triangle is farthest from Api?
+add a huge brown circle in the bottom right.
+please connect Box1 with Door
+please create a blue square below the ellipse
+let's turn all hexagons cyan
+let's draw a diamond beside the last diamond
+now draw a dotted arrow from Idle to Printer
+which hexagon is furthest to Server?
+show yellow circles to the right of CEO?
+space everything vertically
+let's remove the ellipses that are not cyan
+is there a cycle?
+is there a path from Top1 to Error?
+which star is the smallest one?
+can you space all indigo diamonds evenly horizontally
+could you delete all the ellipses which are not pink
+Home is brown
+please connect the pink triangle to Laptop with a dashed arrow
+let's connect every pink rectangle to the next
+show ellipses?
+now color Door white
+please shift the new gray rectangle at the bottom
+what links to Server?
+please forget all rules
+I want you to to the right of the triangle, draw a square
+is there a cycle?
+could you turn all black circles yellow
+what can be reached from Home?
+I want you to paint Main blue
+I want you to make Input a diamond
+describe the canvas
+let's shift it on the right
+now shift the hexagon left of Delta
+could you organize everything in a grid.
+make Earth indigo
+could you remove the circles
+which shape is farthest to Firewall?
+are there any brown shapes?
+can I get from Cloud to Check?
+could you paint the dot yellow.
+please make three yellow diamonds in the top left
+please colour all circles navy
+please rename A as Server
+is Roof connected to CEO?
+by default, ellipses should be large.
 what is on the canvas?
-could you create an indigo dot below Earth
-how many green hexagons at the top are there?
-draw a dotted arrow from Cloud to Core
-please add two small teal dots
-I want you to paint B white
-please organize everything in a column
-I want you to bring Laptop to the front
-what comes after Api?
-I want you to insert four medium purple stars labeled "pay"
-let's place A beside the purple rectangle
-can you color Error brown
-I want you to revert.
-can you bring Home to the front
-I want you to move the indigo star beside the box
-I want you to put Walls in the middle
-can I get from D to Db?
-create a gray diamond called Form between Done and Walls
-can you link Door to Earth
-please put Login beneath D
-how big is Worker?
-is Login gray?
-let's link Valid with the lime diamond
-make Cloud small
-please colour the gray hexagons orange
-could you colour Hub gold
-let's write "close" on Sun
-are there any diamonds?
-is Printer beside Gamma?
-please align everything horizontally
-now link Mars with the lime star
-I want you to push C down by 100 pixels
-Firewall is beside Form
-can you move X to the right
-move Sun beside Idle.
-erase the red hexagon
-please rename Output to Done
-what is reachable from Root?
-could you delete the brown triangles
-please duplicate Form
-how big is Server?
-by default rectangles should be medium
-label the lime dot "ok?"
-now remove the arrow between Home and Check
-I want you to bring the gold box to the front
-let's rename the last lime dot to Ended
-is Ball white?
-please make an oval labeled "done" in the center
-duplicate Mars three times
-let's swap Router and Walls
-please put X beside the black diamond
-get rid of the hexagon.
-now place it in the bottom left
-please label it "login"
-please to the left of Internet, draw a huge green star
-now swap Roof and Walls
-which shapes?
-let's align everything vertically
-now connect all white ellipses in a chain
-redo
-can you line up the lime diamonds horizontally
-now shift it in the top right
-can you join the new box to Valid.
-please insert a navy diamond named Process saying "step 2"
-I want you to arrange everything in a circle
-D is under Cloud
-what is reachable from Ended?
-what links to Cloud?
-let's enlarge the star
-what is connected to Ended?
-are there any red stars at the bottom?
-can you move the box to the right
-is Backup left of C?
-could you make Idle medium
-could you paint Login pink
-what can be reached from Valid?
-now link C to the black star with a line
-write "cancel" on Idle
-please move the square in the lower right
-please color Db indigo
-let's make it black
-create 4 brown boxes at the top
-let's label Idle "yes"
-could you remove all triangles that are not orange
-colour the circle white
-let's link the gold hexagon to the square with a dotted arrow
-turn Home into a hexagon
-list all purple squares are there
-please put a brown star named Backup.
-can you make Walls a star
-is there a path from Firewall to Input?
-could you exchange Cloud and Login
-please write "core" on the white dot
-please enlarge the box
-let's draw three teal ovals next to Earth
-could you draw a white diamond called Tree on the right
-please paint Main teal
-could you make three lime stars left of Printer
-now link Leaf to the rectangle
-let's move the blue square in the middle
-make a gold triangle with the text "cancel" right of Worker
-show magenta ellipses?
-I want you to revert
-what does A say?
-is Laptop over Ball?
-shift Router to the left.
-can you move Main to the left of the pink square
-from now on stars are medium
-shift the blue star in the top right.
-please connect the indigo triangle to Y with a arrow
-please in the top left, add a brown hexagon
-now remove the squares which are not magenta
-which hexagons are there?
-how many cyan squares in the bottom left are there?
-are there any diamonds?
-is Main gold?
-please redo
-make the diamonds that are not purple cyan
-let's color all hexagons orange.
-align all brown diamonds horizontally
-can you place Process left of D
-is Laptop to the left of Server?
-how many orange hexagons do we have?
-which shapes are connected to Server?
-now delete the stars which are not orange
-let's make Core a diamond
-list all navy shapes are there
-could you make an indigo triangle right of Side
-what links to Start?
-how many indigo hexagons in the middle do we have?
-please make two red hexagons in the lower right
-please enlarge CEO
-could you enlarge the cyan diamond
-can you organize all ellipses in a circle
-how many rectangles that are not red do we have?
-over the star, add a blue star
-please distribute all the gold hexagons horizontally
-shift Root on the left
-list all stars that are not gray?
-how many hexagons are there?
-now send the ellipse to the back
-are there any stars on the left?
-please shift the teal ellipse down
-I want you to bring Alpha on top of the others
-let's get rid of Error
-now put the pink hexagon left of the star
-I want you to put a tiny orange circle with the text "reject"
-what links to Idle?
-how many squares in the top right do we have?
-let's forget the rules
-make CEO lime
-turn the box into a square
-which yellow hexagons are there?
-by default circles are black
-I want you to draw a star named Login
-let's insert a hexagon called Process in the bottom right
-list indigo diamonds are there?
-cut the link between Walls and CEO
-I want you to move Walls next to Earth.
-now link the teal hexagon with Roof
-what is reachable from Home?
-Delta is red
-let's place C in the bottom right
-can you connect every ellipse to the next one
-can you move the hexagon above Y
-could you make 3 lime stars in the bottom right
+lay out everything in a row
+is Core over D?
+now copy Core
+let's paint the stars green
+could you enlarge Backup
+please insert 5 stars at the bottom
+how many connections does B have?
+I want you to put a magenta square labelled "user" to the right of the black oval
+let's put a navy circle labeled "Enter password" in the lower right.
+please remove the ellipse
+can I get from Backup to Login?
+please space all yellow triangles horizontally
+let's align the magenta stars horizontally
+I want you to create three white stars to the left of the black hexagon
+let's label Side "pay"
+I want you to undo
+place it in the middle
+what does Backup say?
+please draw a large indigo hexagon named Valid right of the gray dot
+let's add a gold circle in the top right
+is Backup linked to Cloud?
+insert a huge oval saying "ship" left of X
+let's attach Internet to the lime oval.
+which star is the highest?
+please put B between Api and Process
+I want you to draw a dotted arrow from Sun to Done
+please draw a huge indigo ellipse left of the oldest green star
+is Start bigger than Login?
+let's erase all the red stars
+could you align everything vertically
+I want you to paint Firewall magenta
+can you shift Api below the square
+can you make it large
+make a tiny magenta box left of Y
+is Login above Leaf?
+is Delta brown?
+what is reachable from Side?
+how many diamonds that are not purple are there?
+what are the neighbours of Valid?
+which dot has the fewest connections?
+how big is Door?
+please get rid of all teal hexagons.
+please create 4 large pink boxes next to the navy star
+how big is Alpha?
+let's rename Idle to Cache
+send Ball to the back
+is Box1 connected to Server?
+now remove the arrow from Gate to CEO
+please call Box1 Cache.
+is D smaller than Start?
+what can be reached from Walls?
+is there a loop?
+please turn Root into a star
+by default diamonds should be huge
+now get rid of it
+how many connections does Leaf have?
+which triangle is closest from Idle?
+arrange everything in a column
+could you grow the newest square.
+are there cycles?
+let's duplicate Root
+could you add a circle between Check and Input
+I want you to turn Main pink
+please make a pink star between Cloud and Output
+list all lime rectangles?
+I want you to drag C at the bottom
+is Delta smaller than Printer?
+I want you to make the dot purple
+I want you to make a red circle named Laptop in the top right
+can you place Start in the lower right
+which oval is the bottommost?
+are there any cycles?
+is X blue?
+let's create a small black oval
+what does Leaf say?
+is there a route from Internet to Node2?
+let's attach Walls to Side with a line
+connect Sun with Valid with a dotted arrow labeled "close"
+how many ellipses are there?
+could you connect each gold ellipse to the next
+let's shrink Home
+let's organize the circles in a circle
+Printer is over Worker.
+could you line up everything horizontally
+list gold triangles are there?
+move Door to the left by 60 px
+let's turn Worker into a hexagon
+is Tree connected to Mars?
+what links to Api?
+is Api connected to Check?
+how many squares are there?
+how big is Delta?
+now duplicate Core 3 times
+from now on, diamonds should be huge
+could you bring Earth to the front
+which yellow box has the least connections?
+now turn Router cyan
+describe the diagram
+which dot is furthest from Box1?
+is there a blue triangle?
+move Hub to the right
+colour the dots purple.
+which shapes are there?
+let's draw a dotted arrow from Roof to Earth
+now redo.
+can I get from Firewall to Cloud?
+please delete Delta
+is Api linked to Alpha?
+could you connect the blue triangles in sequence
+could you create an ellipse
+list orange hexagons are there.
+duplicate Beta two times
+to the left of the blue hexagon, draw a small oval
+I want you to rename C as Beta.
+please join Firewall to the red diamond
+let's join the gold triangle to Beta
+I want you to add a large box called Mars
+which star is closest from Earth?
+list rectangles that are not magenta
+I want you to insert three medium white stars left of the pink star
+please put Backup to the right of Internet
+please turn the gray ellipses magenta
+can you rename Ended as Box1
+turn Y into a square.
+are there any blue shapes at the bottom?
+what color is Backup?
+which pink shapes in the top left?
+bring Internet on top of the others
+are there any black squares?
+please make Start a box
+I want you to rename Top1 to Router
+can you place Delta in the top left.
+how many gold shapes are there?
+could you call the star Box1
+I want you to label Main "reject".
+how many blue hexagons do we have?
+describe Beta
+is Node2 attached to Printer?
+let's label CEO "yes"
+I want you to line up everything horizontally
+could you put a yellow diamond named Login left of Gamma
+is Main on top of Side?
+how many gray rectangles in the top left corner are there?
+now push the hexagon down by 75 px
+I want you to shift it under Earth
+let's arrange everything in a grid
+can you undo
+from now on, stars should be pink
+which dot is furthest from Node2?
+is Api bigger than Tree?
+can you put Printer at the top
+which indigo ellipse is the highest?
+now paint the yellow diamond lime
+how many connections does Server have?
+let's insert a tiny navy triangle below the blue rectangle
+let's turn Core into a dot
+make 4 orange stars to the left of Ball
+how big is Walls?
+how many lime shapes are there?
+what does Worker say?
+please remove the indigo diamond
+could you on top of the teal box, draw a brown dot
+I want you to arrange everything in a grid
+let's grow the diamond
+how many green triangles are there?
+show brown triangles?
+let's make Process cyan
+list all orange stars?
+how many arrows does Y have?
+I want you to rename Laptop as Hub
+please turn Output cyan.
+which diamond is the rightmost?
+is Login larger than Leaf?
+can you make the gray box huge
+I want you to call Server Internet
+from now on, stars should be tiny
+is Hub indigo?
+I want you to put a triangle right of Error
+how many hexagons do we have?
+Queue is next to Leaf
+how many green stars on the right are there?
+I want you to disconnect CEO from Backup
+could you cut the link between Idle and Start
+I want you to color the blue circles teal
+I want you to get rid of Login
+let's right of the diamond, draw a large purple square
+I want you to lay out everything in a circle
+can you place Roof to the left of Internet
+now undo
+can you bring C on top of the others
+Input is to the left of Walls.
+now enlarge Backup.
+can you put Input in the bottom left
+are there any shapes?
 how many rectangles are there?
-could you connect every orange circle to the next
-could you turn it purple
-now align everything horizontally
-now make Ball indigo
-let's write "step 1" on Api
-delete all triangles which are not gold
-show yellow shapes?
-please add a small gray ellipse with the text "core" on the right
+please insert a navy box called CEO
+how many circles are there?
+B is over Done
+by default shapes should be orange
+grow Error
+which black ellipse is farthest from Top1?
+which box is the highest one?
+let's make Main smaller.
+let's turn the hexagon red
+describe Cloud
+is there a route from Y to Door?
+let's take that back
+which hexagon is the rightmost one?
+please put X on the right
+let's make the ellipses that are not gold indigo
+connect each star to the next one
+from now on, circles are teal
+can you move it down
+please move Gate down by 200 pixels
+which ellipse is the leftmost?
+I want you to make a cyan square in the bottom left
+let's rename Internet to Roof
+which square has the most connections?
+please erase the boxes
+can I get from X to Home?
+how many yellow circles are there?
+now join B with the navy diamond
+is there a route from Internet to Gamma?
+attach A to the white diamond with a two-way arrow labeled "ship"
+can you paint the teal box gold
+can you put Printer beside the star
+let's call Api Root
+is there a triangle in the top right?
+what shape is Login?
+undo
+I want you to put a square with the text "ok?" at the top
+now make Hub a bit smaller
+is there a path from Done to Server?
+could you colour all teal rectangles green
+what shape is B?
+I want you to push Ball up by 20 pixels
+can you organize all gray squares in a column
+make the circles that are not lime navy
+let's space out everything evenly horizontally
+can I get from CEO to Hub?
+please create a pink square with the text "step 1" to the right of the latest black star
+can you attach Internet with Door with a dashed arrow
+please turn Side into a diamond
+delete all ellipses that are not magenta
+let's grow D
+how many brown shapes are there?
+is Form on top of X?
+I want you to remove the arrow between Backup and Gamma
+connect the rectangles one after the other
+I want you to add a pink star named A labelled "pay"
+please place Side left of the lime hexagon
+now duplicate Process 3 times
+from now on, rectangles are white
+how many triangles do we have?
+could you label Internet "step 2"
+please grow the rectangle.
+could you add a medium white dot to the right of Walls
+take that back
+can you connect each triangle to the next one
+please place Sun to the left of the circle
+please put the navy square near the newest cyan diamond
+can you remove all the rectangles which are not white
+now draw a dotted arrow from Router to B
+what does Node2 say?
+now connect all blue ovals one after the other
+are C and Error connected?
+from now on shapes should be magenta.
+how many yellow squares do we have?
+how big is Firewall?
+can you label CEO "load"
+now unlink Home from Gate
+could you put a medium diamond named Alpha
+could you make Backup tiny.
+I want you to call Sun Side
+make the squares that are not teal teal
+can you make Hub large.
+make Alpha a hexagon.
+what links to Node2?
+by default ellipses are gold
+list squares?
+let's paint Router cyan.
+are there any red shapes in the center?
+is there a lime rectangle near Db?
+could you align all the black stars vertically
+describe everything
+which squares near Start?
+can you turn Printer into a star
+describe everything
+connect the triangle to Cache
+please rename the square as Output
+show pink circles?
+what can be reached from Roof?
+could you connect every orange ellipse to the next one
+now arrange the hexagons in a circle
+I want you to paint Roof indigo
+is Home green?
+what does CEO say?
+I want you to move Sun to the left by 30 px.
+is Backup right of Home?
+cut the link between Db and Error
+how many lime hexagons do we have?
+let's place Cloud beside Internet
+let's link the ellipse to the magenta circle with a dotted line labeled "db"
+I want you to create a brown square in the top left
+can you join Roof to the star
+is X gray?
+now delete Check
+could you make Mars a diamond
+which gold dot is the smallest?
+let's clone Walls.
+which blue triangle is the smallest?
+move Internet left of the white square
+let's shift Top1 down by 50 pixels
+are there any cycles?
+what is on the canvas?
+make the triangle small.
+space out everything evenly
+which ellipse is closest from Form?
+is there a pink square?
+can you call Beta X
+please link the diamond with CEO.
+drag the star above Box1
+which purple triangle is closest from Beta?
+can you colour all blue stars blue.
+how many cyan diamonds are there?
+list squares?
+please send the black box behind the others.
+is there a magenta hexagon?
+list stars?
+please delete Server
+let's make Backup a hexagon
+could you make Root teal
+show squares.
+please paint the hexagon black
+which star is farthest from Valid?
+what are the neighbours of B?
+by default, triangles should be huge
+could you shift it to the left
+what comes after Idle?
+please join Done with Printer
+is there a route from Earth to Top1?
+which yellow shape is furthest from Roof?
+let's drag Login below Leaf
+how many shapes are there?
+swap Home and Start
+could you write "yes" on CEO
+could you create a small purple box labelled "end" to the right of the dot
+now drag Output on the left
+what does Start say?
+which shapes are there
+please add a small pink hexagon labeled "db"
+I want you to draw an orange ellipse called Internet beneath the red triangle.
+how many cyan stars are there?
+what is reachable from Mars?
+could you make a huge navy star
+please disconnect Leaf from Input
+let's write "send" on the square
+can you cut the link between Gate and Firewall
+please move Box1 up by 10 pixels
+which purple triangle is the largest?
+attach Internet with Beta
+now color Api white
+list all diamonds to the left of Beta?
+could you turn Login white
+can you shift Done to the left
+are Output and Valid linked?
+I want you to organize everything in a row.
+please join the rectangle to Earth
+add a star.
+please insert a medium lime ellipse on the left
+list triangles are there?
+now delete the rectangles which are not yellow
+I want you to put a brown hexagon labelled "start" beside the rectangle
+can you bring Form on top of the others
+let's grow B.
+put the ellipse beside Firewall.
+let's draw a tiny cyan star named Queue.
+is there a route from Alpha to Delta?
+please connect the orange rectangles in sequence
+put a square above Home
+please create a small green star called Valid over Node2
+what links to Idle?
+I want you to color Ball brown.
+how big is Check?
+let's drag Backup on the right
+list triangles.
+I want you to draw a huge teal square with the text "login" on the right.
+can you push Firewall up by 75 pixels.
+could you align the cyan diamonds vertically
+what is connected to Form?
+what is on the canvas?
+I want you to get rid of A
+which shapes are connected to Gamma?
+how many connections does D have?
+what links to Error?
+please paint it lime
+please attach Core to Roof with a arrow labeled "end".
+let's put Tree near Input
+can you attach Api to Firewall
+now put Leaf to the right of Ball
+what is connected to Gate?
+please align everything horizontally
+now join Hub with the diamond
+please connect the diamonds in sequence.
+could you insert a brown rectangle named Leaf at the top
+how many connections has Output got?
+let's delete all triangles that are not lime
+I want you to align everything horizontally
+attach Ball to the square with a two way arrow
+I want you to make Earth gray
+please connect all green squares one after the other
+could you label Backup "reject"
+what comes after Printer?
+let's shift the triangle in the center
+how many ellipses left of Api do we have?
+which shape is the smallest?
+is Tree indigo?
+can I get from Process to Api?
+let's put Valid in the top left corner
+how many connections does Printer have?
+grow the square
+could you grow Hub
+I want you to add a green hexagon to the left of X.
+can I get from Internet to Roof?
+could you erase Output
+describe the diagram
+please delete the teal ellipses
+could you make it a bit smaller
+I want you to remove Beta
+now connect all the purple squares in sequence
+can you paint Check red
+attach the brown rectangle with Y
+could you at the top, add a rectangle
+by default, stars are tiny
+I want you to rename Form to Core
+can you connect B with Worker
+let's shift CEO in the middle
+can you remove Queue
+connect the magenta hexagon with Leaf with a two-way dotted arrow labeled "open"
+move Core in the top right
+which circle is furthest from Form?
+describe Ball.
+could you align all the cyan triangles vertically
+can you lay out the lime ovals in a column.
+I want you to move B to the right by 50 pixels
+I want you to enlarge the magenta star
+is Check attached to Walls?
+I want you to copy the latest circle.
+please make Y tiny
+which diamond is the topmost one?
+what is reachable from CEO?
+push D to the right by 40 px
+now join Root to Backup
+let's connect the gold hexagon with the gray diamond
+let's move Beta to the right by 80 pixels
+please attach Idle to Ball.
+is there a star right of Cloud?
+please delete Earth
+now move the pink hexagon down by 40 px
+describe Walls
+are Top1 and Process linked?
+colour CEO purple.
+which dot is closest to Hub?
+I want you to get rid of the brown square
+can I get from Roof to Door?
+make the hexagons that are not indigo white
+could you shift it up by 25 px
+is C attached to Server?
+could you create 5 navy diamonds with the text "open" over D.
+which gold ellipses in the top right?
+is Cache over Leaf?
+let's forget all rules
+please add an orange hexagon beside the new triangle
+I want you to remove Walls.
+now make Y medium.
+delete all squares that are not teal.
+connect each diamond to the next
+now shift the magenta hexagon in the top left corner.
+how many connections does Error have?
+forget all rules
+let's link Node2 to the diamond
+now undo.
+please move it on the right
+is Walls connected to Root?
+now link Input to Gamma with a dotted arrow
+please connect all diamonds to each other
+which square has the most connections?
+I want you to unlink Ball from Cache
+please connect the lime stars to each other
+let's draw a dashed arrow from Walls to Laptop
+now make X a circle
+which ellipse is the smallest one?
+remove all squares that are not white.
+what shape is D?
+how many hexagons do we have?
+now attach Internet with Hub with a plain line labeled "reject"
+lay out all the blue diamonds in a circle
+which ellipses?
+let's get rid of the gray box
+show yellow rectangles?
+which circles are there
+is Top1 to the left of Main?
+delete Sun
+can you put Login in the top left
+could you delete all triangles that are not magenta
+please turn the orange hexagon white
+can you shift the square near the gray hexagon
+is there a teal rectangle?
+could you connect every brown hexagon to the next one.
+let's swap CEO and A
+I want you to bring Walls to the front
+what color is Idle?
+could you draw an arrow from Output to Db
+can you lay out everything in a circle
+which hexagon is the rightmost?
+remove all the triangles which are not gold
+list diamonds are there?
+what are the neighbours of Mars?
+clone Server
+now get rid of them
+let's draw a dotted arrow from Gamma to Side.
+is Delta connected to X?
+could you erase Gate
+which ellipse is closest to Core?
+how many ellipses under Y are there?
+let's put an indigo circle saying "next"
+make Cache a bit smaller
+list all black shapes in the bottom left?
+now grow Output
+create a huge lime box called Laptop labeled "end"
+what can be reached from Roof?
+please make Root tiny.
+is Earth larger than Leaf?
+is Ball attached to Delta?
+are there any shapes?
+is Api gold?
+could you put a gold triangle on the left.
+what is on the canvas?
+is Idle larger than Gate?
+let's move Box1 to the left by 100 pixels
+I want you to remove all ellipses that are not gray
+which squares are there
+could you shrink Firewall
+please label the newest hexagon "pay"
+attach the red circle to the square.
+make Side a box
+let's duplicate Core two times.
+move Side up
+let's connect all navy hexagons in sequence
+what does Ball say?
+I want you to make a black rectangle labeled "save" near the red square
+now remove the teal dot.
+let's colour Leaf pink.
+can you duplicate the lime square
+list all hexagons
+add 3 ellipses beside Server
+from now on stars are large
+I want you to organize all navy triangles in a column
+rename Api to Node2.
+can you connect the yellow stars to each other
+how many arrows does Sun have?
+could you paint it black
+is there a path from Ended to Home?
+could you color the pink dots green
+now forget the defaults.
+send the purple circle behind the others.
+is Sun bigger than Top1?
+can you space the magenta stars
+what are the neighbours of Beta?
+please unlink Sun from Node2
+I want you to put a hexagon labelled "send"
+label Delta "Enter password"
+let's delete all squares that are not orange
+can you duplicate the lime circle.
+could you color the last white oval teal
+please connect every orange ellipse to the next
+let's duplicate Start 3 times
+now join Gate to Queue with a plain line
+please drag Home between Error and Earth
+I want you to put a dot
+I want you to insert a tiny gold box called Mars with the text "back"
+what are the neighbours of Gate?
+what comes after Done?
+please place Alpha right of the navy dot
+please link the square to Beta
+what is on the canvas?
+can you make the indigo diamond tiny
+turn the hexagons indigo
+is Core lime?
+please label CEO "load"
+please copy Home.
+list all hexagons
+could you get rid of Server
+let's delete all squares which are not orange
+please insert a large red triangle
+is there a path from Root to Laptop?
+please insert a lime diamond right of Ball
+can you make it tiny
+let's connect all the indigo circles to each other
+I want you to cut the link between A and Backup.
+can you label Idle "Enter password".
+can you write "Enter password" on Y.
+I want you to exchange Form and Beta
+can you turn Done gray
+please remove the arrow between D and Input
+by default, stars are magenta
+could you paint the diamond purple
+can you color X indigo
+make Side medium
+can you move Output over the star
+clone Printer
+let's put Cloud to the right of Leaf.
+how many gray shapes do we have?
+let's organize everything in a grid
+I want you to shift Idle on top of the dot
+are there any cycles?
+is B beside Worker?
+please rename the diamond to Home
+what is reachable from Beta?
+show white stars are there
+what is connected to B?
+which box is farthest from Home?
+are Roof and Worker connected?
+connect all purple circles in a chain
+now join the yellow star to Api
+which diamond is the smallest one?
+I want you to create a cyan triangle called Mars
+which triangle is nearest to Gate?
+how many gray squares are there?
+can you connect every gold ellipse to the next
+what is connected to Alpha?
+is Alpha purple?
+list all shapes on the left?
+color the yellow square gold
+I want you to rename the oldest lime circle to Api
+make Node2 an oval
+create a dot
+please shift it up by 50 px.
+let's attach Mars with Cloud with a dashed arrow labeled "ok?"
+let's draw a diamond between Earth and Walls
+please put Y near Start
+could you call Sun Router
+where is Printer?
+now draw a dotted arrow from Cloud to A
+let's connect each diamond to the next.
+make a small orange box
+please exchange Output and Queue.
+add a black star called Walls right of Home
+is there a star?
+let's clone Box1
+please insert a small cyan triangle named Node2 beside the gray oval
+can you join the purple rectangle with the lime rectangle
+can you turn Door into an oval.
+let's move Error down
+please paint Core indigo
+how many teal shapes do we have?
+now shift Cloud to the right of Idle
+could you create a small hexagon in the middle
+how many diamonds are there?
+is there a red hexagon?
+now send Y behind the others
+what can be reached from Internet?
+are there any shapes which are not lime?
+which triangle has the most connections?
+let's join Y with Root
+which star is furthest to Cloud?
+please link Firewall to Tree with a dotted line labeled "Enter password"
+please colour the triangles red
+let's add a triangle
+now turn it gold
+are Output and Ended connected?
+show white circles
+now turn Internet into a dot
+please link the triangle with Ended.
+now delete Db
+list all stars?
+let's remove all red diamonds
+how many lime ellipses are there?
+describe Door
+now undo.
+is Earth pink?
+let's send Mars to the back
+can you call the circle Gate
+can you duplicate Firewall
+can you connect the gold squares one after the other.
+connect it to Main with a dotted arrow
+can you shift Server above X.
+is Core attached to Ended?
+what comes after Printer?
+please colour Earth purple
+how many pink diamonds are there?
+now colour the square cyan.
+could you make a cyan square called Db at the top
+let's label Y "ok?"
+make a brown ellipse in the bottom right.
+now make Hub teal
+in the top left, add a large oval
+could you make a rectangle named Gate in the middle
+can you delete C
+what color is Node2?
+can you shift Y in the middle
+please make Tree a triangle
+let's on the right, draw a purple star
+is X connected to Tree?
+what is reachable from Api?
+which star has the least connections?
+can you near Leaf, add a box.
+colour the blue squares black
+now label Firewall "Dashboard"
+exchange Earth and Login
+I want you to forget all rules
+please create a large lime oval beside the triangle
+please remove it
+can you call Valid Form
+please drag Server on the right.
+let's make Core pink
+can you join the lime star to the teal ellipse with a plain line
+which orange ellipses near CEO
+how many lime shapes below Core do we have?
+is Box1 smaller than Input?
+now connect every circle to the next one
+now erase the blue triangles
+make it tiny
+let's join the brown box to Mars
+could you put a medium yellow rectangle near Check
+now turn Error red.
+what are the neighbours of Node2?
+where is Valid?
+are there any shapes?
+now undo
+put Db beneath the lime circle
+which cyan shape is the leftmost one?
+please make Box1 huge
+could you beside Alpha, add a medium indigo rectangle
+how many green shapes are there?
+now send Roof to the back.
+link C to D with a dashed arrow
+describe everything
+label Login "pay"
+I want you to color Input indigo
+please align the pink stars horizontally
+how many cyan rectangles are there?
+let's rename Queue to Ended
+please redo
+please redo.
+which stars are there?
+on the right, draw a small square.
+by default shapes are magenta
+please make the diamond huge
+what shape is B?
+put a navy oval named Alpha in the center
+let's connect all hexagons one after the other
+please turn Top1 into a triangle
+rename Roof to Roof
+let's make Ball medium
+what can be reached from CEO?
+how many magenta ellipses do we have?
+is Api attached to Door?
+can you put Delta in the top right
+let's rename Home as Server
+now drag Leaf between Input and Db.
+I want you to paint Y red
+could you label Check "step 2"
+are there cycles?
+how many purple rectangles are there?
+which green triangles to the left of Laptop?
+are there any navy circles on top of Internet?
+drag Box1 left of Mars
+can you make Delta large
+please place it in the lower right
+what is connected to Printer?
+is Cloud left of A?
+now clone Server
+now connect every magenta hexagon to the next
+I want you to turn Db into a diamond
+what is reachable from Valid?
+how many brown circles to the right of Api are there?
+how many green shapes to the left of Node2 do we have?
+which orange shape is the highest?
+please connect all diamonds to each other
+is Check next to Queue?
+how many gray squares do we have?
+list squares to the left of X?
+could you rename Cloud as Sun
+now unlink Alpha from A
+is Input smaller than Printer?
+how many gold diamonds beneath Beta do we have?
+could you lay out everything in a column
+draw a small brown ellipse beneath the diamond.
+please add a medium triangle named Check saying "admin" next to Home
+how many orange shapes in the top right are there?
+I want you to make a small magenta oval
+rename Backup as Gamma
+how many connections does Core have?
+is Top1 connected to Input?
+can you delete all triangles that are not lime.
+can you copy Form
+add a purple diamond
+turn the stars magenta
+please organize everything in a grid
+is there a loop?
+now attach Error with Firewall.
+how many connections does Y have?
+is Node2 bigger than Door?
+please draw a tiny square saying "save" in the middle
+please make the star gray
+could you write "close" on A.
+let's delete the gray hexagon
+can you shift the brown ellipse down by 150 pixels
+what are the neighbours of Firewall?
+now make Core smaller.
+what shape is Earth?
+show navy shapes are there
+please redo
+let's rename Hub to Output
+could you make it larger
+duplicate Tree 2 times
+could you create a huge indigo diamond saying "end" on the right
+now connect every square to the next one
+let's make a lime star saying "yes"
+now line up all orange triangles horizontally
+now connect Form to the triangle with a two-way arrow
+I want you to add five white diamonds between Y and Valid
+how many red rectangles are there?
+are Process and Idle linked?
+place Idle in the top right.
+now enlarge the gold hexagon
+paint Mars pink.
+now erase it
+which navy shape is nearest to Queue?
+Done is pink.
+please rename the circle as Ball
+let's place the green square under Done
+please make CEO a square
+now paint Gamma lime.
+now turn CEO brown
+are C and Start linked?
+now move it down
+could you delete the diamonds which are not black
+can you link Home with Roof with a line
+are there any navy squares?
+now label Ended "step 1"
+can you turn Worker gold
+I want you to move Delta above the circle
+by default, hexagons are huge.
+is Earth white?
+is CEO smaller than Tree?
+how many magenta triangles do we have?
+what can be reached from Sun?
+could you remove the rectangles that are not green
+I want you to bring Y to the front
+align all yellow rectangles horizontally
+please place the white dot in the center
+please connect the hexagons to each other
+can you place Error in the lower right
+please color all blue boxes white
+which red star has the most connections?
+is there a route from A to Error?
+now send Db behind the others
+I want you to delete it
+could you paint Internet black
+please duplicate Cache
+which lime star is nearest to Walls?
+please insert 3 medium green rectangles.
+let's connect Hub to Home with a dashed line labeled "done"
+please turn the navy triangles green
+which teal dot is the rightmost?
+could you get rid of all yellow ovals.
+now remove the triangle
+let's push Idle up by 100 pixels
+please connect the orange dots to each other
+what shape is C?
+turn Check into a dot.
+are there any stars?
+is there a path from Home to Tree?
+now put Worker to the left of the yellow star
+please insert an indigo triangle called Queue saying "Enter password"
+let's draw a dotted arrow from Worker to Box1
+which pink shape is the largest one?
+let's send Db behind the others.
+what shape is Beta?
+let's shift Main to the right
+what is connected to Door?
+is Cloud smaller than Input?
+let's color Server green
+can you unlink Node2 from Top1
+could you remove all the ellipses which are not navy
+is there a cycle?
+could you label Side "user"
+I want you to place Firewall left of Form
+I want you to create a small black dot.
+space out everything vertically
+please duplicate Main
+can you write "error" on Valid
+how big is Main?
+draw a large brown hexagon labelled "ship"
+now connect every gray circle to the next one
+let's remove the brown circles
+let's color the gold hexagon red
+please link Internet with Gamma with a two-way dashed arrow.
+can you bring Backup on top of the others
+could you in the top right, add a small indigo hexagon
+is there a rectangle that are not red?
+I want you to make it teal
+let's add a pink square called C over Door.
+can you erase all the orange boxes.
+can you make Core cyan
+connect the purple hexagon with the red circle
+are Home and Form linked?
+let's organize all ellipses in a circle.
+please place Cache to the left of the black diamond.
+please paint the diamond black
+please put Box1 below the triangle.
+how big is Cloud?
+please duplicate Internet two times
+is Cache to the left of Core?
+I want you to label it "user".
+I want you to put a small square right of the square
+could you delete all the green triangles
+Db is blue
+how many connections does Api have?
+is Leaf blue?
+list all hexagons?
+I want you to create a small red dot with the text "user" above the triangle
+let's link Main to the oval with a line
+please paint it indigo
+now copy the pink hexagon
+now draw a dashed arrow from Server to Gate.
+are there cycles?
+is Alpha to the left of Login?
+please erase Beta
+now undo
+is Cache to the left of C?
+insert a cyan oval under Main
+how many triangles that are not blue are there?
+could you paint Form black.
+are there any purple circles?
+now connect all yellow ellipses to each other
+are there any rectangles at the bottom?
+make a tiny square left of the teal triangle
+please color Box1 green
+please make two circles
+let's make the diamonds that are not red cyan
+now color all white hexagons indigo.
+how many gray shapes are there?
+what is reachable from Gamma?
+can you organize everything in a grid
+what color is Hub?
+is Input attached to Roof?
+how many arrows does Ball have?
+could you put a large red oval named Tree in the lower right
+remove the arrow between Core and Form
+is there a teal ellipse in the bottom right?
+could you make Home a bit bigger
+create a huge dot called Node2 beside Db
+is there a route from Form to Firewall?
+I want you to make a large hexagon called Router
+describe the canvas
+insert a black rectangle named Ball with the text "end" at the top
+please put an oval in the top right.
+how many cyan triangles do we have?
+can I get from C to Roof?
+are Ball and Check linked?
+could you remove all the squares which are not gray
+now forget the rules
+now place X at the bottom
+can you redo
+how many triangles which are not lime are there?
+can you delete Node2
+let's put a dot called Valid beside Server
+can you color Node2 yellow
+can you write "user" on Idle
+can you rename Process as Input
+where is Sun?
+which gold diamond has the fewest connections?
+is Home linked to Hub?
+let's take that back.
+what can be reached from Internet?
+is there a route from Root to Ball?
+are Ended and Process connected?
+could you put a tiny lime diamond with the text "approve" near the newest green hexagon
+please add four gold triangles
+insert a gray rectangle next to Cache
+show lime diamonds in the center
+what is reachable from Sun?
+please get rid of X
+what color is Valid?
+now colour Gamma green
+how many arrows does Top1 have?
+I want you to undo
+make Error green
+is Ball connected to Alpha?
+let's make Laptop a bit smaller
+which brown triangle is the smallest?
+what links to Earth?
+by default, hexagons should be brown
+I want you to shift Mars at the bottom
+rename Top1 as Earth
+describe Error
+can you connect the lime triangle to the first gray square
+what is on the canvas?
+what is reachable from Db?
+is Hub connected to Walls?
+is Roof larger than Valid?
+how many red hexagons beneath Gate are there?
+let's label it "ship"
+I want you to move it down.
+is Node2 green?
+can you join the black star to Core
+put a teal oval above the rectangle
+how many connections does A have?
+now move the hexagon left of Cache
+at the bottom, draw a huge diamond
+list stars
+I want you to make a green square labeled "reject"
+is X smaller than Roof?
+what are the neighbours of Core?
+could you delete all hexagons that are not yellow.
+please enlarge Router
+I want you to shift Laptop up by 80 pixels
+is Delta linked to Start?
+can you move Main to the left
+can you connect Door to Output
+could you insert a tiny gold rectangle
+now revert
+can you delete Walls.
+how many arrows does Cache have?
+now get rid of all blue ovals
+let's make a magenta oval on top of the white diamond
+let's erase Internet
+what can be reached from Mars?
+please grow Internet
+draw a gold box called Beta
+where is Queue?
+please line up the brown hexagons horizontally
+please erase Internet
+Ended is to the right of Top1.
+let's line up everything horizontally
+I want you to unlink Roof from Check
+let's delete Printer
+could you move Input down
+please duplicate Gate
+please send the square behind the others
+connect the box to Printer
+please join the hexagon to Top1
+how many arrows does Top1 have?
+is Valid bigger than Form?
+are there any gold shapes?
+is C left of Ball?
+can you drag Idle over the gold triangle
+could you make Leaf larger
+is there a diamond to the right of Api?
+let's place Walls in the middle
+is Output pink?
+color Firewall white
+where is Form?
+describe the diagram
+right of the teal oval, draw a blue star
+turn the blue boxes orange
+how many circles which are not gray do we have?
+let's join Done to Sun
+I want you to forget the rules
+describe everything
+is Home over Y?
+can you move the circle next to the dot
+how big is Backup?
+link Start to Worker
+let's arrange all brown squares in a circle
+please create a yellow diamond with the text "back" under the white triangle
+describe Walls
+please erase it
+create a huge box beside the red circle
+from now on, squares should be tiny
+could you delete all the hexagons which are not indigo
+I want you to draw a yellow rectangle with the text "cancel"
+move the first star down
+I want you to label Delta "open".
+is Queue smaller than Gamma?
+show shapes are there?
+can you link D with Start with a dotted arrow
+I want you to lay out all triangles in a column
+Cache is gray
+what are the neighbours of Internet?
+is Idle next to Done?
+I want you to paint Ball green
+please create a tiny star labeled "back" next to the navy star.
+could you rename Ball as Process
+describe the diagram
+I want you to grow Worker
+is Gamma smaller than Node2?
+I want you to copy Y
+now paint the triangles green.
+now duplicate Door 3 times
+what are the neighbours of Form?
+I want you to create a huge hexagon with the text "login" in the bottom right
+I want you to grow Y
+can you connect the green hexagon with Valid with a plain dotted line
+could you paint it teal
+line up all green hexagons horizontally
+remove the hexagons.
+make Ended huge
+what does C say?
+delete Server
+now move Earth to the left
+now put Output below Output
+how many cyan rectangles in the bottom right are there?
+from now on, shapes are orange
+I want you to put a brown star
+now make Tree a circle
+how many lime shapes are there?
+is A bigger than Router?
+can you space all the black triangles horizontally
+is Input connected to D?
+how big is Mars?
+can you enlarge Login
+let's label Cache "close"
+what is reachable from Hub?
+let's make a yellow hexagon called Error saying "next" at the bottom
+please send Core to the back
+could you make Backup bigger
+line up the ovals horizontally
+delete the hexagons that are not lime.
+now link the black diamond to Root with a dotted arrow labeled "approve"
+connect Output to the rectangle with a dashed line labeled "open"
+let's link Api to the last brown box with a arrow labeled "save"
+now make Earth tiny
+can you move Alpha down by 25 pixels
+turn C into a hexagon.
+what links to Login?
+can you on the right, add a huge navy square
+how many navy hexagons are there?
+which ellipse is the largest one?
+please place Backup below Worker
+how many squares are there?
+can you connect the cyan triangles to each other
+from now on shapes should be brown.
+how many pink ellipses are there?
+I want you to shrink Sun
+what color is Backup?
+now grow the white ellipse.
+attach it to B
+now grow Ball
+can you unlink Server from Tree.
+add a hexagon with the text "retry"
+are there any blue shapes?
+please attach the oval with D
+draw an arrow from Roof to Gamma
+can you grow the lime hexagon
+let's turn D into a hexagon
+now enlarge Main
+please disconnect Home from B.
+shift D down by 80 pixels.
+please move Queue up by 80 px
+is there a loop?
+please grow Laptop.
+label Printer "back".
+which square is the smallest?
+how many connections has Tree got?
+please drag D beside the square.
+now undo
+can you on top of Router, add a tiny yellow ellipse.
+could you shift the white diamond to the left by 50 px
+let's make a dot.
+can you write "cancel" on the box
+are A and D connected?
+let's rename Node2 as Gamma
+now link the cyan diamond to Gamma
+which square is the biggest?
+now move Gamma in the top right
+could you draw a dotted arrow from Output to Node2
+let's label Sun "admin".
+now link the hexagon with the blue box
+I want you to turn C into a hexagon
+Backup is magenta
+from now on, diamonds should be large
+please arrange everything in a grid
+now get rid of it.
+can you label Leaf "Enter password"
+let's create 3 medium cyan circles between Walls and Ended
+I want you to get rid of all dots
+what comes after Laptop?
+can you line up all red rectangles horizontally
+delete all triangles that are not lime
+I want you to rename the hexagon as Cache
+X is lime.
+please draw a huge diamond called Core labeled "open" at the bottom
+is there a rectangle that are not blue?
+please remove Laptop
+could you bring Printer on top of the others.
+can you join Error with Root
+push it up by 80 pixels
+is there a blue diamond?
+let's make Sun a triangle
+insert a tiny black hexagon called Cache at the bottom
+move Y up
+I want you to grow Laptop
+please add a triangle called B right of Beta
+what shape is B?
+can you attach Gate to B with a dashed arrow labeled "next"
+can you turn Server gray
+could you send Alpha to the back.
+can you rename Printer as Router
+are there any ellipses?
+please turn the dot into a triangle
+what shape is Printer?
+please connect all triangles in sequence
+rename the black triangle to Walls
+now grow Done
+is Internet bigger than Router?
+is Main attached to Api?
+could you make a cyan oval
+put a hexagon
+I want you to get rid of the hexagon
+are CEO and Done linked?
+call Root Gate
+let's remove Gate
+show navy stars are there
+is Output larger than Printer?
+can you label Output "approve"
+please forget the defaults
+which brown square is farthest from Output?
+please add a huge navy star called Valid left of Laptop
+now remove the teal triangle.
+can you rename the star as X
+please move Earth above the diamond
+could you call Output Check
+I want you to draw an arrow from Gamma to Delta
+can you erase the squares
+let's add a white diamond on top of the circle
+how many connections does Valid have?
+please join Cache to Router with a arrow
+list all brown ellipses are there?
+add a large orange triangle labeled "Validate" to the right of Sun
+let's draw five large green boxes in the top left corner
+now color Side navy
+how many cyan hexagons do we have?
+which hexagon is the smallest?
+I want you to drag Check in the top left
+by default, shapes are tiny
+I want you to duplicate Delta
+is there a yellow triangle?
+I want you to drag the newest star left of Tree
+is there a path from C to Home?
+can I get from B to Idle?
+from now on, diamonds are small
+add a tiny square left of Process
+let's connect the first star to Sun
+are there any diamonds on the right?
+what links to Core?
+I want you to erase Gate.
+is Internet attached to Root?
+which dot is closest to Form?
+are B and CEO linked?
+please connect every ellipse to the next
+which square is the rightmost one?
+how many shapes are there?
+can you connect each circle to the next
+I want you to rename the latest gold diamond to Delta
+I want you to delete the rectangles that are not white
+are there any shapes beside Output?
+describe the diagram
+let's draw a triangle at the bottom
+can you turn the ovals gold.
+push Server up by 40 pixels
+let's make a hexagon named Done in the lower right
+can you connect every white square to the next
+how many magenta stars at the bottom do we have?
+now colour Walls yellow
+insert four brown dots in the top left corner.
+connect the magenta hexagons in sequence
+which shape is the lowest one?
+where is Main?
+what does Worker say?
+let's move Hub below Internet
+make a green hexagon named Tree
+is Top1 on top of Mars?
+create an orange square near Hub.
+I want you to rename Leaf to Node2.
+let's draw a dashed arrow from Db to Check
+could you make a white hexagon left of the newest red circle
+can you make Ended larger
+can you get rid of the white boxes
+are there any brown rectangles?
+now lay out everything in a column
+is there a path from Earth to B?
+can you forget all rules
+is Server beneath Printer?
+please connect the brown circles to each other
+join Node2 to the indigo oval with a two-way arrow
+could you make it magenta
+which cyan shapes beside Input?
+can you connect each pink ellipse to the next
+rename Node2 as B.
+clone the new hexagon
+is Top1 under Ball?
+which yellow star is farthest to Backup?
+which shape is the bottommost one?
+please push Sun up by 50 pixels
+can you shift the magenta triangle to the right of Cloud
+arrange the boxes in a column
+let's send Gamma to the back
+which white triangle is nearest from Y?
+is D smaller than Idle?
+now duplicate Printer
+which ellipses that are not yellow are there
+join it to Delta.
+what is connected to Roof?
+erase the hexagons
+from now on, diamonds are small
+what does Input say?
+I want you to rename Door as Start
+draw a tiny box left of Output.
+now join Queue to Cache.
+delete all dots
+how many diamonds are there?
+which shapes are connected to Backup?
+how many stars which are not black do we have?
+can you get rid of Gate
+can you make all the ovals green
+could you create a large indigo oval saying "no" in the lower right
+let's turn Error into a rectangle
+draw two yellow hexagons
+now move Door in the bottom right
+are there any triangles which are not magenta?
+how many circles do we have?
+let's put a diamond labeled "ship" in the top right.
+what are the neighbours of Gamma?
+can you grow Input
+which gold hexagon is the leftmost?
+can you connect all the diamonds to each other
+now turn Input blue
+let's insert a black hexagon on the right.
+let's connect every brown ellipse to the next one
+can you enlarge the triangle
+could you colour Ended black
+please join Delta to Api
+let's insert a large navy dot labeled "db"
+please duplicate Idle three times
+is D left of Done?
+which rectangle is the smallest one?
+how many orange squares are there?
+describe Idle
+how many connections has Roof got?
+can you connect Idle to the blue oval with a dotted arrow
+can you line up all squares horizontally
+is Mars connected to Input?
+I want you to shift Alpha on the left.
+is Worker smaller than Output?
+by default, ellipses are huge
+arrange everything in a circle
+can you paint the rectangle green.
+create a huge square called Input over the red square
+can I get from Walls to Idle?
+could you make Beta large
+could you rename Backup as Firewall
+let's rename Firewall to Beta
+are there any hexagons?
+is there a route from Backup to Earth?
+I want you to revert.
+is there a cycle?
+let's insert a white rectangle called Leaf below the box
+can you duplicate Backup 3 times
+I want you to rename Hub as Home
+can you color all squares red
+are there any cycles?
+could you make a hexagon called Ended near Login
+label Sun "Dashboard"
+could you add a medium blue star named Box1 right of the star
+please make X small
+now forget the rules
+now draw a dashed arrow from Output to Mars
+could you move it up
+can you line up the stars horizontally
+could you add a large rectangle with the text "user" beside Root
+let's connect each hexagon to the next
+now put Worker above Mars
+now move the indigo star to the right by 80 pixels.
+what are the neighbours of B?
+turn Process into a diamond
+which shape is the leftmost one?
+please distribute the teal rectangles evenly horizontally
+label Leaf "done"
+now make Earth a triangle
+show diamonds that are not gold?
+could you connect the blue hexagons to each other
+get rid of D
+how many brown ellipses do we have?
+is Valid connected to Check?
+can you make the squares that are not green teal
+let's colour the gray hexagons orange
+I want you to colour Hub gold
+attach the rectangle to the white diamond with a line
+could you create a brown star right of Root
+are Ended and Gamma linked?
+could you turn the triangle blue
+now revert
+now shrink Y
+please swap Leaf and B
+can you move Sun beside Idle.
+could you erase the red hexagon
+let's label Output "close"
+now send Alpha to the back
+is Process brown?
+please join Alpha with Start
+from now on stars are large
+please swap Walls and Worker
+let's move D to the left by 80 pixels.
+now turn Cloud into a dot
+let's redo
+please send it to the back
+is X green?
+which diamond is nearest from Ended?
+could you call C CEO
+please exchange Check and Backup
+unlink Printer from Done
+let's push the gray circle up by 50 pixels
+cut the link between Firewall and X
+let's link the diamond with D
+could you get rid of the oval.
+move it up
+can you exchange Backup and Hub
+I want you to at the bottom, add a gold circle
+let's connect every gold star to the next one
+which triangle is furthest from Output?
+I want you to erase the squares
+could you make Earth a triangle
+insert a small lime oval named Login in the bottom left
+how many connections has CEO got?
+which magenta rectangle is closest from Output?
+how big is Gamma?
+can you duplicate Walls two times
+what shape is Node2?
+can you paint the triangle teal
+which square is closest from Cloud?
+could you label Error "cancel"
+is Check magenta?
+let's turn the squares cyan
+please make the rectangles that are not gray green
+please align all ovals horizontally
+let's put Home on the right.
+can you bring the gold box to the front
+which hexagon is the leftmost?
+is CEO connected to Laptop?
+remove the squares
+I want you to put the red hexagon to the left of the square.
+now send Core to the back
+I want you to organize the cyan triangles in a row.
+is there a purple ellipse at the bottom?
+by default, hexagons are purple
+join the indigo rectangle to Alpha
+I want you to call the navy circle Worker
+cut the link between C and Walls
+can you move Ended beside Internet
+call the green triangle CEO
+now label Home "core"
+I want you to insert a large hexagon called Printer under the red diamond
+describe everything
+now undo
+by default, squares are white
+I want you to paint the magenta stars red
+is Idle right of CEO?
+let's insert 4 indigo rectangles
+shift Check on the left
+could you turn them purple
+can you shift Check to the right by 100 pixels
+please rename Output to C
+can you unlink Backup from Idle.
+please send the teal diamond behind the others
+now connect each cyan square to the next one
+move the blue square up
+please make it huge
+please lay out all black triangles in a column
+can you connect all indigo diamonds in sequence
+can I get from Cloud to Y?
+list all black stars
+can you redo
+what color is Laptop?
+can you move Login in the bottom left
+let's connect the oval to Y.
+how many stars that are not purple are there?
+how big is C?
+can you exchange Door and Home.
+could you draw a dotted arrow from A to Root
+please align the triangles vertically
+can you colour Root orange
+could you label it "pay".
+can you shift the square down by 150 pixels
+let's shift Error to the right by 100 px
+I want you to revert
+could you exchange Printer and Cache
+are Alpha and Node2 linked?
+are D and Main connected?
+now connect the star to Idle with a arrow
+I want you to draw a dashed arrow from Hub to Firewall
+I want you to add a small red dot right of D
+is Output near Process?
+please make Alpha large
+now connect each circle to the next one
+please align all rectangles horizontally
+please exchange Home and Idle
+could you make an indigo star right of Side
+is Start left of Earth?
+let's insert four huge rectangles labeled "pay"
+which indigo hexagon is the topmost?
+now make CEO huge
+shift D to the right
+please put a huge brown diamond labeled "Validate"
+can you over the star, add a blue star
+how many purple diamonds left of Error do we have?
+can you shift Root on the left
+what are the neighbours of Output?
+remove Api
+what does Gamma say?
+which shapes are connected to Earth?
+is there a rectangle?
+describe Walls
+let's exchange Idle and Core
+please make a tiny white hexagon.
+I want you to cut the link between Y and Tree
+I want you to make a medium diamond called Valid in the bottom left
+can you connect the rectangles one after the other
+which navy shape is furthest to Sun?
+could you call A Valid
+could you put a large circle right of Main
+let's paint Side yellow
+let's colour Backup green
+how many shapes do we have?
+could you colour all the hexagons gray
+let's connect each indigo star to the next.
+I want you to duplicate Gate three times
+which pink ellipse is furthest from Worker?
+let's draw 3 black ellipses saying "open"
+how many diamonds on top of Worker are there?
+what links to Firewall?
+are there any circles at the bottom?
+which shape is nearest from Cache?
+now turn X into an ellipse
+is Internet connected to Gate?
+can you lay out everything in a grid
+let's rename the dot as Worker
+which oval is the smallest?
+which shape is the bottommost?
+let's attach CEO to Process
+could you remove the arrow from Api to Roof

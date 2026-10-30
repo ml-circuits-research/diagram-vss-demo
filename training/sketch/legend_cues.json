@@ -1,0 +1,652 @@
+{
+ "quantifier": {
+  "all": [
+   "all",
+   "every",
+   "each",
+   "everything"
+  ]
+ },
+ "notColor": {
+  "red": [
+   "not red"
+  ],
+  "orange": [
+   "not orange"
+  ],
+  "yellow": [
+   "not yellow"
+  ],
+  "gold": [
+   "not gold"
+  ],
+  "lime": [
+   "not lime"
+  ],
+  "green": [
+   "not green"
+  ],
+  "teal": [
+   "not teal"
+  ],
+  "cyan": [
+   "not cyan"
+  ],
+  "blue": [
+   "not blue"
+  ],
+  "navy": [
+   "not navy"
+  ],
+  "indigo": [
+   "not indigo"
+  ],
+  "purple": [
+   "not purple"
+  ],
+  "magenta": [
+   "not magenta"
+  ],
+  "pink": [
+   "not pink"
+  ],
+  "brown": [
+   "not brown"
+  ],
+  "gray": [
+   "not gray"
+  ],
+  "black": [
+   "not black"
+  ],
+  "white": [
+   "not white"
+  ]
+ },
+ "recency": {
+  "newest": [
+   "new",
+   "newest",
+   "last",
+   "latest",
+   "most recent"
+  ],
+  "oldest": [
+   "first",
+   "oldest",
+   "earliest"
+  ]
+ },
+ "action": {
+  "undo": [
+   "undo",
+   "revert"
+  ],
+  "redo": [
+   "redo",
+   "reapply",
+   "re-apply"
+  ],
+  "create": [
+   "draw",
+   "create",
+   "add",
+   "make",
+   "put",
+   "place",
+   "insert",
+   "sketch",
+   "build",
+   "spawn",
+   "throw",
+   "slap",
+   "pop",
+   "stick",
+   "plonk"
+  ],
+  "delete": [
+   "delete",
+   "remove",
+   "erase",
+   "drop",
+   "clear",
+   "wipe",
+   "reset",
+   "get rid of",
+   "kill",
+   "trash",
+   "axe",
+   "ditch",
+   "zap",
+   "banish",
+   "nuke"
+  ],
+  "move": [
+   "move",
+   "shift",
+   "drag",
+   "push",
+   "nudge",
+   "slide",
+   "reposition",
+   "relocate",
+   "scoot",
+   "shove",
+   "park",
+   "tuck"
+  ],
+  "set": [
+   "set",
+   "change",
+   "turn",
+   "color",
+   "colour",
+   "paint",
+   "fill",
+   "give",
+   "recolor",
+   "recolour"
+  ],
+  "resize": [
+   "resize",
+   "grow",
+   "enlarge",
+   "shrink",
+   "scale"
+  ],
+  "rename": [
+   "rename",
+   "call"
+  ],
+  "label": [
+   "label",
+   "title",
+   "caption",
+   "write",
+   "inscribe",
+   "stamp",
+   "tag"
+  ],
+  "duplicate": [
+   "duplicate",
+   "copy",
+   "clone",
+   "replicate",
+   "dupe"
+  ],
+  "swap": [
+   "swap",
+   "exchange",
+   "trade",
+   "switch places",
+   "trade places"
+  ],
+  "connect": [
+   "connect",
+   "link",
+   "join",
+   "wire",
+   "attach",
+   "hook",
+   "tie"
+  ],
+  "disconnect": [
+   "disconnect",
+   "unlink",
+   "detach",
+   "separate",
+   "cut",
+   "unhook",
+   "sever",
+   "snip"
+  ],
+  "align": [
+   "align",
+   "line up"
+  ],
+  "arrange": [
+   "arrange",
+   "layout",
+   "lay out",
+   "organize",
+   "organise",
+   "tidy"
+  ],
+  "distribute": [
+   "distribute",
+   "space",
+   "spread"
+  ],
+  "toFront": [
+   "bring",
+   "raise"
+  ],
+  "toBack": [
+   "send"
+  ],
+  "forget": [
+   "forget",
+   "discard",
+   "disregard"
+  ]
+ },
+ "shape": {
+  "any": [
+   "shape",
+   "shapes",
+   "node",
+   "nodes",
+   "object",
+   "objects",
+   "thing",
+   "things",
+   "element",
+   "elements",
+   "item",
+   "items",
+   "one",
+   "ones"
+  ],
+  "circle": [
+   "circles",
+   "dot",
+   "dots",
+   "ball",
+   "balls"
+  ],
+  "square": [
+   "squares"
+  ],
+  "rectangle": [
+   "rectangles",
+   "rect",
+   "rects",
+   "box",
+   "boxes",
+   "block",
+   "blocks"
+  ],
+  "triangle": [
+   "triangles"
+  ],
+  "diamond": [
+   "diamonds",
+   "rhombus"
+  ],
+  "ellipse": [
+   "ellipses",
+   "oval",
+   "ovals"
+  ],
+  "hexagon": [
+   "hexagons"
+  ],
+  "star": [
+   "stars"
+  ]
+ },
+ "color": {
+  "red": [
+   "crimson",
+   "scarlet"
+  ],
+  "orange": [],
+  "yellow": [
+   "amber"
+  ],
+  "gold": [
+   "golden"
+  ],
+  "lime": [],
+  "green": [],
+  "teal": [
+   "turquoise"
+  ],
+  "cyan": [
+   "aqua"
+  ],
+  "blue": [],
+  "navy": [],
+  "indigo": [],
+  "purple": [
+   "violet",
+   "lilac"
+  ],
+  "magenta": [
+   "fuchsia"
+  ],
+  "pink": [
+   "rose"
+  ],
+  "brown": [],
+  "gray": [
+   "grey",
+   "silver"
+  ],
+  "black": [],
+  "white": []
+ },
+ "outline": {
+  "none": [
+   "no"
+  ],
+  "red": [
+   "crimson",
+   "scarlet"
+  ],
+  "orange": [],
+  "yellow": [
+   "amber"
+  ],
+  "gold": [
+   "golden"
+  ],
+  "lime": [],
+  "green": [],
+  "teal": [
+   "turquoise"
+  ],
+  "cyan": [
+   "aqua"
+  ],
+  "blue": [],
+  "navy": [],
+  "indigo": [],
+  "purple": [
+   "violet",
+   "lilac"
+  ],
+  "magenta": [
+   "fuchsia"
+  ],
+  "pink": [
+   "rose"
+  ],
+  "brown": [],
+  "gray": [
+   "grey",
+   "silver"
+  ],
+  "black": [],
+  "white": []
+ },
+ "size": {
+  "tiny": [
+   "minuscule"
+  ],
+  "small": [
+   "little"
+  ],
+  "medium": [
+   "normal",
+   "regular",
+   "average"
+  ],
+  "large": [
+   "big"
+  ],
+  "huge": [
+   "giant",
+   "enormous",
+   "massive"
+  ]
+ },
+ "position": {
+  "leftOf": [
+   "left of"
+  ],
+  "rightOf": [
+   "right of"
+  ],
+  "above": [
+   "above",
+   "over",
+   "on top of"
+  ],
+  "below": [
+   "below",
+   "under",
+   "beneath"
+  ],
+  "near": [
+   "next to",
+   "near",
+   "beside"
+  ],
+  "between": [
+   "between"
+  ],
+  "center": [
+   "center",
+   "middle"
+  ],
+  "top": [
+   "at the top"
+  ],
+  "bottom": [
+   "at the bottom"
+  ],
+  "left": [
+   "on the left"
+  ],
+  "right": [
+   "on the right"
+  ],
+  "topLeft": [
+   "top left"
+  ],
+  "topRight": [
+   "top right"
+  ],
+  "bottomLeft": [
+   "bottom left"
+  ],
+  "bottomRight": [
+   "bottom right"
+  ]
+ },
+ "direction": {
+  "left": [],
+  "right": [],
+  "up": [
+   "upwards"
+  ],
+  "down": [
+   "downwards"
+  ]
+ },
+ "style": {
+  "solid": [],
+  "dashed": [
+   "dash"
+  ],
+  "dotted": [
+   "dot"
+  ]
+ },
+ "arrow": {
+  "forward": [
+   "arrow"
+  ],
+  "both": [
+   "two-way",
+   "two way",
+   "bidirectional",
+   "both ways",
+   "double-headed"
+  ],
+  "none": [
+   "line",
+   "plain",
+   "undirected"
+  ]
+ },
+ "pairing": {
+  "chain": [
+   "in a chain",
+   "one after the other",
+   "in sequence",
+   "in order"
+  ],
+  "next": [
+   "each to the next",
+   "to the next one"
+  ],
+  "all": [
+   "all to each other",
+   "every pair"
+  ]
+ },
+ "axis": {
+  "horizontal": [
+   "horizontally",
+   "in a row"
+  ],
+  "vertical": [
+   "vertically",
+   "in a column"
+  ]
+ },
+ "layout": {
+  "row": [
+   "row",
+   "line"
+  ],
+  "column": [
+   "column",
+   "stack"
+  ],
+  "grid": [
+   "grid",
+   "tidy"
+  ],
+  "circle": [
+   "circle",
+   "ring"
+  ]
+ },
+ "ask": {
+  "count": [
+   "how many"
+  ],
+  "list": [
+   "list",
+   "which",
+   "show"
+  ],
+  "exists": [
+   "is there",
+   "are there"
+  ],
+  "property": [
+   "what color",
+   "where is",
+   "how big"
+  ],
+  "check": [
+   "is A …?"
+  ],
+  "describe": [
+   "describe",
+   "what is on"
+  ],
+  "neighbors": [
+   "what is connected to"
+  ],
+  "connected": [
+   "are A and B connected"
+  ],
+  "degree": [
+   "how many connections does"
+  ],
+  "nearest": [
+   "closest",
+   "nearest",
+   "farthest"
+  ],
+  "extreme": [
+   "biggest",
+   "leftmost",
+   "most connections"
+  ],
+  "path": [
+   "is there a path",
+   "can I get from"
+  ],
+  "reachable": [
+   "what can be reached from"
+  ],
+  "cycle": [
+   "are there cycles"
+  ],
+  "rules": [
+   "what rules"
+  ]
+ },
+ "property": {
+  "color": [
+   "colour"
+  ],
+  "size": [
+   "how big"
+  ],
+  "shape": [],
+  "label": [
+   "text"
+  ],
+  "position": [
+   "where",
+   "location"
+  ],
+  "outline": [
+   "border"
+  ]
+ },
+ "kind": {
+  "shape": [],
+  "edge": [
+   "arrows",
+   "connections",
+   "links",
+   "edges",
+   "lines"
+  ]
+ },
+ "comparison": {
+  "bigger": [
+   "larger"
+  ],
+  "smaller": []
+ },
+ "superlative": {
+  "biggest": [
+   "largest"
+  ],
+  "smallest": [
+   "tiniest"
+  ],
+  "leftmost": [],
+  "rightmost": [],
+  "topmost": [
+   "highest"
+  ],
+  "bottommost": [
+   "lowest"
+  ],
+  "closest": [
+   "nearest"
+  ],
+  "farthest": [
+   "furthest"
+  ],
+  "mostConnected": [
+   "most connections",
+   "most links"
+  ],
+  "leastConnected": [
+   "fewest connections",
+   "least connections",
+   "fewest links"
+  ]
+ }
+}
