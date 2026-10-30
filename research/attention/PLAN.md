@@ -69,3 +69,17 @@ of tokens: no all-pairs (n^2) attention. So every design must keep each word att
 nearest centres on each side, or centres within a window), compute centre-relative addresses with running products / prefix scans,
 and keep one fixed-size D-vector per centre. Every implementer measures wall time and memory for one message of 10, 100, 1 000,
 10 000 and 100 000 tokens (synthetic: many requests with chatter) and reports whether the cost grows linearly.
+
+## Added requirement (owner, 01:04): chatter is text of another world
+
+Chatter is not only to be ignored: it may be requests of ANOTHER world. A VSA world's reading should return, besides its
+formalizations, the ZONES of the text that make no sense for it, so that the system can try them in another VSA world (worlds share
+common words). So:
+- every design outputs the unexplained zones explicitly (token spans), not just drops them; measure zone extraction (exact-span F1 of
+  the chatter zones against the gold);
+- E5 (new): two synthetic worlds with partly shared vocabulary (the diagram world and a second one, e.g. a calendar/shopping world with
+  its own actions and roles); messages mix requests of both worlds plus pure chatter. World A reads its requests and hands back its
+  zones; world B reads those zones. Measure: requests of each world read right, requests of B wrongly read by A (and vice versa), pure
+  chatter left over. Threshold: >= 80% of B's requests recovered from A's zones on the gold-cut-level accuracy of B. See vss-demo's
+  "dispatcher by fit over several worlds" and negative examples (R81) for prior mechanisms (training/vss/tool/sop, notes in
+  /home/claude/vss-demo).
