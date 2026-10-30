@@ -7,3 +7,4 @@ training/sketch/__pycache__/
 *.pyc
 node_modules/
 training/sketch/worlds/real/
+research/attention/**/*.pt
