@@ -64,6 +64,15 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
 - Also report separately the requests whose trigger word was seen in training and those whose trigger was not.
 - One change at a time, and every number states which model, which data and which test set produced it.
 
+## Experiments
+
+1. Before an experiment, write and show the owner: the hypothesis, how it is measured, and the threshold that means "it worked".
+2. No knobs turned on the fly. A parameter comes from the model, or is chosen once, by the protocol fixed beforehand, on held-out
+   training messages.
+3. If the result misses the threshold: stop and report it. No patches, no "one more try". A negative result is a result.
+4. One change, one measurement, one report in plain words.
+(2026-10-30: the VSS-native cut scored exact-span F1 0.24 vs 0.92 for the tagger; a weight was then tuned on the fly to 0.38. Wrong.)
+
 ## Working with the owner
 
 - Architecture changes need the owner's approval BEFORE they are built: a new learned component (a tagger, a classifier, any model
