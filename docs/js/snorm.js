@@ -11,6 +11,7 @@ export function compile(T) {
     noNum: new Set(T.number_word_exceptions), punct: T.punctuation, follow: new Set(T.article_followers), before: new Set(T.name_before),
     keepS: new Set(Object.keys(T.contractions).filter((k) => k.endsWith("'s")).map((k) => k.split("'")[0])),
     rewrites: T.rewrites || [], qverbs: new Set(T.question_verbs || []),
+    trig: (T.triggers || []).map((e) => [split(e.p), e.prev, e.next, e.tok, !!e.ins]),
   };
 }
 const eq = (a, b, i) => b.every((x, k) => a[i + k] === x);
@@ -65,5 +66,22 @@ export function normalize(C, lexicon, text, names = []) {
   }
   for (const r of C.rewrites) if (res.length && r.first.includes(res[0]) && r.all.every((alts) => alts.some((w) => res.includes(w)))) { res[0] = r.set; break; }
   if (res.length && C.qverbs.has(res[0])) for (let i = 1; i < res.length; i++) if (res[i] === "is" || res[i] === "are") res[i] = "be";
-  return { tokens: res, info };
+  return { tokens: C.trig.length ? applyTriggers(res, C.trig) : res, info };
+}
+// learned triggers (training/sketch/learn_triggers.py), the twin of normalize.py apply_triggers: the leftmost match whose context fits
+function tclass(t) {
+  if (t == null) return "B";
+  if (t.startsWith("n_")) return "NAME";
+  if (t === "a" || t === "an" || t === "another" || /^\d+$/.test(t)) return "ART";
+  if (t === "the") return "THE";
+  if (["it", "them", "this", "that", "these", "those", "everything", "all", "both", "they"].includes(t)) return "PRON";
+  return "O";
+}
+function applyTriggers(toks, trig) {
+  for (let i = 0; i < toks.length; i++) for (const [ph, pv, nx, tok, ins] of trig) {
+    if (!eq(toks, ph, i)) continue;
+    const p = tclass(i > 0 ? toks[i - 1] : null), n = tclass(i + ph.length < toks.length ? toks[i + ph.length] : null);
+    if ((pv === "*" || pv === p) && (nx === "*" || nx === n)) return toks.slice(0, i).concat([tok], toks.slice(i + (ins ? 0 : ph.length)));
+  }
+  return toks;
 }

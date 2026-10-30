@@ -1,0 +1,5969 @@
+{
+ "contractions": {
+  "don't": "do not",
+  "dont": "do not",
+  "let's": "lets",
+  "can't": "can not",
+  "what's": "what is",
+  "where's": "where is",
+  "it's": "it is",
+  "i'd": "i would",
+  "isn't": "is not",
+  "aren't": "are not",
+  "doesn't": "does not",
+  "won't": "will not",
+  "i'm": "i am",
+  "that's": "that is",
+  "there's": "there is"
+ },
+ "punctuation": ".,;:!?",
+ "number_words": {
+  "zero": 0,
+  "one": 1,
+  "two": 2,
+  "three": 3,
+  "four": 4,
+  "five": 5,
+  "six": 6,
+  "seven": 7,
+  "eight": 8,
+  "nine": 9,
+  "ten": 10,
+  "eleven": 11,
+  "twelve": 12,
+  "twenty": 20,
+  "thirty": 30,
+  "forty": 40,
+  "fifty": 50,
+  "sixty": 60,
+  "seventy": 70,
+  "eighty": 80,
+  "ninety": 90,
+  "hundred": 100
+ },
+ "number_word_exceptions": [
+  "one"
+ ],
+ "article_followers": [
+  "new",
+  "few",
+  "couple",
+  "copy",
+  "bit",
+  "little",
+  "lot",
+  "big",
+  "small",
+  "tiny",
+  "huge",
+  "large",
+  "medium",
+  "box",
+  "oval",
+  "dot",
+  "rect",
+  "grey",
+  "two-way",
+  "plain",
+  "dashed",
+  "dotted",
+  "solid",
+  "arrow",
+  "line",
+  "connection",
+  "shape",
+  "circle",
+  "square",
+  "rectangle",
+  "triangle",
+  "diamond",
+  "ellipse",
+  "hexagon",
+  "star",
+  "red",
+  "orange",
+  "yellow",
+  "gold",
+  "lime",
+  "green",
+  "teal",
+  "cyan",
+  "blue",
+  "navy",
+  "indigo",
+  "purple",
+  "magenta",
+  "pink",
+  "brown",
+  "gray",
+  "black",
+  "white",
+  "crimson",
+  "violet",
+  "turquoise",
+  "aqua",
+  "rose",
+  "giant",
+  "enormous",
+  "little",
+  "path",
+  "route",
+  "cycle",
+  "loop"
+ ],
+ "name_before": [
+  "is",
+  "are",
+  "to",
+  "and",
+  "from",
+  "with",
+  "of",
+  "between",
+  "than",
+  "connect",
+  "link",
+  "join",
+  "swap",
+  "exchange",
+  "rename",
+  "call",
+  "label",
+  "move",
+  "delete",
+  "remove",
+  "describe",
+  "duplicate",
+  "copy",
+  "after",
+  "below",
+  "above",
+  "under",
+  "over",
+  "near",
+  "beside",
+  "paint",
+  "color",
+  "colour",
+  "shrink",
+  "enlarge",
+  "grow",
+  "resize",
+  "make",
+  "turn",
+  "set",
+  "put",
+  "place",
+  "bring",
+  "send",
+  "shift",
+  "drag",
+  "nudge",
+  "rename",
+  "align"
+ ],
+ "lead_strip": [],
+ "openers": [],
+ "mwe": [
+  [
+   "not red",
+   "not_red"
+  ],
+  [
+   "not orange",
+   "not_orange"
+  ],
+  [
+   "not yellow",
+   "not_yellow"
+  ],
+  [
+   "not gold",
+   "not_gold"
+  ],
+  [
+   "not lime",
+   "not_lime"
+  ],
+  [
+   "not green",
+   "not_green"
+  ],
+  [
+   "not teal",
+   "not_teal"
+  ],
+  [
+   "not cyan",
+   "not_cyan"
+  ],
+  [
+   "not blue",
+   "not_blue"
+  ],
+  [
+   "not navy",
+   "not_navy"
+  ],
+  [
+   "not indigo",
+   "not_indigo"
+  ],
+  [
+   "not purple",
+   "not_purple"
+  ],
+  [
+   "not magenta",
+   "not_magenta"
+  ],
+  [
+   "not pink",
+   "not_pink"
+  ],
+  [
+   "not brown",
+   "not_brown"
+  ],
+  [
+   "not gray",
+   "not_gray"
+  ],
+  [
+   "not black",
+   "not_black"
+  ],
+  [
+   "not white",
+   "not_white"
+  ],
+  [
+   "most recent",
+   "newest"
+  ],
+  [
+   "left of",
+   "left_of"
+  ],
+  [
+   "right of",
+   "right_of"
+  ],
+  [
+   "on top of",
+   "above"
+  ],
+  [
+   "next to",
+   "next_to"
+  ],
+  [
+   "at the top",
+   "top"
+  ],
+  [
+   "at the bottom",
+   "bottom"
+  ],
+  [
+   "on the left",
+   "left_side"
+  ],
+  [
+   "on the right",
+   "right_side"
+  ],
+  [
+   "top left",
+   "top_left"
+  ],
+  [
+   "top right",
+   "top_right"
+  ],
+  [
+   "bottom left",
+   "bottom_left"
+  ],
+  [
+   "bottom right",
+   "bottom_right"
+  ],
+  [
+   "two way",
+   "two_way"
+  ],
+  [
+   "both ways",
+   "two_way"
+  ],
+  [
+   "in a chain",
+   "chain"
+  ],
+  [
+   "one after the other",
+   "chain"
+  ],
+  [
+   "in sequence",
+   "chain"
+  ],
+  [
+   "in order",
+   "chain"
+  ],
+  [
+   "each to the next",
+   "next"
+  ],
+  [
+   "to the next one",
+   "next"
+  ],
+  [
+   "all to each other",
+   "each_other"
+  ],
+  [
+   "every pair",
+   "each_other"
+  ],
+  [
+   "in a row",
+   "horizontally"
+  ],
+  [
+   "in a column",
+   "vertically"
+  ],
+  [
+   "most connections",
+   "mostconnected"
+  ],
+  [
+   "most links",
+   "mostconnected"
+  ],
+  [
+   "fewest connections",
+   "leastconnected"
+  ],
+  [
+   "least connections",
+   "leastconnected"
+  ],
+  [
+   "fewest links",
+   "leastconnected"
+  ]
+ ],
+ "synonyms": {
+  "any": "shape",
+  "node": "shape",
+  "nodes": "shapes",
+  "object": "shape",
+  "objects": "shapes",
+  "thing": "shape",
+  "things": "shapes",
+  "element": "shape",
+  "elements": "shapes",
+  "item": "shape",
+  "items": "shapes",
+  "one": "shape",
+  "ones": "shapes",
+  "dot": "circle",
+  "dots": "circles",
+  "ball": "circle",
+  "balls": "circles",
+  "rect": "rectangle",
+  "rects": "rectangles",
+  "box": "rectangle",
+  "boxes": "rectangles",
+  "block": "rectangle",
+  "blocks": "rectangles",
+  "rhombus": "diamond",
+  "oval": "ellipse",
+  "ovals": "ellipses",
+  "crimson": "red",
+  "scarlet": "red",
+  "amber": "yellow",
+  "golden": "gold",
+  "turquoise": "teal",
+  "aqua": "cyan",
+  "violet": "purple",
+  "lilac": "purple",
+  "fuchsia": "magenta",
+  "rose": "pink",
+  "grey": "gray",
+  "silver": "gray",
+  "minuscule": "tiny",
+  "little": "small",
+  "normal": "medium",
+  "regular": "medium",
+  "average": "medium",
+  "big": "large",
+  "giant": "huge",
+  "enormous": "huge",
+  "massive": "huge",
+  "over": "above",
+  "under": "below",
+  "beneath": "below",
+  "near": "next_to",
+  "beside": "next_to",
+  "middle": "center",
+  "upwards": "up",
+  "downwards": "down",
+  "dash": "dashed",
+  "two-way": "two_way",
+  "bidirectional": "two_way",
+  "double-headed": "two_way",
+  "undirected": "plain",
+  "all": "each_other",
+  "horizontal": "horizontally",
+  "vertical": "vertically",
+  "stack": "column",
+  "larger": "bigger",
+  "largest": "biggest",
+  "tiniest": "smallest",
+  "highest": "topmost",
+  "lowest": "bottommost",
+  "nearest": "closest",
+  "furthest": "farthest"
+ },
+ "rewrites": [],
+ "question_verbs": [],
+ "about": "normalize_real.json: the front end of the VSS world `real`. Mechanical part + the legend's cue words + triggers LEARNED from the training messages (learn_triggers.py). Generated by make_normalizer.py: the synonyms and multi-word expressions include the legend's cue words (legend_cues.json).",
+ "triggers": [
+  {
+   "p": "which shapes can i reach",
+   "prev": "B",
+   "next": "O",
+   "tok": "reach_q",
+   "n": 3,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "which shapes can i reach",
+   "prev": "*",
+   "next": "O",
+   "tok": "reach_q",
+   "n": 3,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "which shapes can i reach",
+   "prev": "B",
+   "next": "*",
+   "tok": "reach_q",
+   "n": 3,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "which shapes can i reach",
+   "prev": "*",
+   "next": "*",
+   "tok": "reach_q",
+   "n": 3,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "can i get from",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "path_q",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "do we have shape",
+   "prev": "B",
+   "next": "O",
+   "tok": "is_there",
+   "n": 4,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "which shapes are next_to",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "neigh_q",
+   "n": 3,
+   "prec": 0.6,
+   "ins": true
+  },
+  {
+   "p": "are there shape loops",
+   "prev": "B",
+   "next": "O",
+   "tok": "cycle_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "do i have shape",
+   "prev": "B",
+   "next": "O",
+   "tok": "is_there",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "each_other new squares are",
+   "prev": "B",
+   "next": "O",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "what can i reach",
+   "prev": "B",
+   "next": "O",
+   "tok": "reach_q",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "can i get from",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "path_q",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "can i get from",
+   "prev": "B",
+   "next": "*",
+   "tok": "path_q",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "do we have shape",
+   "prev": "*",
+   "next": "O",
+   "tok": "is_there",
+   "n": 4,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "do we have shape",
+   "prev": "B",
+   "next": "*",
+   "tok": "is_there",
+   "n": 4,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "which shapes are next_to",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "neigh_q",
+   "n": 3,
+   "prec": 0.6,
+   "ins": true
+  },
+  {
+   "p": "are there shape loops",
+   "prev": "*",
+   "next": "O",
+   "tok": "cycle_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "are there shape loops",
+   "prev": "B",
+   "next": "*",
+   "tok": "cycle_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "do i have shape",
+   "prev": "*",
+   "next": "O",
+   "tok": "is_there",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "do i have shape",
+   "prev": "B",
+   "next": "*",
+   "tok": "is_there",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "each_other new squares are",
+   "prev": "*",
+   "next": "O",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "each_other new squares are",
+   "prev": "B",
+   "next": "*",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "what can i reach",
+   "prev": "*",
+   "next": "O",
+   "tok": "reach_q",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "what can i reach",
+   "prev": "B",
+   "next": "*",
+   "tok": "reach_q",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "can i get from",
+   "prev": "*",
+   "next": "*",
+   "tok": "path_q",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "do we have shape",
+   "prev": "*",
+   "next": "*",
+   "tok": "is_there",
+   "n": 4,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "what can i reach",
+   "prev": "*",
+   "next": "*",
+   "tok": "reach_q",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "are there shape loops",
+   "prev": "*",
+   "next": "*",
+   "tok": "cycle_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "do i have shape",
+   "prev": "*",
+   "next": "*",
+   "tok": "is_there",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "each_other new squares are",
+   "prev": "*",
+   "next": "*",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "which shapes are",
+   "prev": "B",
+   "next": "O",
+   "tok": "which",
+   "n": 47,
+   "prec": 0.64,
+   "ins": true
+  },
+  {
+   "p": "how many links",
+   "prev": "B",
+   "next": "O",
+   "tok": "degree_q",
+   "n": 14,
+   "prec": 1.0
+  },
+  {
+   "p": "is there shape",
+   "prev": "B",
+   "next": "O",
+   "tok": "is_there",
+   "n": 14,
+   "prec": 0.74,
+   "ins": true
+  },
+  {
+   "p": "are there shape",
+   "prev": "B",
+   "next": "O",
+   "tok": "is_there",
+   "n": 9,
+   "prec": 0.69,
+   "ins": true
+  },
+  {
+   "p": "from now on",
+   "prev": "B",
+   "next": "O",
+   "tok": "from_now_on",
+   "n": 7,
+   "prec": 1.0
+  },
+  {
+   "p": "each_other squares are",
+   "prev": "B",
+   "next": "O",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "each_other stars are",
+   "prev": "B",
+   "next": "O",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "how many triangles",
+   "prev": "B",
+   "next": "O",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "is anything next_to",
+   "prev": "B",
+   "next": "THE",
+   "tok": "is_there",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "shape color but",
+   "prev": "NAME",
+   "next": "O",
+   "tok": "is_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "what is above",
+   "prev": "B",
+   "next": "THE",
+   "tok": "which",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "what shape is",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "what_shape",
+   "n": 2,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "which shapes are",
+   "prev": "*",
+   "next": "O",
+   "tok": "which",
+   "n": 47,
+   "prec": 0.64,
+   "ins": true
+  },
+  {
+   "p": "which shapes are",
+   "prev": "B",
+   "next": "*",
+   "tok": "which",
+   "n": 47,
+   "prec": 0.64,
+   "ins": true
+  },
+  {
+   "p": "how many links",
+   "prev": "B",
+   "next": "*",
+   "tok": "degree_q",
+   "n": 15,
+   "prec": 1.0
+  },
+  {
+   "p": "how many links",
+   "prev": "*",
+   "next": "O",
+   "tok": "degree_q",
+   "n": 14,
+   "prec": 1.0
+  },
+  {
+   "p": "is there shape",
+   "prev": "*",
+   "next": "O",
+   "tok": "is_there",
+   "n": 14,
+   "prec": 0.74,
+   "ins": true
+  },
+  {
+   "p": "is there shape",
+   "prev": "B",
+   "next": "*",
+   "tok": "is_there",
+   "n": 14,
+   "prec": 0.74,
+   "ins": true
+  },
+  {
+   "p": "are there shape",
+   "prev": "*",
+   "next": "O",
+   "tok": "is_there",
+   "n": 9,
+   "prec": 0.69,
+   "ins": true
+  },
+  {
+   "p": "are there shape",
+   "prev": "B",
+   "next": "*",
+   "tok": "is_there",
+   "n": 9,
+   "prec": 0.69,
+   "ins": true
+  },
+  {
+   "p": "from now on",
+   "prev": "*",
+   "next": "O",
+   "tok": "from_now_on",
+   "n": 8,
+   "prec": 0.89
+  },
+  {
+   "p": "from now on",
+   "prev": "B",
+   "next": "*",
+   "tok": "from_now_on",
+   "n": 7,
+   "prec": 1.0
+  },
+  {
+   "p": "get rid of",
+   "prev": "B",
+   "next": "*",
+   "tok": "delete",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "each_other squares are",
+   "prev": "*",
+   "next": "O",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "each_other squares are",
+   "prev": "B",
+   "next": "*",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "each_other stars are",
+   "prev": "*",
+   "next": "O",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "each_other stars are",
+   "prev": "B",
+   "next": "*",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "how many triangles",
+   "prev": "B",
+   "next": "*",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "is anything next_to",
+   "prev": "*",
+   "next": "THE",
+   "tok": "is_there",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "is anything next_to",
+   "prev": "B",
+   "next": "*",
+   "tok": "is_there",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "shape color but",
+   "prev": "*",
+   "next": "O",
+   "tok": "is_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "shape color but",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "is_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "what is above",
+   "prev": "*",
+   "next": "THE",
+   "tok": "which",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "what is above",
+   "prev": "B",
+   "next": "*",
+   "tok": "which",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "what shape is",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "what_shape",
+   "n": 2,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "which shapes are",
+   "prev": "*",
+   "next": "*",
+   "tok": "which",
+   "n": 47,
+   "prec": 0.63,
+   "ins": true
+  },
+  {
+   "p": "how many links",
+   "prev": "*",
+   "next": "*",
+   "tok": "degree_q",
+   "n": 15,
+   "prec": 0.94
+  },
+  {
+   "p": "is there shape",
+   "prev": "*",
+   "next": "*",
+   "tok": "is_there",
+   "n": 14,
+   "prec": 0.74,
+   "ins": true
+  },
+  {
+   "p": "are there shape",
+   "prev": "*",
+   "next": "*",
+   "tok": "is_there",
+   "n": 9,
+   "prec": 0.69,
+   "ins": true
+  },
+  {
+   "p": "from now on",
+   "prev": "*",
+   "next": "*",
+   "tok": "from_now_on",
+   "n": 8,
+   "prec": 0.73
+  },
+  {
+   "p": "get rid of",
+   "prev": "*",
+   "next": "*",
+   "tok": "delete",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "each_other squares are",
+   "prev": "*",
+   "next": "*",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "each_other stars are",
+   "prev": "*",
+   "next": "*",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "is anything next_to",
+   "prev": "*",
+   "next": "*",
+   "tok": "is_there",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "shape color but",
+   "prev": "*",
+   "next": "*",
+   "tok": "is_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "what is above",
+   "prev": "*",
+   "next": "*",
+   "tok": "which",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "is there",
+   "prev": "B",
+   "next": "ART",
+   "tok": "path_q",
+   "n": 61,
+   "prec": 0.64
+  },
+  {
+   "p": "bigger than",
+   "prev": "NAME",
+   "next": "NAME",
+   "tok": "is_q",
+   "n": 45,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "connected to",
+   "prev": "NAME",
+   "next": "NAME",
+   "tok": "connected_q",
+   "n": 29,
+   "prec": 1.0
+  },
+  {
+   "p": "reachable from",
+   "prev": "NAME",
+   "next": "NAME",
+   "tok": "path_q",
+   "n": 28,
+   "prec": 0.97
+  },
+  {
+   "p": "bigger than",
+   "prev": "NAME",
+   "next": "THE",
+   "tok": "is_q",
+   "n": 25,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "directly linked",
+   "prev": "NAME",
+   "next": "O",
+   "tok": "connected_q",
+   "n": 24,
+   "prec": 1.0
+  },
+  {
+   "p": "smaller than",
+   "prev": "NAME",
+   "next": "NAME",
+   "tok": "is_q",
+   "n": 24,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "most connected",
+   "prev": "THE",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 22,
+   "prec": 1.0
+  },
+  {
+   "p": "least connected",
+   "prev": "THE",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 16,
+   "prec": 1.0
+  },
+  {
+   "p": "closest to",
+   "prev": "THE",
+   "next": "NAME",
+   "tok": "nearest_q",
+   "n": 15,
+   "prec": 0.71,
+   "ins": true
+  },
+  {
+   "p": "smaller than",
+   "prev": "NAME",
+   "next": "THE",
+   "tok": "is_q",
+   "n": 13,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "most connected",
+   "prev": "THE",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 12,
+   "prec": 0.92
+  },
+  {
+   "p": "farthest from",
+   "prev": "THE",
+   "next": "NAME",
+   "tok": "nearest_q",
+   "n": 11,
+   "prec": 0.65,
+   "ins": true
+  },
+  {
+   "p": "connected to",
+   "prev": "NAME",
+   "next": "THE",
+   "tok": "connected_q",
+   "n": 9,
+   "prec": 1.0
+  },
+  {
+   "p": "directly connected",
+   "prev": "NAME",
+   "next": "O",
+   "tok": "connected_q",
+   "n": 9,
+   "prec": 1.0
+  },
+  {
+   "p": "what color",
+   "prev": "B",
+   "next": "O",
+   "tok": "what_color",
+   "n": 7,
+   "prec": 0.7
+  },
+  {
+   "p": "least connected",
+   "prev": "O",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 5,
+   "prec": 1.0
+  },
+  {
+   "p": "reachable from",
+   "prev": "NAME",
+   "next": "THE",
+   "tok": "path_q",
+   "n": 5,
+   "prec": 1.0
+  },
+  {
+   "p": "bottom right",
+   "prev": "NAME",
+   "next": "B",
+   "tok": "move",
+   "n": 4,
+   "prec": 0.8,
+   "ins": true
+  },
+  {
+   "p": "least connected",
+   "prev": "THE",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "reached from",
+   "prev": "O",
+   "next": "THE",
+   "tok": "path_q",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "should be",
+   "prev": "NAME",
+   "next": "ART",
+   "tok": "make",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "connect to",
+   "prev": "NAME",
+   "next": "NAME",
+   "tok": "connected_q",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "goes in",
+   "prev": "NAME",
+   "next": "THE",
+   "tok": "move",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "on top",
+   "prev": "NAME",
+   "next": "B",
+   "tok": "move",
+   "n": 3,
+   "prec": 0.75,
+   "ins": true
+  },
+  {
+   "p": "top left",
+   "prev": "NAME",
+   "next": "B",
+   "tok": "move",
+   "n": 3,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "what size",
+   "prev": "B",
+   "next": "O",
+   "tok": "how_big",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "bigger than",
+   "prev": "O",
+   "next": "THE",
+   "tok": "is_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "blue circle",
+   "prev": "ART",
+   "next": "O",
+   "tok": "draw",
+   "n": 2,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "bottom left",
+   "prev": "NAME",
+   "next": "B",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "brown square",
+   "prev": "ART",
+   "next": "O",
+   "tok": "draw",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "circles are",
+   "prev": "B",
+   "next": "O",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "close to",
+   "prev": "NAME",
+   "next": "THE",
+   "tok": "is_q",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "connect to",
+   "prev": "PRON",
+   "next": "THE",
+   "tok": "connect",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "diamond is",
+   "prev": "O",
+   "next": "O",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "goes next_to",
+   "prev": "NAME",
+   "next": "THE",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "is at",
+   "prev": "NAME",
+   "next": "THE",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "magenta hexagon",
+   "prev": "ART",
+   "next": "O",
+   "tok": "draw",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "most connected",
+   "prev": "O",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "pointing to",
+   "prev": "O",
+   "next": "THE",
+   "tok": "connect",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "sit next_to",
+   "prev": "NAME",
+   "next": "NAME",
+   "tok": "is_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "smaller than",
+   "prev": "O",
+   "next": "NAME",
+   "tok": "is_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "star is",
+   "prev": "O",
+   "next": "O",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "bigger than",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "is_q",
+   "n": 71,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "is there",
+   "prev": "*",
+   "next": "ART",
+   "tok": "path_q",
+   "n": 61,
+   "prec": 0.64
+  },
+  {
+   "p": "bigger than",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "is_q",
+   "n": 45,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "connected to",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "connected_q",
+   "n": 40,
+   "prec": 1.0
+  },
+  {
+   "p": "reachable from",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "path_q",
+   "n": 38,
+   "prec": 0.97
+  },
+  {
+   "p": "smaller than",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "is_q",
+   "n": 37,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "most connected",
+   "prev": "THE",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 34,
+   "prec": 0.97
+  },
+  {
+   "p": "reachable from",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "path_q",
+   "n": 34,
+   "prec": 0.97
+  },
+  {
+   "p": "connected to",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "connected_q",
+   "n": 33,
+   "prec": 0.87
+  },
+  {
+   "p": "bigger than",
+   "prev": "*",
+   "next": "THE",
+   "tok": "is_q",
+   "n": 27,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "closest to",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "nearest_q",
+   "n": 27,
+   "prec": 0.61,
+   "ins": true
+  },
+  {
+   "p": "smaller than",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "is_q",
+   "n": 26,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "directly linked",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "connected_q",
+   "n": 25,
+   "prec": 1.0
+  },
+  {
+   "p": "directly linked",
+   "prev": "*",
+   "next": "O",
+   "tok": "connected_q",
+   "n": 24,
+   "prec": 1.0
+  },
+  {
+   "p": "most connected",
+   "prev": "*",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 24,
+   "prec": 1.0
+  },
+  {
+   "p": "least connected",
+   "prev": "*",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 21,
+   "prec": 1.0
+  },
+  {
+   "p": "least connected",
+   "prev": "THE",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 20,
+   "prec": 1.0
+  },
+  {
+   "p": "farthest from",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "nearest_q",
+   "n": 14,
+   "prec": 0.61,
+   "ins": true
+  },
+  {
+   "p": "smaller than",
+   "prev": "*",
+   "next": "THE",
+   "tok": "is_q",
+   "n": 13,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "most connected",
+   "prev": "*",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 12,
+   "prec": 0.92
+  },
+  {
+   "p": "connected to",
+   "prev": "*",
+   "next": "THE",
+   "tok": "connected_q",
+   "n": 10,
+   "prec": 0.67
+  },
+  {
+   "p": "directly connected",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "connected_q",
+   "n": 10,
+   "prec": 1.0
+  },
+  {
+   "p": "directly connected",
+   "prev": "*",
+   "next": "O",
+   "tok": "connected_q",
+   "n": 9,
+   "prec": 1.0
+  },
+  {
+   "p": "what color",
+   "prev": "B",
+   "next": "*",
+   "tok": "what_color",
+   "n": 8,
+   "prec": 0.73
+  },
+  {
+   "p": "what color",
+   "prev": "*",
+   "next": "O",
+   "tok": "what_color",
+   "n": 7,
+   "prec": 0.7
+  },
+  {
+   "p": "reachable from",
+   "prev": "*",
+   "next": "THE",
+   "tok": "path_q",
+   "n": 6,
+   "prec": 1.0
+  },
+  {
+   "p": "least connected",
+   "prev": "O",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 5,
+   "prec": 1.0
+  },
+  {
+   "p": "bottom right",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "move",
+   "n": 4,
+   "prec": 0.8,
+   "ins": true
+  },
+  {
+   "p": "least connected",
+   "prev": "*",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "reached from",
+   "prev": "*",
+   "next": "THE",
+   "tok": "path_q",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "should be",
+   "prev": "*",
+   "next": "ART",
+   "tok": "make",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "close to",
+   "prev": "*",
+   "next": "THE",
+   "tok": "is_q",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "connect to",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "connected_q",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "connect to",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "connected_q",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "goes in",
+   "prev": "*",
+   "next": "THE",
+   "tok": "move",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "goes in",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "move",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "on top",
+   "prev": "*",
+   "next": "B",
+   "tok": "move",
+   "n": 3,
+   "prec": 0.75,
+   "ins": true
+  },
+  {
+   "p": "on top",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "move",
+   "n": 3,
+   "prec": 0.75,
+   "ins": true
+  },
+  {
+   "p": "sit next_to",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "is_q",
+   "n": 3,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "top left",
+   "prev": "*",
+   "next": "B",
+   "tok": "move",
+   "n": 3,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "top left",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "move",
+   "n": 3,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "what size",
+   "prev": "*",
+   "next": "O",
+   "tok": "how_big",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "what size",
+   "prev": "B",
+   "next": "*",
+   "tok": "how_big",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "bigger than",
+   "prev": "O",
+   "next": "*",
+   "tok": "is_q",
+   "n": 2,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "bottom left",
+   "prev": "*",
+   "next": "B",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "bottom left",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "brown square",
+   "prev": "*",
+   "next": "O",
+   "tok": "draw",
+   "n": 2,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "brown square",
+   "prev": "ART",
+   "next": "*",
+   "tok": "draw",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "circles are",
+   "prev": "B",
+   "next": "*",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "close to",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "is_q",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "connect to",
+   "prev": "*",
+   "next": "THE",
+   "tok": "connect",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "connect to",
+   "prev": "PRON",
+   "next": "*",
+   "tok": "connect",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "connected to",
+   "prev": "*",
+   "next": "B",
+   "tok": "neigh_q",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "diamond is",
+   "prev": "*",
+   "next": "O",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "diamond is",
+   "prev": "O",
+   "next": "*",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "goes below",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "goes next_to",
+   "prev": "*",
+   "next": "THE",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "goes next_to",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "is at",
+   "prev": "*",
+   "next": "THE",
+   "tok": "move",
+   "n": 2,
+   "prec": 0.67
+  },
+  {
+   "p": "is at",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "line up",
+   "prev": "B",
+   "next": "*",
+   "tok": "arrange",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "magenta hexagon",
+   "prev": "*",
+   "next": "O",
+   "tok": "draw",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "magenta hexagon",
+   "prev": "ART",
+   "next": "*",
+   "tok": "draw",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "most connected",
+   "prev": "O",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "pointing to",
+   "prev": "*",
+   "next": "THE",
+   "tok": "connect",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "pointing to",
+   "prev": "O",
+   "next": "*",
+   "tok": "connect",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "sit next_to",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "is_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "sits in",
+   "prev": "*",
+   "next": "THE",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "smaller than",
+   "prev": "O",
+   "next": "*",
+   "tok": "is_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "star is",
+   "prev": "*",
+   "next": "O",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "star is",
+   "prev": "O",
+   "next": "*",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "bigger than",
+   "prev": "*",
+   "next": "*",
+   "tok": "is_q",
+   "n": 73,
+   "prec": 0.99,
+   "ins": true
+  },
+  {
+   "p": "connected to",
+   "prev": "*",
+   "next": "*",
+   "tok": "connected_q",
+   "n": 48,
+   "prec": 0.79
+  },
+  {
+   "p": "reachable from",
+   "prev": "*",
+   "next": "*",
+   "tok": "path_q",
+   "n": 45,
+   "prec": 0.98
+  },
+  {
+   "p": "smaller than",
+   "prev": "*",
+   "next": "*",
+   "tok": "is_q",
+   "n": 39,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "most connected",
+   "prev": "*",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 36,
+   "prec": 0.97
+  },
+  {
+   "p": "directly linked",
+   "prev": "*",
+   "next": "*",
+   "tok": "connected_q",
+   "n": 25,
+   "prec": 1.0
+  },
+  {
+   "p": "least connected",
+   "prev": "*",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 25,
+   "prec": 1.0
+  },
+  {
+   "p": "directly connected",
+   "prev": "*",
+   "next": "*",
+   "tok": "connected_q",
+   "n": 10,
+   "prec": 1.0
+  },
+  {
+   "p": "what color",
+   "prev": "*",
+   "next": "*",
+   "tok": "what_color",
+   "n": 8,
+   "prec": 0.73
+  },
+  {
+   "p": "close to",
+   "prev": "*",
+   "next": "*",
+   "tok": "is_q",
+   "n": 3,
+   "prec": 0.75
+  },
+  {
+   "p": "goes in",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "on top",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 3,
+   "prec": 0.75,
+   "ins": true
+  },
+  {
+   "p": "sit next_to",
+   "prev": "*",
+   "next": "*",
+   "tok": "is_q",
+   "n": 3,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "top left",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 3,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "what size",
+   "prev": "*",
+   "next": "*",
+   "tok": "how_big",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "bottom left",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "diamond is",
+   "prev": "*",
+   "next": "*",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "goes below",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "goes next_to",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "is at",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 2,
+   "prec": 0.67
+  },
+  {
+   "p": "line up",
+   "prev": "*",
+   "next": "*",
+   "tok": "arrange",
+   "n": 2,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "magenta hexagon",
+   "prev": "*",
+   "next": "*",
+   "tok": "draw",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "pointing to",
+   "prev": "*",
+   "next": "*",
+   "tok": "connect",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "sits in",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "star is",
+   "prev": "*",
+   "next": "*",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "connect",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "connect",
+   "n": 523,
+   "prec": 1.0
+  },
+  {
+   "p": "make",
+   "prev": "B",
+   "next": "THE",
+   "tok": "make",
+   "n": 352,
+   "prec": 1.0
+  },
+  {
+   "p": "set",
+   "prev": "B",
+   "next": "THE",
+   "tok": "make",
+   "n": 207,
+   "prec": 1.0
+  },
+  {
+   "p": "move",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "move",
+   "n": 151,
+   "prec": 1.0
+  },
+  {
+   "p": "put",
+   "prev": "B",
+   "next": "THE",
+   "tok": "move",
+   "n": 131,
+   "prec": 0.92
+  },
+  {
+   "p": "create",
+   "prev": "B",
+   "next": "ART",
+   "tok": "draw",
+   "n": 125,
+   "prec": 1.0
+  },
+  {
+   "p": "put",
+   "prev": "B",
+   "next": "ART",
+   "tok": "draw",
+   "n": 107,
+   "prec": 0.99
+  },
+  {
+   "p": "move",
+   "prev": "B",
+   "next": "THE",
+   "tok": "move",
+   "n": 84,
+   "prec": 1.0
+  },
+  {
+   "p": "make",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "make",
+   "n": 83,
+   "prec": 1.0
+  },
+  {
+   "p": "is",
+   "prev": "NAME",
+   "next": "O",
+   "tok": "is",
+   "n": 82,
+   "prec": 0.81
+  },
+  {
+   "p": "duplicate",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "duplicate",
+   "n": 67,
+   "prec": 1.0
+  },
+  {
+   "p": "put",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "move",
+   "n": 62,
+   "prec": 0.91
+  },
+  {
+   "p": "rename",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "rename",
+   "n": 59,
+   "prec": 1.0
+  },
+  {
+   "p": "link",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "connect",
+   "n": 58,
+   "prec": 1.0
+  },
+  {
+   "p": "add",
+   "prev": "B",
+   "next": "ART",
+   "tok": "draw",
+   "n": 50,
+   "prec": 1.0
+  },
+  {
+   "p": "in",
+   "prev": "NAME",
+   "next": "THE",
+   "tok": "move",
+   "n": 47,
+   "prec": 0.82
+  },
+  {
+   "p": "arrange",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "arrange",
+   "n": 44,
+   "prec": 1.0
+  },
+  {
+   "p": "delete",
+   "prev": "B",
+   "next": "THE",
+   "tok": "delete",
+   "n": 38,
+   "prec": 0.79
+  },
+  {
+   "p": "connect",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "connect",
+   "n": 36,
+   "prec": 0.9
+  },
+  {
+   "p": "make",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "make",
+   "n": 36,
+   "prec": 0.95
+  },
+  {
+   "p": "align",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "align",
+   "n": 31,
+   "prec": 1.0
+  },
+  {
+   "p": "biggest",
+   "prev": "THE",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 31,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "swap",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "swap",
+   "n": 30,
+   "prec": 0.91
+  },
+  {
+   "p": "bottom",
+   "prev": "NAME",
+   "next": "B",
+   "tok": "move",
+   "n": 28,
+   "prec": 0.65,
+   "ins": true
+  },
+  {
+   "p": "connect",
+   "prev": "O",
+   "next": "NAME",
+   "tok": "connect",
+   "n": 28,
+   "prec": 0.93
+  },
+  {
+   "p": "disconnect",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "disconnect",
+   "n": 26,
+   "prec": 1.0
+  },
+  {
+   "p": "leftmost",
+   "prev": "THE",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 26,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "describe",
+   "prev": "B",
+   "next": "THE",
+   "tok": "describe",
+   "n": 25,
+   "prec": 1.0
+  },
+  {
+   "p": "forget",
+   "prev": "B",
+   "next": "THE",
+   "tok": "forget",
+   "n": 25,
+   "prec": 1.0
+  },
+  {
+   "p": "smallest",
+   "prev": "THE",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 25,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "closest",
+   "prev": "O",
+   "next": "O",
+   "tok": "nearest_q",
+   "n": 24,
+   "prec": 0.63,
+   "ins": true
+  },
+  {
+   "p": "rightmost",
+   "prev": "THE",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 24,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "topmost",
+   "prev": "THE",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 24,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "bottommost",
+   "prev": "THE",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 23,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "set",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "make",
+   "n": 23,
+   "prec": 1.0
+  },
+  {
+   "p": "make",
+   "prev": "B",
+   "next": "O",
+   "tok": "make",
+   "n": 22,
+   "prec": 0.81
+  },
+  {
+   "p": "chain",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "connect",
+   "n": 21,
+   "prec": 0.91,
+   "ins": true
+  },
+  {
+   "p": "count",
+   "prev": "B",
+   "next": "THE",
+   "tok": "how_many",
+   "n": 21,
+   "prec": 1.0
+  },
+  {
+   "p": "draw",
+   "prev": "B",
+   "next": "ART",
+   "tok": "draw",
+   "n": 21,
+   "prec": 1.0
+  },
+  {
+   "p": "undo",
+   "prev": "B",
+   "next": "THE",
+   "tok": "undo",
+   "n": 21,
+   "prec": 0.91
+  },
+  {
+   "p": "undo",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "undo",
+   "n": 20,
+   "prec": 1.0
+  },
+  {
+   "p": "degree",
+   "prev": "THE",
+   "next": "O",
+   "tok": "degree_q",
+   "n": 19,
+   "prec": 0.83
+  },
+  {
+   "p": "colour",
+   "prev": "B",
+   "next": "THE",
+   "tok": "make",
+   "n": 18,
+   "prec": 1.0
+  },
+  {
+   "p": "connect",
+   "prev": "B",
+   "next": "O",
+   "tok": "connect",
+   "n": 18,
+   "prec": 0.95
+  },
+  {
+   "p": "is",
+   "prev": "NAME",
+   "next": "ART",
+   "tok": "is",
+   "n": 17,
+   "prec": 0.94
+  },
+  {
+   "p": "label",
+   "prev": "B",
+   "next": "THE",
+   "tok": "label",
+   "n": 16,
+   "prec": 1.0
+  },
+  {
+   "p": "rename",
+   "prev": "B",
+   "next": "THE",
+   "tok": "rename",
+   "n": 16,
+   "prec": 1.0
+  },
+  {
+   "p": "biggest",
+   "prev": "THE",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 15,
+   "prec": 0.83,
+   "ins": true
+  },
+  {
+   "p": "describe",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "describe",
+   "n": 15,
+   "prec": 1.0
+  },
+  {
+   "p": "leastconnected",
+   "prev": "THE",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 15,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "mostconnected",
+   "prev": "THE",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 15,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "cycle",
+   "prev": "ART",
+   "next": "B",
+   "tok": "cycle_q",
+   "n": 14,
+   "prec": 1.0
+  },
+  {
+   "p": "leftmost",
+   "prev": "THE",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 14,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "right_side",
+   "prev": "NAME",
+   "next": "B",
+   "tok": "move",
+   "n": 14,
+   "prec": 0.93,
+   "ins": true
+  },
+  {
+   "p": "shrink",
+   "prev": "B",
+   "next": "THE",
+   "tok": "resize",
+   "n": 14,
+   "prec": 1.0
+  },
+  {
+   "p": "topmost",
+   "prev": "THE",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 14,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "distribute",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "distribute",
+   "n": 13,
+   "prec": 1.0
+  },
+  {
+   "p": "duplicate",
+   "prev": "B",
+   "next": "THE",
+   "tok": "duplicate",
+   "n": 13,
+   "prec": 1.0
+  },
+  {
+   "p": "enlarge",
+   "prev": "B",
+   "next": "THE",
+   "tok": "resize",
+   "n": 12,
+   "prec": 1.0
+  },
+  {
+   "p": "neighbors",
+   "prev": "THE",
+   "next": "O",
+   "tok": "neigh_q",
+   "n": 12,
+   "prec": 0.92
+  },
+  {
+   "p": "link",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "connect",
+   "n": 11,
+   "prec": 0.73
+  },
+  {
+   "p": "linked",
+   "prev": "NAME",
+   "next": "B",
+   "tok": "connected_q",
+   "n": 11,
+   "prec": 1.0
+  },
+  {
+   "p": "put",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "move",
+   "n": 11,
+   "prec": 0.61
+  },
+  {
+   "p": "redo",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "redo",
+   "n": 11,
+   "prec": 1.0
+  },
+  {
+   "p": "redo",
+   "prev": "B",
+   "next": "O",
+   "tok": "redo",
+   "n": 11,
+   "prec": 1.0
+  },
+  {
+   "p": "rightmost",
+   "prev": "THE",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 11,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "chain",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "connect",
+   "n": 10,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "label",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "label",
+   "n": 10,
+   "prec": 1.0
+  },
+  {
+   "p": "left_side",
+   "prev": "NAME",
+   "next": "B",
+   "tok": "move",
+   "n": 10,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "remove",
+   "prev": "B",
+   "next": "THE",
+   "tok": "disconnect",
+   "n": 10,
+   "prec": 0.91
+  },
+  {
+   "p": "cycle",
+   "prev": "O",
+   "next": "B",
+   "tok": "cycle_q",
+   "n": 9,
+   "prec": 1.0
+  },
+  {
+   "p": "place",
+   "prev": "B",
+   "next": "ART",
+   "tok": "draw",
+   "n": 9,
+   "prec": 1.0
+  },
+  {
+   "p": "resize",
+   "prev": "B",
+   "next": "THE",
+   "tok": "resize",
+   "n": 9,
+   "prec": 1.0
+  },
+  {
+   "p": "rules",
+   "prev": "THE",
+   "next": "O",
+   "tok": "which",
+   "n": 9,
+   "prec": 0.64
+  },
+  {
+   "p": "align",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "align",
+   "n": 8,
+   "prec": 1.0
+  },
+  {
+   "p": "arrange",
+   "prev": "B",
+   "next": "THE",
+   "tok": "arrange",
+   "n": 8,
+   "prec": 0.8
+  },
+  {
+   "p": "farthest",
+   "prev": "O",
+   "next": "O",
+   "tok": "nearest_q",
+   "n": 8,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "neighbors",
+   "prev": "NAME",
+   "next": "B",
+   "tok": "neigh_q",
+   "n": 8,
+   "prec": 1.0
+  },
+  {
+   "p": "redo",
+   "prev": "B",
+   "next": "THE",
+   "tok": "redo",
+   "n": 8,
+   "prec": 1.0
+  },
+  {
+   "p": "set",
+   "prev": "B",
+   "next": "O",
+   "tok": "make",
+   "n": 8,
+   "prec": 0.89
+  },
+  {
+   "p": "swap",
+   "prev": "B",
+   "next": "THE",
+   "tok": "swap",
+   "n": 8,
+   "prec": 1.0
+  },
+  {
+   "p": "are",
+   "prev": "NAME",
+   "next": "O",
+   "tok": "is",
+   "n": 7,
+   "prec": 0.7
+  },
+  {
+   "p": "colour",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "make",
+   "n": 7,
+   "prec": 1.0
+  },
+  {
+   "p": "cycle",
+   "prev": "ART",
+   "next": "O",
+   "tok": "cycle_q",
+   "n": 7,
+   "prec": 0.88
+  },
+  {
+   "p": "delete",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "delete",
+   "n": 7,
+   "prec": 0.88
+  },
+  {
+   "p": "enlarge",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "resize",
+   "n": 7,
+   "prec": 1.0
+  },
+  {
+   "p": "forget",
+   "prev": "B",
+   "next": "O",
+   "tok": "forget",
+   "n": 7,
+   "prec": 1.0
+  },
+  {
+   "p": "list",
+   "prev": "B",
+   "next": "THE",
+   "tok": "which",
+   "n": 7,
+   "prec": 0.88
+  },
+  {
+   "p": "to",
+   "prev": "PRON",
+   "next": "THE",
+   "tok": "bring",
+   "n": 7,
+   "prec": 0.64
+  },
+  {
+   "p": "arrange",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "arrange",
+   "n": 6,
+   "prec": 1.0
+  },
+  {
+   "p": "arrange",
+   "prev": "B",
+   "next": "O",
+   "tok": "arrange",
+   "n": 6,
+   "prec": 1.0
+  },
+  {
+   "p": "chain",
+   "prev": "B",
+   "next": "O",
+   "tok": "connect",
+   "n": 6,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "connect",
+   "prev": "B",
+   "next": "THE",
+   "tok": "connect",
+   "n": 6,
+   "prec": 1.0
+  },
+  {
+   "p": "link",
+   "prev": "B",
+   "next": "THE",
+   "tok": "connect",
+   "n": 6,
+   "prec": 1.0
+  },
+  {
+   "p": "right_of",
+   "prev": "NAME",
+   "next": "THE",
+   "tok": "move",
+   "n": 6,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "topmost",
+   "prev": "O",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 6,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "where",
+   "prev": "B",
+   "next": "O",
+   "tok": "where_is",
+   "n": 6,
+   "prec": 1.0
+  },
+  {
+   "p": "above",
+   "prev": "NAME",
+   "next": "PRON",
+   "tok": "move",
+   "n": 5,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "below",
+   "prev": "NAME",
+   "next": "B",
+   "tok": "move",
+   "n": 5,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "bottommost",
+   "prev": "O",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 5,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "color",
+   "prev": "B",
+   "next": "THE",
+   "tok": "make",
+   "n": 5,
+   "prec": 1.0
+  },
+  {
+   "p": "count",
+   "prev": "B",
+   "next": "O",
+   "tok": "how_many",
+   "n": 5,
+   "prec": 0.83
+  },
+  {
+   "p": "distribute",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "distribute",
+   "n": 5,
+   "prec": 1.0
+  },
+  {
+   "p": "enlarge",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "resize",
+   "n": 5,
+   "prec": 1.0
+  },
+  {
+   "p": "forget",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "forget",
+   "n": 5,
+   "prec": 1.0
+  },
+  {
+   "p": "leftmost",
+   "prev": "O",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 5,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "link",
+   "prev": "B",
+   "next": "O",
+   "tok": "connect",
+   "n": 5,
+   "prec": 1.0
+  },
+  {
+   "p": "list",
+   "prev": "B",
+   "next": "O",
+   "tok": "which",
+   "n": 5,
+   "prec": 0.71
+  },
+  {
+   "p": "make",
+   "prev": "B",
+   "next": "ART",
+   "tok": "draw",
+   "n": 5,
+   "prec": 1.0
+  },
+  {
+   "p": "place",
+   "prev": "B",
+   "next": "THE",
+   "tok": "move",
+   "n": 5,
+   "prec": 1.0
+  },
+  {
+   "p": "smallest",
+   "prev": "O",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 5,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "align",
+   "prev": "B",
+   "next": "THE",
+   "tok": "align",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "bottommost",
+   "prev": "THE",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 4,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "chained",
+   "prev": "O",
+   "next": "B",
+   "tok": "connect",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "degree",
+   "prev": "NAME",
+   "next": "B",
+   "tok": "degree_q",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "distribute",
+   "prev": "B",
+   "next": "THE",
+   "tok": "distribute",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "farthest",
+   "prev": "THE",
+   "next": "B",
+   "tok": "nearest_q",
+   "n": 4,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "huge",
+   "prev": "B",
+   "next": "O",
+   "tok": "make",
+   "n": 4,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "join",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "connect",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "rightmost",
+   "prev": "B",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 4,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "smallest",
+   "prev": "THE",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 4,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "star",
+   "prev": "ART",
+   "next": "O",
+   "tok": "draw",
+   "n": 4,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "turn",
+   "prev": "B",
+   "next": "THE",
+   "tok": "make",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "another",
+   "prev": "B",
+   "next": "O",
+   "tok": "draw",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "call",
+   "prev": "B",
+   "next": "THE",
+   "tok": "rename",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "chain",
+   "prev": "O",
+   "next": "PRON",
+   "tok": "connect",
+   "n": 3,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "chained",
+   "prev": "O",
+   "next": "O",
+   "tok": "connect",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "check",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "is_q",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "distributed",
+   "prev": "B",
+   "next": "B",
+   "tok": "distribute",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "does",
+   "prev": "B",
+   "next": "ART",
+   "tok": "is_there",
+   "n": 3,
+   "prec": 0.6
+  },
+  {
+   "p": "fewest",
+   "prev": "THE",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "join",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "connect",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "link",
+   "prev": "O",
+   "next": "NAME",
+   "tok": "connect",
+   "n": 3,
+   "prec": 0.75
+  },
+  {
+   "p": "next_to",
+   "prev": "O",
+   "next": "PRON",
+   "tok": "move",
+   "n": 3,
+   "prec": 0.75,
+   "ins": true
+  },
+  {
+   "p": "redo",
+   "prev": "B",
+   "next": "B",
+   "tok": "redo",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "rightmost",
+   "prev": "O",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 3,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "shrink",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "resize",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "shrink",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "resize",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "shrunk",
+   "prev": "O",
+   "next": "B",
+   "tok": "resize",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "above",
+   "prev": "NAME",
+   "next": "B",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "align",
+   "prev": "B",
+   "next": "O",
+   "tok": "align",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "anything",
+   "prev": "O",
+   "next": "PRON",
+   "tok": "is_there",
+   "n": 2,
+   "prec": 0.67
+  },
+  {
+   "p": "below",
+   "prev": "O",
+   "next": "PRON",
+   "tok": "move",
+   "n": 2,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "biggest",
+   "prev": "O",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "closest",
+   "prev": "THE",
+   "next": "B",
+   "tok": "nearest_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "color",
+   "prev": "O",
+   "next": "B",
+   "tok": "what_color",
+   "n": 2,
+   "prec": 0.67
+  },
+  {
+   "p": "color",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "make",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "column",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "arrange",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "column",
+   "prev": "B",
+   "next": "THE",
+   "tok": "arrange",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "connected",
+   "prev": "NAME",
+   "next": "B",
+   "tok": "connected_q",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "count",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "cycle",
+   "prev": "THE",
+   "next": "O",
+   "tok": "cycle_q",
+   "n": 2,
+   "prec": 0.67
+  },
+  {
+   "p": "describe",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "describe",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "distribute",
+   "prev": "B",
+   "next": "O",
+   "tok": "distribute",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "distributed",
+   "prev": "O",
+   "next": "B",
+   "tok": "distribute",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "farthest",
+   "prev": "O",
+   "next": "B",
+   "tok": "nearest_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "forget",
+   "prev": "O",
+   "next": "THE",
+   "tok": "forget",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "have",
+   "prev": "NAME",
+   "next": "ART",
+   "tok": "connected_q",
+   "n": 2,
+   "prec": 0.67
+  },
+  {
+   "p": "hook",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "connect",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "large",
+   "prev": "B",
+   "next": "O",
+   "tok": "make",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "left_of",
+   "prev": "O",
+   "next": "NAME",
+   "tok": "move",
+   "n": 2,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "leftmost",
+   "prev": "B",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "list",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "which",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "loop",
+   "prev": "ART",
+   "next": "B",
+   "tok": "cycle_q",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "most",
+   "prev": "THE",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "mostconnected",
+   "prev": "THE",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "move",
+   "prev": "B",
+   "next": "O",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "next_to",
+   "prev": "NAME",
+   "next": "PRON",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "reach",
+   "prev": "O",
+   "next": "NAME",
+   "tok": "path_q",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "rename",
+   "prev": "B",
+   "next": "PRON",
+   "tok": "rename",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "right_side",
+   "prev": "O",
+   "next": "B",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "slap",
+   "prev": "O",
+   "next": "ART",
+   "tok": "draw",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "slide",
+   "prev": "B",
+   "next": "THE",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "smallest",
+   "prev": "B",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "spaced",
+   "prev": "O",
+   "next": "B",
+   "tok": "distribute",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "turn",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "make",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "undo",
+   "prev": "B",
+   "next": "O",
+   "tok": "undo",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "connect",
+   "prev": "B",
+   "next": "*",
+   "tok": "connect",
+   "n": 583,
+   "prec": 0.99
+  },
+  {
+   "p": "connect",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "connect",
+   "n": 551,
+   "prec": 0.99
+  },
+  {
+   "p": "make",
+   "prev": "B",
+   "next": "*",
+   "tok": "make",
+   "n": 498,
+   "prec": 0.98
+  },
+  {
+   "p": "make",
+   "prev": "*",
+   "next": "THE",
+   "tok": "make",
+   "n": 353,
+   "prec": 0.99
+  },
+  {
+   "p": "move",
+   "prev": "B",
+   "next": "*",
+   "tok": "move",
+   "n": 238,
+   "prec": 1.0
+  },
+  {
+   "p": "set",
+   "prev": "B",
+   "next": "*",
+   "tok": "make",
+   "n": 238,
+   "prec": 1.0
+  },
+  {
+   "p": "set",
+   "prev": "*",
+   "next": "THE",
+   "tok": "make",
+   "n": 207,
+   "prec": 1.0
+  },
+  {
+   "p": "move",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "move",
+   "n": 152,
+   "prec": 1.0
+  },
+  {
+   "p": "put",
+   "prev": "*",
+   "next": "THE",
+   "tok": "move",
+   "n": 131,
+   "prec": 0.92
+  },
+  {
+   "p": "create",
+   "prev": "*",
+   "next": "ART",
+   "tok": "draw",
+   "n": 125,
+   "prec": 1.0
+  },
+  {
+   "p": "create",
+   "prev": "B",
+   "next": "*",
+   "tok": "draw",
+   "n": 125,
+   "prec": 1.0
+  },
+  {
+   "p": "put",
+   "prev": "*",
+   "next": "ART",
+   "tok": "draw",
+   "n": 107,
+   "prec": 0.99
+  },
+  {
+   "p": "is",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "is",
+   "n": 101,
+   "prec": 0.81
+  },
+  {
+   "p": "move",
+   "prev": "*",
+   "next": "THE",
+   "tok": "move",
+   "n": 84,
+   "prec": 1.0
+  },
+  {
+   "p": "make",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "make",
+   "n": 83,
+   "prec": 1.0
+  },
+  {
+   "p": "duplicate",
+   "prev": "B",
+   "next": "*",
+   "tok": "duplicate",
+   "n": 81,
+   "prec": 1.0
+  },
+  {
+   "p": "link",
+   "prev": "B",
+   "next": "*",
+   "tok": "connect",
+   "n": 80,
+   "prec": 0.95
+  },
+  {
+   "p": "rename",
+   "prev": "B",
+   "next": "*",
+   "tok": "rename",
+   "n": 77,
+   "prec": 1.0
+  },
+  {
+   "p": "duplicate",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "duplicate",
+   "n": 67,
+   "prec": 1.0
+  },
+  {
+   "p": "arrange",
+   "prev": "B",
+   "next": "*",
+   "tok": "arrange",
+   "n": 64,
+   "prec": 0.97
+  },
+  {
+   "p": "put",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "move",
+   "n": 62,
+   "prec": 0.91
+  },
+  {
+   "p": "link",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "connect",
+   "n": 61,
+   "prec": 0.98
+  },
+  {
+   "p": "rename",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "rename",
+   "n": 59,
+   "prec": 1.0
+  },
+  {
+   "p": "add",
+   "prev": "*",
+   "next": "ART",
+   "tok": "draw",
+   "n": 50,
+   "prec": 1.0
+  },
+  {
+   "p": "delete",
+   "prev": "B",
+   "next": "*",
+   "tok": "delete",
+   "n": 50,
+   "prec": 0.78
+  },
+  {
+   "p": "in",
+   "prev": "*",
+   "next": "THE",
+   "tok": "move",
+   "n": 50,
+   "prec": 0.6
+  },
+  {
+   "p": "in",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "move",
+   "n": 47,
+   "prec": 0.62
+  },
+  {
+   "p": "biggest",
+   "prev": "THE",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 46,
+   "prec": 0.94,
+   "ins": true
+  },
+  {
+   "p": "align",
+   "prev": "B",
+   "next": "*",
+   "tok": "align",
+   "n": 45,
+   "prec": 1.0
+  },
+  {
+   "p": "arrange",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "arrange",
+   "n": 44,
+   "prec": 1.0
+  },
+  {
+   "p": "undo",
+   "prev": "B",
+   "next": "*",
+   "tok": "undo",
+   "n": 44,
+   "prec": 0.96
+  },
+  {
+   "p": "describe",
+   "prev": "B",
+   "next": "*",
+   "tok": "describe",
+   "n": 43,
+   "prec": 1.0
+  },
+  {
+   "p": "leftmost",
+   "prev": "THE",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 40,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "delete",
+   "prev": "*",
+   "next": "THE",
+   "tok": "delete",
+   "n": 39,
+   "prec": 0.78
+  },
+  {
+   "p": "swap",
+   "prev": "B",
+   "next": "*",
+   "tok": "swap",
+   "n": 39,
+   "prec": 0.93
+  },
+  {
+   "p": "chain",
+   "prev": "B",
+   "next": "*",
+   "tok": "connect",
+   "n": 38,
+   "prec": 0.95,
+   "ins": true
+  },
+  {
+   "p": "topmost",
+   "prev": "THE",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 38,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "connect",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "connect",
+   "n": 37,
+   "prec": 0.88
+  },
+  {
+   "p": "forget",
+   "prev": "B",
+   "next": "*",
+   "tok": "forget",
+   "n": 37,
+   "prec": 1.0
+  },
+  {
+   "p": "make",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "make",
+   "n": 36,
+   "prec": 0.9
+  },
+  {
+   "p": "rightmost",
+   "prev": "THE",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 35,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "biggest",
+   "prev": "*",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 34,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "leftmost",
+   "prev": "*",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 33,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "redo",
+   "prev": "B",
+   "next": "*",
+   "tok": "redo",
+   "n": 33,
+   "prec": 1.0
+  },
+  {
+   "p": "smallest",
+   "prev": "*",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 32,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "align",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "align",
+   "n": 31,
+   "prec": 1.0
+  },
+  {
+   "p": "rightmost",
+   "prev": "*",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 31,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "topmost",
+   "prev": "*",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 31,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "connect",
+   "prev": "O",
+   "next": "*",
+   "tok": "connect",
+   "n": 30,
+   "prec": 0.83
+  },
+  {
+   "p": "swap",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "swap",
+   "n": 30,
+   "prec": 0.88
+  },
+  {
+   "p": "smallest",
+   "prev": "THE",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 29,
+   "prec": 0.94,
+   "ins": true
+  },
+  {
+   "p": "bottommost",
+   "prev": "*",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 28,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "count",
+   "prev": "B",
+   "next": "*",
+   "tok": "how_many",
+   "n": 28,
+   "prec": 0.97
+  },
+  {
+   "p": "disconnect",
+   "prev": "B",
+   "next": "*",
+   "tok": "disconnect",
+   "n": 28,
+   "prec": 1.0
+  },
+  {
+   "p": "bottommost",
+   "prev": "THE",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 27,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "colour",
+   "prev": "B",
+   "next": "*",
+   "tok": "make",
+   "n": 27,
+   "prec": 1.0
+  },
+  {
+   "p": "disconnect",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "disconnect",
+   "n": 27,
+   "prec": 1.0
+  },
+  {
+   "p": "forget",
+   "prev": "*",
+   "next": "THE",
+   "tok": "forget",
+   "n": 27,
+   "prec": 1.0
+  },
+  {
+   "p": "label",
+   "prev": "B",
+   "next": "*",
+   "tok": "label",
+   "n": 27,
+   "prec": 0.96
+  },
+  {
+   "p": "describe",
+   "prev": "*",
+   "next": "THE",
+   "tok": "describe",
+   "n": 26,
+   "prec": 1.0
+  },
+  {
+   "p": "distribute",
+   "prev": "B",
+   "next": "*",
+   "tok": "distribute",
+   "n": 25,
+   "prec": 1.0
+  },
+  {
+   "p": "enlarge",
+   "prev": "B",
+   "next": "*",
+   "tok": "resize",
+   "n": 25,
+   "prec": 1.0
+  },
+  {
+   "p": "chain",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "connect",
+   "n": 24,
+   "prec": 0.92,
+   "ins": true
+  },
+  {
+   "p": "closest",
+   "prev": "O",
+   "next": "*",
+   "tok": "nearest_q",
+   "n": 24,
+   "prec": 0.62,
+   "ins": true
+  },
+  {
+   "p": "cycle",
+   "prev": "*",
+   "next": "B",
+   "tok": "cycle_q",
+   "n": 23,
+   "prec": 1.0
+  },
+  {
+   "p": "set",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "make",
+   "n": 23,
+   "prec": 1.0
+  },
+  {
+   "p": "draw",
+   "prev": "B",
+   "next": "*",
+   "tok": "draw",
+   "n": 22,
+   "prec": 0.92
+  },
+  {
+   "p": "make",
+   "prev": "*",
+   "next": "O",
+   "tok": "make",
+   "n": 22,
+   "prec": 0.73
+  },
+  {
+   "p": "rules",
+   "prev": "THE",
+   "next": "*",
+   "tok": "which",
+   "n": 22,
+   "prec": 0.61
+  },
+  {
+   "p": "count",
+   "prev": "*",
+   "next": "THE",
+   "tok": "how_many",
+   "n": 21,
+   "prec": 1.0
+  },
+  {
+   "p": "cycle",
+   "prev": "ART",
+   "next": "*",
+   "tok": "cycle_q",
+   "n": 21,
+   "prec": 0.95
+  },
+  {
+   "p": "draw",
+   "prev": "*",
+   "next": "ART",
+   "tok": "draw",
+   "n": 21,
+   "prec": 0.95
+  },
+  {
+   "p": "undo",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "undo",
+   "n": 21,
+   "prec": 0.95
+  },
+  {
+   "p": "undo",
+   "prev": "*",
+   "next": "THE",
+   "tok": "undo",
+   "n": 21,
+   "prec": 0.91
+  },
+  {
+   "p": "shrink",
+   "prev": "B",
+   "next": "*",
+   "tok": "resize",
+   "n": 20,
+   "prec": 1.0
+  },
+  {
+   "p": "connect",
+   "prev": "*",
+   "next": "O",
+   "tok": "connect",
+   "n": 19,
+   "prec": 0.66
+  },
+  {
+   "p": "degree",
+   "prev": "*",
+   "next": "O",
+   "tok": "degree_q",
+   "n": 19,
+   "prec": 0.83
+  },
+  {
+   "p": "degree",
+   "prev": "THE",
+   "next": "*",
+   "tok": "degree_q",
+   "n": 19,
+   "prec": 0.83
+  },
+  {
+   "p": "colour",
+   "prev": "*",
+   "next": "THE",
+   "tok": "make",
+   "n": 18,
+   "prec": 1.0
+  },
+  {
+   "p": "label",
+   "prev": "*",
+   "next": "THE",
+   "tok": "label",
+   "n": 17,
+   "prec": 0.89
+  },
+  {
+   "p": "mostconnected",
+   "prev": "THE",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 17,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "leastconnected",
+   "prev": "THE",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 16,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "mostconnected",
+   "prev": "*",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 16,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "rename",
+   "prev": "*",
+   "next": "THE",
+   "tok": "rename",
+   "n": 16,
+   "prec": 1.0
+  },
+  {
+   "p": "right_side",
+   "prev": "*",
+   "next": "B",
+   "tok": "move",
+   "n": 16,
+   "prec": 0.94,
+   "ins": true
+  },
+  {
+   "p": "biggest",
+   "prev": "*",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 15,
+   "prec": 0.79,
+   "ins": true
+  },
+  {
+   "p": "describe",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "describe",
+   "n": 15,
+   "prec": 1.0
+  },
+  {
+   "p": "leastconnected",
+   "prev": "*",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 15,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "leftmost",
+   "prev": "*",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 15,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "list",
+   "prev": "B",
+   "next": "*",
+   "tok": "which",
+   "n": 14,
+   "prec": 0.82
+  },
+  {
+   "p": "right_side",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "move",
+   "n": 14,
+   "prec": 0.88,
+   "ins": true
+  },
+  {
+   "p": "shrink",
+   "prev": "*",
+   "next": "THE",
+   "tok": "resize",
+   "n": 14,
+   "prec": 1.0
+  },
+  {
+   "p": "topmost",
+   "prev": "*",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 14,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "distribute",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "distribute",
+   "n": 13,
+   "prec": 1.0
+  },
+  {
+   "p": "duplicate",
+   "prev": "*",
+   "next": "THE",
+   "tok": "duplicate",
+   "n": 13,
+   "prec": 1.0
+  },
+  {
+   "p": "neighbors",
+   "prev": "*",
+   "next": "O",
+   "tok": "neigh_q",
+   "n": 13,
+   "prec": 0.93
+  },
+  {
+   "p": "cycle",
+   "prev": "*",
+   "next": "O",
+   "tok": "cycle_q",
+   "n": 12,
+   "prec": 0.63
+  },
+  {
+   "p": "cycle",
+   "prev": "O",
+   "next": "*",
+   "tok": "cycle_q",
+   "n": 12,
+   "prec": 0.75
+  },
+  {
+   "p": "enlarge",
+   "prev": "*",
+   "next": "THE",
+   "tok": "resize",
+   "n": 12,
+   "prec": 1.0
+  },
+  {
+   "p": "neighbors",
+   "prev": "THE",
+   "next": "*",
+   "tok": "neigh_q",
+   "n": 12,
+   "prec": 0.92
+  },
+  {
+   "p": "link",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "connect",
+   "n": 11,
+   "prec": 0.73
+  },
+  {
+   "p": "linked",
+   "prev": "*",
+   "next": "B",
+   "tok": "connected_q",
+   "n": 11,
+   "prec": 0.85
+  },
+  {
+   "p": "linked",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "connected_q",
+   "n": 11,
+   "prec": 0.73
+  },
+  {
+   "p": "redo",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "redo",
+   "n": 11,
+   "prec": 1.0
+  },
+  {
+   "p": "redo",
+   "prev": "*",
+   "next": "O",
+   "tok": "redo",
+   "n": 11,
+   "prec": 1.0
+  },
+  {
+   "p": "rightmost",
+   "prev": "*",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 11,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "chain",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "connect",
+   "n": 10,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "farthest",
+   "prev": "O",
+   "next": "*",
+   "tok": "nearest_q",
+   "n": 10,
+   "prec": 0.71,
+   "ins": true
+  },
+  {
+   "p": "label",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "label",
+   "n": 10,
+   "prec": 1.0
+  },
+  {
+   "p": "remove",
+   "prev": "*",
+   "next": "THE",
+   "tok": "disconnect",
+   "n": 10,
+   "prec": 0.91
+  },
+  {
+   "p": "resize",
+   "prev": "B",
+   "next": "*",
+   "tok": "resize",
+   "n": 10,
+   "prec": 0.91
+  },
+  {
+   "p": "color",
+   "prev": "B",
+   "next": "*",
+   "tok": "make",
+   "n": 9,
+   "prec": 0.82
+  },
+  {
+   "p": "place",
+   "prev": "*",
+   "next": "ART",
+   "tok": "draw",
+   "n": 9,
+   "prec": 1.0
+  },
+  {
+   "p": "resize",
+   "prev": "*",
+   "next": "THE",
+   "tok": "resize",
+   "n": 9,
+   "prec": 1.0
+  },
+  {
+   "p": "align",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "align",
+   "n": 8,
+   "prec": 1.0
+  },
+  {
+   "p": "arrange",
+   "prev": "*",
+   "next": "THE",
+   "tok": "arrange",
+   "n": 8,
+   "prec": 0.8
+  },
+  {
+   "p": "neighbors",
+   "prev": "*",
+   "next": "B",
+   "tok": "neigh_q",
+   "n": 8,
+   "prec": 1.0
+  },
+  {
+   "p": "neighbors",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "neigh_q",
+   "n": 8,
+   "prec": 1.0
+  },
+  {
+   "p": "redo",
+   "prev": "*",
+   "next": "THE",
+   "tok": "redo",
+   "n": 8,
+   "prec": 0.89
+  },
+  {
+   "p": "swap",
+   "prev": "*",
+   "next": "THE",
+   "tok": "swap",
+   "n": 8,
+   "prec": 0.89
+  },
+  {
+   "p": "turn",
+   "prev": "B",
+   "next": "*",
+   "tok": "make",
+   "n": 8,
+   "prec": 1.0
+  },
+  {
+   "p": "above",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "move",
+   "n": 7,
+   "prec": 0.78,
+   "ins": true
+  },
+  {
+   "p": "are",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "is",
+   "n": 7,
+   "prec": 0.64
+  },
+  {
+   "p": "chained",
+   "prev": "O",
+   "next": "*",
+   "tok": "connect",
+   "n": 7,
+   "prec": 1.0
+  },
+  {
+   "p": "colour",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "make",
+   "n": 7,
+   "prec": 1.0
+  },
+  {
+   "p": "delete",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "delete",
+   "n": 7,
+   "prec": 0.88
+  },
+  {
+   "p": "enlarge",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "resize",
+   "n": 7,
+   "prec": 1.0
+  },
+  {
+   "p": "forget",
+   "prev": "*",
+   "next": "O",
+   "tok": "forget",
+   "n": 7,
+   "prec": 0.88
+  },
+  {
+   "p": "join",
+   "prev": "B",
+   "next": "*",
+   "tok": "connect",
+   "n": 7,
+   "prec": 1.0
+  },
+  {
+   "p": "list",
+   "prev": "*",
+   "next": "THE",
+   "tok": "which",
+   "n": 7,
+   "prec": 0.88
+  },
+  {
+   "p": "arrange",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "arrange",
+   "n": 6,
+   "prec": 1.0
+  },
+  {
+   "p": "arrange",
+   "prev": "*",
+   "next": "O",
+   "tok": "arrange",
+   "n": 6,
+   "prec": 1.0
+  },
+  {
+   "p": "below",
+   "prev": "*",
+   "next": "B",
+   "tok": "move",
+   "n": 6,
+   "prec": 0.75,
+   "ins": true
+  },
+  {
+   "p": "connect",
+   "prev": "*",
+   "next": "THE",
+   "tok": "connect",
+   "n": 6,
+   "prec": 1.0
+  },
+  {
+   "p": "farthest",
+   "prev": "*",
+   "next": "B",
+   "tok": "nearest_q",
+   "n": 6,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "leftmost",
+   "prev": "O",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 6,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "link",
+   "prev": "*",
+   "next": "THE",
+   "tok": "connect",
+   "n": 6,
+   "prec": 1.0
+  },
+  {
+   "p": "topmost",
+   "prev": "O",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 6,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "where",
+   "prev": "B",
+   "next": "*",
+   "tok": "where_is",
+   "n": 6,
+   "prec": 1.0
+  },
+  {
+   "p": "bottommost",
+   "prev": "O",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 5,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "color",
+   "prev": "*",
+   "next": "THE",
+   "tok": "make",
+   "n": 5,
+   "prec": 1.0
+  },
+  {
+   "p": "column",
+   "prev": "B",
+   "next": "*",
+   "tok": "arrange",
+   "n": 5,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "count",
+   "prev": "*",
+   "next": "O",
+   "tok": "how_many",
+   "n": 5,
+   "prec": 0.71
+  },
+  {
+   "p": "degree",
+   "prev": "*",
+   "next": "B",
+   "tok": "degree_q",
+   "n": 5,
+   "prec": 1.0
+  },
+  {
+   "p": "distribute",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "distribute",
+   "n": 5,
+   "prec": 1.0
+  },
+  {
+   "p": "distributed",
+   "prev": "*",
+   "next": "B",
+   "tok": "distribute",
+   "n": 5,
+   "prec": 1.0
+  },
+  {
+   "p": "enlarge",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "resize",
+   "n": 5,
+   "prec": 1.0
+  },
+  {
+   "p": "forget",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "forget",
+   "n": 5,
+   "prec": 0.83
+  },
+  {
+   "p": "make",
+   "prev": "*",
+   "next": "ART",
+   "tok": "draw",
+   "n": 5,
+   "prec": 0.83
+  },
+  {
+   "p": "next_to",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "move",
+   "n": 5,
+   "prec": 0.83,
+   "ins": true
+  },
+  {
+   "p": "place",
+   "prev": "*",
+   "next": "THE",
+   "tok": "move",
+   "n": 5,
+   "prec": 0.83
+  },
+  {
+   "p": "smallest",
+   "prev": "O",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 5,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "align",
+   "prev": "*",
+   "next": "THE",
+   "tok": "align",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "bottommost",
+   "prev": "*",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 4,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "call",
+   "prev": "B",
+   "next": "*",
+   "tok": "rename",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "chained",
+   "prev": "*",
+   "next": "B",
+   "tok": "connect",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "color",
+   "prev": "*",
+   "next": "B",
+   "tok": "what_color",
+   "n": 4,
+   "prec": 0.8
+  },
+  {
+   "p": "degree",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "degree_q",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "distribute",
+   "prev": "*",
+   "next": "THE",
+   "tok": "distribute",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "distributed",
+   "prev": "B",
+   "next": "*",
+   "tok": "distribute",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "huge",
+   "prev": "B",
+   "next": "*",
+   "tok": "make",
+   "n": 4,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "join",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "connect",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "redo",
+   "prev": "*",
+   "next": "B",
+   "tok": "redo",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "rightmost",
+   "prev": "B",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 4,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "smallest",
+   "prev": "*",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 4,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "turn",
+   "prev": "*",
+   "next": "THE",
+   "tok": "make",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "another",
+   "prev": "*",
+   "next": "O",
+   "tok": "draw",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "another",
+   "prev": "B",
+   "next": "*",
+   "tok": "draw",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "call",
+   "prev": "*",
+   "next": "THE",
+   "tok": "rename",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "chained",
+   "prev": "*",
+   "next": "O",
+   "tok": "connect",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "check",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "is_q",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "distributed",
+   "prev": "O",
+   "next": "*",
+   "tok": "distribute",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "does",
+   "prev": "*",
+   "next": "ART",
+   "tok": "is_there",
+   "n": 3,
+   "prec": 0.6
+  },
+  {
+   "p": "fewest",
+   "prev": "*",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "fewest",
+   "prev": "THE",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "hook",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "connect",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "hook",
+   "prev": "B",
+   "next": "*",
+   "tok": "connect",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "join",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "connect",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "left_of",
+   "prev": "O",
+   "next": "*",
+   "tok": "move",
+   "n": 3,
+   "prec": 0.6,
+   "ins": true
+  },
+  {
+   "p": "reach",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "path_q",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "rightmost",
+   "prev": "O",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 3,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "shrink",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "resize",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "shrink",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "resize",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "shrunk",
+   "prev": "*",
+   "next": "B",
+   "tok": "resize",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "shrunk",
+   "prev": "O",
+   "next": "*",
+   "tok": "resize",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "slide",
+   "prev": "B",
+   "next": "*",
+   "tok": "move",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "above",
+   "prev": "*",
+   "next": "B",
+   "tok": "move",
+   "n": 2,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "align",
+   "prev": "*",
+   "next": "O",
+   "tok": "align",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "anything",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "is_there",
+   "n": 2,
+   "prec": 0.67
+  },
+  {
+   "p": "biggest",
+   "prev": "O",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "closest",
+   "prev": "*",
+   "next": "B",
+   "tok": "nearest_q",
+   "n": 2,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "color",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "make",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "column",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "arrange",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "column",
+   "prev": "*",
+   "next": "THE",
+   "tok": "arrange",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "count",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "cycle",
+   "prev": "THE",
+   "next": "*",
+   "tok": "cycle_q",
+   "n": 2,
+   "prec": 0.67
+  },
+  {
+   "p": "describe",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "describe",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "distribute",
+   "prev": "*",
+   "next": "O",
+   "tok": "distribute",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "distributed",
+   "prev": "*",
+   "next": "O",
+   "tok": "distribute",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "exists",
+   "prev": "B",
+   "next": "*",
+   "tok": "is_there",
+   "n": 2,
+   "prec": 0.67
+  },
+  {
+   "p": "find",
+   "prev": "B",
+   "next": "*",
+   "tok": "path_q",
+   "n": 2,
+   "prec": 0.67
+  },
+  {
+   "p": "large",
+   "prev": "B",
+   "next": "*",
+   "tok": "make",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "leftmost",
+   "prev": "B",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "list",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "which",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "loop",
+   "prev": "*",
+   "next": "B",
+   "tok": "cycle_q",
+   "n": 2,
+   "prec": 0.67
+  },
+  {
+   "p": "most",
+   "prev": "*",
+   "next": "B",
+   "tok": "extreme_q",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "mostconnected",
+   "prev": "*",
+   "next": "O",
+   "tok": "extreme_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "position",
+   "prev": "O",
+   "next": "*",
+   "tok": "where_is",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "rename",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "rename",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "right_side",
+   "prev": "O",
+   "next": "*",
+   "tok": "move",
+   "n": 2,
+   "prec": 0.67,
+   "ins": true
+  },
+  {
+   "p": "shove",
+   "prev": "B",
+   "next": "*",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "slap",
+   "prev": "*",
+   "next": "ART",
+   "tok": "draw",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "slap",
+   "prev": "O",
+   "next": "*",
+   "tok": "draw",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "slide",
+   "prev": "*",
+   "next": "THE",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "smallest",
+   "prev": "B",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 2,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "spaced",
+   "prev": "*",
+   "next": "B",
+   "tok": "distribute",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "spread",
+   "prev": "B",
+   "next": "*",
+   "tok": "distribute",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "tint",
+   "prev": "B",
+   "next": "*",
+   "tok": "make",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "turn",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "make",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "undo",
+   "prev": "*",
+   "next": "O",
+   "tok": "undo",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "connect",
+   "prev": "*",
+   "next": "*",
+   "tok": "connect",
+   "n": 613,
+   "prec": 0.97
+  },
+  {
+   "p": "make",
+   "prev": "*",
+   "next": "*",
+   "tok": "make",
+   "n": 499,
+   "prec": 0.97
+  },
+  {
+   "p": "move",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 239,
+   "prec": 0.96
+  },
+  {
+   "p": "set",
+   "prev": "*",
+   "next": "*",
+   "tok": "make",
+   "n": 238,
+   "prec": 0.96
+  },
+  {
+   "p": "create",
+   "prev": "*",
+   "next": "*",
+   "tok": "draw",
+   "n": 125,
+   "prec": 1.0
+  },
+  {
+   "p": "link",
+   "prev": "*",
+   "next": "*",
+   "tok": "connect",
+   "n": 83,
+   "prec": 0.7
+  },
+  {
+   "p": "duplicate",
+   "prev": "*",
+   "next": "*",
+   "tok": "duplicate",
+   "n": 81,
+   "prec": 1.0
+  },
+  {
+   "p": "rename",
+   "prev": "*",
+   "next": "*",
+   "tok": "rename",
+   "n": 77,
+   "prec": 1.0
+  },
+  {
+   "p": "arrange",
+   "prev": "*",
+   "next": "*",
+   "tok": "arrange",
+   "n": 64,
+   "prec": 0.96
+  },
+  {
+   "p": "label",
+   "prev": "*",
+   "next": "*",
+   "tok": "label",
+   "n": 53,
+   "prec": 0.83
+  },
+  {
+   "p": "delete",
+   "prev": "*",
+   "next": "*",
+   "tok": "delete",
+   "n": 51,
+   "prec": 0.71
+  },
+  {
+   "p": "biggest",
+   "prev": "*",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 49,
+   "prec": 0.92,
+   "ins": true
+  },
+  {
+   "p": "leftmost",
+   "prev": "*",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 48,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "align",
+   "prev": "*",
+   "next": "*",
+   "tok": "align",
+   "n": 45,
+   "prec": 0.98
+  },
+  {
+   "p": "topmost",
+   "prev": "*",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 45,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "undo",
+   "prev": "*",
+   "next": "*",
+   "tok": "undo",
+   "n": 45,
+   "prec": 0.92
+  },
+  {
+   "p": "describe",
+   "prev": "*",
+   "next": "*",
+   "tok": "describe",
+   "n": 44,
+   "prec": 1.0
+  },
+  {
+   "p": "rightmost",
+   "prev": "*",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 42,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "forget",
+   "prev": "*",
+   "next": "*",
+   "tok": "forget",
+   "n": 39,
+   "prec": 0.95
+  },
+  {
+   "p": "swap",
+   "prev": "*",
+   "next": "*",
+   "tok": "swap",
+   "n": 39,
+   "prec": 0.87
+  },
+  {
+   "p": "smallest",
+   "prev": "*",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 36,
+   "prec": 0.95,
+   "ins": true
+  },
+  {
+   "p": "cycle",
+   "prev": "*",
+   "next": "*",
+   "tok": "cycle_q",
+   "n": 35,
+   "prec": 0.83
+  },
+  {
+   "p": "redo",
+   "prev": "*",
+   "next": "*",
+   "tok": "redo",
+   "n": 34,
+   "prec": 0.97
+  },
+  {
+   "p": "bottommost",
+   "prev": "*",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 32,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "disconnect",
+   "prev": "*",
+   "next": "*",
+   "tok": "disconnect",
+   "n": 29,
+   "prec": 0.97
+  },
+  {
+   "p": "count",
+   "prev": "*",
+   "next": "*",
+   "tok": "how_many",
+   "n": 28,
+   "prec": 0.93
+  },
+  {
+   "p": "colour",
+   "prev": "*",
+   "next": "*",
+   "tok": "make",
+   "n": 27,
+   "prec": 0.93
+  },
+  {
+   "p": "farthest",
+   "prev": "*",
+   "next": "*",
+   "tok": "nearest_q",
+   "n": 26,
+   "prec": 0.62,
+   "ins": true
+  },
+  {
+   "p": "distribute",
+   "prev": "*",
+   "next": "*",
+   "tok": "distribute",
+   "n": 25,
+   "prec": 0.96
+  },
+  {
+   "p": "enlarge",
+   "prev": "*",
+   "next": "*",
+   "tok": "resize",
+   "n": 25,
+   "prec": 1.0
+  },
+  {
+   "p": "degree",
+   "prev": "*",
+   "next": "*",
+   "tok": "degree_q",
+   "n": 24,
+   "prec": 0.86
+  },
+  {
+   "p": "neighbors",
+   "prev": "*",
+   "next": "*",
+   "tok": "neigh_q",
+   "n": 21,
+   "prec": 0.95
+  },
+  {
+   "p": "shrink",
+   "prev": "*",
+   "next": "*",
+   "tok": "resize",
+   "n": 20,
+   "prec": 0.91
+  },
+  {
+   "p": "mostconnected",
+   "prev": "*",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 18,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "leastconnected",
+   "prev": "*",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 16,
+   "prec": 1.0,
+   "ins": true
+  },
+  {
+   "p": "right_side",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 16,
+   "prec": 0.8,
+   "ins": true
+  },
+  {
+   "p": "resize",
+   "prev": "*",
+   "next": "*",
+   "tok": "resize",
+   "n": 11,
+   "prec": 0.92
+  },
+  {
+   "p": "turn",
+   "prev": "*",
+   "next": "*",
+   "tok": "make",
+   "n": 8,
+   "prec": 1.0
+  },
+  {
+   "p": "chained",
+   "prev": "*",
+   "next": "*",
+   "tok": "connect",
+   "n": 7,
+   "prec": 1.0
+  },
+  {
+   "p": "distributed",
+   "prev": "*",
+   "next": "*",
+   "tok": "distribute",
+   "n": 7,
+   "prec": 1.0
+  },
+  {
+   "p": "join",
+   "prev": "*",
+   "next": "*",
+   "tok": "connect",
+   "n": 7,
+   "prec": 1.0
+  },
+  {
+   "p": "call",
+   "prev": "*",
+   "next": "*",
+   "tok": "rename",
+   "n": 4,
+   "prec": 0.67
+  },
+  {
+   "p": "hook",
+   "prev": "*",
+   "next": "*",
+   "tok": "connect",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "another",
+   "prev": "*",
+   "next": "*",
+   "tok": "draw",
+   "n": 3,
+   "prec": 0.75
+  },
+  {
+   "p": "fewest",
+   "prev": "*",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "shrunk",
+   "prev": "*",
+   "next": "*",
+   "tok": "resize",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "exists",
+   "prev": "*",
+   "next": "*",
+   "tok": "is_there",
+   "n": 2,
+   "prec": 0.67
+  },
+  {
+   "p": "shove",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "slap",
+   "prev": "*",
+   "next": "*",
+   "tok": "draw",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "tint",
+   "prev": "*",
+   "next": "*",
+   "tok": "make",
+   "n": 2,
+   "prec": 1.0
+  }
+ ]
+}

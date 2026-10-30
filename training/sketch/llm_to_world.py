@@ -22,11 +22,11 @@ QUESTION_EVENT = {"count": "count", "exists": "exists", "list": "list", "propert
 class Skip(Exception): pass
 
 
-def convert(row, lexicon=None, soft=False, lost=None):
+def convert(row, lexicon=None, soft=False, lost=None, table=None):
     """soft: never set a row aside for a missing word; a role whose words are not in the clause is left out (listed in `lost`)"""
     lexicon = LEXICON if lexicon is None else lexicon; lost = [] if lost is None else lost
     names = list(row.get("names") or []) + list(row.get("created") or [])
-    toks, info = normalize(row["text"], lexicon, names)
+    toks, info = normalize(row["text"], lexicon, names, table=table)
     T = set(toks); w = row["wire"]; a = w.get("args", {}); typ = w.get("type")
     ev = a.get("action") if typ == "command" else QUESTION_EVENT.get(a.get("ask")) if typ == "question" else typ
     if ev not in EVENTS: raise Skip(f"no event for {typ}:{a.get('action') or a.get('ask')}")
