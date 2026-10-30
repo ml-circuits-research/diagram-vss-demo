@@ -6,3 +6,4 @@ training/sketch/worlds/sketch/versions/
 training/sketch/__pycache__/
 *.pyc
 node_modules/
+training/sketch/worlds/real/

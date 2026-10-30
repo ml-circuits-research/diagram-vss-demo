@@ -1,121 +1,92 @@
-# World `real`: built from 285 training messages (1341 gold wires)
+# World `real`: built from 235 training messages (1109 requests with a span)
 
-Rows: 1318. Dropped (cannot be trained): 23 {'no verb and no role (zero target)': 23}.
+Front end learned from the same messages: 71 value n-grams, 434 trigger rules, 5213 segmenter weights; params {"seg_epochs": 8, "val_min_count": 5, "val_min_prec": 0.8, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}.
 
-Kinds: 62 (legend value kinds 16, VERB 1, own-kind frequent tokens 45, freq >= 8); lexicon 200 words.
+Rows: 1101. Dropped (cannot be trained): 8 {'no event token and no role (zero target)': 8}.
 
-Own-kind tokens: ,, a, and, are, at, be, called, can, cycle, does, each, from, has, have, how, i, in, it, labeled, last, lines, link, many, me, named, now, of, on, path, reached, route, rules, show, than, that, the, them, then, there, times, to, we, what, who, with
+Kinds: 53; lexicon 187 words (legend value tokens 105, event tokens 44, own-kind tokens seen >= 8 times).
 
-Roles left out because their words are not in the span (rows kept):
+Own-kind tokens: a, and, are, arrow, at, be, called, can, does, from, has, have, i, in, it, labeled, last, line, lines, me, named, now, of, on, one, other, put, reached, shape, that, the, them, then, there, to, what, who, with
+
+Roles left out because their words are not in the normalized span (rows kept):
 
 | what | n |
 |---|---|
-| verb not found | 236 |
-| several | 147 |
-| name | 85 |
-| row | 18 |
-| chain | 18 |
-| mostconnected | 12 |
-| leastconnected | 10 |
-| left_side | 9 |
-| right_side | 9 |
-| right_of | 7 |
-| rules | 7 |
-| next_to | 6 |
-| head | 5 |
+| event token not found | 152 |
+| name | 119 |
+| chain | 20 |
+| right_side | 11 |
+| next_to | 9 |
+| rules | 8 |
+| head | 7 |
+| two_way | 6 |
+| left_side | 6 |
+| below | 4 |
+| 2 | 4 |
+| top_left | 4 |
+| right_of | 4 |
+| shape | 4 |
 | ring | 4 |
-| 2 | 3 |
-| column | 3 |
-| 1 | 3 |
-| newest | 3 |
-| shape | 3 |
-| horizontally | 3 |
+| bottom_right | 3 |
+| not_blue | 3 |
+| 4 | 2 |
 | $new | 2 |
-| t_alarm | 2 |
-| two_way | 2 |
-| bottom_right | 2 |
-| top_right | 2 |
+| horizontally | 2 |
+| gold | 2 |
 | oldest | 2 |
-| t_sun | 1 |
-| t_choose | 1 |
-| t_delay | 1 |
-| t_box | 1 |
-| t_music | 1 |
 | t_inlet | 1 |
-| t_spring | 1 |
-| t_humanism | 1 |
-| t_test | 1 |
-| t_asteroid | 1 |
-| t_stage | 1 |
-| t_danger | 1 |
-| t_breakdown | 1 |
-| t_ballot | 1 |
-| t_oven | 1 |
-| t_cut | 1 |
-| t_free | 1 |
-| t_trophy | 1 |
-| t_umpire | 1 |
-| t_dictionary | 1 |
-| t_dragon | 1 |
-| t_palace | 1 |
-| t_well | 1 |
-| t_witness | 1 |
-| t_ridge | 1 |
-| t_shower | 1 |
 | t_grandma_grace | 1 |
+| n_pi_ata | 1 |
 | t_dc_motor | 1 |
-| below | 1 |
-| t_quiet | 1 |
-| t_moon | 1 |
-| t_crossing | 1 |
-| t_hotel | 1 |
-| t_grapes | 1 |
-| t_coin | 1 |
-| t_smoke | 1 |
-| t_vegan | 1 |
-| t_note | 1 |
-| top_left | 1 |
-| dashed | 1 |
+| ellipse | 1 |
+| biggest | 1 |
+| mostconnected | 1 |
+| orange | 1 |
+| row | 1 |
+| bottom_left | 1 |
+| not_lime | 1 |
+| small | 1 |
 | vertically | 1 |
+| 5 | 1 |
+| right | 1 |
 | circle | 1 |
-| square | 1 |
 | left_of | 1 |
-| triangle | 1 |
+| square | 1 |
 
 | event | rows |
 |---|---|
-| connect | 222 |
-| set | 212 |
-| move | 186 |
-| extreme | 98 |
-| create | 84 |
-| check | 58 |
-| path | 33 |
-| fact | 31 |
-| nearest | 29 |
-| arrange | 28 |
+| connect | 175 |
+| set | 172 |
+| move | 158 |
+| extreme | 85 |
+| create | 71 |
+| check | 50 |
 | count | 27 |
-| list | 27 |
-| connected | 20 |
-| duplicate | 18 |
-| describe | 18 |
-| delete | 17 |
-| property | 16 |
-| exists | 16 |
+| arrange | 26 |
+| list | 25 |
+| fact | 24 |
+| nearest | 24 |
+| path | 23 |
+| connected | 17 |
+| duplicate | 16 |
+| delete | 16 |
 | rename | 15 |
-| resize | 15 |
 | rule | 14 |
-| disconnect | 12 |
+| describe | 14 |
+| resize | 13 |
+| property | 12 |
 | toFront | 12 |
-| reachable | 11 |
-| distribute | 11 |
-| redo | 11 |
-| toBack | 11 |
-| degree | 10 |
-| align | 10 |
-| neighbors | 9 |
-| undo | 9 |
-| forget | 9 |
+| exists | 11 |
+| redo | 10 |
+| reachable | 9 |
+| distribute | 9 |
+| toBack | 9 |
+| neighbors | 8 |
+| undo | 8 |
 | label | 7 |
+| cycle | 7 |
+| forget | 7 |
 | swap | 7 |
-| cycle | 5 |
+| align | 7 |
+| disconnect | 7 |
+| degree | 6 |
