@@ -9,10 +9,10 @@ so a name or label never seen in training is read with sentence candidates.
 
 Also writes eval/*.jsonl: the surface sentence, the shape names it mentions, and the gold frame, which the browser benchmark turns into
 the demo's own wires with the same adaptor it applies to the VSS reading (docs/js/vss-adapter.js).
-Run: python3 generate.py --out worlds/sketch [--n 8000] [--n_eval 300] [--seed 0]   (needs VSS_DEMO = path of a vss-demo checkout for tool/)"""
+Run: python3 generate.py --out worlds/sketch [--n 8000] [--n_eval 300] [--seed 0]   (the sop tool comes from training/vss, or VSS_DEMO)"""
 import argparse, collections, datetime, hashlib, json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
-VSS = os.environ.get("VSS_DEMO", os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(HERE))), "vss-demo"))
+VSS = os.environ.get("VSS_DEMO", os.path.join(os.path.dirname(HERE), "vss"))
 sys.path.insert(0, os.path.join(VSS, "tool")); sys.path.insert(0, HERE)
 import numpy as np
 from sop import soplang

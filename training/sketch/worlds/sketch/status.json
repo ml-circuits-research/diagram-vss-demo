@@ -1,16 +1,16 @@
 {
  "label": "BUILT",
- "when": "2026-10-30T19:41:56",
+ "when": "2026-10-30T19:57:14",
  "legend": "sha256:9a92ad4aa726b9a8c43f7650f831ffe4b7e0bb5aae12e8fcfb0fa3103fb05c68",
  "legend_version": 1,
- "run": "20261030-192516",
+ "run": "20261030-195608",
  "examples_sha256": "a00d495a0dda3289aff0cc9ba99fdc3522c88bf766871f0934235f9e256eb1ae",
  "metrics_summary": {
   "FULL (catalog candidates)": {
-   "heldout_formulations": 0.8936170212765957,
-   "heldout_sentences": 0.9016666666666666,
-   "new_identities": 0.9066666666666666,
-   "train (sample)": 0.9366666666666666
+   "heldout_formulations": 0.1,
+   "heldout_sentences": 0.2,
+   "new_identities": 0.35,
+   "train (sample)": 0.3
   }
  }
 }
