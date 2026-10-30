@@ -18,6 +18,7 @@ import generate as G
 import front as FR
 from llm_to_world import convert, Skip
 
+CAL_SHARE = 0.08
 ROLES = G.ROLES + [("members", "which shapes, as a list?"), ("targets", "to which shapes, as a list?")]   # set roles (lists of shapes)
 
 
@@ -72,14 +73,21 @@ def main():
     json.dump(F, open(os.path.join(out, "front.json"), "w"))
     json.dump({"name": "real", "language": "en", "description": "SOP Sketchpad legend, world built from annotated realistic messages", "created": datetime.date.today().isoformat(),
                "version": 1, "min_examples": 500, "max_versions_per_run": 3, "second_look_escalate": 0.05, "second_look_retrain": 0.05}, open(os.path.join(out, "world.json"), "w"), indent=1)
-    json.dump({"heldout_sentence_share": 0.1, "new_identities": "none: realistic messages, names are not controlled",
-               "heldout_formulations": "none: realistic messages; held-out training messages and the test sets are evaluated outside sop train", "file_splits": {}, "template_splits": {}},
+    json.dump({"heldout_sentence_share": 0.0, "new_identities": "none: realistic messages, names are not controlled",
+               "file_splits": {"examples/calib.sop": "heldout_formulations"}, "template_splits": {},
+               "protocol": f"calib.sop = the requests of {CAL_SHARE:.0%} of the messages: half set the thresholds, half reported; everything else is trained on"},
               open(os.path.join(out, "split_hints.json"), "w"), indent=1)
-    doc = G.soplang.Doc(directives=[("world", "real", None), ("legend", sha, None), ("generated", "training/sketch/msg_to_world.py from llm_train/*_msg", None)]); k = 0
+    k = 0
+    # calibration (DECISIONS.md 3): the presence thresholds are set on rows the model does not train on: the requests of CAL_SHARE of the
+    # messages (by a hash of the id) go to examples/calib.sop, declared as the held-out formulations split; sop train
+    # --calibrate_on_heldout_formulations uses half of them for the thresholds and reports the other half. Every other row is trained on
+    # (heldout_sentence_share 0: DECISIONS.md 2).
+    cal = lambda mid: int(G.hashlib.sha256((mid + "|cal").encode()).hexdigest()[:8], 16) / 2 ** 32 < CAL_SHARE
+    docs = {f: G.soplang.Doc(directives=[("world", "real", None), ("legend", sha, None), ("generated", "training/sketch/msg_to_world.py from llm_train/*_msg", None)]) for f in ("train.sop", "calib.sop")}
     for ev, text, roles, mid in rows:
         ids = iter(f"w{k + i}" for i in range(1, 100)); ws = G.wires_for(ev, roles, text, f"msg.{mid[:2]}", ids, world="real", source="llm")
-        k += len(ws); doc.wires += ws
-    open(os.path.join(out, "examples", "train.sop"), "w").write(G.soplang.write(doc))
+        k += len(ws); docs["calib.sop" if cal(mid) else "train.sop"].wires += ws
+    for f, d in docs.items(): open(os.path.join(out, "examples", f), "w").write(G.soplang.write(d))
     open(os.path.join(out, "raw", "sentences.txt"), "w").write("\n".join(r[1] for r in rows) + "\n")
     if not os.path.exists(os.path.join(out, "status.json")): json.dump({"label": None, "note": "never trained"}, open(os.path.join(out, "status.json"), "w"))
     kc = collections.Counter(kinds.values())

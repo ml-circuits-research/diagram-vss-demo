@@ -25,7 +25,8 @@ for (const e of vss.model.legend.events) for (const v of e.verbs) verbEvent.set(
 const sys = K.createSystem();
 
 function vssFormalize(text, ctx) {
-  const segs = F ? FRONT.segment(text, ctx.names, F).map((src) => ({ src })) : sys.formalize(text, ctx).segments;
+  // SEG=gold: the annotated spans (held-out TRAINING messages only: the test sets have none): the reading quality without the cut
+  const segs = process.env.SEG === "gold" && ctx.spans ? ctx.spans.map((src) => ({ src })) : F ? FRONT.segment(text, ctx.names, F).map((src) => ({ src })) : sys.formalize(text, ctx).segments;
   const seq = { s: 0, m: 0 }, c = { names: ctx.names, last: [], refs: new Map() }, nodes = [];
   for (const seg of segs) {
     const nm = c.names.concat([...c.refs.keys()]);
@@ -72,7 +73,7 @@ for (const d of dirs) {
   const rows = files.flatMap((f) => readFileSync(`${d}/${f}`, "utf8").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l)));
   const tot = { rules: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, byAct: {} }, vss: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, byAct: {} } }, dump = [];
   for (const r of rows) {
-    const ctx = { names: r.names || [], last: [] };
+    const ctx = { names: r.names || [], last: [], spans: r.wires.every((w) => w.span) ? r.wires.map((w) => w.span) : null };
     const out = { rules: sys.formalize(r.text, ctx).nodes, vss: vssFormalize(r.text, ctx) }, rec = { id: r.id, text: r.text };
     for (const f of ["rules", "vss"]) {
       const s = scoreMessage(out[f], r), T = tot[f];
