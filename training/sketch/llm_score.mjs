@@ -7,6 +7,8 @@ import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { load } from "../../docs/js/vss.js";
 import { compile, normalize } from "../../docs/js/snorm.js";
+import * as FRONT from "../../docs/js/front.js";
+import { existsSync } from "node:fs";
 import { readingFromWires, toNodes } from "../../docs/js/vss-adapter.js";
 import { canon } from "../../docs/js/bench-canon.js";
 const require = createRequire(import.meta.url);
@@ -16,15 +18,18 @@ const dirs = argv.filter((a, i) => !a.startsWith("-") && (dumpAt < 0 || i !== du
 const dir = new URL(`../../docs/model/${process.env.MODEL || "sketch"}/`, import.meta.url);
 const readFile = async (n) => { const b = readFileSync(new URL(n, dir)); return n.endsWith(".json") ? b.toString("utf8") : b.buffer.slice(b.byteOffset, b.byteOffset + b.length); };
 const vss = await load(null, { readFile, sentenceCandidates: true });
-const C = compile(JSON.parse(await readFile("normalize.json")));
+const F = existsSync(new URL("front.json", dir)) ? JSON.parse(await readFile("front.json")) : null;   // the learned front end (world real)
+const C = F ? null : compile(JSON.parse(await readFile("normalize.json")));
 const lex = new Set(Object.keys(vss.model.lexicon || {})), verbEvent = new Map();
 for (const e of vss.model.legend.events) for (const v of e.verbs) verbEvent.set(v, e.id);
 const sys = K.createSystem();
 
 function vssFormalize(text, ctx) {
-  const cut = sys.formalize(text, ctx), seq = { s: 0, m: 0 }, c = { names: ctx.names, last: [], refs: new Map() }, nodes = [];
-  for (const seg of cut.segments) {
-    const { tokens, info: ni } = normalize(C, lex, seg.src, c.names.concat([...c.refs.keys()])), r = vss.read(tokens.join(" "));
+  const segs = F ? FRONT.segment(text, ctx.names, F).map((src) => ({ src })) : sys.formalize(text, ctx).segments;
+  const seq = { s: 0, m: 0 }, c = { names: ctx.names, last: [], refs: new Map() }, nodes = [];
+  for (const seg of segs) {
+    const nm = c.names.concat([...c.refs.keys()]);
+    const { tokens, info: ni } = F ? FRONT.normalize(seg.src, nm, F) : normalize(C, lex, seg.src, nm), r = vss.read(tokens.join(" "));
     const verb = tokens.find((t) => verbEvent.has(t)) || null;
     const reading = r.status === "unknown-event" || r.status === "no-sense" ? null : readingFromWires(r.wires, verb);
     const out = reading ? toNodes(reading, ni, c, seq) : { nodes: [] };

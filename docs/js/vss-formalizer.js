@@ -1,8 +1,9 @@
 // vss-formalizer.js: the VSS formalizer of the demo. Clauses come from the rules segmenter (the same cut every formalizer gets); each
-// clause is normalized (snorm.js), read by the VSS reader trained on the sketch world (vss.js, model in ../model/sketch/), and turned into
+// clause is normalized (snorm.js), read by the VSS reader trained on the sketch world (vss.js, model in ../model/real/ with its learned front end front.js / front.json), and turned into
 // the demo's wires (vss-adapter.js). Exposes window.VSSFormalizer = { load, formalize, readClause, info }.
 import { load as loadVSS } from "./vss.js";
 import { compile, normalize } from "./snorm.js";
+import * as FRONT from "./front.js";
 import { readingFromWires, readingFromGold, toNodes } from "./vss-adapter.js";
 
 const state = { vss: null, table: null, lexicon: null, verbs: null, verbEvent: null, bytes: 0, loadMs: 0, base: null };
@@ -19,13 +20,14 @@ async function fetchBin(base, name) {
   }
 }
 
-export async function load(base = new URL("../model/sketch/", import.meta.url).href) {
+export async function load(base = new URL("../model/real/", import.meta.url).href) {
   if (state.vss) return info();
   const t0 = performance.now(); state.base = base; state.bytes = 0;
   const cache = new Map();
   const readFile = async (name) => { if (!cache.has(name)) cache.set(name, name.endsWith(".bin") ? await fetchBin(base, name) : await fetchSize(new URL(name, base))); const b = cache.get(name); return name.endsWith(".json") ? new TextDecoder().decode(b) : b; };
   state.vss = await loadVSS(null, { readFile, sentenceCandidates: true });
-  state.table = compile(JSON.parse(await readFile("normalize.json")));
+  try { state.front = JSON.parse(await readFile("front.json")); } catch (e) { state.front = null; }   // the learned front end (world real)
+  if (!state.front) state.table = compile(JSON.parse(await readFile("normalize.json")));
   const m = state.vss.model;
   state.lexicon = new Set(Object.keys(m.lexicon || {}));
   state.verbs = {}; state.verbEvent = new Map();
@@ -42,7 +44,8 @@ export function info() {
 
 /** one clause -> { nodes, notes, reading, vss } */
 export function readClause(src, ctx, seq) {
-  const { tokens, info: ninfo } = normalize(state.table, state.lexicon, src, (ctx.names || []).concat([...(ctx.refs ? ctx.refs.keys() : [])]));
+  const names = (ctx.names || []).concat([...(ctx.refs ? ctx.refs.keys() : [])]);
+  const { tokens, info: ninfo } = state.front ? FRONT.normalize(src, names, state.front) : normalize(state.table, state.lexicon, src, names);
   const text = tokens.join(" ");
   const r = state.vss.read(text);
   const verb = tokens.find((t) => state.verbEvent.has(t)) || r.frame.lemma || null;
@@ -52,10 +55,11 @@ export function readClause(src, ctx, seq) {
   return Object.assign(out, { reading, normalized: text, vss: { status: r.status, sop: r.sop, margins: r.margins, residual: r.residual, ms: r.timings.total_ms, unplaced: r.unplaced } });
 }
 
-/** a whole message; `rulesFormalize` supplies the clause cut (segments) */
+/** a whole message; the learned segmenter cuts it into requests (a model without front.json: the rules' cut, `rulesFormalize`) */
 export async function formalize(text, ctx, rulesFormalize) {
   if (!state.vss) await load();
-  const t0 = performance.now(), cut = rulesFormalize(text, ctx), seq = { s: 0, m: 0 };
+  const t0 = performance.now(), seq = { s: 0, m: 0 };
+  const cut = state.front ? { segments: FRONT.segment(text, ctx.names || [], state.front).map((src) => ({ src, id: null })), nodes: [], corrections: [] } : rulesFormalize(text, ctx);
   const c = { names: ctx.names || [], last: (ctx.last || []).slice(), refs: new Map() };
   const nodes = [], notes = [], clauses = [];
   for (const seg of cut.segments || []) {

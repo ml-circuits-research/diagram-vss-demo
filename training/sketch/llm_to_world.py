@@ -25,11 +25,11 @@ class Skip(Exception): pass
 LISTS = os.environ.get("LISTS", "1") == "1"   # lists of shapes -> the set roles `members` / `targets` (world real); 0: the first shape only
 
 
-def convert(row, lexicon=None, soft=False, lost=None, table=None):
+def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
     """soft: never set a row aside for a missing word; a role whose words are not in the clause is left out (listed in `lost`)"""
     lexicon = LEXICON if lexicon is None else lexicon; lost = [] if lost is None else lost
     names = list(row.get("names") or []) + list(row.get("created") or [])
-    toks, info = normalize(row["text"], lexicon, names, table=table)
+    toks, info = norm(row["text"], names) if norm else normalize(row["text"], lexicon, names, table=table)
     T = set(toks); w = row["wire"]; a = w.get("args", {}); typ = w.get("type")
     ev = a.get("action") if typ == "command" else QUESTION_EVENT.get(a.get("ask")) if typ == "question" else typ
     if ev not in EVENTS: raise Skip(f"no event for {typ}:{a.get('action') or a.get('ask')}")
@@ -65,7 +65,7 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None):
             e = {"head": head}
             if kv.get("color"): e["attr"] = need(kv["color"])
             if kv.get("recency"): e["det"] = need(kv["recency"])
-            elif plural: d = next((x for x in ("all", "every", "each") if x in T), None); e.update({"det": d} if d else {})
+            elif plural and "all" in T: e["det"] = "all"   # the quantifier, as the learned front end writes it
             return e, kv.get("notcolor")
         n = "n_" + slug(v)
         if n in T: return {"head": n}, None
@@ -122,7 +122,6 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None):
         if ev == "connected": roles["landmark"], _ = ent(a.get("anchor", ""))
         if ev in ("align", "distribute") and a.get("axis"): roles["axis"] = need({"horizontal": "horizontally", "vertical": "vertically"}[a["axis"]])
         if ev == "arrange" and a.get("layout"): roles["layout"] = need({"circle": "ring"}.get(a["layout"], a["layout"]))
-        if ev in ("toFront", "toBack"): roles["depth"] = need("front" if ev == "toFront" else "back")
     elif ev == "swap":
         x = [s.strip() for s in str(a.get("target", "")).split(",")]
         if len(x) != 2:

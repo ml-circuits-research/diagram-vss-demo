@@ -1,0 +1,8 @@
+{
+ "seg_epochs": 8,
+ "val_min_count": 5,
+ "val_min_prec": 0.8,
+ "trig_min_count": 2,
+ "trig_share": 0.75,
+ "trig_min_prec": 0.6
+}
