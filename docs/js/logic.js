@@ -1086,19 +1086,20 @@ function makeFormalizer(engine) {
     // verb ellipsis: "connect Api to Db, then Core to Utils", "Jazz blue" after "make X red" -> the previous clause's verb is repeated
     const ELLIPSIS = nameAltRe ? new RegExp(`^\\s*(?:(?:and|then|also|plus|now)\\s+)*(?:the\\s+)?(?:${nameAltRe})\\b\\s+\\S`, 'i') : null;
     let prevVerb = null;
-    const PLACE_ONLY = nameAltRe ? new RegExp(`^\\s*(?:the\\s+)?(?:${nameAltRe})\\s+(?:(?:is|goes|sits|stays|should\\s+be|just|right|way|then)\\s+)*(?:(?:at|in|on|to)\\s+the\\s+(?:top|bottom|left|right|center|centre|middle|upper|lower)|(?:above|below|under|over|beneath|underneath|left\\s+of|right\\s+of|next\\s+to|near|beside|between|on\\s+top\\s+of)\\b)`, 'i') : null;
-    const FACT_LIST = nameAltRe ? new RegExp(`\\s*,\\s*(?:and\\s+)?(?=(?:the\\s+)?(?:${nameAltRe})\\s+(?:is|are)\\s)|\\s*,\\s*(?:and\\s+)?(?=(?:the\\s+)?(?:${nameAltRe})\\s+(?:at|in|on)\\s+the\\b|(?:the\\s+)?(?:${nameAltRe})\\s+(?:above|below|under|over|left\\s+of|right\\s+of|next\\s+to|near|beside)\\b)`, 'i') : null;
+    const PLACE_ONLY = nameAltRe ? new RegExp(`^\\s*(?:the\\s+)?(?:${nameAltRe})\\s+(?:(?:is|goes|sits|stays|should\\s+be|just|right|way|then)\\s+)*(?:(?:at|in|on|to)\\s+the\\s+(?:top|bottom|left|right|center|centre|middle|upper|lower)|(?:top|bottom|upper|lower)(?:[\\s-]+(?:left|right))?\\s*$|on\\s+top\\s*$|(?:in\\s+the\\s+)?(?:center|centre|middle)\\s*$|(?:above|below|under|over|beneath|underneath|left\\s+of|right\\s+of|next\\s+to|near|beside|between|on\\s+top\\s+of)\\b)`, 'i') : null;
+    const CONNECT_ONLY = nameAltRe ? new RegExp(`^\\s*(?:the\\s+)?(?:${nameAltRe})(?:\\s*(?:,|and)\\s*(?:the\\s+)?(?:${nameAltRe}))*\\s+(?:(?:both\\s+|each\\s+|all\\s+)?(?:goes|go|leads?|flows?|feeds?|sends?|files|points?|runs?|passes|connects?)\\s+(?:in)?to|to)\\s+(?:the\\s+)?(?:${nameAltRe}|the\\s+next)\\b`, 'i') : null;
+    const FACT_LIST = nameAltRe ? new RegExp(`\\s*,\\s*(?:and\\s+)?(?=(?:the\\s+)?(?:${nameAltRe})\\s+(?:is|are)\\s)|\\s*,\\s*(?:and\\s+)?(?=(?:the\\s+)?(?:${nameAltRe})\\s+(?:(?:at|in|on)\\s+the|top|bottom|upper|lower|center|centre|middle|on\\s+top|(?:goes\\s+)?to\\s+(?:the\\s+)?(?:${nameAltRe}))\\b|(?:the\\s+)?(?:${nameAltRe})\\s+(?:above|below|under|over|left\\s+of|right\\s+of|next\\s+to|near|beside)\\b)`, 'i') : null;
     for (const sen of sentences) {
       const isQ = /\?\s*$/.test(sen);
       const body = sen.replace(/[.!?;]+\s*$/, '');
-      const parts = body.split(/\s*,?\s*\b(?:and then|then|after that|afterwards|finally)\b[\s,]*/i).flatMap(p => p.split(SPLIT_VERB)).flatMap(coordSplit).flatMap(p => FACT_LIST && !VERB_RE.test(p) ? p.split(FACT_LIST) : [p]);
+      const parts = body.split(/\s*,?\s*\b(?:and then|then|after that|afterwards|finally)\b[\s,]*/i).flatMap(p => p.split(SPLIT_VERB)).flatMap(coordSplit).flatMap(p => FACT_LIST && !VERB_RE.test(p) ? p.split(FACT_LIST) : [p]).flatMap(p => CONNECT_ONLY && CONNECT_ONLY.test(p) && nameAltRe ? p.split(new RegExp(`\\s+and\\s+(?=(?:the\\s+)?(?:${nameAltRe})\\s+(?:goes|go|leads?|flows?|feeds?|sends?|files|points?|runs?|passes)\\b)`, 'i')) : [p]);
       for (let pi = 0; pi < parts.length; pi++) {
         let p = parts[pi];
         if (!p || !p.trim()) continue;
         const pv = p.match(VERB_RE);
         if (pv) prevVerb = pv[1];
         else if (prevVerb && !isQ && ELLIPSIS && ELLIPSIS.test(p) && !/^\s*(?:the\s+)?\S+\s+(?:is|are|was|were|should|would|will|has|have)\b/i.test(p)) { p = prevVerb + ' ' + p.replace(/^\s*(?:(?:and|then|also|plus|now)\s+)*/i, ''); parts[pi] = p; }
-        if (pi + 1 < parts.length && !VERB_RE.test(p) && !/^\s*(undo|redo)\b/i.test(p) && !/\?/.test(p) && !(PLACE_ONLY && PLACE_ONLY.test(p)) && !(nameAltRe && new RegExp(`^\\s*(?:the\\s+)?(?:${nameAltRe})\\s+(?:is|are)\\s`, 'i').test(p))) { parts[pi + 1] = parts[pi + 1] + ' ' + p.replace(/^[\s,]+|[\s,]+$/g, ''); continue; }
+        if (pi + 1 < parts.length && !VERB_RE.test(p) && !/^\s*(undo|redo)\b/i.test(p) && !/\?/.test(p) && !(PLACE_ONLY && PLACE_ONLY.test(p)) && !(CONNECT_ONLY && CONNECT_ONLY.test(p)) && !(nameAltRe && new RegExp(`^\\s*(?:the\\s+)?(?:${nameAltRe})\\s+(?:is|are)\\s`, 'i').test(p))) { parts[pi + 1] = parts[pi + 1] + ' ' + p.replace(/^[\s,]+|[\s,]+$/g, ''); continue; }
         const cm = p.match(CREATE_START);
         if (cm) { const objs = p.split(OBJ_SPLIT); clause(objs[0], isQ); objs.slice(1).forEach(o => clause(cm[1] + ' ' + o, isQ)); }
         else clause(p, isQ);
@@ -1110,6 +1111,9 @@ function makeFormalizer(engine) {
       const one = v => v != null && !Array.isArray(v) && !isRef(v) && typeof v === 'string';
       if (!a || a.type !== 'command' || b.type !== 'command' || a.args.action !== 'connect' || b.args.action !== 'connect') continue;
       const ka = Object.keys(a.args).filter(k => !['action', 'from', 'to', 'pairing'].includes(k)), kb = Object.keys(b.args).filter(k => !['action', 'from', 'to'].includes(k));
+      if (!ka.length && !kb.length && b.args.pairing === 'chain' && Array.isArray(b.args.from) && one(a.args.from) && one(a.args.to) && !a.args.pairing && a.args.to === b.args.from[0]) {
+        a.args = { action: 'connect', from: [a.args.from].concat(b.args.from), pairing: 'chain' }; F.nodes.splice(F.nodes.indexOf(b), 1); F.segments = F.segments.filter(sg => sg.id !== b.id); continue;
+      }
       if (ka.length || kb.length || !one(b.args.from) || !one(b.args.to)) continue;
       const aList = a.args.pairing === 'chain' && Array.isArray(a.args.from) ? a.args.from : (one(a.args.from) && one(a.args.to) && !a.args.pairing ? [a.args.from, a.args.to] : null);
       if (!aList || aList[aList.length - 1] !== b.args.from) continue;
@@ -1163,6 +1167,7 @@ function makeFormalizer(engine) {
           if (action === 'delete' && /\b(clear|wipe|reset)\b/i.test(verb) && !/⟦/.test(t)) { /* clear the canvas */ }
           if (verb === 'give' && !/\b(border|outline|stroke|label|colou?r)\b/i.test(after)) action = 'set';
         } else if (/^\s*(?:a|an|another|\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s/i.test(t)) action = 'create';
+        else if (CONNECT_ONLY && CONNECT_ONLY.test(t)) action = 'connect';   /* "Ingress to Pod1 and Pod2", "Syn goes to SynAck" */
         else if (PLACE_ONLY && PLACE_ONLY.test(t)) action = 'move';   /* "Kitchen at the left", "Pit just below the Stage": a placement */
         else if (/^\s*start over\b/i.test(t)) action = 'delete';
         else { F.notes.push(`I couldn't find an action in "${raw.trim()}".`); F.segments.push({ src: raw.trim().replace(/⟪(\d+)⟫/g, (m, n) => '"' + quotes[+n] + '"').replace(/\s+/g, ' '), id: null }); return; }
@@ -1292,6 +1297,10 @@ function makeFormalizer(engine) {
           if (!C.args.position && !(action === 'move' && /\bby\s+\d|\b(?:up|down)\b|\bto\s+the\s+(?:left|right)\s*$/i.test(C.t))) {
             const SP = [['topLeft', /\b(?:in|at|to|into|on)?\s*the\s+(?:top|upper)[\s-]+left(?:\s+corner)?\b/i], ['topRight', /\b(?:in|at|to|into|on)?\s*the\s+(?:top|upper)[\s-]+right(?:\s+corner)?\b/i], ['bottomLeft', /\b(?:in|at|to|into|on)?\s*the\s+(?:bottom|lower)[\s-]+left(?:\s+corner)?\b/i], ['bottomRight', /\b(?:in|at|to|into|on)?\s*the\s+(?:bottom|lower)[\s-]+right(?:\s+corner)?\b/i], ['center', /\b(?:in|at|to|into)?\s*the\s+(?:center|centre|middle)(?:\s+of\s+the\s+(?:canvas|page|screen|diagram))?\b/i], ['top', /\b(?:at|to|on|along|in)\s+the\s+top(?:\s+(?:edge|side|row))?\b/i], ['bottom', /\b(?:at|to|on|along|in)\s+the\s+bottom(?:\s+(?:edge|side|row))?\b/i], ['left', /\b(?:at|on|along|in)\s+the\s+left(?:\s+(?:edge|side))?\b/i], ['right', /\b(?:at|on|along|in)\s+the\s+right(?:\s+(?:edge|side))?\b/i]];
             for (const [p, re] of SP) if (take(re)) { C.args.position = p; break; }
+            if (!C.args.position && (action === 'move' || action === 'create')) {   /* without an article: "Cabin1 top left", "Lake bottom", "Stage on top" */
+              const BARE = [['topLeft', /\b(?:top|upper)[\s-]+left\b/i], ['topRight', /\b(?:top|upper)[\s-]+right\b/i], ['bottomLeft', /\b(?:bottom|lower)[\s-]+left\b/i], ['bottomRight', /\b(?:bottom|lower)[\s-]+right\b/i], ['top', /\b(?:on\s+)?top\s*$/i], ['bottom', /\b(?:at\s+)?bottom\s*$/i], ['center', /\b(?:center|centre|middle)\s*$/i]];
+              for (const [p, re] of BARE) if (take(re)) { C.args.position = p; break; }
+            }
           }
           if (!C.args.position && action === 'move') take(/\b(?:to\s+the\s+)?(left|right|up|down|upwards|downwards)\b(?!\s+(?:of|side|corner))/i, m => C.args.direction = m[1].toLowerCase().replace('wards', ''));
         }
