@@ -1,32 +1,32 @@
 # Action cues learned from the training triggers
 
-1075 training messages; 9 cues learned (min count 2, share 0.8).
+1200 training messages; 9 cues learned (min count 2, share 0.8).
 
 | trigger (cut) | n | actions | decision |
 |---|---|---|---|
-| connect | 512 | connect 512 | already a cue |
-| make | 428 | set 420, create 5, resize 2, connect 1 | already a cue of create (conflict: data says set) |
-| put | 260 | move 159, create 96, arrange 2, toFront 2, connect 1 | ambiguous: move 159, create 96, arrange 2, toFront 2, connect 1 |
-| move | 199 | move 199 | already a cue |
-| set | 180 | set 180 | already a cue |
-| create | 103 | create 103 | already a cue |
+| connect | 614 | connect 614 | already a cue |
+| make | 499 | set 491, create 5, resize 2, connect 1 | already a cue of create (conflict: data says set) |
+| put | 312 | move 201, create 106, arrange 2, toFront 2, connect 1 | ambiguous: move 201, create 106, arrange 2, toFront 2, connect 1 |
+| move | 239 | move 239 | already a cue |
+| set | 238 | set 238 | already a cue |
+| create | 125 | create 125 | already a cue |
 | link | 84 | connect 84 | already a cue |
-| rename | 75 | rename 75 | already a cue |
-| duplicate | 74 | duplicate 74 | already a cue |
-| arrange | 55 | arrange 55 | already a cue |
+| duplicate | 81 | duplicate 81 | already a cue |
+| rename | 77 | rename 77 | already a cue |
+| arrange | 64 | arrange 64 | already a cue |
 | add | 52 | create 38, connect 14 | ambiguous: create 38, connect 14 |
-| delete | 50 | delete 50 | already a cue |
+| delete | 51 | delete 51 | already a cue |
+| align | 45 | align 45 | already a cue |
 | label | 45 | label 42, connect 3 | a value word of another legend question, not an action |
+| undo | 45 | undo 45 | already a cue |
 | chain | 45 | connect 45 | a value word of another legend question, not an action |
-| undo | 44 | undo 44 | already a cue |
-| align | 41 | align 41 | already a cue |
 | swap | 39 | swap 39 | already a cue |
-| forget | 38 | forget 38 | already a cue |
+| forget | 39 | forget 39 | already a cue |
 | redo | 34 | redo 34 | already a cue |
 | disconnect | 29 | disconnect 29 | already a cue |
 | colour | 27 | set 27 | a value word of another legend question, not an action |
+| distribute | 25 | distribute 25 | already a cue |
 | enlarge | 25 | resize 25 | already a cue |
-| distribute | 24 | distribute 24 | already a cue |
 | draw | 22 | create 19, connect 3 | already a cue |
 | shrink | 20 | resize 20 | already a cue |
 | below | 18 | move 18 | a value word of another legend question, not an action |
@@ -34,8 +34,8 @@
 | above | 18 | move 17, arrange 1 | a value word of another legend question, not an action |
 | place | 17 | create 9, move 7, arrange 1 | ambiguous: create 9, move 7, arrange 1 |
 | remove | 13 | disconnect 9, delete 4 | ambiguous: disconnect 9, delete 4 |
+| resize | 11 | resize 11 | already a cue |
 | row | 11 | arrange 11 | a value word of another legend question, not an action |
-| resize | 10 | resize 10 | already a cue |
 | right | 10 | move 10 | a value word of another legend question, not an action |
 | color | 9 | set 9 | a value word of another legend question, not an action |
 | turn | 8 | set 8 | already a cue |
@@ -68,6 +68,7 @@
 | slap | 2 | create 2 | already a cue |
 | bring | 2 | toFront 2 | already a cue |
 | give | 2 | set 2 | already a cue |
+| make every shape | 2 | resize 1, set 1 | a value word of another legend question, not an action |
 | line up | 2 | arrange 2 | a value word of another legend question, not an action |
 | push | 2 | move 2 | already a cue |
 | shove | 2 | move 2 | already a cue |
@@ -86,7 +87,6 @@
 | spaced | 2 | distribute 2 | LEARNED |
 | each leading | 2 | connect 2 | a value word of another legend question, not an action |
 | stack | 1 | move 1 | a value word of another legend question, not an action |
-| make every shape | 1 | resize 1 | a value word of another legend question, not an action |
 | not linked | 1 | disconnect 1 | a value word of another legend question, not an action |
 | paint | 1 | set 1 | seen 1x |
 | sends traffic | 1 | connect 1 | seen 1x |

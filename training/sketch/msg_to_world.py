@@ -28,9 +28,10 @@ def legend_kinds():
 
 
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--freq", type=int, default=8); ap.add_argument("--out", default=os.path.join(HERE, "worlds", "real"))
+    ap = argparse.ArgumentParser(); ap.add_argument("--freq", type=int, default=8); ap.add_argument("--out", default=os.path.join(HERE, "worlds", "real")); ap.add_argument("--frac", type=float, default=1.0, help="share of the training messages (by a hash of the id; the learning-curve experiment)")
     a = ap.parse_args()
     msgs = [json.loads(l) for f in sorted(glob.glob(os.path.join(HERE, "llm_train", "*_msg", "msg_*.jsonl"))) for l in open(f) if l.strip()]
+    if a.frac < 1: msgs = [m for m in msgs if int(G.hashlib.sha256(m["id"].encode()).hexdigest()[:8], 16) / 2 ** 32 < a.frac]
     base = legend_kinds()
     # pass 1: normalize every span with the legend-only lexicon and count tokens
     items = []

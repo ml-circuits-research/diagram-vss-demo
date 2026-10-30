@@ -13,7 +13,7 @@ const require = createRequire(import.meta.url);
 const K = require("../../docs/js/logic.js");
 const argv = process.argv.slice(2), verbose = argv.includes("-v"), dumpAt = argv.indexOf("--dump");
 const dirs = argv.filter((a, i) => !a.startsWith("-") && (dumpAt < 0 || i !== dumpAt + 1));
-const dir = new URL("../../docs/model/sketch/", import.meta.url);
+const dir = new URL(`../../docs/model/${process.env.MODEL || "sketch"}/`, import.meta.url);
 const readFile = async (n) => { const b = readFileSync(new URL(n, dir)); return n.endsWith(".json") ? b.toString("utf8") : b.buffer.slice(b.byteOffset, b.byteOffset + b.length); };
 const vss = await load(null, { readFile, sentenceCandidates: true });
 const C = compile(JSON.parse(await readFile("normalize.json")));
@@ -57,20 +57,20 @@ function scoreMessage(nodes, row) {
   }
   const matched = new Set(pairs.map((p) => p[1]));
   gold.forEach((g, j) => { if (!matched.has(j)) bad.push(`missing ${g.act}`); });
-  return { right, acts: pairs.length, gold: gold.length, extra: mains.length - pairs.length, exact: right === gold.length && mains.length === gold.length, bad, perAct: gold.map((g, j) => [g.act, pairs.some(([i, jj]) => jj === j && !bad.some((b) => false))]) };
+  return { right, wrongAligned: pairs.length - right, missed: gold.length - pairs.length, acts: pairs.length, gold: gold.length, extra: mains.length - pairs.length, exact: right === gold.length && mains.length === gold.length, bad, perAct: gold.map((g, j) => [g.act, pairs.some(([i, jj]) => jj === j && !bad.some((b) => false))]) };
 }
 
-const report = {}, ALL = { n: 0, rules: { exact: 0, right: 0, acts: 0, extra: 0, gold: 0 }, vss: { exact: 0, right: 0, acts: 0, extra: 0, gold: 0 } };
+const report = {}, ALL = { n: 0, rules: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0 }, vss: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0 } };
 for (const d of dirs) {
   const files = readdirSync(d).filter((f) => f.endsWith(".jsonl")).sort();
   const rows = files.flatMap((f) => readFileSync(`${d}/${f}`, "utf8").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l)));
-  const tot = { rules: { exact: 0, right: 0, acts: 0, extra: 0, gold: 0, byAct: {} }, vss: { exact: 0, right: 0, acts: 0, extra: 0, gold: 0, byAct: {} } }, dump = [];
+  const tot = { rules: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, byAct: {} }, vss: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, byAct: {} } }, dump = [];
   for (const r of rows) {
     const ctx = { names: r.names || [], last: [] };
     const out = { rules: sys.formalize(r.text, ctx).nodes, vss: vssFormalize(r.text, ctx) }, rec = { id: r.id, text: r.text };
     for (const f of ["rules", "vss"]) {
       const s = scoreMessage(out[f], r), T = tot[f];
-      T.exact += s.exact; T.right += s.right; T.acts += s.acts; T.extra += s.extra; T.gold += s.gold; rec[f] = s.bad;
+      T.exact += s.exact; T.right += s.right; T.wrongAligned += s.wrongAligned; T.missed += s.missed; T.acts += s.acts; T.extra += s.extra; T.gold += s.gold; rec[f] = s.bad;
       // per gold act: right?
       const mains = out[f].filter((n) => n.type !== "mention").map((n) => ({ act: actOf(n.type, n.args), got: canon(n, out[f]) }));
       const gold = r.wires.map((w) => ({ act: actOf(w.type, w.args), want: Object.fromEntries(Object.entries(w.args).map(([k, v]) => [k, low(v)])) }));
@@ -83,8 +83,8 @@ for (const d of dirs) {
   console.log(`\n${d}: ${n} messages, ${tot.rules.gold} gold wires`); console.log("  " + line("rules")); console.log("  " + line("vss"));
   const acts = Object.keys(tot.rules.byAct).sort((a, b) => tot.rules.byAct[b][1] - tot.rules.byAct[a][1]);
   console.log("  per act (rules · vss · n): " + acts.map((a) => `${a.split(":").pop() || a} ${tot.rules.byAct[a][0]}·${(tot.vss.byAct[a] || [0])[0]}·${tot.rules.byAct[a][1]}`).join(", "));
-  report[d] = { n, tot }; ALL.n += n; for (const f of ["rules", "vss"]) for (const k of ["exact", "right", "acts", "extra", "gold"]) ALL[f][k] += tot[f][k]; if (verbose) dump.slice(0, 12).forEach((x) => console.log(`  ${x.id} ${x.text}\n     rules: ${x.rules.join(" | ") || "ok"}\n     vss:   ${x.vss.join(" | ") || "ok"}`));
+  report[d] = { n, tot }; ALL.n += n; for (const f of ["rules", "vss"]) for (const k of ["exact", "right", "wrongAligned", "missed", "acts", "extra", "gold"]) ALL[f][k] += tot[f][k]; if (verbose) dump.slice(0, 12).forEach((x) => console.log(`  ${x.id} ${x.text}\n     rules: ${x.rules.join(" | ") || "ok"}\n     vss:   ${x.vss.join(" | ") || "ok"}`));
   if (dumpAt >= 0) writeFileSync(argv[dumpAt + 1].replace(/(\.json)?$/, `_${d.split("/").filter(Boolean).pop()}.json`), JSON.stringify(dump, null, 1));
 }
-if (dirs.length > 1) { const n = ALL.n, line = (f) => { const T = ALL[f]; return `${f.padEnd(5)} messages fully right ${(T.exact / n * 100).toFixed(1)}% · wires right ${(T.right / T.gold * 100).toFixed(1)}% (${T.right}/${T.gold}) · act found ${(T.acts / T.gold * 100).toFixed(1)}% · extra wires ${T.extra}`; };
+if (dirs.length > 1) { const n = ALL.n, pc = (x, T) => (x / T.gold * 100).toFixed(1) + "%", line = (f) => { const T = ALL[f]; return `${f.padEnd(5)} correct ${pc(T.right, T)} · not done ${pc(T.missed, T)} · done wrong ${pc(T.wrongAligned, T)} · plus ${T.extra} extra wires not asked for (${pc(T.extra, T)} of the gold count) · messages fully right ${(T.exact / n * 100).toFixed(1)}%`; };
   console.log(`\nALL (${dirs.join(" + ")}): ${n} messages, ${ALL.rules.gold} gold wires`); console.log("  " + line("rules")); console.log("  " + line("vss")); }

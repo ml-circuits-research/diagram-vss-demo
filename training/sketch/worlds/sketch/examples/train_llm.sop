@@ -13329,19 +13329,7 @@ attr=cyan
 @l2288 entity
 head=n_sofa
 
-@l2289 connect
-_text=connect them chain : n_alice , n_bob , n_carol
-_world=sketch
-_source=generator
-_template=connect.llm.ts
-_mood=command
-source=$l2290
-pairing=chain
-
-@l2290 entity
-head=them
-
-@l2291 arrange
+@l2289 arrange
 _text=arrange the whole canvas row
 _world=sketch
 _source=generator
@@ -13349,67 +13337,67 @@ _template=arrange.llm.ts
 _mood=command
 layout=row
 
-@l2292 set
+@l2290 set
 _text=color n_poppy to orange
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2293
+object=$l2291
 color=orange
 
-@l2293 entity
+@l2291 entity
 head=n_poppy
 
-@l2294 move
+@l2292 move
 _text=move n_kiosk 200 left
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2295
+object=$l2293
 direction=left
 amount=200
 
-@l2295 entity
+@l2293 entity
 head=n_kiosk
 
-@l2296 fact
+@l2294 fact
 _text=the n_rocket is a triangle
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2297
+object=$l2295
 shape=triangle
 
-@l2297 entity
+@l2295 entity
 head=n_rocket
 
-@l2298 check
+@l2296 check
 _text=is_q n_ox bigger than n_hen ?
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2299
-landmark=$l2300
+object=$l2297
+landmark=$l2298
 comparison=bigger
 
-@l2299 entity
+@l2297 entity
 head=n_ox
 
-@l2300 entity
+@l2298 entity
 head=n_hen
 
-@l2301 redo
+@l2299 redo
 _text=redo please
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l2302 extreme
+@l2300 extreme
 _text=extreme_q be the bottommost one
 _world=sketch
 _source=generator
@@ -13417,1029 +13405,1029 @@ _template=extreme.llm.ts
 _mood=command
 superlative=bottommost
 
-@l2303 move
+@l2301 move
 _text=move n_crow below n_nest
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2304
+object=$l2302
 relation=below
-landmark=$l2305
+landmark=$l2303
 
-@l2304 entity
+@l2302 entity
 head=n_crow
 
-@l2305 entity
+@l2303 entity
 head=n_nest
 
-@l2306 list
+@l2304 list
 _text=which rules apply
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l2307
+object=$l2305
 
-@l2307 entity
+@l2305 entity
 head=rules
 
-@l2308 delete
+@l2306 delete
 _text=delete all the white shapes
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l2309
+object=$l2307
 
-@l2309 entity
+@l2307 entity
 head=shapes
 attr=white
 det=all
 
-@l2310 create
+@l2308 create
 _text=draw a teal square named n_barn above the n_ranch
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2311
+object=$l2309
 name=n_barn
 relation=above
-landmark=$l2312
+landmark=$l2310
 
-@l2311 entity
+@l2309 entity
 head=square
 attr=teal
 
-@l2312 entity
+@l2310 entity
 head=n_ranch
 
-@l2313 connect
+@l2311 connect
 _text=connect n_spleen to n_liver using a thin dotted line
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l2314
-target=$l2315
+source=$l2312
+target=$l2313
 style=dotted
-edge=$l2316
+edge=$l2314
 
-@l2314 entity
+@l2312 entity
 head=n_spleen
 
-@l2315 entity
+@l2313 entity
 head=n_liver
 
-@l2316 entity
+@l2314 entity
 head=line
 
-@l2317 exists
+@l2315 exists
 _text=is_there a navy ellipse
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l2318
+object=$l2316
 
-@l2318 entity
+@l2316 entity
 head=ellipse
 attr=navy
 
-@l2319 set
+@l2317 set
 _text=make n_sprout a lime hexagon
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2320
+object=$l2318
 shape=hexagon
 color=lime
 
-@l2320 entity
+@l2318 entity
 head=n_sprout
 
-@l2321 check
+@l2319 check
 _text=is_q n_anna left_of n_ben
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2322
+object=$l2320
 relation=left_of
-landmark=$l2323
+landmark=$l2321
 
-@l2322 entity
+@l2320 entity
 head=n_anna
 
-@l2323 entity
+@l2321 entity
 head=n_ben
 
-@l2324 resize
+@l2322 resize
 _text=scale n_spark up
 _world=sketch
 _source=generator
 _template=resize.llm.ts
 _mood=command
-object=$l2325
+object=$l2323
 
-@l2325 entity
+@l2323 entity
 head=n_spark
 
-@l2326 list
+@l2324 list
 _text=which be all the stars ?
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l2327
+object=$l2325
 
-@l2327 entity
+@l2325 entity
 head=stars
 
-@l2328 rename
+@l2326 rename
 _text=rename oldest hexagon n_anchor
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l2329
+object=$l2327
 name=n_anchor
 
-@l2329 entity
+@l2327 entity
 head=hexagon
 det=oldest
 
-@l2330 property
+@l2328 property
 _text=where_is n_barrel
 _world=sketch
 _source=generator
 _template=property.llm.ts
 _mood=command
-object=$l2331
+object=$l2329
 
-@l2331 entity
+@l2329 entity
 head=n_barrel
 
-@l2332 create
+@l2330 create
 _text=draw a gray star in between the n_roof and the n_wall
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2333
+object=$l2331
 relation=between
-landmark=$l2334
-landmark2=$l2335
+landmark=$l2332
+landmark2=$l2333
 
-@l2333 entity
+@l2331 entity
 head=star
 attr=gray
 
-@l2334 entity
+@l2332 entity
 head=n_roof
 
-@l2335 entity
+@l2333 entity
 head=n_wall
 
-@l2336 fact
+@l2334 fact
 _text=n_pond is right_of n_dam
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2337
+object=$l2335
 relation=right_of
-landmark=$l2338
+landmark=$l2336
 
-@l2337 entity
+@l2335 entity
 head=n_pond
 
-@l2338 entity
+@l2336 entity
 head=n_dam
 
-@l2339 duplicate
+@l2337 duplicate
 _text=duplicate the n_notebook
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l2340
+object=$l2338
 
-@l2340 entity
+@l2338 entity
 head=n_notebook
 
-@l2341 nearest
+@l2339 nearest
 _text=nearest_q shape be closest to n_pole
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l2342
-landmark=$l2343
+object=$l2340
+landmark=$l2341
 superlative=closest
 
-@l2342 entity
+@l2340 entity
 head=shape
 
-@l2343 entity
+@l2341 entity
 head=n_pole
 
-@l2344 check
+@l2342 check
 _text=is_q n_finch navy
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2345
+object=$l2343
 color=navy
 
-@l2345 entity
+@l2343 entity
 head=n_finch
 
-@l2346 disconnect
+@l2344 disconnect
 _text=disconnect n_ned from n_meg
 _world=sketch
 _source=generator
 _template=disconnect.llm.ts
 _mood=command
-source=$l2347
-target=$l2348
+source=$l2345
+target=$l2346
 
-@l2347 entity
+@l2345 entity
 head=n_ned
 
-@l2348 entity
+@l2346 entity
 head=n_meg
 
-@l2349 set
+@l2347 set
 _text=color n_chip black
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2350
+object=$l2348
 color=black
 
-@l2350 entity
+@l2348 entity
 head=n_chip
 
-@l2351 connect
+@l2349 connect
 _text=connect n_fan up to n_vent with an plain line
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l2352
-target=$l2353
+source=$l2350
+target=$l2351
 arrow=plain
-edge=$l2354
+edge=$l2352
 
-@l2352 entity
+@l2350 entity
 head=n_fan
 
-@l2353 entity
+@l2351 entity
 head=n_vent
 
-@l2354 entity
+@l2352 entity
 head=line
 
-@l2355 move
+@l2353 move
 _text=move the n_table up 30 px
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2356
+object=$l2354
 direction=up
 amount=30
 
-@l2356 entity
+@l2354 entity
 head=n_table
 
-@l2357 delete
+@l2355 delete
 _text=delete n_gum
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l2358
+object=$l2356
 
-@l2358 entity
+@l2356 entity
 head=n_gum
 
-@l2359 undo
+@l2357 undo
 _text=nope , undo
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l2360 count
+@l2358 count
 _text=how_many connection be in the canvas
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
 
-@l2361 fact
+@l2359 fact
 _text=n_jam is purple
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2362
+object=$l2360
 color=purple
 
-@l2362 entity
+@l2360 entity
 head=n_jam
 
-@l2363 swap
+@l2361 swap
 _text=swap the positions of n_desk and n_chair
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l2364
-target=$l2365
+object=$l2362
+target=$l2363
 
-@l2364 entity
+@l2362 entity
 head=n_desk
 
-@l2365 entity
+@l2363 entity
 head=n_chair
 
-@l2366 set
+@l2364 set
 _text=make the n_nebula huge
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2367
+object=$l2365
 size=huge
 
-@l2367 entity
+@l2365 entity
 head=n_nebula
 
-@l2368 nearest
+@l2366 nearest
 _text=nearest_q shape be the farthest from n_boat
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l2369
-landmark=$l2370
+object=$l2367
+landmark=$l2368
 superlative=farthest
 
-@l2369 entity
+@l2367 entity
 head=shape
 
-@l2370 entity
+@l2368 entity
 head=n_boat
 
-@l2371 connected
+@l2369 connected
 _text=connected_q n_hose and n_tap linked ?
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l2372
-landmark=$l2373
+object=$l2370
+landmark=$l2371
 
-@l2372 entity
+@l2370 entity
 head=n_hose
 
-@l2373 entity
+@l2371 entity
 head=n_tap
 
-@l2374 redo
+@l2372 redo
 _text=redo what i just undid
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l2375 resize
+@l2373 resize
 _text=smaller_v newest circle
 _world=sketch
 _source=generator
 _template=resize.llm.ts
 _mood=command
-object=$l2376
+object=$l2374
 
-@l2376 entity
+@l2374 entity
 head=circle
 det=newest
 
-@l2377 set
+@l2375 set
 _text=color n_dice to medium
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2378
+object=$l2376
 size=medium
 
-@l2378 entity
+@l2376 entity
 head=n_dice
 
-@l2379 describe
+@l2377 describe
 _text=describe everything
 _world=sketch
 _source=generator
 _template=describe.llm.ts
 _mood=command
 
-@l2380 move
+@l2378 move
 _text=move n_wasp 45 right
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2381
+object=$l2379
 direction=right
 amount=45
 
-@l2381 entity
+@l2379 entity
 head=n_wasp
 
-@l2382 duplicate
+@l2380 duplicate
 _text=duplicate n_taxi 4 times
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l2383
+object=$l2381
 quantity=4
 
-@l2383 entity
+@l2381 entity
 head=n_taxi
 
-@l2384 fact
+@l2382 fact
 _text=n_lynx is large
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2385
+object=$l2383
 size=large
 
-@l2385 entity
+@l2383 entity
 head=n_lynx
 
-@l2386 degree
+@l2384 degree
 _text=degree_q connection does n_drum have
 _world=sketch
 _source=generator
 _template=degree.llm.ts
 _mood=command
-object=$l2387
+object=$l2385
 
-@l2387 entity
+@l2385 entity
 head=n_drum
 
-@l2388 rename
+@l2386 rename
 _text=rename n_shoe to n_boot
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l2389
+object=$l2387
 name=n_boot
 
-@l2389 entity
+@l2387 entity
 head=n_shoe
 
-@l2390 create
+@l2388 create
 _text=draw a pink circle left_of the n_library
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2391
+object=$l2389
 relation=left_of
-landmark=$l2392
+landmark=$l2390
 
-@l2391 entity
+@l2389 entity
 head=circle
 attr=pink
 
-@l2392 entity
+@l2390 entity
 head=n_library
 
-@l2393 count
+@l2391 count
 _text=how_many circles
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l2394
+object=$l2392
 
-@l2394 entity
+@l2392 entity
 head=circles
 
-@l2395 delete
+@l2393 delete
 _text=delete the n_mop
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l2396
+object=$l2394
 
-@l2396 entity
+@l2394 entity
 head=n_mop
 
-@l2397 create
+@l2395 create
 _text=draw a gray rectangle named n_cooler below n_fridge
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2398
+object=$l2396
 name=n_cooler
 relation=below
-landmark=$l2399
+landmark=$l2397
 
-@l2398 entity
+@l2396 entity
 head=rectangle
 attr=gray
 
-@l2399 entity
+@l2397 entity
 head=n_fridge
 
-@l2400 swap
+@l2398 swap
 _text=swap : n_sun and n_moon
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l2401
-target=$l2402
+object=$l2399
+target=$l2400
 
-@l2401 entity
+@l2399 entity
 head=n_sun
 
-@l2402 entity
+@l2400 entity
 head=n_moon
 
-@l2403 fact
+@l2401 fact
 _text=n_buoy is small
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2404
+object=$l2402
 size=small
 
-@l2404 entity
+@l2402 entity
 head=n_buoy
 
-@l2405 create
+@l2403 create
 _text=draw a purple triangle above the n_hub
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2406
+object=$l2404
 relation=above
-landmark=$l2407
+landmark=$l2405
 
-@l2406 entity
+@l2404 entity
 head=triangle
 attr=purple
 
-@l2407 entity
+@l2405 entity
 head=n_hub
 
-@l2408 duplicate
+@l2406 duplicate
 _text=draw a duplicate of the red rectangle
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l2409
+object=$l2407
 
-@l2409 entity
+@l2407 entity
 head=rectangle
 attr=red
 
-@l2410 arrange
+@l2408 arrange
 _text=arrange the diamonds ring
 _world=sketch
 _source=generator
 _template=arrange.llm.ts
 _mood=command
-object=$l2411
+object=$l2409
 layout=ring
 
-@l2411 entity
+@l2409 entity
 head=diamonds
 
-@l2412 set
+@l2410 set
 _text=make n_beacon a star
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2413
+object=$l2411
 shape=star
 
-@l2413 entity
+@l2411 entity
 head=n_beacon
 
-@l2414 move
+@l2412 move
 _text=move the n_jet above left 90 px
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2415
+object=$l2413
 direction=left
 amount=90
 
-@l2415 entity
+@l2413 entity
 head=n_jet
 
-@l2416 fact
+@l2414 fact
 _text=n_pasta is a rectangle
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2417
+object=$l2415
 shape=rectangle
 
-@l2417 entity
+@l2415 entity
 head=n_pasta
 
-@l2418 check
+@l2416 check
 _text=is_q n_mars huge
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2419
+object=$l2417
 size=huge
 
-@l2419 entity
+@l2417 entity
 head=n_mars
 
-@l2420 redo
+@l2418 redo
 _text=oops , bring it back , redo
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l2421 distribute
+@l2419 distribute
 _text=distribute n_cup , n_mug and n_jug along the horizontally axis
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l2422
+object=$l2420
 axis=horizontally
 
-@l2422 entity
+@l2420 entity
 head=n_cup
 
-@l2423 delete
+@l2421 delete
 _text=delete newest circle
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l2424
+object=$l2422
 
-@l2424 entity
+@l2422 entity
 head=circle
 det=newest
 
-@l2425 connect
+@l2423 connect
 _text=connect n_mixer to n_oven with a dashed arrow in orange
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l2426
-target=$l2427
+source=$l2424
+target=$l2425
 style=dashed
-edge=$l2428
+edge=$l2426
 
-@l2426 entity
+@l2424 entity
 head=n_mixer
 
-@l2427 entity
+@l2425 entity
 head=n_oven
 
-@l2428 entity
+@l2426 entity
 head=arrow
 attr=orange
 
-@l2429 set
+@l2427 set
 _text=make the color of n_wasp to gold
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2430
+object=$l2428
 color=gold
 
-@l2430 entity
+@l2428 entity
 head=n_wasp
 
-@l2431 check
+@l2429 check
 _text=is_q n_pine far from n_fir , i mean be it above it
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2432
+object=$l2430
 relation=above
-landmark=$l2433
+landmark=$l2431
 
-@l2432 entity
+@l2430 entity
 head=n_pine
 
-@l2433 entity
+@l2431 entity
 head=n_fir
 
-@l2434 resize
+@l2432 resize
 _text=smaller_v n_pad
 _world=sketch
 _source=generator
 _template=resize.llm.ts
 _mood=command
-object=$l2435
+object=$l2433
 
-@l2435 entity
+@l2433 entity
 head=n_pad
 
-@l2436 property
+@l2434 property
 _text=how_big the n_lotus
 _world=sketch
 _source=generator
 _template=property.llm.ts
 _mood=command
-object=$l2437
+object=$l2435
 
-@l2437 entity
+@l2435 entity
 head=n_lotus
 
-@l2438 create
+@l2436 create
 _text=draw a red diamond between n_lamp and n_shade
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2439
+object=$l2437
 relation=between
-landmark=$l2440
-landmark2=$l2441
+landmark=$l2438
+landmark2=$l2439
 
-@l2439 entity
+@l2437 entity
 head=diamond
 attr=red
 
-@l2440 entity
+@l2438 entity
 head=n_lamp
 
-@l2441 entity
+@l2439 entity
 head=n_shade
 
-@l2442 arrange
+@l2440 arrange
 _text=neatly arrange the circles grid
 _world=sketch
 _source=generator
 _template=arrange.llm.ts
 _mood=command
-object=$l2443
+object=$l2441
 layout=grid
 
-@l2443 entity
+@l2441 entity
 head=circles
 
-@l2444 check
+@l2442 check
 _text=is_q n_atlas smaller than n_globe or not
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2445
-landmark=$l2446
+object=$l2443
+landmark=$l2444
 comparison=smaller
 
-@l2445 entity
+@l2443 entity
 head=n_atlas
 
-@l2446 entity
+@l2444 entity
 head=n_globe
 
-@l2447 fact
+@l2445 fact
 _text=n_oven is below n_stove
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2448
+object=$l2446
 relation=below
-landmark=$l2449
+landmark=$l2447
 
-@l2448 entity
+@l2446 entity
 head=n_oven
 
-@l2449 entity
+@l2447 entity
 head=n_stove
 
-@l2450 duplicate
+@l2448 duplicate
 _text=duplicate it
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l2451
+object=$l2449
 
-@l2451 entity
+@l2449 entity
 head=it
 
-@l2452 create
+@l2450 create
 _text=draw 2 small orange squares
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2453
+object=$l2451
 size=small
 quantity=2
 
-@l2453 entity
+@l2451 entity
 head=squares
 attr=orange
 
-@l2454 nearest
+@l2452 nearest
 _text=nearest_q be closest to n_arch
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-landmark=$l2455
+landmark=$l2453
 superlative=closest
 
-@l2455 entity
+@l2453 entity
 head=n_arch
 
-@l2456 check
+@l2454 check
 _text=is_q the n_mole a hexagon ?
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2457
+object=$l2455
 shape=hexagon
 
-@l2457 entity
+@l2455 entity
 head=n_mole
 
-@l2458 disconnect
+@l2456 disconnect
 _text=disconnect n_tim from n_tom
 _world=sketch
 _source=generator
 _template=disconnect.llm.ts
 _mood=command
-source=$l2459
-target=$l2460
+source=$l2457
+target=$l2458
 
-@l2459 entity
+@l2457 entity
 head=n_tim
 
-@l2460 entity
+@l2458 entity
 head=n_tom
 
-@l2461 set
+@l2459 set
 _text=color every circle blue
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2462
+object=$l2460
 color=blue
 
-@l2462 entity
+@l2460 entity
 head=circle
 det=every
 
-@l2463 connect
+@l2461 connect
 _text=connect n_plug and n_socket with a two_way arrow
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l2464
-target=$l2465
+source=$l2462
+target=$l2463
 arrow=two_way
 
-@l2464 entity
+@l2462 entity
 head=n_plug
 
-@l2465 entity
+@l2463 entity
 head=n_socket
 
-@l2466 delete
+@l2464 delete
 _text=delete the n_ghost
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l2467
+object=$l2465
 
-@l2467 entity
+@l2465 entity
 head=n_ghost
 
-@l2468 undo
+@l2466 undo
 _text=undo
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l2469 fact
+@l2467 fact
 _text=n_haze is gray
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2470
+object=$l2468
 color=gray
 
-@l2470 entity
+@l2468 entity
 head=n_haze
 
-@l2471 swap
+@l2469 swap
 _text=swap n_wick and n_wax please
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l2472
-target=$l2473
+object=$l2470
+target=$l2471
 
-@l2472 entity
+@l2470 entity
 head=n_wick
 
-@l2473 entity
+@l2471 entity
 head=n_wax
 
-@l2474 set
+@l2472 set
 _text=make the n_rink into a huge diamond
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2475
+object=$l2473
 shape=diamond
 size=huge
 
-@l2475 entity
+@l2473 entity
 head=n_rink
 
-@l2476 forget
+@l2474 forget
 _text=forget the standing rules
 _world=sketch
 _source=generator
 _template=forget.llm.ts
 _mood=command
 
-@l2477 create
+@l2475 create
 _text=draw a brown star named n_ranger right_side
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2478
+object=$l2476
 name=n_ranger
 region=right_side
 
-@l2478 entity
+@l2476 entity
 head=star
 attr=brown
 
-@l2479 connected
+@l2477 connected
 _text=connected_q n_bud and n_stem connected ?
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l2480
-landmark=$l2481
+object=$l2478
+landmark=$l2479
 
-@l2480 entity
+@l2478 entity
 head=n_bud
 
-@l2481 entity
+@l2479 entity
 head=n_stem
 
-@l2482 arrange
+@l2480 arrange
 _text=arrange the whole shape column
 _world=sketch
 _source=generator
@@ -14447,346 +14435,346 @@ _template=arrange.llm.ts
 _mood=command
 layout=column
 
-@l2483 redo
+@l2481 redo
 _text=redo
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l2484 move
+@l2482 move
 _text=move the n_wolf 150 down
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2485
+object=$l2483
 direction=down
 amount=150
 
-@l2485 entity
+@l2483 entity
 head=n_wolf
 
-@l2486 connect
+@l2484 connect
 _text=connect n_dial to n_knob , solid green line labeled t_turn
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
 text=t_turn
-source=$l2487
-target=$l2488
-edge=$l2489
+source=$l2485
+target=$l2486
+edge=$l2487
 
-@l2487 entity
+@l2485 entity
 head=n_dial
 
-@l2488 entity
+@l2486 entity
 head=n_knob
 
-@l2489 entity
+@l2487 entity
 head=line
 attr=green
 
-@l2490 list
+@l2488 list
 _text=which the shapes that be not circles.. . sorry , list everything not_red
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l2491
+object=$l2489
 notcolor=not_red
 
-@l2491 entity
+@l2489 entity
 head=shapes
 
-@l2492 distribute
+@l2490 distribute
 _text=space n_a1 , n_a2 , n_a3 vertically
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l2493
+object=$l2491
 axis=vertically
 
-@l2493 entity
+@l2491 entity
 head=n_a1
 
-@l2494 create
+@l2492 create
 _text=yo draw in a lime circle
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2495
+object=$l2493
 
-@l2495 entity
+@l2493 entity
 head=circle
 attr=lime
 
-@l2496 duplicate
+@l2494 duplicate
 _text=duplicate n_wall 3 times
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l2497
+object=$l2495
 quantity=3
 
-@l2497 entity
+@l2495 entity
 head=n_wall
 
-@l2498 check
+@l2496 check
 _text=is_q n_dew taller.. . i mean , be n_dew above n_fog
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2499
+object=$l2497
 relation=above
-landmark=$l2500
+landmark=$l2498
 
-@l2499 entity
+@l2497 entity
 head=n_dew
 
-@l2500 entity
+@l2498 entity
 head=n_fog
 
-@l2501 fact
+@l2499 fact
 _text=n_elm is left_of n_oak
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2502
+object=$l2500
 relation=left_of
-landmark=$l2503
+landmark=$l2501
 
-@l2502 entity
+@l2500 entity
 head=n_elm
 
-@l2503 entity
+@l2501 entity
 head=n_oak
 
-@l2504 list
+@l2502 list
 _text=which be the active rules
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l2505
+object=$l2503
 
-@l2505 entity
+@l2503 entity
 head=rules
 
-@l2506 rename
+@l2504 rename
 _text=rename n_loom to n_weaver
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l2507
+object=$l2505
 name=n_weaver
 
-@l2507 entity
+@l2505 entity
 head=n_loom
 
-@l2508 set
+@l2506 set
 _text=give the n_manager a navy color
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2509
+object=$l2507
 color=navy
 
-@l2509 entity
+@l2507 entity
 head=n_manager
 
-@l2510 move
+@l2508 move
 _text=move it a small right , the n_cursor , about 10 px
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2511
+object=$l2509
 direction=right
 amount=10
 
-@l2511 entity
+@l2509 entity
 head=n_cursor
 
-@l2512 exists
+@l2510 exists
 _text=is_there gold shapes
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l2513
+object=$l2511
 
-@l2513 entity
+@l2511 entity
 head=shapes
 attr=gold
 
-@l2514 delete
+@l2512 delete
 _text=delete the n_spare
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l2515
+object=$l2513
 
-@l2515 entity
+@l2513 entity
 head=n_spare
 
-@l2516 swap
+@l2514 swap
 _text=let n_wizard and n_troll swap positions
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l2517
-target=$l2518
+object=$l2515
+target=$l2516
 
-@l2517 entity
+@l2515 entity
 head=n_wizard
 
-@l2518 entity
+@l2516 entity
 head=n_troll
 
-@l2519 align
+@l2517 align
 _text=align n_q1 n_q2 n_q3 on a horizontally line
 _world=sketch
 _source=generator
 _template=align.llm.ts
 _mood=command
-object=$l2520
+object=$l2518
 axis=horizontally
 
-@l2520 entity
+@l2518 entity
 head=n_q1
 
-@l2521 fact
+@l2519 fact
 _text=n_beam is a diamond
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2522
+object=$l2520
 shape=diamond
 
-@l2522 entity
+@l2520 entity
 head=n_beam
 
-@l2523 create
+@l2521 create
 _text=draw a brown hexagon right_of n_bench
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2524
+object=$l2522
 relation=right_of
-landmark=$l2525
+landmark=$l2523
 
-@l2524 entity
+@l2522 entity
 head=hexagon
 attr=brown
 
-@l2525 entity
+@l2523 entity
 head=n_bench
 
-@l2526 arrange
+@l2524 arrange
 _text=arrange all the hexagons row
 _world=sketch
 _source=generator
 _template=arrange.llm.ts
 _mood=command
-object=$l2527
+object=$l2525
 layout=row
 
-@l2527 entity
+@l2525 entity
 head=hexagons
 det=all
 
-@l2528 set
+@l2526 set
 _text=color the n_tuna cyan
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2529
+object=$l2527
 color=cyan
 
-@l2529 entity
+@l2527 entity
 head=n_tuna
 
-@l2530 fact
+@l2528 fact
 _text=n_orca is huge
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2531
+object=$l2529
 size=huge
 
-@l2531 entity
+@l2529 entity
 head=n_orca
 
-@l2532 check
+@l2530 check
 _text=is_q n_tower bigger than n_hut
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2533
-landmark=$l2534
+object=$l2531
+landmark=$l2532
 comparison=bigger
 
-@l2533 entity
+@l2531 entity
 head=n_tower
 
-@l2534 entity
+@l2532 entity
 head=n_hut
 
-@l2535 redo
+@l2533 redo
 _text=redo newest undone make
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l2536 create
+@l2534 create
 _text=draw a small white ellipse named n_boat next_to the n_lake
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2537
+object=$l2535
 size=small
 name=n_boat
 relation=next_to
-landmark=$l2538
+landmark=$l2536
 
-@l2537 entity
+@l2535 entity
 head=ellipse
 attr=white
 
-@l2538 entity
+@l2536 entity
 head=n_lake
 
-@l2539 distribute
+@l2537 distribute
 _text=distribute n_n1 , n_n2 , n_n3 and n_n4 horizontally
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l2540
+object=$l2538
 axis=horizontally
 
-@l2540 entity
+@l2538 entity
 head=n_n1
 
-@l2541 extreme
+@l2539 extreme
 _text=extreme_q one be the topmost on the canvas
 _world=sketch
 _source=generator
@@ -14794,117 +14782,117 @@ _template=extreme.llm.ts
 _mood=command
 superlative=topmost
 
-@l2542 move
+@l2540 move
 _text=move the n_chair left_of the n_table
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2543
+object=$l2541
 relation=left_of
-landmark=$l2544
+landmark=$l2542
 
-@l2543 entity
+@l2541 entity
 head=n_chair
 
-@l2544 entity
+@l2542 entity
 head=n_table
 
-@l2545 delete
+@l2543 delete
 _text=delete the lime circles
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l2546
+object=$l2544
 
-@l2546 entity
+@l2544 entity
 head=circles
 attr=lime
 
-@l2547 create
+@l2545 create
 _text=draw a tiny black circle bottom
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2548
+object=$l2546
 size=tiny
 region=bottom
 
-@l2548 entity
+@l2546 entity
 head=circle
 attr=black
 
-@l2549 exists
+@l2547 exists
 _text=is_there a hexagon right_of n_dock
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l2550
+object=$l2548
 relation=right_of
-landmark=$l2551
+landmark=$l2549
 
-@l2550 entity
+@l2548 entity
 head=hexagon
 
-@l2551 entity
+@l2549 entity
 head=n_dock
 
-@l2552 check
+@l2550 check
 _text=is_q n_cliff left_of n_beach
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2553
+object=$l2551
 relation=left_of
-landmark=$l2554
+landmark=$l2552
 
-@l2553 entity
+@l2551 entity
 head=n_cliff
 
-@l2554 entity
+@l2552 entity
 head=n_beach
 
-@l2555 resize
+@l2553 resize
 _text=smaller_v the n_cone a bit
 _world=sketch
 _source=generator
 _template=resize.llm.ts
 _mood=command
-object=$l2556
+object=$l2554
 
-@l2556 entity
+@l2554 entity
 head=n_cone
 
-@l2557 list
+@l2555 list
 _text=which pink shapes be there
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l2558
+object=$l2556
 
-@l2558 entity
+@l2556 entity
 head=shapes
 attr=pink
 
-@l2559 rename
+@l2557 rename
 _text=rename oldest star n_polaris
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l2560
+object=$l2558
 name=n_polaris
 
-@l2560 entity
+@l2558 entity
 head=star
 det=oldest
 
-@l2561 rule
+@l2559 rule
 _text=from_now_on whatever i draw is large
 _world=sketch
 _source=generator
@@ -14912,817 +14900,829 @@ _template=rule.llm.ts
 _mood=command
 size=large
 
-@l2562 property
+@l2560 property
 _text=how_big n_brie
 _world=sketch
 _source=generator
 _template=property.llm.ts
 _mood=command
-object=$l2563
+object=$l2561
 
-@l2563 entity
+@l2561 entity
 head=n_brie
 
-@l2564 check
+@l2562 check
 _text=is_q n_moth smaller than n_bat
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2565
-landmark=$l2566
+object=$l2563
+landmark=$l2564
 comparison=smaller
 
-@l2565 entity
+@l2563 entity
 head=n_moth
 
-@l2566 entity
+@l2564 entity
 head=n_bat
 
-@l2567 describe
+@l2565 describe
 _text=describe canvas
 _world=sketch
 _source=generator
 _template=describe.llm.ts
 _mood=command
-object=$l2568
+object=$l2566
 
-@l2568 entity
+@l2566 entity
 head=canvas
 
-@l2569 fact
+@l2567 fact
 _text=n_sink is below n_tap
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2570
+object=$l2568
 relation=below
-landmark=$l2571
+landmark=$l2569
 
-@l2570 entity
+@l2568 entity
 head=n_sink
 
-@l2571 entity
+@l2569 entity
 head=n_tap
 
-@l2572 create
+@l2570 create
 _text=draw down 5 teal squares
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2573
+object=$l2571
 quantity=5
 
-@l2573 entity
+@l2571 entity
 head=squares
 attr=teal
 
-@l2574 nearest
+@l2572 nearest
 _text=nearest_q be closest to n_bell
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-landmark=$l2575
+landmark=$l2573
 superlative=closest
 
-@l2575 entity
+@l2573 entity
 head=n_bell
 
-@l2576 check
+@l2574 check
 _text=is_q n_wasp black
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2577
+object=$l2575
 color=black
 
-@l2577 entity
+@l2575 entity
 head=n_wasp
 
-@l2578 set
+@l2576 set
 _text=color the n_canoe to indigo and tiny
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2579
+object=$l2577
 color=indigo
 size=tiny
 
-@l2579 entity
+@l2577 entity
 head=n_canoe
 
-@l2580 move
+@l2578 move
 _text=move n_bin 70 px right
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2581
+object=$l2579
 direction=right
 amount=70
 
-@l2581 entity
+@l2579 entity
 head=n_bin
 
-@l2582 extreme
+@l2580 extreme
 _text=extreme_q be the rightmost shape here
 _world=sketch
 _source=generator
 _template=extreme.llm.ts
 _mood=command
-object=$l2583
+object=$l2581
 superlative=rightmost
 
-@l2583 entity
+@l2581 entity
 head=shape
 
-@l2584 delete
+@l2582 delete
 _text=delete the n_husk
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l2585
+object=$l2583
 
-@l2585 entity
+@l2583 entity
 head=n_husk
 
-@l2586 count
+@l2584 count
 _text=how_many arrow be there in total
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
 
-@l2587 fact
+@l2585 fact
 _text=n_cyan1 is cyan
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2588
+object=$l2586
 color=cyan
 
-@l2588 entity
+@l2586 entity
 head=n_cyan1
 
-@l2589 swap
+@l2587 swap
 _text=swap the n_pen and the n_ink
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l2590
-target=$l2591
+object=$l2588
+target=$l2589
 
-@l2590 entity
+@l2588 entity
 head=n_pen
 
-@l2591 entity
+@l2589 entity
 head=n_ink
 
-@l2592 set
+@l2590 set
 _text=make n_hull orange
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2593
+object=$l2591
 color=orange
 
-@l2593 entity
+@l2591 entity
 head=n_hull
 
-@l2594 nearest
+@l2592 nearest
 _text=nearest_q be the shape farthest away from n_drift
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l2595
-landmark=$l2596
+object=$l2593
+landmark=$l2594
 superlative=farthest
 
-@l2595 entity
+@l2593 entity
 head=shape
 
-@l2596 entity
+@l2594 entity
 head=n_drift
 
-@l2597 create
+@l2595 create
 _text=draw a purple diamond named n_jewel top_left
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2598
+object=$l2596
 name=n_jewel
 region=top_left
 
-@l2598 entity
+@l2596 entity
 head=diamond
 attr=purple
 
-@l2599 connected
+@l2597 connected
 _text=connected_q n_egg connected with n_hen
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l2600
-landmark=$l2601
+object=$l2598
+landmark=$l2599
 
-@l2600 entity
+@l2598 entity
 head=n_egg
 
-@l2601 entity
+@l2599 entity
 head=n_hen
 
-@l2602 redo
+@l2600 redo
 _text=redo , thanks
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l2603 move
+@l2601 move
 _text=move n_barge bottom_left
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2604
+object=$l2602
 region=bottom_left
 
-@l2604 entity
+@l2602 entity
 head=n_barge
 
-@l2605 list
+@l2603 list
 _text=which all the diamonds
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l2606
+object=$l2604
 
-@l2606 entity
+@l2604 entity
 head=diamonds
 
-@l2607 duplicate
+@l2605 duplicate
 _text=duplicate the n_ladder 2 times
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l2608
+object=$l2606
 quantity=2
 
-@l2608 entity
+@l2606 entity
 head=n_ladder
 
-@l2609 describe
+@l2607 describe
 _text=describe the n_kite
 _world=sketch
 _source=generator
 _template=describe.llm.ts
 _mood=command
-object=$l2610
+object=$l2608
 
-@l2610 entity
+@l2608 entity
 head=n_kite
 
-@l2611 check
+@l2609 check
 _text=is_q the n_jug blue ?
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2612
+object=$l2610
 color=blue
 
-@l2612 entity
+@l2610 entity
 head=n_jug
 
-@l2613 fact
+@l2611 fact
 _text=n_moat is right_of n_castle
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2614
+object=$l2612
 relation=right_of
-landmark=$l2615
+landmark=$l2613
 
-@l2614 entity
+@l2612 entity
 head=n_moat
 
-@l2615 entity
+@l2613 entity
 head=n_castle
 
-@l2616 property
+@l2614 property
 _text=where_is n_weir located
 _world=sketch
 _source=generator
 _template=property.llm.ts
 _mood=command
-object=$l2617
+object=$l2615
 
-@l2617 entity
+@l2615 entity
 head=n_weir
 
-@l2618 count
+@l2616 count
 _text=how_many number of stars
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l2619
+object=$l2617
 
-@l2619 entity
+@l2617 entity
 head=stars
 
-@l2620 rename
+@l2618 rename
 _text=rename the n_dew n_mist
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l2621
+object=$l2619
 name=n_mist
 
-@l2621 entity
+@l2619 entity
 head=n_dew
 
-@l2622 degree
+@l2620 degree
 _text=degree_q connection does the n_brook have
 _world=sketch
 _source=generator
 _template=degree.llm.ts
 _mood=command
-object=$l2623
+object=$l2621
 
-@l2623 entity
+@l2621 entity
 head=n_brook
 
-@l2624 list
+@l2622 list
 _text=which rules am i running with
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l2625
+object=$l2623
 
-@l2625 entity
+@l2623 entity
 head=rules
 
-@l2626 count
+@l2624 count
 _text=how_many white shapes
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l2627
+object=$l2625
 
-@l2627 entity
+@l2625 entity
 head=shapes
 attr=white
 
-@l2628 exists
+@l2626 exists
 _text=is_there a green triangle anywhere
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l2629
+object=$l2627
 
-@l2629 entity
+@l2627 entity
 head=triangle
 attr=green
 
-@l2630 describe
+@l2628 describe
 _text=describe canvas , in a nutshell
 _world=sketch
 _source=generator
 _template=describe.llm.ts
 _mood=command
-object=$l2631
+object=$l2629
 
-@l2631 entity
+@l2629 entity
 head=canvas
 
-@l2632 nearest
+@l2630 nearest
 _text=nearest_q be the closest shape to n_pivot
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l2633
-landmark=$l2634
+object=$l2631
+landmark=$l2632
 superlative=closest
 
-@l2633 entity
+@l2631 entity
 head=shape
 
-@l2634 entity
+@l2632 entity
 head=n_pivot
 
-@l2635 extreme
+@l2633 extreme
 _text=extreme_q shape be the biggest ?
 _world=sketch
 _source=generator
 _template=extreme.llm.ts
 _mood=command
-object=$l2636
+object=$l2634
 superlative=biggest
 
-@l2636 entity
+@l2634 entity
 head=shape
 
-@l2637 property
+@l2635 property
 _text=what_shape n_apple
 _world=sketch
 _source=generator
 _template=property.llm.ts
 _mood=command
-object=$l2638
+object=$l2636
 
-@l2638 entity
+@l2636 entity
 head=n_apple
 
-@l2639 check
+@l2637 check
 _text=is_q the n_ant smaller than the n_hill
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2640
-landmark=$l2641
+object=$l2638
+landmark=$l2639
 comparison=smaller
 
-@l2640 entity
+@l2638 entity
 head=n_ant
 
-@l2641 entity
+@l2639 entity
 head=n_hill
 
-@l2642 check
+@l2640 check
 _text=is_q the n_truck bigger than the n_van
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2643
-landmark=$l2644
+object=$l2641
+landmark=$l2642
 comparison=bigger
 
-@l2643 entity
+@l2641 entity
 head=n_truck
 
-@l2644 entity
+@l2642 entity
 head=n_van
 
-@l2645 check
+@l2643 check
 _text=is_q n_toast a hexagon ?
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2646
+object=$l2644
 shape=hexagon
 
-@l2646 entity
+@l2644 entity
 head=n_toast
 
-@l2647 check
+@l2645 check
 _text=is_q n_bread next_to n_butter
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2648
+object=$l2646
 relation=next_to
-landmark=$l2649
+landmark=$l2647
 
-@l2648 entity
+@l2646 entity
 head=n_bread
 
-@l2649 entity
+@l2647 entity
 head=n_butter
 
-@l2650 list
+@l2648 list
 _text=which the orange shapes
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l2651
+object=$l2649
 
-@l2651 entity
+@l2649 entity
 head=shapes
 attr=orange
 
-@l2652 count
+@l2650 count
 _text=how_many circles be there
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l2653
+object=$l2651
 
-@l2653 entity
+@l2651 entity
 head=circles
 
-@l2654 nearest
+@l2652 nearest
 _text=nearest_q be the farthest shape from n_pond
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l2655
-landmark=$l2656
+object=$l2653
+landmark=$l2654
 superlative=farthest
 
-@l2655 entity
+@l2653 entity
 head=shape
 
-@l2656 entity
+@l2654 entity
 head=n_pond
 
-@l2657 extreme
+@l2655 extreme
 _text=extreme_q shape be the bottommost
 _world=sketch
 _source=generator
 _template=extreme.llm.ts
 _mood=command
-object=$l2658
+object=$l2656
 superlative=bottommost
 
-@l2658 entity
+@l2656 entity
 head=shape
 
-@l2659 property
+@l2657 property
 _text=what_color the n_saw ?
 _world=sketch
 _source=generator
 _template=property.llm.ts
 _mood=command
-object=$l2660
+object=$l2658
 
-@l2660 entity
+@l2658 entity
 head=n_saw
 
-@l2661 swap
+@l2659 swap
 _text=swap the n_rack with the n_shelf
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l2662
-target=$l2663
+object=$l2660
+target=$l2661
 
-@l2662 entity
+@l2660 entity
 head=n_rack
 
-@l2663 entity
+@l2661 entity
 head=n_shelf
 
-@l2664 disconnect
+@l2662 disconnect
 _text=disconnect n_tea away from n_cup
 _world=sketch
 _source=generator
 _template=disconnect.llm.ts
 _mood=command
-source=$l2665
-target=$l2666
+source=$l2663
+target=$l2664
 
-@l2665 entity
+@l2663 entity
 head=n_tea
 
-@l2666 entity
+@l2664 entity
 head=n_cup
 
-@l2667 align
+@l2665 align
 _text=align n_mic1 , n_mic2 and n_mic3 vertically
 _world=sketch
 _source=generator
 _template=align.llm.ts
 _mood=command
-object=$l2668
+object=$l2666
 axis=vertically
 
-@l2668 entity
+@l2666 entity
 head=n_mic1
 
-@l2669 align
+@l2667 align
 _text=align all the squares on the horizontally axis
 _world=sketch
 _source=generator
 _template=align.llm.ts
 _mood=command
-object=$l2670
+object=$l2668
 axis=horizontally
 
-@l2670 entity
+@l2668 entity
 head=squares
 det=all
 
-@l2671 distribute
+@l2669 distribute
 _text=distribute the triangles evenly vertically
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l2672
+object=$l2670
 axis=vertically
 
-@l2672 entity
+@l2670 entity
 head=triangles
 
-@l2673 distribute
+@l2671 distribute
 _text=distribute n_k1 , n_k2 , n_k3 horizontally please
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l2674
+object=$l2672
 axis=horizontally
 
-@l2674 entity
+@l2672 entity
 head=n_k1
 
-@l2675 undo
+@l2673 undo
 _text=undo newest step
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l2676 redo
+@l2674 redo
 _text=redo that
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l2677 forget
+@l2675 forget
 _text=forget the default rules
 _world=sketch
 _source=generator
 _template=forget.llm.ts
 _mood=command
 
-@l2678 forget
+@l2676 forget
 _text=forget all my defaults
 _world=sketch
 _source=generator
 _template=forget.llm.ts
 _mood=command
 
-@l2679 create
+@l2677 create
 _text=draw a magenta circle named n_lab below n_ward
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2680
+object=$l2678
 name=n_lab
 relation=below
-landmark=$l2681
+landmark=$l2679
 
-@l2680 entity
+@l2678 entity
 head=circle
 attr=magenta
 
-@l2681 entity
+@l2679 entity
 head=n_ward
 
-@l2682 create
+@l2680 create
 _text=draw a navy square left_of the n_roster
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2683
+object=$l2681
 relation=left_of
-landmark=$l2684
+landmark=$l2682
 
-@l2683 entity
+@l2681 entity
 head=square
 attr=navy
 
-@l2684 entity
+@l2682 entity
 head=n_roster
 
-@l2685 create
+@l2683 create
 _text=draw a black triangle named n_cap center
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2686
+object=$l2684
 name=n_cap
 region=center
 
-@l2686 entity
+@l2684 entity
 head=triangle
 attr=black
 
-@l2687 set
+@l2685 set
 _text=make n_pond brown
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2688
+object=$l2686
 color=brown
 
-@l2688 entity
+@l2686 entity
 head=n_pond
 
-@l2689 set
+@l2687 set
 _text=make n_slab into a circle
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2690
+object=$l2688
 shape=circle
 
-@l2690 entity
+@l2688 entity
 head=n_slab
 
-@l2691 set
+@l2689 set
 _text=make all the circles green
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2692
+object=$l2690
 color=green
 
-@l2692 entity
+@l2690 entity
 head=circles
 det=all
 
-@l2693 connect
+@l2691 connect
 _text=connect n_coop to n_pen
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l2694
-target=$l2695
+source=$l2692
+target=$l2693
 
-@l2694 entity
+@l2692 entity
 head=n_coop
 
-@l2695 entity
+@l2693 entity
 head=n_pen
 
-@l2696 connect
+@l2694 connect
 _text=connect n_ark to n_flood with a dashed line labeled t_escape
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
 text=t_escape
-source=$l2697
-target=$l2698
+source=$l2695
+target=$l2696
 style=dashed
-edge=$l2699
+edge=$l2697
 
-@l2697 entity
+@l2695 entity
 head=n_ark
 
-@l2698 entity
+@l2696 entity
 head=n_flood
 
-@l2699 entity
+@l2697 entity
 head=line
 
-@l2700 move
+@l2698 move
 _text=move n_pipe right_of the n_tank
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2701
+object=$l2699
 relation=right_of
-landmark=$l2702
+landmark=$l2700
 
-@l2701 entity
+@l2699 entity
 head=n_pipe
 
-@l2702 entity
+@l2700 entity
 head=n_tank
 
-@l2703 delete
+@l2701 delete
 _text=delete newest triangle
+_world=sketch
+_source=generator
+_template=delete.llm.ts
+_mood=command
+object=$l2702
+
+@l2702 entity
+head=triangle
+det=newest
+
+@l2703 delete
+_text=delete n_cat
 _world=sketch
 _source=generator
 _template=delete.llm.ts
@@ -15730,3047 +15730,3046 @@ _mood=command
 object=$l2704
 
 @l2704 entity
-head=triangle
-det=newest
-
-@l2705 delete
-_text=delete n_cat
-_world=sketch
-_source=generator
-_template=delete.llm.ts
-_mood=command
-object=$l2706
-
-@l2706 entity
 head=n_cat
 
-@l2707 resize
+@l2705 resize
 _text=bigger_v n_ship
 _world=sketch
 _source=generator
 _template=resize.llm.ts
 _mood=command
-object=$l2708
+object=$l2706
 
-@l2708 entity
+@l2706 entity
 head=n_ship
 
-@l2709 rename
+@l2707 rename
 _text=rename n_eel as n_moray
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l2710
+object=$l2708
 name=n_moray
 
-@l2710 entity
+@l2708 entity
 head=n_eel
 
-@l2711 duplicate
+@l2709 duplicate
 _text=draw a duplicate of n_bun
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l2712
+object=$l2710
 
-@l2712 entity
+@l2710 entity
 head=n_bun
 
-@l2713 duplicate
+@l2711 duplicate
 _text=duplicate n_sock 6 times
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l2714
+object=$l2712
 quantity=6
 
-@l2714 entity
+@l2712 entity
 head=n_sock
 
-@l2715 fact
+@l2713 fact
 _text=n_sprite is orange
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2716
+object=$l2714
 color=orange
 
-@l2716 entity
+@l2714 entity
 head=n_sprite
 
-@l2717 rule
+@l2715 rule
 _text=from_now_on circles are large
 _world=sketch
 _source=generator
 _template=rule.llm.ts
 _mood=command
-object=$l2718
+object=$l2716
 size=large
 
-@l2718 entity
+@l2716 entity
 head=circles
 
-@l2719 fact
+@l2717 fact
 _text=n_hub is above n_rim
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2720
+object=$l2718
 relation=above
-landmark=$l2721
+landmark=$l2719
 
-@l2720 entity
+@l2718 entity
 head=n_hub
 
-@l2721 entity
+@l2719 entity
 head=n_rim
 
-@l2722 delete
+@l2720 delete
 _text=delete n_tree
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l2723
+object=$l2721
 
-@l2723 entity
+@l2721 entity
 head=n_tree
 
-@l2724 cycle
+@l2722 cycle
 _text=cycle_q of connection
 _world=sketch
 _source=generator
 _template=cycle.llm.ts
 _mood=command
 
-@l2725 reachable
+@l2723 reachable
 _text=reach_q from n_source
 _world=sketch
 _source=generator
 _template=reachable.llm.ts
 _mood=command
-source=$l2726
+source=$l2724
 
-@l2726 entity
+@l2724 entity
 head=n_source
 
-@l2727 connected
+@l2725 connected
 _text=connected_q n_a directly linked to n_b
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l2728
-landmark=$l2729
+object=$l2726
+landmark=$l2727
 
-@l2728 entity
+@l2726 entity
 head=n_a
 
-@l2729 entity
+@l2727 entity
 head=n_b
 
-@l2730 degree
+@l2728 degree
 _text=degree_q how many connection n_drone has
 _world=sketch
 _source=generator
 _template=degree.llm.ts
 _mood=command
-object=$l2731
+object=$l2729
 
-@l2731 entity
+@l2729 entity
 head=n_drone
 
-@l2732 path
+@l2730 path
 _text=path_q from n_begin to n_end
 _world=sketch
 _source=generator
 _template=path.llm.ts
 _mood=command
-source=$l2733
-target=$l2734
+source=$l2731
+target=$l2732
 
-@l2733 entity
+@l2731 entity
 head=n_begin
 
-@l2734 entity
+@l2732 entity
 head=n_end
 
-@l2735 count
+@l2733 count
 _text=how_many yellow shapes
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l2736
+object=$l2734
 
-@l2736 entity
+@l2734 entity
 head=shapes
 attr=yellow
 
-@l2737 exists
+@l2735 exists
 _text=is_there a hexagon yet
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l2738
+object=$l2736
 
-@l2738 entity
+@l2736 entity
 head=hexagon
 
-@l2739 describe
+@l2737 describe
 _text=describe the n_dingo
 _world=sketch
 _source=generator
 _template=describe.llm.ts
 _mood=command
-object=$l2740
+object=$l2738
 
-@l2740 entity
+@l2738 entity
 head=n_dingo
 
-@l2741 nearest
+@l2739 nearest
 _text=nearest_q shape be closest to the n_hut
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l2742
-landmark=$l2743
+object=$l2740
+landmark=$l2741
 superlative=closest
 
-@l2742 entity
+@l2740 entity
 head=shape
 
-@l2743 entity
+@l2741 entity
 head=n_hut
 
-@l2744 list
+@l2742 list
 _text=which all the ellipses
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l2745
+object=$l2743
 
-@l2745 entity
+@l2743 entity
 head=ellipses
 
-@l2746 count
+@l2744 count
 _text=how_many purple circles
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l2747
+object=$l2745
 
-@l2747 entity
+@l2745 entity
 head=circles
 attr=purple
 
-@l2748 exists
+@l2746 exists
 _text=is_there squares left_of n_birch
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l2749
+object=$l2747
 relation=left_of
-landmark=$l2750
+landmark=$l2748
 
-@l2749 entity
+@l2747 entity
 head=squares
 
-@l2750 entity
+@l2748 entity
 head=n_birch
 
-@l2751 describe
+@l2749 describe
 _text=describe n_mango for me
 _world=sketch
 _source=generator
 _template=describe.llm.ts
 _mood=command
-object=$l2752
+object=$l2750
 
-@l2752 entity
+@l2750 entity
 head=n_mango
 
-@l2753 nearest
+@l2751 nearest
 _text=nearest_q be the closest shape to n_tower
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l2754
-landmark=$l2755
+object=$l2752
+landmark=$l2753
 superlative=closest
 
-@l2754 entity
+@l2752 entity
 head=shape
 
-@l2755 entity
+@l2753 entity
 head=n_tower
 
-@l2756 check
+@l2754 check
 _text=is_q n_whale bigger than n_seal
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2757
-landmark=$l2758
+object=$l2755
+landmark=$l2756
 comparison=bigger
 
-@l2757 entity
+@l2755 entity
 head=n_whale
 
-@l2758 entity
+@l2756 entity
 head=n_seal
 
-@l2759 extreme
+@l2757 extreme
 _text=extreme_q shape be leftmost
 _world=sketch
 _source=generator
 _template=extreme.llm.ts
 _mood=command
-object=$l2760
+object=$l2758
 superlative=leftmost
 
-@l2760 entity
+@l2758 entity
 head=shape
 
-@l2761 check
+@l2759 check
 _text=is_q n_quince huge ?
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2762
+object=$l2760
 size=huge
 
-@l2762 entity
+@l2760 entity
 head=n_quince
 
-@l2763 check
+@l2761 check
 _text=is_q n_opal below n_onyx
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2764
+object=$l2762
 relation=below
-landmark=$l2765
+landmark=$l2763
 
-@l2764 entity
+@l2762 entity
 head=n_opal
 
-@l2765 entity
+@l2763 entity
 head=n_onyx
 
-@l2766 swap
+@l2764 swap
 _text=swap n_cargo with n_port
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l2767
-target=$l2768
+object=$l2765
+target=$l2766
 
-@l2767 entity
+@l2765 entity
 head=n_cargo
 
-@l2768 entity
+@l2766 entity
 head=n_port
 
-@l2769 disconnect
+@l2767 disconnect
 _text=disconnect n_ham from n_egg
 _world=sketch
 _source=generator
 _template=disconnect.llm.ts
 _mood=command
-source=$l2770
-target=$l2771
+source=$l2768
+target=$l2769
 
-@l2770 entity
+@l2768 entity
 head=n_ham
 
-@l2771 entity
+@l2769 entity
 head=n_egg
 
-@l2772 align
+@l2770 align
 _text=align the pink shapes vertically
 _world=sketch
 _source=generator
 _template=align.llm.ts
 _mood=command
-object=$l2773
+object=$l2771
 axis=vertically
 
-@l2773 entity
+@l2771 entity
 head=shapes
 attr=pink
 
-@l2774 distribute
+@l2772 distribute
 _text=distribute n_peak1 , n_peak2 and n_peak3 out evenly on the vertically
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l2775
+object=$l2773
 axis=vertically
 
-@l2775 entity
+@l2773 entity
 head=n_peak1
 
-@l2776 distribute
+@l2774 distribute
 _text=distribute all the diamonds horizontally
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l2777
+object=$l2775
 axis=horizontally
 
-@l2777 entity
+@l2775 entity
 head=diamonds
 det=all
 
-@l2778 toFront
+@l2776 toFront
 _text=bring newest square front
 _world=sketch
 _source=generator
 _template=toFront.llm.ts
 _mood=command
-object=$l2779
+object=$l2777
 depth=front
 
-@l2779 entity
+@l2777 entity
 head=square
 det=newest
 
-@l2780 toBack
+@l2778 toBack
 _text=send every gray shape back
 _world=sketch
 _source=generator
 _template=toBack.llm.ts
 _mood=command
-object=$l2781
+object=$l2779
 depth=back
 
-@l2781 entity
+@l2779 entity
 head=shape
 attr=gray
 det=every
 
-@l2782 undo
+@l2780 undo
 _text=undo that last bit
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l2783 undo
+@l2781 undo
 _text=hold on , undo
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l2784 redo
+@l2782 redo
 _text=redo it
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l2785 redo
+@l2783 redo
 _text=yeah redo the shape i undid
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l2786 forget
+@l2784 forget
 _text=forget rules
 _world=sketch
 _source=generator
 _template=forget.llm.ts
 _mood=command
 
-@l2787 arrange
+@l2785 arrange
 _text=arrange all the rectangles column
 _world=sketch
 _source=generator
 _template=arrange.llm.ts
 _mood=command
-object=$l2788
+object=$l2786
 layout=column
 
-@l2788 entity
+@l2786 entity
 head=rectangles
 det=all
 
-@l2789 rename
+@l2787 rename
 _text=rename the n_lark n_skylark
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l2790
+object=$l2788
 name=n_skylark
 
-@l2790 entity
+@l2788 entity
 head=n_lark
 
-@l2791 label
+@l2789 label
 _text=label t_stop on the red octagon.. . i mean on n_sign
 _world=sketch
 _source=generator
 _template=label.llm.ts
 _mood=command
-object=$l2792
+object=$l2790
 text=t_stop
 
-@l2792 entity
+@l2790 entity
 head=n_sign
 
-@l2793 duplicate
+@l2791 duplicate
 _text=duplicate n_pawn 7 times
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l2794
+object=$l2792
 quantity=7
 
-@l2794 entity
+@l2792 entity
 head=n_pawn
 
-@l2795 duplicate
+@l2793 duplicate
 _text=duplicate n_rook
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l2796
+object=$l2794
 
-@l2796 entity
+@l2794 entity
 head=n_rook
 
-@l2797 resize
+@l2795 resize
 _text=n_fly is too large , smaller_v it
 _world=sketch
 _source=generator
 _template=resize.llm.ts
 _mood=command
-object=$l2798
+object=$l2796
 
-@l2798 entity
+@l2796 entity
 head=n_fly
 
-@l2799 delete
+@l2797 delete
 _text=delete the red hexagons
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l2800
+object=$l2798
 
-@l2800 entity
+@l2798 entity
 head=hexagons
 attr=red
 
-@l2801 delete
+@l2799 delete
 _text=delete everything not_gray
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l2802
+object=$l2800
 notcolor=not_gray
 
-@l2802 entity
+@l2800 entity
 head=everything
 
-@l2803 create
+@l2801 create
 _text=draw a lime hexagon right_of n_spruce
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2804
+object=$l2802
 relation=right_of
-landmark=$l2805
+landmark=$l2803
 
-@l2804 entity
+@l2802 entity
 head=hexagon
 attr=lime
 
-@l2805 entity
+@l2803 entity
 head=n_spruce
 
-@l2806 create
+@l2804 create
 _text=draw a large orange circle named n_intern below n_boss
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2807
+object=$l2805
 size=large
 name=n_intern
 relation=below
-landmark=$l2808
+landmark=$l2806
 
-@l2807 entity
+@l2805 entity
 head=circle
 attr=orange
 
-@l2808 entity
+@l2806 entity
 head=n_boss
 
-@l2809 create
+@l2807 create
 _text=draw a small gold diamond
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2810
+object=$l2808
 size=small
 
-@l2810 entity
+@l2808 entity
 head=diamond
 attr=gold
 
-@l2811 create
+@l2809 create
 _text=draw an indigo ellipse bottom_right
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2812
+object=$l2810
 region=bottom_right
 
-@l2812 entity
+@l2810 entity
 head=ellipse
 attr=indigo
 
-@l2813 create
+@l2811 create
 _text=draw a medium teal square named n_attic
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2814
+object=$l2812
 size=medium
 name=n_attic
 
-@l2814 entity
+@l2812 entity
 head=square
 attr=teal
 
-@l2815 set
+@l2813 set
 _text=make n_lava red
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2816
+object=$l2814
 color=red
 
-@l2816 entity
+@l2814 entity
 head=n_lava
 
-@l2817 set
+@l2815 set
 _text=make the black squares white
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2818
+object=$l2816
 color=white
 
-@l2818 entity
+@l2816 entity
 head=squares
 attr=black
 
-@l2819 set
+@l2817 set
 _text=color n_sled gold and make it a star
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2820
+object=$l2818
 shape=star
 color=gold
 
-@l2820 entity
+@l2818 entity
 head=n_sled
 
-@l2821 connect
+@l2819 connect
 _text=connect n_fan to n_roof with a navy dotted line
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l2822
-target=$l2823
+source=$l2820
+target=$l2821
 style=dotted
-edge=$l2824
+edge=$l2822
 
-@l2822 entity
+@l2820 entity
 head=n_fan
 
-@l2823 entity
+@l2821 entity
 head=n_roof
 
-@l2824 entity
+@l2822 entity
 head=line
 attr=navy
 
-@l2825 move
+@l2823 move
 _text=move n_mole 20 down
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2826
+object=$l2824
 direction=down
 amount=20
 
-@l2826 entity
+@l2824 entity
 head=n_mole
 
-@l2827 move
+@l2825 move
 _text=move the n_panda between n_bamboo and n_zoo
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2828
+object=$l2826
 relation=between
-landmark=$l2829
-landmark2=$l2830
+landmark=$l2827
+landmark2=$l2828
 
-@l2828 entity
+@l2826 entity
 head=n_panda
 
-@l2829 entity
+@l2827 entity
 head=n_bamboo
 
-@l2830 entity
+@l2828 entity
 head=n_zoo
 
-@l2831 fact
+@l2829 fact
 _text=n_drill is brown
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2832
+object=$l2830
 color=brown
 
-@l2832 entity
+@l2830 entity
 head=n_drill
 
-@l2833 rule
+@l2831 rule
 _text=from_now_on new hexagons are pink
 _world=sketch
 _source=generator
 _template=rule.llm.ts
 _mood=command
-object=$l2834
+object=$l2832
 color=pink
 
-@l2834 entity
+@l2832 entity
 head=hexagons
 
-@l2835 degree
+@l2833 degree
 _text=degree_q connection does n_cove have ?
 _world=sketch
 _source=generator
 _template=degree.llm.ts
 _mood=command
-object=$l2836
+object=$l2834
 
-@l2836 entity
+@l2834 entity
 head=n_cove
 
-@l2837 list
+@l2835 list
 _text=which the white shapes
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l2838
+object=$l2836
 
-@l2838 entity
+@l2836 entity
 head=shapes
 attr=white
 
-@l2839 count
+@l2837 count
 _text=how_many all the rectangles
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l2840
+object=$l2838
 
-@l2840 entity
+@l2838 entity
 head=rectangles
 
-@l2841 exists
+@l2839 exists
 _text=is_there a star ?
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l2842
+object=$l2840
 
-@l2842 entity
+@l2840 entity
 head=star
 
-@l2843 nearest
+@l2841 nearest
 _text=nearest_q one be farthest from n_glen
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-landmark=$l2844
+landmark=$l2842
 superlative=farthest
 
-@l2844 entity
+@l2842 entity
 head=n_glen
 
-@l2845 check
+@l2843 check
 _text=is_q n_noble bigger than n_serf ?
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2846
-landmark=$l2847
+object=$l2844
+landmark=$l2845
 comparison=bigger
 
-@l2846 entity
+@l2844 entity
 head=n_noble
 
-@l2847 entity
+@l2845 entity
 head=n_serf
 
-@l2848 check
+@l2846 check
 _text=is_q n_elf smaller than n_orc
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2849
-landmark=$l2850
+object=$l2847
+landmark=$l2848
 comparison=smaller
 
-@l2849 entity
+@l2847 entity
 head=n_elf
 
-@l2850 entity
+@l2848 entity
 head=n_orc
 
-@l2851 check
+@l2849 check
 _text=is_q n_iron a circle ?
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2852
+object=$l2850
 shape=circle
 
-@l2852 entity
+@l2850 entity
 head=n_iron
 
-@l2853 check
+@l2851 check
 _text=is_q n_lead right_of n_tin
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2854
+object=$l2852
 relation=right_of
-landmark=$l2855
+landmark=$l2853
 
-@l2854 entity
+@l2852 entity
 head=n_lead
 
-@l2855 entity
+@l2853 entity
 head=n_tin
 
-@l2856 list
+@l2854 list
 _text=which rules have i color
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l2857
+object=$l2855
 
-@l2857 entity
+@l2855 entity
 head=rules
 
-@l2858 connected
+@l2856 connected
 _text=connected_q n_buck connected to n_doe
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l2859
-landmark=$l2860
+object=$l2857
+landmark=$l2858
 
-@l2859 entity
+@l2857 entity
 head=n_buck
 
-@l2860 entity
+@l2858 entity
 head=n_doe
 
-@l2861 set
+@l2859 set
 _text=color the n_teacher purple
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2862
+object=$l2860
 color=purple
 
-@l2862 entity
+@l2860 entity
 head=n_teacher
 
-@l2863 connect
+@l2861 connect
 _text=connect n_barn and n_silo
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l2864
-target=$l2865
+source=$l2862
+target=$l2863
 
-@l2864 entity
+@l2862 entity
 head=n_barn
 
-@l2865 entity
+@l2863 entity
 head=n_silo
 
-@l2866 swap
+@l2864 swap
 _text=swap n_wolf and n_dog
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l2867
-target=$l2868
+object=$l2865
+target=$l2866
 
-@l2867 entity
+@l2865 entity
 head=n_wolf
 
-@l2868 entity
+@l2866 entity
 head=n_dog
 
-@l2869 connected
+@l2867 connected
 _text=connected_q n_bolt and n_nut joined by a line
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l2870
-landmark=$l2871
+object=$l2868
+landmark=$l2869
 
-@l2870 entity
+@l2868 entity
 head=n_bolt
 
-@l2871 entity
+@l2869 entity
 head=n_nut
 
-@l2872 move
+@l2870 move
 _text=move n_mixer 40 px left
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2873
+object=$l2871
 direction=left
 amount=40
 
-@l2873 entity
+@l2871 entity
 head=n_mixer
 
-@l2874 degree
+@l2872 degree
 _text=degree_q connection does n_ledger have
 _world=sketch
 _source=generator
 _template=degree.llm.ts
 _mood=command
-object=$l2875
+object=$l2873
 
-@l2875 entity
+@l2873 entity
 head=n_ledger
 
-@l2876 list
+@l2874 list
 _text=which a list of the red shapes
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l2877
+object=$l2875
 
-@l2877 entity
+@l2875 entity
 head=shapes
 attr=red
 
-@l2878 disconnect
+@l2876 disconnect
 _text=disconnect n_dock from n_pier
 _world=sketch
 _source=generator
 _template=disconnect.llm.ts
 _mood=command
-source=$l2879
-target=$l2880
+source=$l2877
+target=$l2878
 
-@l2879 entity
+@l2877 entity
 head=n_dock
 
-@l2880 entity
+@l2878 entity
 head=n_pier
 
-@l2881 exists
+@l2879 exists
 _text=is_there any black diamonds
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l2882
+object=$l2880
 
-@l2882 entity
+@l2880 entity
 head=diamonds
 attr=black
 
-@l2883 align
+@l2881 align
 _text=align n_lamp1 , n_lamp2 and n_lamp3 horizontally
 _world=sketch
 _source=generator
 _template=align.llm.ts
 _mood=command
-object=$l2884
+object=$l2882
 axis=horizontally
 
-@l2884 entity
+@l2882 entity
 head=n_lamp1
 
-@l2885 nearest
+@l2883 nearest
 _text=nearest_q shape be closest to the n_flag
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l2886
-landmark=$l2887
+object=$l2884
+landmark=$l2885
 superlative=closest
 
-@l2886 entity
+@l2884 entity
 head=shape
 
-@l2887 entity
+@l2885 entity
 head=n_flag
 
-@l2888 check
+@l2886 check
 _text=is_q the n_ox bigger than the n_cow ?
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2889
-landmark=$l2890
+object=$l2887
+landmark=$l2888
 comparison=bigger
 
-@l2889 entity
+@l2887 entity
 head=n_ox
 
-@l2890 entity
+@l2888 entity
 head=n_cow
 
-@l2891 check
+@l2889 check
 _text=is_q n_mole smaller than n_vole
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2892
-landmark=$l2893
+object=$l2890
+landmark=$l2891
 comparison=smaller
 
-@l2892 entity
+@l2890 entity
 head=n_mole
 
-@l2893 entity
+@l2891 entity
 head=n_vole
 
-@l2894 redo
+@l2892 redo
 _text=redo that please
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l2895 extreme
+@l2893 extreme
 _text=extreme_q be the topmost shape
 _world=sketch
 _source=generator
 _template=extreme.llm.ts
 _mood=command
-object=$l2896
+object=$l2894
 superlative=topmost
 
-@l2896 entity
+@l2894 entity
 head=shape
 
-@l2897 property
+@l2895 property
 _text=what_shape the n_pail
 _world=sketch
 _source=generator
 _template=property.llm.ts
 _mood=command
-object=$l2898
+object=$l2896
 
-@l2898 entity
+@l2896 entity
 head=n_pail
 
-@l2899 undo
+@l2897 undo
 _text=i made a mistake , undo
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l2900 forget
+@l2898 forget
 _text=forget the standing rules
 _world=sketch
 _source=generator
 _template=forget.llm.ts
 _mood=command
 
-@l2901 create
+@l2899 create
 _text=draw a hexagon labeled t_harbor next_to n_bay
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2902
+object=$l2900
 text=t_harbor
 relation=next_to
-landmark=$l2903
+landmark=$l2901
 
-@l2902 entity
+@l2900 entity
 head=hexagon
 
-@l2903 entity
+@l2901 entity
 head=n_bay
 
-@l2904 set
+@l2902 set
 _text=color n_frame to medium
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2905
+object=$l2903
 size=medium
 
-@l2905 entity
+@l2903 entity
 head=n_frame
 
-@l2906 move
+@l2904 move
 _text=move the n_tin bottom_left
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2907
+object=$l2905
 region=bottom_left
 
-@l2907 entity
+@l2905 entity
 head=n_tin
 
-@l2908 fact
+@l2906 fact
 _text=n_hill is above n_vale
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2909
+object=$l2907
 relation=above
-landmark=$l2910
+landmark=$l2908
 
-@l2909 entity
+@l2907 entity
 head=n_hill
 
-@l2910 entity
+@l2908 entity
 head=n_vale
 
-@l2911 arrange
+@l2909 arrange
 _text=arrange everything ring
 _world=sketch
 _source=generator
 _template=arrange.llm.ts
 _mood=command
-object=$l2912
+object=$l2910
 layout=ring
 
-@l2912 entity
+@l2910 entity
 head=everything
 
-@l2913 resize
+@l2911 resize
 _text=bigger_v the n_wrench
 _world=sketch
 _source=generator
 _template=resize.llm.ts
 _mood=command
-object=$l2914
+object=$l2912
 
-@l2914 entity
+@l2912 entity
 head=n_wrench
 
-@l2915 delete
+@l2913 delete
 _text=delete n_hose
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l2916
+object=$l2914
 
-@l2916 entity
+@l2914 entity
 head=n_hose
 
-@l2917 rename
+@l2915 rename
 _text=rename n_oven to n_kiln
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l2918
+object=$l2916
 name=n_kiln
 
-@l2918 entity
+@l2916 entity
 head=n_oven
 
-@l2919 cycle
+@l2917 cycle
 _text=cycle_q in the graph
 _world=sketch
 _source=generator
 _template=cycle.llm.ts
 _mood=command
 
-@l2920 list
+@l2918 list
 _text=which rules in force
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l2921
+object=$l2919
 
-@l2921 entity
+@l2919 entity
 head=rules
 
-@l2922 neighbors
+@l2920 neighbors
 _text=neigh_q n_pivot
 _world=sketch
 _source=generator
 _template=neighbors.llm.ts
 _mood=command
-object=$l2923
+object=$l2921
 
-@l2923 entity
+@l2921 entity
 head=n_pivot
 
-@l2924 connected
+@l2922 connected
 _text=connected_q n_ink linked to n_quill
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l2925
-landmark=$l2926
+object=$l2923
+landmark=$l2924
 
-@l2925 entity
+@l2923 entity
 head=n_ink
 
-@l2926 entity
+@l2924 entity
 head=n_quill
 
-@l2927 list
+@l2925 list
 _text=which be the hexagons
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l2928
+object=$l2926
 
-@l2928 entity
+@l2926 entity
 head=hexagons
 
-@l2929 count
+@l2927 count
 _text=how_many orange shapes
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l2930
+object=$l2928
 
-@l2930 entity
+@l2928 entity
 head=shapes
 attr=orange
 
-@l2931 exists
+@l2929 exists
 _text=is_there anything above n_aster
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
 relation=above
-landmark=$l2932
+landmark=$l2930
 
-@l2932 entity
+@l2930 entity
 head=n_aster
 
-@l2933 describe
+@l2931 describe
 _text=describe the n_seat
 _world=sketch
 _source=generator
 _template=describe.llm.ts
 _mood=command
-object=$l2934
+object=$l2932
 
-@l2934 entity
+@l2932 entity
 head=n_seat
 
-@l2935 nearest
+@l2933 nearest
 _text=nearest_q be farthest from n_hut
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-landmark=$l2936
+landmark=$l2934
 superlative=farthest
 
-@l2936 entity
+@l2934 entity
 head=n_hut
 
-@l2937 check
+@l2935 check
 _text=is_q n_kern bigger than n_font
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2938
-landmark=$l2939
+object=$l2936
+landmark=$l2937
 comparison=bigger
 
-@l2938 entity
+@l2936 entity
 head=n_kern
 
-@l2939 entity
+@l2937 entity
 head=n_font
 
-@l2940 check
+@l2938 check
 _text=is_q n_ray small
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2941
+object=$l2939
 size=small
 
-@l2941 entity
+@l2939 entity
 head=n_ray
 
-@l2942 fact
+@l2940 fact
 _text=n_moth is a triangle
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2943
+object=$l2941
 shape=triangle
 
-@l2943 entity
+@l2941 entity
 head=n_moth
 
-@l2944 swap
+@l2942 swap
 _text=swap the n_fox and the n_hen , will you
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l2945
-target=$l2946
+object=$l2943
+target=$l2944
 
-@l2945 entity
+@l2943 entity
 head=n_fox
 
-@l2946 entity
+@l2944 entity
 head=n_hen
 
-@l2947 align
+@l2945 align
 _text=align the stars horizontally
 _world=sketch
 _source=generator
 _template=align.llm.ts
 _mood=command
-object=$l2948
+object=$l2946
 axis=horizontally
 
-@l2948 entity
+@l2946 entity
 head=stars
 
-@l2949 distribute
+@l2947 distribute
 _text=distribute the squares along the horizontally axis
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l2950
+object=$l2948
 axis=horizontally
 
-@l2950 entity
+@l2948 entity
 head=squares
 
-@l2951 toBack
+@l2949 toBack
 _text=n_rug should go behind floor.. . just send n_rug back
 _world=sketch
 _source=generator
 _template=toBack.llm.ts
 _mood=command
-object=$l2952
+object=$l2950
 depth=back
 
-@l2952 entity
+@l2950 entity
 head=n_rug
 
-@l2953 undo
+@l2951 undo
 _text=undo
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l2954 redo
+@l2952 redo
 _text=redo please
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l2955 arrange
+@l2953 arrange
 _text=arrange the red shapes row
 _world=sketch
 _source=generator
 _template=arrange.llm.ts
 _mood=command
-object=$l2956
+object=$l2954
 layout=row
 
-@l2956 entity
+@l2954 entity
 head=shapes
 attr=red
 
-@l2957 rename
+@l2955 rename
 _text=rename n_cask to n_barrel
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l2958
+object=$l2956
 name=n_barrel
 
-@l2958 entity
+@l2956 entity
 head=n_cask
 
-@l2959 duplicate
+@l2957 duplicate
 _text=duplicate the n_moss 5 times
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l2960
+object=$l2958
 quantity=5
 
-@l2960 entity
+@l2958 entity
 head=n_moss
 
-@l2961 resize
+@l2959 resize
 _text=smaller_v every circle
 _world=sketch
 _source=generator
 _template=resize.llm.ts
 _mood=command
-object=$l2962
+object=$l2960
 
-@l2962 entity
+@l2960 entity
 head=circle
 det=every
 
-@l2963 delete
+@l2961 delete
 _text=delete newest hexagon
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l2964
+object=$l2962
 
-@l2964 entity
+@l2962 entity
 head=hexagon
 det=newest
 
-@l2965 create
+@l2963 create
 _text=draw a tiny gold star between n_dunes and n_oasis
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2966
+object=$l2964
 size=tiny
 relation=between
-landmark=$l2967
-landmark2=$l2968
+landmark=$l2965
+landmark2=$l2966
 
-@l2966 entity
+@l2964 entity
 head=star
 attr=gold
 
-@l2967 entity
+@l2965 entity
 head=n_dunes
 
-@l2968 entity
+@l2966 entity
 head=n_oasis
 
-@l2969 create
+@l2967 create
 _text=draw a green square
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2970
+object=$l2968
 
-@l2970 entity
+@l2968 entity
 head=square
 attr=green
 
-@l2971 create
+@l2969 create
 _text=draw 4 orange circles top
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2972
+object=$l2970
 region=top
 quantity=4
 
-@l2972 entity
+@l2970 entity
 head=circles
 attr=orange
 
-@l2973 set
+@l2971 set
 _text=make n_quay a pink diamond
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2974
+object=$l2972
 shape=diamond
 color=pink
 
-@l2974 entity
+@l2972 entity
 head=n_quay
 
-@l2975 set
+@l2973 set
 _text=make all the purple shapes to teal
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l2976
+object=$l2974
 color=teal
 
-@l2976 entity
+@l2974 entity
 head=shapes
 attr=purple
 det=all
 
-@l2977 move
+@l2975 move
 _text=move n_anvil up 90
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2978
+object=$l2976
 direction=up
 amount=90
 
-@l2978 entity
+@l2976 entity
 head=n_anvil
 
-@l2979 move
+@l2977 move
 _text=move n_pail below n_well
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l2980
+object=$l2978
 relation=below
-landmark=$l2981
+landmark=$l2979
 
-@l2980 entity
+@l2978 entity
 head=n_pail
 
-@l2981 entity
+@l2979 entity
 head=n_well
 
-@l2982 fact
+@l2980 fact
 _text=n_fable is gold
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l2983
+object=$l2981
 color=gold
 
-@l2983 entity
+@l2981 entity
 head=n_fable
 
-@l2984 list
+@l2982 list
 _text=which rules exist
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l2985
+object=$l2983
 
-@l2985 entity
+@l2983 entity
 head=rules
 
-@l2986 path
+@l2984 path
 _text=path_q from n_eve to n_adam ?
 _world=sketch
 _source=generator
 _template=path.llm.ts
 _mood=command
-source=$l2987
-target=$l2988
+source=$l2985
+target=$l2986
 
-@l2987 entity
+@l2985 entity
 head=n_eve
 
-@l2988 entity
+@l2986 entity
 head=n_adam
 
-@l2989 extreme
+@l2987 extreme
 _text=extreme_q shape be the smallest one
 _world=sketch
 _source=generator
 _template=extreme.llm.ts
 _mood=command
-object=$l2990
+object=$l2988
 superlative=smallest
 
-@l2990 entity
+@l2988 entity
 head=shape
 
-@l2991 check
+@l2989 check
 _text=is_q n_elm above n_ash
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l2992
+object=$l2990
 relation=above
-landmark=$l2993
+landmark=$l2991
 
-@l2992 entity
+@l2990 entity
 head=n_elm
 
-@l2993 entity
+@l2991 entity
 head=n_ash
 
-@l2994 property
+@l2992 property
 _text=what_color n_emu
 _world=sketch
 _source=generator
 _template=property.llm.ts
 _mood=command
-object=$l2995
+object=$l2993
 
-@l2995 entity
+@l2993 entity
 head=n_emu
 
-@l2996 create
+@l2994 create
 _text=draw a small blue circle named n_desk right_of n_reception
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l2997
+object=$l2995
 size=small
 name=n_desk
 relation=right_of
-landmark=$l2998
+landmark=$l2996
 
-@l2997 entity
+@l2995 entity
 head=circle
 attr=blue
 
-@l2998 entity
+@l2996 entity
 head=n_reception
 
-@l2999 swap
+@l2997 swap
 _text=swap n_stable and n_barn
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l3000
-target=$l3001
+object=$l2998
+target=$l2999
 
-@l3000 entity
+@l2998 entity
 head=n_stable
 
-@l3001 entity
+@l2999 entity
 head=n_barn
 
-@l3002 connect
+@l3000 connect
 _text=connect n_axle to n_wheel with a dashed line
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3003
-target=$l3004
+source=$l3001
+target=$l3002
 style=dashed
-edge=$l3005
+edge=$l3003
 
-@l3003 entity
+@l3001 entity
 head=n_axle
 
-@l3004 entity
+@l3002 entity
 head=n_wheel
 
-@l3005 entity
+@l3003 entity
 head=line
 
-@l3006 align
+@l3004 align
 _text=align the circles on the vertically axis
 _world=sketch
 _source=generator
 _template=align.llm.ts
 _mood=command
-object=$l3007
+object=$l3005
 axis=vertically
 
-@l3007 entity
+@l3005 entity
 head=circles
 
-@l3008 distribute
+@l3006 distribute
 _text=distribute n_p1 , n_p2 and n_p3 vertically
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l3009
+object=$l3007
 axis=vertically
 
-@l3009 entity
+@l3007 entity
 head=n_p1
 
-@l3010 undo
+@l3008 undo
 _text=undo my last move
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l3011 redo
+@l3009 redo
 _text=i take it back , redo
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3012 path
+@l3010 path
 _text=path_q from n_mars to n_pluto
 _world=sketch
 _source=generator
 _template=path.llm.ts
 _mood=command
-source=$l3013
-target=$l3014
+source=$l3011
+target=$l3012
 
-@l3013 entity
+@l3011 entity
 head=n_mars
 
-@l3014 entity
+@l3012 entity
 head=n_pluto
 
-@l3015 list
+@l3013 list
 _text=which every triangle
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l3016
+object=$l3014
 
-@l3016 entity
+@l3014 entity
 head=triangle
 
-@l3017 count
+@l3015 count
 _text=how_many gray shapes
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l3018
+object=$l3016
 
-@l3018 entity
+@l3016 entity
 head=shapes
 attr=gray
 
-@l3019 describe
+@l3017 describe
 _text=describe the whole canvas please
 _world=sketch
 _source=generator
 _template=describe.llm.ts
 _mood=command
-object=$l3020
+object=$l3018
 
-@l3020 entity
+@l3018 entity
 head=canvas
 
-@l3021 check
+@l3019 check
 _text=is_q n_tank bigger than n_jeep
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3022
-landmark=$l3023
+object=$l3020
+landmark=$l3021
 comparison=bigger
 
-@l3022 entity
+@l3020 entity
 head=n_tank
 
-@l3023 entity
+@l3021 entity
 head=n_jeep
 
-@l3024 check
+@l3022 check
 _text=is_q n_thumb smaller than n_palm
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3025
-landmark=$l3026
+object=$l3023
+landmark=$l3024
 comparison=smaller
 
-@l3025 entity
+@l3023 entity
 head=n_thumb
 
-@l3026 entity
+@l3024 entity
 head=n_palm
 
-@l3027 check
+@l3025 check
 _text=is_q n_cress green
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3028
+object=$l3026
 color=green
 
-@l3028 entity
+@l3026 entity
 head=n_cress
 
-@l3029 create
+@l3027 create
 _text=draw a pink triangle above n_zone1
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3030
+object=$l3028
 relation=above
-landmark=$l3031
+landmark=$l3029
 
-@l3030 entity
+@l3028 entity
 head=triangle
 attr=pink
 
-@l3031 entity
+@l3029 entity
 head=n_zone1
 
-@l3032 create
+@l3030 create
 _text=for the school plan draw a gold star top
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3033
+object=$l3031
 region=top
 
-@l3033 entity
+@l3031 entity
 head=star
 attr=gold
 
-@l3034 create
+@l3032 create
 _text=draw in 2 lime hexagons
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3035
+object=$l3033
 quantity=2
 
-@l3035 entity
+@l3033 entity
 head=hexagons
 attr=lime
 
-@l3036 create
+@l3034 create
 _text=draw a purple circle between n_aunt and n_uncle
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3037
+object=$l3035
 relation=between
-landmark=$l3038
-landmark2=$l3039
+landmark=$l3036
+landmark2=$l3037
 
-@l3037 entity
+@l3035 entity
 head=circle
 attr=purple
 
-@l3038 entity
+@l3036 entity
 head=n_aunt
 
-@l3039 entity
+@l3037 entity
 head=n_uncle
 
-@l3040 create
+@l3038 create
 _text=draw a small navy ellipse below the n_pen
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3041
+object=$l3039
 size=small
 relation=below
-landmark=$l3042
+landmark=$l3040
 
-@l3041 entity
+@l3039 entity
 head=ellipse
 attr=navy
 
-@l3042 entity
+@l3040 entity
 head=n_pen
 
-@l3043 create
+@l3041 create
 _text=draw a red rectangle named n_stove next_to the n_cabin
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3044
+object=$l3042
 name=n_stove
 relation=next_to
-landmark=$l3045
+landmark=$l3043
 
-@l3044 entity
+@l3042 entity
 head=rectangle
 attr=red
 
-@l3045 entity
+@l3043 entity
 head=n_cabin
 
-@l3046 set
+@l3044 set
 _text=color n_cobalt to blue
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3047
+object=$l3045
 color=blue
 
-@l3047 entity
+@l3045 entity
 head=n_cobalt
 
-@l3048 set
+@l3046 set
 _text=make newest circle yellow
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3049
+object=$l3047
 color=yellow
 
-@l3049 entity
+@l3047 entity
 head=circle
 det=newest
 
-@l3050 connect
+@l3048 connect
 _text=connect n_car up to n_garage
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3051
-target=$l3052
+source=$l3049
+target=$l3050
 
-@l3051 entity
+@l3049 entity
 head=n_car
 
-@l3052 entity
+@l3050 entity
 head=n_garage
 
-@l3053 connect
+@l3051 connect
 _text=connect n_dad to n_son , label it t_father
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
 text=t_father
-source=$l3054
-target=$l3055
+source=$l3052
+target=$l3053
 
-@l3054 entity
+@l3052 entity
 head=n_dad
 
-@l3055 entity
+@l3053 entity
 head=n_son
 
-@l3056 connect
+@l3054 connect
 _text=connect n_pot to n_lid with a green dashed arrow
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3057
-target=$l3058
+source=$l3055
+target=$l3056
 style=dashed
-edge=$l3059
+edge=$l3057
 
-@l3057 entity
+@l3055 entity
 head=n_pot
 
-@l3058 entity
+@l3056 entity
 head=n_lid
 
-@l3059 entity
+@l3057 entity
 head=arrow
 attr=green
 
-@l3060 move
+@l3058 move
 _text=move n_crate 100 right
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3061
+object=$l3059
 direction=right
 amount=100
 
-@l3061 entity
+@l3059 entity
 head=n_crate
 
-@l3062 move
+@l3060 move
 _text=move n_raft to the bottom
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3063
+object=$l3061
 region=bottom
 
-@l3063 entity
+@l3061 entity
 head=n_raft
 
-@l3064 move
+@l3062 move
 _text=move the red rectangle next_to n_stool
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3065
+object=$l3063
 relation=next_to
-landmark=$l3066
+landmark=$l3064
 
-@l3065 entity
+@l3063 entity
 head=rectangle
 attr=red
 
-@l3066 entity
+@l3064 entity
 head=n_stool
 
-@l3067 move
+@l3065 move
 _text=move n_tuft up
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3068
+object=$l3066
 direction=up
 
-@l3068 entity
+@l3066 entity
 head=n_tuft
 
-@l3069 delete
+@l3067 delete
 _text=delete all the circles not_red
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l3070
+object=$l3068
 notcolor=not_red
 
-@l3070 entity
+@l3068 entity
 head=circles
 det=all
 
-@l3071 delete
+@l3069 delete
 _text=delete oldest circle
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l3072
+object=$l3070
 
-@l3072 entity
+@l3070 entity
 head=circle
 det=oldest
 
-@l3073 resize
+@l3071 resize
 _text=scale up n_shark
 _world=sketch
 _source=generator
 _template=resize.llm.ts
 _mood=command
-object=$l3074
+object=$l3072
 
-@l3074 entity
+@l3072 entity
 head=n_shark
 
-@l3075 rename
+@l3073 rename
 _text=rename n_mule to n_donkey
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l3076
+object=$l3074
 name=n_donkey
 
-@l3076 entity
+@l3074 entity
 head=n_mule
 
-@l3077 duplicate
+@l3075 duplicate
 _text=duplicate n_vest
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l3078
+object=$l3076
 
-@l3078 entity
+@l3076 entity
 head=n_vest
 
-@l3079 arrange
+@l3077 arrange
 _text=arrange the circles row
 _world=sketch
 _source=generator
 _template=arrange.llm.ts
 _mood=command
-object=$l3080
+object=$l3078
 layout=row
 
-@l3080 entity
+@l3078 entity
 head=circles
 
-@l3081 fact
+@l3079 fact
 _text=n_beta is a gold rectangle
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l3082
+object=$l3080
 shape=rectangle
 color=gold
 
-@l3082 entity
+@l3080 entity
 head=n_beta
 
-@l3083 list
+@l3081 list
 _text=which rules be there
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l3084
+object=$l3082
 
-@l3084 entity
+@l3082 entity
 head=rules
 
-@l3085 degree
+@l3083 degree
 _text=degree_q connection does n_jolt have
 _world=sketch
 _source=generator
 _template=degree.llm.ts
 _mood=command
-object=$l3086
+object=$l3084
 
-@l3086 entity
+@l3084 entity
 head=n_jolt
 
-@l3087 list
+@l3085 list
 _text=which be the not_gray shapes
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l3088
+object=$l3086
 notcolor=not_gray
 
-@l3088 entity
+@l3086 entity
 head=shapes
 
-@l3089 count
+@l3087 count
 _text=how_many squares
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l3090
+object=$l3088
 
-@l3090 entity
+@l3088 entity
 head=squares
 
-@l3091 exists
+@l3089 exists
 _text=is_there an orange circle
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l3092
+object=$l3090
 
-@l3092 entity
+@l3090 entity
 head=circle
 attr=orange
 
-@l3093 describe
+@l3091 describe
 _text=describe it all
 _world=sketch
 _source=generator
 _template=describe.llm.ts
 _mood=command
 
-@l3094 nearest
+@l3092 nearest
 _text=nearest_q shape be farthest from n_snow
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l3095
-landmark=$l3096
+object=$l3093
+landmark=$l3094
 superlative=farthest
 
-@l3095 entity
+@l3093 entity
 head=shape
 
-@l3096 entity
+@l3094 entity
 head=n_snow
 
-@l3097 check
+@l3095 check
 _text=is_q n_rhea bigger than n_zeus
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3098
-landmark=$l3099
+object=$l3096
+landmark=$l3097
 comparison=bigger
 
-@l3098 entity
+@l3096 entity
 head=n_rhea
 
-@l3099 entity
+@l3097 entity
 head=n_zeus
 
-@l3100 check
+@l3098 check
 _text=is_q n_ares smaller than n_eros
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3101
-landmark=$l3102
+object=$l3099
+landmark=$l3100
 comparison=smaller
 
-@l3101 entity
+@l3099 entity
 head=n_ares
 
-@l3102 entity
+@l3100 entity
 head=n_eros
 
-@l3103 check
+@l3101 check
 _text=is_q n_iris large
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3104
+object=$l3102
 size=large
 
-@l3104 entity
+@l3102 entity
 head=n_iris
 
-@l3105 disconnect
+@l3103 disconnect
 _text=disconnect n_tin from n_can
 _world=sketch
 _source=generator
 _template=disconnect.llm.ts
 _mood=command
-source=$l3106
-target=$l3107
+source=$l3104
+target=$l3105
 
-@l3106 entity
+@l3104 entity
 head=n_tin
 
-@l3107 entity
+@l3105 entity
 head=n_can
 
-@l3108 distribute
+@l3106 distribute
 _text=space n_c1 , n_c2 , n_c3 evenly horizontally
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l3109
+object=$l3107
 axis=horizontally
 
-@l3109 entity
+@l3107 entity
 head=n_c1
 
-@l3110 redo
+@l3108 redo
 _text=redo newest undo please
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3111 forget
+@l3109 forget
 _text=forget all rules
 _world=sketch
 _source=generator
 _template=forget.llm.ts
 _mood=command
 
-@l3112 describe
+@l3110 describe
 _text=describe n_poem
 _world=sketch
 _source=generator
 _template=describe.llm.ts
 _mood=command
-object=$l3113
+object=$l3111
 
-@l3113 entity
+@l3111 entity
 head=n_poem
 
-@l3114 nearest
+@l3112 nearest
 _text=nearest_q shape be closest the n_lyric
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l3115
-landmark=$l3116
+object=$l3113
+landmark=$l3114
 superlative=closest
 
-@l3115 entity
+@l3113 entity
 head=shape
 
-@l3116 entity
+@l3114 entity
 head=n_lyric
 
-@l3117 create
+@l3115 create
 _text=yo draw a brown rectangle named n_crate onto the left_of n_truck
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3118
+object=$l3116
 name=n_crate
 relation=left_of
-landmark=$l3119
+landmark=$l3117
 
-@l3118 entity
+@l3116 entity
 head=rectangle
 attr=brown
 
-@l3119 entity
+@l3117 entity
 head=n_truck
 
-@l3120 swap
+@l3118 swap
 _text=swap n_wedge and n_slice
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l3121
-target=$l3122
+object=$l3119
+target=$l3120
 
-@l3121 entity
+@l3119 entity
 head=n_wedge
 
-@l3122 entity
+@l3120 entity
 head=n_slice
 
-@l3123 disconnect
+@l3121 disconnect
 _text=disconnect n_chip and n_board
 _world=sketch
 _source=generator
 _template=disconnect.llm.ts
 _mood=command
-source=$l3124
-target=$l3125
+source=$l3122
+target=$l3123
 
-@l3124 entity
+@l3122 entity
 head=n_chip
 
-@l3125 entity
+@l3123 entity
 head=n_board
 
-@l3126 connected
+@l3124 connected
 _text=connected_q n_penn directly joined to n_dell
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l3127
-landmark=$l3128
+object=$l3125
+landmark=$l3126
 
-@l3127 entity
+@l3125 entity
 head=n_penn
 
-@l3128 entity
+@l3126 entity
 head=n_dell
 
-@l3129 list
+@l3127 list
 _text=which the lime shapes
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l3130
+object=$l3128
 
-@l3130 entity
+@l3128 entity
 head=shapes
 attr=lime
 
-@l3131 count
+@l3129 count
 _text=how_many diamonds
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l3132
+object=$l3130
 
-@l3132 entity
+@l3130 entity
 head=diamonds
 
-@l3133 exists
+@l3131 exists
 _text=is_there a white square
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l3134
+object=$l3132
 
-@l3134 entity
+@l3132 entity
 head=square
 attr=white
 
-@l3135 describe
+@l3133 describe
 _text=describe what be drawn
 _world=sketch
 _source=generator
 _template=describe.llm.ts
 _mood=command
 
-@l3136 check
+@l3134 check
 _text=is_q n_elder bigger than n_youth
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3137
-landmark=$l3138
+object=$l3135
+landmark=$l3136
 comparison=bigger
 
-@l3137 entity
+@l3135 entity
 head=n_elder
 
-@l3138 entity
+@l3136 entity
 head=n_youth
 
-@l3139 check
+@l3137 check
 _text=is_q n_junior smaller than n_senior
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3140
-landmark=$l3141
+object=$l3138
+landmark=$l3139
 comparison=smaller
 
-@l3140 entity
+@l3138 entity
 head=n_junior
 
-@l3141 entity
+@l3139 entity
 head=n_senior
 
-@l3142 check
+@l3140 check
 _text=is_q n_wisp tiny
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3143
+object=$l3141
 size=tiny
 
-@l3143 entity
+@l3141 entity
 head=n_wisp
 
-@l3144 create
+@l3142 create
 _text=for my fantasy map , draw an indigo hexagon named n_keep
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3145
+object=$l3143
 name=n_keep
 
-@l3145 entity
+@l3143 entity
 head=hexagon
 attr=indigo
 
-@l3146 create
+@l3144 create
 _text=draw 4 tiny yellow stars
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3147
+object=$l3145
 size=tiny
 quantity=4
 
-@l3147 entity
+@l3145 entity
 head=stars
 attr=yellow
 
-@l3148 create
+@l3146 create
 _text=draw a white ellipse between n_chapel and n_abbey
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3149
+object=$l3147
 relation=between
-landmark=$l3150
-landmark2=$l3151
+landmark=$l3148
+landmark2=$l3149
 
-@l3149 entity
+@l3147 entity
 head=ellipse
 attr=white
 
-@l3150 entity
+@l3148 entity
 head=n_chapel
 
-@l3151 entity
+@l3149 entity
 head=n_abbey
 
-@l3152 create
+@l3150 create
 _text=draw a black square top_left
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3153
+object=$l3151
 region=top_left
 
-@l3153 entity
+@l3151 entity
 head=square
 attr=black
 
-@l3154 create
+@l3152 create
 _text=draw a large teal triangle above n_garden
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3155
+object=$l3153
 size=large
 relation=above
-landmark=$l3156
+landmark=$l3154
 
-@l3155 entity
+@l3153 entity
 head=triangle
 attr=teal
 
-@l3156 entity
+@l3154 entity
 head=n_garden
 
-@l3157 set
+@l3155 set
 _text=make n_mortar gray
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3158
+object=$l3156
 color=gray
 
-@l3158 entity
+@l3156 entity
 head=n_mortar
 
-@l3159 set
+@l3157 set
 _text=color n_cairn to huge
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3160
+object=$l3158
 size=huge
 
-@l3160 entity
+@l3158 entity
 head=n_cairn
 
-@l3161 set
+@l3159 set
 _text=color all the stars pink
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3162
+object=$l3160
 color=pink
 
-@l3162 entity
+@l3160 entity
 head=stars
 det=all
 
-@l3163 set
+@l3161 set
 _text=make oldest square orange
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3164
+object=$l3162
 color=orange
 
-@l3164 entity
+@l3162 entity
 head=square
 det=oldest
 
-@l3165 connect
+@l3163 connect
 _text=connect n_fork with n_knife
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3166
-target=$l3167
+source=$l3164
+target=$l3165
 
-@l3166 entity
+@l3164 entity
 head=n_fork
 
-@l3167 entity
+@l3165 entity
 head=n_knife
 
-@l3168 connect
+@l3166 connect
 _text=connect n_hub and n_spoke with a two_way red arrow
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3169
-target=$l3170
+source=$l3167
+target=$l3168
 arrow=two_way
-edge=$l3171
+edge=$l3169
 
-@l3169 entity
+@l3167 entity
 head=n_hub
 
-@l3170 entity
+@l3168 entity
 head=n_spoke
 
-@l3171 entity
+@l3169 entity
 head=arrow
 attr=red
 
-@l3172 move
+@l3170 move
 _text=move the n_sofa 250 left
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3173
+object=$l3171
 direction=left
 amount=250
 
-@l3173 entity
+@l3171 entity
 head=n_sofa
 
-@l3174 move
+@l3172 move
 _text=move the n_lamp on the n_desk , above it
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3175
+object=$l3173
 relation=above
-landmark=$l3176
+landmark=$l3174
 
-@l3175 entity
+@l3173 entity
 head=n_lamp
 
-@l3176 entity
+@l3174 entity
 head=n_desk
 
-@l3177 move
+@l3175 move
 _text=move n_shelf into the center
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3178
+object=$l3176
 region=center
 
-@l3178 entity
+@l3176 entity
 head=n_shelf
 
-@l3179 delete
+@l3177 delete
 _text=delete newest star
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l3180
+object=$l3178
 
-@l3180 entity
+@l3178 entity
 head=star
 det=newest
 
-@l3181 rename
+@l3179 rename
 _text=rename n_bard n_poet
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l3182
+object=$l3180
 name=n_poet
 
-@l3182 entity
+@l3180 entity
 head=n_bard
 
-@l3183 rename
+@l3181 rename
 _text=rename n_pawn2 to n_knight2
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l3184
+object=$l3182
 name=n_knight2
 
-@l3184 entity
+@l3182 entity
 head=n_pawn2
 
-@l3185 duplicate
+@l3183 duplicate
 _text=duplicate n_seed 8 times
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l3186
+object=$l3184
 quantity=8
 
-@l3186 entity
+@l3184 entity
 head=n_seed
 
-@l3187 arrange
+@l3185 arrange
 _text=arrange everything into a row
 _world=sketch
 _source=generator
 _template=arrange.llm.ts
 _mood=command
-object=$l3188
+object=$l3186
 layout=row
 
-@l3188 entity
+@l3186 entity
 head=everything
 
-@l3189 align
+@l3187 align
 _text=align n_align1 , n_align2 and n_align3 on the horizontally
 _world=sketch
 _source=generator
 _template=align.llm.ts
 _mood=command
-object=$l3190
+object=$l3188
 axis=horizontally
 
-@l3190 entity
+@l3188 entity
 head=n_align1
 
-@l3191 align
+@l3189 align
 _text=make n_v1 , n_v2 and n_v3 align vertically
 _world=sketch
 _source=generator
 _template=align.llm.ts
 _mood=command
-object=$l3192
+object=$l3190
 axis=vertically
 
-@l3192 entity
+@l3190 entity
 head=n_v1
 
-@l3193 distribute
+@l3191 distribute
 _text=distribute n_d1 , n_d2 , n_d3 , n_d4 horizontally
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l3194
+object=$l3192
 axis=horizontally
 
-@l3194 entity
+@l3192 entity
 head=n_d1
 
-@l3195 distribute
+@l3193 distribute
 _text=distribute the stars vertically
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l3196
+object=$l3194
 axis=vertically
 
-@l3196 entity
+@l3194 entity
 head=stars
 
-@l3197 disconnect
+@l3195 disconnect
 _text=disconnect n_hat and n_cap
 _world=sketch
 _source=generator
 _template=disconnect.llm.ts
 _mood=command
-source=$l3198
-target=$l3199
+source=$l3196
+target=$l3197
 
-@l3198 entity
+@l3196 entity
 head=n_hat
 
-@l3199 entity
+@l3197 entity
 head=n_cap
 
-@l3200 swap
+@l3198 swap
 _text=swap n_glove and n_mitt
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l3201
-target=$l3202
+object=$l3199
+target=$l3200
 
-@l3201 entity
+@l3199 entity
 head=n_glove
 
-@l3202 entity
+@l3200 entity
 head=n_mitt
 
-@l3203 undo
+@l3201 undo
 _text=undo newest make
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l3204 undo
+@l3202 undo
 _text=oh no , undo that
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l3205 redo
+@l3203 redo
 _text=redo what was undone
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3206 redo
+@l3204 redo
 _text=redo
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3207 toFront
+@l3205 toFront
 _text=bring n_skink up front
 _world=sketch
 _source=generator
 _template=toFront.llm.ts
 _mood=command
-object=$l3208
+object=$l3206
 depth=front
 
-@l3208 entity
+@l3206 entity
 head=n_skink
 
-@l3209 toBack
+@l3207 toBack
 _text=send newest rectangle back
 _world=sketch
 _source=generator
 _template=toBack.llm.ts
 _mood=command
-object=$l3210
+object=$l3208
 depth=back
 
-@l3210 entity
+@l3208 entity
 head=rectangle
 det=newest
 
-@l3211 forget
+@l3209 forget
 _text=forget rules i gave
 _world=sketch
 _source=generator
 _template=forget.llm.ts
 _mood=command
 
-@l3212 fact
+@l3210 fact
 _text=n_rattler is brown
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l3213
+object=$l3211
 color=brown
 
-@l3213 entity
+@l3211 entity
 head=n_rattler
 
-@l3214 rule
+@l3212 rule
 _text=from_now_on squares are small
 _world=sketch
 _source=generator
 _template=rule.llm.ts
 _mood=command
-object=$l3215
+object=$l3213
 size=small
 
-@l3215 entity
+@l3213 entity
 head=squares
 
-@l3216 list
+@l3214 list
 _text=which rules be active
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l3217
+object=$l3215
 
-@l3217 entity
+@l3215 entity
 head=rules
 
-@l3218 connected
+@l3216 connected
 _text=connected_q n_butte and n_knoll linked directly
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l3219
-landmark=$l3220
+object=$l3217
+landmark=$l3218
 
-@l3219 entity
+@l3217 entity
 head=n_butte
 
-@l3220 entity
+@l3218 entity
 head=n_knoll
 
-@l3221 degree
+@l3219 degree
 _text=degree_q connection does the n_crag have
 _world=sketch
 _source=generator
 _template=degree.llm.ts
 _mood=command
-object=$l3222
+object=$l3220
 
-@l3222 entity
+@l3220 entity
 head=n_crag
 
-@l3223 count
+@l3221 count
 _text=how_many ellipses
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l3224
+object=$l3222
 
-@l3224 entity
+@l3222 entity
 head=ellipses
 
-@l3225 nearest
+@l3223 nearest
 _text=nearest_q be closest to n_glade
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-landmark=$l3226
+landmark=$l3224
 superlative=closest
 
-@l3226 entity
+@l3224 entity
 head=n_glade
 
-@l3227 check
+@l3225 check
 _text=is_q n_heath bigger than n_moor
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3228
-landmark=$l3229
+object=$l3226
+landmark=$l3227
 comparison=bigger
 
-@l3228 entity
+@l3226 entity
 head=n_heath
 
-@l3229 entity
+@l3227 entity
 head=n_moor
 
-@l3230 check
+@l3228 check
 _text=is_q n_fen smaller than n_bog
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3231
-landmark=$l3232
+object=$l3229
+landmark=$l3230
 comparison=smaller
 
-@l3231 entity
+@l3229 entity
 head=n_fen
 
-@l3232 entity
+@l3230 entity
 head=n_bog
 
-@l3233 property
+@l3231 property
 _text=where_is the n_steppe
+_world=sketch
+_source=generator
+_template=property.llm.ts
+_mood=command
+object=$l3232
+
+@l3232 entity
+head=n_steppe
+
+@l3233 property
+_text=how_big n_tundra
 _world=sketch
 _source=generator
 _template=property.llm.ts
@@ -18778,543 +18777,543 @@ _mood=command
 object=$l3234
 
 @l3234 entity
-head=n_steppe
-
-@l3235 property
-_text=how_big n_tundra
-_world=sketch
-_source=generator
-_template=property.llm.ts
-_mood=command
-object=$l3236
-
-@l3236 entity
 head=n_tundra
 
-@l3237 check
+@l3235 check
 _text=is_q n_taiga a triangle
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3238
+object=$l3236
 shape=triangle
 
-@l3238 entity
+@l3236 entity
 head=n_taiga
 
-@l3239 check
+@l3237 check
 _text=is_q n_veldt below n_savanna
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3240
+object=$l3238
 relation=below
-landmark=$l3241
+landmark=$l3239
 
-@l3240 entity
+@l3238 entity
 head=n_veldt
 
-@l3241 entity
+@l3239 entity
 head=n_savanna
 
-@l3242 describe
+@l3240 describe
 _text=describe n_pampas
 _world=sketch
 _source=generator
 _template=describe.llm.ts
 _mood=command
-object=$l3243
+object=$l3241
 
-@l3243 entity
+@l3241 entity
 head=n_pampas
 
-@l3244 nearest
+@l3242 nearest
 _text=nearest_q be farthest from n_llano
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-landmark=$l3245
+landmark=$l3243
 superlative=farthest
 
-@l3245 entity
+@l3243 entity
 head=n_llano
 
-@l3246 extreme
+@l3244 extreme
 _text=extreme_q be the leftmost shape on the canvas
 _world=sketch
 _source=generator
 _template=extreme.llm.ts
 _mood=command
-object=$l3247
+object=$l3245
 superlative=leftmost
 
-@l3247 entity
+@l3245 entity
 head=shape
 
-@l3248 create
+@l3246 create
 _text=i am planning a kitchen , so draw a lime rectangle named n_fridge right_of the n_pantry
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3249
+object=$l3247
 name=n_fridge
 relation=right_of
-landmark=$l3250
+landmark=$l3248
 
-@l3249 entity
+@l3247 entity
 head=rectangle
 attr=lime
 
-@l3250 entity
+@l3248 entity
 head=n_pantry
 
-@l3251 list
+@l3249 list
 _text=which be rules i color earlier
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l3252
+object=$l3250
 
-@l3252 entity
+@l3250 entity
 head=rules
 
-@l3253 swap
+@l3251 swap
 _text=swap places of n_tray and n_plate
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l3254
-target=$l3255
+object=$l3252
+target=$l3253
 
-@l3254 entity
+@l3252 entity
 head=n_tray
 
-@l3255 entity
+@l3253 entity
 head=n_plate
 
-@l3256 list
+@l3254 list
 _text=which every white shape
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l3257
+object=$l3255
 
-@l3257 entity
+@l3255 entity
 head=shape
 attr=white
 
-@l3258 connected
+@l3256 connected
 _text=connected_q n_vera and n_wes linked
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l3259
-landmark=$l3260
+object=$l3257
+landmark=$l3258
 
-@l3259 entity
+@l3257 entity
 head=n_vera
 
-@l3260 entity
+@l3258 entity
 head=n_wes
 
-@l3261 exists
+@l3259 exists
 _text=is_there a gold circle
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l3262
+object=$l3260
 
-@l3262 entity
+@l3260 entity
 head=circle
 attr=gold
 
-@l3263 count
+@l3261 count
 _text=how_many stars do i have
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l3264
+object=$l3262
 
-@l3264 entity
+@l3262 entity
 head=stars
 
-@l3265 undo
+@l3263 undo
 _text=undo
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l3266 redo
+@l3264 redo
 _text=never mind , move it back with redo
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3267 distribute
+@l3265 distribute
 _text=evenly distribute n_bay1 , n_bay2 , n_bay3 horizontally
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l3268
+object=$l3266
 axis=horizontally
 
-@l3268 entity
+@l3266 entity
 head=n_bay1
 
-@l3269 rule
+@l3267 rule
 _text=from_now_on rectangles are gray
 _world=sketch
 _source=generator
 _template=rule.llm.ts
 _mood=command
-object=$l3270
+object=$l3268
 color=gray
 
-@l3270 entity
+@l3268 entity
 head=rectangles
 
-@l3271 nearest
+@l3269 nearest
 _text=nearest_q be the closest shape to n_cranny
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l3272
-landmark=$l3273
+object=$l3270
+landmark=$l3271
 superlative=closest
 
-@l3272 entity
+@l3270 entity
 head=shape
 
-@l3273 entity
+@l3271 entity
 head=n_cranny
 
-@l3274 check
+@l3272 check
 _text=is_q n_fawn bigger than n_doe
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3275
-landmark=$l3276
+object=$l3273
+landmark=$l3274
 comparison=bigger
 
-@l3275 entity
+@l3273 entity
 head=n_fawn
 
-@l3276 entity
+@l3274 entity
 head=n_doe
 
-@l3277 check
+@l3275 check
 _text=is_q n_calf smaller than n_cow
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3278
-landmark=$l3279
+object=$l3276
+landmark=$l3277
 comparison=smaller
 
-@l3278 entity
+@l3276 entity
 head=n_calf
 
-@l3279 entity
+@l3277 entity
 head=n_cow
 
-@l3280 check
+@l3278 check
 _text=is_q n_pearl a circle ?
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3281
+object=$l3279
 shape=circle
 
-@l3281 entity
+@l3279 entity
 head=n_pearl
 
-@l3282 extreme
+@l3280 extreme
 _text=extreme_q shape be the topmost
 _world=sketch
 _source=generator
 _template=extreme.llm.ts
 _mood=command
-object=$l3283
+object=$l3281
 superlative=topmost
 
-@l3283 entity
+@l3281 entity
 head=shape
 
-@l3284 property
+@l3282 property
 _text=what_shape n_sable
 _world=sketch
 _source=generator
 _template=property.llm.ts
 _mood=command
-object=$l3285
+object=$l3283
 
-@l3285 entity
+@l3283 entity
 head=n_sable
 
-@l3286 create
+@l3284 create
 _text=draw a navy square above n_skiff
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3287
+object=$l3285
 relation=above
-landmark=$l3288
+landmark=$l3286
 
-@l3287 entity
+@l3285 entity
 head=square
 attr=navy
 
-@l3288 entity
+@l3286 entity
 head=n_skiff
 
-@l3289 create
+@l3287 create
 _text=draw 3 pink diamonds
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3290
+object=$l3288
 quantity=3
 
-@l3290 entity
+@l3288 entity
 head=diamonds
 attr=pink
 
-@l3291 create
+@l3289 create
 _text=draw a medium white circle named n_spring next_to n_coil
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3292
+object=$l3290
 size=medium
 name=n_spring
 relation=next_to
-landmark=$l3293
+landmark=$l3291
 
-@l3292 entity
+@l3290 entity
 head=circle
 attr=white
 
-@l3293 entity
+@l3291 entity
 head=n_coil
 
-@l3294 create
+@l3292 create
 _text=draw a huge green star below the n_pond
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3295
+object=$l3293
 size=huge
 relation=below
-landmark=$l3296
+landmark=$l3294
 
-@l3295 entity
+@l3293 entity
 head=star
 attr=green
 
-@l3296 entity
+@l3294 entity
 head=n_pond
 
-@l3297 create
+@l3295 create
 _text=draw a tiny purple rectangle bottom_right
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3298
+object=$l3296
 size=tiny
 region=bottom_right
 
-@l3298 entity
+@l3296 entity
 head=rectangle
 attr=purple
 
-@l3299 set
+@l3297 set
 _text=make n_cinder to black
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3300
+object=$l3298
 color=black
 
-@l3300 entity
+@l3298 entity
 head=n_cinder
 
-@l3301 set
+@l3299 set
 _text=make n_flare small
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3302
+object=$l3300
 size=small
 
-@l3302 entity
+@l3300 entity
 head=n_flare
 
-@l3303 set
+@l3301 set
 _text=make the biggest.. . make newest rectangle navy
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3304
+object=$l3302
 color=navy
 
-@l3304 entity
+@l3302 entity
 head=rectangle
 det=newest
 
-@l3305 connect
+@l3303 connect
 _text=connect n_gauge to n_dial
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3306
-target=$l3307
+source=$l3304
+target=$l3305
 
-@l3306 entity
+@l3304 entity
 head=n_gauge
 
-@l3307 entity
+@l3305 entity
 head=n_dial
 
-@l3308 connect
+@l3306 connect
 _text=connect n_fan and n_grille with a dashed orange line
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3309
-target=$l3310
+source=$l3307
+target=$l3308
 style=dashed
-edge=$l3311
+edge=$l3309
 
-@l3309 entity
+@l3307 entity
 head=n_fan
 
-@l3310 entity
+@l3308 entity
 head=n_grille
 
-@l3311 entity
+@l3309 entity
 head=line
 attr=orange
 
-@l3312 connect
+@l3310 connect
 _text=connect n_wi to n_fi with a two_way arrow
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3313
-target=$l3314
+source=$l3311
+target=$l3312
 arrow=two_way
 
-@l3313 entity
+@l3311 entity
 head=n_wi
 
-@l3314 entity
+@l3312 entity
 head=n_fi
 
-@l3315 connect
+@l3313 connect
 _text=connect n_sun to n_dawn , labeled t_rises
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
 text=t_rises
-source=$l3316
-target=$l3317
+source=$l3314
+target=$l3315
 
-@l3316 entity
+@l3314 entity
 head=n_sun
 
-@l3317 entity
+@l3315 entity
 head=n_dawn
 
-@l3318 connect
+@l3316 connect
 _text=connect n_pen to n_ink , plain line without arrowheads
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3319
-target=$l3320
+source=$l3317
+target=$l3318
 arrow=plain
-edge=$l3321
+edge=$l3319
 
-@l3319 entity
+@l3317 entity
 head=n_pen
 
-@l3320 entity
+@l3318 entity
 head=n_ink
 
-@l3321 entity
+@l3319 entity
 head=line
 
-@l3322 move
+@l3320 move
 _text=move n_easel 30 up
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3323
+object=$l3321
 direction=up
 amount=30
 
-@l3323 entity
+@l3321 entity
 head=n_easel
 
-@l3324 move
+@l3322 move
 _text=move n_oil left
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3325
+object=$l3323
 direction=left
 
-@l3325 entity
+@l3323 entity
 head=n_oil
 
-@l3326 move
+@l3324 move
 _text=move the n_mime 15 px down
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3327
+object=$l3325
 direction=down
 amount=15
 
-@l3327 entity
+@l3325 entity
 head=n_mime
 
-@l3328 delete
+@l3326 delete
 _text=delete the n_clown
+_world=sketch
+_source=generator
+_template=delete.llm.ts
+_mood=command
+object=$l3327
+
+@l3327 entity
+head=n_clown
+
+@l3328 delete
+_text=delete every gray circle
 _world=sketch
 _source=generator
 _template=delete.llm.ts
@@ -19322,10 +19321,12 @@ _mood=command
 object=$l3329
 
 @l3329 entity
-head=n_clown
+head=circle
+attr=gray
+det=every
 
 @l3330 delete
-_text=delete every gray circle
+_text=delete oldest diamond
 _world=sketch
 _source=generator
 _template=delete.llm.ts
@@ -19333,1375 +19334,1362 @@ _mood=command
 object=$l3331
 
 @l3331 entity
-head=circle
-attr=gray
-det=every
-
-@l3332 delete
-_text=delete oldest diamond
-_world=sketch
-_source=generator
-_template=delete.llm.ts
-_mood=command
-object=$l3333
-
-@l3333 entity
 head=diamond
 det=oldest
 
-@l3334 resize
+@l3332 resize
 _text=bigger_v newest star
 _world=sketch
 _source=generator
 _template=resize.llm.ts
 _mood=command
-object=$l3335
+object=$l3333
 
-@l3335 entity
+@l3333 entity
 head=star
 det=newest
 
-@l3336 rename
+@l3334 rename
 _text=rename n_aerial to n_dish
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l3337
+object=$l3335
 name=n_dish
 
-@l3337 entity
+@l3335 entity
 head=n_aerial
 
-@l3338 rename
+@l3336 rename
 _text=rename newest hexagon n_hexa
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l3339
+object=$l3337
 name=n_hexa
 
-@l3339 entity
+@l3337 entity
 head=hexagon
 det=newest
 
-@l3340 duplicate
+@l3338 duplicate
 _text=duplicate n_usher 4 times
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l3341
+object=$l3339
 quantity=4
 
-@l3341 entity
+@l3339 entity
 head=n_usher
 
-@l3342 duplicate
+@l3340 duplicate
 _text=duplicate the gold star
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l3343
+object=$l3341
 
-@l3343 entity
+@l3341 entity
 head=star
 attr=gold
 
-@l3344 arrange
+@l3342 arrange
 _text=arrange all the stars grid
 _world=sketch
 _source=generator
 _template=arrange.llm.ts
 _mood=command
-object=$l3345
+object=$l3343
 layout=grid
 
-@l3345 entity
+@l3343 entity
 head=stars
 det=all
 
-@l3346 arrange
+@l3344 arrange
 _text=arrange everything ring
 _world=sketch
 _source=generator
 _template=arrange.llm.ts
 _mood=command
-object=$l3347
+object=$l3345
 layout=ring
 
-@l3347 entity
+@l3345 entity
 head=everything
 
-@l3348 fact
+@l3346 fact
 _text=n_opera is a diamond
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l3349
+object=$l3347
 shape=diamond
 
-@l3349 entity
+@l3347 entity
 head=n_opera
 
-@l3350 cycle
+@l3348 cycle
 _text=cycle_q ?
 _world=sketch
 _source=generator
 _template=cycle.llm.ts
 _mood=command
 
-@l3351 reachable
+@l3349 reachable
 _text=reach_q from n_solo
 _world=sketch
 _source=generator
 _template=reachable.llm.ts
 _mood=command
-source=$l3352
+source=$l3350
 
-@l3352 entity
+@l3350 entity
 head=n_solo
 
-@l3353 list
+@l3351 list
 _text=which rules in effect
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l3354
+object=$l3352
 
-@l3354 entity
+@l3352 entity
 head=rules
 
-@l3355 exists
+@l3353 exists
 _text=is_there a pink anything
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
 
-@l3356 count
+@l3354 count
 _text=how_many number of orange shapes
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l3357
+object=$l3355
 
-@l3357 entity
+@l3355 entity
 head=shapes
 attr=orange
 
-@l3358 nearest
+@l3356 nearest
 _text=nearest_q be farthest away from n_lute
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-landmark=$l3359
+landmark=$l3357
 superlative=farthest
 
-@l3359 entity
+@l3357 entity
 head=n_lute
 
-@l3360 check
+@l3358 check
 _text=is_q n_bugle bigger than n_fife
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3361
-landmark=$l3362
+object=$l3359
+landmark=$l3360
 comparison=bigger
 
-@l3361 entity
+@l3359 entity
 head=n_bugle
 
-@l3362 entity
+@l3360 entity
 head=n_fife
 
-@l3363 check
+@l3361 check
 _text=is_q n_gong smaller than the n_bell
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3364
-landmark=$l3365
+object=$l3362
+landmark=$l3363
 comparison=smaller
 
-@l3364 entity
+@l3362 entity
 head=n_gong
 
-@l3365 entity
+@l3363 entity
 head=n_bell
 
-@l3366 check
+@l3364 check
 _text=is_q n_drum right_of n_cymbal
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3367
+object=$l3365
 relation=right_of
-landmark=$l3368
+landmark=$l3366
 
-@l3367 entity
+@l3365 entity
 head=n_drum
 
-@l3368 entity
+@l3366 entity
 head=n_cymbal
 
-@l3369 check
+@l3367 check
 _text=is_q n_reed medium sized
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3370
+object=$l3368
 size=medium
 
-@l3370 entity
+@l3368 entity
 head=n_reed
 
-@l3371 swap
+@l3369 swap
 _text=swap n_lyre and n_zither
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l3372
-target=$l3373
+object=$l3370
+target=$l3371
 
-@l3372 entity
+@l3370 entity
 head=n_lyre
 
-@l3373 entity
+@l3371 entity
 head=n_zither
 
-@l3374 disconnect
+@l3372 disconnect
 _text=disconnect n_kora from n_oud
 _world=sketch
 _source=generator
 _template=disconnect.llm.ts
 _mood=command
-source=$l3375
-target=$l3376
+source=$l3373
+target=$l3374
 
-@l3375 entity
+@l3373 entity
 head=n_kora
 
-@l3376 entity
+@l3374 entity
 head=n_oud
 
-@l3377 align
+@l3375 align
 _text=align all the diamonds on the horizontally axis
 _world=sketch
 _source=generator
 _template=align.llm.ts
 _mood=command
-object=$l3378
+object=$l3376
 axis=horizontally
 
-@l3378 entity
+@l3376 entity
 head=diamonds
 det=all
 
-@l3379 distribute
+@l3377 distribute
 _text=distribute the hexagons horizontally
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l3380
+object=$l3378
 axis=horizontally
 
-@l3380 entity
+@l3378 entity
 head=hexagons
 
-@l3381 undo
+@l3379 undo
 _text=undo my previous edit
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l3382 redo
+@l3380 redo
 _text=redo my last edit
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3383 forget
+@l3381 forget
 _text=forget my defaults
 _world=sketch
 _source=generator
 _template=forget.llm.ts
 _mood=command
 
-@l3384 fact
+@l3382 fact
 _text=n_spell is above n_wand
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l3385
+object=$l3383
 relation=above
-landmark=$l3386
+landmark=$l3384
 
-@l3385 entity
+@l3383 entity
 head=n_spell
 
-@l3386 entity
+@l3384 entity
 head=n_wand
 
-@l3387 property
+@l3385 property
 _text=what_color the n_potion
 _world=sketch
 _source=generator
 _template=property.llm.ts
 _mood=command
-object=$l3388
+object=$l3386
 
-@l3388 entity
+@l3386 entity
 head=n_potion
 
-@l3389 extreme
+@l3387 extreme
 _text=extreme_q shape be rightmost
 _world=sketch
 _source=generator
 _template=extreme.llm.ts
 _mood=command
-object=$l3390
+object=$l3388
 superlative=rightmost
 
-@l3390 entity
+@l3388 entity
 head=shape
 
-@l3391 nearest
+@l3389 nearest
 _text=nearest_q be next_to n_broom , which shape be closest
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l3392
-landmark=$l3393
+object=$l3390
+landmark=$l3391
 superlative=closest
 
-@l3392 entity
+@l3390 entity
 head=shape
 
-@l3393 entity
+@l3391 entity
 head=n_broom
 
-@l3394 create
+@l3392 create
 _text=draw a pink square named n_booth just below the n_studio
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3395
+object=$l3393
 name=n_booth
 relation=below
-landmark=$l3396
+landmark=$l3394
 
-@l3395 entity
+@l3393 entity
 head=square
 attr=pink
 
-@l3396 entity
+@l3394 entity
 head=n_studio
 
-@l3397 list
+@l3395 list
 _text=tell me which rules are on
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l3398
+object=$l3396
 
-@l3398 entity
+@l3396 entity
 head=rules
 
-@l3399 swap
+@l3397 swap
 _text=swap n_press and n_die
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l3400
-target=$l3401
+object=$l3398
+target=$l3399
 
-@l3400 entity
+@l3398 entity
 head=n_press
 
-@l3401 entity
+@l3399 entity
 head=n_die
 
-@l3402 list
+@l3400 list
 _text=which the navy shapes
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l3403
+object=$l3401
 
-@l3403 entity
+@l3401 entity
 head=shapes
 attr=navy
 
-@l3404 connected
+@l3402 connected
 _text=connected_q n_jig and n_vise connected directly
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l3405
-landmark=$l3406
+object=$l3403
+landmark=$l3404
 
-@l3405 entity
+@l3403 entity
 head=n_jig
 
-@l3406 entity
+@l3404 entity
 head=n_vise
 
-@l3407 exists
+@l3405 exists
 _text=is_there magenta shapes
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l3408
+object=$l3406
 
-@l3408 entity
+@l3406 entity
 head=shapes
 attr=magenta
 
-@l3409 count
+@l3407 count
 _text=how_many triangles be there
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l3410
+object=$l3408
 
-@l3410 entity
+@l3408 entity
 head=triangles
 
-@l3411 undo
+@l3409 undo
 _text=undo please
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l3412 redo
+@l3410 redo
 _text=redo please
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3413 forget
+@l3411 forget
 _text=forget those default rules
 _world=sketch
 _source=generator
 _template=forget.llm.ts
 _mood=command
 
-@l3414 distribute
+@l3412 distribute
 _text=distribute n_pin1 , n_pin2 and n_pin3 on the vertically axis
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l3415
+object=$l3413
 axis=vertically
 
-@l3415 entity
+@l3413 entity
 head=n_pin1
 
-@l3416 describe
+@l3414 describe
 _text=describe what be in the canvas
 _world=sketch
 _source=generator
 _template=describe.llm.ts
 _mood=command
-object=$l3417
+object=$l3415
 
-@l3417 entity
+@l3415 entity
 head=canvas
 
-@l3418 nearest
+@l3416 nearest
 _text=nearest_q shape be closest to the n_keg
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l3419
-landmark=$l3420
+object=$l3417
+landmark=$l3418
 superlative=closest
 
-@l3419 entity
+@l3417 entity
 head=shape
 
-@l3420 entity
+@l3418 entity
 head=n_keg
 
-@l3421 check
+@l3419 check
 _text=is_q n_bear bigger than n_cub
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3422
-landmark=$l3423
+object=$l3420
+landmark=$l3421
 comparison=bigger
 
-@l3422 entity
+@l3420 entity
 head=n_bear
 
-@l3423 entity
+@l3421 entity
 head=n_cub
 
-@l3424 check
+@l3422 check
 _text=is_q n_pup smaller than n_dog
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3425
-landmark=$l3426
+object=$l3423
+landmark=$l3424
 comparison=smaller
 
-@l3425 entity
+@l3423 entity
 head=n_pup
 
-@l3426 entity
+@l3424 entity
 head=n_dog
 
-@l3427 check
+@l3425 check
 _text=is_q the n_hare cyan
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3428
+object=$l3426
 color=cyan
 
-@l3428 entity
+@l3426 entity
 head=n_hare
 
-@l3429 create
+@l3427 create
 _text=draw a red circle labeled t_ring center
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3430
+object=$l3428
 text=t_ring
 region=center
 
-@l3430 entity
+@l3428 entity
 head=circle
 attr=red
 
-@l3431 create
+@l3429 create
 _text=draw a small gold diamond between n_forum and n_senate
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3432
+object=$l3430
 size=small
 relation=between
-landmark=$l3433
-landmark2=$l3434
+landmark=$l3431
+landmark2=$l3432
 
-@l3432 entity
+@l3430 entity
 head=diamond
 attr=gold
 
-@l3433 entity
+@l3431 entity
 head=n_forum
 
-@l3434 entity
+@l3432 entity
 head=n_senate
 
-@l3435 create
+@l3433 create
 _text=draw a large teal rectangle named n_pool left_of n_villa
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3436
+object=$l3434
 size=large
 name=n_pool
 relation=left_of
-landmark=$l3437
+landmark=$l3435
 
-@l3436 entity
+@l3434 entity
 head=rectangle
 attr=teal
 
-@l3437 entity
+@l3435 entity
 head=n_villa
 
-@l3438 create
+@l3436 create
 _text=draw a huge brown hexagon
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3439
+object=$l3437
 size=huge
 
-@l3439 entity
+@l3437 entity
 head=hexagon
 attr=brown
 
-@l3440 create
+@l3438 create
 _text=draw a lime circle next_to n_road
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3441
+object=$l3439
 relation=next_to
-landmark=$l3442
+landmark=$l3440
 
-@l3441 entity
+@l3439 entity
 head=circle
 attr=lime
 
-@l3442 entity
+@l3440 entity
 head=n_road
 
-@l3443 set
+@l3441 set
 _text=make n_wall to indigo
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3444
+object=$l3442
 color=indigo
 
-@l3444 entity
+@l3442 entity
 head=n_wall
 
-@l3445 set
+@l3443 set
 _text=make n_gate a rectangle
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3446
+object=$l3444
 shape=rectangle
 
-@l3446 entity
+@l3444 entity
 head=n_gate
 
-@l3447 set
+@l3445 set
 _text=color the triangles red
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3448
+object=$l3446
 color=red
 
-@l3448 entity
+@l3446 entity
 head=triangles
 
-@l3449 set
+@l3447 set
 _text=color newest diamond to black
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3450
+object=$l3448
 color=black
 
-@l3450 entity
+@l3448 entity
 head=diamond
 det=newest
 
-@l3451 connect
+@l3449 connect
 _text=connect n_rome to n_capua
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3452
-target=$l3453
+source=$l3450
+target=$l3451
 
-@l3452 entity
+@l3450 entity
 head=n_rome
 
-@l3453 entity
+@l3451 entity
 head=n_capua
 
-@l3454 connect
+@l3452 connect
 _text=connect n_pisa to n_siena with a dotted gray line
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3455
-target=$l3456
+source=$l3453
+target=$l3454
 style=dotted
-edge=$l3457
+edge=$l3455
 
-@l3455 entity
+@l3453 entity
 head=n_pisa
 
-@l3456 entity
+@l3454 entity
 head=n_siena
 
-@l3457 entity
+@l3455 entity
 head=line
 attr=gray
 
-@l3458 connect
+@l3456 connect
 _text=connect n_milan to n_bari and rename the line t_rail
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
 text=t_rail
-source=$l3459
-target=$l3460
-edge=$l3461
+source=$l3457
+target=$l3458
+edge=$l3459
 
-@l3459 entity
+@l3457 entity
 head=n_milan
 
-@l3460 entity
+@l3458 entity
 head=n_bari
 
-@l3461 entity
+@l3459 entity
 head=line
 
-@l3462 connect
+@l3460 connect
 _text=draw a plain plain connect from n_napoli to n_parma
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3463
-target=$l3464
+source=$l3461
+target=$l3462
 arrow=plain
 
-@l3463 entity
+@l3461 entity
 head=n_napoli
 
-@l3464 entity
+@l3462 entity
 head=n_parma
 
-@l3465 move
+@l3463 move
 _text=move n_lido 60 right
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3466
+object=$l3464
 direction=right
 amount=60
 
-@l3466 entity
+@l3464 entity
 head=n_lido
 
-@l3467 move
+@l3465 move
 _text=move n_canal bottom_left
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3468
+object=$l3466
 region=bottom_left
 
-@l3468 entity
+@l3466 entity
 head=n_canal
 
-@l3469 move
+@l3467 move
 _text=move the n_gondola up a bit
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3470
+object=$l3468
 direction=up
 
-@l3470 entity
+@l3468 entity
 head=n_gondola
 
-@l3471 move
+@l3469 move
 _text=move n_vespa below the n_lane
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3472
+object=$l3470
 relation=below
-landmark=$l3473
+landmark=$l3471
 
-@l3472 entity
+@l3470 entity
 head=n_vespa
 
-@l3473 entity
+@l3471 entity
 head=n_lane
 
-@l3474 delete
+@l3472 delete
 _text=delete n_tuk
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l3475
+object=$l3473
 
-@l3475 entity
+@l3473 entity
 head=n_tuk
 
-@l3476 delete
+@l3474 delete
 _text=delete the stars not_gold
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l3477
+object=$l3475
 notcolor=not_gold
 
-@l3477 entity
+@l3475 entity
 head=stars
 
-@l3478 rename
+@l3476 rename
 _text=rename the n_cart to n_wagon
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l3479
+object=$l3477
 name=n_wagon
 
-@l3479 entity
+@l3477 entity
 head=n_cart
 
-@l3480 label
+@l3478 label
 _text=label t_line_7 on n_trolley
 _world=sketch
 _source=generator
 _template=label.llm.ts
 _mood=command
-object=$l3481
+object=$l3479
 text=t_line_7
 
-@l3481 entity
+@l3479 entity
 head=n_trolley
 
-@l3482 duplicate
+@l3480 duplicate
 _text=duplicate the n_bus
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l3483
+object=$l3481
 
-@l3483 entity
+@l3481 entity
 head=n_bus
 
-@l3484 arrange
+@l3482 arrange
 _text=arrange the squares column
 _world=sketch
 _source=generator
 _template=arrange.llm.ts
 _mood=command
-object=$l3485
+object=$l3483
 layout=column
 
-@l3485 entity
+@l3483 entity
 head=squares
 
-@l3486 arrange
+@l3484 arrange
 _text=arrange everything grid
 _world=sketch
 _source=generator
 _template=arrange.llm.ts
 _mood=command
-object=$l3487
+object=$l3485
 layout=grid
 
-@l3487 entity
+@l3485 entity
 head=everything
 
-@l3488 fact
+@l3486 fact
 _text=n_ferry is red
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l3489
+object=$l3487
 color=red
 
-@l3489 entity
+@l3487 entity
 head=n_ferry
 
-@l3490 cycle
+@l3488 cycle
 _text=cycle_q in here
 _world=sketch
 _source=generator
 _template=cycle.llm.ts
 _mood=command
 
-@l3491 reachable
+@l3489 reachable
 _text=reach_q from n_coach
 _world=sketch
 _source=generator
 _template=reachable.llm.ts
 _mood=command
-source=$l3492
+source=$l3490
 
-@l3492 entity
+@l3490 entity
 head=n_coach
 
-@l3493 list
+@l3491 list
 _text=which hexagons exist , list them
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l3494
+object=$l3492
 
-@l3494 entity
+@l3492 entity
 head=hexagons
 
-@l3495 connected
+@l3493 connected
 _text=connected_q n_cab connected to n_limo
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l3496
-landmark=$l3497
+object=$l3494
+landmark=$l3495
 
-@l3496 entity
+@l3494 entity
 head=n_cab
 
-@l3497 entity
+@l3495 entity
 head=n_limo
 
-@l3498 path
+@l3496 path
 _text=path_q from n_moped to n_scooter
 _world=sketch
 _source=generator
 _template=path.llm.ts
 _mood=command
-source=$l3499
-target=$l3500
+source=$l3497
+target=$l3498
 
-@l3499 entity
+@l3497 entity
 head=n_moped
 
-@l3500 entity
+@l3498 entity
 head=n_scooter
 
-@l3501 exists
+@l3499 exists
 _text=is_there a diamond not_red
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l3502
+object=$l3500
 notcolor=not_red
 
-@l3502 entity
+@l3500 entity
 head=diamond
 
-@l3503 count
+@l3501 count
 _text=how_many yellow shapes
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l3504
+object=$l3502
 
-@l3504 entity
+@l3502 entity
 head=shapes
 attr=yellow
 
-@l3505 nearest
+@l3503 nearest
 _text=nearest_q shape be closest to n_skiff
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l3506
-landmark=$l3507
+object=$l3504
+landmark=$l3505
 superlative=closest
 
-@l3506 entity
+@l3504 entity
 head=shape
 
-@l3507 entity
+@l3505 entity
 head=n_skiff
 
-@l3508 check
+@l3506 check
 _text=is_q n_rig bigger than n_platform
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3509
-landmark=$l3510
+object=$l3507
+landmark=$l3508
 comparison=bigger
 
-@l3509 entity
+@l3507 entity
 head=n_rig
 
-@l3510 entity
+@l3508 entity
 head=n_platform
 
-@l3511 check
+@l3509 check
 _text=is_q n_buoy smaller than n_float
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3512
-landmark=$l3513
+object=$l3510
+landmark=$l3511
 comparison=smaller
 
-@l3512 entity
+@l3510 entity
 head=n_buoy
 
-@l3513 entity
+@l3511 entity
 head=n_float
 
-@l3514 extreme
+@l3512 extreme
 _text=extreme_q be the smallest shape
 _world=sketch
 _source=generator
 _template=extreme.llm.ts
 _mood=command
-object=$l3515
+object=$l3513
 superlative=smallest
 
-@l3515 entity
+@l3513 entity
 head=shape
 
-@l3516 check
+@l3514 check
 _text=is_q n_sail white ?
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3517
+object=$l3515
 color=white
 
-@l3517 entity
+@l3515 entity
 head=n_sail
 
-@l3518 check
+@l3516 check
 _text=is_q n_keel below n_hull
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3519
+object=$l3517
 relation=below
-landmark=$l3520
+landmark=$l3518
 
-@l3519 entity
+@l3517 entity
 head=n_keel
 
-@l3520 entity
+@l3518 entity
 head=n_hull
 
-@l3521 swap
+@l3519 swap
 _text=swap the n_bow and the n_stern
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l3522
-target=$l3523
+object=$l3520
+target=$l3521
 
-@l3522 entity
+@l3520 entity
 head=n_bow
 
-@l3523 entity
+@l3521 entity
 head=n_stern
 
-@l3524 disconnect
+@l3522 disconnect
 _text=disconnect n_helm and n_wheel
 _world=sketch
 _source=generator
 _template=disconnect.llm.ts
 _mood=command
-source=$l3525
-target=$l3526
+source=$l3523
+target=$l3524
 
-@l3525 entity
+@l3523 entity
 head=n_helm
 
-@l3526 entity
+@l3524 entity
 head=n_wheel
 
-@l3527 align
+@l3525 align
 _text=align the circles horizontally
 _world=sketch
 _source=generator
 _template=align.llm.ts
 _mood=command
-object=$l3528
+object=$l3526
 axis=horizontally
 
-@l3528 entity
+@l3526 entity
 head=circles
 
-@l3529 distribute
+@l3527 distribute
 _text=distribute the circles vertically
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l3530
+object=$l3528
 axis=vertically
 
-@l3530 entity
+@l3528 entity
 head=circles
 
-@l3531 undo
+@l3529 undo
 _text=undo newest shape i did
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l3532 redo
+@l3530 redo
 _text=redo the shape
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3533 toFront
+@l3531 toFront
 _text=bring n_yacht front of the others
 _world=sketch
 _source=generator
 _template=toFront.llm.ts
 _mood=command
-object=$l3534
+object=$l3532
 depth=front
 
-@l3534 entity
+@l3532 entity
 head=n_yacht
 
-@l3535 forget
+@l3533 forget
 _text=forget about the default rules
 _world=sketch
 _source=generator
 _template=forget.llm.ts
 _mood=command
 
-@l3536 property
+@l3534 property
 _text=where_is n_punt
 _world=sketch
 _source=generator
 _template=property.llm.ts
 _mood=command
-object=$l3537
+object=$l3535
 
-@l3537 entity
+@l3535 entity
 head=n_punt
 
-@l3538 count
+@l3536 count
 _text=how_many connection be there in total
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
 
-@l3539 reachable
+@l3537 reachable
 _text=reach_q from n_alpha following the arrow
 _world=sketch
 _source=generator
 _template=reachable.llm.ts
 _mood=command
-source=$l3540
+source=$l3538
 
-@l3540 entity
+@l3538 entity
 head=n_alpha
 
-@l3541 swap
+@l3539 swap
 _text=swap the n_clinic and the n_ward
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l3542
-target=$l3543
+object=$l3540
+target=$l3541
 
-@l3542 entity
+@l3540 entity
 head=n_clinic
 
-@l3543 entity
+@l3541 entity
 head=n_ward
 
-@l3544 connected
+@l3542 connected
 _text=connected_q n_nurse and n_doctor connected
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l3545
-landmark=$l3546
+object=$l3543
+landmark=$l3544
 
-@l3545 entity
+@l3543 entity
 head=n_nurse
 
-@l3546 entity
+@l3544 entity
 head=n_doctor
 
-@l3547 degree
+@l3545 degree
 _text=degree_q connection has n_bed got
 _world=sketch
 _source=generator
 _template=degree.llm.ts
 _mood=command
-object=$l3548
+object=$l3546
 
-@l3548 entity
+@l3546 entity
 head=n_bed
 
-@l3549 undo
+@l3547 undo
 _text=undo this
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l3550 undo
+@l3548 undo
 _text=undo what i just did
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l3551 undo
+@l3549 undo
 _text=undo that last one , thanks
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l3552 redo
+@l3550 redo
 _text=redo that
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3553 redo
+@l3551 redo
 _text=redo newest step i undid
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3554 redo
+@l3552 redo
 _text=redo
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3555 align
+@l3553 align
 _text=align n_dial1 , n_dial2 and n_dial3 along the vertically
 _world=sketch
 _source=generator
 _template=align.llm.ts
 _mood=command
-object=$l3556
+object=$l3554
 axis=vertically
 
-@l3556 entity
+@l3554 entity
 head=n_dial1
 
-@l3557 distribute
+@l3555 distribute
 _text=distribute n_s1 , n_s2 and n_s3 evenly across horizontally
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l3558
+object=$l3556
 axis=horizontally
 
-@l3558 entity
+@l3556 entity
 head=n_s1
 
-@l3559 forget
+@l3557 forget
 _text=reset rules , forget them
 _world=sketch
 _source=generator
 _template=forget.llm.ts
 _mood=command
 
-@l3560 describe
+@l3558 describe
 _text=describe the picture
 _world=sketch
 _source=generator
 _template=describe.llm.ts
 _mood=command
 
-@l3561 check
+@l3559 check
 _text=is_q n_moon bigger than n_comet
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3562
-landmark=$l3563
+object=$l3560
+landmark=$l3561
 comparison=bigger
 
-@l3562 entity
+@l3560 entity
 head=n_moon
 
-@l3563 entity
+@l3561 entity
 head=n_comet
 
-@l3564 check
+@l3562 check
 _text=is_q n_quark smaller than n_atom
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3565
-landmark=$l3566
+object=$l3563
+landmark=$l3564
 comparison=smaller
 
-@l3565 entity
+@l3563 entity
 head=n_quark
 
-@l3566 entity
+@l3564 entity
 head=n_atom
 
-@l3567 check
+@l3565 check
 _text=is_q n_photon orange
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3568
+object=$l3566
 color=orange
 
-@l3568 entity
+@l3566 entity
 head=n_photon
 
-@l3569 extreme
+@l3567 extreme
 _text=extreme_q be the topmost one
 _world=sketch
 _source=generator
@@ -20709,238 +20697,249 @@ _template=extreme.llm.ts
 _mood=command
 superlative=topmost
 
-@l3570 count
+@l3568 count
 _text=how_many hexagons
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l3571
+object=$l3569
 
-@l3571 entity
+@l3569 entity
 head=hexagons
 
-@l3572 create
+@l3570 create
 _text=draw a white diamond above the n_pole
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3573
+object=$l3571
 relation=above
-landmark=$l3574
+landmark=$l3572
 
-@l3573 entity
+@l3571 entity
 head=diamond
 attr=white
 
-@l3574 entity
+@l3572 entity
 head=n_pole
 
-@l3575 create
+@l3573 create
 _text=draw a navy hexagon named n_reef , tiny
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3576
+object=$l3574
 size=tiny
 name=n_reef
 
-@l3576 entity
+@l3574 entity
 head=hexagon
 attr=navy
 
-@l3577 create
+@l3575 create
 _text=draw 3 green stars on the canvas
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3578
+object=$l3576
 quantity=3
 
-@l3578 entity
+@l3576 entity
 head=stars
 attr=green
 
-@l3579 create
+@l3577 create
 _text=draw a yellow circle in between n_cay and n_atoll
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3580
+object=$l3578
 relation=between
-landmark=$l3581
-landmark2=$l3582
+landmark=$l3579
+landmark2=$l3580
 
-@l3580 entity
+@l3578 entity
 head=circle
 attr=yellow
 
-@l3581 entity
+@l3579 entity
 head=n_cay
 
-@l3582 entity
+@l3580 entity
 head=n_atoll
 
-@l3583 create
+@l3581 create
 _text=draw a gray ellipse top_right
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3584
+object=$l3582
 region=top_right
 
-@l3584 entity
+@l3582 entity
 head=ellipse
 attr=gray
 
-@l3585 create
+@l3583 create
 _text=draw a purple triangle next_to n_gulf
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3586
+object=$l3584
 relation=next_to
-landmark=$l3587
+landmark=$l3585
 
-@l3586 entity
+@l3584 entity
 head=triangle
 attr=purple
 
-@l3587 entity
+@l3585 entity
 head=n_gulf
 
-@l3588 create
+@l3586 create
 _text=draw a large pink diamond
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3589
+object=$l3587
 size=large
 
-@l3589 entity
+@l3587 entity
 head=diamond
 attr=pink
 
-@l3590 set
+@l3588 set
 _text=color n_firth to red
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3591
+object=$l3589
 color=red
 
-@l3591 entity
+@l3589 entity
 head=n_firth
 
-@l3592 set
+@l3590 set
 _text=make newest circle cyan and small
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3593
+object=$l3591
 color=cyan
 size=small
 
-@l3593 entity
+@l3591 entity
 head=circle
 det=newest
 
-@l3594 set
+@l3592 set
 _text=color the not_blue squares green
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3595
+object=$l3593
 color=green
 notcolor=not_blue
 
-@l3595 entity
+@l3593 entity
 head=squares
 
-@l3596 connect
+@l3594 connect
 _text=connect n_spring to n_well
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3597
-target=$l3598
+source=$l3595
+target=$l3596
 
-@l3597 entity
+@l3595 entity
 head=n_spring
 
-@l3598 entity
+@l3596 entity
 head=n_well
 
-@l3599 connect
+@l3597 connect
 _text=connect n_hail and n_sleet two_way
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3600
-target=$l3601
+source=$l3598
+target=$l3599
 arrow=two_way
 
-@l3600 entity
+@l3598 entity
 head=n_hail
 
-@l3601 entity
+@l3599 entity
 head=n_sleet
 
-@l3602 move
+@l3600 move
 _text=move n_breeze 75 down
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3603
+object=$l3601
 direction=down
 amount=75
 
-@l3603 entity
+@l3601 entity
 head=n_breeze
 
-@l3604 move
+@l3602 move
 _text=move n_gust left_of n_squall
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3605
+object=$l3603
 relation=left_of
-landmark=$l3606
+landmark=$l3604
 
-@l3605 entity
+@l3603 entity
 head=n_gust
 
-@l3606 entity
+@l3604 entity
 head=n_squall
 
-@l3607 move
+@l3605 move
 _text=move the n_draft right
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3608
+object=$l3606
 direction=right
 
-@l3608 entity
+@l3606 entity
 head=n_draft
 
-@l3609 delete
+@l3607 delete
 _text=delete n_gale1
+_world=sketch
+_source=generator
+_template=delete.llm.ts
+_mood=command
+object=$l3608
+
+@l3608 entity
+head=n_gale1
+
+@l3609 delete
+_text=delete the blue squares
 _world=sketch
 _source=generator
 _template=delete.llm.ts
@@ -20948,98 +20947,98 @@ _mood=command
 object=$l3610
 
 @l3610 entity
-head=n_gale1
-
-@l3611 delete
-_text=delete the blue squares
-_world=sketch
-_source=generator
-_template=delete.llm.ts
-_mood=command
-object=$l3612
-
-@l3612 entity
 head=squares
 attr=blue
 
-@l3613 resize
+@l3611 resize
 _text=smaller_v n_monsoon
 _world=sketch
 _source=generator
 _template=resize.llm.ts
 _mood=command
-object=$l3614
+object=$l3612
 
-@l3614 entity
+@l3612 entity
 head=n_monsoon
 
-@l3615 duplicate
+@l3613 duplicate
 _text=duplicate n_snowman 3 times
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l3616
+object=$l3614
 quantity=3
 
-@l3616 entity
+@l3614 entity
 head=n_snowman
 
-@l3617 duplicate
+@l3615 duplicate
 _text=duplicate the blue hexagon
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l3618
+object=$l3616
 
-@l3618 entity
+@l3616 entity
 head=hexagon
 attr=blue
 
-@l3619 arrange
+@l3617 arrange
 _text=arrange all the hexagons ring
 _world=sketch
 _source=generator
 _template=arrange.llm.ts
 _mood=command
-object=$l3620
+object=$l3618
 layout=ring
 
-@l3620 entity
+@l3618 entity
 head=hexagons
 det=all
 
-@l3621 fact
+@l3619 fact
 _text=n_glacier is white
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l3622
+object=$l3620
 color=white
 
-@l3622 entity
+@l3620 entity
 head=n_glacier
 
-@l3623 fact
+@l3621 fact
 _text=n_pack is below n_ice
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l3624
+object=$l3622
 relation=below
-landmark=$l3625
+landmark=$l3623
 
-@l3624 entity
+@l3622 entity
 head=n_pack
 
-@l3625 entity
+@l3623 entity
 head=n_ice
 
-@l3626 list
+@l3624 list
 _text=which rules do i have
+_world=sketch
+_source=generator
+_template=list.llm.ts
+_mood=command
+object=$l3625
+
+@l3625 entity
+head=rules
+
+@l3626 list
+_text=which the cyan shapes
 _world=sketch
 _source=generator
 _template=list.llm.ts
@@ -21047,319 +21046,320 @@ _mood=command
 object=$l3627
 
 @l3627 entity
-head=rules
-
-@l3628 list
-_text=which the cyan shapes
-_world=sketch
-_source=generator
-_template=list.llm.ts
-_mood=command
-object=$l3629
-
-@l3629 entity
 head=shapes
 attr=cyan
 
-@l3630 path
+@l3628 path
 _text=path_q from n_sand to n_gravel
 _world=sketch
 _source=generator
 _template=path.llm.ts
 _mood=command
-source=$l3631
-target=$l3632
+source=$l3629
+target=$l3630
 
-@l3631 entity
+@l3629 entity
 head=n_sand
 
-@l3632 entity
+@l3630 entity
 head=n_gravel
 
-@l3633 connected
+@l3631 connected
 _text=connected_q n_loam linked to n_marl
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l3634
-landmark=$l3635
+object=$l3632
+landmark=$l3633
 
-@l3634 entity
+@l3632 entity
 head=n_loam
 
-@l3635 entity
+@l3633 entity
 head=n_marl
 
-@l3636 nearest
+@l3634 nearest
 _text=nearest_q shape be farthest from n_flint
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l3637
-landmark=$l3638
+object=$l3635
+landmark=$l3636
 superlative=farthest
 
-@l3637 entity
+@l3635 entity
 head=shape
 
-@l3638 entity
+@l3636 entity
 head=n_flint
 
-@l3639 check
+@l3637 check
 _text=is_q n_slate bigger than n_mica
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3640
-landmark=$l3641
+object=$l3638
+landmark=$l3639
 comparison=bigger
 
-@l3640 entity
+@l3638 entity
 head=n_slate
 
-@l3641 entity
+@l3639 entity
 head=n_mica
 
-@l3642 extreme
+@l3640 extreme
 _text=extreme_q shape be leftmost ?
 _world=sketch
 _source=generator
 _template=extreme.llm.ts
 _mood=command
-object=$l3643
+object=$l3641
 superlative=leftmost
 
-@l3643 entity
+@l3641 entity
 head=shape
 
-@l3644 check
+@l3642 check
 _text=is_q n_quartz left_of n_jasper
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3645
+object=$l3643
 relation=left_of
-landmark=$l3646
+landmark=$l3644
 
-@l3645 entity
+@l3643 entity
 head=n_quartz
 
-@l3646 entity
+@l3644 entity
 head=n_jasper
 
-@l3647 exists
+@l3645 exists
 _text=is_there a hexagon
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l3648
+object=$l3646
 
-@l3648 entity
+@l3646 entity
 head=hexagon
 
-@l3649 count
+@l3647 count
 _text=how_many gold shapes
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l3650
+object=$l3648
 
-@l3650 entity
+@l3648 entity
 head=shapes
 attr=gold
 
-@l3651 swap
+@l3649 swap
 _text=swap n_topaz and n_beryl
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l3652
-target=$l3653
+object=$l3650
+target=$l3651
 
-@l3652 entity
+@l3650 entity
 head=n_topaz
 
-@l3653 entity
+@l3651 entity
 head=n_beryl
 
-@l3654 list
+@l3652 list
 _text=which the gold shapes
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l3655
+object=$l3653
 
-@l3655 entity
+@l3653 entity
 head=shapes
 attr=gold
 
-@l3656 connected
+@l3654 connected
 _text=connected_q n_theta joined directly with n_iota
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l3657
-landmark=$l3658
+object=$l3655
+landmark=$l3656
 
-@l3657 entity
+@l3655 entity
 head=n_theta
 
-@l3658 entity
+@l3656 entity
 head=n_iota
 
-@l3659 undo
+@l3657 undo
 _text=undo
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l3660 undo
+@l3658 undo
 _text=step back , undo it
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l3661 undo
+@l3659 undo
 _text=undo what you just did
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l3662 redo
+@l3660 redo
 _text=redo
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3663 redo
+@l3661 redo
 _text=move back what i undid , redo
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3664 redo
+@l3662 redo
 _text=redo the previous make
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3665 toFront
+@l3663 toFront
 _text=bring all the circles front
 _world=sketch
 _source=generator
 _template=toFront.llm.ts
 _mood=command
-object=$l3666
+object=$l3664
 depth=front
 
-@l3666 entity
+@l3664 entity
 head=circles
 det=all
 
-@l3667 swap
+@l3665 swap
 _text=swap the places of n_ham and n_jam
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l3668
-target=$l3669
+object=$l3666
+target=$l3667
 
-@l3668 entity
+@l3666 entity
 head=n_ham
 
-@l3669 entity
+@l3667 entity
 head=n_jam
 
-@l3670 swap
+@l3668 swap
 _text=swap n_rice and n_beans
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l3671
-target=$l3672
+object=$l3669
+target=$l3670
 
-@l3671 entity
+@l3669 entity
 head=n_rice
 
-@l3672 entity
+@l3670 entity
 head=n_beans
 
-@l3673 disconnect
+@l3671 disconnect
 _text=disconnect n_corn from n_wheat
 _world=sketch
 _source=generator
 _template=disconnect.llm.ts
 _mood=command
-source=$l3674
-target=$l3675
+source=$l3672
+target=$l3673
 
-@l3674 entity
+@l3672 entity
 head=n_corn
 
-@l3675 entity
+@l3673 entity
 head=n_wheat
 
-@l3676 disconnect
+@l3674 disconnect
 _text=disconnect n_oats and n_barley
 _world=sketch
 _source=generator
 _template=disconnect.llm.ts
 _mood=command
-source=$l3677
-target=$l3678
+source=$l3675
+target=$l3676
 
-@l3677 entity
+@l3675 entity
 head=n_oats
 
-@l3678 entity
+@l3676 entity
 head=n_barley
 
-@l3679 disconnect
+@l3677 disconnect
 _text=disconnect n_millet and n_sorghum
 _world=sketch
 _source=generator
 _template=disconnect.llm.ts
 _mood=command
-source=$l3680
-target=$l3681
+source=$l3678
+target=$l3679
 
-@l3680 entity
+@l3678 entity
 head=n_millet
 
-@l3681 entity
+@l3679 entity
 head=n_sorghum
 
-@l3682 align
+@l3680 align
 _text=align n_t1 , n_t2 , n_t3 horizontally
 _world=sketch
 _source=generator
 _template=align.llm.ts
 _mood=command
-object=$l3683
+object=$l3681
 axis=horizontally
 
-@l3683 entity
+@l3681 entity
 head=n_t1
 
-@l3684 align
+@l3682 align
 _text=make n_u1 and n_u2 align vertically
+_world=sketch
+_source=generator
+_template=align.llm.ts
+_mood=command
+object=$l3683
+axis=vertically
+
+@l3683 entity
+head=n_u1
+
+@l3684 align
+_text=align every hexagon vertically
 _world=sketch
 _source=generator
 _template=align.llm.ts
@@ -21368,87 +21368,86 @@ object=$l3685
 axis=vertically
 
 @l3685 entity
-head=n_u1
-
-@l3686 align
-_text=align every hexagon vertically
-_world=sketch
-_source=generator
-_template=align.llm.ts
-_mood=command
-object=$l3687
-axis=vertically
-
-@l3687 entity
 head=hexagon
 det=every
 
-@l3688 distribute
+@l3686 distribute
 _text=distribute n_x1 , n_x2 , n_x3 horizontally
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l3689
+object=$l3687
 axis=horizontally
 
-@l3689 entity
+@l3687 entity
 head=n_x1
 
-@l3690 distribute
+@l3688 distribute
 _text=evenly space all the red shapes vertically
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l3691
+object=$l3689
 axis=vertically
 
-@l3691 entity
+@l3689 entity
 head=shapes
 attr=red
 det=all
 
-@l3692 forget
+@l3690 forget
 _text=forget the default rules
 _world=sketch
 _source=generator
 _template=forget.llm.ts
 _mood=command
 
-@l3693 rule
+@l3691 rule
 _text=from_now_on every ellipse is purple
 _world=sketch
 _source=generator
 _template=rule.llm.ts
 _mood=command
-object=$l3694
+object=$l3692
 color=purple
 
-@l3694 entity
+@l3692 entity
 head=ellipse
 
-@l3695 fact
+@l3693 fact
 _text=n_needle is a star
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l3696
+object=$l3694
 shape=star
 
-@l3696 entity
+@l3694 entity
 head=n_needle
 
-@l3697 cycle
+@l3695 cycle
 _text=cycle_q
 _world=sketch
 _source=generator
 _template=cycle.llm.ts
 _mood=command
 
-@l3698 list
+@l3696 list
 _text=which rules have been defined
+_world=sketch
+_source=generator
+_template=list.llm.ts
+_mood=command
+object=$l3697
+
+@l3697 entity
+head=rules
+
+@l3698 list
+_text=which all the blue shapes
 _world=sketch
 _source=generator
 _template=list.llm.ts
@@ -21456,10 +21455,11 @@ _mood=command
 object=$l3699
 
 @l3699 entity
-head=rules
+head=shapes
+attr=blue
 
 @l3700 list
-_text=which all the blue shapes
+_text=which the diamonds
 _world=sketch
 _source=generator
 _template=list.llm.ts
@@ -21467,428 +21467,427 @@ _mood=command
 object=$l3701
 
 @l3701 entity
-head=shapes
-attr=blue
-
-@l3702 list
-_text=which the diamonds
-_world=sketch
-_source=generator
-_template=list.llm.ts
-_mood=command
-object=$l3703
-
-@l3703 entity
 head=diamonds
 
-@l3704 connected
+@l3702 connected
 _text=connected_q n_hood and n_visor connected
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l3705
-landmark=$l3706
+object=$l3703
+landmark=$l3704
 
-@l3705 entity
+@l3703 entity
 head=n_hood
 
-@l3706 entity
+@l3704 entity
 head=n_visor
 
-@l3707 degree
+@l3705 degree
 _text=degree_q connection does n_shoe have
 _world=sketch
 _source=generator
 _template=degree.llm.ts
 _mood=command
-object=$l3708
+object=$l3706
 
-@l3708 entity
+@l3706 entity
 head=n_shoe
 
-@l3709 count
+@l3707 count
 _text=how_many squares
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l3710
+object=$l3708
 
-@l3710 entity
+@l3708 entity
 head=squares
 
-@l3711 exists
+@l3709 exists
 _text=is_there ellipse
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l3712
+object=$l3710
 
-@l3712 entity
+@l3710 entity
 head=ellipse
 
-@l3713 describe
+@l3711 describe
 _text=describe everything on the canvas
 _world=sketch
 _source=generator
 _template=describe.llm.ts
 _mood=command
-object=$l3714
+object=$l3712
 
-@l3714 entity
+@l3712 entity
 head=canvas
 
-@l3715 check
+@l3713 check
 _text=is_q n_clog bigger than n_sandal
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3716
-landmark=$l3717
+object=$l3714
+landmark=$l3715
 comparison=bigger
 
-@l3716 entity
+@l3714 entity
 head=n_clog
 
-@l3717 entity
+@l3715 entity
 head=n_sandal
 
-@l3718 extreme
+@l3716 extreme
 _text=extreme_q shape be the biggest
 _world=sketch
 _source=generator
 _template=extreme.llm.ts
 _mood=command
-object=$l3719
+object=$l3717
 superlative=biggest
 
-@l3719 entity
+@l3717 entity
 head=shape
 
-@l3720 property
+@l3718 property
 _text=what_shape n_mule2
 _world=sketch
 _source=generator
 _template=property.llm.ts
 _mood=command
-object=$l3721
+object=$l3719
 
-@l3721 entity
+@l3719 entity
 head=n_mule2
 
-@l3722 check
+@l3720 check
 _text=is_q n_flat purple
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3723
+object=$l3721
 color=purple
 
-@l3723 entity
+@l3721 entity
 head=n_flat
 
-@l3724 create
+@l3722 create
 _text=draw a cyan hexagon right_of n_bay2
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3725
+object=$l3723
 relation=right_of
-landmark=$l3726
+landmark=$l3724
 
-@l3725 entity
+@l3723 entity
 head=hexagon
 attr=cyan
 
-@l3726 entity
+@l3724 entity
 head=n_bay2
 
-@l3727 create
+@l3725 create
 _text=draw a tiny gray circle named n_pew
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3728
+object=$l3726
 size=tiny
 name=n_pew
 
-@l3728 entity
+@l3726 entity
 head=circle
 attr=gray
 
-@l3729 create
+@l3727 create
 _text=draw a gold star above the n_altar
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3730
+object=$l3728
 relation=above
-landmark=$l3731
+landmark=$l3729
 
-@l3730 entity
+@l3728 entity
 head=star
 attr=gold
 
-@l3731 entity
+@l3729 entity
 head=n_altar
 
-@l3732 create
+@l3730 create
 _text=draw 3 purple squares
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3733
+object=$l3731
 quantity=3
 
-@l3733 entity
+@l3731 entity
 head=squares
 attr=purple
 
-@l3734 create
+@l3732 create
 _text=draw a black rectangle bottom_right
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3735
+object=$l3733
 region=bottom_right
 
-@l3735 entity
+@l3733 entity
 head=rectangle
 attr=black
 
-@l3736 create
+@l3734 create
 _text=draw a navy circle onto the board next_to the n_belfry
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3737
+object=$l3735
 relation=next_to
-landmark=$l3738
+landmark=$l3736
 
-@l3737 entity
+@l3735 entity
 head=circle
 attr=navy
 
-@l3738 entity
+@l3736 entity
 head=n_belfry
 
-@l3739 create
+@l3737 create
 _text=draw a medium lime star
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3740
+object=$l3738
 size=medium
 
-@l3740 entity
+@l3738 entity
 head=star
 attr=lime
 
-@l3741 set
+@l3739 set
 _text=make n_hatch2 orange
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3742
+object=$l3740
 color=orange
 
-@l3742 entity
+@l3740 entity
 head=n_hatch2
 
-@l3743 set
+@l3741 set
 _text=make the n_plank to a triangle
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3744
+object=$l3742
 shape=triangle
 
-@l3744 entity
+@l3742 entity
 head=n_plank
 
-@l3745 set
+@l3743 set
 _text=make all the rectangles yellow
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3746
+object=$l3744
 color=yellow
 
-@l3746 entity
+@l3744 entity
 head=rectangles
 det=all
 
-@l3747 set
+@l3745 set
 _text=make oldest triangle teal
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3748
+object=$l3746
 color=teal
 
-@l3748 entity
+@l3746 entity
 head=triangle
 det=oldest
 
-@l3749 set
+@l3747 set
 _text=color n_stud2 to white and make it huge
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3750
+object=$l3748
 color=white
 size=huge
 
-@l3750 entity
+@l3748 entity
 head=n_stud2
 
-@l3751 connect
+@l3749 connect
 _text=connect n_pipe2 to n_valve2
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3752
-target=$l3753
+source=$l3750
+target=$l3751
 
-@l3752 entity
+@l3750 entity
 head=n_pipe2
 
-@l3753 entity
+@l3751 entity
 head=n_valve2
 
-@l3754 connect
+@l3752 connect
 _text=connect dashed line from n_tap2 to n_basin
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3755
-target=$l3756
+source=$l3753
+target=$l3754
 style=dashed
-edge=$l3757
+edge=$l3755
 
-@l3755 entity
+@l3753 entity
 head=n_tap2
 
-@l3756 entity
+@l3754 entity
 head=n_basin
 
-@l3757 entity
+@l3755 entity
 head=line
 
-@l3758 connect
+@l3756 connect
 _text=connect n_drain2 with n_sewer using a dotted red arrow
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3759
-target=$l3760
+source=$l3757
+target=$l3758
 style=dotted
-edge=$l3761
+edge=$l3759
 
-@l3759 entity
+@l3757 entity
 head=n_drain2
 
-@l3760 entity
+@l3758 entity
 head=n_sewer
 
-@l3761 entity
+@l3759 entity
 head=arrow
 attr=red
 
-@l3762 connect
+@l3760 connect
 _text=connect n_sun2 and n_moon2 with a two_way line
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3763
-target=$l3764
+source=$l3761
+target=$l3762
 arrow=two_way
-edge=$l3765
+edge=$l3763
 
-@l3763 entity
+@l3761 entity
 head=n_sun2
 
-@l3764 entity
+@l3762 entity
 head=n_moon2
 
-@l3765 entity
+@l3763 entity
 head=line
 
-@l3766 move
+@l3764 move
 _text=move the n_motor 120 left
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3767
+object=$l3765
 direction=left
 amount=120
 
-@l3767 entity
+@l3765 entity
 head=n_motor
 
-@l3768 move
+@l3766 move
 _text=move n_belt above the n_pulley2
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3769
+object=$l3767
 relation=above
-landmark=$l3770
+landmark=$l3768
 
-@l3769 entity
+@l3767 entity
 head=n_belt
 
-@l3770 entity
+@l3768 entity
 head=n_pulley2
 
-@l3771 move
+@l3769 move
 _text=move n_gear3 top_left
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3772
+object=$l3770
 region=top_left
 
-@l3772 entity
+@l3770 entity
 head=n_gear3
 
-@l3773 move
+@l3771 move
 _text=move the n_cam down
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3774
+object=$l3772
 direction=down
 
-@l3774 entity
+@l3772 entity
 head=n_cam
 
-@l3775 delete
+@l3773 delete
 _text=delete n_crank
+_world=sketch
+_source=generator
+_template=delete.llm.ts
+_mood=command
+object=$l3774
+
+@l3774 entity
+head=n_crank
+
+@l3775 delete
+_text=delete all the white circles
 _world=sketch
 _source=generator
 _template=delete.llm.ts
@@ -21896,10 +21895,12 @@ _mood=command
 object=$l3776
 
 @l3776 entity
-head=n_crank
+head=circles
+attr=white
+det=all
 
 @l3777 delete
-_text=delete all the white circles
+_text=delete everything
 _world=sketch
 _source=generator
 _template=delete.llm.ts
@@ -21907,930 +21908,917 @@ _mood=command
 object=$l3778
 
 @l3778 entity
-head=circles
-attr=white
-det=all
-
-@l3779 delete
-_text=delete everything
-_world=sketch
-_source=generator
-_template=delete.llm.ts
-_mood=command
-object=$l3780
-
-@l3780 entity
 head=everything
 
-@l3781 resize
+@l3779 resize
 _text=smaller_v all the squares
 _world=sketch
 _source=generator
 _template=resize.llm.ts
 _mood=command
-object=$l3782
+object=$l3780
 
-@l3782 entity
+@l3780 entity
 head=squares
 det=all
 
-@l3783 rename
+@l3781 rename
 _text=rename n_lever2 to n_handle
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l3784
+object=$l3782
 name=n_handle
 
-@l3784 entity
+@l3782 entity
 head=n_lever2
 
-@l3785 create
+@l3783 create
 _text=on our logistics board , draw a green hexagon named n_hub below the n_dispatcher
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3786
+object=$l3784
 name=n_hub
 relation=below
-landmark=$l3787
+landmark=$l3785
 
-@l3786 entity
+@l3784 entity
 head=hexagon
 attr=green
 
-@l3787 entity
+@l3785 entity
 head=n_dispatcher
 
-@l3788 cycle
+@l3786 cycle
 _text=cycle_q between tasks and reviews
 _world=sketch
 _source=generator
 _template=cycle.llm.ts
 _mood=command
 
-@l3789 list
+@l3787 list
 _text=which rules
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
-object=$l3790
+object=$l3788
 
-@l3790 entity
+@l3788 entity
 head=rules
 
-@l3791 exists
+@l3789 exists
 _text=is_there a teal shape
 _world=sketch
 _source=generator
 _template=exists.llm.ts
 _mood=command
-object=$l3792
+object=$l3790
 
-@l3792 entity
+@l3790 entity
 head=shape
 attr=teal
 
-@l3793 reachable
+@l3791 reachable
 _text=reach_q from n_swift
 _world=sketch
 _source=generator
 _template=reachable.llm.ts
 _mood=command
-source=$l3794
+source=$l3792
 
-@l3794 entity
+@l3792 entity
 head=n_swift
 
-@l3795 list
+@l3793 list
 _text=which the purple stuff
 _world=sketch
 _source=generator
 _template=list.llm.ts
 _mood=command
 
-@l3796 connected
+@l3794 connected
 _text=connected_q n_crow and n_rook directly connected
 _world=sketch
 _source=generator
 _template=connected.llm.ts
 _mood=command
-object=$l3797
-landmark=$l3798
+object=$l3795
+landmark=$l3796
 
-@l3797 entity
+@l3795 entity
 head=n_crow
 
-@l3798 entity
+@l3796 entity
 head=n_rook
 
-@l3799 count
+@l3797 count
 _text=how_many pink shapes
 _world=sketch
 _source=generator
 _template=count.llm.ts
 _mood=command
-object=$l3800
+object=$l3798
 
-@l3800 entity
+@l3798 entity
 head=shapes
 attr=pink
 
-@l3801 nearest
+@l3799 nearest
 _text=nearest_q shape be closest to n_duck
 _world=sketch
 _source=generator
 _template=nearest.llm.ts
 _mood=command
-object=$l3802
-landmark=$l3803
+object=$l3800
+landmark=$l3801
 superlative=closest
 
-@l3802 entity
+@l3800 entity
 head=shape
 
-@l3803 entity
+@l3801 entity
 head=n_duck
 
-@l3804 check
+@l3802 check
 _text=is_q n_heron bigger than n_egret
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3805
-landmark=$l3806
+object=$l3803
+landmark=$l3804
 comparison=bigger
 
-@l3805 entity
+@l3803 entity
 head=n_heron
 
-@l3806 entity
+@l3804 entity
 head=n_egret
 
-@l3807 check
+@l3805 check
 _text=is_q n_ibis smaller than n_stork
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3808
-landmark=$l3809
+object=$l3806
+landmark=$l3807
 comparison=smaller
 
-@l3808 entity
+@l3806 entity
 head=n_ibis
 
-@l3809 entity
+@l3807 entity
 head=n_stork
 
-@l3810 check
+@l3808 check
 _text=is_q n_crane gray
 _world=sketch
 _source=generator
 _template=check.llm.ts
 _mood=command
-object=$l3811
+object=$l3809
 color=gray
 
-@l3811 entity
+@l3809 entity
 head=n_crane
 
-@l3812 property
+@l3810 property
 _text=what_color n_teal1
 _world=sketch
 _source=generator
 _template=property.llm.ts
 _mood=command
-object=$l3813
+object=$l3811
 
-@l3813 entity
+@l3811 entity
 head=n_teal1
 
-@l3814 align
+@l3812 align
 _text=align the stars vertically
 _world=sketch
 _source=generator
 _template=align.llm.ts
 _mood=command
-object=$l3815
+object=$l3813
 axis=vertically
 
-@l3815 entity
+@l3813 entity
 head=stars
 
-@l3816 distribute
+@l3814 distribute
 _text=distribute n_y1 , n_y2 and n_y3 evenly , horizontally
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l3817
+object=$l3815
 axis=horizontally
 
-@l3817 entity
+@l3815 entity
 head=n_y1
 
-@l3818 distribute
+@l3816 distribute
 _text=distribute the rectangles vertically
 _world=sketch
 _source=generator
 _template=distribute.llm.ts
 _mood=command
-object=$l3819
+object=$l3817
 axis=vertically
 
-@l3819 entity
+@l3817 entity
 head=rectangles
 
-@l3820 forget
+@l3818 forget
 _text=forget rules , all of them
 _world=sketch
 _source=generator
 _template=forget.llm.ts
 _mood=command
 
-@l3821 redo
+@l3819 redo
 _text=redo that undo
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3822 redo
+@l3820 redo
 _text=redo what i took back
 _world=sketch
 _source=generator
 _template=redo.llm.ts
 _mood=command
 
-@l3823 undo
+@l3821 undo
 _text=undo the previous step
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l3824 undo
+@l3822 undo
 _text=hmm no , undo that
 _world=sketch
 _source=generator
 _template=undo.llm.ts
 _mood=command
 
-@l3825 disconnect
+@l3823 disconnect
 _text=disconnect n_petal from n_stem2
 _world=sketch
 _source=generator
 _template=disconnect.llm.ts
 _mood=command
-source=$l3826
-target=$l3827
+source=$l3824
+target=$l3825
 
-@l3826 entity
+@l3824 entity
 head=n_petal
 
-@l3827 entity
+@l3825 entity
 head=n_stem2
 
-@l3828 swap
+@l3826 swap
 _text=swap n_root2 and n_branch
 _world=sketch
 _source=generator
 _template=swap.llm.ts
 _mood=command
-object=$l3829
-target=$l3830
+object=$l3827
+target=$l3828
 
-@l3829 entity
+@l3827 entity
 head=n_root2
 
-@l3830 entity
+@l3828 entity
 head=n_branch
 
-@l3831 duplicate
+@l3829 duplicate
 _text=draw 2 more n_twin shapes , duplicate it twice
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l3832
+object=$l3830
 quantity=2
 
-@l3832 entity
+@l3830 entity
 head=n_twin
 
-@l3833 duplicate
+@l3831 duplicate
 _text=duplicate the n_echo2
 _world=sketch
 _source=generator
 _template=duplicate.llm.ts
 _mood=command
-object=$l3834
+object=$l3832
 
-@l3834 entity
+@l3832 entity
 head=n_echo2
 
-@l3835 rename
+@l3833 rename
 _text=rename n_alias to n_handle2
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l3836
+object=$l3834
 name=n_handle2
 
-@l3836 entity
+@l3834 entity
 head=n_alias
 
-@l3837 rename
+@l3835 rename
 _text=rename n_temp1 n_final1
 _world=sketch
 _source=generator
 _template=rename.llm.ts
 _mood=command
-object=$l3838
+object=$l3836
 name=n_final1
 
-@l3838 entity
+@l3836 entity
 head=n_temp1
 
-@l3839 label
+@l3837 label
 _text=label the n_note t_remember
 _world=sketch
 _source=generator
 _template=label.llm.ts
 _mood=command
-object=$l3840
+object=$l3838
 text=t_remember
 
-@l3840 entity
+@l3838 entity
 head=n_note
 
-@l3841 arrange
+@l3839 arrange
 _text=arrange the diamonds column
 _world=sketch
 _source=generator
 _template=arrange.llm.ts
 _mood=command
-object=$l3842
+object=$l3840
 layout=column
 
-@l3842 entity
+@l3840 entity
 head=diamonds
 
-@l3843 arrange
+@l3841 arrange
 _text=arrange everything ring arrange
 _world=sketch
 _source=generator
 _template=arrange.llm.ts
 _mood=command
-object=$l3844
+object=$l3842
 layout=ring
 
-@l3844 entity
+@l3842 entity
 head=everything
 
-@l3845 resize
+@l3843 resize
 _text=bigger_v n_bulb
 _world=sketch
 _source=generator
 _template=resize.llm.ts
 _mood=command
-object=$l3846
+object=$l3844
 
-@l3846 entity
+@l3844 entity
 head=n_bulb
 
-@l3847 delete
+@l3845 delete
 _text=delete all stars not_red
 _world=sketch
 _source=generator
 _template=delete.llm.ts
 _mood=command
-object=$l3848
+object=$l3846
 notcolor=not_red
 
-@l3848 entity
+@l3846 entity
 head=stars
 det=all
 
-@l3849 fact
+@l3847 fact
 _text=n_prism is navy
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l3850
+object=$l3848
 color=navy
 
-@l3850 entity
+@l3848 entity
 head=n_prism
 
-@l3851 fact
+@l3849 fact
 _text=n_ray2 is left_of n_beam3
 _world=sketch
 _source=generator
 _template=fact.llm.ts
 _mood=command
-object=$l3852
+object=$l3850
 relation=left_of
-landmark=$l3853
+landmark=$l3851
 
-@l3852 entity
+@l3850 entity
 head=n_ray2
 
-@l3853 entity
+@l3851 entity
 head=n_beam3
 
-@l3854 create
+@l3852 create
 _text=draw a small white square named n_desk2 above n_hall2
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3855
+object=$l3853
 size=small
 name=n_desk2
 relation=above
-landmark=$l3856
+landmark=$l3854
 
-@l3855 entity
+@l3853 entity
 head=square
 attr=white
 
-@l3856 entity
+@l3854 entity
 head=n_hall2
 
-@l3857 create
+@l3855 create
 _text=draw a yellow triangle next_to n_base2
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3858
+object=$l3856
 relation=next_to
-landmark=$l3859
+landmark=$l3857
 
-@l3858 entity
+@l3856 entity
 head=triangle
 attr=yellow
 
-@l3859 entity
+@l3857 entity
 head=n_base2
 
-@l3860 create
+@l3858 create
 _text=draw 3 red diamonds
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3861
+object=$l3859
 quantity=3
 
-@l3861 entity
+@l3859 entity
 head=diamonds
 attr=red
 
-@l3862 create
+@l3860 create
 _text=draw a pink star between n_kit2 and n_tool
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3863
+object=$l3861
 relation=between
-landmark=$l3864
-landmark2=$l3865
+landmark=$l3862
+landmark2=$l3863
 
-@l3863 entity
+@l3861 entity
 head=star
 attr=pink
 
-@l3864 entity
+@l3862 entity
 head=n_kit2
 
-@l3865 entity
+@l3863 entity
 head=n_tool
 
-@l3866 create
+@l3864 create
 _text=draw a huge gray hexagon
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3867
+object=$l3865
 size=huge
 
-@l3867 entity
+@l3865 entity
 head=hexagon
 attr=gray
 
-@l3868 create
+@l3866 create
 _text=draw a lime ellipse bottom
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3869
+object=$l3867
 region=bottom
 
-@l3869 entity
+@l3867 entity
 head=ellipse
 attr=lime
 
-@l3870 create
+@l3868 create
 _text=draw a medium magenta rectangle named n_pen2
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3871
+object=$l3869
 size=medium
 name=n_pen2
 
-@l3871 entity
+@l3869 entity
 head=rectangle
 attr=magenta
 
-@l3872 create
+@l3870 create
 _text=draw a purple diamond left_of the n_hutch
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3873
+object=$l3871
 relation=left_of
-landmark=$l3874
+landmark=$l3872
 
-@l3873 entity
+@l3871 entity
 head=diamond
 attr=purple
 
-@l3874 entity
+@l3872 entity
 head=n_hutch
 
-@l3875 create
+@l3873 create
 _text=draw a black star named n_bat
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3876
+object=$l3874
 name=n_bat
 
-@l3876 entity
+@l3874 entity
 head=star
 attr=black
 
-@l3877 create
+@l3875 create
 _text=draw an indigo square top_left
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3878
+object=$l3876
 region=top_left
 
-@l3878 entity
+@l3876 entity
 head=square
 attr=indigo
 
-@l3879 create
+@l3877 create
 _text=draw an orange hexagon center
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3880
+object=$l3878
 region=center
 
-@l3880 entity
+@l3878 entity
 head=hexagon
 attr=orange
 
-@l3881 create
+@l3879 create
 _text=draw 2 small green triangles next_to the n_lawn
 _world=sketch
 _source=generator
 _template=create.llm.ts
 _mood=command
-object=$l3882
+object=$l3880
 size=small
 relation=next_to
-landmark=$l3883
+landmark=$l3881
 quantity=2
 
-@l3882 entity
+@l3880 entity
 head=triangles
 attr=green
 
-@l3883 entity
+@l3881 entity
 head=n_lawn
 
-@l3884 set
+@l3882 set
 _text=make n_porch to purple
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3885
+object=$l3883
 color=purple
 
-@l3885 entity
+@l3883 entity
 head=n_porch
 
-@l3886 set
+@l3884 set
 _text=make n_step large
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3887
+object=$l3885
 size=large
 
-@l3887 entity
+@l3885 entity
 head=n_step
 
-@l3888 set
+@l3886 set
 _text=color the diamonds orange
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3889
+object=$l3887
 color=orange
 
-@l3889 entity
+@l3887 entity
 head=diamonds
 
-@l3890 set
+@l3888 set
 _text=make newest star lime
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3891
+object=$l3889
 color=lime
 
-@l3891 entity
+@l3889 entity
 head=star
 det=newest
 
-@l3892 set
+@l3890 set
 _text=color the red circle brown
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3893
+object=$l3891
 color=brown
 
-@l3893 entity
+@l3891 entity
 head=circle
 attr=red
 
-@l3894 set
+@l3892 set
 _text=color n_rail2 to tiny and cyan
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3895
+object=$l3893
 color=cyan
 size=tiny
 
-@l3895 entity
+@l3893 entity
 head=n_rail2
 
-@l3896 set
+@l3894 set
 _text=make n_newel to a square
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3897
+object=$l3895
 shape=square
 
-@l3897 entity
+@l3895 entity
 head=n_newel
 
-@l3898 set
+@l3896 set
 _text=make n_baluster magenta
 _world=sketch
 _source=generator
 _template=set.llm.ts
 _mood=command
-object=$l3899
+object=$l3897
 color=magenta
 
-@l3899 entity
+@l3897 entity
 head=n_baluster
 
-@l3900 connect
+@l3898 connect
 _text=connect n_client to n_server2
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3901
-target=$l3902
+source=$l3899
+target=$l3900
 
-@l3901 entity
+@l3899 entity
 head=n_client
 
-@l3902 entity
+@l3900 entity
 head=n_server2
 
-@l3903 connect
+@l3901 connect
 _text=connect n_web2 to n_api2 with a dashed line
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3904
-target=$l3905
+source=$l3902
+target=$l3903
 style=dashed
-edge=$l3906
+edge=$l3904
 
-@l3904 entity
+@l3902 entity
 head=n_web2
 
-@l3905 entity
+@l3903 entity
 head=n_api2
 
-@l3906 entity
+@l3904 entity
 head=line
 
-@l3907 connect
+@l3905 connect
 _text=connect n_db2 and n_cache2 with a dotted line
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3908
-target=$l3909
+source=$l3906
+target=$l3907
 style=dotted
-edge=$l3910
+edge=$l3908
 
-@l3908 entity
+@l3906 entity
 head=n_db2
 
-@l3909 entity
+@l3907 entity
 head=n_cache2
 
-@l3910 entity
+@l3908 entity
 head=line
 
-@l3911 connect
+@l3909 connect
 _text=connect n_log and n_store with a two_way arrow
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3912
-target=$l3913
+source=$l3910
+target=$l3911
 arrow=two_way
 
-@l3912 entity
+@l3910 entity
 head=n_log
 
-@l3913 entity
+@l3911 entity
 head=n_store
 
-@l3914 connect
+@l3912 connect
 _text=connect n_auth2 to n_gate2 , no arrowhead , labeled t_trusts
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
 text=t_trusts
-source=$l3915
-target=$l3916
+source=$l3913
+target=$l3914
 
-@l3915 entity
+@l3913 entity
 head=n_auth2
 
-@l3916 entity
+@l3914 entity
 head=n_gate2
 
-@l3917 connect
+@l3915 connect
 _text=connect n_lead2 to n_follow
 _world=sketch
 _source=generator
 _template=connect.llm.ts
 _mood=command
-source=$l3918
-target=$l3919
+source=$l3916
+target=$l3917
 
-@l3918 entity
+@l3916 entity
 head=n_lead2
 
-@l3919 entity
+@l3917 entity
 head=n_follow
 
-@l3920 move
+@l3918 move
 _text=move n_pivot2 50 px left
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3921
+object=$l3919
 direction=left
 amount=50
 
-@l3921 entity
+@l3919 entity
 head=n_pivot2
 
-@l3922 move
+@l3920 move
 _text=move n_axis below n_origin2
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3923
+object=$l3921
 relation=below
-landmark=$l3924
+landmark=$l3922
 
-@l3923 entity
+@l3921 entity
 head=n_axis
 
-@l3924 entity
+@l3922 entity
 head=n_origin2
 
-@l3925 move
+@l3923 move
 _text=move n_edge2 up 200
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3926
+object=$l3924
 direction=up
 amount=200
 
-@l3926 entity
+@l3924 entity
 head=n_edge2
 
-@l3927 move
+@l3925 move
 _text=move n_face to the top
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3928
+object=$l3926
 region=top
 
-@l3928 entity
+@l3926 entity
 head=n_face
 
-@l3929 move
+@l3927 move
 _text=move n_poly right_of n_gon
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3930
+object=$l3928
 relation=right_of
-landmark=$l3931
+landmark=$l3929
 
-@l3930 entity
+@l3928 entity
 head=n_poly
 
-@l3931 entity
+@l3929 entity
 head=n_gon
 
-@l3932 move
+@l3930 move
 _text=move the n_cube down by 35 px
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3933
+object=$l3931
 direction=down
 amount=35
 
-@l3933 entity
+@l3931 entity
 head=n_cube
 
-@l3934 move
+@l3932 move
 _text=move the n_sphere2 between the n_cone2 and n_cube2
 _world=sketch
 _source=generator
 _template=move.llm.ts
 _mood=command
-object=$l3935
+object=$l3933
 relation=between
-landmark=$l3936
-landmark2=$l3937
+landmark=$l3934
+landmark2=$l3935
 
-@l3935 entity
+@l3933 entity
 head=n_sphere2
 
-@l3936 entity
+@l3934 entity
 head=n_cone2
 
-@l3937 entity
+@l3935 entity
 head=n_cube2
