@@ -439,7 +439,7 @@ def legend_dict():
 
 def wires_for(ev, roles, text, template, ids, world="sketch", source="generator"):
     w = soplang.Wire(next(ids), ev); later = []
-    for r, _ in ROLES:
+    for r in [x for x, _ in ROLES] + [x for x in roles if x not in dict(ROLES)]:
         if r not in roles: continue
         v = roles[r]
         if isinstance(v, dict):
@@ -447,6 +447,11 @@ def wires_for(ev, roles, text, template, ids, world="sketch", source="generator"
             if v.get("attr"): en.set("attr", v["attr"])
             if v.get("det"): en.set("det", v["det"])
             later.append(en); w.set(r, ("ref", en.id))
+        elif isinstance(v, list):   # a set role (world real: members / targets): one entity per member, joined with &
+            refs = []
+            for x in v:
+                en = soplang.Wire(next(ids), "entity"); en.set("head", x["head"]); later.append(en); refs.append(("ref", en.id))
+            w.set(r, ("&", refs))
         else: w.set(r, str(v))
     w.lines = [soplang.Line("_text", text), soplang.Line("_world", world), soplang.Line("_source", source), soplang.Line("_template", template), soplang.Line("_mood", "command")] + w.lines
     return [w] + later

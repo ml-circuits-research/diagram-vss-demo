@@ -19,7 +19,8 @@ export function readingFromWires(wires, verb) {
   for (const l of top.lines) {
     if (l.key.startsWith("_")) continue;
     const refs = l.refs();
-    if (refs.length) {
+    if (refs.length > 1) roles[l.key] = refs.map((id) => byId.get(id)).filter(Boolean).map((en) => ({ head: en.value("head") }));   // a set role: a list of shapes
+    else if (refs.length) {
       const en = byId.get(refs[0]); if (!en) continue;
       roles[l.key] = { head: en.value("head"), attr: en.value("attr"), det: en.value("det") };
     } else roles[l.key] = l.text;
@@ -80,6 +81,7 @@ export function toNodes(reading, info, ctx, seq) {
       if (anc.length) args.anchor = anc.length === 1 ? anc[0] : anc;
     }
   };
+  const list = (v) => { const xs = [].concat(v || []).map((e) => ref(e)).filter((x) => x !== undefined); return xs.length ? xs : undefined; };
   const ev = reading.event, args = {};
   let type = COMMANDS.has(ev) ? "command" : QUESTIONS.has(ev) ? "question" : ev === "fact" ? "fact" : ev === "rule" ? "rule" : null;
   if (!type) return { nodes, notes: [`unknown event ${ev}`] };
@@ -87,6 +89,7 @@ export function toNodes(reading, info, ctx, seq) {
   if (type === "question") args.ask = ev;
   const obj = R.object;
   const shapeOf = (en) => (en && typeof en === "object" && SHAPES[en.head]) || undefined;
+  const withMembers = () => { if (R.members && !["connect", "disconnect", "path"].includes(ev)) args.target = list(R.members); };
   switch (ev) {
     case "create": {
       args.shape = shapeOf(obj) || "circle"; if (obj && obj.attr) args.color = obj.attr; if (R.color) args.color = R.color;
@@ -115,6 +118,8 @@ export function toNodes(reading, info, ctx, seq) {
     case "swap": { const a = ref(obj), b = ref(R.target); args.target = [a, b].filter((x) => x !== undefined); break; }
     case "connect": case "disconnect": case "path": {
       if (R.source) args.from = ref(R.source); if (R.target) args.to = ref(R.target);
+      if (R.members) args.from = list(R.members);          // "connect A, B and C in a chain", "connect A and B to C"
+      if (R.targets) args.to = list(R.targets);            // "link Hub to A, B and C"
       if (ev === "connect") {
         if (R.style) args.style = R.style;
         if (R.arrow === "two_way") args.arrow = "both"; else if (R.arrow === "plain" || (R.edge && R.edge.head === "line")) args.arrow = "none";
@@ -152,6 +157,7 @@ export function toNodes(reading, info, ctx, seq) {
     case "rule": { const s = shapeOf(obj); if (s) args.shape = s; if (R.color) args.color = R.color; if (R.size) args.size = R.size; break; }
     default: break;
   }
+  withMembers();
   for (const k of Object.keys(args)) if (args[k] === undefined) delete args[k];
   nodes.push({ id: (type === "rule" ? "r" : "s") + (++seq.s), type, args });
   return { nodes, notes };

@@ -22,6 +22,9 @@ QUESTION_EVENT = {"count": "count", "exists": "exists", "list": "list", "propert
 class Skip(Exception): pass
 
 
+LISTS = os.environ.get("LISTS", "1") == "1"   # lists of shapes -> the set roles `members` / `targets` (world real); 0: the first shape only
+
+
 def convert(row, lexicon=None, soft=False, lost=None, table=None):
     """soft: never set a row aside for a missing word; a role whose words are not in the clause is left out (listed in `lost`)"""
     lexicon = LEXICON if lexicon is None else lexicon; lost = [] if lost is None else lost
@@ -38,8 +41,8 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None):
             if soft: lost.append(tok); return None
             raise Skip(f"word not in the clause: {tok}")
         return tok
-    def need_text(lbl):   # a quoted label is a t_ token; an unquoted one ("labeled Rocks") is read as a name token (LABEL_AS_NAME=1)
-        if os.environ.get("LABEL_AS_NAME") != "1": return need("t_" + slug(lbl))
+    def need_text(lbl):   # a quoted label is a t_ token; an unquoted one ("labeled Rocks") is read as a name token (LABEL_AS_NAME=0 turns it off)
+        if os.environ.get("LABEL_AS_NAME", "1") != "1": return need("t_" + slug(lbl))
         return "t_" + slug(lbl) if "t_" + slug(lbl) in T else "n_" + slug(lbl) if "n_" + slug(lbl) in T else need("t_" + slug(lbl))
     def ent(v):
         v = str(v)
@@ -98,7 +101,8 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None):
     elif ev in ("delete", "duplicate", "neighbors", "describe", "property", "degree", "toFront", "toBack", "resize", "rename", "label", "set", "align", "arrange", "distribute", "move", "check", "fact", "connected"):
         if a.get("target") is not None:
             tg = [x.strip() for x in str(a["target"]).split(",") if x.strip()] if not str(a["target"]).startswith("mention(") else [a["target"]]
-            roles["object"], neg = ent(tg[0])
+            if LISTS and len(tg) > 1: roles["members"] = [ent(x)[0] for x in tg]
+            else: roles["object"], neg = ent(tg[0])
         elif ev == "describe" and "canvas" in T: roles["object"] = {"head": "canvas"}
         elif ev in ("arrange", "distribute") and "everything" in T: roles["object"] = {"head": "everything"}
         if ev == "duplicate" and a.get("count"): roles["quantity"] = need(str(a["count"]))
@@ -131,14 +135,16 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None):
             fr = [x.strip() for x in str(a["from"]).split(",")] if not str(a["from"]).startswith("mention(") else [a["from"]]
             if len(fr) > 1:
                 if not soft: raise Skip("several sources in one role")
-                lost.append("several sources (first kept)")
-            roles["source"], neg = ent(fr[0])
+                if LISTS: roles["members"] = [ent(x)[0] for x in fr]
+                else: lost.append("several sources (first kept)"); roles["source"], neg = ent(fr[0])
+            else: roles["source"], neg = ent(fr[0])
         if a.get("to") is not None:
             to = [s.strip() for s in str(a["to"]).split(",")] if not str(a["to"]).startswith("mention(") else [a["to"]]
             if len(to) > 1:
                 if not soft: raise Skip("several targets in one role")
-                lost.append("several targets (first kept)")
-            roles["target"], _ = ent(to[0])
+                if LISTS: roles["targets"] = [ent(x)[0] for x in to]
+                else: lost.append("several targets (first kept)"); roles["target"], _ = ent(to[0])
+            else: roles["target"], _ = ent(to[0])
         if ev == "connect":
             if a.get("style"): roles["style"] = need(a["style"])
             if a.get("arrow") == "both": roles["arrow"] = need("two_way")
@@ -174,7 +180,12 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None):
     clean = {}
     for r, v in roles.items():
         if v is None: continue
-        if isinstance(v, dict):
+        if isinstance(v, list):   # a set role: its members, each a bare name entity (sets carry heads only)
+            v = [{"head": x["head"]} for x in v if x and x.get("head")]
+            if not v: continue
+            if len(v) == 1:   # only one member found in the clause: the ordinary single role
+                v = v[0]; r = "target" if r == "targets" else ("source" if ev in ("connect", "disconnect", "path") else "object")
+        elif isinstance(v, dict):
             if v.get("head") is None: continue
             v = {k: x for k, x in v.items() if x is not None}
         clean[r] = v

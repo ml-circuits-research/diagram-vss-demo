@@ -69,11 +69,12 @@ def main():
     for d in ("examples", "raw", "audit", "model", "runs", "versions", "requests"): os.makedirs(os.path.join(out, d), exist_ok=True)
     roles_of = collections.defaultdict(set)
     for ev, _, roles, _ in rows: roles_of[ev] |= set(roles)
-    legend = {"version": 1, "roles": [{"id": r, "question": q} for r, q in G.ROLES],
-              "events": [{"id": e, "verbs": vs, "roles": [r for r, _ in G.ROLES if r in roles_of[e]], "required": []} for e, vs in G.EVENTS.items()],
+    ROLES = G.ROLES + [("members", "which shapes, as a list?"), ("targets", "to which shapes, as a list?")]   # set roles (lists of shapes)
+    legend = {"version": 1, "roles": [{"id": r, "question": q} for r, q in ROLES],
+              "events": [{"id": e, "verbs": vs, "roles": [r for r, _ in ROLES if r in roles_of[e]], "required": []} for e, vs in G.EVENTS.items()],
               "operators": ["not"], "moods": ["command"], "kinds": {"source": "lexicon", "lexicon": "kinds.tsv"},
               "values": [{"kind": "NUM", "pattern": "\\d+"}, {"kind": "NAME", "pattern": "n_[a-z0-9_]+"}, {"kind": "TEXT", "pattern": "t_[a-z0-9_]+"}],
-              "reader": {"predicate_role": True, "occupancy_marker": True, "definite_dets": ["the"],
+              "reader": {"predicate_role": True, "occupancy_marker": True, "definite_dets": ["the"], "set_roles": ["members", "targets"],
                          "gates_given": {"open": [g for g in ["to", "from", "of", "in", "on", "at", "by", "with", "into", "as", "and", ",", "named", "labeled"] if g in kinds], "closed": []}}}
     lp = os.path.join(out, "legend.json"); json.dump(legend, open(lp, "w"), indent=1); sha = G.sha256_file(lp)
     with open(os.path.join(out, "kinds.tsv"), "w") as fh:

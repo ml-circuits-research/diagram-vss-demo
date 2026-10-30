@@ -71,8 +71,8 @@ export class Reader {
     this.words = new Map(Object.entries(model.catalog.words)); this.schema = model.schema; this.th = this.cfg.thresholds || {};
     this.tau = this.th.tau !== undefined ? this.th.tau : 0.05; this.contentKinds = new Set(this.schema.content_kinds || []);
     const rr = this.legend.reader; this.closed = rr.closed_values || {}; this.tableRoles = new Set(rr.table_roles || []); this.setRoles = new Set(rr.set_roles || []);
-    if (this.tableRoles.size || this.setRoles.size || rr.value_identity === "bundle_alnum")
-      throw new Error("vss.js: table roles, set roles and bundle_alnum value identities (the WikiSQL world) are not ported");
+    if (this.tableRoles.size || rr.value_identity === "bundle_alnum")
+      throw new Error("vss.js: table roles and bundle_alnum value identities (the WikiSQL world) are not ported");   // set roles: ported here (diagram-vss-demo)
     this.sentenceCandidates = !!opts.sentenceCandidates; this.sentTokens = []; this._cands = new Map(); this.sqrtD = Math.sqrt(this.D); this.filt = null;
   }
   // ---------------- words
@@ -198,8 +198,28 @@ export class Reader {
     if (this.legend.reader.predicate_role) tops.push(Reader.best(cmulc(cmul(Sn, K), this.st.op("pred")), this.verbCands())[2]);
     return tops.length ? tops.reduce((a, b) => a + b, 0) / tops.length : 0;
   }
+  // a SET role (legend reader.set_roles): every candidate whose ratio reaches the calibrated member threshold is a member; the twin of
+  // infer.py read_set_role (ported in diagram-vss-demo for lists of shapes: "connect A, B and C in a chain")
+  readSetRole(Sn, key, r, core, presence) {
+    const [ws, M] = this.roleCands(r), out = { margins: {} };
+    if (!ws.length) { out.presence = 0; out.present = false; return out; }
+    const x = cmul(Sn, key), sc = M.map((m) => cdotRe(m, x)), ratio = sc.map((v) => (core > 1e-9 ? v / core : 0 * v));
+    const thr = (this.th.set_member || {})[r];
+    let i0 = 0; sc.forEach((v, i) => { if (v > sc[i0]) i0 = i; });
+    let mem = ws.map((_, i) => i).filter((i) => (thr !== undefined && thr !== null ? ratio[i] >= thr : i === i0));
+    if (presence === "all" && !mem.length) mem = [i0];
+    out.presence = Math.max(...ratio); out.member_ratios = Object.fromEntries(ws.map((w, i) => [w, ratio[i]])); out.present = mem.length > 0;
+    if (thr !== undefined && thr !== null && presence !== "all") out.presence_margin = Math.min(...ratio.map((v) => Math.abs(v - thr)));
+    if (!mem.length) return out;
+    const non = ws.map((_, i) => i).filter((i) => !mem.includes(i));
+    out.margins[r] = Math.min(...mem.map((i) => sc[i])) - (non.length ? Math.max(...non.map((i) => sc[i])) : 0);
+    const ents = mem.map((i) => ["entity", ws[i], null, null]).sort((a, b) => (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0));
+    out.filler = ents.length === 1 ? ents[0] : ["set", ...ents];
+    return out;
+  }
   readRole(Sn, K, r, core, presence) {
     const key = cmulc(K, this.st.role(r));
+    if (this.setRoles.has(r)) return this.readSetRole(Sn, key, r, core, presence);
     if (Object.hasOwn(this.closed, r)) {
       const [w, mg, top] = Reader.best(cmul(Sn, key), this.roleCands(r)), out = { margins: {}, presence: core > 1e-9 ? top / core : 0, present: w !== null };
       if (w !== null) { out.filler = ["word", w]; out.margins[r] = mg; }
@@ -298,6 +318,7 @@ export class Reader {
     for (const r of sch.role_order) {
       if (taken !== undefined && !taken.includes(r)) { f.presence[r] = 0.0; continue; }      // not a role of this event: not read, no candidate
       const o = this.readRole(Sn, K, r, core, presence); f.presence[r] = o.presence;
+      if (o.member_ratios) f.presence[r + ".members"] = o.member_ratios;
       for (const part of ["attr", "det"]) if ((part + "_ratio") in o) f.presence[r + "." + part] = o[part + "_ratio"];
       if ("presence_margin" in o) {
         const given = o.present && o.filler !== null && o.filler !== undefined;
@@ -363,7 +384,10 @@ export class Reader {
       if (!(r in f.roles)) continue;
       const fl = f.roles[r];
       if (fl[0] === "word") ev.set(r, fl[1]);
-      else if (fl[0] === "negword") {
+      else if (fl[0] === "set") {      // a set role's members: one entity wire each, joined with & (diagram-vss-demo port)
+        const refs = fl.slice(1).map((m) => { const en = new Wire(ids.next().value, "entity"); later.push(en); en.set("head", m[1]); return ["ref", en.id]; });
+        ev.set(r, ["&", refs]); if (r in mg) ev.set(`_margin.${r}`, fmt(mg[r]));
+      } else if (fl[0] === "negword") {
         const n = new Wire(ids.next().value, "not"); n.set("scope", fl[1]); later.push(n); ev.set(r, ["ref", n.id]);
         if (r in mg) n.set("_margin.scope", fmt(mg[r]));
       } else if (fl[0] === "entity") {
