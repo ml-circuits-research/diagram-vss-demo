@@ -44,6 +44,17 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
 - Adding a synonym of a known action ("feeds" = connect) is a lexicon entry: no retraining. A new sentence construction needs further
   training from the current model, mixed with old examples, and the old tests are re-run to show nothing was lost.
 
+## No hand-written equivalences between language and the legend
+
+- The only hand-written inputs of a learned reader are the legend (questions and their values), the annotated data and the model's
+  architecture. Every mapping from words to the legend (verbs, values, question forms, how a message is cut into requests) is learned
+  from the annotated training data. A table that says "under means below" or "how many means count" is a hack, even when it helps.
+- Mechanical steps that stay (tokenization, names by capital letter, digits, contractions) are listed explicitly in
+  `training/sketch/VSS_READER_SPEC.md` and measured: what is lost if a step is removed.
+- Debt to pay (2026-10-30), in this order: value equivalences (legend cue words) -> learned from the annotation; cutting a message into
+  requests (today the rules' segmenter) -> learned from the spans; the trigger context classes and the thresholds -> chosen on held-out
+  training messages, not by hand.
+
 ## Fair comparison
 
 - Rules and VSS use the same legend and the same cue list (`export_cues.mjs` -> `make_normalizer.py`). A cue added for one reader is
