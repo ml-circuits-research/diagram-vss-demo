@@ -220,3 +220,67 @@ Summary for the owner's requirement:
 4. Plug-in points: new `V8.states_centred` (V8 after l.106) for centre-relative addresses, a per-kind-pair-distance sigmoid weight in the same
    function, targets k per message (TR l.446, `load_rows` l.54-77), `Routebook.addresses`/`Reader.chart`/`formalize` per centre (INF l.69, 210, 631),
    and the same three places in RB.js/RD.js. Roughly 400-700 lines across Python and JS plus a retrain.
+
+## 7. Several worlds: what exists, and how a world could hand back the text it cannot explain (added on request)
+
+Caveat: the experiments that measured the dispatcher and the negative examples on real data (SNIPS, seven per-intent worlds; R72, R75, R79,
+R81, R90, R92, R94) were run in the vss-vs-bert repository, which is NOT on this machine (searched). Here I have only the code copied into
+vss-demo / diagram-vss-demo and the notes that cite those runs. I can therefore give mechanism and file:line, but not those repositories' numbers.
+
+### 7.1 Dispatcher by fit (world-level vote)
+- Code: `formalize_text` INF l.746-775 (also vss-demo/tool/sop/infer.py). Every reader (one per world: its own legend, lexicon, route book, stars
+  for role/operator vectors; word stars are global, README "Word stars are global") reads the same line. Per reader, the sort key (l.762) is
+  `(status in {no-sense, unknown-event}, relative residual, -mean margin)`; relative residual = `residual / no_fit_residual` (l.760), using the
+  refusal-pass residual when the model has one. Smallest wins.
+- Refusal: if the best reader cannot place the sentence or its relative residual >= 1.0 (residual >= 0.9, `no_fit_residual`, INF l.542-546, stated and
+  not fitted: "unseen depths of a world reach 0.6-0.8, random text 0.99"), output is an `unknown` wire with `_world=none`, `_status=no-sense`, all
+  tokens in `_unplaced` (l.766-769). Otherwise `_world_margin` = gap in relative residual to the runner-up (l.771-772).
+- Docs: vss-demo/tool/README.md l.60-63, 164, 171; ACTIVATION_rules_and_worlds_2026-10-26.md l.24-30 ("Level W is the voting... each vote is a
+  measured quantity ... the share of the sentence the reading does not explain"). Test: README l.312 ("the dispatcher by fit sends 3 + 3 sentences to
+  the right worlds"), smoke readers only. Stated limits (README l.352-353): dispatch strategy 3 (sticky context) not built; the 0.9 constant is not
+  calibrated because a world folder has no out-of-world sentences.
+- Used in the diagram app? I found no dispatcher call in docs/js (grep: no "dispatch"/"world_margin" outside an unrelated comment in logic.js); the
+  shipped diagram readers are single-world. vss-demo responses.md D9 (l.96-127) planned the seven SNIPS worlds as a demo page ("many small worlds
+  read fast and the one that explains the request wins; a request outside them is a refusal") and PROPOSAL_object_worlds_sketches (l.13: stroke groups
+  read by every object world, dispatcher keeps the one that explains it, refuses when none does).
+
+### 7.2 Negative examples (R81), "one-vs-rest"
+- Data: a top-level wire with `_negative=true` is a sentence of ANOTHER world, "written with the anchor role only" (TR l.74-76).
+- Training: its target is MINUS the compiled anchor state: `targets = comp.wire(...) * (-1.0 if negative else 1.0)` (TR l.446-448). The loss is the same
+  -cos(S, target) (trainer.py l.41-42), so for a foreign sentence it pushes S away from this world's anchor (predicate/anchor key): one-vs-rest.
+- Kept out of: calibration rows (TR l.509, "never a negative example"), the schema (TR l.847), evaluation rows (TR l.646).
+- Result here: none in this repo's models (vss-demo STATUS.md l.81-85: no frozen example carries `_negative`; 0 files). Results on SNIPS are in
+  vss-vs-bert, not available. Granularity is the WHOLE sentence: there is no per-word or per-zone negative.
+
+### 7.3 Refusal readout (R90 / R92 / R94)
+- INF l.719-734: if `config.refusal` is set, `formalize` runs a SECOND pass of the same state with decoder keys overridden (e.g. `presence_by_kind:
+  false`, so kind-driven filling does not explain foreign words) and optionally its own admission sets (R94: `adm`), and stores its explained residual as
+  `residual_refusal` / `_residual.refusal`; the dispatcher uses that value instead of the frame's residual (l.760). Rationale in the comment l.720-722:
+  "the refusal is a different question from the frame ... a foreign utterance keeps its charge".
+- Related per-state gate: `presence_by_kind` (l.276-286), `no_sense_share` (l.695), `frame_incomplete -> residual 1.0` (l.583-588, 710).
+
+### 7.4 What does NOT exist
+- No mechanism that cuts a text into zones and gives each zone to a different world; the dispatcher votes per whole line only.
+- No per-word "belongs to world X" score; per-word information is only placed/unplaced (INF l.674-678) and the token terms `addr (x) star`.
+- No negative examples at word/zone level; no use of `_negative` in the diagram data (checked: only the vss-demo STATUS note; llm_train data not scanned).
+- Stars are global, so a word's identity is the same across worlds, but the kind lexicon and route book are per world: another world must re-derive kinds
+  for the zone (its own lexicon), which is natural.
+
+### 7.5 How a world could hand back the zones it cannot explain (design sketch, nothing built or measured)
+1. World A reads a message (or one centre/window). It already exports the two things needed: `unplaced` token indices (INF l.674-678, `info["unplaced"]`)
+   and the explained residual (l.590-604). With centres (section 4), the zones are the tokens with low membership for every centre of A, plus the unplaced
+   content tokens of each of A's states.
+2. Group the leftover tokens into maximal contiguous zones (a linear scan over the membership/unplaced flags; punctuation as separator).
+3. Hand each zone to the other readers with the existing `formalize_text` / dispatcher (INF l.746-775): each world W_j reads the zone, the relative
+   residual (refusal-pass value when available) decides who takes it; `_world=none` means nobody does, i.e. true chatter. The zone's best reader may in
+   turn hand back its own unplaced words, with a fixed depth limit (and a rule that a zone never returns to the world that already gave it up).
+4. Training the "null" side: R81 already supplies a world-level form: sentences of other worlds with target = minus the anchor. For zones, make the
+   negative rows zones (a chatter phrase, or a request of another world embedded in a message) with the same sign flip; the soft weights of section 4
+   then learn to give such words weight ~0 for A's centres. The refusal pass (7.3) is the existing readout for "this zone keeps its charge".
+5. Calibration: the 0.9 no-fit constant must be fitted on zones, which needs out-of-world zones in the training split (the README names this as the missing
+   data); with real messages these exist (chatter, other-world requests) but must come from the annotated training data (AGENTS.md rules on data).
+6. Cost: W worlds x (zone length) per zone, W fixed, zones disjoint, so total cost is linear in T provided each world's per-zone read is linear (it is
+   not today because of chainL, section 5) and zones are bounded. Total tokens read = T x (1 + depth of hand-backs) at most.
+7. Known risks from the existing results: the hard "explained" test is weak (67% of gold requests fully placed, EB l.17-20), and the no-fit residual is a
+   stated constant tuned for sentence-length inputs; a zone of a few words has a noisy residual (1.0 whenever a core role is missing, l.583-588, 710). The
+   dispatcher has only been exercised on whole sentences.
