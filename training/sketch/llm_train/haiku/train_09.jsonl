@@ -19,7 +19,7 @@
 {"id": "th-0819", "names": ["Invoice"], "text": "paint Invoice cyan", "wire": {"type": "command", "args": {"action": "set", "target": "Invoice", "color": "cyan"}}}
 {"id": "th-0820", "names": [], "text": "make the squares that aren't orange green", "wire": {"type": "command", "args": {"action": "set", "target": "mention(notcolor=orange,quantifier=all,shape=square)", "color": "green"}}}
 {"id": "th-0821", "names": ["Ledger"], "text": "make Ledger white", "wire": {"type": "command", "args": {"action": "set", "target": "Ledger", "color": "white"}}}
-{"id": "th-0822", "names": ["User", "Session"], "text": "link User to Session", "wire": {"type": "command", "args": {"action": "connect", "from": "User", "to": "Session"}}}
+{"id": "th-0822", "names": ["User", "Session", "Token"], "text": "link User, Session and Token in a chain", "wire": {"type": "command", "args": {"action": "connect", "from": "User,Session,Token", "to": "User,Session,Token", "pairing": "chain"}}}
 {"id": "th-0823", "names": ["Order", "Product"], "text": "a dashed link between Order and Product", "wire": {"type": "command", "args": {"action": "connect", "from": "Order", "to": "Product", "style": "dashed"}}}
 {"id": "th-0824", "names": ["Cart", "Order", "Invoice"], "text": "chain Cart, Order and Invoice in order", "wire": {"type": "command", "args": {"action": "connect", "from": "Cart,Order,Invoice", "to": "Cart,Order,Invoice", "pairing": "chain"}}}
 {"id": "th-0825", "names": ["User", "Ledger"], "text": "draw a navy line from User to Ledger", "wire": {"type": "command", "args": {"action": "connect", "from": "User", "to": "Ledger", "color": "navy"}}}

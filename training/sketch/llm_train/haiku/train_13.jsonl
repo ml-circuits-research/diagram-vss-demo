@@ -16,11 +16,11 @@
 {"id": "th-1216", "names": ["Lamp"], "text": "make Lamp small", "wire": {"type": "command", "args": {"action": "set", "target": "Lamp", "size": "small"}}}
 {"id": "th-1217", "names": ["Riser"], "text": "paint Riser brown", "wire": {"type": "command", "args": {"action": "set", "target": "Riser", "color": "brown"}}}
 {"id": "th-1218", "names": [], "text": "make all the diamonds that aren't white gold", "wire": {"type": "command", "args": {"action": "set", "target": "mention(notcolor=white,quantifier=all,shape=diamond)", "color": "gold"}}}
-{"id": "th-1219", "names": ["Mic", "Band"], "text": "run a line from Mic to Band", "wire": {"type": "command", "args": {"action": "connect", "from": "Mic", "to": "Band"}}}
+{"id": "th-1219", "names": ["Mic", "Drum", "Band"], "text": "run a line from Mic and Drum to Band, both of them", "wire": {"type": "command", "args": {"action": "connect", "from": "Mic,Drum", "to": "Band", "pairing": "all"}}}
 {"id": "th-1220", "names": ["Drum", "Cymbal"], "text": "connect Drum to Cymbal with a dotted line", "wire": {"type": "command", "args": {"action": "connect", "from": "Drum", "to": "Cymbal", "style": "dotted"}}}
 {"id": "th-1221", "names": ["Piano", "Stage"], "text": "two-way arrow between Piano and Stage", "wire": {"type": "command", "args": {"action": "connect", "from": "Piano", "to": "Stage", "arrow": "both"}}}
 {"id": "th-1222", "names": ["Spot", "Mic", "Lamp"], "text": "chain Spot, Mic and Lamp", "wire": {"type": "command", "args": {"action": "connect", "from": "Spot,Mic,Lamp", "to": "Spot,Mic,Lamp", "pairing": "chain"}}}
-{"id": "th-1223", "names": ["Curtain", "Stage"], "text": "a navy link from Curtain to Stage", "wire": {"type": "command", "args": {"action": "connect", "from": "Curtain", "to": "Stage", "color": "navy"}}}
+{"id": "th-1223", "names": ["Curtain", "Stage"], "text": "a navy link from Curtain to Stage labelled 'Act 2'", "wire": {"type": "command", "args": {"action": "connect", "from": "Curtain", "to": "Stage", "color": "navy", "label": "Act 2"}}}
 {"id": "th-1224", "names": ["Moon"], "text": "move Moon 35 pixels down", "wire": {"type": "command", "args": {"action": "move", "target": "Moon", "direction": "down", "distance": "35"}}}
 {"id": "th-1225", "names": ["Exit"], "text": "shift Exit left 20 px", "wire": {"type": "command", "args": {"action": "move", "target": "Exit", "direction": "left", "distance": "20"}}}
 {"id": "th-1226", "names": ["Cymbal", "Drum"], "text": "put Cymbal right of Drum", "wire": {"type": "command", "args": {"action": "move", "target": "Cymbal", "position": "rightOf", "anchor": "Drum"}}}

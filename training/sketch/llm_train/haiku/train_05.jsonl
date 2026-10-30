@@ -21,7 +21,7 @@
 {"id": "th-0421", "names": [], "text": "make all the stars huge", "wire": {"type": "command", "args": {"action": "set", "target": "mention(quantifier=all,shape=star)", "size": "huge"}}}
 {"id": "th-0422", "names": ["Ideas", "Goals"], "text": "link Ideas to Goals, dashed", "wire": {"type": "command", "args": {"action": "connect", "from": "Ideas", "to": "Goals", "style": "dashed"}}}
 {"id": "th-0423", "names": ["Budget", "Limit"], "text": "connect Budget and Limit with a two-way arrow", "wire": {"type": "command", "args": {"action": "connect", "from": "Budget", "to": "Limit", "arrow": "both"}}}
-{"id": "th-0424", "names": ["Travel", "Notes"], "text": "a red line from Travel to Notes", "wire": {"type": "command", "args": {"action": "connect", "from": "Travel", "to": "Notes", "color": "red"}}}
+{"id": "th-0424", "names": ["Travel", "Notes"], "text": "a red line from Travel to Notes labelled 'plan'", "wire": {"type": "command", "args": {"action": "connect", "from": "Travel", "to": "Notes", "color": "red", "label": "plan"}}}
 {"id": "th-0425", "names": ["Goals", "Risks", "Notes"], "text": "chain Goals, Risks and Notes", "wire": {"type": "command", "args": {"action": "connect", "from": "Goals,Risks,Notes", "to": "Goals,Risks,Notes", "pairing": "chain"}}}
 {"id": "th-0426", "names": ["Hub", "Ideas", "Goals", "Risks"], "text": "wire Hub and Ideas to each of Goals and Risks", "wire": {"type": "command", "args": {"action": "connect", "from": "Hub,Ideas", "to": "Goals,Risks", "pairing": "all"}}}
 {"id": "th-0427", "names": ["Hub"], "text": "move Hub 10 pixels left", "wire": {"type": "command", "args": {"action": "move", "target": "Hub", "direction": "left", "distance": "10"}}}

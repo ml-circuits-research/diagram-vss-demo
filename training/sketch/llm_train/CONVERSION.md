@@ -1,17 +1,17 @@
 # Conversion of the LLM training clauses (3000 clauses)
 
-Converted: 1802 (60.1%). Set aside: 1198.
+Converted: 1791 (59.7%). Set aside: 1209.
 
 | reason set aside | n |
 |---|---|
 | no create verb in the clause | 130 |
-| word not in the clause | 77 |
+| word not in the clause | 80 |
 | no set verb in the clause | 61 |
 | no neighbors verb in the clause | 59 |
 | no reachable verb in the clause | 58 |
 | no connect verb in the clause | 54 |
+| name not in the clause | 53 |
 | no cycle verb in the clause | 46 |
-| name not in the clause | 45 |
 | no rule verb in the clause | 45 |
 | no path verb in the clause | 44 |
 | no move verb in the clause | 41 |
@@ -52,8 +52,8 @@ Converted: 1802 (60.1%). Set aside: 1198.
 | check | 121 |
 | list | 86 |
 | delete | 76 |
-| connect | 72 |
 | count | 72 |
+| connect | 61 |
 | fact | 59 |
 | nearest | 54 |
 | redo | 52 |

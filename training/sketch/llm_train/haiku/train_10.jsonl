@@ -16,11 +16,11 @@
 {"id": "th-0916", "names": ["Coach"], "text": "recolor Coach gold", "wire": {"type": "command", "args": {"action": "set", "target": "Coach", "color": "gold"}}}
 {"id": "th-0917", "names": ["Ball"], "text": "make Ball white", "wire": {"type": "command", "args": {"action": "set", "target": "Ball", "color": "white"}}}
 {"id": "th-0918", "names": [], "text": "make the hexagons that aren't lime huge", "wire": {"type": "command", "args": {"action": "set", "target": "mention(notcolor=lime,quantifier=all,shape=hexagon)", "size": "huge"}}}
-{"id": "th-0919", "names": ["Keeper", "Defender"], "text": "link Keeper to Defender", "wire": {"type": "command", "args": {"action": "connect", "from": "Keeper", "to": "Defender"}}}
+{"id": "th-0919", "names": ["Keeper", "Striker", "Defender"], "text": "Keeper and Striker both link to Defender, every one of them", "wire": {"type": "command", "args": {"action": "connect", "from": "Keeper,Striker", "to": "Defender", "pairing": "all"}}}
 {"id": "th-0920", "names": ["Striker", "Winger"], "text": "a dotted line from Striker to Winger", "wire": {"type": "command", "args": {"action": "connect", "from": "Striker", "to": "Winger", "style": "dotted"}}}
 {"id": "th-0921", "names": ["Mid", "Coach"], "text": "two-way link between Mid and Coach", "wire": {"type": "command", "args": {"action": "connect", "from": "Mid", "to": "Coach", "arrow": "both"}}}
 {"id": "th-0922", "names": ["Keeper", "Defender", "Mid", "Striker"], "text": "connect Keeper, Defender and Mid in a chain", "wire": {"type": "command", "args": {"action": "connect", "from": "Keeper,Defender,Mid", "to": "Keeper,Defender,Mid", "pairing": "chain"}}}
-{"id": "th-0923", "names": ["Pivot", "Ball"], "text": "a red connection from Pivot to Ball", "wire": {"type": "command", "args": {"action": "connect", "from": "Pivot", "to": "Ball", "color": "red"}}}
+{"id": "th-0923", "names": ["Pivot", "Ball"], "text": "a red connection from Pivot to Ball labelled 'pass'", "wire": {"type": "command", "args": {"action": "connect", "from": "Pivot", "to": "Ball", "color": "red", "label": "pass"}}}
 {"id": "th-0924", "names": ["Ball"], "text": "move Ball 25 pixels right", "wire": {"type": "command", "args": {"action": "move", "target": "Ball", "direction": "right", "distance": "25"}}}
 {"id": "th-0925", "names": ["Striker"], "text": "shift Striker left 60", "wire": {"type": "command", "args": {"action": "move", "target": "Striker", "direction": "left", "distance": "60"}}}
 {"id": "th-0926", "names": ["Ref", "Keeper"], "text": "slide Ref to the right of the Keeper", "wire": {"type": "command", "args": {"action": "move", "target": "Ref", "position": "rightOf", "anchor": "Keeper"}}}

@@ -19,7 +19,7 @@
 {"id": "th-0319", "names": ["Mentor"], "text": "please turn the Mentor into a star", "wire": {"type": "command", "args": {"action": "set", "target": "Mentor", "shape": "star"}}}
 {"id": "th-0320", "names": ["Board"], "text": "recolor it orange", "wire": {"type": "command", "args": {"action": "set", "target": "Board", "color": "orange"}}}
 {"id": "th-0321", "names": [], "text": "paint the stars that aren't purple navy", "wire": {"type": "command", "args": {"action": "set", "target": "mention(notcolor=purple,quantifier=all,shape=star)", "color": "navy"}}}
-{"id": "th-0322", "names": ["Cto", "Ceo"], "text": "Cto reports to Ceo, draw that line", "wire": {"type": "command", "args": {"action": "connect", "from": "Cto", "to": "Ceo"}}}
+{"id": "th-0322", "names": ["Cto", "Cfo", "Ceo"], "text": "Cto and Cfo both report to Ceo, draw all of those lines", "wire": {"type": "command", "args": {"action": "connect", "from": "Cto,Cfo", "to": "Ceo", "pairing": "all"}}}
 {"id": "th-0323", "names": ["Cfo", "Ceo"], "text": "a dotted connector from Cfo to Ceo", "wire": {"type": "command", "args": {"action": "connect", "from": "Cfo", "to": "Ceo", "style": "dotted"}}}
 {"id": "th-0324", "names": ["Lead", "Dev"], "text": "run a two-way link between Lead and Dev", "wire": {"type": "command", "args": {"action": "connect", "from": "Lead", "to": "Dev", "arrow": "both"}}}
 {"id": "th-0325", "names": ["Pm", "Dev", "Lead"], "text": "connect Pm, Dev, and Lead in a chain", "wire": {"type": "command", "args": {"action": "connect", "from": "Pm,Dev,Lead", "to": "Pm,Dev,Lead", "pairing": "chain"}}}

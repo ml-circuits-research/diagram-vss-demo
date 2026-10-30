@@ -19,7 +19,7 @@
 {"id": "th-0719", "names": ["Park"], "text": "park should be lime", "wire": {"type": "command", "args": {"action": "set", "target": "Park", "color": "lime"}}}
 {"id": "th-0720", "names": ["Stop"], "text": "make it red", "wire": {"type": "command", "args": {"action": "set", "target": "Stop", "color": "red"}}}
 {"id": "th-0721", "names": [], "text": "make the ellipses that aren't green purple", "wire": {"type": "command", "args": {"action": "set", "target": "mention(notcolor=green,quantifier=all,shape=ellipse)", "color": "purple"}}}
-{"id": "th-0722", "names": ["Central", "Harbor"], "text": "run a line from Central to Harbor", "wire": {"type": "command", "args": {"action": "connect", "from": "Central", "to": "Harbor"}}}
+{"id": "th-0722", "names": ["Central", "Harbor", "Park"], "text": "run lines from each of Central, Harbor and Park to the next one", "wire": {"type": "command", "args": {"action": "connect", "from": "Central,Harbor,Park", "to": "Central,Harbor,Park", "pairing": "next"}}}
 {"id": "th-0723", "names": ["Museum", "Park"], "text": "connect Museum and Park with a dashed line", "wire": {"type": "command", "args": {"action": "connect", "from": "Museum", "to": "Park", "style": "dashed"}}}
 {"id": "th-0724", "names": ["Airport", "Market"], "text": "link Airport and Market with a plain line, no arrowheads", "wire": {"type": "command", "args": {"action": "connect", "from": "Airport", "to": "Market", "arrow": "none"}}}
 {"id": "th-0725", "names": ["Central", "Stadium"], "text": "a blue connection from Central to Stadium", "wire": {"type": "command", "args": {"action": "connect", "from": "Central", "to": "Stadium", "color": "blue"}}}

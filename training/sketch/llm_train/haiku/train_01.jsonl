@@ -18,7 +18,7 @@
 {"id": "th-0018", "names": ["Modem"], "text": "change the shape of Modem to a diamond", "wire": {"type": "command", "args": {"action": "set", "target": "Modem", "shape": "diamond"}}}
 {"id": "th-0019", "names": ["Proxy"], "text": "Proxy needs to go tiny", "wire": {"type": "command", "args": {"action": "set", "target": "Proxy", "size": "tiny"}}}
 {"id": "th-0020", "names": ["Backup"], "text": "make it white", "wire": {"type": "command", "args": {"action": "set", "target": "Backup", "color": "white"}}}
-{"id": "th-0021", "names": ["Router", "Firewall"], "text": "wire Router to Firewall", "wire": {"type": "command", "args": {"action": "connect", "from": "Router", "to": "Firewall"}}}
+{"id": "th-0021", "names": ["Router", "Firewall", "Switch"], "text": "tie Router, Firewall and Switch into a chain", "wire": {"type": "command", "args": {"action": "connect", "from": "Router,Firewall,Switch", "to": "Router,Firewall,Switch", "pairing": "chain"}}}
 {"id": "th-0022", "names": ["Switch", "Server"], "text": "hook up Switch and Server with a dashed line", "wire": {"type": "command", "args": {"action": "connect", "from": "Switch", "to": "Server", "style": "dashed"}}}
 {"id": "th-0023", "names": ["Laptop", "Router"], "text": "link Laptop to Router with a two-way arrow", "wire": {"type": "command", "args": {"action": "connect", "from": "Laptop", "to": "Router", "arrow": "both"}}}
 {"id": "th-0024", "names": ["Printer", "Switch", "Server"], "text": "connect Printer, Switch and Server in a chain", "wire": {"type": "command", "args": {"action": "connect", "from": "Printer,Switch,Server", "to": "Printer,Switch,Server", "pairing": "chain"}}}

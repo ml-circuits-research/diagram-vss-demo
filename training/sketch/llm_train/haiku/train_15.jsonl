@@ -17,8 +17,8 @@
 {"id": "th-1417", "names": ["Qa"], "text": "Qa becomes small", "wire": {"type": "command", "args": {"action": "set", "target": "Qa", "size": "small"}}}
 {"id": "th-1418", "names": ["Ship"], "text": "color Ship navy", "wire": {"type": "command", "args": {"action": "set", "target": "Ship", "color": "navy"}}}
 {"id": "th-1419", "names": [], "text": "make all the black diamonds white", "wire": {"type": "command", "args": {"action": "set", "target": "mention(color=black,quantifier=all,shape=diamond)", "color": "white"}}}
-{"id": "th-1420", "names": ["Kickoff", "Design"], "text": "connect Kickoff to Design", "wire": {"type": "command", "args": {"action": "connect", "from": "Kickoff", "to": "Design"}}}
-{"id": "th-1421", "names": ["Beta", "Launch"], "text": "a dashed link from Beta to Launch", "wire": {"type": "command", "args": {"action": "connect", "from": "Beta", "to": "Launch", "style": "dashed"}}}
+{"id": "th-1420", "names": ["Kickoff", "Design", "Launch"], "text": "connect Kickoff, Design and Launch in order", "wire": {"type": "command", "args": {"action": "connect", "from": "Kickoff,Design,Launch", "to": "Kickoff,Design,Launch", "pairing": "chain"}}}
+{"id": "th-1421", "names": ["Beta", "Launch"], "text": "a plain line from Beta to Launch, no arrowheads", "wire": {"type": "command", "args": {"action": "connect", "from": "Beta", "to": "Launch", "arrow": "none"}}}
 {"id": "th-1422", "names": ["Qa", "Retro"], "text": "two-way connection between Qa and Retro", "wire": {"type": "command", "args": {"action": "connect", "from": "Qa", "to": "Retro", "arrow": "both"}}}
 {"id": "th-1423", "names": ["Kickoff", "Design", "Beta", "Launch"], "text": "chain Kickoff, Design, Beta and Launch", "wire": {"type": "command", "args": {"action": "connect", "from": "Kickoff,Design,Beta,Launch", "to": "Kickoff,Design,Beta,Launch", "pairing": "chain"}}}
 {"id": "th-1424", "names": ["Freeze", "Ship"], "text": "a red line from Freeze to Ship", "wire": {"type": "command", "args": {"action": "connect", "from": "Freeze", "to": "Ship", "color": "red"}}}

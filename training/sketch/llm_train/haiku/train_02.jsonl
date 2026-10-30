@@ -18,7 +18,7 @@
 {"id": "th-0118", "names": ["Worker"], "text": "change Worker to a star", "wire": {"type": "command", "args": {"action": "set", "target": "Worker", "shape": "star"}}}
 {"id": "th-0119", "names": ["Auth"], "text": "can you color Auth black", "wire": {"type": "command", "args": {"action": "set", "target": "Auth", "color": "black"}}}
 {"id": "th-0120", "names": ["Web"], "text": "make it navy", "wire": {"type": "command", "args": {"action": "set", "target": "Web", "color": "navy"}}}
-{"id": "th-0121", "names": ["Web", "Api"], "text": "link Web to Api", "wire": {"type": "command", "args": {"action": "connect", "from": "Web", "to": "Api"}}}
+{"id": "th-0121", "names": ["Web", "Api", "Db"], "text": "tie Web, Api and Db into a chain", "wire": {"type": "command", "args": {"action": "connect", "from": "Web,Api,Db", "to": "Web,Api,Db", "pairing": "chain"}}}
 {"id": "th-0122", "names": ["Api", "Db"], "text": "connect Api to Db with a dotted line", "wire": {"type": "command", "args": {"action": "connect", "from": "Api", "to": "Db", "style": "dotted"}}}
 {"id": "th-0123", "names": ["Worker", "Queue"], "text": "run a red line from Worker to Queue", "wire": {"type": "command", "args": {"action": "connect", "from": "Worker", "to": "Queue", "color": "red"}}}
 {"id": "th-0124", "names": ["Cache", "Db"], "text": "wire Cache to Db both ways", "wire": {"type": "command", "args": {"action": "connect", "from": "Cache", "to": "Db", "arrow": "both"}}}

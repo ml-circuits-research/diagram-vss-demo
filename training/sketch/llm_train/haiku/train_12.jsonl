@@ -17,7 +17,7 @@
 {"id": "th-1117", "names": ["Rack"], "text": "rack should be small", "wire": {"type": "command", "args": {"action": "set", "target": "Rack", "size": "small"}}}
 {"id": "th-1118", "names": ["Hood"], "text": "paint Hood gray", "wire": {"type": "command", "args": {"action": "set", "target": "Hood", "color": "gray"}}}
 {"id": "th-1119", "names": [], "text": "make the squares that aren't pink purple", "wire": {"type": "command", "args": {"action": "set", "target": "mention(notcolor=pink,quantifier=all,shape=square)", "color": "purple"}}}
-{"id": "th-1120", "names": ["Probe", "Beaker"], "text": "wire Probe to Beaker", "wire": {"type": "command", "args": {"action": "connect", "from": "Probe", "to": "Beaker"}}}
+{"id": "th-1120", "names": ["Probe", "Beaker", "Flask"], "text": "wire Probe, Beaker and Flask one after the next", "wire": {"type": "command", "args": {"action": "connect", "from": "Probe,Beaker,Flask", "to": "Probe,Beaker,Flask", "pairing": "next"}}}
 {"id": "th-1121", "names": ["Beaker", "Flask"], "text": "a dashed line from Beaker to Flask", "wire": {"type": "command", "args": {"action": "connect", "from": "Beaker", "to": "Flask", "style": "dashed"}}}
 {"id": "th-1122", "names": ["Burner", "Rack"], "text": "run a two-way arrow between Burner and Rack", "wire": {"type": "command", "args": {"action": "connect", "from": "Burner", "to": "Rack", "arrow": "both"}}}
 {"id": "th-1123", "names": ["Tube", "Flask", "Cork"], "text": "chain Tube, Flask and Cork together", "wire": {"type": "command", "args": {"action": "connect", "from": "Tube,Flask,Cork", "to": "Tube,Flask,Cork", "pairing": "chain"}}}

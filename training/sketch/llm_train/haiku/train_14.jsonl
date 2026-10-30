@@ -17,7 +17,7 @@
 {"id": "th-1317", "names": ["Token"], "text": "Token should be tiny", "wire": {"type": "command", "args": {"action": "set", "target": "Token", "size": "tiny"}}}
 {"id": "th-1318", "names": ["Prize"], "text": "paint Prize gold", "wire": {"type": "command", "args": {"action": "set", "target": "Prize", "color": "gold"}}}
 {"id": "th-1319", "names": [], "text": "make the boxes that aren't gray yellow", "wire": {"type": "command", "args": {"action": "set", "target": "mention(notcolor=gray,quantifier=all,shape=rectangle)", "color": "yellow"}}}
-{"id": "th-1320", "names": ["Pawn", "Board"], "text": "link Pawn to Board", "wire": {"type": "command", "args": {"action": "connect", "from": "Pawn", "to": "Board"}}}
+{"id": "th-1320", "names": ["Pawn", "Dice", "Board"], "text": "link Pawn and Dice to Board, all of them", "wire": {"type": "command", "args": {"action": "connect", "from": "Pawn,Dice", "to": "Board", "pairing": "all"}}}
 {"id": "th-1321", "names": ["Dice", "Card"], "text": "a dashed line from Dice to Card", "wire": {"type": "command", "args": {"action": "connect", "from": "Dice", "to": "Card", "style": "dashed"}}}
 {"id": "th-1322", "names": ["Token", "Deck"], "text": "two-way link between Token and Deck", "wire": {"type": "command", "args": {"action": "connect", "from": "Token", "to": "Deck", "arrow": "both"}}}
 {"id": "th-1323", "names": ["Board", "Prize", "Card"], "text": "chain Board, Prize and Card", "wire": {"type": "command", "args": {"action": "connect", "from": "Board,Prize,Card", "to": "Board,Prize,Card", "pairing": "chain"}}}

@@ -19,7 +19,7 @@
 {"id": "th-0619", "names": ["Twin"], "text": "make it blue", "wire": {"type": "command", "args": {"action": "set", "target": "Twin", "color": "blue"}}}
 {"id": "th-0620", "names": ["Uncle"], "text": "change Uncle's color to lime", "wire": {"type": "command", "args": {"action": "set", "target": "Uncle", "color": "lime"}}}
 {"id": "th-0621", "names": [], "text": "make the hexagons that aren't gray huge", "wire": {"type": "command", "args": {"action": "set", "target": "mention(notcolor=gray,quantifier=all,shape=hexagon)", "size": "huge"}}}
-{"id": "th-0622", "names": ["Grandma", "Mom"], "text": "Grandma is linked to Mom", "wire": {"type": "command", "args": {"action": "connect", "from": "Grandma", "to": "Mom"}}}
+{"id": "th-0622", "names": ["Grandma", "Mom", "Dad"], "text": "Grandma, Mom and Dad link up in a chain", "wire": {"type": "command", "args": {"action": "connect", "from": "Grandma,Mom,Dad", "to": "Grandma,Mom,Dad", "pairing": "chain"}}}
 {"id": "th-0623", "names": ["Mom", "Kid"], "text": "draw a dotted line between Mom and Kid", "wire": {"type": "command", "args": {"action": "connect", "from": "Mom", "to": "Kid", "style": "dotted"}}}
 {"id": "th-0624", "names": ["Dad", "Mom"], "text": "a double-headed arrow between Dad and Mom", "wire": {"type": "command", "args": {"action": "connect", "from": "Dad", "to": "Mom", "arrow": "both"}}}
 {"id": "th-0625", "names": ["Grandma", "Mom", "Kid"], "text": "chain Grandma, Mom and Kid", "wire": {"type": "command", "args": {"action": "connect", "from": "Grandma,Mom,Kid", "to": "Grandma,Mom,Kid", "pairing": "chain"}}}

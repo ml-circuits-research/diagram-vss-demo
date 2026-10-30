@@ -17,7 +17,7 @@
 {"id": "th-1017", "names": ["Attic"], "text": "make Attic tiny", "wire": {"type": "command", "args": {"action": "set", "target": "Attic", "size": "tiny"}}}
 {"id": "th-1018", "names": ["Bath"], "text": "bath should be teal", "wire": {"type": "command", "args": {"action": "set", "target": "Bath", "color": "teal"}}}
 {"id": "th-1019", "names": [], "text": "make the squares that aren't gray blue", "wire": {"type": "command", "args": {"action": "set", "target": "mention(notcolor=gray,quantifier=all,shape=square)", "color": "blue"}}}
-{"id": "th-1020", "names": ["Kitchen", "Den"], "text": "connect Kitchen to Den", "wire": {"type": "command", "args": {"action": "connect", "from": "Kitchen", "to": "Den"}}}
+{"id": "th-1020", "names": ["Kitchen", "Bath", "Den"], "text": "connect Kitchen and Bath to Den, all of them", "wire": {"type": "command", "args": {"action": "connect", "from": "Kitchen,Bath", "to": "Den", "pairing": "all"}}}
 {"id": "th-1021", "names": ["Hall", "Bedroom"], "text": "run a dashed line from Hall to Bedroom", "wire": {"type": "command", "args": {"action": "connect", "from": "Hall", "to": "Bedroom", "style": "dashed"}}}
 {"id": "th-1022", "names": ["Garage", "Kitchen"], "text": "Garage connects both ways with Kitchen", "wire": {"type": "command", "args": {"action": "connect", "from": "Garage", "to": "Kitchen", "arrow": "both"}}}
 {"id": "th-1023", "names": ["Attic", "Bath", "Bedroom"], "text": "chain Attic, Bath and Bedroom", "wire": {"type": "command", "args": {"action": "connect", "from": "Attic,Bath,Bedroom", "to": "Attic,Bath,Bedroom", "pairing": "chain"}}}

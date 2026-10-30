@@ -19,7 +19,7 @@
 {"id": "th-0519", "names": ["Timer"], "text": "color the Timer white", "wire": {"type": "command", "args": {"action": "set", "target": "Timer", "color": "white"}}}
 {"id": "th-0520", "names": ["Rack"], "text": "make it gray", "wire": {"type": "command", "args": {"action": "set", "target": "Rack", "color": "gray"}}}
 {"id": "th-0521", "names": [], "text": "make the circles that aren't black red", "wire": {"type": "command", "args": {"action": "set", "target": "mention(notcolor=black,quantifier=all,shape=circle)", "color": "red"}}}
-{"id": "th-0522", "names": ["Dough", "Oven"], "text": "wire the Dough to the Oven", "wire": {"type": "command", "args": {"action": "connect", "from": "Dough", "to": "Oven"}}}
+{"id": "th-0522", "names": ["Dough", "Oven", "Mix"], "text": "wire Dough, Oven and Mix together in a chain", "wire": {"type": "command", "args": {"action": "connect", "from": "Dough,Oven,Mix", "to": "Dough,Oven,Mix", "pairing": "chain"}}}
 {"id": "th-0523", "names": ["Oven", "Rack"], "text": "a dashed link from Oven to Rack", "wire": {"type": "command", "args": {"action": "connect", "from": "Oven", "to": "Rack", "style": "dashed"}}}
 {"id": "th-0524", "names": ["Mix", "Dough"], "text": "connect Mix and Dough both ways", "wire": {"type": "command", "args": {"action": "connect", "from": "Mix", "to": "Dough", "arrow": "both"}}}
 {"id": "th-0525", "names": ["Sauce", "Dough", "Oven"], "text": "string Sauce, Dough and Oven together in a chain", "wire": {"type": "command", "args": {"action": "connect", "from": "Sauce,Dough,Oven", "to": "Sauce,Dough,Oven", "pairing": "chain"}}}

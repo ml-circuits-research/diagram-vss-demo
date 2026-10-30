@@ -19,7 +19,7 @@
 {"id": "th-0219", "names": ["Log"], "text": "could Log be brown", "wire": {"type": "command", "args": {"action": "set", "target": "Log", "color": "brown"}}}
 {"id": "th-0220", "names": ["Retry"], "text": "please make the Retry box huge", "wire": {"type": "command", "args": {"action": "set", "target": "Retry", "size": "huge"}}}
 {"id": "th-0221", "names": [], "text": "make the red circle navy", "wire": {"type": "command", "args": {"action": "set", "target": "mention(color=red,shape=circle)", "color": "navy"}}}
-{"id": "th-0222", "names": ["Start", "Check"], "text": "connect Start to Check", "wire": {"type": "command", "args": {"action": "connect", "from": "Start", "to": "Check"}}}
+{"id": "th-0222", "names": ["Start", "Check"], "text": "link Start and Check, each one to the next", "wire": {"type": "command", "args": {"action": "connect", "from": "Start,Check", "to": "Start,Check", "pairing": "next"}}}
 {"id": "th-0223", "names": ["Check", "Fix"], "text": "draw a dashed arrow from Check to Fix", "wire": {"type": "command", "args": {"action": "connect", "from": "Check", "to": "Fix", "style": "dashed"}}}
 {"id": "th-0224", "names": ["Review", "Ship"], "text": "link Review and Ship with a plain line, no arrowhead", "wire": {"type": "command", "args": {"action": "connect", "from": "Review", "to": "Ship", "arrow": "none"}}}
 {"id": "th-0225", "names": ["Start", "Check", "Review", "Done"], "text": "chain Start, Check, Review and Done", "wire": {"type": "command", "args": {"action": "connect", "from": "Start,Check,Review,Done", "to": "Start,Check,Review,Done", "pairing": "chain"}}}
