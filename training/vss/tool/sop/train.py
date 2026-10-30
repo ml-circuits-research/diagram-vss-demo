@@ -174,6 +174,10 @@ def build_schema(rows, legend):
         fs = [f["roles"][r] for f in ok if r in f["roles"]]
         if not fs: continue
         shapes = collections.Counter(x[0] for x in fs); ents = [x for x in fs if x[0] == "entity"]
+        # diagram-vss-demo patch: a set role of entities ("members=$a & $b") has "set" fillers; its members are entities, so the role's
+        # head kinds come from them (without this the schema has no head_kinds and reading the set role fails)
+        ents += [m for x in fs if x[0] == "set" for m in x[1:] if m and m[0] == "entity"]
+        if ents and shapes["entity"] == 0: shapes["entity"] = len(ents)
         kinds = sorted({legend.kind(x[1]) for x in fs if x[0] in ("word", "negword") and legend.kind(x[1])})
         rs = {"rate": len(fs) / n, "shapes": dict(shapes), "main": "entity" if shapes["entity"] >= shapes["word"] + shapes["negword"] else "word",
               "kinds": kinds, "negword": shapes["negword"] > 0}

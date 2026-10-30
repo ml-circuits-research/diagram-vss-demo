@@ -39,3 +39,10 @@ the evidence, and what this repository did.
 ## vsa-semantic-space (frozen paper repository)
 
 Nothing changed or copied from it directly (training/vss comes from vss-demo, which imported it at e531283).
+
+### 5. Set roles of entities and the browser reader
+- `tool/sop/train.py` `build_schema()`: a set role whose members are entities (`members=$a & $b`, lists of shapes) gets no `head_kinds`,
+  because only fillers of shape `entity` are counted; reading the role then fails with `KeyError: 'head_kinds'`. Patched here
+  (training/vss/tool/sop/train.py, "diagram-vss-demo patch"): the members of set fillers count as entities.
+- `app/src/vss/reader.js` refuses worlds with set roles ("not ported"). Ported here (docs/js/vss/reader.js `readSetRole`, the frame ->
+  wires step writes `$a & $b`).
