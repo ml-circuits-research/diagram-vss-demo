@@ -36,6 +36,7 @@ function centres(words, F, verbs) {
 
 export function vssCentres(text, names, F, vss, opts = {}) {
   const verbs = opts.verbs || new Set(vss.model.legend.events.flatMap((e) => e.verbs || []));
+  const vk = new Set(Object.entries(vss.model.lexicon || {}).filter(([w, e]) => /^[A-Z]+$/.test(e.kind) && e.kind !== "VERB").map(([w]) => w));   // legend value tokens (kinds in capitals)
   const [toks] = FRONT.tokenize(text, names), sents = []; let cur = [];
   toks.forEach((t, k) => { cur.push(k); if (ENDS.has(t[0])) { sents.push(cur); cur = []; } });
   if (cur.length) sents.push(cur);
@@ -49,8 +50,11 @@ export function vssCentres(text, names, F, vss, opts = {}) {
     const { tokens } = FRONT.normalize(srcText, names, F); let v = null;
     if (tokens.filter((t) => verbs.has(t)).length === 1) {
       const r = vss.read(tokens.join(" "));
-      if (r.status !== "unknown-event" && r.status !== "no-sense") {
-        const un = r.unplaced.filter((t) => !PUNCT.has(t)).length, all = tokens.filter((t) => !PUNCT.has(t)).length;
+      if (r.status !== "unknown-event" && r.status !== "no-sense" && !(opts.confident && r.status === "abstain")) {   // confident: a centre whose reading abstains is not a request
+        // only words that carry content count: names, quoted texts, numbers, legend values, action words (a word of these kinds that
+        // the reading cannot place belongs to another request); chatter words ("still", "uh", "because") are neither for nor against
+        const content = (t) => t.startsWith("n_") || t.startsWith("t_") || /^\d+$/.test(t) || verbs.has(t) || (vk && vk.has(t));
+        const un = r.unplaced.filter(content).length, all = tokens.filter(content).length;
         v = { src: srcText, score: (all - un) - un };
       }
     }

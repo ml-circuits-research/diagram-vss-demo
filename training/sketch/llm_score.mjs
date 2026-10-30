@@ -8,6 +8,7 @@ import { createRequire } from "node:module";
 import { load } from "../../docs/js/vss.js";
 import { compile, normalize } from "../../docs/js/snorm.js";
 import * as FRONT from "../../docs/js/front.js";
+import { vssCentres } from "../../docs/js/vss-centers.js";
 import { existsSync } from "node:fs";
 import { readingFromWires, toNodes } from "../../docs/js/vss-adapter.js";
 import { canon } from "../../docs/js/bench-canon.js";
@@ -26,7 +27,9 @@ const sys = K.createSystem();
 
 function vssFormalize(text, ctx) {
   // SEG=gold: the annotated spans (held-out TRAINING messages only: the test sets have none): the reading quality without the cut
-  const segs = process.env.SEG === "gold" && ctx.spans ? ctx.spans.map((src) => ({ src })) : F ? FRONT.segment(text, ctx.names, F).map((src) => ({ src })) : sys.formalize(text, ctx).segments;
+  const segs = process.env.SEG === "gold" && ctx.spans ? ctx.spans.map((src) => ({ src }))
+    : process.env.SEG === "centres" && F ? vssCentres(text, ctx.names, F, vss, { confident: process.env.CONFIDENT === "1" }).map((src) => ({ src }))      // the VSS reader's own cut
+    : F ? FRONT.segment(text, ctx.names, F).map((src) => ({ src })) : sys.formalize(text, ctx).segments;
   const seq = { s: 0, m: 0 }, c = { names: ctx.names, last: [], refs: new Map() }, nodes = [];
   for (const seg of segs) {
     const nm = c.names.concat([...c.refs.keys()]);

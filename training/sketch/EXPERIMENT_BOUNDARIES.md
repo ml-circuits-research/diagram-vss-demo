@@ -30,3 +30,16 @@ What matters more (same dev split, model final_p40, all requests):
 | (rules, for reference) | 69.7% |
 
 The cut costs VSS about 2 points; the gap to the rules (~17-19 points) is in READING the requests, not in finding them.
+
+## Follow-up (owner allowed small adjustments), end to end on the same dev split (1126 requests), model final_p40
+
+| VSS fed with | wires right | extra wires (not asked for) |
+|---|---|---|
+| annotated spans (perfect cut) | 52.2% | 80 |
+| learned tagger's cut | 50.4% | 90 |
+| VSS centres, only content words scored (names, values, numbers, action words) | 41.7% | 290 |
+| same, centres whose reading abstains dropped | 38.5% | 289 |
+
+The centres find slightly more requests (act found 83.7% vs 80.8%) but chatter becomes centres (about 200 extra commands).
+Why it worked elsewhere: WikiSQL and SNIPS have ONE request per input (one question -> one query), so one centre was always enough;
+the several-centres reading was never tested there.
