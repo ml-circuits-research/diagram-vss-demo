@@ -988,7 +988,7 @@ head=hexagon
 attr=red
 
 @w170 disconnect
-_text=let delete the arrow from n_gamma to n_start
+_text=disconnect n_gamma to n_start
 _world=sketch
 _source=generator
 _template=disconnect.dc.lets
@@ -1121,7 +1121,7 @@ size=large
 head=triangle
 
 @w194 disconnect
-_text=let delete the arrow from n_mars to n_earth
+_text=disconnect n_mars to n_earth
 _world=sketch
 _source=generator
 _template=disconnect.dc.lets
@@ -1578,7 +1578,7 @@ color=gold
 head=n_gate
 
 @w271 disconnect
-_text=let disconnect n_cache from n_check
+_text=disconnect n_cache from n_check
 _world=sketch
 _source=generator
 _template=disconnect.dc.lets
@@ -2027,7 +2027,7 @@ head=n_c
 head=arrow
 
 @w349 disconnect
-_text=let delete the arrow from n_valid to n_leaf
+_text=disconnect n_valid to n_leaf
 _world=sketch
 _source=generator
 _template=disconnect.dc.lets
@@ -2653,7 +2653,7 @@ head=n_core
 head=arrow
 
 @w454 disconnect
-_text=let disconnect n_internet from n_side
+_text=disconnect n_internet from n_side
 _world=sketch
 _source=generator
 _template=disconnect.dc.lets
@@ -3327,7 +3327,7 @@ object=$w568
 head=n_backup
 
 @w569 disconnect
-_text=let disconnect n_walls from n_b
+_text=disconnect n_walls from n_b
 _world=sketch
 _source=generator
 _template=disconnect.dc.lets
@@ -3548,7 +3548,7 @@ head=n_mars
 head=arrow
 
 @w610 disconnect
-_text=let cut the connect between n_beta and n_box1
+_text=disconnect n_beta and n_box1
 _world=sketch
 _source=generator
 _template=disconnect.dc.lets

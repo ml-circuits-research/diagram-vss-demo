@@ -1,16 +1,16 @@
 # Conversion of the LLM training clauses (3000 clauses)
 
-Converted: 1791 (59.7%). Set aside: 1209.
+Converted: 1796 (59.9%). Set aside: 1204.
 
 | reason set aside | n |
 |---|---|
 | no create verb in the clause | 130 |
 | word not in the clause | 80 |
 | no set verb in the clause | 61 |
-| no neighbors verb in the clause | 59 |
-| no reachable verb in the clause | 58 |
+| no neighbors verb in the clause | 58 |
 | no connect verb in the clause | 54 |
 | name not in the clause | 53 |
+| no reachable verb in the clause | 53 |
 | no cycle verb in the clause | 46 |
 | no rule verb in the clause | 45 |
 | no path verb in the clause | 44 |
@@ -20,9 +20,9 @@ Converted: 1791 (59.7%). Set aside: 1209.
 | no property verb in the clause | 35 |
 | no toFront verb in the clause | 34 |
 | no resize verb in the clause | 33 |
-| no describe verb in the clause | 32 |
+| no describe verb in the clause | 31 |
 | no forget verb in the clause | 28 |
-| no list verb in the clause | 24 |
+| no list verb in the clause | 26 |
 | no exists verb in the clause | 21 |
 | no arrange verb in the clause | 21 |
 | no disconnect verb in the clause | 20 |
@@ -50,7 +50,7 @@ Converted: 1791 (59.7%). Set aside: 1209.
 | set | 143 |
 | move | 137 |
 | check | 121 |
-| list | 86 |
+| list | 84 |
 | delete | 76 |
 | count | 72 |
 | connect | 61 |
@@ -71,7 +71,7 @@ Converted: 1791 (59.7%). Set aside: 1209.
 | arrange | 38 |
 | forget | 33 |
 | resize | 30 |
-| describe | 29 |
+| describe | 30 |
 | label | 27 |
 | degree | 21 |
 | toBack | 20 |
@@ -79,5 +79,5 @@ Converted: 1791 (59.7%). Set aside: 1209.
 | path | 17 |
 | rule | 17 |
 | cycle | 15 |
-| reachable | 4 |
-| neighbors | 2 |
+| reachable | 9 |
+| neighbors | 3 |

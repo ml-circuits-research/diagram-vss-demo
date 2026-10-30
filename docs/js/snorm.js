@@ -9,6 +9,7 @@ export function compile(T) {
     T, lead: T.lead_strip.map(split).sort((a, b) => b.length - a.length), open: T.openers.map(([a, b]) => [split(a), split(b)]),
     mwe: T.mwe.map(([a, b]) => [split(a), split(b)]).sort((a, b) => b[0].length - a[0].length), syn: T.synonyms, num: T.number_words,
     noNum: new Set(T.number_word_exceptions), punct: T.punctuation, follow: new Set(T.article_followers), before: new Set(T.name_before),
+    keepS: new Set(Object.keys(T.contractions).filter((k) => k.endsWith("'s")).map((k) => k.split("'")[0])),
     rewrites: T.rewrites || [], qverbs: new Set(T.question_verbs || []),
   };
 }
@@ -18,14 +19,14 @@ export function normalize(C, lexicon, text, names = []) {
   const info = { texts: {}, names: {}, numbers: {} }, known = new Set(names.map((n) => String(n).toLowerCase()));
   let s = text.replace(/"([^"]*)"|“([^”]*)”|(?<![A-Za-z0-9])'([^']+)'(?![A-Za-z0-9])/g, (m, a, b, c) => {
     const v = a ?? b ?? c, tok = "t_" + slug(v); info.texts[tok] = v; return ` ${tok} `;
-  });
+  }).replace(/\u2019/g, "'");   // a curly apostrophe left inside a word: let’s -> let's
   const parts = s.split(" ");
   for (let i = 0; i < parts.length; i++) if (parts[i] === "A") {
     const nxt = parts.slice(i + 1).find((x) => x) || "", prev = (parts.slice(0, i).reverse().find((x) => x) || "").toLowerCase();
     if (!C.follow.has(nxt.toLowerCase().replace(/[^a-z-]/g, "")) || C.before.has(prev)) parts[i] = "N_A_NAME";
   }
   s = parts.join(" ");
-  s = s.replace(/\b(\d+)(px|pixels?)\b/g, "$1 $2").replace(/(?<=[A-Za-z0-9])['\u2019]s\b/g, "");
+  s = s.replace(/\b(\d+)(px|pixels?)\b/g, "$1 $2").replace(/\b([A-Za-z0-9]+)['\u2019]s\b/g, (m, w) => (C.keepS.has(w.toLowerCase()) ? m : w));   // Done's -> Done; let's, it's stay
   const originals = new Map(), capital = new Set(), words = s.match(/[A-Za-z_][\w-]*/g) || [];
   words.forEach((w, k) => { if (!originals.has(w.toLowerCase())) originals.set(w.toLowerCase(), w); if (k > 0 && w[0] >= "A" && w[0] <= "Z" && w !== "I") capital.add(w.toLowerCase()); });
   s = s.toLowerCase();

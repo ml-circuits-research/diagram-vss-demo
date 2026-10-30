@@ -98,7 +98,7 @@ attr=teal
 det=the
 
 @w17 move
-_text=let move it left by 250 px
+_text=move it left by 250 px
 _world=sketch
 _source=generator
 _template=move.mv_dir.lets
@@ -722,7 +722,7 @@ object=$w124
 head=n_inbox
 
 @w125 move
-_text=let move it left by 45 px
+_text=move it left by 45 px
 _world=sketch
 _source=generator
 _template=move.mv_dir.lets
@@ -806,7 +806,7 @@ head=n_venus
 head=arrow
 
 @w139 undo
-_text=let undo
+_text=undo
 _world=sketch
 _source=generator
 _template=undo.ud.lets
@@ -1020,7 +1020,7 @@ head=rectangles
 det=all
 
 @w175 delete
-_text=let delete n_prism
+_text=delete n_prism
 _world=sketch
 _source=generator
 _template=delete.de.lets
@@ -1072,7 +1072,7 @@ head=diamonds
 det=all
 
 @w184 connect
-_text=let connect the navy ellipse to n_venus with a line
+_text=connect the navy ellipse to n_venus with a line
 _world=sketch
 _source=generator
 _template=connect.cn.lets
@@ -1164,7 +1164,7 @@ head=rectangles
 det=all
 
 @w200 set
-_text=let make n_orbit a diamond
+_text=make n_orbit a diamond
 _world=sketch
 _source=generator
 _template=set.st_shape.lets
@@ -1290,7 +1290,7 @@ head=n_finish
 head=n_q
 
 @w222 create
-_text=let draw a diamond named n_q labeled t_archive above the pink diamond .
+_text=draw a diamond named n_q labeled t_archive above the pink diamond .
 _world=sketch
 _source=generator
 _template=create.cr.lets
@@ -1374,7 +1374,7 @@ attr=indigo
 det=the
 
 @w235 rename
-_text=let rename the red rectangle n_nova .
+_text=rename the red rectangle n_nova .
 _world=sketch
 _source=generator
 _template=rename.rn.lets
@@ -1421,7 +1421,7 @@ attr=gray
 det=the
 
 @w243 label
-_text=let write t_refund on n_vault
+_text=label t_refund on n_vault
 _world=sketch
 _source=generator
 _template=label.lb.lets
@@ -1446,7 +1446,7 @@ region=top_right
 head=diamond
 
 @w247 connect
-_text=let connect n_vault to the hexagon .
+_text=connect n_vault to the hexagon .
 _world=sketch
 _source=generator
 _template=connect.cn.lets
@@ -1531,7 +1531,7 @@ attr=white
 det=all
 
 @w261 move
-_text=let move n_moon bottom
+_text=move n_moon bottom
 _world=sketch
 _source=generator
 _template=move.mv_place.lets
@@ -1567,7 +1567,7 @@ attr=orange
 det=the
 
 @w267 set
-_text=let make the ellipse white .
+_text=make the ellipse white .
 _world=sketch
 _source=generator
 _template=set.st_color.lets
@@ -1668,7 +1668,7 @@ attr=green
 det=the
 
 @w284 create
-_text=let draw a white ellipse named n_dev below the hexagon
+_text=draw a white ellipse named n_dev below the hexagon
 _world=sketch
 _source=generator
 _template=create.cr.lets
@@ -1763,7 +1763,7 @@ head=triangle
 attr=purple
 
 @w300 connect
-_text=let connect the purple triangles each_other
+_text=connect the purple triangles each_other
 _world=sketch
 _source=generator
 _template=connect.cn_pair.lets
@@ -2159,7 +2159,7 @@ head=stars
 det=all
 
 @w369 undo
-_text=let undo
+_text=undo
 _world=sketch
 _source=generator
 _template=undo.ud.lets
@@ -2348,7 +2348,7 @@ color=indigo
 head=n_gem
 
 @w401 connect
-_text=let connect n_kiwi to n_ops
+_text=connect n_kiwi to n_ops
 _world=sketch
 _source=generator
 _template=connect.cn.lets
@@ -2411,7 +2411,7 @@ head=diamond
 attr=brown
 
 @w412 rename
-_text=let rename the black circle as n_moon
+_text=rename the black circle as n_moon
 _world=sketch
 _source=generator
 _template=rename.rn.lets
@@ -2717,7 +2717,7 @@ object=$w464
 head=n_atlas
 
 @w465 toBack
-_text=let send n_gem back
+_text=send n_gem back
 _world=sketch
 _source=generator
 _template=toBack.tb.lets
@@ -2813,7 +2813,7 @@ head=n_ledger
 head=n_kiwi
 
 @w482 create
-_text=let draw 5 white squares labeled t_checkout left_of n_ledger .
+_text=draw 5 white squares labeled t_checkout left_of n_ledger .
 _world=sketch
 _source=generator
 _template=create.cr.lets
@@ -2845,7 +2845,7 @@ amount=250
 head=n_gem
 
 @w487 connect
-_text=let connect the circles chain
+_text=connect the circles chain
 _world=sketch
 _source=generator
 _template=connect.cn_pair.lets
@@ -2896,7 +2896,7 @@ object=$w495
 head=shapes
 
 @w496 create
-_text=let draw a medium square named n_begin
+_text=draw a medium square named n_begin
 _world=sketch
 _source=generator
 _template=create.cr.lets
@@ -2987,7 +2987,7 @@ size=huge
 head=hexagons
 
 @w511 toBack
-_text=let send n_f back
+_text=send n_f back
 _world=sketch
 _source=generator
 _template=toBack.tb.lets
@@ -3069,7 +3069,7 @@ object=$w525
 head=n_orbit
 
 @w526 create
-_text=let draw a huge ellipse labeled t_notify left_of the green square
+_text=draw a huge ellipse labeled t_notify left_of the green square
 _world=sketch
 _source=generator
 _template=create.cr.lets
@@ -3361,7 +3361,7 @@ object=$w576
 head=n_e
 
 @w577 move
-_text=let move the square center
+_text=move the square center
 _world=sketch
 _source=generator
 _template=move.mv_place.lets
@@ -3504,7 +3504,7 @@ object=$w600
 head=n_q
 
 @w601 set
-_text=let make n_ops a star
+_text=make n_ops a star
 _world=sketch
 _source=generator
 _template=set.st_shape.lets
@@ -3540,7 +3540,7 @@ direction=up
 head=n_venus
 
 @w607 create
-_text=let top , draw a tiny brown hexagon
+_text=top , draw a tiny brown hexagon
 _world=sketch
 _source=generator
 _template=create.cr_loc_first.lets
@@ -3619,7 +3619,7 @@ _template=redo.rd.can
 _mood=command
 
 @w620 move
-_text=let move it next_to n_ops
+_text=move it next_to n_ops
 _world=sketch
 _source=generator
 _template=move.mv_place.lets
@@ -3659,7 +3659,7 @@ head=triangles
 det=the
 
 @w627 delete
-_text=let delete all triangles
+_text=delete all triangles
 _world=sketch
 _source=generator
 _template=delete.de.lets
@@ -3687,7 +3687,7 @@ head=rectangle
 head=n_hub2
 
 @w632 set
-_text=let make the squares not_navy green
+_text=make the squares not_navy green
 _world=sketch
 _source=generator
 _template=set.st_not.lets

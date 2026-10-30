@@ -1,16 +1,8 @@
 {
- "label": "BUILT",
- "when": "2026-10-30T19:57:14",
- "legend": "sha256:9a92ad4aa726b9a8c43f7650f831ffe4b7e0bb5aae12e8fcfb0fa3103fb05c68",
+ "label": "FAILED",
+ "when": "2026-10-30T20:36:00",
+ "legend": "sha256:ecd34967af65d57cb90a3b12797d96d492d19e19b139d2676fcee71367854e53",
  "legend_version": 1,
- "run": "20261030-195608",
- "examples_sha256": "a00d495a0dda3289aff0cc9ba99fdc3522c88bf766871f0934235f9e256eb1ae",
- "metrics_summary": {
-  "FULL (catalog candidates)": {
-   "heldout_formulations": 0.1,
-   "heldout_sentences": 0.2,
-   "new_identities": 0.35,
-   "train (sample)": 0.3
-  }
- }
+ "run": "20261030-203519",
+ "reason": "AssertionError: non-finite loss at step 264: a target or state is NaN (check the world)"
 }

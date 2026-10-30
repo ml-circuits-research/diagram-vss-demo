@@ -27,7 +27,7 @@ def normalize(text, lexicon, names=()):
     known = {n.lower() for n in names}
     def q(m):
         s = next(g for g in m.groups() if g is not None); tok = "t_" + slug(s); info["texts"][tok] = s; return f" {tok} "
-    s = QUOTE.sub(q, text)
+    s = QUOTE.sub(q, text).replace("\u2019", "'")                        # a curly apostrophe left inside a word: let’s -> let's
     parts = s.split(" ")                                               # a capital A is the article only before a word that can follow one
     for i, w in enumerate(parts):
         if w == "A":
@@ -36,7 +36,8 @@ def normalize(text, lexicon, names=()):
             if re.sub(r"[^a-z-]", "", nxt.lower()) not in FOLLOW or prev in BEFORE: parts[i] = "N_A_NAME"
     s = " ".join(parts)
     s = re.sub(r"\b(\d+)(px|pixels?)\b", r"\1 \2", s)                    # 30px -> 30 px
-    s = re.sub(r"(?<=[A-Za-z0-9])['\u2019]s\b", "", s)                    # Done's -> Done
+    keep = {k.split("'")[0] for k in T["contractions"] if k.endswith("'s")}     # let's, it's ... are contractions, not possessives
+    s = re.sub(r"\b([A-Za-z0-9]+)['\u2019]s\b", lambda m: m.group(0) if m.group(1).lower() in keep else m.group(1), s)   # Done's -> Done
     originals, capital = {}, set()                                     # lower-case word -> first original spelling; words written capitalised
     words = re.findall(r"[A-Za-z_][\w-]*", s)
     for k, w in enumerate(words):
