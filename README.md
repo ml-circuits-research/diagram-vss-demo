@@ -14,6 +14,8 @@ size, the load time and the time per message.
 
 Open it: `docs/` is the whole application (GitHub Pages from `/docs`, or `npx serve docs` locally; ES modules do not load from `file://`).
 
+Working rules for this repository (scope, data, fairness): `AGENTS.md`. The VSS reader's design: `training/sketch/VSS_READER_SPEC.md`.
+
 ## Layout
 
 | path | content |
@@ -35,4 +37,4 @@ A new legend question needs: a legend entry in a plugin (`logic.js`), its cue wo
 ## Licences
 
 This repository: AGPL-3.0 (LICENSE). `docs/js/vss.js` and `docs/js/vss/` are copied from ml-circuits-research/vss-demo `app/src`
-(MIT, commit 9c85649). The training tool is not copied: `training/sketch/build.sh` runs it from a vss-demo checkout.
+(MIT, commit 9c85649). The training tool is copied into `training/vss` (MIT, see its PROVENANCE.md).
