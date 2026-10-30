@@ -66,6 +66,10 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
 
 ## Working with the owner
 
+- Architecture changes need the owner's approval BEFORE they are built: a new learned component (a tagger, a classifier, any model
+  besides the VSS reader), a new layer in the pipeline, or replacing one. Propose it with the reason and the alternative, then wait.
+  (2026-10-30: a perceptron segmenter was added without asking; it stays only as a labelled baseline until the owner decides.)
+
 - Do not take decisions that move away from real use without asking; state assumptions explicitly, with concrete examples.
 - Explain in plain words, without jargon; no needless cleverness. If something was a mistake, say so plainly and fix it.
 - Long runs (training, agents) are reported when they finish, with numbers; never predicted.
