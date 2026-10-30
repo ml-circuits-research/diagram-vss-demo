@@ -1,0 +1,12 @@
+  [rel gold] epoch 0 loss -0.681 (38s)
+  [rel gold] epoch 1 loss -0.958 (44s)
+  [rel gold] epoch 2 loss -0.975 (51s)
+e1 dev {'acc': 1.0, 'extra_per100': 0.0, 'n_gold': 1222, 'unseen_acc': 0.0}
+e1 test {'acc': 1.0, 'extra_per100': 0.0, 'n_gold': 3040, 'unseen_acc': 1.0}
+done e1 seed 0 in 55s
+  [rel gold] epoch 0 loss -0.680 (5s)
+  [rel gold] epoch 1 loss -0.958 (11s)
+  [rel gold] epoch 2 loss -0.975 (84s)
+e1 dev {'acc': 1.0, 'extra_per100': 0.0, 'n_gold': 1233, 'unseen_acc': 0.0}
+e1 test {'acc': 1.0, 'extra_per100': 0.0, 'n_gold': 2949, 'unseen_acc': 1.0}
+done e1 seed 1 in 87s

@@ -1,0 +1,12 @@
+  [rel uniform] epoch 0 loss -0.440 (152s)
+  [rel uniform] epoch 1 loss -0.673 (158s)
+  [rel uniform] epoch 2 loss -0.709 (164s)
+e2u dev {'acc': 0.9819967266775778, 'extra_per100': 10.556464811783961, 'n_gold': 1222, 'unseen_acc': 0.0, 'z_span_f1': 0.0, 'z_tok_f1': 0.0, 'z2_span_f1': 0.6407407407407408, 'z2_tok_f1': 0.8384862725698738}
+e2u test {'acc': 0.9756578947368421, 'extra_per100': 9.375, 'n_gold': 3040, 'unseen_acc': 0.97, 'z_span_f1': 0.0, 'z_tok_f1': 0.0, 'z2_span_f1': 0.5875656742556917, 'z2_tok_f1': 0.801859799713877}
+done e2u seed 0 in 168s
+  [rel uniform] epoch 0 loss -0.435 (6s)
+  [rel uniform] epoch 1 loss -0.671 (12s)
+  [rel uniform] epoch 2 loss -0.708 (18s)
+e2u dev {'acc': 0.9829683698296837, 'extra_per100': 9.894566098945662, 'n_gold': 1233, 'unseen_acc': 0.0, 'z_span_f1': 0.0, 'z_tok_f1': 0.0, 'z2_span_f1': 0.6339691189827429, 'z2_tok_f1': 0.821917808219178}
+e2u test {'acc': 0.9820278060359444, 'extra_per100': 9.223465581553068, 'n_gold': 2949, 'unseen_acc': 0.9798941798941799, 'z_span_f1': 0.0, 'z_tok_f1': 0.0, 'z2_span_f1': 0.5878594249201278, 'z2_tok_f1': 0.8023429710867398}
+done e2u seed 1 in 21s

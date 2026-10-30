@@ -1,0 +1,61 @@
+{
+ "seed": 0,
+ "thr": 0.5098499602896264,
+ "dev": {
+  "acc": 1.0,
+  "extra_per100": 0.0,
+  "n_gold": 1222,
+  "unseen_acc": 0.0
+ },
+ "test": {
+  "all": {
+   "acc": 1.0,
+   "extra_per100": 0.0,
+   "n_gold": 3040,
+   "unseen_acc": 1.0
+  },
+  "req1": {
+   "acc": 1.0,
+   "extra_per100": 0.0,
+   "n_gold": 301,
+   "unseen_acc": 1.0
+  },
+  "req2": {
+   "acc": 1.0,
+   "extra_per100": 0.0,
+   "n_gold": 568,
+   "unseen_acc": 1.0
+  },
+  "req3": {
+   "acc": 1.0,
+   "extra_per100": 0.0,
+   "n_gold": 867,
+   "unseen_acc": 1.0
+  },
+  "req4": {
+   "acc": 1.0,
+   "extra_per100": 0.0,
+   "n_gold": 1304,
+   "unseen_acc": 1.0
+  },
+  "chat0": {
+   "acc": 1.0,
+   "extra_per100": 0.0,
+   "n_gold": 954,
+   "unseen_acc": 1.0
+  },
+  "chat1": {
+   "acc": 1.0,
+   "extra_per100": 0.0,
+   "n_gold": 1080,
+   "unseen_acc": 1.0
+  },
+  "chat2": {
+   "acc": 1.0,
+   "extra_per100": 0.0,
+   "n_gold": 1006,
+   "unseen_acc": 1.0
+  }
+ },
+ "time_s": 55.29812550544739
+}

@@ -1,0 +1,22 @@
+  [std] epoch 0 loss -0.825 (50s)
+  [std] epoch 1 loss -0.948 (130s)
+  [std] epoch 2 loss -0.952 (189s)
+E0a dev {'acc': 0.9918166939443536, 'extra_per100': 0.0, 'n_gold': 1222, 'unseen_acc': 0.0}
+E0a {'acc': 0.9924342105263158, 'extra_per100': 0.0, 'n_gold': 3040, 'unseen_acc': 0.991}
+  [std] epoch 0 loss -0.559 (2s)
+  [std] epoch 1 loss -0.772 (4s)
+  [std] epoch 2 loss -0.806 (6s)
+E0b {'acc': 0.3226973684210526, 'extra_per100': 0.0, 'n_gold': 3040, 'unseen_acc': 0.305}
+E0c {'acc': 0.8953947368421052, 'extra_per100': 9.375, 'n_gold': 3040, 'unseen_acc': 0.883, 'z_span_f1': 0.4463738508682329, 'z_tok_f1': 0.6382280557834291, 'z2_span_f1': 0.4877513711151737, 'z2_tok_f1': 0.8468273700140524}
+done e0 seed 0 in 212s
+  [std] epoch 0 loss -0.821 (3s)
+  [std] epoch 1 loss -0.947 (6s)
+  [std] epoch 2 loss -0.952 (9s)
+E0a dev {'acc': 0.9967558799675588, 'extra_per100': 0.0, 'n_gold': 1233, 'unseen_acc': 0.0}
+E0a {'acc': 0.9945744320108512, 'extra_per100': 0.0, 'n_gold': 2949, 'unseen_acc': 0.9936507936507937}
+  [std] epoch 0 loss -0.559 (2s)
+  [std] epoch 1 loss -0.770 (4s)
+  [std] epoch 2 loss -0.802 (6s)
+E0b {'acc': 0.3350288233299423, 'extra_per100': 0.0, 'n_gold': 2949, 'unseen_acc': 0.3513227513227513}
+E0c {'acc': 0.8901322482197355, 'extra_per100': 9.223465581553068, 'n_gold': 2949, 'unseen_acc': 0.8931216931216931, 'z_span_f1': 0.43804347826086953, 'z_tok_f1': 0.6181079512478235, 'z2_span_f1': 0.4850833010461061, 'z2_tok_f1': 0.8389444949954504}
+done e0 seed 1 in 107s

@@ -1,0 +1,47 @@
+[
+ {
+  "tokens": 10,
+  "centres": 2,
+  "prep_s": 0.0009009838104248047,
+  "states_s": 0.001377105712890625,
+  "end_to_end_s": 0.003495931625366211,
+  "peak_extra_MB": 7.13671875,
+  "state_bytes_per_centre": 2048
+ },
+ {
+  "tokens": 100,
+  "centres": 17,
+  "prep_s": 0.000713348388671875,
+  "states_s": 0.002783536911010742,
+  "end_to_end_s": 0.005936861038208008,
+  "peak_extra_MB": 7.66015625,
+  "state_bytes_per_centre": 2048
+ },
+ {
+  "tokens": 1000,
+  "centres": 168,
+  "prep_s": 0.0029773712158203125,
+  "states_s": 0.02802443504333496,
+  "end_to_end_s": 0.08354949951171875,
+  "peak_extra_MB": 26.23828125,
+  "state_bytes_per_centre": 2048
+ },
+ {
+  "tokens": 10000,
+  "centres": 1647,
+  "prep_s": 0.025311708450317383,
+  "states_s": 0.27968287467956543,
+  "end_to_end_s": 0.5811524391174316,
+  "peak_extra_MB": 152.83203125,
+  "state_bytes_per_centre": 2048
+ },
+ {
+  "tokens": 100000,
+  "centres": 16351,
+  "prep_s": 0.2779836654663086,
+  "states_s": 2.9162561893463135,
+  "end_to_end_s": 5.8478593826293945,
+  "peak_extra_MB": 854.609375,
+  "state_bytes_per_centre": 2048
+ }
+]
