@@ -1,0 +1,18 @@
+[splits] written to /home/claude/diagram-vss-demo/training/sketch/runs/real_p100_D1024_e2_s0/splits.json before training: heldout_sentences 571, train 4770
+[schema] roles ['object', 'shape', 'color', 'size', 'name', 'text', 'relation', 'landmark', 'landmark2', 'region', 'direction', 'amount', 'quantity', 'axis', 'layout', 'source', 'target', 'style', 'arrow', 'edge', 'pairing', 'notcolor', 'depth', 'superlative', 'comparison'] (core []), max depth 0, event negation False
+[train] seed 0: 4770 training rows x 2 epoch(s) -> 9540 steps' sentences; D=1024; kinds 110; vocab 2884; predicate lemma not found in 2080 targets
+[train] gates GIVEN open (legend reader.gates_given, rule 20, not learned): ['to', 'from', 'of', 'in', 'on', 'at', 'by', 'with', 'as', 'and', ',', 'named', 'labeled']
+[trace] text: n_badge orange
+[trace] tokens/kinds: n_badge/NAME orange/COLOR
+[trace] gold frame: {"event": "set", "lemma": null, "neg": false, "roles": {"color": ["word", "orange"], "object": ["entity", "n_badge", null, null]}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 64.35 (sqrt(D) per unit term = 32.0); initial gates all 1.00 (closed start)
+[train seed 0] start: RSS 2.12 GB | cpu | MemAvailable 5.3 GB
+[train seed 0] step 500 sent 4000/9540 loss -0.664 (1082s) | RSS 3.35 GB | cpu | MemAvailable 3.9 GB
+[train seed 0] step 1000 sent 8000/9540 loss -0.837 (2169s) | RSS 3.35 GB | cpu | MemAvailable 3.9 GB
+[train seed 0] end: RSS 3.35 GB | cpu | MemAvailable 3.9 GB (2548s)
+[export] numpy reader vs torch states: max relative difference 5.30e-08 (float32 phases in the route book)
+[eval] seed 0 heldout_sentences: FULL catalog candidates 0.615 | residual 0.286
+[eval] seed 0 train (sample): FULL catalog candidates 0.593 | residual 0.322
+[mem] after seed 0: RSS 1.42 GB | cpu | MemAvailable 6.1 GB
+[done] model written to /home/claude/diagram-vss-demo/training/sketch/worlds/real/model; REPORT.md and metrics.json there; run log /home/claude/diagram-vss-demo/training/sketch/runs/real_p100_D1024_e2_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)
