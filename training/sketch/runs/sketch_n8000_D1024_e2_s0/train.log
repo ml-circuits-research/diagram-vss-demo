@@ -1,0 +1,21 @@
+[splits] written to /home/claude/diagram-vss-demo/training/sketch/runs/sketch_n8000_D1024_e2_s0/splits.json before training: calibration_heldout_formulations 159, heldout_formulations 141, heldout_sentences 727, new_identities 300, train 7273
+[schema] roles ['object', 'shape', 'color', 'size', 'name', 'text', 'relation', 'landmark', 'landmark2', 'region', 'direction', 'amount', 'quantity', 'axis', 'layout', 'source', 'target', 'style', 'arrow', 'edge', 'pairing', 'notcolor', 'depth'] (core []), max depth 0, event negation False
+[train] seed 0: 7273 training rows x 2 epoch(s) -> 14546 steps' sentences; D=1024; kinds 68; vocab 329; predicate lemma not found in 0 targets
+[train] gates GIVEN open (legend reader.gates_given, rule 20, not learned): ['to', 'from', 'of', 'in', 'on', 'at', 'by', 'with', 'into', 'as', 'and', ',', 'named', 'labeled']
+[trace] text: draw a large gray rectangle named n_internet top_left
+[trace] tokens/kinds: draw/VERB a/a large/SIZE gray/COLOR rectangle/SHAPE named/named n_internet/NAME top_left/REGION
+[trace] gold frame: {"event": "create", "lemma": "draw", "neg": false, "roles": {"name": ["word", "n_internet"], "object": ["entity", "rectangle", ["word", "gray"], null], "region": ["word", "top_left"], "size": ["word", "large"]}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 101.15 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[train seed 0] start: RSS 1.80 GB | cpu | MemAvailable 5.2 GB
+[train seed 0] step 500 sent 4000/14546 loss -0.772 (277s) | RSS 2.26 GB | cpu | MemAvailable 5.2 GB
+[train seed 0] step 1000 sent 8000/14546 loss -0.880 (548s) | RSS 2.23 GB | cpu | MemAvailable 5.1 GB
+[train seed 0] step 1500 sent 12000/14546 loss -0.923 (821s) | RSS 2.35 GB | cpu | MemAvailable 5.1 GB
+[train seed 0] end: RSS 2.11 GB | cpu | MemAvailable 5.3 GB (996s)
+[export] numpy reader vs torch states: max relative difference 5.51e-08 (float32 phases in the route book)
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.773 | residual 0.113
+[eval] seed 0 heldout_sentences: FULL catalog candidates 0.848 | residual 0.092
+[eval] seed 0 new_identities: FULL catalog candidates 0.813 | residual 0.123
+[eval] seed 0 train (sample): FULL catalog candidates 0.883 | residual 0.065
+[mem] after seed 0: RSS 1.20 GB | cpu | MemAvailable 6.4 GB
+[done] model written to /home/claude/diagram-vss-demo/training/sketch/worlds/sketch/model; REPORT.md and metrics.json there; run log /home/claude/diagram-vss-demo/training/sketch/runs/sketch_n8000_D1024_e2_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)

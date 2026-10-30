@@ -1,0 +1,23 @@
+diff --git a/tool/sop/train.py b/tool/sop/train.py
+index d934d81..64238ad 100644
+--- a/tool/sop/train.py
++++ b/tool/sop/train.py
+@@ -512,6 +512,9 @@ def train_one(a, legend, rows, splits, schema, seed, model_dir, run_dir):
+             if g["shape"] != "ok": continue
+             S, kept, _, _ = rd.chart(row["tokens"])
+             f = rd.read(S, row["tokens"], force=(len(g["speakers"]), g["neg"]), table=row.get("table"))
++            # diagram-vss-demo patch: attribute / determiner ratios read with every role read (presence 'all'), so that a role whose
++            # training rate is under 0.5 (landmark, source, target) still gets its ratios measured on the rows that fill it
++            fa = rd.read(S, row["tokens"], force=(len(g["speakers"]), g["neg"]), table=row.get("table"), presence="all")
+             st_ = legend.reader.get("scope_terms") or {}
+             for r in legend.reader.get("set_roles") or []:      # set members: the gold members vs the other candidates of the table
+                 mr = f["presence"].get(r + ".members") or {}; gold = set(world.filler_heads(g["roles"].get(r)))
+@@ -526,7 +529,7 @@ def train_one(a, legend, rows, splits, schema, seed, model_dir, run_dir):
+                 stats[("presence", r)]["present" if gf is not None else "absent"].append(f["presence"].get(r, 0))
+                 if gf is not None and gf[0] == "entity":
+                     for part, idx in (("attr", 2), ("det", 3)):
+-                        if r + "." + part in f["presence"]: stats[(part + "_presence", r)]["present" if gf[idx] is not None else "absent"].append(f["presence"][r + "." + part])
++                        if r + "." + part in fa["presence"]: stats[(part + "_presence", r)]["present" if gf[idx] is not None else "absent"].append(fa["presence"][r + "." + part])
+         th = {"presence": {}, "attr_presence": {}, "det_presence": {}, "scope_term": None, "set_member": {}}; calrep = {}
+         mid = {"presence": {}, "attr_presence": {}, "det_presence": {}, "scope_term": None, "set_member": {}}      # the pooled midpoint: the comparison, one more round
+         for (kind, r), v in stats.items():

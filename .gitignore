@@ -1,0 +1,8 @@
+# the trained model inside the world folder is exported to docs/model/sketch (the copy the demo loads)
+training/sketch/worlds/sketch/model/
+training/sketch/worlds/sketch/runs/
+training/sketch/worlds/sketch/requests/
+training/sketch/worlds/sketch/versions/
+training/sketch/__pycache__/
+*.pyc
+node_modules/

@@ -1,0 +1,564 @@
+{
+ "version": 1,
+ "roles": [
+  {
+   "id": "object",
+   "question": "which shape or shapes?"
+  },
+  {
+   "id": "shape",
+   "question": "which kind of shape?"
+  },
+  {
+   "id": "color",
+   "question": "which colour?"
+  },
+  {
+   "id": "size",
+   "question": "which size?"
+  },
+  {
+   "id": "name",
+   "question": "what is it called?"
+  },
+  {
+   "id": "text",
+   "question": "what text is written on it?"
+  },
+  {
+   "id": "relation",
+   "question": "where, relative to another shape?"
+  },
+  {
+   "id": "landmark",
+   "question": "relative to which shape?"
+  },
+  {
+   "id": "landmark2",
+   "question": "and which second shape?"
+  },
+  {
+   "id": "region",
+   "question": "where on the canvas?"
+  },
+  {
+   "id": "direction",
+   "question": "in which direction?"
+  },
+  {
+   "id": "amount",
+   "question": "how far?"
+  },
+  {
+   "id": "quantity",
+   "question": "how many?"
+  },
+  {
+   "id": "axis",
+   "question": "along which axis?"
+  },
+  {
+   "id": "layout",
+   "question": "in which arrangement?"
+  },
+  {
+   "id": "source",
+   "question": "from which shape?"
+  },
+  {
+   "id": "target",
+   "question": "to which shape?"
+  },
+  {
+   "id": "style",
+   "question": "with which line style?"
+  },
+  {
+   "id": "arrow",
+   "question": "which way does the line point?"
+  },
+  {
+   "id": "edge",
+   "question": "with which line?"
+  },
+  {
+   "id": "pairing",
+   "question": "connected how among themselves?"
+  },
+  {
+   "id": "notcolor",
+   "question": "which colour must they not have?"
+  },
+  {
+   "id": "depth",
+   "question": "to the front or to the back?"
+  }
+ ],
+ "events": [
+  {
+   "id": "create",
+   "verbs": [
+    "draw"
+   ],
+   "roles": [
+    "object",
+    "size",
+    "name",
+    "text",
+    "relation",
+    "landmark",
+    "landmark2",
+    "region",
+    "quantity"
+   ],
+   "required": [
+    "object"
+   ]
+  },
+  {
+   "id": "delete",
+   "verbs": [
+    "delete"
+   ],
+   "roles": [
+    "object",
+    "notcolor"
+   ],
+   "required": [
+    "object"
+   ]
+  },
+  {
+   "id": "move",
+   "verbs": [
+    "move"
+   ],
+   "roles": [
+    "object",
+    "relation",
+    "landmark",
+    "landmark2",
+    "region",
+    "direction",
+    "amount"
+   ],
+   "required": [
+    "object"
+   ]
+  },
+  {
+   "id": "set",
+   "verbs": [
+    "make",
+    "color"
+   ],
+   "roles": [
+    "object",
+    "shape",
+    "color",
+    "size",
+    "notcolor"
+   ],
+   "required": [
+    "object"
+   ]
+  },
+  {
+   "id": "resize",
+   "verbs": [
+    "resize",
+    "scale",
+    "bigger_v",
+    "smaller_v"
+   ],
+   "roles": [
+    "object"
+   ],
+   "required": [
+    "object"
+   ]
+  },
+  {
+   "id": "rename",
+   "verbs": [
+    "rename"
+   ],
+   "roles": [
+    "object",
+    "name"
+   ],
+   "required": [
+    "object",
+    "name"
+   ]
+  },
+  {
+   "id": "label",
+   "verbs": [
+    "label"
+   ],
+   "roles": [
+    "object",
+    "text"
+   ],
+   "required": [
+    "object",
+    "text"
+   ]
+  },
+  {
+   "id": "duplicate",
+   "verbs": [
+    "duplicate"
+   ],
+   "roles": [
+    "object",
+    "quantity"
+   ],
+   "required": [
+    "object"
+   ]
+  },
+  {
+   "id": "swap",
+   "verbs": [
+    "swap"
+   ],
+   "roles": [
+    "object",
+    "target"
+   ],
+   "required": [
+    "object",
+    "target"
+   ]
+  },
+  {
+   "id": "connect",
+   "verbs": [
+    "connect"
+   ],
+   "roles": [
+    "text",
+    "source",
+    "target",
+    "style",
+    "arrow",
+    "edge",
+    "pairing"
+   ],
+   "required": [
+    "source",
+    "target"
+   ]
+  },
+  {
+   "id": "disconnect",
+   "verbs": [
+    "disconnect"
+   ],
+   "roles": [
+    "source",
+    "target"
+   ],
+   "required": [
+    "source",
+    "target"
+   ]
+  },
+  {
+   "id": "align",
+   "verbs": [
+    "align"
+   ],
+   "roles": [
+    "object",
+    "axis"
+   ],
+   "required": [
+    "object"
+   ]
+  },
+  {
+   "id": "arrange",
+   "verbs": [
+    "arrange"
+   ],
+   "roles": [
+    "object",
+    "layout"
+   ],
+   "required": [
+    "object"
+   ]
+  },
+  {
+   "id": "distribute",
+   "verbs": [
+    "distribute",
+    "space"
+   ],
+   "roles": [
+    "object",
+    "axis"
+   ],
+   "required": []
+  },
+  {
+   "id": "toFront",
+   "verbs": [
+    "bring"
+   ],
+   "roles": [
+    "object",
+    "depth"
+   ],
+   "required": []
+  },
+  {
+   "id": "toBack",
+   "verbs": [
+    "send"
+   ],
+   "roles": [
+    "object",
+    "depth"
+   ],
+   "required": []
+  },
+  {
+   "id": "undo",
+   "verbs": [
+    "undo"
+   ],
+   "roles": [],
+   "required": []
+  },
+  {
+   "id": "redo",
+   "verbs": [
+    "redo"
+   ],
+   "roles": [],
+   "required": []
+  },
+  {
+   "id": "forget",
+   "verbs": [
+    "forget"
+   ],
+   "roles": [
+    "object"
+   ],
+   "required": []
+  },
+  {
+   "id": "count",
+   "verbs": [
+    "how_many"
+   ],
+   "roles": [
+    "object",
+    "relation",
+    "landmark",
+    "region",
+    "notcolor"
+   ],
+   "required": []
+  },
+  {
+   "id": "exists",
+   "verbs": [
+    "is_there"
+   ],
+   "roles": [
+    "object",
+    "relation",
+    "landmark",
+    "region",
+    "notcolor"
+   ],
+   "required": []
+  },
+  {
+   "id": "list",
+   "verbs": [
+    "which"
+   ],
+   "roles": [
+    "object",
+    "relation",
+    "landmark",
+    "region",
+    "notcolor"
+   ],
+   "required": []
+  },
+  {
+   "id": "property",
+   "verbs": [
+    "what_color",
+    "what_shape",
+    "where_is",
+    "how_big",
+    "what_says"
+   ],
+   "roles": [
+    "object"
+   ],
+   "required": [
+    "object"
+   ]
+  },
+  {
+   "id": "describe",
+   "verbs": [
+    "describe"
+   ],
+   "roles": [
+    "object"
+   ],
+   "required": []
+  },
+  {
+   "id": "neighbors",
+   "verbs": [
+    "neigh_q"
+   ],
+   "roles": [
+    "object"
+   ],
+   "required": [
+    "object"
+   ]
+  },
+  {
+   "id": "path",
+   "verbs": [
+    "path_q"
+   ],
+   "roles": [
+    "source",
+    "target"
+   ],
+   "required": [
+    "source",
+    "target"
+   ]
+  },
+  {
+   "id": "reachable",
+   "verbs": [
+    "reach_q"
+   ],
+   "roles": [
+    "source"
+   ],
+   "required": [
+    "source"
+   ]
+  },
+  {
+   "id": "cycle",
+   "verbs": [
+    "cycle_q"
+   ],
+   "roles": [],
+   "required": []
+  },
+  {
+   "id": "check",
+   "verbs": [
+    "is_q"
+   ],
+   "roles": [
+    "object",
+    "color",
+    "relation",
+    "landmark"
+   ],
+   "required": [
+    "object"
+   ]
+  },
+  {
+   "id": "fact",
+   "verbs": [
+    "is"
+   ],
+   "roles": [
+    "object",
+    "color",
+    "relation",
+    "landmark"
+   ],
+   "required": [
+    "object"
+   ]
+  },
+  {
+   "id": "rule",
+   "verbs": [
+    "from_now_on"
+   ],
+   "roles": [
+    "object",
+    "color",
+    "size"
+   ],
+   "required": [
+    "object"
+   ]
+  }
+ ],
+ "operators": [
+  "not"
+ ],
+ "moods": [
+  "command"
+ ],
+ "kinds": {
+  "source": "lexicon",
+  "lexicon": "kinds.tsv"
+ },
+ "values": [
+  {
+   "kind": "NUM",
+   "pattern": "\\d+"
+  },
+  {
+   "kind": "NAME",
+   "pattern": "n_[a-z0-9_]+"
+  },
+  {
+   "kind": "TEXT",
+   "pattern": "t_[a-z0-9_]+"
+  }
+ ],
+ "reader": {
+  "predicate_role": true,
+  "occupancy_marker": true,
+  "definite_dets": [
+   "the"
+  ],
+  "gates_given": {
+   "open": [
+    "to",
+    "from",
+    "of",
+    "in",
+    "on",
+    "at",
+    "by",
+    "with",
+    "into",
+    "as",
+    "and",
+    ",",
+    "named",
+    "labeled"
+   ],
+   "closed": []
+  }
+ }
+}

@@ -1,0 +1,78 @@
+"""normalize.py: the sketch world's normalizer, driven by normalize.json so that docs/js/snorm.js applies exactly the same rules.
+
+normalize(text, lexicon) -> (tokens, info) with info = {"texts": {token: original}, "names": {token: original}, "numbers": {token: value}}.
+`lexicon` is the set of words with a kind (kinds.tsv); a token outside it that is not a number or punctuation becomes a NAME token n_<word>,
+so that shape names never seen in training (Start, Gem, Hub) are read through the legend's NAME value pattern. Deterministic; no learning.
+Steps, in order: quoted strings -> one TEXT token t_<words>; lower-case; contractions; punctuation split; leading politeness removed;
+sentence-initial openers (question forms become pseudo-verbs); multi-word expressions, longest first; synonyms; number words; names."""
+import json, os, re
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+T = json.load(open(os.path.join(HERE, "normalize.json")))
+SPLIT = lambda s: s.split()
+LEAD = sorted((SPLIT(x) for x in T["lead_strip"]), key=lambda x: -len(x))
+OPEN = [(SPLIT(a), SPLIT(b)) for a, b in T["openers"]]           # first match wins (the table is ordered)
+MWE = sorted(((SPLIT(a), SPLIT(b)) for a, b in T["mwe"]), key=lambda x: -len(x[0]))
+SYN = T["synonyms"]; NUM = T["number_words"]; NO_NUM = set(T["number_word_exceptions"])
+QUOTE = re.compile(r"\"([^\"]*)\"|“([^”]*)”|(?<![A-Za-z0-9])'([^']+)'(?![A-Za-z0-9])")
+PUNCT = T["punctuation"]
+FOLLOW = set(T["article_followers"]); BEFORE = set(T["name_before"])
+
+
+def slug(s): return re.sub(r"[^a-z0-9]+", "_", s.lower()).strip("_") or "x"
+
+
+def normalize(text, lexicon):
+    info = {"texts": {}, "names": {}, "numbers": {}}
+    def q(m):
+        s = next(g for g in m.groups() if g is not None); tok = "t_" + slug(s); info["texts"][tok] = s; return f" {tok} "
+    s = QUOTE.sub(q, text)
+    parts = s.split(" ")                                               # a capital A is the article only before a word that can follow one
+    for i, w in enumerate(parts):
+        if w == "A":
+            nxt = next((x for x in parts[i + 1:] if x), "")
+            prev = next((x for x in reversed(parts[:i]) if x), "").lower()
+            if re.sub(r"[^a-z-]", "", nxt.lower()) not in FOLLOW or prev in BEFORE: parts[i] = "N_A_NAME"
+    s = " ".join(parts)
+    originals = {}                                                     # lower-case word -> first original spelling (for names)
+    for w in re.findall(r"[A-Za-z_][\w-]*", s): originals.setdefault(w.lower(), w)
+    s = s.lower()
+    for a, b in T["contractions"].items(): s = re.sub(r"(?<![a-z])" + re.escape(a) + r"(?![a-z])", b, s)
+    s = re.sub(r"([" + re.escape(PUNCT) + r"])(?=\s|$)", r" \1 ", s)
+    s = re.sub(r",(?=\d)", " , ", s)
+    toks = s.split()
+    changed = True
+    while changed and toks:                                            # politeness at the start, repeatedly
+        changed = False
+        for a in LEAD:
+            if toks[:len(a)] == a and len(toks) > len(a): toks = toks[len(a):]; changed = True; break
+        if toks and toks[0] == ",": toks = toks[1:]; changed = True
+    for a, b in OPEN:
+        if toks[:len(a)] == a: toks = b + toks[len(a):]; break
+    out, i = [], 0
+    while i < len(toks):
+        for a, b in MWE:
+            if toks[i:i + len(a)] == a: out += b; i += len(a); break
+        else: out.append(toks[i]); i += 1
+    toks = [SYN.get(t, t) for t in out]
+    out, i = [], 0
+    while i < len(toks):
+        t = toks[i]
+        if t in NUM and t not in NO_NUM:
+            v = NUM[t]; j = i + 1
+            if 20 <= v <= 90 and j < len(toks) and toks[j] in NUM and 1 <= NUM[toks[j]] <= 9: v += NUM[toks[j]]; j += 1
+            out.append(str(v)); info["numbers"][str(v)] = v; i = j; continue
+        if t.isdigit(): info["numbers"][t] = int(t)
+        out.append(t); i += 1
+    toks = []
+    for t in out:
+        if t == "n_a_name": info["names"]["n_a"] = "A"; toks.append("n_a"); continue
+        if t in lexicon or t.isdigit() or t in PUNCT or t.startswith("t_") or re.fullmatch(r"[^a-z0-9_]+", t): toks.append(t); continue
+        n = "n_" + slug(t); info["names"][n] = originals.get(t, t); toks.append(n)
+    return toks, info
+
+
+if __name__ == "__main__":
+    import sys
+    lex = {l.split("\t")[0] for l in open(os.path.join(HERE, "worlds", "sketch", "kinds.tsv")) if l.strip() and not l.startswith("#")} if os.path.exists(os.path.join(HERE, "worlds", "sketch", "kinds.tsv")) else set()
+    for line in sys.stdin: print(" ".join(normalize(line.strip(), lex)[0]))

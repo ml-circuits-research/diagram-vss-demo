@@ -1,0 +1,11 @@
+{
+ "name": "sketch",
+ "language": "en",
+ "description": "SOP Sketchpad legend (diagram-vss-demo)",
+ "created": "2026-10-30",
+ "version": 1,
+ "min_examples": 500,
+ "max_versions_per_run": 3,
+ "second_look_escalate": 0.05,
+ "second_look_retrain": 0.05
+}

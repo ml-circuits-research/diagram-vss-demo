@@ -1,0 +1,2 @@
+sop train /home/claude/diagram-vss-demo/training/sketch/worlds/sketch --D 1024 --seeds 1 --epochs 2 --shuffle --device cpu --candidate_sets catalog --n_eval 600 --no_ckpt --star_version 2 --calibrate_on_heldout_formulations --threshold_rule fit --run_dir /home/claude/diagram-vss-demo/training/sketch/runs/sketch_n8000_D1024_e2_s0
+commit 9c85649
