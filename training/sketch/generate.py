@@ -437,7 +437,7 @@ def legend_dict():
                        "gates_given": {"open": ["to", "from", "of", "in", "on", "at", "by", "with", "into", "as", "and", ",", "named", "labeled"], "closed": []}}}
 
 
-def wires_for(ev, roles, text, template, ids):
+def wires_for(ev, roles, text, template, ids, world="sketch", source="generator"):
     w = soplang.Wire(next(ids), ev); later = []
     for r, _ in ROLES:
         if r not in roles: continue
@@ -448,7 +448,7 @@ def wires_for(ev, roles, text, template, ids):
             if v.get("det"): en.set("det", v["det"])
             later.append(en); w.set(r, ("ref", en.id))
         else: w.set(r, str(v))
-    w.lines = [soplang.Line("_text", text), soplang.Line("_world", "sketch"), soplang.Line("_source", "generator"), soplang.Line("_template", template), soplang.Line("_mood", "command")] + w.lines
+    w.lines = [soplang.Line("_text", text), soplang.Line("_world", world), soplang.Line("_source", source), soplang.Line("_template", template), soplang.Line("_mood", "command")] + w.lines
     return [w] + later
 
 

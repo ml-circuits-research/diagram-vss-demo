@@ -1066,18 +1066,55 @@ function makeFormalizer(engine) {
     const SPLIT_VERB = new RegExp(`\\s*(?:,\\s*(?:and\\s+)?|\\s+and\\s+)(?=(?:${alt(verbCues.concat(['undo', 'redo']))})\\b)`, 'i');
     const CREATE_START = /^\s*(?:please\s+)?(draw|add|create|insert|sketch|place|put|make)\s+(?:a|an|another|\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s/i;
     const OBJ_SPLIT = new RegExp(`\\s*(?:,\\s*(?:and\\s+|plus\\s+)?|\\s+and\\s+|\\s+plus\\s+)(?=(?:a|an|another|${NUMRE})\\s+(?:(?:[a-z-]+)\\s+){0,3}?(?:${nounRe})\\b)`, 'i');
+    // coordination: "make Open green, Closed yellow and Locked red", "put Stove right of Sink and Fridge above Sink" -> one clause per
+    // name, the verb repeated; only when the left piece is complete (verb + at least two more words) and the right piece starts with a
+    // known name followed by a predicate word, and never inside "between A and B"
+    const nameAltRe = [...nameIndex.keys()].filter(k => k.length > 1).sort((a, b) => b.length - a.length).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+    const PRED = `(?:to|a|an|in|at|on|into|onto|above|below|under|over|left|right|next|near|beside|by|up|down|${colorRe}|${sizeRe}|(?!ones?\\b)(?:${nounRe}))`;
+    const COORD = nameAltRe ? new RegExp(`(?:,\\s*(?:and\\s+)?|\\s+and\\s+)(?=(?:the\\s+)?(?:${nameAltRe})\\s+${PRED}\\b)`, 'i') : null;
+    const DIST_VERB = /^\s*(?:(?:please|now|then|and|also|ok(?:ay)?|so|just)\s+)*(make|put|move|place|turn|colou?r|paint|set|shift|drag|slide|connect|link|join|hook)\b/i;
+    const coordSplit = p => {
+      const vm = COORD && p.match(DIST_VERB); if (!vm || /\b(?:one\s+after\s+(?:the\s+)?other|in\s+(?:a\s+)?(?:chain|sequence|order)|to\s+the\s+next|each\s+other|every\s+pair)\b/i.test(p)) return [p];
+      const pieces = p.split(COORD), out = [pieces[0]];
+      for (const q of pieces.slice(1)) {
+        const left = out[out.length - 1], afterVerb = left.slice(left.search(DIST_VERB) + vm[0].length).trim().split(/\s+/).filter(Boolean);
+        if (/\bbetween\s+(?:the\s+)?\S+\s*$/i.test(left) || afterVerb.length < 2) out[out.length - 1] = left + ' and ' + q;
+        else out.push(vm[1] + ' ' + q);
+      }
+      return out;
+    };
+    // verb ellipsis: "connect Api to Db, then Core to Utils", "Jazz blue" after "make X red" -> the previous clause's verb is repeated
+    const ELLIPSIS = nameAltRe ? new RegExp(`^\\s*(?:(?:and|then|also|plus|now)\\s+)*(?:the\\s+)?(?:${nameAltRe})\\b\\s+\\S`, 'i') : null;
+    let prevVerb = null;
+    const PLACE_ONLY = nameAltRe ? new RegExp(`^\\s*(?:the\\s+)?(?:${nameAltRe})\\s+(?:(?:is|goes|sits|stays|should\\s+be|just|right|way|then)\\s+)*(?:(?:at|in|on|to)\\s+the\\s+(?:top|bottom|left|right|center|centre|middle|upper|lower)|(?:above|below|under|over|beneath|underneath|left\\s+of|right\\s+of|next\\s+to|near|beside|between|on\\s+top\\s+of)\\b)`, 'i') : null;
+    const FACT_LIST = nameAltRe ? new RegExp(`\\s*,\\s*(?:and\\s+)?(?=(?:the\\s+)?(?:${nameAltRe})\\s+(?:is|are)\\s)|\\s*,\\s*(?:and\\s+)?(?=(?:the\\s+)?(?:${nameAltRe})\\s+(?:at|in|on)\\s+the\\b|(?:the\\s+)?(?:${nameAltRe})\\s+(?:above|below|under|over|left\\s+of|right\\s+of|next\\s+to|near|beside)\\b)`, 'i') : null;
     for (const sen of sentences) {
       const isQ = /\?\s*$/.test(sen);
       const body = sen.replace(/[.!?;]+\s*$/, '');
-      const parts = body.split(/\s*,?\s*\b(?:and then|then|after that|afterwards|finally)\b[\s,]*/i).flatMap(p => p.split(SPLIT_VERB));
+      const parts = body.split(/\s*,?\s*\b(?:and then|then|after that|afterwards|finally)\b[\s,]*/i).flatMap(p => p.split(SPLIT_VERB)).flatMap(coordSplit).flatMap(p => FACT_LIST && !VERB_RE.test(p) ? p.split(FACT_LIST) : [p]);
       for (let pi = 0; pi < parts.length; pi++) {
         let p = parts[pi];
         if (!p || !p.trim()) continue;
-        if (pi + 1 < parts.length && !VERB_RE.test(p) && !/^\s*(undo|redo)\b/i.test(p) && !/\?/.test(p)) { parts[pi + 1] = parts[pi + 1] + ' ' + p.replace(/^[\s,]+|[\s,]+$/g, ''); continue; }
+        const pv = p.match(VERB_RE);
+        if (pv) prevVerb = pv[1];
+        else if (prevVerb && !isQ && ELLIPSIS && ELLIPSIS.test(p) && !/^\s*(?:the\s+)?\S+\s+(?:is|are|was|were|should|would|will|has|have)\b/i.test(p)) { p = prevVerb + ' ' + p.replace(/^\s*(?:(?:and|then|also|plus|now)\s+)*/i, ''); parts[pi] = p; }
+        if (pi + 1 < parts.length && !VERB_RE.test(p) && !/^\s*(undo|redo)\b/i.test(p) && !/\?/.test(p) && !(PLACE_ONLY && PLACE_ONLY.test(p)) && !(nameAltRe && new RegExp(`^\\s*(?:the\\s+)?(?:${nameAltRe})\\s+(?:is|are)\\s`, 'i').test(p))) { parts[pi + 1] = parts[pi + 1] + ' ' + p.replace(/^[\s,]+|[\s,]+$/g, ''); continue; }
         const cm = p.match(CREATE_START);
         if (cm) { const objs = p.split(OBJ_SPLIT); clause(objs[0], isQ); objs.slice(1).forEach(o => clause(cm[1] + ' ' + o, isQ)); }
         else clause(p, isQ);
       }
+    }
+    // "connect A to B and B to C": consecutive connections that continue each other are one chain
+    for (let i = F.nodes.length - 1; i > 0; i--) {
+      const b = F.nodes[i], a = F.nodes.slice(0, i).reverse().find(n => n.type !== 'mention');
+      const one = v => v != null && !Array.isArray(v) && !isRef(v) && typeof v === 'string';
+      if (!a || a.type !== 'command' || b.type !== 'command' || a.args.action !== 'connect' || b.args.action !== 'connect') continue;
+      const ka = Object.keys(a.args).filter(k => !['action', 'from', 'to', 'pairing'].includes(k)), kb = Object.keys(b.args).filter(k => !['action', 'from', 'to'].includes(k));
+      if (ka.length || kb.length || !one(b.args.from) || !one(b.args.to)) continue;
+      const aList = a.args.pairing === 'chain' && Array.isArray(a.args.from) ? a.args.from : (one(a.args.from) && one(a.args.to) && !a.args.pairing ? [a.args.from, a.args.to] : null);
+      if (!aList || aList[aList.length - 1] !== b.args.from) continue;
+      a.args = { action: 'connect', from: aList.concat(b.args.to), pairing: 'chain' };
+      F.nodes.splice(F.nodes.indexOf(b), 1); F.segments = F.segments.filter(sg => sg.id !== b.id);
     }
     return { nodes: F.nodes, notes: corrections.concat(F.notes), segments: F.segments, corrections };
 
@@ -1091,7 +1128,7 @@ function makeFormalizer(engine) {
       const take = (re, fn) => { const m = C.t.match(re); if (!m) return null; C.t = C.t.slice(0, m.index) + ' ' + C.t.slice(m.index + m[0].length) + ' '; if (fn) fn(m); return m; };
       const mark = v => { C.marks.push(v); return ' ⟦' + (C.marks.length - 1) + '⟧ '; };
       const refsIn = s => [...s.matchAll(/⟦(\d+)⟧/g)].map(m => +m[1]);
-      const markVals = idx => { const vs = idx.map(i => C.marks[i]); const out = []; vs.forEach(v => [].concat(v).forEach(x => out.push(x))); return out.length === 1 ? out[0] : out; };
+      const markVals = idx => { const vs = idx.map(i => C.marks[i]); const out = [], seen = new Set(); vs.forEach(v => [].concat(v).forEach(x => { const k = JSON.stringify(x); if (!seen.has(k)) { seen.add(k); out.push(x); } })); return out.length === 1 ? out[0] : out; };
 
       // ---- what kind of wire is this? ----
       let kind, action = null;
@@ -1126,6 +1163,7 @@ function makeFormalizer(engine) {
           if (action === 'delete' && /\b(clear|wipe|reset)\b/i.test(verb) && !/⟦/.test(t)) { /* clear the canvas */ }
           if (verb === 'give' && !/\b(border|outline|stroke|label|colou?r)\b/i.test(after)) action = 'set';
         } else if (/^\s*(?:a|an|another|\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s/i.test(t)) action = 'create';
+        else if (PLACE_ONLY && PLACE_ONLY.test(t)) action = 'move';   /* "Kitchen at the left", "Pit just below the Stage": a placement */
         else if (/^\s*start over\b/i.test(t)) action = 'delete';
         else { F.notes.push(`I couldn't find an action in "${raw.trim()}".`); F.segments.push({ src: raw.trim().replace(/⟪(\d+)⟫/g, (m, n) => '"' + quotes[+n] + '"').replace(/\s+/g, ' '), id: null }); return; }
       }
@@ -1166,6 +1204,7 @@ function makeFormalizer(engine) {
         for (const w of (mods || '').toLowerCase().split(/\s+/).filter(Boolean)) { if (COLOR.has(w)) a.color = COLOR.get(w); else if (SIZE.has(w)) a.size = SIZE.get(w); }
         const id = 'm' + (++F.m); F.nodes.push({ id, type: 'mention', args: a }); return ref(id);
       };
+      if (kind !== 'rule' && lastRef != null) C.t = C.t.replace(new RegExp(`\\b(?:this|that)\\s+(?:${MOD})(?:${nounRe})\\b`, 'gi'), m => pluralNoun(m.split(/\s+/).pop().toLowerCase()) ? m : mark(lastRef));
       if (kind !== 'rule') {
         C.t = C.t.replace(new RegExp(`\\b(the|all(?:\\s+of)?(?:\\s+the)?|every|each)\\s+((?:newest|new|last|latest|most\\s+recent|first|oldest|earliest)\\s+)?(${MOD})(${nounRe})\\b`, 'gi'), (m, art, rec, mods, noun) => {
           const all = !rec && (/^(all|every|each)/i.test(art) || pluralNoun(noun.toLowerCase()));
@@ -1189,6 +1228,7 @@ function makeFormalizer(engine) {
         return mark(nameIndex.get(lw));
       });
 
+      C.t = C.t.replace(/\bthe\s+(?=⟦)/gi, ' ');
       { const toks = C.t.replace(/⟦\d+⟧|⟪\d+⟫/g, ' ').trim().split(/\s+/); toks.slice(1).forEach(w => { const c = w.replace(/[^\w-]/g, ''); if (c && /[A-Z]|\d/.test(c) && /^[A-Za-z_]/.test(c) && !COLOR.has(c.toLowerCase()) && !SHAPE.has(c.toLowerCase()) && !SIZE.has(c.toLowerCase()) && c !== 'A' && c !== 'I') F.notes.push(`"${c}" is not a shape I know.`); }); }
       // ---- question type, decided on the marked text ----
       let ask = null;
@@ -1222,6 +1262,7 @@ function makeFormalizer(engine) {
       const listOf = `${M}(?:\\s*(?:,|and|&)\\s*${M})*`;
       const grab = re => { let v = null; take(re, m => { v = markVals(refsIn(m[0])); }); return v; };
       if (action === 'connect' || action === 'disconnect' || ask === 'path') {
+        C.connRefs = refsIn(C.t);   /* every shape of the clause, in order: the list a pairing connects */
         if (action === 'disconnect') { const mm = C.t.match(new RegExp(`${M}\\s+from\\s+${M}`)); if (mm) { C.args.from = markVals([+mm[1]]); C.args.to = markVals([+mm[2]]); C.t = C.t.replace(mm[0], ' '); } }
         const f = C.args.from != null ? null : grab(new RegExp(`\\bfrom\\s+${M}`, 'i')); if (f != null) C.args.from = f;
         const to = grab(new RegExp(`\\b(?:to|with|and)\\s+${listOf}`, 'i')); if (to != null) C.args.to = to;
@@ -1283,7 +1324,8 @@ function makeFormalizer(engine) {
         else if (/\b(line|lines|undirected|plain|without\s+(?:an?\s+)?arrows?)\b/.test(rest)) C.args.arrow = 'none';
       }
       if (action === 'disconnect' && !C.args.from && /\b(all|every|everything)\b/.test(rest)) C.args.quantifier = 'all';
-      if (action === 'connect') { if (/\b(in\s+a\s+chain|one\s+after\s+(?:the\s+)?other|in\s+sequence|in\s+order)\b/.test(rest)) C.args.pairing = 'chain'; else if (/\bto\s+the\s+next(?:\s+one)?\b/.test(rest)) C.args.pairing = 'next'; else if (/\b(?:all\s+to\s+each\s+other|every\s+pair|to\s+each\s+other)\b/.test(rest)) C.args.pairing = 'all'; }
+      if (action === 'connect') { if (/\b(in\s+a\s+chain|one\s+after\s+(?:the\s+)?other|in\s+sequence|in\s+order)\b/.test(rest)) C.args.pairing = 'chain'; else if (/\bto\s+the\s+next(?:\s+one)?\b/.test(rest)) C.args.pairing = 'next'; else if (/\b(?:all\s+to\s+each\s+other|every\s+pair|to\s+each\s+other)\b/.test(rest)) C.args.pairing = 'all';
+        if (C.args.pairing && C.connRefs && C.connRefs.length > 1) { C.args.from = markVals(C.connRefs); delete C.args.to; } }
       if (action === 'distribute') C.args.axis = /\b(vertical|vertically|column)\b/.test(rest) ? 'vertical' : 'horizontal';
       if (action === 'align') C.args.axis = /\b(vertical|vertically|column)\b/.test(rest) ? 'vertical' : 'horizontal';
       if (action === 'arrange') { const lay = rest.match(/\b(row|line|column|stack|grid|circle|ring|tidy)\b/); if (lay) C.args.layout = { line: 'row', stack: 'column', ring: 'circle', tidy: 'grid' }[lay[1]] || lay[1]; else if (/\bvertical/.test(rest)) C.args.layout = 'column'; else if (/\bhorizontal/.test(rest)) C.args.layout = 'row'; delete C.args.shape; }
@@ -1330,11 +1372,21 @@ function makeFormalizer(engine) {
 /* =====================================================================
    7. Assembly
    ===================================================================== */
-function createSystem() {
+function learnedCues() {   /* docs/js/learned-cues.js, generated from the training messages (training/sketch/mine_triggers.py) */
+  if (typeof SOP_LEARNED_CUES !== 'undefined') return SOP_LEARNED_CUES;
+  if (typeof module !== 'undefined' && typeof require === 'function') { try { return require('./learned-cues.js'); } catch (e) { return null; } }
+  return null;
+}
+function createSystem(opts = {}) {
   const world = new DiagramWorld();
   const engine = new Engine(world);
   [corePlugin, historyPlugin, shapesPlugin, connectionsPlugin, layoutPlugin, queriesPlugin, reasoningPlugin, logicPlugin, rulesPlugin, factsPlugin].forEach(p => engine.use(Object.assign({}, p)));
   engine.legend.define('core', 'action', { ask: 'What should happen?', kind: 'enum' });
+  const LC = opts.learned === false ? null : learnedCues();
+  if (LC) for (const [key, vals] of Object.entries(LC)) {   /* merged, never replacing the hand-written cues */
+    const q = engine.legend.get(key); if (!q || !q.values) continue;
+    for (const [v, cues] of Object.entries(vals)) if (q.values[v]) q.values[v] = q.values[v].concat(cues.filter(c => !q.values[v].includes(c)));
+  }
   return { world, engine, formalize: makeFormalizer(engine) };
 }
 

@@ -1,15 +1,14 @@
 # Conversion of the LLM training clauses (3000 clauses)
 
-Converted: 1796 (59.9%). Set aside: 1204.
+Converted: 1795 (59.8%). Set aside: 1205.
 
 | reason set aside | n |
 |---|---|
 | no create verb in the clause | 130 |
-| word not in the clause | 80 |
+| word not in the clause | 77 |
 | no set verb in the clause | 61 |
 | no neighbors verb in the clause | 58 |
 | no connect verb in the clause | 54 |
-| name not in the clause | 53 |
 | no reachable verb in the clause | 53 |
 | no cycle verb in the clause | 46 |
 | no rule verb in the clause | 45 |
@@ -21,7 +20,9 @@ Converted: 1796 (59.9%). Set aside: 1204.
 | no toFront verb in the clause | 34 |
 | no resize verb in the clause | 33 |
 | no describe verb in the clause | 31 |
+| several sources in one role | 30 |
 | no forget verb in the clause | 28 |
+| name not in the clause | 28 |
 | no list verb in the clause | 26 |
 | no exists verb in the clause | 21 |
 | no arrange verb in the clause | 21 |
@@ -42,7 +43,6 @@ Converted: 1796 (59.9%). Set aside: 1204.
 | no redo verb in the clause | 9 |
 | no nearest verb in the clause | 8 |
 | no count verb in the clause | 4 |
-| several targets in one role | 1 |
 
 | event | converted |
 |---|---|
@@ -53,7 +53,7 @@ Converted: 1796 (59.9%). Set aside: 1204.
 | list | 84 |
 | delete | 76 |
 | count | 72 |
-| connect | 61 |
+| connect | 60 |
 | fact | 59 |
 | nearest | 54 |
 | redo | 52 |

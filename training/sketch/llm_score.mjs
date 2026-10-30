@@ -60,7 +60,7 @@ function scoreMessage(nodes, row) {
   return { right, acts: pairs.length, gold: gold.length, extra: mains.length - pairs.length, exact: right === gold.length && mains.length === gold.length, bad, perAct: gold.map((g, j) => [g.act, pairs.some(([i, jj]) => jj === j && !bad.some((b) => false))]) };
 }
 
-const report = {};
+const report = {}, ALL = { n: 0, rules: { exact: 0, right: 0, acts: 0, extra: 0, gold: 0 }, vss: { exact: 0, right: 0, acts: 0, extra: 0, gold: 0 } };
 for (const d of dirs) {
   const files = readdirSync(d).filter((f) => f.endsWith(".jsonl")).sort();
   const rows = files.flatMap((f) => readFileSync(`${d}/${f}`, "utf8").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l)));
@@ -83,6 +83,8 @@ for (const d of dirs) {
   console.log(`\n${d}: ${n} messages, ${tot.rules.gold} gold wires`); console.log("  " + line("rules")); console.log("  " + line("vss"));
   const acts = Object.keys(tot.rules.byAct).sort((a, b) => tot.rules.byAct[b][1] - tot.rules.byAct[a][1]);
   console.log("  per act (rules · vss · n): " + acts.map((a) => `${a.split(":").pop() || a} ${tot.rules.byAct[a][0]}·${(tot.vss.byAct[a] || [0])[0]}·${tot.rules.byAct[a][1]}`).join(", "));
-  report[d] = { n, tot }; if (verbose) dump.slice(0, 12).forEach((x) => console.log(`  ${x.id} ${x.text}\n     rules: ${x.rules.join(" | ") || "ok"}\n     vss:   ${x.vss.join(" | ") || "ok"}`));
+  report[d] = { n, tot }; ALL.n += n; for (const f of ["rules", "vss"]) for (const k of ["exact", "right", "acts", "extra", "gold"]) ALL[f][k] += tot[f][k]; if (verbose) dump.slice(0, 12).forEach((x) => console.log(`  ${x.id} ${x.text}\n     rules: ${x.rules.join(" | ") || "ok"}\n     vss:   ${x.vss.join(" | ") || "ok"}`));
   if (dumpAt >= 0) writeFileSync(argv[dumpAt + 1].replace(/(\.json)?$/, `_${d.split("/").filter(Boolean).pop()}.json`), JSON.stringify(dump, null, 1));
 }
+if (dirs.length > 1) { const n = ALL.n, line = (f) => { const T = ALL[f]; return `${f.padEnd(5)} messages fully right ${(T.exact / n * 100).toFixed(1)}% · wires right ${(T.right / T.gold * 100).toFixed(1)}% (${T.right}/${T.gold}) · act found ${(T.acts / T.gold * 100).toFixed(1)}% · extra wires ${T.extra}`; };
+  console.log(`\nALL (${dirs.join(" + ")}): ${n} messages, ${ALL.rules.gold} gold wires`); console.log("  " + line("rules")); console.log("  " + line("vss")); }

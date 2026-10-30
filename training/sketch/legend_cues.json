@@ -133,7 +133,8 @@
    "scoot",
    "shove",
    "park",
-   "tuck"
+   "tuck",
+   "sits"
   ],
   "set": [
    "set",
@@ -145,18 +146,21 @@
    "fill",
    "give",
    "recolor",
-   "recolour"
+   "recolour",
+   "tint"
   ],
   "resize": [
    "resize",
    "grow",
    "enlarge",
    "shrink",
-   "scale"
+   "scale",
+   "shrunk"
   ],
   "rename": [
    "rename",
-   "call"
+   "call",
+   "name"
   ],
   "label": [
    "label",
@@ -188,7 +192,10 @@
    "wire",
    "attach",
    "hook",
-   "tie"
+   "tie",
+   "connects",
+   "leads",
+   "sends"
   ],
   "disconnect": [
    "disconnect",
@@ -215,7 +222,9 @@
   "distribute": [
    "distribute",
    "space",
-   "spread"
+   "spread",
+   "distributed",
+   "spaced"
   ],
   "toFront": [
    "bring",

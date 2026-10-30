@@ -22,25 +22,40 @@ QUESTION_EVENT = {"count": "count", "exists": "exists", "list": "list", "propert
 class Skip(Exception): pass
 
 
-def convert(row):
-    names = row.get("names") or []
-    toks, info = normalize(row["text"], LEXICON, names)
+def convert(row, lexicon=None, soft=False, lost=None):
+    """soft: never set a row aside for a missing word; a role whose words are not in the clause is left out (listed in `lost`)"""
+    lexicon = LEXICON if lexicon is None else lexicon; lost = [] if lost is None else lost
+    names = list(row.get("names") or []) + list(row.get("created") or [])
+    toks, info = normalize(row["text"], lexicon, names)
     T = set(toks); w = row["wire"]; a = w.get("args", {}); typ = w.get("type")
     ev = a.get("action") if typ == "command" else QUESTION_EVENT.get(a.get("ask")) if typ == "question" else typ
     if ev not in EVENTS: raise Skip(f"no event for {typ}:{a.get('action') or a.get('ask')}")
-    if not (set(EVENTS[ev]) & T): raise Skip(f"no {ev} verb in the clause")
+    if not (set(EVENTS[ev]) & T):
+        if not soft: raise Skip(f"no {ev} verb in the clause")
+        lost.append(f"verb of {ev}")
     def need(tok):
-        if tok not in T: raise Skip(f"word not in the clause: {tok}")
+        if tok not in T:
+            if soft: lost.append(tok); return None
+            raise Skip(f"word not in the clause: {tok}")
         return tok
     def ent(v):
         v = str(v)
+        if v == "$new":
+            for nm in reversed(row.get("created") or []):
+                if "n_" + slug(nm) in T: return {"head": "n_" + slug(nm)}, None
+            for p in ("it", "them"):
+                if p in T: return {"head": p}, None
+            if soft: lost.append("$new"); return None, None
+            raise Skip("$new not in the clause")
         if v.startswith("mention("):
             kv = dict(x.split("=", 1) for x in v[len("mention("):-1].split(",") if "=" in x)
             plural = kv.get("quantifier") == "all"
             sh = kv.get("shape")
             cands = ([PLURAL[sh], sh] if sh else ["shapes", "shape", "everything"]) if plural else ([sh] if sh else ["shape", "it"])
             head = next((c for c in cands if c in T), None) or next((c for c in ("it", "them", "everything") if c in T), None)
-            if head is None: raise Skip(f"no head for {v}")
+            if head is None:
+                if soft: lost.append(f"head of {v}"); return None, None
+                raise Skip(f"no head for {v}")
             e = {"head": head}
             if kv.get("color"): e["attr"] = need(kv["color"])
             if kv.get("recency"): e["det"] = need(kv["recency"])
@@ -50,13 +65,16 @@ def convert(row):
         if n in T: return {"head": n}, None
         for p in ("it", "them", "this", "that"):
             if p in T and p in LEXICON: return {"head": p}, None
+        if soft: lost.append(f"name {v}"); return None, None
         raise Skip(f"name not in the clause: {v}")
     roles, neg = {}, None
     def place():
         if "position" not in a: return
         p = a["position"]
         if p in REGION: roles["region"] = need(REGION[p]); return
-        if p not in REL: raise Skip(f"position {p}")
+        if p not in REL:
+            if soft: lost.append(f"position {p}"); return
+            raise Skip(f"position {p}")
         roles["relation"] = need(REL[p])
         anc = [x.strip() for x in str(a.get("anchor", "")).split(",") if x.strip()]
         if anc: roles["landmark"], _ = ent(anc[0])
@@ -64,7 +82,8 @@ def convert(row):
     if ev == "create":
         sh = a.get("shape", "circle"); cnt = a.get("count")
         head = next((c for c in ([PLURAL[sh], sh] if cnt else [sh]) if c in T), None)
-        if head is None: raise Skip(f"no shape word {sh}")
+        if head is None and not soft: raise Skip(f"no shape word {sh}")
+        if head is None: lost.append(f"shape word {sh}")
         e = {"head": head}
         if a.get("color"): e["attr"] = need(a["color"])
         roles["object"] = e
@@ -99,13 +118,23 @@ def convert(row):
         if ev in ("toFront", "toBack"): roles["depth"] = need("front" if ev == "toFront" else "back")
     elif ev == "swap":
         x = [s.strip() for s in str(a.get("target", "")).split(",")]
-        if len(x) != 2: raise Skip("swap needs two")
-        roles["object"], _ = ent(x[0]); roles["target"], _ = ent(x[1])
+        if len(x) != 2:
+            if not soft: raise Skip("swap needs two")
+            lost.append("swap needs two")
+        roles["object"], _ = ent(x[0])
+        if len(x) > 1: roles["target"], _ = ent(x[1])
     elif ev in ("connect", "disconnect", "path", "reachable"):
-        if a.get("from") is not None: roles["source"], neg = ent(a["from"])
+        if a.get("from") is not None:
+            fr = [x.strip() for x in str(a["from"]).split(",")] if not str(a["from"]).startswith("mention(") else [a["from"]]
+            if len(fr) > 1:
+                if not soft: raise Skip("several sources in one role")
+                lost.append("several sources (first kept)")
+            roles["source"], neg = ent(fr[0])
         if a.get("to") is not None:
             to = [s.strip() for s in str(a["to"]).split(",")] if not str(a["to"]).startswith("mention(") else [a["to"]]
-            if len(to) > 1: raise Skip("several targets in one role")
+            if len(to) > 1:
+                if not soft: raise Skip("several targets in one role")
+                lost.append("several targets (first kept)")
             roles["target"], _ = ent(to[0])
         if ev == "connect":
             if a.get("style"): roles["style"] = need(a["style"])
@@ -113,8 +142,9 @@ def convert(row):
             if a.get("arrow") == "none" and "plain" in T: roles["arrow"] = "plain"
             edge = next((x for x in ("arrow", "line", "connection") if x in T), None)
             if a.get("color"):
-                if not edge: raise Skip("edge colour without an edge word")
-                roles["edge"] = {"head": edge, "attr": need(a["color"])}
+                if not edge and not soft: raise Skip("edge colour without an edge word")
+                if edge: roles["edge"] = {"head": edge, "attr": need(a["color"])}
+                else: lost.append("edge word")
             elif edge and (a.get("arrow") == "none" or edge != "arrow" or a.get("style")): roles["edge"] = {"head": edge}
             if a.get("label"): roles["text"] = need("t_" + slug(a["label"]))
             if a.get("pairing"): roles["pairing"] = need({"all": "each_other"}.get(a["pairing"], a["pairing"]))
@@ -125,7 +155,9 @@ def convert(row):
             cands = [PLURAL.get(sh, sh), sh] if sh else ["shapes", "shape"]
             head = next((c for c in cands if c in T), None)
             if head: roles["object"] = {"head": head} | ({"attr": need(a["color"])} if a.get("color") and ev != "rule" else {})
-            elif sh: raise Skip(f"no shape word {sh}")
+            elif sh:
+                if not soft: raise Skip(f"no shape word {sh}")
+                lost.append(f"shape word {sh}")
             if ev == "rule":
                 if a.get("color"): roles["color"] = need(a["color"])
                 if a.get("size"): roles["size"] = need(a["size"])
@@ -136,7 +168,14 @@ def convert(row):
     elif ev in ("undo", "redo", "forget", "cycle"):
         pass
     if neg: roles["notcolor"] = need("not_" + neg)
-    return " ".join(toks), roles, ev
+    clean = {}
+    for r, v in roles.items():
+        if v is None: continue
+        if isinstance(v, dict):
+            if v.get("head") is None: continue
+            v = {k: x for k, x in v.items() if x is not None}
+        clean[r] = v
+    return " ".join(toks), clean, ev
 
 
 def main():
