@@ -61,3 +61,11 @@ message and by chatter level; dev for every choice, test reported once.
 - No knob turned after seeing a test number. Write the hypothesis, measure and threshold in your RESULTS.md BEFORE each run; report
   negative results as they are. Seeds: at least 2 for every reported number.
 - Do not commit; the coordinator commits.
+
+## Added requirement (owner, 01:02): linear in the number of tokens
+
+A context limit is acceptable (BERT has 512 tokens), but the target is texts of up to ~1 million tokens with cost LINEAR in the number
+of tokens: no all-pairs (n^2) attention. So every design must keep each word attached to a bounded number of centres (e.g. the
+nearest centres on each side, or centres within a window), compute centre-relative addresses with running products / prefix scans,
+and keep one fixed-size D-vector per centre. Every implementer measures wall time and memory for one message of 10, 100, 1 000,
+10 000 and 100 000 tokens (synthetic: many requests with chatter) and reports whether the cost grows linearly.
