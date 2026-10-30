@@ -15,7 +15,11 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import generate as G
 from llm_to_world import convert, Skip
 from normalize import normalize
-REAL_TABLE = os.path.join(HERE, "normalize_real.json")   # the learned front end (learn_triggers.py)
+FRONT = os.environ.get("FRONT", "triggers")   # triggers: normalize_real.json (learned rewrite rules with context); lexicon: variant A
+REAL_TABLE = os.path.join(HERE, "normalize_real_lex.json" if FRONT == "lexicon" else "normalize_real.json")   # learn_triggers.py
+if FRONT == "lexicon":   # variant A: the learned trigger words are verbs of their events in the legend (G.EVENTS is shared with llm_to_world)
+    for _ev, _ws in json.load(open(os.path.join(HERE, "learned_verbs.json"))).items():
+        G.EVENTS[_ev] = list(dict.fromkeys(G.EVENTS[_ev] + _ws))
 
 VALUE_KINDS = {"SHAPE", "EDGE", "COLOR", "SIZE", "STYLE", "ARROW", "REL", "REGION", "DIR", "LAYOUT", "AXIS", "PAIR", "NOTCOLOR", "DEPTH", "RECENT", "SUPER"}
 

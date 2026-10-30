@@ -38,6 +38,9 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None):
             if soft: lost.append(tok); return None
             raise Skip(f"word not in the clause: {tok}")
         return tok
+    def need_text(lbl):   # a quoted label is a t_ token; an unquoted one ("labeled Rocks") is read as a name token (LABEL_AS_NAME=1)
+        if os.environ.get("LABEL_AS_NAME") != "1": return need("t_" + slug(lbl))
+        return "t_" + slug(lbl) if "t_" + slug(lbl) in T else "n_" + slug(lbl) if "n_" + slug(lbl) in T else need("t_" + slug(lbl))
     def ent(v):
         v = str(v)
         if v == "$new":
@@ -90,7 +93,7 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None):
         if a.get("size"): roles["size"] = need(a["size"])
         if cnt: roles["quantity"] = need(str(cnt))
         if a.get("name"): roles["name"] = need("n_" + slug(a["name"]))
-        if a.get("label"): roles["text"] = need("t_" + slug(a["label"]))
+        if a.get("label"): roles["text"] = need_text(a["label"])
         place()
     elif ev in ("delete", "duplicate", "neighbors", "describe", "property", "degree", "toFront", "toBack", "resize", "rename", "label", "set", "align", "arrange", "distribute", "move", "check", "fact", "connected"):
         if a.get("target") is not None:
@@ -100,7 +103,7 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None):
         elif ev in ("arrange", "distribute") and "everything" in T: roles["object"] = {"head": "everything"}
         if ev == "duplicate" and a.get("count"): roles["quantity"] = need(str(a["count"]))
         if ev == "rename": roles["name"] = need("n_" + slug(a.get("name", "")))
-        if ev == "label": roles["text"] = need("t_" + slug(a.get("label", "")))
+        if ev == "label": roles["text"] = need_text(a.get("label", ""))
         if ev in ("set", "check", "fact"):
             if a.get("color"): roles["color"] = need(a["color"])
             if a.get("shape"): roles["shape"] = need(a["shape"])
@@ -146,7 +149,7 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None):
                 if edge: roles["edge"] = {"head": edge, "attr": need(a["color"])}
                 else: lost.append("edge word")
             elif edge and (a.get("arrow") == "none" or edge != "arrow" or a.get("style")): roles["edge"] = {"head": edge}
-            if a.get("label"): roles["text"] = need("t_" + slug(a["label"]))
+            if a.get("label"): roles["text"] = need_text(a["label"])
             if a.get("pairing"): roles["pairing"] = need({"all": "each_other"}.get(a["pairing"], a["pairing"]))
     elif ev in ("count", "exists", "list", "extreme", "nearest", "rule"):
         if a.get("ask") == "rules": roles["object"] = {"head": need("rules")}

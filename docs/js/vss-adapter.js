@@ -51,7 +51,7 @@ export function toNodes(reading, info, ctx, seq) {
   const refs = ctx.refs || new Map();   // names created earlier in the same message -> {ref: id}
   const nameOf = (tok) => { const raw = (info.names && info.names[tok]) || tok.replace(/^n_/, ""); const k = String(raw).toLowerCase(); return refs.get(k) || names.get(k) || raw; };
   const plainName = (tok) => { const raw = (info.names && info.names[tok]) || tok.replace(/^n_/, ""); return names.get(String(raw).toLowerCase()) || raw; };
-  const textOf = (tok) => (info.texts && info.texts[tok]) || String(tok).replace(/^t_/, "").replace(/_/g, " ");
+  const textOf = (tok) => (info.texts && info.texts[tok]) || (info.names && info.names[tok]) || String(tok).replace(/^[tn]_/, "").replace(/_/g, " ");   // labelled Rocks: an unquoted label is a name token
   const R = reading.roles || {}; let negUsed = false;
   const ref = (en) => {
     if (en == null) return undefined;

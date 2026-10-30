@@ -67,7 +67,7 @@ def main():
             if i >= 0:
                 for k in range(i, i + len(sp)): covered[k] = 1
             tok = event_token(w)
-            toks, _ = normalize(sp, lex, names, table=table); spans_toks.append(toks)
+            toks, _ = normalize(sp, lex, names, table=table); spans_toks.append([toks, tok, None])
             if not tok or not w.get("trigger"): continue
             tt, _ = normalize(w["trigger"], lex, names, table=table)
             tt = [x for x in tt if x not in ("?", ".", ",", "!")]
@@ -77,35 +77,54 @@ def main():
             pos = next((k for k in range(len(toks)) if toks[k:k + len(tt)] == tt), None)
             if pos is None: continue
             p = tclass(toks[pos - 1] if pos > 0 else None); n = tclass(toks[pos + len(tt)] if pos + len(tt) < len(toks) else None)
-            ph = " ".join(tt); phrases.add(ph)
+            ph = " ".join(tt); phrases.add(ph); spans_toks[-1][2] = tt
             for key in ((ph, p, n), (ph, "*", n), (ph, p, "*"), (ph, "*", "*")): tp[key][tok] += 1
         for s in re.finditer(r"[^.!?]+[.!?]?", m["text"]):
             if len(s.group(0).strip()) > 3 and not any(covered[s.start():s.end()]): fluff_toks.append(normalize(s.group(0), lex, names, table=table)[0])
-    # false positives: occurrences of the phrase in a context that the rule would match, in fluff, or in spans beyond the trigger count
-    occ = collections.Counter(); occ_fluff = collections.Counter()
-    for bag, ctr in ((spans_toks, occ), (fluff_toks, occ_fluff)):
-        for toks in bag:
-            for ph in phrases:
-                pt = ph.split()
-                for i in range(len(toks) - len(pt) + 1):
-                    if toks[i:i + len(pt)] == pt:
-                        p = tclass(toks[i - 1] if i > 0 else None); n = tclass(toks[i + len(pt)] if i + len(pt) < len(toks) else None)
-                        for key in ((ph, p, n), (ph, "*", n), (ph, p, "*"), (ph, "*", "*")): ctr[key] += 1
+    # false positives of a rule: its phrase in the same context inside FLUFF, or inside a span whose request is another event
+    occ = collections.defaultdict(collections.Counter); occ_fluff = collections.Counter()
+    def scan(toks, hit, own=None):
+        for ph in phrases:
+            pt = ph.split()
+            for i in range(len(toks) - len(pt) + 1):
+                if toks[i:i + len(pt)] == pt:
+                    if own and len(own) > len(pt): continue   # the span's own, longer trigger is tried first (rules are ordered longest first)
+                    p = tclass(toks[i - 1] if i > 0 else None); n = tclass(toks[i + len(pt)] if i + len(pt) < len(toks) else None)
+                    for key in ((ph, p, n), (ph, "*", n), (ph, p, "*"), (ph, "*", "*")): hit(key)
+    for toks, ev, own in spans_toks: scan(toks, lambda key: occ[key].__setitem__(ev, occ[key][ev] + 1), own)
+    for toks in fluff_toks: scan(toks, lambda key: occ_fluff.__setitem__(key, occ_fluff[key] + 1))
     rules, report = [], []
     for key, c in tp.items():
         n = sum(c.values()); tok, k = c.most_common(1)[0]
-        fp = occ_fluff[key] + max(0, occ[key] - n)
+        fp = occ_fluff[key] + sum(v for e, v in occ[key].items() if e != tok)
         prec = n / (n + fp) if n + fp else 0
         ok = n >= MIN_COUNT and k / n >= SHARE and prec >= MIN_PREC
         report.append((key, n, dict(c.most_common(3)), occ_fluff[key], round(prec, 2), ok))
         if ok:
             e = {"p": key[0], "prev": key[1], "next": key[2], "tok": tok, "n": n, "prec": round(prec, 2)}
-            if any(G.KINDS.get(x) in VALUE_KINDS for x in key[0].split()): e["ins"] = True   # "right_side", "bigger than": the value stays as a role filler
+            kv = [x for x in key[0].split() if G.KINDS.get(x) in VALUE_KINDS]
+            if kv: e["keep"] = kv   # "right_side", "bigger than", "how many circles": the value words stay as role fillers
             rules.append(e)
     spec = lambda e: (e["prev"] != "*") + (e["next"] != "*")
     rules.sort(key=lambda e: (-len(e["p"].split()), -spec(e), -e["n"], e["p"]))
     table["triggers"] = rules
     json.dump(table, open(os.path.join(HERE, "normalize_real.json"), "w"), indent=1)
+    # variant A (VSS_READER_SPEC: the learned words go into the LEXICON, no rewriting): every context-free trigger kept above becomes a
+    # verb of its event in the legend; a multi-word trigger becomes one token (its words joined by "_") so that it can be a verb word.
+    # A word has one event (its majority), so context ("put a" vs "put the") is not available to the reader in this variant.
+    tok2ev = {v: k for k, vs in G.EVENTS.items() for v in vs}
+    verbs, mwe = collections.defaultdict(list), []
+    for key, n, c, f, prec, ok in report:   # the majority event of every phrase (no share threshold: one event per word is this variant's premise)
+        tok = max(c, key=c.get)
+        if key[1] != "*" or key[2] != "*" or n < MIN_COUNT or prec < MIN_PREC or tok not in tok2ev or any(G.KINDS.get(x) in VALUE_KINDS for x in key[0].split()): continue
+        e = {"p": key[0], "tok": tok}
+        w = e["p"].replace(" ", "_")
+        if " " in e["p"]: mwe.append([e["p"], w])
+        verbs[tok2ev[e["tok"]]].append(w)
+    lt = dict(table); lt.pop("triggers"); lt["mwe"] = sorted(mwe, key=lambda x: -len(x[0].split())) + table["mwe"]
+    lt["about"] = "normalize_real_lex.json: variant A of the learned front end: mechanical part + legend value cues + learned multi-word triggers joined into one token; the verbs themselves are in the legend (learned_verbs.json)."
+    json.dump(lt, open(os.path.join(HERE, "normalize_real_lex.json"), "w"), indent=1)
+    json.dump({k: sorted(set(v)) for k, v in sorted(verbs.items())}, open(os.path.join(HERE, "learned_verbs.json"), "w"), indent=1)
     # the same learned ACTION phrases (context-free rules) for the rules formalizer
     inv = {v: k for k, vs in G.EVENTS.items() for v in vs if k in json.load(open(os.path.join(HERE, "legend_cues.json")))["action"]}
     act = collections.defaultdict(list)

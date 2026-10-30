@@ -442,7 +442,9 @@
    "tok": "reach_q",
    "n": 3,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shapes"
+   ]
   },
   {
    "p": "which shapes can i reach",
@@ -451,7 +453,9 @@
    "tok": "reach_q",
    "n": 3,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shapes"
+   ]
   },
   {
    "p": "which shapes can i reach",
@@ -460,7 +464,33 @@
    "tok": "reach_q",
    "n": 3,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shapes"
+   ]
+  },
+  {
+   "p": "how many shapes are below",
+   "prev": "B",
+   "next": "*",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "shapes",
+    "below"
+   ]
+  },
+  {
+   "p": "how many shapes are next_to",
+   "prev": "B",
+   "next": "*",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "shapes",
+    "next_to"
+   ]
   },
   {
    "p": "which shapes can i reach",
@@ -469,7 +499,33 @@
    "tok": "reach_q",
    "n": 3,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shapes"
+   ]
+  },
+  {
+   "p": "how many shapes are below",
+   "prev": "*",
+   "next": "*",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "shapes",
+    "below"
+   ]
+  },
+  {
+   "p": "how many shapes are next_to",
+   "prev": "*",
+   "next": "*",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "shapes",
+    "next_to"
+   ]
   },
   {
    "p": "can i get from",
@@ -486,7 +542,9 @@
    "tok": "is_there",
    "n": 4,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "which shapes are next_to",
@@ -494,8 +552,11 @@
    "next": "NAME",
    "tok": "neigh_q",
    "n": 3,
-   "prec": 0.6,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "shapes",
+    "next_to"
+   ]
   },
   {
    "p": "are there shape loops",
@@ -504,7 +565,17 @@
    "tok": "cycle_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
+  },
+  {
+   "p": "can be reached from",
+   "prev": "O",
+   "next": "NAME",
+   "tok": "reach_q",
+   "n": 2,
+   "prec": 1.0
   },
   {
    "p": "do i have shape",
@@ -513,7 +584,9 @@
    "tok": "is_there",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "each_other new squares are",
@@ -522,7 +595,10 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "each_other",
+    "squares"
+   ]
   },
   {
    "p": "what can i reach",
@@ -555,7 +631,9 @@
    "tok": "is_there",
    "n": 4,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "do we have shape",
@@ -564,7 +642,9 @@
    "tok": "is_there",
    "n": 4,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "which shapes are next_to",
@@ -572,8 +652,23 @@
    "next": "NAME",
    "tok": "neigh_q",
    "n": 3,
-   "prec": 0.6,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "shapes",
+    "next_to"
+   ]
+  },
+  {
+   "p": "which shapes are next_to",
+   "prev": "B",
+   "next": "*",
+   "tok": "neigh_q",
+   "n": 3,
+   "prec": 1.0,
+   "keep": [
+    "shapes",
+    "next_to"
+   ]
   },
   {
    "p": "are there shape loops",
@@ -582,7 +677,9 @@
    "tok": "cycle_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "are there shape loops",
@@ -591,7 +688,17 @@
    "tok": "cycle_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
+  },
+  {
+   "p": "can be reached from",
+   "prev": "O",
+   "next": "*",
+   "tok": "reach_q",
+   "n": 2,
+   "prec": 1.0
   },
   {
    "p": "do i have shape",
@@ -600,7 +707,9 @@
    "tok": "is_there",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "do i have shape",
@@ -609,7 +718,9 @@
    "tok": "is_there",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "each_other new squares are",
@@ -618,7 +729,10 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "each_other",
+    "squares"
+   ]
   },
   {
    "p": "each_other new squares are",
@@ -627,7 +741,10 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "each_other",
+    "squares"
+   ]
   },
   {
    "p": "what can i reach",
@@ -660,7 +777,9 @@
    "tok": "is_there",
    "n": 4,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "what can i reach",
@@ -671,13 +790,27 @@
    "prec": 1.0
   },
   {
+   "p": "which shapes are next_to",
+   "prev": "*",
+   "next": "*",
+   "tok": "neigh_q",
+   "n": 3,
+   "prec": 1.0,
+   "keep": [
+    "shapes",
+    "next_to"
+   ]
+  },
+  {
    "p": "are there shape loops",
    "prev": "*",
    "next": "*",
    "tok": "cycle_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "do i have shape",
@@ -686,7 +819,9 @@
    "tok": "is_there",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "each_other new squares are",
@@ -695,7 +830,10 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "each_other",
+    "squares"
+   ]
   },
   {
    "p": "which shapes are",
@@ -703,8 +841,21 @@
    "next": "O",
    "tok": "which",
    "n": 47,
-   "prec": 0.64,
-   "ins": true
+   "prec": 0.87,
+   "keep": [
+    "shapes"
+   ]
+  },
+  {
+   "p": "how many shapes",
+   "prev": "B",
+   "next": "O",
+   "tok": "how_many",
+   "n": 20,
+   "prec": 0.83,
+   "keep": [
+    "shapes"
+   ]
   },
   {
    "p": "how many links",
@@ -721,7 +872,9 @@
    "tok": "is_there",
    "n": 14,
    "prec": 0.74,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "are there shape",
@@ -729,8 +882,10 @@
    "next": "O",
    "tok": "is_there",
    "n": 9,
-   "prec": 0.69,
-   "ins": true
+   "prec": 0.9,
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "from now on",
@@ -741,13 +896,38 @@
    "prec": 1.0
   },
   {
+   "p": "how many circles",
+   "prev": "B",
+   "next": "O",
+   "tok": "how_many",
+   "n": 4,
+   "prec": 1.0,
+   "keep": [
+    "circles"
+   ]
+  },
+  {
+   "p": "how many rectangles",
+   "prev": "B",
+   "next": "O",
+   "tok": "how_many",
+   "n": 3,
+   "prec": 1.0,
+   "keep": [
+    "rectangles"
+   ]
+  },
+  {
    "p": "each_other squares are",
    "prev": "B",
    "next": "O",
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "each_other",
+    "squares"
+   ]
   },
   {
    "p": "each_other stars are",
@@ -756,7 +936,21 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "each_other",
+    "stars"
+   ]
+  },
+  {
+   "p": "how many stars",
+   "prev": "B",
+   "next": "O",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "stars"
+   ]
   },
   {
    "p": "how many triangles",
@@ -764,8 +958,10 @@
    "next": "O",
    "tok": "how_many",
    "n": 2,
-   "prec": 0.67,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "triangles"
+   ]
   },
   {
    "p": "is anything next_to",
@@ -774,7 +970,9 @@
    "tok": "is_there",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "next_to"
+   ]
   },
   {
    "p": "shape color but",
@@ -783,7 +981,17 @@
    "tok": "is_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
+  },
+  {
+   "p": "what color is",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "what_color",
+   "n": 2,
+   "prec": 1.0
   },
   {
    "p": "what is above",
@@ -792,7 +1000,9 @@
    "tok": "which",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "above"
+   ]
   },
   {
    "p": "what shape is",
@@ -800,8 +1010,10 @@
    "next": "NAME",
    "tok": "what_shape",
    "n": 2,
-   "prec": 0.67,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "which shapes are",
@@ -809,8 +1021,10 @@
    "next": "O",
    "tok": "which",
    "n": 47,
-   "prec": 0.64,
-   "ins": true
+   "prec": 0.87,
+   "keep": [
+    "shapes"
+   ]
   },
   {
    "p": "which shapes are",
@@ -818,8 +1032,32 @@
    "next": "*",
    "tok": "which",
    "n": 47,
-   "prec": 0.64,
-   "ins": true
+   "prec": 0.85,
+   "keep": [
+    "shapes"
+   ]
+  },
+  {
+   "p": "how many shapes",
+   "prev": "*",
+   "next": "O",
+   "tok": "how_many",
+   "n": 20,
+   "prec": 0.83,
+   "keep": [
+    "shapes"
+   ]
+  },
+  {
+   "p": "how many shapes",
+   "prev": "B",
+   "next": "*",
+   "tok": "how_many",
+   "n": 20,
+   "prec": 0.83,
+   "keep": [
+    "shapes"
+   ]
   },
   {
    "p": "how many links",
@@ -844,7 +1082,9 @@
    "tok": "is_there",
    "n": 14,
    "prec": 0.74,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "is there shape",
@@ -853,7 +1093,9 @@
    "tok": "is_there",
    "n": 14,
    "prec": 0.74,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "are there shape",
@@ -861,8 +1103,10 @@
    "next": "O",
    "tok": "is_there",
    "n": 9,
-   "prec": 0.69,
-   "ins": true
+   "prec": 0.9,
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "are there shape",
@@ -870,8 +1114,10 @@
    "next": "*",
    "tok": "is_there",
    "n": 9,
-   "prec": 0.69,
-   "ins": true
+   "prec": 0.9,
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "from now on",
@@ -879,7 +1125,7 @@
    "next": "O",
    "tok": "from_now_on",
    "n": 8,
-   "prec": 0.89
+   "prec": 1.0
   },
   {
    "p": "from now on",
@@ -895,6 +1141,58 @@
    "next": "*",
    "tok": "delete",
    "n": 4,
+   "prec": 0.8
+  },
+  {
+   "p": "how many circles",
+   "prev": "*",
+   "next": "O",
+   "tok": "how_many",
+   "n": 4,
+   "prec": 1.0,
+   "keep": [
+    "circles"
+   ]
+  },
+  {
+   "p": "how many circles",
+   "prev": "B",
+   "next": "*",
+   "tok": "how_many",
+   "n": 4,
+   "prec": 1.0,
+   "keep": [
+    "circles"
+   ]
+  },
+  {
+   "p": "how many rectangles",
+   "prev": "*",
+   "next": "O",
+   "tok": "how_many",
+   "n": 3,
+   "prec": 1.0,
+   "keep": [
+    "rectangles"
+   ]
+  },
+  {
+   "p": "how many rectangles",
+   "prev": "B",
+   "next": "*",
+   "tok": "how_many",
+   "n": 3,
+   "prec": 1.0,
+   "keep": [
+    "rectangles"
+   ]
+  },
+  {
+   "p": "what color is",
+   "prev": "B",
+   "next": "*",
+   "tok": "what_color",
+   "n": 3,
    "prec": 1.0
   },
   {
@@ -904,7 +1202,10 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "each_other",
+    "squares"
+   ]
   },
   {
    "p": "each_other squares are",
@@ -913,7 +1214,10 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "each_other",
+    "squares"
+   ]
   },
   {
    "p": "each_other stars are",
@@ -922,7 +1226,10 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "each_other",
+    "stars"
+   ]
   },
   {
    "p": "each_other stars are",
@@ -931,7 +1238,54 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "each_other",
+    "stars"
+   ]
+  },
+  {
+   "p": "how many squares",
+   "prev": "*",
+   "next": "O",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "squares"
+   ]
+  },
+  {
+   "p": "how many stars",
+   "prev": "*",
+   "next": "O",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "stars"
+   ]
+  },
+  {
+   "p": "how many stars",
+   "prev": "B",
+   "next": "*",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "stars"
+   ]
+  },
+  {
+   "p": "how many triangles",
+   "prev": "*",
+   "next": "O",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "triangles"
+   ]
   },
   {
    "p": "how many triangles",
@@ -939,8 +1293,10 @@
    "next": "*",
    "tok": "how_many",
    "n": 2,
-   "prec": 0.67,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "triangles"
+   ]
   },
   {
    "p": "is anything next_to",
@@ -949,7 +1305,9 @@
    "tok": "is_there",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "next_to"
+   ]
   },
   {
    "p": "is anything next_to",
@@ -958,7 +1316,9 @@
    "tok": "is_there",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "next_to"
+   ]
   },
   {
    "p": "shape color but",
@@ -967,7 +1327,9 @@
    "tok": "is_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "shape color but",
@@ -976,7 +1338,17 @@
    "tok": "is_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
+  },
+  {
+   "p": "what color is",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "what_color",
+   "n": 2,
+   "prec": 1.0
   },
   {
    "p": "what is above",
@@ -985,7 +1357,9 @@
    "tok": "which",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "above"
+   ]
   },
   {
    "p": "what is above",
@@ -994,7 +1368,9 @@
    "tok": "which",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "above"
+   ]
   },
   {
    "p": "what shape is",
@@ -1002,8 +1378,21 @@
    "next": "NAME",
    "tok": "what_shape",
    "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "shape"
+   ]
+  },
+  {
+   "p": "what shape is",
+   "prev": "B",
+   "next": "*",
+   "tok": "what_shape",
+   "n": 2,
    "prec": 0.67,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "which shapes are",
@@ -1011,8 +1400,21 @@
    "next": "*",
    "tok": "which",
    "n": 47,
-   "prec": 0.63,
-   "ins": true
+   "prec": 0.85,
+   "keep": [
+    "shapes"
+   ]
+  },
+  {
+   "p": "how many shapes",
+   "prev": "*",
+   "next": "*",
+   "tok": "how_many",
+   "n": 20,
+   "prec": 0.83,
+   "keep": [
+    "shapes"
+   ]
   },
   {
    "p": "how many links",
@@ -1020,7 +1422,7 @@
    "next": "*",
    "tok": "degree_q",
    "n": 15,
-   "prec": 0.94
+   "prec": 1.0
   },
   {
    "p": "is there shape",
@@ -1029,7 +1431,9 @@
    "tok": "is_there",
    "n": 14,
    "prec": 0.74,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "are there shape",
@@ -1037,8 +1441,10 @@
    "next": "*",
    "tok": "is_there",
    "n": 9,
-   "prec": 0.69,
-   "ins": true
+   "prec": 0.9,
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "from now on",
@@ -1046,7 +1452,7 @@
    "next": "*",
    "tok": "from_now_on",
    "n": 8,
-   "prec": 0.73
+   "prec": 1.0
   },
   {
    "p": "get rid of",
@@ -1054,6 +1460,36 @@
    "next": "*",
    "tok": "delete",
    "n": 4,
+   "prec": 0.8
+  },
+  {
+   "p": "how many circles",
+   "prev": "*",
+   "next": "*",
+   "tok": "how_many",
+   "n": 4,
+   "prec": 1.0,
+   "keep": [
+    "circles"
+   ]
+  },
+  {
+   "p": "how many rectangles",
+   "prev": "*",
+   "next": "*",
+   "tok": "how_many",
+   "n": 3,
+   "prec": 1.0,
+   "keep": [
+    "rectangles"
+   ]
+  },
+  {
+   "p": "what color is",
+   "prev": "*",
+   "next": "*",
+   "tok": "what_color",
+   "n": 3,
    "prec": 1.0
   },
   {
@@ -1063,7 +1499,10 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "each_other",
+    "squares"
+   ]
   },
   {
    "p": "each_other stars are",
@@ -1072,7 +1511,43 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "each_other",
+    "stars"
+   ]
+  },
+  {
+   "p": "how many squares",
+   "prev": "*",
+   "next": "*",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "squares"
+   ]
+  },
+  {
+   "p": "how many stars",
+   "prev": "*",
+   "next": "*",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "stars"
+   ]
+  },
+  {
+   "p": "how many triangles",
+   "prev": "*",
+   "next": "*",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "triangles"
+   ]
   },
   {
    "p": "is anything next_to",
@@ -1081,7 +1556,9 @@
    "tok": "is_there",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "next_to"
+   ]
   },
   {
    "p": "shape color but",
@@ -1090,7 +1567,9 @@
    "tok": "is_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "what is above",
@@ -1099,7 +1578,20 @@
    "tok": "which",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "above"
+   ]
+  },
+  {
+   "p": "what shape is",
+   "prev": "*",
+   "next": "*",
+   "tok": "what_shape",
+   "n": 2,
+   "prec": 0.67,
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "is there",
@@ -1107,7 +1599,7 @@
    "next": "ART",
    "tok": "path_q",
    "n": 61,
-   "prec": 0.64
+   "prec": 0.72
   },
   {
    "p": "bigger than",
@@ -1116,7 +1608,17 @@
    "tok": "is_q",
    "n": 45,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bigger"
+   ]
+  },
+  {
+   "p": "how many",
+   "prev": "B",
+   "next": "O",
+   "tok": "how_many",
+   "n": 44,
+   "prec": 0.92
   },
   {
    "p": "connected to",
@@ -1132,7 +1634,7 @@
    "next": "NAME",
    "tok": "path_q",
    "n": 28,
-   "prec": 0.97
+   "prec": 1.0
   },
   {
    "p": "bigger than",
@@ -1141,7 +1643,9 @@
    "tok": "is_q",
    "n": 25,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bigger"
+   ]
   },
   {
    "p": "directly linked",
@@ -1158,7 +1662,9 @@
    "tok": "is_q",
    "n": 24,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "smaller"
+   ]
   },
   {
    "p": "most connected",
@@ -1182,8 +1688,10 @@
    "next": "NAME",
    "tok": "nearest_q",
    "n": 15,
-   "prec": 0.71,
-   "ins": true
+   "prec": 0.94,
+   "keep": [
+    "closest"
+   ]
   },
   {
    "p": "smaller than",
@@ -1192,7 +1700,20 @@
    "tok": "is_q",
    "n": 13,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "smaller"
+   ]
+  },
+  {
+   "p": "closest to",
+   "prev": "O",
+   "next": "NAME",
+   "tok": "nearest_q",
+   "n": 12,
+   "prec": 1.0,
+   "keep": [
+    "closest"
+   ]
   },
   {
    "p": "most connected",
@@ -1208,8 +1729,10 @@
    "next": "NAME",
    "tok": "nearest_q",
    "n": 11,
-   "prec": 0.65,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "farthest"
+   ]
   },
   {
    "p": "connected to",
@@ -1233,7 +1756,7 @@
    "next": "O",
    "tok": "what_color",
    "n": 7,
-   "prec": 0.7
+   "prec": 1.0
   },
   {
    "p": "least connected",
@@ -1258,7 +1781,18 @@
    "tok": "move",
    "n": 4,
    "prec": 0.8,
-   "ins": true
+   "keep": [
+    "bottom",
+    "right"
+   ]
+  },
+  {
+   "p": "degree of",
+   "prev": "THE",
+   "next": "NAME",
+   "tok": "degree_q",
+   "n": 4,
+   "prec": 1.0
   },
   {
    "p": "least connected",
@@ -1274,7 +1808,7 @@
    "next": "THE",
    "tok": "path_q",
    "n": 4,
-   "prec": 1.0
+   "prec": 0.8
   },
   {
    "p": "should be",
@@ -1293,6 +1827,17 @@
    "prec": 1.0
   },
   {
+   "p": "farthest from",
+   "prev": "O",
+   "next": "NAME",
+   "tok": "nearest_q",
+   "n": 3,
+   "prec": 1.0,
+   "keep": [
+    "farthest"
+   ]
+  },
+  {
    "p": "goes in",
    "prev": "NAME",
    "next": "THE",
@@ -1306,8 +1851,26 @@
    "next": "B",
    "tok": "move",
    "n": 3,
-   "prec": 0.75,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "top"
+   ]
+  },
+  {
+   "p": "reach from",
+   "prev": "O",
+   "next": "NAME",
+   "tok": "reach_q",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "sends to",
+   "prev": "NAME",
+   "next": "NAME",
+   "tok": "connect",
+   "n": 3,
+   "prec": 0.6
   },
   {
    "p": "top left",
@@ -1316,7 +1879,10 @@
    "tok": "move",
    "n": 3,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "top",
+    "left"
+   ]
   },
   {
    "p": "what size",
@@ -1333,7 +1899,9 @@
    "tok": "is_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bigger"
+   ]
   },
   {
    "p": "blue circle",
@@ -1341,8 +1909,11 @@
    "next": "O",
    "tok": "draw",
    "n": 2,
-   "prec": 0.67,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "blue",
+    "circle"
+   ]
   },
   {
    "p": "bottom left",
@@ -1351,7 +1922,10 @@
    "tok": "move",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bottom",
+    "left"
+   ]
   },
   {
    "p": "brown square",
@@ -1360,7 +1934,10 @@
    "tok": "draw",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "brown",
+    "square"
+   ]
   },
   {
    "p": "circles are",
@@ -1369,7 +1946,9 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "circles"
+   ]
   },
   {
    "p": "close to",
@@ -1378,6 +1957,17 @@
    "tok": "is_q",
    "n": 2,
    "prec": 1.0
+  },
+  {
+   "p": "closest to",
+   "prev": "O",
+   "next": "THE",
+   "tok": "nearest_q",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "closest"
+   ]
   },
   {
    "p": "connect to",
@@ -1394,7 +1984,17 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "diamond"
+   ]
+  },
+  {
+   "p": "get from",
+   "prev": "O",
+   "next": "NAME",
+   "tok": "path_q",
+   "n": 2,
+   "prec": 1.0
   },
   {
    "p": "goes next_to",
@@ -1403,7 +2003,17 @@
    "tok": "move",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "next_to"
+   ]
+  },
+  {
+   "p": "how many",
+   "prev": "O",
+   "next": "O",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 0.67
   },
   {
    "p": "is at",
@@ -1420,7 +2030,21 @@
    "tok": "draw",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "magenta",
+    "hexagon"
+   ]
+  },
+  {
+   "p": "make each_other",
+   "prev": "B",
+   "next": "THE",
+   "tok": "make",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "each_other"
+   ]
   },
   {
    "p": "most connected",
@@ -1445,7 +2069,9 @@
    "tok": "is_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "next_to"
+   ]
   },
   {
    "p": "smaller than",
@@ -1454,7 +2080,9 @@
    "tok": "is_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "smaller"
+   ]
   },
   {
    "p": "star is",
@@ -1463,7 +2091,32 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "star"
+   ]
+  },
+  {
+   "p": "top right",
+   "prev": "NAME",
+   "next": "B",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "top",
+    "right"
+   ]
+  },
+  {
+   "p": "what shape",
+   "prev": "B",
+   "next": "O",
+   "tok": "what_shape",
+   "n": 2,
+   "prec": 0.67,
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "bigger than",
@@ -1472,7 +2125,17 @@
    "tok": "is_q",
    "n": 71,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bigger"
+   ]
+  },
+  {
+   "p": "is there",
+   "prev": "B",
+   "next": "*",
+   "tok": "path_q",
+   "n": 62,
+   "prec": 0.65
   },
   {
    "p": "is there",
@@ -1480,7 +2143,15 @@
    "next": "ART",
    "tok": "path_q",
    "n": 61,
-   "prec": 0.64
+   "prec": 0.72
+  },
+  {
+   "p": "how many",
+   "prev": "*",
+   "next": "O",
+   "tok": "how_many",
+   "n": 46,
+   "prec": 0.9
   },
   {
    "p": "bigger than",
@@ -1489,7 +2160,17 @@
    "tok": "is_q",
    "n": 45,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bigger"
+   ]
+  },
+  {
+   "p": "how many",
+   "prev": "B",
+   "next": "*",
+   "tok": "how_many",
+   "n": 45,
+   "prec": 0.92
   },
   {
    "p": "connected to",
@@ -1497,7 +2178,7 @@
    "next": "*",
    "tok": "connected_q",
    "n": 40,
-   "prec": 1.0
+   "prec": 0.98
   },
   {
    "p": "reachable from",
@@ -1505,7 +2186,7 @@
    "next": "NAME",
    "tok": "path_q",
    "n": 38,
-   "prec": 0.97
+   "prec": 0.84
   },
   {
    "p": "smaller than",
@@ -1514,7 +2195,9 @@
    "tok": "is_q",
    "n": 37,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "smaller"
+   ]
   },
   {
    "p": "most connected",
@@ -1530,7 +2213,7 @@
    "next": "*",
    "tok": "path_q",
    "n": 34,
-   "prec": 0.97
+   "prec": 1.0
   },
   {
    "p": "connected to",
@@ -1538,7 +2221,7 @@
    "next": "NAME",
    "tok": "connected_q",
    "n": 33,
-   "prec": 0.87
+   "prec": 0.94
   },
   {
    "p": "bigger than",
@@ -1547,7 +2230,9 @@
    "tok": "is_q",
    "n": 27,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bigger"
+   ]
   },
   {
    "p": "closest to",
@@ -1555,8 +2240,10 @@
    "next": "NAME",
    "tok": "nearest_q",
    "n": 27,
-   "prec": 0.61,
-   "ins": true
+   "prec": 0.96,
+   "keep": [
+    "closest"
+   ]
   },
   {
    "p": "smaller than",
@@ -1565,7 +2252,9 @@
    "tok": "is_q",
    "n": 26,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "smaller"
+   ]
   },
   {
    "p": "directly linked",
@@ -1608,13 +2297,37 @@
    "prec": 1.0
   },
   {
+   "p": "closest to",
+   "prev": "THE",
+   "next": "*",
+   "tok": "nearest_q",
+   "n": 15,
+   "prec": 0.94,
+   "keep": [
+    "closest"
+   ]
+  },
+  {
+   "p": "closest to",
+   "prev": "O",
+   "next": "*",
+   "tok": "nearest_q",
+   "n": 14,
+   "prec": 1.0,
+   "keep": [
+    "closest"
+   ]
+  },
+  {
    "p": "farthest from",
    "prev": "*",
    "next": "NAME",
    "tok": "nearest_q",
    "n": 14,
-   "prec": 0.61,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "farthest"
+   ]
   },
   {
    "p": "smaller than",
@@ -1623,7 +2336,20 @@
    "tok": "is_q",
    "n": 13,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "smaller"
+   ]
+  },
+  {
+   "p": "farthest from",
+   "prev": "THE",
+   "next": "*",
+   "tok": "nearest_q",
+   "n": 12,
+   "prec": 1.0,
+   "keep": [
+    "farthest"
+   ]
   },
   {
    "p": "most connected",
@@ -1639,7 +2365,7 @@
    "next": "THE",
    "tok": "connected_q",
    "n": 10,
-   "prec": 0.67
+   "prec": 0.83
   },
   {
    "p": "directly connected",
@@ -1663,7 +2389,7 @@
    "next": "*",
    "tok": "what_color",
    "n": 8,
-   "prec": 0.73
+   "prec": 1.0
   },
   {
    "p": "what color",
@@ -1671,7 +2397,7 @@
    "next": "O",
    "tok": "what_color",
    "n": 7,
-   "prec": 0.7
+   "prec": 1.0
   },
   {
    "p": "reachable from",
@@ -1680,6 +2406,18 @@
    "tok": "path_q",
    "n": 6,
    "prec": 1.0
+  },
+  {
+   "p": "bottom right",
+   "prev": "*",
+   "next": "B",
+   "tok": "move",
+   "n": 5,
+   "prec": 0.71,
+   "keep": [
+    "bottom",
+    "right"
+   ]
   },
   {
    "p": "least connected",
@@ -1696,7 +2434,26 @@
    "tok": "move",
    "n": 4,
    "prec": 0.8,
-   "ins": true
+   "keep": [
+    "bottom",
+    "right"
+   ]
+  },
+  {
+   "p": "degree of",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "degree_q",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "degree of",
+   "prev": "THE",
+   "next": "*",
+   "tok": "degree_q",
+   "n": 4,
+   "prec": 1.0
   },
   {
    "p": "least connected",
@@ -1712,7 +2469,7 @@
    "next": "THE",
    "tok": "path_q",
    "n": 4,
-   "prec": 1.0
+   "prec": 0.8
   },
   {
    "p": "should be",
@@ -1721,6 +2478,18 @@
    "tok": "make",
    "n": 4,
    "prec": 1.0
+  },
+  {
+   "p": "blue circle",
+   "prev": "ART",
+   "next": "*",
+   "tok": "draw",
+   "n": 3,
+   "prec": 0.6,
+   "keep": [
+    "blue",
+    "circle"
+   ]
   },
   {
    "p": "close to",
@@ -1747,6 +2516,17 @@
    "prec": 1.0
   },
   {
+   "p": "farthest from",
+   "prev": "O",
+   "next": "*",
+   "tok": "nearest_q",
+   "n": 3,
+   "prec": 1.0,
+   "keep": [
+    "farthest"
+   ]
+  },
+  {
    "p": "goes in",
    "prev": "*",
    "next": "THE",
@@ -1768,8 +2548,10 @@
    "next": "B",
    "tok": "move",
    "n": 3,
-   "prec": 0.75,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "top"
+   ]
   },
   {
    "p": "on top",
@@ -1777,8 +2559,42 @@
    "next": "*",
    "tok": "move",
    "n": 3,
-   "prec": 0.75,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "top"
+   ]
+  },
+  {
+   "p": "reach from",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "reach_q",
+   "n": 3,
+   "prec": 1.0
+  },
+  {
+   "p": "reach from",
+   "prev": "O",
+   "next": "*",
+   "tok": "reach_q",
+   "n": 3,
+   "prec": 0.6
+  },
+  {
+   "p": "sends to",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "connect",
+   "n": 3,
+   "prec": 0.6
+  },
+  {
+   "p": "sends to",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "connect",
+   "n": 3,
+   "prec": 0.6
   },
   {
    "p": "sit next_to",
@@ -1787,7 +2603,9 @@
    "tok": "is_q",
    "n": 3,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "next_to"
+   ]
   },
   {
    "p": "top left",
@@ -1796,7 +2614,10 @@
    "tok": "move",
    "n": 3,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "top",
+    "left"
+   ]
   },
   {
    "p": "top left",
@@ -1805,7 +2626,21 @@
    "tok": "move",
    "n": 3,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "top",
+    "left"
+   ]
+  },
+  {
+   "p": "what shape",
+   "prev": "B",
+   "next": "*",
+   "tok": "what_shape",
+   "n": 3,
+   "prec": 0.75,
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "what size",
@@ -1830,7 +2665,21 @@
    "tok": "is_q",
    "n": 2,
    "prec": 0.67,
-   "ins": true
+   "keep": [
+    "bigger"
+   ]
+  },
+  {
+   "p": "blue circle",
+   "prev": "*",
+   "next": "O",
+   "tok": "draw",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "blue",
+    "circle"
+   ]
   },
   {
    "p": "bottom left",
@@ -1839,7 +2688,10 @@
    "tok": "move",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bottom",
+    "left"
+   ]
   },
   {
    "p": "bottom left",
@@ -1848,7 +2700,10 @@
    "tok": "move",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bottom",
+    "left"
+   ]
   },
   {
    "p": "brown square",
@@ -1856,8 +2711,11 @@
    "next": "O",
    "tok": "draw",
    "n": 2,
-   "prec": 0.67,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "brown",
+    "square"
+   ]
   },
   {
    "p": "brown square",
@@ -1866,7 +2724,21 @@
    "tok": "draw",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "brown",
+    "square"
+   ]
+  },
+  {
+   "p": "circles are",
+   "prev": "*",
+   "next": "O",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "circles"
+   ]
   },
   {
    "p": "circles are",
@@ -1875,7 +2747,9 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "circles"
+   ]
   },
   {
    "p": "close to",
@@ -1884,6 +2758,17 @@
    "tok": "is_q",
    "n": 2,
    "prec": 1.0
+  },
+  {
+   "p": "closest to",
+   "prev": "*",
+   "next": "THE",
+   "tok": "nearest_q",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "closest"
+   ]
   },
   {
    "p": "connect to",
@@ -1916,7 +2801,9 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "diamond"
+   ]
   },
   {
    "p": "diamond is",
@@ -1925,7 +2812,25 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "diamond"
+   ]
+  },
+  {
+   "p": "get from",
+   "prev": "*",
+   "next": "NAME",
+   "tok": "path_q",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "get from",
+   "prev": "O",
+   "next": "*",
+   "tok": "path_q",
+   "n": 2,
+   "prec": 1.0
   },
   {
    "p": "goes below",
@@ -1934,7 +2839,9 @@
    "tok": "move",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "below"
+   ]
   },
   {
    "p": "goes next_to",
@@ -1943,7 +2850,9 @@
    "tok": "move",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "next_to"
+   ]
   },
   {
    "p": "goes next_to",
@@ -1952,7 +2861,17 @@
    "tok": "move",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "next_to"
+   ]
+  },
+  {
+   "p": "how many",
+   "prev": "O",
+   "next": "*",
+   "tok": "how_many",
+   "n": 2,
+   "prec": 0.67
   },
   {
    "p": "is at",
@@ -1960,7 +2879,7 @@
    "next": "THE",
    "tok": "move",
    "n": 2,
-   "prec": 0.67
+   "prec": 1.0
   },
   {
    "p": "is at",
@@ -1977,7 +2896,10 @@
    "tok": "arrange",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "line",
+    "up"
+   ]
   },
   {
    "p": "magenta hexagon",
@@ -1986,7 +2908,10 @@
    "tok": "draw",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "magenta",
+    "hexagon"
+   ]
   },
   {
    "p": "magenta hexagon",
@@ -1995,7 +2920,32 @@
    "tok": "draw",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "magenta",
+    "hexagon"
+   ]
+  },
+  {
+   "p": "make each_other",
+   "prev": "*",
+   "next": "THE",
+   "tok": "make",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "each_other"
+   ]
+  },
+  {
+   "p": "make each_other",
+   "prev": "B",
+   "next": "*",
+   "tok": "make",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "each_other"
+   ]
   },
   {
    "p": "most connected",
@@ -2028,7 +2978,9 @@
    "tok": "is_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "next_to"
+   ]
   },
   {
    "p": "sits in",
@@ -2045,7 +2997,9 @@
    "tok": "is_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "smaller"
+   ]
   },
   {
    "p": "star is",
@@ -2054,7 +3008,9 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "star"
+   ]
   },
   {
    "p": "star is",
@@ -2063,7 +3019,33 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "star"
+   ]
+  },
+  {
+   "p": "top right",
+   "prev": "*",
+   "next": "B",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "top",
+    "right"
+   ]
+  },
+  {
+   "p": "top right",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "top",
+    "right"
+   ]
   },
   {
    "p": "bigger than",
@@ -2072,7 +3054,17 @@
    "tok": "is_q",
    "n": 73,
    "prec": 0.99,
-   "ins": true
+   "keep": [
+    "bigger"
+   ]
+  },
+  {
+   "p": "is there",
+   "prev": "*",
+   "next": "*",
+   "tok": "path_q",
+   "n": 62,
+   "prec": 0.65
   },
   {
    "p": "connected to",
@@ -2080,7 +3072,15 @@
    "next": "*",
    "tok": "connected_q",
    "n": 48,
-   "prec": 0.79
+   "prec": 0.84
+  },
+  {
+   "p": "how many",
+   "prev": "*",
+   "next": "*",
+   "tok": "how_many",
+   "n": 47,
+   "prec": 0.9
   },
   {
    "p": "reachable from",
@@ -2088,7 +3088,7 @@
    "next": "*",
    "tok": "path_q",
    "n": 45,
-   "prec": 0.98
+   "prec": 0.87
   },
   {
    "p": "smaller than",
@@ -2097,7 +3097,9 @@
    "tok": "is_q",
    "n": 39,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "smaller"
+   ]
   },
   {
    "p": "most connected",
@@ -2106,6 +3108,17 @@
    "tok": "extreme_q",
    "n": 36,
    "prec": 0.97
+  },
+  {
+   "p": "closest to",
+   "prev": "*",
+   "next": "*",
+   "tok": "nearest_q",
+   "n": 29,
+   "prec": 0.97,
+   "keep": [
+    "closest"
+   ]
   },
   {
    "p": "directly linked",
@@ -2124,6 +3137,17 @@
    "prec": 1.0
   },
   {
+   "p": "farthest from",
+   "prev": "*",
+   "next": "*",
+   "tok": "nearest_q",
+   "n": 15,
+   "prec": 1.0,
+   "keep": [
+    "farthest"
+   ]
+  },
+  {
    "p": "directly connected",
    "prev": "*",
    "next": "*",
@@ -2137,7 +3161,38 @@
    "next": "*",
    "tok": "what_color",
    "n": 8,
-   "prec": 0.73
+   "prec": 1.0
+  },
+  {
+   "p": "bottom right",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 5,
+   "prec": 0.71,
+   "keep": [
+    "bottom",
+    "right"
+   ]
+  },
+  {
+   "p": "degree of",
+   "prev": "*",
+   "next": "*",
+   "tok": "degree_q",
+   "n": 4,
+   "prec": 1.0
+  },
+  {
+   "p": "what shape",
+   "prev": "*",
+   "next": "*",
+   "tok": "what_shape",
+   "n": 4,
+   "prec": 0.67,
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "close to",
@@ -2161,8 +3216,26 @@
    "next": "*",
    "tok": "move",
    "n": 3,
-   "prec": 0.75,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "top"
+   ]
+  },
+  {
+   "p": "reach from",
+   "prev": "*",
+   "next": "*",
+   "tok": "reach_q",
+   "n": 3,
+   "prec": 0.6
+  },
+  {
+   "p": "sends to",
+   "prev": "*",
+   "next": "*",
+   "tok": "connect",
+   "n": 3,
+   "prec": 0.6
   },
   {
    "p": "sit next_to",
@@ -2171,7 +3244,9 @@
    "tok": "is_q",
    "n": 3,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "next_to"
+   ]
   },
   {
    "p": "top left",
@@ -2180,7 +3255,10 @@
    "tok": "move",
    "n": 3,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "top",
+    "left"
+   ]
   },
   {
    "p": "what size",
@@ -2197,7 +3275,21 @@
    "tok": "move",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bottom",
+    "left"
+   ]
+  },
+  {
+   "p": "circles are",
+   "prev": "*",
+   "next": "*",
+   "tok": "from_now_on",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "circles"
+   ]
   },
   {
    "p": "diamond is",
@@ -2206,7 +3298,17 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "diamond"
+   ]
+  },
+  {
+   "p": "get from",
+   "prev": "*",
+   "next": "*",
+   "tok": "path_q",
+   "n": 2,
+   "prec": 1.0
   },
   {
    "p": "goes below",
@@ -2215,7 +3317,9 @@
    "tok": "move",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "below"
+   ]
   },
   {
    "p": "goes next_to",
@@ -2224,7 +3328,9 @@
    "tok": "move",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "next_to"
+   ]
   },
   {
    "p": "is at",
@@ -2232,7 +3338,7 @@
    "next": "*",
    "tok": "move",
    "n": 2,
-   "prec": 0.67
+   "prec": 1.0
   },
   {
    "p": "line up",
@@ -2241,7 +3347,10 @@
    "tok": "arrange",
    "n": 2,
    "prec": 0.67,
-   "ins": true
+   "keep": [
+    "line",
+    "up"
+   ]
   },
   {
    "p": "magenta hexagon",
@@ -2250,7 +3359,21 @@
    "tok": "draw",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "magenta",
+    "hexagon"
+   ]
+  },
+  {
+   "p": "make each_other",
+   "prev": "*",
+   "next": "*",
+   "tok": "make",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "each_other"
+   ]
   },
   {
    "p": "pointing to",
@@ -2275,7 +3398,21 @@
    "tok": "from_now_on",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "star"
+   ]
+  },
+  {
+   "p": "top right",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "top",
+    "right"
+   ]
   },
   {
    "p": "connect",
@@ -2291,7 +3428,7 @@
    "next": "THE",
    "tok": "make",
    "n": 352,
-   "prec": 1.0
+   "prec": 0.99
   },
   {
    "p": "set",
@@ -2315,7 +3452,7 @@
    "next": "THE",
    "tok": "move",
    "n": 131,
-   "prec": 0.92
+   "prec": 0.91
   },
   {
    "p": "create",
@@ -2331,7 +3468,7 @@
    "next": "ART",
    "tok": "draw",
    "n": 107,
-   "prec": 0.99
+   "prec": 0.98
   },
   {
    "p": "move",
@@ -2355,7 +3492,7 @@
    "next": "O",
    "tok": "is",
    "n": 82,
-   "prec": 0.81
+   "prec": 0.95
   },
   {
    "p": "duplicate",
@@ -2371,7 +3508,7 @@
    "next": "NAME",
    "tok": "move",
    "n": 62,
-   "prec": 0.91
+   "prec": 0.89
   },
   {
    "p": "rename",
@@ -2395,7 +3532,7 @@
    "next": "ART",
    "tok": "draw",
    "n": 50,
-   "prec": 1.0
+   "prec": 0.81
   },
   {
    "p": "in",
@@ -2403,7 +3540,7 @@
    "next": "THE",
    "tok": "move",
    "n": 47,
-   "prec": 0.82
+   "prec": 1.0
   },
   {
    "p": "arrange",
@@ -2422,6 +3559,14 @@
    "prec": 0.79
   },
   {
+   "p": "is",
+   "prev": "B",
+   "next": "THE",
+   "tok": "is_q",
+   "n": 37,
+   "prec": 0.73
+  },
+  {
    "p": "connect",
    "prev": "B",
    "next": "PRON",
@@ -2435,7 +3580,15 @@
    "next": "PRON",
    "tok": "make",
    "n": 36,
-   "prec": 0.95
+   "prec": 0.92
+  },
+  {
+   "p": "is",
+   "prev": "B",
+   "next": "NAME",
+   "tok": "is_q",
+   "n": 32,
+   "prec": 0.6
   },
   {
    "p": "align",
@@ -2452,7 +3605,9 @@
    "tok": "extreme_q",
    "n": 31,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "biggest"
+   ]
   },
   {
    "p": "swap",
@@ -2468,8 +3623,10 @@
    "next": "B",
    "tok": "move",
    "n": 28,
-   "prec": 0.65,
-   "ins": true
+   "prec": 0.97,
+   "keep": [
+    "bottom"
+   ]
   },
   {
    "p": "connect",
@@ -2477,7 +3634,7 @@
    "next": "NAME",
    "tok": "connect",
    "n": 28,
-   "prec": 0.93
+   "prec": 1.0
   },
   {
    "p": "disconnect",
@@ -2494,7 +3651,17 @@
    "tok": "extreme_q",
    "n": 26,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "leftmost"
+   ]
+  },
+  {
+   "p": "at",
+   "prev": "NAME",
+   "next": "THE",
+   "tok": "move",
+   "n": 25,
+   "prec": 0.86
   },
   {
    "p": "describe",
@@ -2519,7 +3686,9 @@
    "tok": "extreme_q",
    "n": 25,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "smallest"
+   ]
   },
   {
    "p": "closest",
@@ -2527,8 +3696,10 @@
    "next": "O",
    "tok": "nearest_q",
    "n": 24,
-   "prec": 0.63,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "closest"
+   ]
   },
   {
    "p": "rightmost",
@@ -2536,8 +3707,10 @@
    "next": "B",
    "tok": "extreme_q",
    "n": 24,
-   "prec": 1.0,
-   "ins": true
+   "prec": 0.96,
+   "keep": [
+    "rightmost"
+   ]
   },
   {
    "p": "topmost",
@@ -2546,7 +3719,9 @@
    "tok": "extreme_q",
    "n": 24,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "topmost"
+   ]
   },
   {
    "p": "bottommost",
@@ -2555,7 +3730,9 @@
    "tok": "extreme_q",
    "n": 23,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bottommost"
+   ]
   },
   {
    "p": "set",
@@ -2571,7 +3748,7 @@
    "next": "O",
    "tok": "make",
    "n": 22,
-   "prec": 0.81
+   "prec": 0.92
   },
   {
    "p": "chain",
@@ -2580,7 +3757,9 @@
    "tok": "connect",
    "n": 21,
    "prec": 0.91,
-   "ins": true
+   "keep": [
+    "chain"
+   ]
   },
   {
    "p": "count",
@@ -2596,7 +3775,7 @@
    "next": "ART",
    "tok": "draw",
    "n": 21,
-   "prec": 1.0
+   "prec": 0.91
   },
   {
    "p": "undo",
@@ -2620,7 +3799,7 @@
    "next": "O",
    "tok": "degree_q",
    "n": 19,
-   "prec": 0.83
+   "prec": 1.0
   },
   {
    "p": "colour",
@@ -2647,12 +3826,23 @@
    "prec": 0.94
   },
   {
+   "p": "top",
+   "prev": "NAME",
+   "next": "B",
+   "tok": "move",
+   "n": 17,
+   "prec": 1.0,
+   "keep": [
+    "top"
+   ]
+  },
+  {
    "p": "label",
    "prev": "B",
    "next": "THE",
    "tok": "label",
    "n": 16,
-   "prec": 1.0
+   "prec": 0.89
   },
   {
    "p": "rename",
@@ -2669,7 +3859,20 @@
    "tok": "extreme_q",
    "n": 15,
    "prec": 0.83,
-   "ins": true
+   "keep": [
+    "biggest"
+   ]
+  },
+  {
+   "p": "closest",
+   "prev": "THE",
+   "next": "O",
+   "tok": "nearest_q",
+   "n": 15,
+   "prec": 0.94,
+   "keep": [
+    "closest"
+   ]
   },
   {
    "p": "describe",
@@ -2686,7 +3889,9 @@
    "tok": "extreme_q",
    "n": 15,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "leastconnected"
+   ]
   },
   {
    "p": "mostconnected",
@@ -2695,7 +3900,9 @@
    "tok": "extreme_q",
    "n": 15,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "mostconnected"
+   ]
   },
   {
    "p": "cycle",
@@ -2712,7 +3919,17 @@
    "tok": "extreme_q",
    "n": 14,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "leftmost"
+   ]
+  },
+  {
+   "p": "path",
+   "prev": "ART",
+   "next": "O",
+   "tok": "path_q",
+   "n": 14,
+   "prec": 1.0
   },
   {
    "p": "right_side",
@@ -2720,8 +3937,10 @@
    "next": "B",
    "tok": "move",
    "n": 14,
-   "prec": 0.93,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "right_side"
+   ]
   },
   {
    "p": "shrink",
@@ -2737,8 +3956,10 @@
    "next": "O",
    "tok": "extreme_q",
    "n": 14,
-   "prec": 1.0,
-   "ins": true
+   "prec": 0.93,
+   "keep": [
+    "topmost"
+   ]
   },
   {
    "p": "distribute",
@@ -2765,12 +3986,23 @@
    "prec": 1.0
   },
   {
+   "p": "farthest",
+   "prev": "THE",
+   "next": "O",
+   "tok": "nearest_q",
+   "n": 12,
+   "prec": 1.0,
+   "keep": [
+    "farthest"
+   ]
+  },
+  {
    "p": "neighbors",
    "prev": "THE",
    "next": "O",
    "tok": "neigh_q",
    "n": 12,
-   "prec": 0.92
+   "prec": 1.0
   },
   {
    "p": "link",
@@ -2819,7 +4051,9 @@
    "tok": "extreme_q",
    "n": 11,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "rightmost"
+   ]
   },
   {
    "p": "chain",
@@ -2828,7 +4062,9 @@
    "tok": "connect",
    "n": 10,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "chain"
+   ]
   },
   {
    "p": "label",
@@ -2844,8 +4080,10 @@
    "next": "B",
    "tok": "move",
    "n": 10,
-   "prec": 0.67,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "left_side"
+   ]
   },
   {
    "p": "remove",
@@ -2853,7 +4091,7 @@
    "next": "THE",
    "tok": "disconnect",
    "n": 10,
-   "prec": 0.91
+   "prec": 0.77
   },
   {
    "p": "cycle",
@@ -2896,12 +4134,20 @@
    "prec": 1.0
   },
   {
+   "p": "anything",
+   "prev": "O",
+   "next": "O",
+   "tok": "is_there",
+   "n": 8,
+   "prec": 0.67
+  },
+  {
    "p": "arrange",
    "prev": "B",
    "next": "THE",
    "tok": "arrange",
    "n": 8,
-   "prec": 0.8
+   "prec": 1.0
   },
   {
    "p": "farthest",
@@ -2909,8 +4155,10 @@
    "next": "O",
    "tok": "nearest_q",
    "n": 8,
-   "prec": 0.67,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "farthest"
+   ]
   },
   {
    "p": "neighbors",
@@ -2950,7 +4198,7 @@
    "next": "O",
    "tok": "is",
    "n": 7,
-   "prec": 0.7
+   "prec": 0.78
   },
   {
    "p": "colour",
@@ -2966,7 +4214,7 @@
    "next": "O",
    "tok": "cycle_q",
    "n": 7,
-   "prec": 0.88
+   "prec": 1.0
   },
   {
    "p": "delete",
@@ -2993,12 +4241,23 @@
    "prec": 1.0
   },
   {
+   "p": "grid",
+   "prev": "ART",
+   "next": "B",
+   "tok": "arrange",
+   "n": 7,
+   "prec": 1.0,
+   "keep": [
+    "grid"
+   ]
+  },
+  {
    "p": "list",
    "prev": "B",
    "next": "THE",
    "tok": "which",
    "n": 7,
-   "prec": 0.88
+   "prec": 1.0
   },
   {
    "p": "to",
@@ -3031,7 +4290,9 @@
    "tok": "connect",
    "n": 6,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "chain"
+   ]
   },
   {
    "p": "connect",
@@ -3056,7 +4317,9 @@
    "tok": "move",
    "n": 6,
    "prec": 0.67,
-   "ins": true
+   "keep": [
+    "right_of"
+   ]
   },
   {
    "p": "topmost",
@@ -3065,7 +4328,9 @@
    "tok": "extreme_q",
    "n": 6,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "topmost"
+   ]
   },
   {
    "p": "where",
@@ -3082,7 +4347,20 @@
    "tok": "move",
    "n": 5,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "above"
+   ]
+  },
+  {
+   "p": "below",
+   "prev": "NAME",
+   "next": "PRON",
+   "tok": "move",
+   "n": 5,
+   "prec": 0.71,
+   "keep": [
+    "below"
+   ]
   },
   {
    "p": "below",
@@ -3091,7 +4369,9 @@
    "tok": "move",
    "n": 5,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "below"
+   ]
   },
   {
    "p": "bottommost",
@@ -3100,7 +4380,9 @@
    "tok": "extreme_q",
    "n": 5,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bottommost"
+   ]
   },
   {
    "p": "color",
@@ -3116,7 +4398,7 @@
    "next": "O",
    "tok": "how_many",
    "n": 5,
-   "prec": 0.83
+   "prec": 1.0
   },
   {
    "p": "distribute",
@@ -3149,7 +4431,9 @@
    "tok": "extreme_q",
    "n": 5,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "leftmost"
+   ]
   },
   {
    "p": "link",
@@ -3165,7 +4449,7 @@
    "next": "O",
    "tok": "which",
    "n": 5,
-   "prec": 0.71
+   "prec": 1.0
   },
   {
    "p": "make",
@@ -3190,7 +4474,20 @@
    "tok": "extreme_q",
    "n": 5,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "smallest"
+   ]
+  },
+  {
+   "p": "square",
+   "prev": "ART",
+   "next": "O",
+   "tok": "draw",
+   "n": 5,
+   "prec": 0.71,
+   "keep": [
+    "square"
+   ]
   },
   {
    "p": "align",
@@ -3207,7 +4504,9 @@
    "tok": "extreme_q",
    "n": 4,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bottommost"
+   ]
   },
   {
    "p": "chained",
@@ -3226,6 +4525,14 @@
    "prec": 1.0
   },
   {
+   "p": "delete",
+   "prev": "B",
+   "next": "O",
+   "tok": "delete",
+   "n": 4,
+   "prec": 0.67
+  },
+  {
    "p": "distribute",
    "prev": "B",
    "next": "THE",
@@ -3240,7 +4547,9 @@
    "tok": "nearest_q",
    "n": 4,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "farthest"
+   ]
   },
   {
    "p": "huge",
@@ -3249,7 +4558,9 @@
    "tok": "make",
    "n": 4,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "huge"
+   ]
   },
   {
    "p": "join",
@@ -3266,7 +4577,17 @@
    "tok": "extreme_q",
    "n": 4,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "rightmost"
+   ]
+  },
+  {
+   "p": "send",
+   "prev": "B",
+   "next": "THE",
+   "tok": "send",
+   "n": 4,
+   "prec": 0.67
   },
   {
    "p": "smallest",
@@ -3275,7 +4596,9 @@
    "tok": "extreme_q",
    "n": 4,
    "prec": 0.67,
-   "ins": true
+   "keep": [
+    "smallest"
+   ]
   },
   {
    "p": "star",
@@ -3283,8 +4606,10 @@
    "next": "O",
    "tok": "draw",
    "n": 4,
-   "prec": 0.67,
-   "ins": true
+   "prec": 0.8,
+   "keep": [
+    "star"
+   ]
   },
   {
    "p": "turn",
@@ -3313,11 +4638,24 @@
   {
    "p": "chain",
    "prev": "O",
+   "next": "B",
+   "tok": "connect",
+   "n": 3,
+   "prec": 1.0,
+   "keep": [
+    "chain"
+   ]
+  },
+  {
+   "p": "chain",
+   "prev": "O",
    "next": "PRON",
    "tok": "connect",
    "n": 3,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "chain"
+   ]
   },
   {
    "p": "chained",
@@ -3368,12 +4706,34 @@
    "prec": 1.0
   },
   {
+   "p": "left_of",
+   "prev": "NAME",
+   "next": "THE",
+   "tok": "move",
+   "n": 3,
+   "prec": 0.75,
+   "keep": [
+    "left_of"
+   ]
+  },
+  {
    "p": "link",
    "prev": "O",
    "next": "NAME",
    "tok": "connect",
    "n": 3,
-   "prec": 0.75
+   "prec": 1.0
+  },
+  {
+   "p": "next",
+   "prev": "O",
+   "next": "B",
+   "tok": "connect",
+   "n": 3,
+   "prec": 1.0,
+   "keep": [
+    "next"
+   ]
   },
   {
    "p": "next_to",
@@ -3382,7 +4742,9 @@
    "tok": "move",
    "n": 3,
    "prec": 0.75,
-   "ins": true
+   "keep": [
+    "next_to"
+   ]
   },
   {
    "p": "redo",
@@ -3399,7 +4761,28 @@
    "tok": "extreme_q",
    "n": 3,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "rightmost"
+   ]
+  },
+  {
+   "p": "rules",
+   "prev": "O",
+   "next": "O",
+   "tok": "which",
+   "n": 3,
+   "prec": 0.75
+  },
+  {
+   "p": "shape",
+   "prev": "THE",
+   "next": "O",
+   "tok": "what_shape",
+   "n": 3,
+   "prec": 0.75,
+   "keep": [
+    "shape"
+   ]
   },
   {
    "p": "shrink",
@@ -3426,13 +4809,37 @@
    "prec": 1.0
   },
   {
+   "p": "top",
+   "prev": "O",
+   "next": "B",
+   "tok": "move",
+   "n": 3,
+   "prec": 0.75,
+   "keep": [
+    "top"
+   ]
+  },
+  {
+   "p": "top",
+   "prev": "NAME",
+   "next": "O",
+   "tok": "move",
+   "n": 3,
+   "prec": 0.75,
+   "keep": [
+    "top"
+   ]
+  },
+  {
    "p": "above",
    "prev": "NAME",
    "next": "B",
    "tok": "move",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "above"
+   ]
   },
   {
    "p": "align",
@@ -3451,13 +4858,26 @@
    "prec": 0.67
   },
   {
+   "p": "back",
+   "prev": "O",
+   "next": "B",
+   "tok": "send",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "back"
+   ]
+  },
+  {
    "p": "below",
    "prev": "O",
    "next": "PRON",
    "tok": "move",
    "n": 2,
-   "prec": 0.67,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "below"
+   ]
   },
   {
    "p": "biggest",
@@ -3466,7 +4886,9 @@
    "tok": "extreme_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "biggest"
+   ]
   },
   {
    "p": "closest",
@@ -3475,7 +4897,9 @@
    "tok": "nearest_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "closest"
+   ]
   },
   {
    "p": "color",
@@ -3483,7 +4907,7 @@
    "next": "B",
    "tok": "what_color",
    "n": 2,
-   "prec": 0.67
+   "prec": 1.0
   },
   {
    "p": "color",
@@ -3500,7 +4924,9 @@
    "tok": "arrange",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "column"
+   ]
   },
   {
    "p": "column",
@@ -3509,7 +4935,9 @@
    "tok": "arrange",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "column"
+   ]
   },
   {
    "p": "connected",
@@ -3533,7 +4961,7 @@
    "next": "O",
    "tok": "cycle_q",
    "n": 2,
-   "prec": 0.67
+   "prec": 1.0
   },
   {
    "p": "describe",
@@ -3566,7 +4994,9 @@
    "tok": "nearest_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "farthest"
+   ]
   },
   {
    "p": "forget",
@@ -3593,13 +5023,26 @@
    "prec": 1.0
   },
   {
+   "p": "horizontally",
+   "prev": "NAME",
+   "next": "O",
+   "tok": "arrange",
+   "n": 2,
+   "prec": 0.67,
+   "keep": [
+    "horizontally"
+   ]
+  },
+  {
    "p": "large",
    "prev": "B",
    "next": "O",
    "tok": "make",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "large"
+   ]
   },
   {
    "p": "left_of",
@@ -3607,8 +5050,10 @@
    "next": "NAME",
    "tok": "move",
    "n": 2,
-   "prec": 0.67,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "left_of"
+   ]
   },
   {
    "p": "leftmost",
@@ -3617,7 +5062,9 @@
    "tok": "extreme_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "leftmost"
+   ]
   },
   {
    "p": "list",
@@ -3650,7 +5097,9 @@
    "tok": "extreme_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "mostconnected"
+   ]
   },
   {
    "p": "move",
@@ -3667,7 +5116,9 @@
    "tok": "move",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "next_to"
+   ]
   },
   {
    "p": "reach",
@@ -3692,7 +5143,9 @@
    "tok": "move",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "right_side"
+   ]
   },
   {
    "p": "slap",
@@ -3717,7 +5170,9 @@
    "tok": "extreme_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "smallest"
+   ]
   },
   {
    "p": "spaced",
@@ -3757,7 +5212,7 @@
    "next": "NAME",
    "tok": "connect",
    "n": 551,
-   "prec": 0.99
+   "prec": 1.0
   },
   {
    "p": "make",
@@ -3765,7 +5220,7 @@
    "next": "*",
    "tok": "make",
    "n": 498,
-   "prec": 0.98
+   "prec": 0.97
   },
   {
    "p": "make",
@@ -3813,7 +5268,7 @@
    "next": "THE",
    "tok": "move",
    "n": 131,
-   "prec": 0.92
+   "prec": 0.91
   },
   {
    "p": "create",
@@ -3837,7 +5292,7 @@
    "next": "ART",
    "tok": "draw",
    "n": 107,
-   "prec": 0.99
+   "prec": 0.98
   },
   {
    "p": "is",
@@ -3845,7 +5300,7 @@
    "next": "*",
    "tok": "is",
    "n": 101,
-   "prec": 0.81
+   "prec": 0.93
   },
   {
    "p": "move",
@@ -3901,7 +5356,7 @@
    "next": "*",
    "tok": "arrange",
    "n": 64,
-   "prec": 0.97
+   "prec": 1.0
   },
   {
    "p": "put",
@@ -3909,7 +5364,7 @@
    "next": "NAME",
    "tok": "move",
    "n": 62,
-   "prec": 0.91
+   "prec": 0.89
   },
   {
    "p": "link",
@@ -3917,7 +5372,7 @@
    "next": "NAME",
    "tok": "connect",
    "n": 61,
-   "prec": 0.98
+   "prec": 1.0
   },
   {
    "p": "rename",
@@ -3933,7 +5388,7 @@
    "next": "ART",
    "tok": "draw",
    "n": 50,
-   "prec": 1.0
+   "prec": 0.81
   },
   {
    "p": "delete",
@@ -3941,7 +5396,7 @@
    "next": "*",
    "tok": "delete",
    "n": 50,
-   "prec": 0.78
+   "prec": 0.79
   },
   {
    "p": "in",
@@ -3949,7 +5404,7 @@
    "next": "THE",
    "tok": "move",
    "n": 50,
-   "prec": 0.6
+   "prec": 0.76
   },
   {
    "p": "in",
@@ -3957,7 +5412,7 @@
    "next": "*",
    "tok": "move",
    "n": 47,
-   "prec": 0.62
+   "prec": 0.73
   },
   {
    "p": "biggest",
@@ -3966,7 +5421,9 @@
    "tok": "extreme_q",
    "n": 46,
    "prec": 0.94,
-   "ins": true
+   "keep": [
+    "biggest"
+   ]
   },
   {
    "p": "align",
@@ -4007,7 +5464,20 @@
    "tok": "extreme_q",
    "n": 40,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "leftmost"
+   ]
+  },
+  {
+   "p": "closest",
+   "prev": "*",
+   "next": "O",
+   "tok": "nearest_q",
+   "n": 39,
+   "prec": 0.97,
+   "keep": [
+    "closest"
+   ]
   },
   {
    "p": "delete",
@@ -4032,7 +5502,9 @@
    "tok": "connect",
    "n": 38,
    "prec": 0.95,
-   "ins": true
+   "keep": [
+    "chain"
+   ]
   },
   {
    "p": "topmost",
@@ -4040,8 +5512,10 @@
    "next": "*",
    "tok": "extreme_q",
    "n": 38,
-   "prec": 1.0,
-   "ins": true
+   "prec": 0.97,
+   "keep": [
+    "topmost"
+   ]
   },
   {
    "p": "connect",
@@ -4073,8 +5547,10 @@
    "next": "*",
    "tok": "extreme_q",
    "n": 35,
-   "prec": 1.0,
-   "ins": true
+   "prec": 0.97,
+   "keep": [
+    "rightmost"
+   ]
   },
   {
    "p": "biggest",
@@ -4083,7 +5559,9 @@
    "tok": "extreme_q",
    "n": 34,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "biggest"
+   ]
   },
   {
    "p": "leftmost",
@@ -4092,7 +5570,9 @@
    "tok": "extreme_q",
    "n": 33,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "leftmost"
+   ]
   },
   {
    "p": "redo",
@@ -4109,7 +5589,9 @@
    "tok": "extreme_q",
    "n": 32,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "smallest"
+   ]
   },
   {
    "p": "align",
@@ -4125,8 +5607,10 @@
    "next": "B",
    "tok": "extreme_q",
    "n": 31,
-   "prec": 1.0,
-   "ins": true
+   "prec": 0.97,
+   "keep": [
+    "rightmost"
+   ]
   },
   {
    "p": "topmost",
@@ -4135,7 +5619,9 @@
    "tok": "extreme_q",
    "n": 31,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "topmost"
+   ]
   },
   {
    "p": "connect",
@@ -4143,7 +5629,7 @@
    "next": "*",
    "tok": "connect",
    "n": 30,
-   "prec": 0.83
+   "prec": 0.91
   },
   {
    "p": "swap",
@@ -4154,13 +5640,37 @@
    "prec": 0.88
   },
   {
+   "p": "bottom",
+   "prev": "*",
+   "next": "B",
+   "tok": "move",
+   "n": 29,
+   "prec": 0.97,
+   "keep": [
+    "bottom"
+   ]
+  },
+  {
    "p": "smallest",
    "prev": "THE",
    "next": "*",
    "tok": "extreme_q",
    "n": 29,
    "prec": 0.94,
-   "ins": true
+   "keep": [
+    "smallest"
+   ]
+  },
+  {
+   "p": "bottom",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "move",
+   "n": 28,
+   "prec": 0.93,
+   "keep": [
+    "bottom"
+   ]
   },
   {
    "p": "bottommost",
@@ -4169,7 +5679,9 @@
    "tok": "extreme_q",
    "n": 28,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bottommost"
+   ]
   },
   {
    "p": "count",
@@ -4177,7 +5689,7 @@
    "next": "*",
    "tok": "how_many",
    "n": 28,
-   "prec": 0.97
+   "prec": 1.0
   },
   {
    "p": "disconnect",
@@ -4194,7 +5706,9 @@
    "tok": "extreme_q",
    "n": 27,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bottommost"
+   ]
   },
   {
    "p": "colour",
@@ -4226,7 +5740,7 @@
    "next": "*",
    "tok": "label",
    "n": 27,
-   "prec": 0.96
+   "prec": 0.9
   },
   {
    "p": "describe",
@@ -4235,6 +5749,14 @@
    "tok": "describe",
    "n": 26,
    "prec": 1.0
+  },
+  {
+   "p": "at",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "move",
+   "n": 25,
+   "prec": 0.86
   },
   {
    "p": "distribute",
@@ -4259,7 +5781,9 @@
    "tok": "connect",
    "n": 24,
    "prec": 0.92,
-   "ins": true
+   "keep": [
+    "chain"
+   ]
   },
   {
    "p": "closest",
@@ -4267,8 +5791,10 @@
    "next": "*",
    "tok": "nearest_q",
    "n": 24,
-   "prec": 0.62,
-   "ins": true
+   "prec": 0.96,
+   "keep": [
+    "closest"
+   ]
   },
   {
    "p": "cycle",
@@ -4292,7 +5818,7 @@
    "next": "*",
    "tok": "draw",
    "n": 22,
-   "prec": 0.92
+   "prec": 0.85
   },
   {
    "p": "make",
@@ -4300,7 +5826,7 @@
    "next": "O",
    "tok": "make",
    "n": 22,
-   "prec": 0.73
+   "prec": 0.81
   },
   {
    "p": "rules",
@@ -4324,7 +5850,7 @@
    "next": "*",
    "tok": "cycle_q",
    "n": 21,
-   "prec": 0.95
+   "prec": 1.0
   },
   {
    "p": "draw",
@@ -4332,7 +5858,7 @@
    "next": "ART",
    "tok": "draw",
    "n": 21,
-   "prec": 0.95
+   "prec": 0.88
   },
   {
    "p": "undo",
@@ -4351,6 +5877,17 @@
    "prec": 0.91
   },
   {
+   "p": "farthest",
+   "prev": "*",
+   "next": "O",
+   "tok": "nearest_q",
+   "n": 20,
+   "prec": 1.0,
+   "keep": [
+    "farthest"
+   ]
+  },
+  {
    "p": "shrink",
    "prev": "B",
    "next": "*",
@@ -4359,12 +5896,34 @@
    "prec": 1.0
   },
   {
+   "p": "top",
+   "prev": "*",
+   "next": "B",
+   "tok": "move",
+   "n": 20,
+   "prec": 0.95,
+   "keep": [
+    "top"
+   ]
+  },
+  {
+   "p": "top",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "move",
+   "n": 20,
+   "prec": 0.95,
+   "keep": [
+    "top"
+   ]
+  },
+  {
    "p": "connect",
    "prev": "*",
    "next": "O",
    "tok": "connect",
    "n": 19,
-   "prec": 0.66
+   "prec": 0.83
   },
   {
    "p": "degree",
@@ -4372,7 +5931,7 @@
    "next": "O",
    "tok": "degree_q",
    "n": 19,
-   "prec": 0.83
+   "prec": 1.0
   },
   {
    "p": "degree",
@@ -4380,7 +5939,7 @@
    "next": "*",
    "tok": "degree_q",
    "n": 19,
-   "prec": 0.83
+   "prec": 1.0
   },
   {
    "p": "colour",
@@ -4391,12 +5950,23 @@
    "prec": 1.0
   },
   {
+   "p": "closest",
+   "prev": "THE",
+   "next": "*",
+   "tok": "nearest_q",
+   "n": 17,
+   "prec": 0.94,
+   "keep": [
+    "closest"
+   ]
+  },
+  {
    "p": "label",
    "prev": "*",
    "next": "THE",
    "tok": "label",
    "n": 17,
-   "prec": 0.89
+   "prec": 0.77
   },
   {
    "p": "mostconnected",
@@ -4405,7 +5975,20 @@
    "tok": "extreme_q",
    "n": 17,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "mostconnected"
+   ]
+  },
+  {
+   "p": "farthest",
+   "prev": "THE",
+   "next": "*",
+   "tok": "nearest_q",
+   "n": 16,
+   "prec": 1.0,
+   "keep": [
+    "farthest"
+   ]
   },
   {
    "p": "leastconnected",
@@ -4414,7 +5997,9 @@
    "tok": "extreme_q",
    "n": 16,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "leastconnected"
+   ]
   },
   {
    "p": "mostconnected",
@@ -4423,7 +6008,9 @@
    "tok": "extreme_q",
    "n": 16,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "mostconnected"
+   ]
   },
   {
    "p": "rename",
@@ -4439,8 +6026,10 @@
    "next": "B",
    "tok": "move",
    "n": 16,
-   "prec": 0.94,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "right_side"
+   ]
   },
   {
    "p": "biggest",
@@ -4449,7 +6038,9 @@
    "tok": "extreme_q",
    "n": 15,
    "prec": 0.79,
-   "ins": true
+   "keep": [
+    "biggest"
+   ]
   },
   {
    "p": "describe",
@@ -4466,7 +6057,9 @@
    "tok": "extreme_q",
    "n": 15,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "leastconnected"
+   ]
   },
   {
    "p": "leftmost",
@@ -4475,7 +6068,9 @@
    "tok": "extreme_q",
    "n": 15,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "leftmost"
+   ]
   },
   {
    "p": "list",
@@ -4483,7 +6078,15 @@
    "next": "*",
    "tok": "which",
    "n": 14,
-   "prec": 0.82
+   "prec": 1.0
+  },
+  {
+   "p": "path",
+   "prev": "ART",
+   "next": "*",
+   "tok": "path_q",
+   "n": 14,
+   "prec": 1.0
   },
   {
    "p": "right_side",
@@ -4491,8 +6094,10 @@
    "next": "*",
    "tok": "move",
    "n": 14,
-   "prec": 0.88,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "right_side"
+   ]
   },
   {
    "p": "shrink",
@@ -4508,8 +6113,10 @@
    "next": "O",
    "tok": "extreme_q",
    "n": 14,
-   "prec": 1.0,
-   "ins": true
+   "prec": 0.93,
+   "keep": [
+    "topmost"
+   ]
   },
   {
    "p": "distribute",
@@ -4533,7 +6140,7 @@
    "next": "O",
    "tok": "neigh_q",
    "n": 13,
-   "prec": 0.93
+   "prec": 1.0
   },
   {
    "p": "cycle",
@@ -4541,7 +6148,7 @@
    "next": "O",
    "tok": "cycle_q",
    "n": 12,
-   "prec": 0.63
+   "prec": 0.71
   },
   {
    "p": "cycle",
@@ -4565,7 +6172,15 @@
    "next": "*",
    "tok": "neigh_q",
    "n": 12,
-   "prec": 0.92
+   "prec": 1.0
+  },
+  {
+   "p": "rules",
+   "prev": "*",
+   "next": "O",
+   "tok": "which",
+   "n": 12,
+   "prec": 0.63
   },
   {
    "p": "link",
@@ -4581,7 +6196,7 @@
    "next": "B",
    "tok": "connected_q",
    "n": 11,
-   "prec": 0.85
+   "prec": 1.0
   },
   {
    "p": "linked",
@@ -4589,7 +6204,7 @@
    "next": "*",
    "tok": "connected_q",
    "n": 11,
-   "prec": 0.73
+   "prec": 1.0
   },
   {
    "p": "redo",
@@ -4614,7 +6229,17 @@
    "tok": "extreme_q",
    "n": 11,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "rightmost"
+   ]
+  },
+  {
+   "p": "anything",
+   "prev": "O",
+   "next": "*",
+   "tok": "is_there",
+   "n": 10,
+   "prec": 0.67
   },
   {
    "p": "chain",
@@ -4623,7 +6248,9 @@
    "tok": "connect",
    "n": 10,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "chain"
+   ]
   },
   {
    "p": "farthest",
@@ -4631,8 +6258,10 @@
    "next": "*",
    "tok": "nearest_q",
    "n": 10,
-   "prec": 0.71,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "farthest"
+   ]
   },
   {
    "p": "label",
@@ -4643,12 +6272,34 @@
    "prec": 1.0
   },
   {
+   "p": "left_side",
+   "prev": "*",
+   "next": "B",
+   "tok": "move",
+   "n": 10,
+   "prec": 0.91,
+   "keep": [
+    "left_side"
+   ]
+  },
+  {
+   "p": "left_side",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "move",
+   "n": 10,
+   "prec": 0.91,
+   "keep": [
+    "left_side"
+   ]
+  },
+  {
    "p": "remove",
    "prev": "*",
    "next": "THE",
    "tok": "disconnect",
    "n": 10,
-   "prec": 0.91
+   "prec": 0.77
   },
   {
    "p": "resize",
@@ -4657,6 +6308,14 @@
    "tok": "resize",
    "n": 10,
    "prec": 0.91
+  },
+  {
+   "p": "anything",
+   "prev": "*",
+   "next": "O",
+   "tok": "is_there",
+   "n": 9,
+   "prec": 0.64
   },
   {
    "p": "color",
@@ -4696,7 +6355,18 @@
    "next": "THE",
    "tok": "arrange",
    "n": 8,
-   "prec": 0.8
+   "prec": 1.0
+  },
+  {
+   "p": "below",
+   "prev": "*",
+   "next": "PRON",
+   "tok": "move",
+   "n": 8,
+   "prec": 0.8,
+   "keep": [
+    "below"
+   ]
   },
   {
    "p": "neighbors",
@@ -4744,8 +6414,10 @@
    "next": "PRON",
    "tok": "move",
    "n": 7,
-   "prec": 0.78,
-   "ins": true
+   "prec": 0.88,
+   "keep": [
+    "above"
+   ]
   },
   {
    "p": "are",
@@ -4753,7 +6425,7 @@
    "next": "*",
    "tok": "is",
    "n": 7,
-   "prec": 0.64
+   "prec": 0.7
   },
   {
    "p": "chained",
@@ -4796,6 +6468,28 @@
    "prec": 0.88
   },
   {
+   "p": "grid",
+   "prev": "*",
+   "next": "B",
+   "tok": "arrange",
+   "n": 7,
+   "prec": 0.78,
+   "keep": [
+    "grid"
+   ]
+  },
+  {
+   "p": "grid",
+   "prev": "ART",
+   "next": "*",
+   "tok": "arrange",
+   "n": 7,
+   "prec": 0.78,
+   "keep": [
+    "grid"
+   ]
+  },
+  {
    "p": "join",
    "prev": "B",
    "next": "*",
@@ -4809,7 +6503,7 @@
    "next": "THE",
    "tok": "which",
    "n": 7,
-   "prec": 0.88
+   "prec": 1.0
   },
   {
    "p": "arrange",
@@ -4833,8 +6527,10 @@
    "next": "B",
    "tok": "move",
    "n": 6,
-   "prec": 0.75,
-   "ins": true
+   "prec": 0.86,
+   "keep": [
+    "below"
+   ]
   },
   {
    "p": "connect",
@@ -4851,7 +6547,9 @@
    "tok": "nearest_q",
    "n": 6,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "farthest"
+   ]
   },
   {
    "p": "leftmost",
@@ -4860,7 +6558,9 @@
    "tok": "extreme_q",
    "n": 6,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "leftmost"
+   ]
   },
   {
    "p": "link",
@@ -4877,7 +6577,9 @@
    "tok": "extreme_q",
    "n": 6,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "topmost"
+   ]
   },
   {
    "p": "where",
@@ -4894,7 +6596,9 @@
    "tok": "extreme_q",
    "n": 5,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bottommost"
+   ]
   },
   {
    "p": "color",
@@ -4910,8 +6614,10 @@
    "next": "*",
    "tok": "arrange",
    "n": 5,
-   "prec": 1.0,
-   "ins": true
+   "prec": 0.83,
+   "keep": [
+    "column"
+   ]
   },
   {
    "p": "count",
@@ -4919,7 +6625,7 @@
    "next": "O",
    "tok": "how_many",
    "n": 5,
-   "prec": 0.71
+   "prec": 0.83
   },
   {
    "p": "degree",
@@ -4976,7 +6682,9 @@
    "tok": "move",
    "n": 5,
    "prec": 0.83,
-   "ins": true
+   "keep": [
+    "next_to"
+   ]
   },
   {
    "p": "place",
@@ -4993,7 +6701,9 @@
    "tok": "extreme_q",
    "n": 5,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "smallest"
+   ]
   },
   {
    "p": "align",
@@ -5010,7 +6720,9 @@
    "tok": "extreme_q",
    "n": 4,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bottommost"
+   ]
   },
   {
    "p": "call",
@@ -5019,6 +6731,17 @@
    "tok": "rename",
    "n": 4,
    "prec": 1.0
+  },
+  {
+   "p": "chain",
+   "prev": "*",
+   "next": "B",
+   "tok": "connect",
+   "n": 4,
+   "prec": 1.0,
+   "keep": [
+    "chain"
+   ]
   },
   {
    "p": "chained",
@@ -5034,7 +6757,7 @@
    "next": "B",
    "tok": "what_color",
    "n": 4,
-   "prec": 0.8
+   "prec": 1.0
   },
   {
    "p": "degree",
@@ -5067,7 +6790,9 @@
    "tok": "make",
    "n": 4,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "huge"
+   ]
   },
   {
    "p": "join",
@@ -5076,6 +6801,17 @@
    "tok": "connect",
    "n": 4,
    "prec": 1.0
+  },
+  {
+   "p": "next",
+   "prev": "*",
+   "next": "B",
+   "tok": "connect",
+   "n": 4,
+   "prec": 1.0,
+   "keep": [
+    "next"
+   ]
   },
   {
    "p": "redo",
@@ -5092,7 +6828,25 @@
    "tok": "extreme_q",
    "n": 4,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "rightmost"
+   ]
+  },
+  {
+   "p": "send",
+   "prev": "*",
+   "next": "THE",
+   "tok": "send",
+   "n": 4,
+   "prec": 0.67
+  },
+  {
+   "p": "send",
+   "prev": "B",
+   "next": "*",
+   "tok": "send",
+   "n": 4,
+   "prec": 0.67
   },
   {
    "p": "smallest",
@@ -5101,7 +6855,9 @@
    "tok": "extreme_q",
    "n": 4,
    "prec": 0.67,
-   "ins": true
+   "keep": [
+    "smallest"
+   ]
   },
   {
    "p": "turn",
@@ -5150,6 +6906,14 @@
    "tok": "is_q",
    "n": 3,
    "prec": 1.0
+  },
+  {
+   "p": "color",
+   "prev": "O",
+   "next": "*",
+   "tok": "what_color",
+   "n": 3,
+   "prec": 0.6
   },
   {
    "p": "distributed",
@@ -5213,8 +6977,10 @@
    "next": "*",
    "tok": "move",
    "n": 3,
-   "prec": 0.6,
-   "ins": true
+   "prec": 0.75,
+   "keep": [
+    "left_of"
+   ]
   },
   {
    "p": "reach",
@@ -5231,7 +6997,9 @@
    "tok": "extreme_q",
    "n": 3,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "rightmost"
+   ]
   },
   {
    "p": "shrink",
@@ -5280,7 +7048,9 @@
    "tok": "move",
    "n": 2,
    "prec": 0.67,
-   "ins": true
+   "keep": [
+    "above"
+   ]
   },
   {
    "p": "align",
@@ -5299,13 +7069,34 @@
    "prec": 0.67
   },
   {
+   "p": "back",
+   "prev": "*",
+   "next": "B",
+   "tok": "send",
+   "n": 2,
+   "prec": 0.67,
+   "keep": [
+    "back"
+   ]
+  },
+  {
    "p": "biggest",
    "prev": "O",
    "next": "*",
    "tok": "extreme_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "biggest"
+   ]
+  },
+  {
+   "p": "bring",
+   "prev": "B",
+   "next": "*",
+   "tok": "bring",
+   "n": 2,
+   "prec": 0.67
   },
   {
    "p": "closest",
@@ -5314,7 +7105,17 @@
    "tok": "nearest_q",
    "n": 2,
    "prec": 0.67,
-   "ins": true
+   "keep": [
+    "closest"
+   ]
+  },
+  {
+   "p": "color",
+   "prev": "THE",
+   "next": "*",
+   "tok": "what_color",
+   "n": 2,
+   "prec": 0.67
   },
   {
    "p": "color",
@@ -5331,7 +7132,9 @@
    "tok": "arrange",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "column"
+   ]
   },
   {
    "p": "column",
@@ -5340,7 +7143,25 @@
    "tok": "arrange",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "column"
+   ]
+  },
+  {
+   "p": "connected",
+   "prev": "*",
+   "next": "B",
+   "tok": "connected_q",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "connected",
+   "prev": "NAME",
+   "next": "*",
+   "tok": "connected_q",
+   "n": 2,
+   "prec": 1.0
   },
   {
    "p": "count",
@@ -5356,7 +7177,7 @@
    "next": "*",
    "tok": "cycle_q",
    "n": 2,
-   "prec": 0.67
+   "prec": 1.0
   },
   {
    "p": "describe",
@@ -5388,7 +7209,7 @@
    "next": "*",
    "tok": "is_there",
    "n": 2,
-   "prec": 0.67
+   "prec": 1.0
   },
   {
    "p": "find",
@@ -5396,7 +7217,7 @@
    "next": "*",
    "tok": "path_q",
    "n": 2,
-   "prec": 0.67
+   "prec": 1.0
   },
   {
    "p": "large",
@@ -5405,7 +7226,9 @@
    "tok": "make",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "large"
+   ]
   },
   {
    "p": "leftmost",
@@ -5414,7 +7237,9 @@
    "tok": "extreme_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "leftmost"
+   ]
   },
   {
    "p": "list",
@@ -5441,13 +7266,34 @@
    "prec": 1.0
   },
   {
+   "p": "most",
+   "prev": "THE",
+   "next": "*",
+   "tok": "extreme_q",
+   "n": 2,
+   "prec": 0.67
+  },
+  {
    "p": "mostconnected",
    "prev": "*",
    "next": "O",
    "tok": "extreme_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "mostconnected"
+   ]
+  },
+  {
+   "p": "next_to",
+   "prev": "PRON",
+   "next": "*",
+   "tok": "is_q",
+   "n": 2,
+   "prec": 1.0,
+   "keep": [
+    "next_to"
+   ]
   },
   {
    "p": "position",
@@ -5471,8 +7317,10 @@
    "next": "*",
    "tok": "move",
    "n": 2,
-   "prec": 0.67,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "right_side"
+   ]
   },
   {
    "p": "shove",
@@ -5513,7 +7361,9 @@
    "tok": "extreme_q",
    "n": 2,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "smallest"
+   ]
   },
   {
    "p": "spaced",
@@ -5561,7 +7411,7 @@
    "next": "*",
    "tok": "connect",
    "n": 613,
-   "prec": 0.97
+   "prec": 0.98
   },
   {
    "p": "make",
@@ -5569,7 +7419,7 @@
    "next": "*",
    "tok": "make",
    "n": 499,
-   "prec": 0.97
+   "prec": 0.96
   },
   {
    "p": "move",
@@ -5601,7 +7451,7 @@
    "next": "*",
    "tok": "connect",
    "n": 83,
-   "prec": 0.7
+   "prec": 0.79
   },
   {
    "p": "duplicate",
@@ -5625,7 +7475,7 @@
    "next": "*",
    "tok": "arrange",
    "n": 64,
-   "prec": 0.96
+   "prec": 0.98
   },
   {
    "p": "label",
@@ -5633,7 +7483,7 @@
    "next": "*",
    "tok": "label",
    "n": 53,
-   "prec": 0.83
+   "prec": 0.71
   },
   {
    "p": "delete",
@@ -5641,7 +7491,7 @@
    "next": "*",
    "tok": "delete",
    "n": 51,
-   "prec": 0.71
+   "prec": 0.72
   },
   {
    "p": "biggest",
@@ -5650,7 +7500,9 @@
    "tok": "extreme_q",
    "n": 49,
    "prec": 0.92,
-   "ins": true
+   "keep": [
+    "biggest"
+   ]
   },
   {
    "p": "leftmost",
@@ -5659,7 +7511,9 @@
    "tok": "extreme_q",
    "n": 48,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "leftmost"
+   ]
   },
   {
    "p": "align",
@@ -5675,8 +7529,10 @@
    "next": "*",
    "tok": "extreme_q",
    "n": 45,
-   "prec": 1.0,
-   "ins": true
+   "prec": 0.98,
+   "keep": [
+    "topmost"
+   ]
   },
   {
    "p": "undo",
@@ -5700,8 +7556,21 @@
    "next": "*",
    "tok": "extreme_q",
    "n": 42,
-   "prec": 1.0,
-   "ins": true
+   "prec": 0.98,
+   "keep": [
+    "rightmost"
+   ]
+  },
+  {
+   "p": "closest",
+   "prev": "*",
+   "next": "*",
+   "tok": "nearest_q",
+   "n": 41,
+   "prec": 0.95,
+   "keep": [
+    "closest"
+   ]
   },
   {
    "p": "forget",
@@ -5726,7 +7595,9 @@
    "tok": "extreme_q",
    "n": 36,
    "prec": 0.95,
-   "ins": true
+   "keep": [
+    "smallest"
+   ]
   },
   {
    "p": "cycle",
@@ -5734,7 +7605,7 @@
    "next": "*",
    "tok": "cycle_q",
    "n": 35,
-   "prec": 0.83
+   "prec": 0.88
   },
   {
    "p": "redo",
@@ -5751,7 +7622,20 @@
    "tok": "extreme_q",
    "n": 32,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "bottommost"
+   ]
+  },
+  {
+   "p": "bottom",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 29,
+   "prec": 0.88,
+   "keep": [
+    "bottom"
+   ]
   },
   {
    "p": "disconnect",
@@ -5767,7 +7651,7 @@
    "next": "*",
    "tok": "how_many",
    "n": 28,
-   "prec": 0.93
+   "prec": 0.97
   },
   {
    "p": "colour",
@@ -5783,8 +7667,10 @@
    "next": "*",
    "tok": "nearest_q",
    "n": 26,
-   "prec": 0.62,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "farthest"
+   ]
   },
   {
    "p": "distribute",
@@ -5808,7 +7694,18 @@
    "next": "*",
    "tok": "degree_q",
    "n": 24,
-   "prec": 0.86
+   "prec": 1.0
+  },
+  {
+   "p": "top",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 23,
+   "prec": 0.82,
+   "keep": [
+    "top"
+   ]
   },
   {
    "p": "neighbors",
@@ -5816,7 +7713,7 @@
    "next": "*",
    "tok": "neigh_q",
    "n": 21,
-   "prec": 0.95
+   "prec": 1.0
   },
   {
    "p": "shrink",
@@ -5833,7 +7730,9 @@
    "tok": "extreme_q",
    "n": 18,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "mostconnected"
+   ]
   },
   {
    "p": "leastconnected",
@@ -5842,7 +7741,9 @@
    "tok": "extreme_q",
    "n": 16,
    "prec": 1.0,
-   "ins": true
+   "keep": [
+    "leastconnected"
+   ]
   },
   {
    "p": "right_side",
@@ -5850,8 +7751,26 @@
    "next": "*",
    "tok": "move",
    "n": 16,
-   "prec": 0.8,
-   "ins": true
+   "prec": 1.0,
+   "keep": [
+    "right_side"
+   ]
+  },
+  {
+   "p": "linked",
+   "prev": "*",
+   "next": "*",
+   "tok": "connected_q",
+   "n": 13,
+   "prec": 0.62
+  },
+  {
+   "p": "anything",
+   "prev": "*",
+   "next": "*",
+   "tok": "is_there",
+   "n": 11,
+   "prec": 0.65
   },
   {
    "p": "resize",
@@ -5860,6 +7779,17 @@
    "tok": "resize",
    "n": 11,
    "prec": 0.92
+  },
+  {
+   "p": "left_side",
+   "prev": "*",
+   "next": "*",
+   "tok": "move",
+   "n": 10,
+   "prec": 0.83,
+   "keep": [
+    "left_side"
+   ]
   },
   {
    "p": "turn",
@@ -5915,7 +7845,7 @@
    "next": "*",
    "tok": "draw",
    "n": 3,
-   "prec": 0.75
+   "prec": 1.0
   },
   {
    "p": "fewest",
@@ -5934,10 +7864,26 @@
    "prec": 1.0
   },
   {
+   "p": "bring",
+   "prev": "*",
+   "next": "*",
+   "tok": "bring",
+   "n": 2,
+   "prec": 0.67
+  },
+  {
    "p": "exists",
    "prev": "*",
    "next": "*",
    "tok": "is_there",
+   "n": 2,
+   "prec": 1.0
+  },
+  {
+   "p": "reachable",
+   "prev": "*",
+   "next": "*",
+   "tok": "path_q",
    "n": 2,
    "prec": 0.67
   },

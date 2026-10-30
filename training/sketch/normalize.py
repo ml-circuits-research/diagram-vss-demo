@@ -19,7 +19,7 @@ def compile_table(T):
             "MWE": sorted(((SPLIT(a), SPLIT(b)) for a, b in T["mwe"]), key=lambda x: -len(x[0])), "SYN": T["synonyms"], "NUM": T["number_words"],
             "NO_NUM": set(T["number_word_exceptions"]), "PUNCT": T["punctuation"], "FOLLOW": set(T["article_followers"]), "BEFORE": set(T["name_before"]),
             "REWRITES": T.get("rewrites", []), "QVERBS": set(T.get("question_verbs", [])),
-            "TRIG": [(SPLIT(e["p"]), e["prev"], e["next"], e["tok"], bool(e.get("ins"))) for e in T.get("triggers", [])]}
+            "TRIG": [(SPLIT(e["p"]), e["prev"], e["next"], e["tok"], list(e.get("keep", []))) for e in T.get("triggers", [])]}
 
 
 def tclass(t):
@@ -33,13 +33,13 @@ def tclass(t):
 
 
 def apply_triggers(toks, trig):
-    """learned triggers (training/sketch/learn_triggers.py): the leftmost match of a trigger phrase whose context fits becomes the event's
-    token (or the token is inserted before it, when the phrase is a value word that also fills a role); entries are ordered longest phrase first, then most specific context first. One replacement per clause."""
-    for i in range(len(toks)):
-        for ph, pv, nx, tok, ins in trig:
+    """learned triggers (training/sketch/learn_triggers.py): the first rule (in table order) with a match whose context fits; its leftmost such match becomes the event's
+    token (followed by the phrase's value words, which also fill roles); entries are ordered longest phrase first, then most specific context first. One replacement per clause."""
+    for ph, pv, nx, tok, keep in trig:
+        for i in range(len(toks) - len(ph) + 1):
             if toks[i:i + len(ph)] != ph: continue
             p = tclass(toks[i - 1] if i > 0 else None); n = tclass(toks[i + len(ph)] if i + len(ph) < len(toks) else None)
-            if (pv == "*" or pv == p) and (nx == "*" or nx == n): return toks[:i] + [tok] + toks[i + (0 if ins else len(ph)):]   # ins: the phrase is a value (right_side) kept as the role's filler
+            if (pv == "*" or pv == p) and (nx == "*" or nx == n): return toks[:i] + [tok] + keep + toks[i + len(ph):]   # keep: the phrase's value words (right_side, circles) stay as role fillers
     return toks
 
 
