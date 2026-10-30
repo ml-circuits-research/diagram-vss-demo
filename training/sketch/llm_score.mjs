@@ -28,7 +28,7 @@ function vssFormalize(text, ctx) {
     const verb = tokens.find((t) => verbEvent.has(t)) || null;
     const reading = r.status === "unknown-event" || r.status === "no-sense" ? null : readingFromWires(r.wires, verb);
     const out = reading ? toNodes(reading, ni, c, seq) : { nodes: [] };
-    nodes.push(...out.nodes);
+    out.nodes.forEach((n) => { if (n.type !== "mention") Object.defineProperty(n, "src", { value: seg.src, enumerable: false }); }); nodes.push(...out.nodes);
     const main = out.nodes[out.nodes.length - 1];
     if (main && main.args) {
       if (main.args.action === "create") { if (main.args.name && !main.args.count) c.refs.set(String(main.args.name).toLowerCase(), { ref: main.id }); c.last = [{ ref: main.id }]; }
@@ -55,7 +55,8 @@ function scoreMessage(nodes, row) {
     const miss = Object.entries(gold[j].want).filter(([k, v]) => (mains[i].got[k] ?? "∅") !== v).map(([k, v]) => `${k}:${mains[i].got[k] ?? "∅"}≠${v}`);
     if (!miss.length) right++; else bad.push(`${gold[j].act} ${miss.join(" ")}`);
   }
-  const matched = new Set(pairs.map((p) => p[1]));
+  const matched = new Set(pairs.map((p) => p[1])), usedP = new Set(pairs.map((p) => p[0]));
+  mains.forEach((m, i) => { if (!usedP.has(i)) bad.push(`EXTRA ${m.act} ${JSON.stringify(m.got)} <- "${m.n.src || ''}"`); });
   gold.forEach((g, j) => { if (!matched.has(j)) bad.push(`missing ${g.act}`); });
   return { right, wrongAligned: pairs.length - right, missed: gold.length - pairs.length, acts: pairs.length, gold: gold.length, extra: mains.length - pairs.length, exact: right === gold.length && mains.length === gold.length, bad, perAct: gold.map((g, j) => [g.act, pairs.some(([i, jj]) => jj === j && !bad.some((b) => false))]) };
 }
