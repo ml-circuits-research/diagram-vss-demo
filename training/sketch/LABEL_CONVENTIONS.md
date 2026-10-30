@@ -74,3 +74,5 @@ Values:
   to Y", "can I get from X to Y" -> path, from X, to Y.
 - A question "is X red / a circle / left of Y / bigger than Y?" -> question check. A statement "X is red" -> fact.
 - "connect A to B and B to C" (a continuing sequence) -> one connect: from "A,B,C", pairing "chain".
+- Several to one ("arrows from Water and Salt to Mix", "Bus and Tram both go to Metro") -> one connect per source, in the text's order
+  (from "Water", to "Mix"; from "Salt", to "Mix"), no pairing.
