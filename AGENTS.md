@@ -65,6 +65,15 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
   requests (today the rules' segmenter) -> learned from the spans; the trigger context classes and the thresholds -> chosen on held-out
   training messages, not by hand.
 
+## What counts as an error (owner, 2026-10-31)
+
+- The reader's job is a truthful formalization, not a perfect one. A reference it cannot resolve from the request itself
+  (a pronoun, "the new one", a name stated in an earlier sentence) is left as a reference for the reasoning layer, which fills it
+  from the context; that is not a reader error. A piece the reader did not understand is reported as not understood (it asks).
+- The real error is a formalization that is wrong: a command executed with the wrong action, the wrong shape or the wrong value.
+  Decisions weigh "done wrong" first, then "correct"; "not done / asked" is the honest outcome. Do not chase perfection on
+  pieces the reasoning layer or a question to the user can supply.
+
 ## Fair comparison
 
 - Rules and VSS use the same legend and the same cue list (`export_cues.mjs` -> `make_normalizer.py`). A cue added for one reader is
