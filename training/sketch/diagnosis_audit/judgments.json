@@ -1,0 +1,24 @@
+{
+ "_legend": "Every sampled request not listed here was judged C (correct). C correct, A acceptable alternative, W wrong (right label given), U text ambiguous (U-line: a connect '... with a (dashed / dotted / solid) line' with no arrow key: the gold convention (TRAIN_MSG_SPEC example) writes no arrow, the editor's own cue list maps 'line' to arrow=none, logic.js:561).",
+ "dev": {
+  "5":   ["A", "'make them gold' after 'Create five tiny stars' in the same message: the convention writes a pronoun for shapes created in this message as $new; mention(quantifier=all,shape=star) executes the same unless other stars already exist."],
+  "14":  ["U", "'If the ticket is urgent, make Triage huge, otherwise leave it': a condition the legend cannot express; the gold makes it unconditional."],
+  "18":  ["U-line", "'Connect Rack1 to Rack2 with a solid line'"],
+  "19":  ["U-line", "'Connect them each to the next, with dotted lines'"],
+  "46":  ["U-line", "'Connect Rack2 to Tube1 and Tube2 with dotted lines'"],
+  "49":  ["U-line", "'Connect Tap to Tomatoes and Peppers with dotted lines'"],
+  "95":  ["W", "'What is next to the Shelf' (shop floor layout, nothing about links): 'next to' is the legend's cue for position=near; neighbors answers what is CONNECTED. Right: question {ask:list, position:near, anchor:Shelf}."],
+  "106": ["A", "'The Dogs wing is on the left' is a statement: the convention gives fact {target:Dogs, position:left}; the gold move puts it in the same place (logic.js:967 a fact with a canvas place moves the shape there too)."],
+  "119": ["U-line", "'Connect Glider to Target and Dart to Target with dotted lines'"],
+  "123": ["U-line", "'Connect Chapter2 to Epilogue with a dotted line'"],
+  "141": ["W", "'Is Welcome the topmost shape, or Landing?': a comparison of which is highest. Gold check position=top only tests whether Welcome lies in the top band of the canvas (logic.js:323). Right: question {ask:extreme, superlative:topmost} (as the other 61 'Is X the -most' questions are labelled)."],
+  "145": ["U-line", "'Connect Entrance2 to Stall and Coat with dashed lines'"]
+ },
+ "train": {
+  "2":  ["U", "'Disconnect Amp from Speaker, uh, no, keep that link ... Actually, undo that': the disconnect is already taken back, so 'that' has no clear referent."],
+  "6":  ["W", "'are they bigger than the Hall' -> check target 'Room1,Room2': the editor checks only the first target (logic.js:699 and :839 needTargets(a)[0]) and answers for Room1 alone. Right: two wires, check Room1 bigger than Hall and check Room2 bigger than Hall."],
+  "17": ["W", "'Align the sensors in a column' (Sensor plus its 3 copies) -> target 'Sensor,mention(quantifier=all,recency=newest)': with quantifier=all the editor ignores recency (logic.js:418), so the mention matches EVERY shape and Gateway and Cloud are moved too (editor_probe.mjs (d)). Right: command {action:align, target:'Sensor,$new', axis:vertical} (or arrange layout=column with the same target)."],
+  "57": ["U", "'Redo that last move, I think I messed it': 'messed it' suggests undo; the word is redo."],
+  "75": ["U-line", "'Connect Harvest to Seeds with a dashed line' (the next question asks whether the schedule loops: with arrow=none the edge is not counted by the cycle check, logic.js:373)."]
+ }
+}
