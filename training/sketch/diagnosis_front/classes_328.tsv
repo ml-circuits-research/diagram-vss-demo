@@ -1,0 +1,329 @@
+id	class	event	trigger	phrase(normalized)	span
+hm-0014	2 never a rule: count+prec	check	look like	look like	Does Basil look like a square
+hm-0090	3b rule/phrase exists but a value n-gram rewrote the trigger	set	Make	make	Make all the circles teal
+hm-0107	2 never a rule: count	path	Find a route	find a route	Find a route from Clip1 to Clip3
+hm-0110	3b rule/phrase exists but a value n-gram rewrote the trigger	set	Make	make	Make every circle orange
+hm-0114	2 never a rule: count	list	Show every shape	show every shape	Show every shape that isn't orange
+hm-0174	2 never a rule: count	neighbors	What's touching	what's touching	What's touching the Monitor
+hm-0180	2 never a rule: count	reachable	What can be reached	what can be reached	What can be reached from Payment
+hm-0187	2 never a rule: count+prec	describe	Tell me what	tell me what	Tell me what the Rice shape looks like
+hm-0190	3b rule/phrase exists but a value n-gram rewrote the trigger	set	Make	make	Make every square gray
+hm-0203	2 never a rule: count+prec	move	Stack	stack	Stack Middle above Bottom
+hm-0240	3b rule/phrase exists but a value n-gram rewrote the trigger	set	Make	make	Make every square red
+hm-0274	3b rule/phrase exists but a value n-gram rewrote the trigger	set	Make	make	Make all the rectangles gray
+hm-0307	3b rule/phrase exists but a value n-gram rewrote the trigger	set	Make	make	Make every circle brown
+hm-0336	2 never a rule: count	set	Make all the boxes	all boxes	Make all the boxes that are not blue gray
+hm-0336	2 never a rule: count	list	tell me the shapes	tell me the shapes	Can you tell me the shapes that are not blue
+hm-0368	2 never a rule: count+prec	set	Give	give	Give Floor3 a medium gray rectangle shape
+hm-0370	2 never a rule: count	list	What shapes are not blue	what shapes are not blue	What shapes are not blue
+sm-0009	2 never a rule: count	rule	every circle should be	every circle should be	every circle should be blue
+sm-0019	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Orders and Items		Orders and Items too, but dashed
+sm-0023	3b rule/phrase exists but a value n-gram rewrote the trigger	align	align	align	align them vertically
+sm-0025	2 never a rule: count	list	what stars	what stars	what stars do we have
+sm-0027	3a a rule of this phrase exists, but not for this context	exists	Any	any	Any lime things on the map yet
+sm-0029	2 never a rule: prec	connect	goes to	goes to	Login goes to Signup with a dashed arrow
+sm-0029	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Signup to Help		Signup to Help with a plain line
+sm-0029	2 never a rule: count	disconnect	Remove the connection	remove the connection	Remove the connection between Login and Help
+sm-0032	1c verbless: the trigger is a value / position / description	move	above	above	Fridge above Sink
+sm-0033	2 never a rule: count	set	paint	paint	paint Scene3 black
+sm-0034	2 never a rule: count	connect	sends traffic to	sends traffic to	Lb sends traffic to App1 and App2
+sm-0034	2 never a rule: count	connect	write to	write to	both write to Store
+sm-0035	1c verbless: the trigger is a value / position / description	move	to the bottom left	to the bottom_left	Bank to the bottom left
+sm-0035	1c verbless: the trigger is a value / position / description	resize	bigger	bigger	bigger please
+sm-0036	3b rule/phrase exists but a value n-gram rewrote the trigger	set	make	make	make all the circles gray
+sm-0037	1c verbless: the trigger is a value / position / description	create	a blue one	a blue one	a blue one named Team right of it
+sm-0038	2 never a rule: count	describe	whole picture	whole picture	give me the whole picture
+sm-0048	2 never a rule: count+prec	connect	feeds	feeds	Farm feeds Mill and Mill feeds Shop
+sm-0048	4 ambiguous phrase: two events share it, the deciding word i	path	reached from	reached from	tell me if Shop can be reached from Farm
+sm-0051	2 never a rule: prec	toFront	front	front	push it to the very front of the stack
+sm-0055	1c verbless: the trigger is a value / position / description	move	to the bottom right	to the bottom_right	the Mall to the bottom right
+sm-0058	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Bank to Fraud		Bank to Fraud with a dotted line
+sm-0061	2 never a rule: count	rule	every triangle must be	every triangle must be	every triangle must be large
+sm-0064	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Hub to both		then Hub to both stores
+sm-0068	2 never a rule: count	move	sit between	sit between	Food should sit between Stage and Parking
+sm-0069	4 ambiguous phrase: two events share it, the deciding word i	path	reached from	reached from	Can Prod be reached from Git
+sm-0073	2 never a rule: count+prec	set	last one	last one	the last one pink
+sm-0076	2 never a rule: count+prec	exists	Do we have	do we have	Do we have a diamond anywhere
+sm-0084	2 never a rule: count+prec	connect	triggers	triggers	S3 triggers Lambda and Lambda writes to Dynamo
+sm-0087	1b verbless: determiner + name ('the Hero a')	set	the Hero a	the	the Hero a tiny blue circle
+sm-0089	4 ambiguous phrase: two events share it, the deciding word i	check	Does	does	Does Salt exist as a star
+sm-0090	1c verbless: the trigger is a value / position / description	move	under	below	Panel3 under Panel2
+sm-0091	4 ambiguous phrase: two events share it, the deciding word i	count	Show me	show me	Show me all the connections
+sm-0097	2 never a rule: count	fact	turns	turns	the Light turns red
+sm-0100	1a verbless: the trigger is a name (or starts with one): 'X 	set	Yellow a		Yellow a yellow circle
+sm-0100	1a verbless: the trigger is a name (or starts with one): 'X 	set	Black a		Black a black circle
+sm-0101	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Ingress to		Ingress to Pod1 and Pod2
+sm-0101	1c verbless: the trigger is a value / position / description	set	teal	teal	Pods teal, both
+sm-0101	4 ambiguous phrase: two events share it, the deciding word i	reachable	reached from	reached from	What can be reached from Ingress
+sm-0106	1a verbless: the trigger is a name (or starts with one): 'X 	set	Post		Post blue
+sm-0106	1a verbless: the trigger is a name (or starts with one): 'X 	set	Delete red		Delete red
+sm-0108	2 never a rule: count	connect	Wire	wire	Wire Producer to Broker and Broker to Consumer
+sm-0112	2 never a rule: count	set	Mark	mark	Mark Tax purple
+sm-0114	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Paris to		Paris to Lille
+sm-0123	2 never a rule: prec	rename	Name	name	Name it Love
+sm-0124	2 never a rule: prec	connect	goes to	goes to	button goes to mcu and mcu goes to led
+sm-0126	2 never a rule: count	rule	all new ellipses should be	all new ellipses should be	all new ellipses should be teal
+sm-0128	2 never a rule: count+prec	connect	talks to	talks to	Client talks to the Gateway
+sm-0128	2 never a rule: count	connect	fans out to	fans out to	the Gateway fans out to Svc1 and Svc2
+sm-0129	3a a rule of this phrase exists, but not for this context	set	should be	should be	All three should be rectangles
+sm-0129	4 ambiguous phrase: two events share it, the deciding word i	exists	Does	does	Does the shop have any circles left over
+sm-0132	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Cat to Dan		Cat to Dan with plain lines
+sm-0132	1c verbless: the trigger is a value / position / description	extreme	far right	far right	who sits at the far right
+sm-0134	4 ambiguous phrase: two events share it, the deciding word i	arrange	Place	place	Place Pool, Spa and Gym around it in a circle
+sm-0135	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Core to		then Core to Utils
+sm-0136	2 never a rule: count+prec	move	at the front	at the front	Vocals at the front
+sm-0139	1c verbless: the trigger is a value / position / description	move	70 pixels down	70 pixels down	the Pine 70 pixels down
+sm-0141	2 never a rule: count	move	goes near	goes next_to	Truck goes near the Site
+sm-0142	2 never a rule: prec	connect	leads to	leads to	Post leads to Like and to Share, with dashed lines
+sm-0142	1a verbless: the trigger is a name (or starts with one): 'X 	set	Share		Share cyan
+sm-0145	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Member to		Member to Loan and Loan to Book, arrows both ways
+sm-0148	1c verbless: the trigger is a value / position / description	move	above	above	the Fly above the Frog
+sm-0149	2 never a rule: count+prec	connect	links to	links to	Home links to Profile and Settings
+sm-0155	2 never a rule: count	rule	circles should be	circles should be	circles should be pink
+sm-0157	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Ship to		then Ship to Check
+sm-0159	1a verbless: the trigger is a name (or starts with one): 'X 	set	Parent2 a		Parent2 a pink circle
+sm-0161	1c verbless: the trigger is a value / position / description	move	above	above	App above the Shell
+sm-0167	1a verbless: the trigger is a name (or starts with one): 'X 	fact	Frame a		Frame a triangle
+sm-0167	1b verbless: determiner + name ('the Hero a')	fact	the Chain a	the	the Chain a long ellipse
+sm-0174	2 never a rule: prec	move	goes	goes	Carousel goes bottom left
+sm-0174	1c verbless: the trigger is a value / position / description	set	tiny	tiny	tiny and pink
+sm-0175	4 ambiguous phrase: two events share it, the deciding word i	path	reached from	reached from	Can Main be reached from Feature
+sm-0178	1a verbless: the trigger is a name (or starts with one): 'X 	set	Detail a		Detail a big rectangle too
+sm-0183	1a verbless: the trigger is a name (or starts with one): 'X 	set	Closed		Closed green
+sm-0186	1c verbless: the trigger is a value / position / description	move	near the bottom	next_to the bottom	the Sparrow near the bottom
+sm-0187	1a verbless: the trigger is a name (or starts with one): 'X 	set	OnPrem a		OnPrem a gray rectangle
+sm-0193	1c verbless: the trigger is a value / position / description	move	near the bottom left	next_to the bottom_left	Camp near the bottom left
+sm-0193	1c verbless: the trigger is a value / position / description	move	between	between	Lake between Camp and Peak
+sm-0195	3a a rule of this phrase exists, but not for this context	path	path	path	what's the shortest path between them
+sm-0203	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Agent to Manager		Agent to Manager with a dashed arrow
+sm-0204	1c verbless: the trigger is a value / position / description	move	in the top left	in the top_left	Ward in the top left
+sm-0204	1b verbless: determiner + name ('the Hero a')	set	the Lab	the	the Lab small
+sm-0206	2 never a rule: count	rule	every rectangle	every rectangle	every rectangle large
+sm-0209	1b verbless: determiner + name ('the Hero a')	set	the Drone	the	the Drone brown
+sm-0212	1b verbless: determiner + name ('the Hero a')	set	the Tower	the	the Tower white
+sm-0215	1a verbless: the trigger is a name (or starts with one): 'X 	set	Lead a		Lead a small gray circle
+sm-0217	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Dispatch to both		then Dispatch to both Car1 and Car2
+sm-0219	2 never a rule: prec	connect	leads to	leads to	Lesson leads to Quiz, Quiz to Badge
+sm-0221	1b verbless: determiner + name ('the Hero a')	fact	the Crater	the	the Crater small and brown
+sm-0221	1b verbless: determiner + name ('the Hero a')	fact	the Ash	the	the Ash gray
+sm-0221	1c verbless: the trigger is a value / position / description	move	above	above	the Ash above the Crater
+sm-0222	1b verbless: determiner + name ('the Hero a')	set	the Savings	the	the Savings green
+sm-0223	1c verbless: the trigger is a value / position / description	move	between	between	The Ball goes between them
+sm-0224	1a verbless: the trigger is a name (or starts with one): 'X 	set	Laptop		Laptop blue
+sm-0224	1a verbless: the trigger is a name (or starts with one): 'X 	set	Account		Account green
+sm-0224	1a verbless: the trigger is a name (or starts with one): 'X 	set	Badge		Badge orange
+sm-0225	2 never a rule: count	exists	Does any	does any	Does any circle exist yet
+sm-0227	4 ambiguous phrase: two events share it, the deciding word i	path	reached from	reached from	Can Guest be reached from Farm now
+sm-0233	1c verbless: the trigger is a value / position / description	move	to the top left	to the top_left	Laser to the top left
+sm-0233	1c verbless: the trigger is a value / position / description	move	to the top right	to the top_right	Printer3d to the top right
+sm-0233	2 never a rule: count	list	What do we have	what do we have	What do we have that's not gray
+sm-0235	1c verbless: the trigger is a value / position / description	move	100 pixels to the left	100 pixels left_of	Tent near the Fire but not too near, so 100 pixels to the left of it
+sm-0238	1c verbless: the trigger is a value / position / description	move	on her left	on her left	Aunt on her left
+sm-0238	1c verbless: the trigger is a value / position / description	move	on her right	on her right	Cousin on her right
+sm-0244	2 never a rule: prec	connect	goes to	goes to	Browse goes to Add, Add goes to Pay, Pay goes to Confirm
+sm-0245	1b verbless: determiner + name ('the Hero a')	set	the Outfall	the	the Outfall blue
+sm-0247	2 never a rule: count+prec	create	Plant	plant	Plant five small green triangles near the Oak
+sm-0247	3b rule/phrase exists but a value n-gram rewrote the trigger	set	make	make	make all the triangles tiny
+sm-0248	2 never a rule: prec	connect	goes to	goes to	Syn goes to SynAck and SynAck goes to Ack
+sm-0253	1a verbless: the trigger is a name (or starts with one): 'X 	set	Costs red		Costs red
+sm-0256	1c verbless: the trigger is a value / position / description	connect	dotted	dotted	use a dotted line for the Valve to the Faucet part
+sm-0260	2 never a rule: prec	move	goes	goes	Tomatoes goes top left
+sm-0260	1a verbless: the trigger is a name (or starts with one): 'X 	move	Peppers		Peppers top right
+sm-0260	1a verbless: the trigger is a name (or starts with one): 'X 	move	Herbs		Herbs bottom
+sm-0260	1b verbless: determiner + name ('the Hero a')	set	the Peppers	the	the Peppers red
+sm-0264	4 ambiguous phrase: two events share it, the deciding word i	path	reached from	reached from	whether Broker can be reached from Feed
+sm-0266	1b verbless: determiner + name ('the Hero a')	set	the Hearing	the	the Hearing indigo
+sm-0267	1a verbless: the trigger is a name (or starts with one): 'X 	set	Jazz blue		Jazz blue
+sm-0267	1a verbless: the trigger is a name (or starts with one): 'X 	set	Pop pink		Pop pink
+sm-0273	1a verbless: the trigger is a name (or starts with one): 'X 	set	Villain a		Villain a diamond
+sm-0276	1b verbless: determiner + name ('the Hero a')	set	the Leader a	the	the Leader a big gold star
+sm-0280	1c verbless: the trigger is a value / position / description	move	left of	left_of	Court1 left of Court2
+sm-0284	1c verbless: the trigger is a value / position / description	set	small	small	both small
+sm-0288	2 never a rule: count	connect	pointing to the next	pointing to the next	each pointing to the next tier
+sm-0288	1a verbless: the trigger is a name (or starts with one): 'X 	set	Silver gray		Silver gray
+sm-0288	1a verbless: the trigger is a name (or starts with one): 'X 	set	Gold gold		Gold gold
+sm-0289	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Final to		then Final to Winner
+sm-0290	1c verbless: the trigger is a value / position / description	create	a small gold star	a small gold star	a small gold star called Risks right of it
+sm-0290	1c verbless: the trigger is a value / position / description	exists	a diamond	a diamond	a diamond
+sm-0291	1c verbless: the trigger is a value / position / description	move	below	below	Sofa below the Tv
+sm-0293	2 never a rule: count+prec	connect	connected	connected	Problem, Solution, Market, in this order, left to right, connected with arrows
+sm-0297	3a a rule of this phrase exists, but not for this context	list	What are	what are	What are the stars
+sm-0299	3b rule/phrase exists but a value n-gram rewrote the trigger	align	align	align	align them horizontally
+sm-0306	2 never a rule: count	connect	connected to each other	connected each_other other	Cake, Lemonade, Music and Games should all be connected to each other
+sm-0306	2 never a rule: count+prec	disconnect	Remove the line	remove the line	Remove the line between Music and Cake
+sm-0309	1c verbless: the trigger is a value / position / description	move	to the right of	right_of of	Kitchen to the right of Dock
+sm-0309	1c verbless: the trigger is a value / position / description	move	to the right of	right_of of	Bedroom to the right of Kitchen
+sm-0311	2 never a rule: count	rule	all new stars are	all new stars are	all new stars are yellow
+sm-0313	1c verbless: the trigger is a value / position / description	create	a cyan star	a cyan star	a cyan star named Nouns, both near Learning
+sm-0316	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Heart and Body		Heart and Body too
+sm-0318	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Page2 to		then Page2 to Page3
+sm-0321	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Plant to		Plant to Wholesale and Wholesale to Pharmacy, with plain lines
+sm-0326	1b verbless: determiner + name ('the Hero a')	set	the Pears	the	the Pears lime
+sm-0326	1a verbless: the trigger is a name (or starts with one): 'X 	set	Plums purple		Plums purple
+sm-0328	1c verbless: the trigger is a value / position / description	move	to the left of	left_of of	Altar to the left of the Nave
+sm-0332	1b verbless: determiner + name ('the Hero a')	set	the Plant	the	the Plant huge and green
+sm-0333	1a verbless: the trigger is a name (or starts with one): 'X 	set	Ambulance white		Ambulance white
+sm-0333	2 never a rule: count	rule	every new circle should be	every new circle should be	every new circle should be blue
+sm-0334	2 never a rule: count	describe	description	description	Show me a description of everything
+sm-0338	2 never a rule: prec	property	position	position	what's its position
+sm-0339	1c verbless: the trigger is a value / position / description	create	an indigo hexagon	an indigo hexagon	an indigo hexagon named Weights
+sm-0341	1a verbless: the trigger is a name (or starts with one): 'X 	set	Lemons yellow		Lemons yellow
+sm-0341	1a verbless: the trigger is a name (or starts with one): 'X 	set	Sugar white		Sugar white
+sm-0343	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Editor to both		then Editor to both reviewers
+sm-0344	1b verbless: determiner + name ('the Hero a')	set	the Lily	the	the Lily pink
+sm-0347	1c verbless: the trigger is a value / position / description	move	below	below	Pit just below the Stage
+sm-0347	1c verbless: the trigger is a value / position / description	move	above	above	Balcony above the Stage
+sm-0348	2 never a rule: count	rule	all hexagons are	all hexagons are	all hexagons are teal
+sm-0349	1c verbless: the trigger is a value / position / description	move	right of	right_of	Puppet2 right of it
+sm-0349	2 never a rule: count	swap	Switch places	switch places	Switch places of the two puppets
+sm-0351	2 never a rule: count	connect	sends samples to	sends samples to	Ward also sends samples to Lab
+sm-0352	1b verbless: determiner + name ('the Hero a')	set	the Plate	the	the Plate gold
+sm-0353	1b verbless: determiner + name ('the Hero a')	label	the Lead	the	the Lead "Sam"
+sm-0356	2 never a rule: count+prec	rule	squares are	squares are	squares are navy
+sm-0358	1b verbless: determiner + name ('the Hero a')	set	the Bin2	the	the Bin2 blue
+sm-0359	2 never a rule: count	connect	each go to the next	each go to the next	Intake, Filter, Chlorine and Tank each go to the next
+sm-0364	1b verbless: determiner + name ('the Hero a')	set	the Berry	the	the Berry purple
+sm-0364	1b verbless: determiner + name ('the Hero a')	set	the Blender	the	the Blender huge and gray
+sm-0367	5 other: the annotated trigger is a prefix of a token (Where	property	Where	where	Where's the Road relative to the Crater
+sm-0369	1c verbless: the trigger is a value / position / description	create	a pink circle	a pink circle	a pink circle called Roses around Garden
+sm-0370	1c verbless: the trigger is a value / position / description	move	above	above	Platform1 above the Yard
+sm-0370	1c verbless: the trigger is a value / position / description	move	below	below	Platform2 below the Yard
+sm-0370	2 never a rule: count	exists	exists	exists	exists check for a lime thing
+sm-0372	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Linear to		then Linear to Stats
+sm-0378	1a verbless: the trigger is a name (or starts with one): 'X 	fact	Sandbox yellow		Sandbox yellow
+sm-0378	1a verbless: the trigger is a name (or starts with one): 'X 	fact	Slide red		Slide red
+sm-0378	1a verbless: the trigger is a name (or starts with one): 'X 	fact	Swing blue		Swing blue
+sm-0378	1c verbless: the trigger is a value / position / description	move	to the right of	right_of of	the Swing to the right of the Slide
+sm-0381	1a verbless: the trigger is a name (or starts with one): 'X 	set	Invoice a		Invoice a big square
+sm-0382	1b verbless: determiner + name ('the Hero a')	set	the Base	the	the Base huge
+sm-0382	1b verbless: determiner + name ('the Hero a')	set	the Body	the	the Body large
+sm-0382	1b verbless: determiner + name ('the Hero a')	set	the Head	the	the Head medium
+sm-0382	3a a rule of this phrase exists, but not for this context	check	Check	check	Check the Head
+sm-0383	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Mentor2 to		Mentor2 to Mentee2 with plain lines
+sm-0385	1c verbless: the trigger is a value / position / description	create	a teal square	a teal square	a teal square called Science below Reading
+sm-0385	3a a rule of this phrase exists, but not for this context	exists	any	any	any triangles
+sm-0387	1c verbless: the trigger is a value / position / description	distribute	distributed	horizontally	distributed evenly
+sm-0387	1a verbless: the trigger is a name (or starts with one): 'X 	set	Basses navy		Basses navy
+sm-0388	4 ambiguous phrase: two events share it, the deciding word i	delete	Remove	remove	Remove the last copy
+sm-0390	1a verbless: the trigger is a name (or starts with one): 'X 	move	Pens left		Pens left
+sm-0390	1a verbless: the trigger is a name (or starts with one): 'X 	move	Glue right		Glue right
+sm-0392	1b verbless: determiner + name ('the Hero a')	set	the Extinguisher	the	the Extinguisher red
+sm-0394	1a verbless: the trigger is a name (or starts with one): 'X 	set	Reds red		Reds red
+sm-0394	1c verbless: the trigger is a value / position / description	set	and so on	and so on	and so on
+sm-0395	4 ambiguous phrase: two events share it, the deciding word i	delete	Remove	remove	Remove the Diner
+sm-0395	4 ambiguous phrase: two events share it, the deciding word i	path	reached from	reached from	Can the Canyon be reached from Start
+sm-0399	1a verbless: the trigger is a name (or starts with one): 'X 	set	Bronze brown		Bronze brown
+sm-0403	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Billing to		then Billing to Email
+sm-0405	1c verbless: the trigger is a value / position / description	create	an orange triangle	an orange triangle	an orange triangle called Diet near Health
+sm-0408	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Canal to		then Canal to Field1 and Field2
+sm-0409	1a verbless: the trigger is a name (or starts with one): 'X 	fact	Destroyer a		Destroyer a huge black triangle
+sm-0409	1a verbless: the trigger is a name (or starts with one): 'X 	fact	Planet a		Planet a blue circle
+sm-0412	3b rule/phrase exists but a value n-gram rewrote the trigger	align	align	align	align them horizontally
+sm-0414	1c verbless: the trigger is a value / position / description	create	a medium lime hexagon	a medium lime hexagon	a medium lime hexagon called Team right of Startup
+sm-0422	1b verbless: determiner + name ('the Hero a')	set	the Lookout	the	the Lookout yellow
+sm-0423	2 never a rule: count	connect	each pointing to the next	each pointing to the next	Order, Verify, Dispense and Ward, each pointing to the next
+sm-0427	1c verbless: the trigger is a value / position / description	move	at the far left	at the far left	Goal1 at the far left
+sm-0427	1c verbless: the trigger is a value / position / description	move	at the far right	at the far right	Goal2 at the far right
+sm-0431	1b verbless: determiner + name ('the Hero a')	fact	the Red a	the	the Red a red circle
+sm-0434	1a verbless: the trigger is a name (or starts with one): 'X 	set	Venus yellow		Venus yellow
+sm-0434	1a verbless: the trigger is a name (or starts with one): 'X 	set	Earth blue		Earth blue
+sm-0438	1a verbless: the trigger is a name (or starts with one): 'X 	set	Zone2 yellow		Zone2 yellow
+sm-0438	1a verbless: the trigger is a name (or starts with one): 'X 	set	Zone3 red		Zone3 red
+sm-0438	1a verbless: the trigger is a name (or starts with one): 'X 	move	Zone3 left		Zone3 left by 90
+sm-0441	1a verbless: the trigger is a name (or starts with one): 'X 	set	Keynote navy		Keynote navy
+sm-0442	1b verbless: determiner + name ('the Hero a')	set	the Amp a	the	the Amp a huge black one
+sm-0443	1b verbless: determiner + name ('the Hero a')	set	the Cafe	the	the Cafe orange
+sm-0444	4 ambiguous phrase: two events share it, the deciding word i	path	reached from	reached from	Can Archive be reached from Intake
+sm-0446	1c verbless: the trigger is a value / position / description	create	an orange square	an orange square	an orange square called Boxes left of Garage
+sm-0446	2 never a rule: prec	rename	name	name	name the copy Spare
+sm-0448	1b verbless: determiner + name ('the Hero a')	set	the Caboose	the	the Caboose blue
+sm-0449	1b verbless: determiner + name ('the Hero a')	set	the Cards	the	the Cards black
+sm-0455	2 never a rule: count+prec	rule	stars are	stars are	stars are gold
+sm-0459	1c verbless: the trigger is a value / position / description	extreme	most	mostconnected	who has the most
+sm-0463	4 ambiguous phrase: two events share it, the deciding word i	list	show me	show me	show me them first
+sm-0464	4 ambiguous phrase: two events share it, the deciding word i	path	reached from	reached from	Can the Cafe be reached from Flour
+sm-0468	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Aunt to		Aunt to Cousin
+sm-0473	1c verbless: the trigger is a value / position / description	move	above	above	Shelf1 above Shelf2
+sm-0473	1a verbless: the trigger is a name (or starts with one): 'X 	set	Shelf2 gray		Shelf2 gray
+sm-0474	2 never a rule: count	rule	new circles are	new circles are	new circles are red
+sm-0475	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Sous to both		Sous to both cooks
+sm-0475	4 ambiguous phrase: two events share it, the deciding word i	path	reached from	reached from	can Cook2 be reached from Chef
+sm-0478	3b rule/phrase exists but a value n-gram rewrote the trigger	align	Align	align	Align them horizontally
+sm-0482	2 never a rule: count	connect	both trucks to	both trucks to	then both trucks to Client
+sm-0483	1c verbless: the trigger is a value / position / description	create	a lime star	a lime star	a lime star named Fern
+sm-0483	1c verbless: the trigger is a value / position / description	create	a gold star	a gold star	a gold star named Sunflower near Garden
+sm-0484	1a verbless: the trigger is a name (or starts with one): 'X 	set	Paint a		Paint a red circle
+sm-0487	1a verbless: the trigger is a name (or starts with one): 'X 	move	Park left		Park left
+sm-0487	1a verbless: the trigger is a name (or starts with one): 'X 	move	Mall right		Mall right
+sm-0487	1b verbless: determiner + name ('the Hero a')	set	the Clinic a	the	the Clinic a square
+sm-0489	1a verbless: the trigger is a name (or starts with one): 'X 	connect	R4 to		then R4 to R1 to close a ring
+sm-0491	4 ambiguous phrase: two events share it, the deciding word i	path	reached from	reached from	Can Search be reached from Ticket
+sm-0492	1c verbless: the trigger is a value / position / description	move	top left	top_left	Rack in the corner, top left
+sm-0494	1a verbless: the trigger is a name (or starts with one): 'X 	set	Tile2 and Tile3		Tile2 and Tile3 navy
+sm-0496	1c verbless: the trigger is a value / position / description	move	middle	center	Hall middle
+sm-0496	1c verbless: the trigger is a value / position / description	move	bottom	bottom	Hotel bottom
+sm-0497	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Belt to		then Belt to Bin
+sm-0502	2 never a rule: count	rule	all new circles are	all new circles are	all new circles are pink
+sm-0504	1c verbless: the trigger is a value / position / description	move	above	above	Lab above the Hall
+sm-0506	1c verbless: the trigger is a value / position / description	create	a gray circle	a gray circle	a gray circle called Cat near Pets
+sm-0508	1c verbless: the trigger is a value / position / description	move	bottom right	bottom_right	the Moon uh bottom right
+sm-0509	2 never a rule: count	connect	each leading to the next	each leading to the next	Check, Security, Gate and Plane, each leading to the next one
+sm-0510	1a verbless: the trigger is a name (or starts with one): 'X 	move	Orc left		Orc left
+sm-0510	1a verbless: the trigger is a name (or starts with one): 'X 	move	Elf right		Elf right
+sm-0510	1a verbless: the trigger is a name (or starts with one): 'X 	move	Dwarf bottom		Dwarf bottom
+sm-0511	1a verbless: the trigger is a name (or starts with one): 'X 	connect	River to		then River to Ocean
+sm-0512	2 never a rule: count	move	put under	put below	the Circle1 must be put under the Box2
+sm-0513	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Branch to		then Branch to Atm and Vault
+sm-0514	2 never a rule: count	rule	all circles are	all circles are	all circles are blue
+sm-0519	1b verbless: determiner + name ('the Hero a')	set	the Doll a	the	the Doll a pink circle
+sm-0519	1b verbless: determiner + name ('the Hero a')	set	the Ball a	the	the Ball a red circle
+sm-0523	4 ambiguous phrase: two events share it, the deciding word i	reachable	reached from	reached from	What can be reached from Plant now
+sm-0524	1a verbless: the trigger is a name (or starts with one): 'X 	move	Spot1 left		Spot1 left
+sm-0524	1a verbless: the trigger is a name (or starts with one): 'X 	move	Spot2 center		Spot2 center
+sm-0524	1a verbless: the trigger is a name (or starts with one): 'X 	move	Spot3 right		Spot3 right
+sm-0524	3b rule/phrase exists but a value n-gram rewrote the trigger	align	Align	align	Align them horizontally
+sm-0526	2 never a rule: count	connect	all connected to each other	all connected each_other other	Alice, Ben, Cara and Dev, all connected to each other
+sm-0528	1a verbless: the trigger is a name (or starts with one): 'X 	set	Stay yellow		Stay yellow
+sm-0528	1a verbless: the trigger is a name (or starts with one): 'X 	set	Come red		Come red
+sm-0529	1c verbless: the trigger is a value / position / description	create	an ellipse	an ellipse	an ellipse called Pot near Garden
+sm-0530	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Isle1 to		Isle1 to Isle2 as well, dashed
+sm-0535	1a verbless: the trigger is a name (or starts with one): 'X 	move	Saw top left		Saw top left
+sm-0535	1a verbless: the trigger is a name (or starts with one): 'X 	move	Drill top right		Drill top right
+sm-0535	1a verbless: the trigger is a name (or starts with one): 'X 	move	Lathe bottom left		Lathe bottom left
+sm-0535	1a verbless: the trigger is a name (or starts with one): 'X 	move	Bench bottom right		Bench bottom right
+sm-0535	1b verbless: determiner + name ('the Hero a')	set	the Lathe	the	the Lathe blue
+sm-0540	1c verbless: the trigger is a value / position / description	create	an orange circle	an orange circle	an orange circle called Teachers
+sm-0540	1c verbless: the trigger is a value / position / description	create	a teal circle	a teal circle	a teal circle called Pricing, all near Yoga
+sm-0540	2 never a rule: count	list	What circles	what circles	What circles do we have
+sm-0541	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Blue to		then Blue to Server
+sm-0544	1c verbless: the trigger is a value / position / description	connect	all to each other	each_other each_other	then Sw1, Sw2 and Sw3 all to each other
+sm-0547	1a verbless: the trigger is a name (or starts with one): 'X 	set	Milk white		Milk white too
+sm-0547	1a verbless: the trigger is a name (or starts with one): 'X 	set	Honey gold		Honey gold
+sm-0548	2 never a rule: count+prec	connected	follow	follow	Does Cy follow Ann
+sm-0549	1c verbless: the trigger is a value / position / description	move	in between	in between	Desk in between
+sm-0551	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Ridge to		Ridge to Peak
+sm-0551	2 never a rule: count	reachable	get anywhere from	get anywhere from	Can I get anywhere from Falls
+sm-0561	4 ambiguous phrase: two events share it, the deciding word i	path	reached from	reached from	Can Pc3 still be reached from Hub
+sm-0566	4 ambiguous phrase: two events share it, the deciding word i	reachable	reached from	reached from	Can everyone be reached from Dev1
+sm-0568	1a verbless: the trigger is a name (or starts with one): 'X 	set	Jet3 tiny		Jet3 tiny
+sm-0569	1a verbless: the trigger is a name (or starts with one): 'X 	label	Mito		Mito "Energy"
+sm-0571	3b rule/phrase exists but a value n-gram rewrote the trigger	align	Align	align	Align them all horizontally
+sm-0574	2 never a rule: count	exists	Are any	are any	Are any of them not red
+sm-0583	1a verbless: the trigger is a name (or starts with one): 'X 	label	Cake		Cake "Sweet"
+sm-0583	1a verbless: the trigger is a name (or starts with one): 'X 	label	Pie		Pie "Hot"
+sm-0585	2 never a rule: count+prec	connect	back to	back to	Review back to Learn
+sm-0586	1a verbless: the trigger is a name (or starts with one): 'X 	move	Stacks top left		Stacks top left
+sm-0586	1a verbless: the trigger is a name (or starts with one): 'X 	move	Desk bottom left		Desk bottom left
+sm-0586	1a verbless: the trigger is a name (or starts with one): 'X 	move	Study top right		Study top right
+sm-0586	1a verbless: the trigger is a name (or starts with one): 'X 	move	Cafe bottom right		Cafe bottom right
+sm-0588	1a verbless: the trigger is a name (or starts with one): 'X 	set	Pawn tiny		Pawn tiny
+sm-0589	1c verbless: the trigger is a value / position / description	move	above	above	the Capsule above the Rocket
+sm-0593	4 ambiguous phrase: two events share it, the deciding word i	reachable	reached from	reached from	What can be reached from Weld
+sm-0594	1a verbless: the trigger is a name (or starts with one): 'X 	connect	Dad to		then Dad to Me
+sm-0595	1a verbless: the trigger is a name (or starts with one): 'X 	set	Scarf red		Scarf red
+sm-0595	1a verbless: the trigger is a name (or starts with one): 'X 	set	Boots brown		Boots brown
+sm-0596	4 ambiguous phrase: two events share it, the deciding word i	reachable	reached from	reached from	what can be reached from Van1
+sm-0599	1a verbless: the trigger is a name (or starts with one): 'X 	move	Cabin1 top left		Cabin1 top left
+sm-0599	1a verbless: the trigger is a name (or starts with one): 'X 	move	Cabin2 top right		Cabin2 top right
+sm-0599	1a verbless: the trigger is a name (or starts with one): 'X 	move	Lake bottom		Lake bottom
+sm-0600	4 ambiguous phrase: two events share it, the deciding word i	describe	show me	show me	show me what's left

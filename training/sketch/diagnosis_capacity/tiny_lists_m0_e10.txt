@@ -1,0 +1,34 @@
+world lists_m0: 260 training rows read in sample; status {'ok': 242, 'abstain': 18}
+event right 260 (100.0%), frame exactly right 239 (91.9%)
+
+frame right per (event, gold structure):
+  connect source+target: 71/74
+  connect members: 74/74
+  connect source+targets: 71/73
+  connect target+members: 23/39
+
+most common errors: [('miss target wrong members', 7), ('miss members', 4), ('wrong edge', 2), ('miss source', 2), ('extra targets miss members', 2), ('wrong members', 2), ('miss source miss targets', 1), ('extra targets', 1)]
+
+per role (rows whose event is read right): present read present / absent read absent with the model's thresholds; best balanced accuracy of any threshold
+  target: thr 0.446 present 111/113 absent 147/147 | best balanced 0.991
+  source: thr 0.651 present 144/147 absent 113/113 | best balanced 0.990
+  edge: thr 0.299 present 50/50 absent 210/210 | best balanced 1.000
+  pairing: thr 0.443 present 74/74 absent 186/186 | best balanced 1.000
+  arrow: thr 0.379 present 8/8 absent 252/252 | best balanced 1.000
+  targets: thr 0.472 present 72/73 absent 183/187 | best balanced 0.982
+  style: thr 0.445 present 58/58 absent 202/202 | best balanced 1.000
+  members: thr 0.374 present 108/113 absent 146/147 | best balanced 0.974
+
+examples of errors:
+  connect n_spill to n_pump3 with a red dashed line | gold connect {"source": ["E", "n_spill", null, null], "target": ["E", "n_pump3", null, null], "style": ["W", "dashed"], "edge": ["E", "line", "red", null]} | got connect {"source": ["E", "n_spill", null, null], "target": ["E", "n_pump3", null, null], "style": ["W", "dashed"], "edge": ["E", "line", null, null]} | ok
+  connect chain n_vent to n_ash2 and n_lava2 | gold connect {"source": ["E", "n_vent", null, null], "targets": ["S", ["n_ash2", "n_lava2"]]} | got connect {"targets": ["S", ["n_ash2", "n_lava2"]]} | ok
+  connect chain n_credit to n_approve and n_reject | gold connect {"source": ["E", "n_credit", null, null], "targets": ["S", ["n_approve", "n_reject"]]} | got connect {} | ok
+  connect chain n_quest2 to n_bye | gold connect {"source": ["E", "n_quest2", null, null], "target": ["E", "n_bye", null, null]} | got connect {"target": ["E", "n_bye", null, null]} | ok
+  connect n_spark to n_grass2 with a red arrow | gold connect {"source": ["E", "n_spark", null, null], "target": ["E", "n_grass2", null, null], "edge": ["E", "arrow", "red", null]} | got connect {"source": ["E", "n_spark", null, null], "target": ["E", "n_grass2", null, null], "edge": ["E", "arrow", null, null]} | ok
+  connect n_key to n_subject and n_fill to n_subject | gold connect {"members": ["S", ["n_fill", "n_key"]], "target": ["E", "n_subject", null, null]} | got connect {"target": ["E", "n_subject", null, null], "members": ["S", ["n_fill", "n_key"]], "targets": ["S", ["n_fill", "n_subject"]]} | ok
+  connect n_merchant to n_well and n_guard to n_well | gold connect {"members": ["S", ["n_guard", "n_merchant"]], "target": ["E", "n_well", null, null]} | got connect {"target": ["E", "n_well", null, null], "targets": ["S", ["n_guard", "n_well"]]} | ok
+  connect n_boat1 to n_mark and n_boat2 to n_mark | gold connect {"members": ["S", ["n_boat1", "n_boat2"]], "target": ["E", "n_mark", null, null]} | got connect {"target": ["E", "n_mark", null, null]} | ok
+  connect n_pier3 to n_deck and n_cable to n_deck | gold connect {"members": ["S", ["n_cable", "n_pier3"]], "target": ["E", "n_deck", null, null]} | got connect {"target": ["E", "n_deck", null, null]} | ok
+  connect n_lane1 to n_bar2 and n_lane2 to n_bar2 | gold connect {"members": ["S", ["n_lane1", "n_lane2"]], "target": ["E", "n_bar2", null, null]} | got connect {"target": ["E", "n_bar2", null, null], "targets": ["S", ["n_bar2", "n_lane2"]]} | abstain
+  connect n_judge1 to n_routine and n_judge2 to n_routine | gold connect {"members": ["S", ["n_judge1", "n_judge2"]], "target": ["E", "n_routine", null, null]} | got connect {"target": ["E", "n_routine", null, null]} | ok
+  connect both to it | gold connect {"members": ["S", ["it", "it"]], "target": ["E", "it", null, null]} | got connect {"members": ["E", "it", null, null]} | ok

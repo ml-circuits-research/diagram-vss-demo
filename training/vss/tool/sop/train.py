@@ -791,31 +791,65 @@ def calibrate_and_finish(a, legend, rows, schema, seed, model_dir, run_dir, cfg,
     def calibrate(crow):
         """thresholds = midpoints of the mean present / absent ratios on the given calibration rows (read with the gold structure)"""
         stats = collections.defaultdict(lambda: {"present": [], "absent": []})
-        for row in crow:
-            g = row["frame"]
-            if g["shape"] != "ok": continue
-            cs = chart_of(row)
-            if cs is None: continue
-            S, toks = cs
-            f = rd.read(S, toks, force=(len(g["speakers"]), g["neg"]), table=row.get("table"))
-            # diagram-vss-demo patch: attribute / determiner ratios read with every role read (presence 'all'), so that a role whose
-            # training rate is under 0.5 (landmark, source, target) still gets its ratios measured on the rows that fill it
-            fa = rd.read(S, toks, force=(len(g["speakers"]), g["neg"]), table=row.get("table"), presence="all")
-            st_ = legend.reader.get("scope_terms") or {}
-            for r in legend.reader.get("set_roles") or []:      # set members: the gold members vs the other candidates of the table
-                mr = f["presence"].get(r + ".members") or {}; gold = set(world.filler_heads(g["roles"].get(r)))
-                for col, x in mr.items(): stats[("set_member", r)]["present" if col in gold else "absent"].append(x)
-            for r in schema["role_order"]:
-                gf = g["roles"].get(r)
-                if st_ and gf is not None and gf[0] == "entity" and r + ".wide" in f["presence"]:
-                    d = gf[3]; w_, q_ = f["presence"][r + ".wide"], f["presence"][r + ".q"]
-                    if d in st_.get("wide", []): stats[("scope_term", "_")]["present"].append(w_); stats[("scope_term", "_")]["absent"].append(q_)
-                    elif d in st_.get("q", []): stats[("scope_term", "_")]["present"].append(q_); stats[("scope_term", "_")]["absent"].append(w_)
-                    else: stats[("scope_term", "_")]["absent"] += [w_, q_]
-                stats[("presence", r)]["present" if gf is not None else "absent"].append(f["presence"].get(r, 0))
-                if gf is not None and gf[0] == "entity":
-                    for part, idx in (("attr", 2), ("det", 3)):
-                        if r + "." + part in fa["presence"]: stats[(part + "_presence", r)]["present" if gf[idx] is not None else "absent"].append(fa["presence"][r + "." + part])
+        for row in crow: add_row(row, stats)
+        if os.environ.get("CAL_FALLBACK") == "train": fallback_rows(crow, stats)
+        return thresholds_of(stats)
+    def add_row(row, stats):
+        """one calibration row's ratios into stats (the body of calibrate's loop before CAL_FALLBACK; unchanged)"""
+        g = row["frame"]
+        if g["shape"] != "ok": return
+        cs = chart_of(row)
+        if cs is None: return
+        S, toks = cs
+        f = rd.read(S, toks, force=(len(g["speakers"]), g["neg"]), table=row.get("table"))
+        # diagram-vss-demo patch: attribute / determiner ratios read with every role read (presence 'all'), so that a role whose
+        # training rate is under 0.5 (landmark, source, target) still gets its ratios measured on the rows that fill it
+        fa = rd.read(S, toks, force=(len(g["speakers"]), g["neg"]), table=row.get("table"), presence="all")
+        st_ = legend.reader.get("scope_terms") or {}
+        for r in legend.reader.get("set_roles") or []:      # set members: the gold members vs the other candidates of the table
+            mr = f["presence"].get(r + ".members") or {}; gold = set(world.filler_heads(g["roles"].get(r)))
+            for col, x in mr.items(): stats[("set_member", r)]["present" if col in gold else "absent"].append(x)
+        for r in schema["role_order"]:
+            gf = g["roles"].get(r)
+            if st_ and gf is not None and gf[0] == "entity" and r + ".wide" in f["presence"]:
+                d = gf[3]; w_, q_ = f["presence"][r + ".wide"], f["presence"][r + ".q"]
+                if d in st_.get("wide", []): stats[("scope_term", "_")]["present"].append(w_); stats[("scope_term", "_")]["absent"].append(q_)
+                elif d in st_.get("q", []): stats[("scope_term", "_")]["present"].append(q_); stats[("scope_term", "_")]["absent"].append(w_)
+                else: stats[("scope_term", "_")]["absent"] += [w_, q_]
+            stats[("presence", r)]["present" if gf is not None else "absent"].append(f["presence"].get(r, 0))
+            if gf is not None and gf[0] == "entity":
+                for part, idx in (("attr", 2), ("det", 3)):
+                    if r + "." + part in fa["presence"]: stats[(part + "_presence", r)]["present" if gf[idx] is not None else "absent"].append(fa["presence"][r + "." + part])
+    def fallback_rows(crow, stats):
+        """CAL_FALLBACK=train (off by default; CAPACITY.md S6). A role (or an entity role's attribute / determiner) with fewer than 5
+        present or 5 absent calibration rows gets no threshold and is then read by its training rate, i.e. NEVER for a rare role
+        (fix_p80_s0: direction, amount, arrow, object.det, edge.attr, 97 of 3900 training requests). The same rule for every role:
+        such a role is fitted by the same rule (fit_threshold) on the calibration rows PLUS the training rows that hold the missing
+        class. Reason: the training rows are the only other labelled rows the trainer has; a threshold fitted in sample is biased
+        (too easy), but "never" is wrong for every request that has the role, so an in-sample threshold is the smaller error. The
+        held-out calibration rows stay in. A role that still has < 5 of a class keeps no threshold (as before)."""
+        used = {id(x) for x in crow}; heads = {}
+        for r in schema["role_order"]:
+            heads[("presence", r)] = lambda gf: gf is not None
+            rs = schema["roles"].get(r, {})
+            if rs.get("main") == "entity":
+                if rs.get("attr_kinds"): heads[("attr_presence", r)] = lambda gf: gf is not None and gf[0] == "entity" and gf[2] is not None
+                if rs.get("det_kinds"): heads[("det_presence", r)] = lambda gf: gf is not None and gf[0] == "entity" and gf[3] is not None
+        need = [k for k in heads if len(stats[k]["present"]) < 5 or len(stats[k]["absent"]) < 5]
+        if not need: return
+        extra = collections.defaultdict(lambda: {"present": [], "absent": []}); n_abs = collections.Counter()
+        for row in pos:                     # the training rows, in their fixed order; the calibration rows are already in stats
+            if id(row) in used or row["frame"]["shape"] != "ok": continue
+            gr = row["frame"]["roles"]; take = False
+            for (kind, r) in need:
+                has = heads[(kind, r)](gr.get(r))
+                if kind != "presence" and (gr.get(r) is None or gr.get(r)[0] != "entity"): continue   # attr / det: rows that fill the role only
+                if has and len(stats[(kind, r)]["present"]) < 5: take = True
+                if not has and len(stats[(kind, r)]["absent"]) < 5 and n_abs[(kind, r)] < 50: take = True; n_abs[(kind, r)] += 1
+            if take: add_row(row, extra)
+        for k in need:
+            stats[k]["present"] += extra[k]["present"]; stats[k]["absent"] += extra[k]["absent"]; stats[k]["fallback"] = True
+    def thresholds_of(stats):
         th = {"presence": {}, "attr_presence": {}, "det_presence": {}, "scope_term": None, "set_member": {}}; calrep = {}
         mid = {"presence": {}, "attr_presence": {}, "det_presence": {}, "scope_term": None, "set_member": {}}      # the pooled midpoint: the comparison, one more round
         for (kind, r), v in stats.items():
@@ -831,6 +865,7 @@ def calibrate_and_finish(a, legend, rows, schema, seed, model_dir, run_dir, cfg,
                 th[kind][r] = fit_threshold(v["present"], v["absent"]) if rule == "fit" else mid[kind][r]
                 calrep[f"{kind}:{r}"] = {"mean_present": mp, "mean_absent": ma, "threshold": th[kind][r], "pooled_midpoint": mid[kind][r], "rule": rule,
                                          "n_present": len(v["present"]), "n_absent": len(v["absent"])}
+                if v.get("fallback"): calrep[f"{kind}:{r}"]["fallback"] = "CAL_FALLBACK=train: calibration rows + the training rows that hold the missing class (in sample)"
             else:
                 th[kind][r] = None; calrep[f"{kind}:{r}"] = {"threshold": None, "n_present": len(v["present"]), "n_absent": len(v["absent"]),
                                                              "rule": "one class missing in the calibration rows: read by the training rate (always / never)"}

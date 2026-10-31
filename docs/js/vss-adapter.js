@@ -138,6 +138,7 @@ export function toNodes(reading, info, ctx, seq) {
     case "count": case "exists": case "list": {
       if (obj && obj.head === "rules") { args.ask = "rules"; break; }
       if (obj) { const s = shapeOf(obj); if (s) args.shape = s; if (obj.attr) args.color = obj.attr; }
+      if (R.color && !args.color) args.color = R.color;      // a colour without a shape word (world built with QCOLOR=1, CAPACITY.md S7); inert for a model whose count / exists / list take no `color` role
       if (R.notcolor) args.notColor = String(R.notcolor).replace(/^not_/, "");
       place(args); break;
     }

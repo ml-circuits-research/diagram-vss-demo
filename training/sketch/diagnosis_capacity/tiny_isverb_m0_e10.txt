@@ -1,0 +1,33 @@
+world isverb_m0: 240 training rows read in sample; status {'ok': 240}
+event right 240 (100.0%), frame exactly right 231 (96.2%)
+
+frame right per (event, gold structure):
+  fact object: 54/55
+  extreme -: 47/55
+  extreme object: 54/54
+  connected object: 52/52
+  path source+target: 24/24
+
+most common errors: [('extra object', 8), ('miss relation', 1)]
+
+per role (rows whose event is read right): present read present / absent read absent with the model's thresholds; best balanced accuracy of any threshold
+  object: thr 0.301 present 161/161 absent 47/55 | best balanced 0.927
+  superlative: thr 0.342 present 109/109 absent 0/0 | best balanced -
+  landmark: thr 0.249 present 53/53 absent 54/54 | best balanced 1.000
+  relation: thr None present - absent - | best balanced 1.000
+  size: thr 0.374 present 12/12 absent 43/43 | best balanced 1.000
+  shape: thr 0.357 present 10/10 absent 45/45 | best balanced 1.000
+  color: thr 0.311 present 52/52 absent 3/3 | best balanced 1.000
+  target: thr 0.101 present 24/24 absent 0/0 | best balanced -
+  source: thr 0.084 present 24/24 absent 0/0 | best balanced -
+
+examples of errors:
+  the n_frame is next_to the n_painting3 | gold fact {"object": ["E", "n_frame", null, null], "relation": ["W", "next_to"], "landmark": ["E", "n_painting3", null, null]} | got fact {"object": ["E", "n_frame", null, null], "landmark": ["E", "n_painting3", null, null]} | ok
+  is n_spot extreme_q topmost | gold extreme {"superlative": ["W", "topmost"]} | got extreme {"object": ["E", "n_spot", null, null], "superlative": ["W", "topmost"]} | ok
+  is n_goldie extreme_q bottommost | gold extreme {"superlative": ["W", "bottommost"]} | got extreme {"object": ["E", "n_goldie", null, null], "superlative": ["W", "bottommost"]} | ok
+  is n_grandma extreme_q biggest | gold extreme {"superlative": ["W", "biggest"]} | got extreme {"object": ["E", "n_grandma", null, null], "superlative": ["W", "biggest"]} | ok
+  is n_bay3 extreme_q bottommost | gold extreme {"superlative": ["W", "bottommost"]} | got extreme {"object": ["E", "n_bay3", null, null], "superlative": ["W", "bottommost"]} | ok
+  is n_shelf3 extreme_q bottommost | gold extreme {"superlative": ["W", "bottommost"]} | got extreme {"object": ["E", "n_shelf3", null, null], "superlative": ["W", "bottommost"]} | ok
+  is n_counter extreme_q biggest | gold extreme {"superlative": ["W", "biggest"]} | got extreme {"object": ["E", "n_counter", null, null], "superlative": ["W", "biggest"]} | ok
+  is the n_balcony extreme_q topmost | gold extreme {"superlative": ["W", "topmost"]} | got extreme {"object": ["E", "n_balcony", null, null], "superlative": ["W", "topmost"]} | ok
+  is the n_swing extreme_q rightmost | gold extreme {"superlative": ["W", "rightmost"]} | got extreme {"object": ["E", "n_swing", null, null], "superlative": ["W", "rightmost"]} | ok

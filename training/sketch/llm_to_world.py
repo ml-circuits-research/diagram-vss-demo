@@ -166,6 +166,11 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
             elif sh:
                 if not soft: raise Skip(f"no shape word {sh}")
                 lost.append(f"shape word {sh}")
+            # QCOLOR=1 (off by default; CAPACITY.md S7): a colour filter of a count / exists / list question ("which ones are blue",
+            # "how many are red") is a legend key of these questions (docs/js/logic.js LOGIC_MAP color) but was kept only as the
+            # attribute of a shape word, so with no shape word it was dropped silently and never trained. Here it fills the role
+            # `color`, which the world's events then take (msg_to_world.py derives each event's roles from its rows).
+            if os.environ.get("QCOLOR") == "1" and ev in ("count", "exists", "list") and a.get("color") and not head: roles["color"] = need(a["color"])
             if ev == "rule":
                 if a.get("color"): roles["color"] = need(a["color"])
                 if a.get("size"): roles["size"] = need(a["size"])

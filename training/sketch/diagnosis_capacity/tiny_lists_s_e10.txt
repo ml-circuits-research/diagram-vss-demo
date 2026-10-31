@@ -1,0 +1,34 @@
+world lists_s: 260 training rows read in sample; status {'ok': 241, 'abstain': 19}
+event right 260 (100.0%), frame exactly right 229 (88.1%)
+
+frame right per (event, gold structure):
+  connect source+target: 70/74
+  connect members: 72/74
+  connect source+targets: 64/73
+  connect target+members: 23/39
+
+most common errors: [('extra style', 7), ('miss target wrong members', 7), ('extra targets miss members', 4), ('miss members', 3), ('miss source', 2), ('wrong edge', 2), ('extra target', 2), ('extra targets miss target', 2), ('wrong members', 2)]
+
+per role (rows whose event is read right): present read present / absent read absent with the model's thresholds; best balanced accuracy of any threshold
+  members: thr 0.413 present 107/113 absent 146/147 | best balanced 0.970
+  style: thr 0.38 present 58/58 absent 195/202 | best balanced 0.983
+  arrow: thr 0.363 present 8/8 absent 252/252 | best balanced 1.000
+  targets: thr 0.499 present 73/73 absent 181/187 | best balanced 0.984
+  edge: thr 0.32 present 50/50 absent 209/210 | best balanced 0.998
+  target: thr 0.392 present 113/113 absent 145/147 | best balanced 0.993
+  source: thr 0.666 present 145/147 absent 113/113 | best balanced 0.993
+  pairing: thr 0.433 present 74/74 absent 186/186 | best balanced 1.000
+
+examples of errors:
+  connect n_readme to n_src , n_tests and n_docs | gold connect {"source": ["E", "n_readme", null, null], "targets": ["S", ["n_docs", "n_src", "n_tests"]]} | got connect {"targets": ["S", ["n_docs", "n_src", "n_tests"]]} | abstain
+  connect n_home to n_search , n_profile and n_settings | gold connect {"source": ["E", "n_home", null, null], "targets": ["S", ["n_profile", "n_search", "n_settings"]]} | got connect {"targets": ["S", ["n_profile", "n_search", "n_settings"]]} | ok
+  connect n_spill to n_pump3 with a red dashed line | gold connect {"source": ["E", "n_spill", null, null], "target": ["E", "n_pump3", null, null], "style": ["W", "dashed"], "edge": ["E", "line", "red", null]} | got connect {"source": ["E", "n_spill", null, null], "target": ["E", "n_pump3", null, null], "style": ["W", "dashed"], "edge": ["E", "line", null, null]} | ok
+  connect n_floor1 to n_floor2 with an arrow , chain n_floor2 to n_lobby2 with an arrow | gold connect {"members": ["S", ["n_floor1", "n_floor2", "n_lobby2"]], "pairing": ["W", "chain"]} | got connect {"target": ["E", "n_floor2", null, null], "pairing": ["W", "chain"], "members": ["S", ["n_floor1", "n_floor2", "n_lobby2"]]} | abstain
+  connect n_router2 to n_node1 and n_node2 with solid lines | gold connect {"source": ["E", "n_router2", null, null], "targets": ["S", ["n_node1", "n_node2"]]} | got connect {"source": ["E", "n_router2", null, null], "style": ["W", "solid"], "targets": ["S", ["n_node1", "n_node2"]]} | ok
+  connect n_desk2 to n_courta and n_courtb with solid lines | gold connect {"source": ["E", "n_desk2", null, null], "targets": ["S", ["n_courta", "n_courtb"]]} | got connect {"source": ["E", "n_desk2", null, null], "style": ["W", "solid"], "targets": ["S", ["n_courta", "n_courtb"]]} | ok
+  connect n_magma to n_vent | gold connect {"source": ["E", "n_magma", null, null], "target": ["E", "n_vent", null, null]} | got connect {"source": ["E", "n_magma", null, null], "targets": ["E", "n_vent", null, null]} | abstain
+  connect n_applicant to n_credit | gold connect {"source": ["E", "n_applicant", null, null], "target": ["E", "n_credit", null, null]} | got connect {"source": ["E", "n_applicant", null, null], "targets": ["E", "n_credit", null, null]} | ok
+  connect n_desk3 to n_lane1 and n_lane2 with solid lines | gold connect {"source": ["E", "n_desk3", null, null], "targets": ["S", ["n_lane1", "n_lane2"]]} | got connect {"source": ["E", "n_desk3", null, null], "style": ["W", "solid"], "targets": ["S", ["n_lane1", "n_lane2"]]} | abstain
+  connect n_battery2 to n_resistor with a solid line , chain n_resistor to n_bulb | gold connect {"members": ["S", ["n_battery2", "n_bulb", "n_resistor"]], "edge": ["E", "line", null, null], "pairing": ["W", "chain"]} | got connect {"target": ["E", "n_resistor", null, null], "edge": ["E", "line", null, null], "pairing": ["W", "chain"], "members": ["S", ["n_battery2", "n_bulb", "n_resistor"]]} | abstain
+  connect n_spark to n_grass2 with a red arrow | gold connect {"source": ["E", "n_spark", null, null], "target": ["E", "n_grass2", null, null], "edge": ["E", "arrow", "red", null]} | got connect {"source": ["E", "n_spark", null, null], "target": ["E", "n_grass2", null, null], "edge": ["E", "arrow", null, null]} | ok
+  connect n_panel to n_cable2 and n_brake with solid lines | gold connect {"source": ["E", "n_panel", null, null], "targets": ["S", ["n_brake", "n_cable2"]]} | got connect {"source": ["E", "n_panel", null, null], "style": ["W", "solid"], "targets": ["S", ["n_brake", "n_cable2"]]} | ok

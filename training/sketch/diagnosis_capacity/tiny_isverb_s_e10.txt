@@ -1,0 +1,29 @@
+world isverb_s: 240 training rows read in sample; status {'ok': 227, 'abstain': 13}
+event right 240 (100.0%), frame exactly right 235 (97.9%)
+
+frame right per (event, gold structure):
+  fact object: 54/55
+  extreme -: 55/55
+  extreme object: 51/54
+  connected object: 51/52
+  path source+target: 24/24
+
+most common errors: [('miss object', 4), ('miss relation', 1)]
+
+per role (rows whose event is read right): present read present / absent read absent with the model's thresholds; best balanced accuracy of any threshold
+  object: thr 0.527 present 157/161 absent 55/55 | best balanced 0.988
+  superlative: thr 0.213 present 109/109 absent 0/0 | best balanced -
+  landmark: thr 0.37 present 53/53 absent 54/54 | best balanced 1.000
+  size: thr 0.249 present 12/12 absent 43/43 | best balanced 1.000
+  shape: thr 0.184 present 10/10 absent 45/45 | best balanced 1.000
+  relation: thr None present - absent - | best balanced 1.000
+  color: thr 0.494 present 52/52 absent 3/3 | best balanced 1.000
+  target: thr 0.212 present 24/24 absent 0/0 | best balanced -
+  source: thr 0.192 present 24/24 absent 0/0 | best balanced -
+
+examples of errors:
+  is n_sample connected_q n_control | gold connected {"object": ["E", "n_sample", null, null], "landmark": ["E", "n_control", null, null]} | got connected {"landmark": ["E", "n_control", null, null]} | ok
+  which one is extreme_q leftmost shape | gold extreme {"object": ["E", "shape", null, null], "superlative": ["W", "leftmost"]} | got extreme {"superlative": ["W", "leftmost"]} | ok
+  who is extreme_q mostconnected shape | gold extreme {"object": ["E", "shape", null, null], "superlative": ["W", "mostconnected"]} | got extreme {"superlative": ["W", "mostconnected"]} | ok
+  the n_frame is next_to the n_painting3 | gold fact {"object": ["E", "n_frame", null, null], "relation": ["W", "next_to"], "landmark": ["E", "n_painting3", null, null]} | got fact {"object": ["E", "n_frame", null, null], "landmark": ["E", "n_painting3", null, null]} | ok
+  which is extreme_q biggest shape | gold extreme {"object": ["E", "shape", null, null], "superlative": ["W", "biggest"]} | got extreme {"superlative": ["W", "biggest"]} | ok

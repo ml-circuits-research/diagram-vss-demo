@@ -1,0 +1,56 @@
+world noown_s: 240 training rows read in sample; status {'ok': 204, 'abstain': 22, 'no-sense': 9, 'unknown-event': 5}
+event right 226 (94.2%), frame exactly right 197 (82.1%)
+
+frame right per (event, gold structure):
+  set object: 6/12
+  move object: 11/12
+  fact object: 9/12
+  extreme -: 11/12
+  check object: 12/12
+  duplicate object: 11/11
+  toFront object: 11/11
+  connected object: 11/11
+  property object: 4/11
+  delete object: 7/11
+  path source+target: 11/11
+  toBack object: 11/11
+  label object: 8/11
+  list -: 9/9
+  count object: 9/9
+  list object: 8/8
+
+most common errors: [('miss object', 15), ('miss pairing', 4), ('miss size', 3), ('event check <- align', 3), ('miss shape', 2), ('miss shape miss size', 1), ('event label <- move', 1), ('event toFront <- align', 1), ('event connect <- set', 1), ('event resize <- set', 1)]
+
+per role (rows whose event is read right): present read present / absent read absent with the model's thresholds; best balanced accuracy of any threshold
+  object: thr 0.085 present 144/159 absent 43/45 | best balanced 0.931
+  quantity: thr 0.093 present 10/10 absent 1/1 | best balanced 1.000
+  size: thr None present - absent - | best balanced 1.000
+  shape: thr None present - absent - | best balanced 1.000
+  members: thr None present - absent - | best balanced 1.000
+  color: thr 0.117 present 27/27 absent 15/16 | best balanced 0.969
+  relation: thr 0.087 present 14/14 absent 52/52 | best balanced 1.000
+  region: thr None present - absent - | best balanced -
+  landmark: thr 0.117 present 43/43 absent 40/42 | best balanced 0.988
+  superlative: thr 0.178 present 20/20 absent 0/0 | best balanced -
+  comparison: thr 0.253 present 11/11 absent 1/1 | best balanced 1.000
+  source: thr 0.012 present 12/13 absent 5/5 | best balanced 0.962
+  target: thr 0.057 present 12/12 absent 6/6 | best balanced 1.000
+  layout: thr 0.294 present 5/5 absent 0/0 | best balanced -
+  pairing: thr None present - absent - | best balanced -
+  text: thr 0.069 present 8/8 absent 5/5 | best balanced 1.000
+  name: thr None present - absent - | best balanced -
+  axis: thr 0.438 present 3/3 absent 0/0 | best balanced -
+
+examples of errors:
+  make n_db huge | gold set {"object": ["E", "n_db", null, null], "size": ["W", "huge"]} | got set {"object": ["E", "n_db", null, null]} | ok
+  n_team is huge blue ellipse | gold fact {"object": ["E", "n_team", null, null], "color": ["W", "blue"], "shape": ["W", "ellipse"], "size": ["W", "huge"]} | got fact {"object": ["E", "n_team", null, null], "color": ["W", "blue"]} | ok
+  n_control is green circle | gold fact {"object": ["E", "n_control", null, null], "color": ["W", "green"], "shape": ["W", "circle"]} | got fact {"object": ["E", "n_control", null, null], "color": ["W", "green"]} | ok
+  what_shape n_fiction | gold property {"object": ["E", "n_fiction", null, null]} | got property {} | ok
+  make n_trial2 huge | gold set {"object": ["E", "n_trial2", null, null], "size": ["W", "huge"]} | got set {"object": ["E", "n_trial2", null, null]} | ok
+  what_shape n_boss | gold property {"object": ["E", "n_boss", null, null]} | got property {} | ok
+  what_shape n_row1 | gold property {"object": ["E", "n_row1", null, null]} | got property {} | ok
+  what_shape n_cat1 | gold property {"object": ["E", "n_cat1", null, null]} | got property {} | ok
+  stack n_middle above n_bottom | gold move {"object": ["E", "n_middle", null, null], "relation": ["W", "above"], "landmark": ["E", "n_bottom", null, null]} | got label {"object": ["E", "n_middle", null, null]} | no-sense
+  what_color n_wide | gold property {"object": ["E", "n_wide", null, null]} | got property {} | ok
+  delete n_logo | gold delete {"object": ["E", "n_logo", null, null]} | got delete {} | ok
+  delete n_error | gold delete {"object": ["E", "n_error", null, null]} | got delete {} | ok
