@@ -6,6 +6,7 @@
 // vs sparse of the same model): the effect of a format change on the readings themselves, counted three ways: any difference of the SOP
 // text (margins and residual included); a difference of what is decided (the wires and their role values: the SOP lines that are not
 // _ annotations) or of the status; the status alone.
+// A golden file written with --excl (switch EXCL, DECODE.md) is read with the exclusion pairs of <export-web dir>/decode.json.
 // node parity_reader.mjs <golden.json> <export-web dir> [--against <export-web dir>]
 import { readFileSync } from "node:fs";
 import { load } from "../../docs/js/vss.js";
@@ -14,7 +15,8 @@ const argv = process.argv.slice(2), ag = argv.indexOf("--against");
 const g = JSON.parse(readFileSync(argv[0], "utf8"));
 const open = async (d) => {
   const dir = d.replace(/\/?$/, "/"), readFile = async (n) => { const b = readFileSync(dir + n); return n.endsWith(".json") ? b.toString("utf8") : b.buffer.slice(b.byteOffset, b.byteOffset + b.length); };
-  return { vss: await load(null, { readFile, sentenceCandidates: true }), F: JSON.parse(await readFile("front.json")) };
+  const excl = g.excl ? { excl: JSON.parse(await readFile("decode.json")).excl_pairs } : {};
+  return { vss: await load(null, Object.assign({ readFile, sentenceCandidates: true }, excl)), F: JSON.parse(await readFile("front.json")) };
 };
 const A = await open(argv[1]), B = ag >= 0 ? await open(argv[ag + 1]) : null;
 const decided = (sop) => sop.split("\n").filter((l) => !/^\s*_/.test(l)).join("\n");     // the wires and their role values, no _ annotation line

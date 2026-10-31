@@ -132,6 +132,10 @@ export function vssCentresQ1(text, names, F, vss, opts = {}) {
   const verbs = opts.verbs || new Set(vss.model.legend.events.flatMap((e) => e.verbs || []));
   const vk = new Set(Object.entries(vss.model.lexicon || {}).filter(([w, e]) => /^[A-Z]+$/.test(e.kind) && e.kind !== "VERB").map(([w]) => w));
   const evRoles = new Map(vss.model.legend.events.map((e) => [e.id, (e.roles || []).length]));
+  // switch Q1b (training/sketch/DECODE.md): opts.roleless = the events that may be read with no role, learned from the training frames
+  // (decode.json roleless_ok: >= 5% of the event's training frames fill no role; tool/sop/decode_stats.py); it replaces the legend test
+  const rolelessOk = opts.roleless ? new Set(opts.roleless) : null;
+  const mayBeRoleless = (ev) => (rolelessOk ? rolelessOk.has(ev) : (evRoles.get(ev) || 0) === 0);
   const content = (t) => t.startsWith("n_") || t.startsWith("t_") || /^\d+$/.test(t) || verbs.has(t) || vk.has(t);
   const [toks] = FRONT.tokenize(text, names), sents = []; let cur = [];
   toks.forEach((t, k) => { cur.push(k); if (ENDS.has(t[0])) { sents.push(cur); cur = []; } });
@@ -151,7 +155,7 @@ export function vssCentresQ1(text, names, F, vss, opts = {}) {
         const cont = tokens.filter(content), un = r.unplaced.filter(content);
         const ev = cont.filter((t) => verbs.has(t)).length, unEv = un.filter((t) => verbs.has(t)).length;
         const roles = Object.values((r.frame && r.frame.roles) || {}).filter((x) => x !== null && x !== undefined).length;
-        const roleless = roles === 0 && (evRoles.get(r.frame && r.frame.event) || 0) > 0;
+        const roleless = roles === 0 && !mayBeRoleless(r.frame && r.frame.event);
         if (!roleless) v = { src: srcText, c0, c1, score: ((cont.length - ev) - (un.length - unEv)) - (un.length - unEv) };
       }
     }

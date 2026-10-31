@@ -1,0 +1,154 @@
+{
+ "legend_sha256": "sha256:cbf20196eeebd828ac961e92cf26465b7b62e8002d34caad7c4db62eb0b2c353",
+ "training_rows": 3902,
+ "rule": {
+  "excl_pairs": "two legend roles of one event sharing a candidate kind, each given in >= 5 training frames of the event, given together in 0 of them",
+  "roleless_ok": "events whose training frames fill no role in >= 5% of their rows"
+ },
+ "excl_pairs": {
+  "check": [
+   [
+    "comparison",
+    "size"
+   ],
+   [
+    "landmark",
+    "shape"
+   ]
+  ],
+  "connect": [
+   [
+    "members",
+    "source"
+   ],
+   [
+    "members",
+    "targets"
+   ],
+   [
+    "members",
+    "text"
+   ],
+   [
+    "target",
+    "targets"
+   ],
+   [
+    "targets",
+    "text"
+   ]
+  ],
+  "count": [
+   [
+    "landmark",
+    "object"
+   ]
+  ],
+  "create": [
+   [
+    "name",
+    "text"
+   ]
+  ],
+  "move": [
+   [
+    "region",
+    "relation"
+   ]
+  ],
+  "set": [
+   [
+    "members",
+    "object"
+   ]
+  ]
+ },
+ "roleless_ok": [
+  "count",
+  "cycle",
+  "delete",
+  "describe",
+  "distribute",
+  "forget",
+  "list",
+  "property",
+  "redo",
+  "resize",
+  "swap",
+  "undo"
+ ],
+ "event_rows": {
+  "align": 32,
+  "arrange": 84,
+  "check": 165,
+  "connect": 629,
+  "connected": 69,
+  "count": 84,
+  "create": 270,
+  "cycle": 32,
+  "degree": 35,
+  "delete": 40,
+  "describe": 37,
+  "disconnect": 29,
+  "distribute": 27,
+  "duplicate": 58,
+  "exists": 46,
+  "extreme": 267,
+  "fact": 97,
+  "forget": 27,
+  "label": 30,
+  "list": 91,
+  "move": 549,
+  "nearest": 80,
+  "neighbors": 30,
+  "path": 98,
+  "property": 41,
+  "reachable": 33,
+  "redo": 26,
+  "rename": 62,
+  "resize": 42,
+  "rule": 34,
+  "set": 641,
+  "swap": 29,
+  "toBack": 29,
+  "toFront": 25,
+  "undo": 34
+ },
+ "event_rows_no_role": {
+  "align": 0,
+  "arrange": 1,
+  "check": 0,
+  "connect": 4,
+  "connected": 0,
+  "count": 28,
+  "create": 0,
+  "cycle": 32,
+  "degree": 1,
+  "delete": 7,
+  "describe": 9,
+  "disconnect": 0,
+  "distribute": 3,
+  "duplicate": 0,
+  "exists": 2,
+  "extreme": 0,
+  "fact": 0,
+  "forget": 27,
+  "label": 0,
+  "list": 30,
+  "move": 0,
+  "nearest": 0,
+  "neighbors": 0,
+  "path": 0,
+  "property": 3,
+  "reachable": 0,
+  "redo": 26,
+  "rename": 0,
+  "resize": 3,
+  "rule": 0,
+  "set": 1,
+  "swap": 2,
+  "toBack": 0,
+  "toFront": 0,
+  "undo": 34
+ }
+}

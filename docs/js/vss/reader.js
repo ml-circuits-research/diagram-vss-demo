@@ -75,6 +75,23 @@ export class Reader {
       throw new Error("vss.js: table roles and bundle_alnum value identities (the WikiSQL world) are not ported");   // set roles: ported here (diagram-vss-demo)
     this.sentenceCandidates = !!opts.sentenceCandidates; this.sentTokens = []; this._cands = new Map(); this.sqrtD = Math.sqrt(this.D); this.filt = null;
     this.centres = !!rr.centres;          // the centre reader (legend reader.centres, chosen by the world): readMessage
+    this.excl = opts.excl || null;        // switch EXCL (training/sketch/DECODE.md): {event: [[a, b], ...]}, decode.json excl_pairs; null = off
+  }
+  /** EXCL (infer.Reader.exclude; training/sketch/DECODE.md): of two roles of the decided event that the training frames never give
+   *  together (decode.json excl_pairs, learned by tool/sop/decode_stats.py), both given, only the one with the larger presence ratio /
+   *  threshold is kept (ties keep the first of the pair) */
+  exclude(f) {
+    const thp = this.th.presence || {}, sc = (r) => (f.presence[r] ?? 0) / Math.max(1e-9, thp[r] ?? 1);
+    for (const [a, b] of this.excl[f.event]) {
+      if (!f.roles[a] || !f.roles[b]) continue;
+      const drop = sc(a) >= sc(b) ? b : a;
+      delete f.roles[drop];
+      for (const k of Object.keys(f.margins)) if (k === drop || k.startsWith(drop + ".")) delete f.margins[k];
+      if (f.identity_margins) delete f.identity_margins[drop];
+      if (f.det_best) delete f.det_best[drop];
+      if (f.runner_up) delete f.runner_up[drop];
+      (f.excluded = f.excluded || {})[drop] = drop === a ? b : a;
+    }
   }
   // ---------------- words
   wordEntry(tok) { return this.words.get(tok) || this.words.get(tok.toLowerCase()) || null; }
@@ -346,6 +363,7 @@ export class Reader {
       }
     }
     if (this.legend.reader.scope_terms) this.readScope(Sn, K, core, f);
+    if (this.excl && f.event && Object.hasOwn(this.excl, f.event)) this.exclude(f);
     if (f.event === null) f.shape = "unknown";
     return f;
   }

@@ -186,10 +186,11 @@ class Routebook:
 
 
 class Reader:
-    def __init__(self, model_dir, legend_path=None, force=False, sentence_candidates=False, routebook=None):
+    def __init__(self, model_dir, legend_path=None, force=False, sentence_candidates=False, routebook=None, excl_pairs=None):
         """sentence_candidates (default off: the existing behaviour): the candidates of a role are the catalog words of the role's kinds AND the
-        sentence's own tokens whose kind is one of them (new labels and numbers read without retraining; mirrored by app/src/vss.js)"""
-        self.dir = model_dir; self.sentence_candidates = bool(sentence_candidates); self._sent_tokens = ()
+        sentence's own tokens whose kind is one of them (new labels and numbers read without retraining; mirrored by app/src/vss.js).
+        excl_pairs (default None = off): switch EXCL, {event: [[a, b], ...]} (decode.json, decode_stats.py; training/sketch/DECODE.md)"""
+        self.dir = model_dir; self.sentence_candidates = bool(sentence_candidates); self._sent_tokens = (); self.excl_pairs = excl_pairs or None
         need = ["config.json", "legend.json", "catalog.json"] + (["routebook.npz"] if routebook is None else [])
         for n in need:
             if not os.path.exists(os.path.join(model_dir, n)): raise ModelError(f"model incomplete: {n} missing in {model_dir}")
@@ -492,8 +493,27 @@ class Reader:
                 if f["roles"].get(r) is None: f.setdefault("presence_queries", {})[r] = f["margins"].pop(r + ".presence", 0.0)
         st = self.legend.reader.get("scope_terms")
         if st: self.read_scope(Sn, K, core, f)
+        if self.excl_pairs and f.get("event") in self.excl_pairs: self.exclude(f)
         if f["event"] is None: f["shape"] = "unknown"
         return f
+
+    def exclude(self, f):
+        """switch EXCL (training/sketch/DECODE.md; the twin of docs/js/vss/reader.js exclude): of two roles of the decided event that the
+        training frames never give together (decode.json excl_pairs, learned by decode_stats.py), both given, only the one with the larger
+        presence ratio / threshold is kept (ties keep the first of the pair)"""
+        thp = self.th.get("presence") or {}
+        def sc(r):
+            p, t = f["presence"].get(r), thp.get(r)
+            return (0.0 if p is None else p) / max(1e-9, 1.0 if t is None else t)
+        for a, b in self.excl_pairs[f["event"]]:
+            if not f["roles"].get(a) or not f["roles"].get(b): continue
+            drop = b if sc(a) >= sc(b) else a
+            del f["roles"][drop]
+            for k in list(f["margins"]):
+                if k == drop or k.startswith(drop + "."): del f["margins"][k]
+            for part in ("identity_margins", "det_best"):
+                if part in f: f[part].pop(drop, None)
+            f.setdefault("excluded", {})[drop] = b if drop == a else a
 
     @staticmethod
     def head_of(fl): return fl[1] if fl and fl[0] in ("entity", "word", "negword") else None

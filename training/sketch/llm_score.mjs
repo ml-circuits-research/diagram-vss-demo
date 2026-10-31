@@ -18,7 +18,10 @@ const argv = process.argv.slice(2), verbose = argv.includes("-v"), dumpAt = argv
 const dirs = argv.filter((a, i) => !a.startsWith("-") && (dumpAt < 0 || i !== dumpAt + 1));
 const dir = new URL(`../../docs/model/${process.env.MODEL || "sketch"}/`, import.meta.url);
 const readFile = async (n) => { const b = readFileSync(new URL(n, dir)); return n.endsWith(".json") ? b.toString("utf8") : b.buffer.slice(b.byteOffset, b.byteOffset + b.length); };
-const vss = await load(null, { readFile, sentenceCandidates: true });
+// EXCL=1 / Q1B=1 (DECODE.md): the decode data learned from the training frames, decode.json in the model folder (tool/sop/decode_stats.py)
+const DEC = process.env.EXCL === "1" || process.env.Q1B === "1" ? JSON.parse(readFileSync(new URL("decode.json", dir), "utf8")) : null;
+if (process.env.Q1B === "1" && process.env.SEG !== "q1") throw new Error("Q1B=1 is a switch of the q1 cut: use it with SEG=q1");
+const vss = await load(null, Object.assign({ readFile, sentenceCandidates: true }, process.env.EXCL === "1" ? { excl: DEC.excl_pairs } : {}));
 const F = existsSync(new URL("front.json", dir)) ? JSON.parse(await readFile("front.json")) : null;   // the learned front end (world real)
 const C = F ? null : compile(JSON.parse(await readFile("normalize.json")));
 const lex = new Set(Object.keys(vss.model.lexicon || {})), verbEvent = new Map();
@@ -53,7 +56,7 @@ function vssFormalize(text, ctx) {
   // SEG=gold: the annotated spans (held-out TRAINING messages only: the test sets have none): the reading quality without the cut
   const segs = process.env.SEG === "gold" && ctx.spans ? ctx.spans.map((src) => ({ src }))
     : process.env.SEG === "tagger" && F ? FRONT.segment(text, ctx.names, F).map((src) => ({ src }))        // labelled reference only
-    : SEGQ1 && F ? vssCentres(text, ctx.names, F, vss, { cut: "q1", confident: process.env.CONFIDENT === "1" }).map((src) => ({ src }))   // SEG=q1: the q1 cut (diagnosis_cut/CUT.md)
+    : SEGQ1 && F ? vssCentres(text, ctx.names, F, vss, Object.assign({ cut: "q1", confident: process.env.CONFIDENT === "1" }, process.env.Q1B === "1" ? { roleless: DEC.roleless_ok } : {})).map((src) => ({ src }))   // SEG=q1: the q1 cut (diagnosis_cut/CUT.md)
     : F ? vssCentres(text, ctx.names, F, vss, { confident: process.env.CONFIDENT === "1" }).map((src) => ({ src }))   // default: the VSS reader's own cut
     : sys.formalize(text, ctx).segments;
   const seq = { s: 0, m: 0 }, c = { names: ctx.names, last: [], refs: new Map() }, nodes = [];

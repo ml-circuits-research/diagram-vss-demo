@@ -11,3 +11,5 @@ right of the gold wires, extra wires), who ran it and why. Aggregate numbers onl
 | 2026-10-31 | llm_bench/fresh1 | yes | comb1_p80_s0 | default own cut | as above | sonnet 47.7% / 836; haiku 59.7% / 814; all 53.1% / 1650 | same |
 | 2026-10-31 | llm_bench/fresh1 | yes | comb1_p80_s0 | SEG=q1 | as above | sonnet 50.1% / 387; haiku 60.1% / 324; all 54.6% / 711 | same |
 | 2026-10-31 | llm_bench/fresh1 | yes | comb1_p80_s0 | SEG=gold | as above | sonnet 56.5% / 211; haiku 66.5% / 181; all 61.1% / 392 | same (reported, not in the criterion) |
+| 2026-10-31 | llm_bench/fresh1 | yes (CUT.md section 7, same session) | kinds_p80_s0 | default own cut (re-run; identical to the line above) | sonnet 69.8% / 427; haiku 78.7% / 321; all 73.8% / 748 (not done 12.8%, done wrong 13.4%) | sonnet 47.7% / 837; haiku 59.9% / 814; all 53.2% / 1651 (not done 16.0%, done wrong 30.8%) | decode agent; DECODE.md (pre-registered, report only) |
+| 2026-10-31 | llm_bench/fresh1 | yes | kinds_p80_s0 | SEG=q1 Q1B=1 (q1 cut, roleless test learned from the training frames) | as above | sonnet 50.8% / 417; haiku 64.4% / 333; all 57.0% / 750 (not done 19.9%, done wrong 23.1%) | same |

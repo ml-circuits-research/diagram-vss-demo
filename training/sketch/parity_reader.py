@@ -4,7 +4,8 @@ folder only (model.json, routebook.bin dense or sparse, stars.bin, front.json), 
 by front.normalize (the message's names); written per span: the tokens, the SOP text of the reading, its status and residual.
 The JS side (docs/js/vss.js read + docs/js/front.js normalize) must give the same tokens, SOP texts and statuses; residuals are compared
 with a stated tolerance.
-Usage: python3 parity_reader.py --web <export-web dir> --msgs <jsonl> [--msgs <jsonl> ...] --out <golden.json>"""
+With --excl the reader runs with the switch EXCL (training/sketch/DECODE.md): the exclusion pairs of <export-web dir>/decode.json.
+Usage: python3 parity_reader.py --web <export-web dir> --msgs <jsonl> [--msgs <jsonl> ...] --out <golden.json> [--excl]"""
 import argparse, json, os, sys, tempfile
 import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); sys.path.insert(0, os.path.join(HERE, "..", "vss", "tool"))
@@ -36,8 +37,9 @@ def web_reader(web_dir):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--web", required=True); ap.add_argument("--msgs", required=True, action="append")
-    ap.add_argument("--out", required=True); a = ap.parse_args()
+    ap.add_argument("--out", required=True); ap.add_argument("--excl", action="store_true"); a = ap.parse_args()
     rd, model = web_reader(a.web); F = json.load(open(os.path.join(a.web, "front.json")))
+    if a.excl: rd.excl_pairs = json.load(open(os.path.join(a.web, "decode.json")))["excl_pairs"]
     directives = [("world", model.get("world") or "?", None), ("legend", model["legend_sha256"], None)]
     cases = []
     for path in a.msgs:
@@ -50,7 +52,7 @@ def main():
                 wires, frame, info = rd.formalize(" ".join(toks), 0, idgen())
                 cases.append({"id": f"{m.get('id')}#{j}", "span": w["span"], "names": m.get("names") or [], "tokens": toks,
                               "sop": soplang.write(soplang.Doc(directives=directives, wires=wires)), "status": info["status"], "residual": info["residual"]})
-    json.dump({"web": a.web, "cases": cases}, open(a.out, "w"))
+    json.dump(dict({"web": a.web, "cases": cases}, **({"excl": True} if a.excl else {})), open(a.out, "w"))
     print(f"golden: {len(cases)} spans -> {a.out}")
 
 
