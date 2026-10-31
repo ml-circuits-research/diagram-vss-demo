@@ -50,3 +50,29 @@ converter, triggers firing in the 312 chatter sentences):
 
 Neither is better on balance (fewer readable requests, more false triggers); both reverted. The front end's remaining misses are
 mostly data coverage (rare verbs: "slide", "touch") and questions whose action is spread over the sentence ("are X and Y connected").
+
+## Retrained with the corrected labels and the held-out calibration (model fix_p80_s0, 80% fit split, seed 0)
+
+Same 1126 held-out requests. Previous model: final_p40 (old labels, 40% share, thresholds calibrated in-sample).
+
+| | final_p40 | fix_p80_s0 |
+|---|---|---|
+| VSS, requests cut as annotated (the reading alone) | 52.2% | 60.5% |
+| VSS, requests cut by the tagger | 50.4% | 58.7% |
+| rules (for reference) | 69.7% | 70.4% |
+| extra wires (not asked for), VSS annotated cut | 80 | 71 |
+
+Causes of the misses, fix_p80_s0 (error_analysis.mjs; read alone, 61.0% fully right):
+
+| cause | % of requests |
+|---|---|
+| no action word found (status unknown-event or no event token) | 8.2 |
+| wrong action or type | 6.5 |
+| reader status no-sense | 0.8 |
+| value not reachable | 2.2 |
+| name not reachable | 4.1 |
+| role missed | 7.2 |
+| description read differently | 1.6 |
+| role wrong (mostly lists) | 8.4 |
+
+Reader status: ok 731, abstain 294, unknown-event 83, no-sense 18. Words with no kind of their own: 1.7% (right) vs 5.5% (wrong).
