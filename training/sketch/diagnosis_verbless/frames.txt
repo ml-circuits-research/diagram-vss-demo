@@ -1,0 +1,36 @@
+create         anchor, color, count, label, name, position, shape, size
+delete         target
+move           anchor, direction, distance, position, target
+set            color, shape, size, target
+resize         target
+rename         name, target
+label          label, target
+duplicate      count, target
+swap           target
+connect        arrow, color, from, label, pairing, style, to
+disconnect     from, to
+align          axis, target
+arrange        layout, target
+distribute     axis, target
+toFront        target
+toBack         target
+undo           
+redo           
+forget         
+?count         anchor, color, kind, notColor, position, shape
+?exists        anchor, color, kind, notColor, position, shape
+?list          anchor, color, kind, notColor, position, shape
+?property      color, label, position, property, shape, size, target
+?describe      target
+?neighbors     target
+?connected     anchor, target
+?degree        target
+?path          from, to
+?reachable     from
+?cycle         
+?rules         
+?check         anchor, color, comparison, notColor, position, shape, size, target
+?extreme       superlative
+?nearest       anchor, color, shape, superlative
+fact           anchor, color, position, shape, size, target
+rule           color, shape, size
