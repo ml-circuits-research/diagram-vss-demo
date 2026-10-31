@@ -35,13 +35,11 @@ Read this first. These rules come from mistakes already made here; each says wha
 - Template-generated sentences (`training/sketch/generate.py`) are at most a secondary, clearly labelled variant, never the base.
 - A data writer saves its texts BEFORE annotating (one file per batch, ids and texts only); the coordinator checks that the annotated
   texts are identical to the saved ones. (2026-10-31: two writers edited about 50 texts to fit their annotation; one did not report it.)
-- The test sets (`llm_bench/sonnet`, `llm_bench/haiku`, `docs/bench/blind.json`, `hand_broad`) are never read while writing training
-  data, rules, cues or lexicon entries. Nothing is tuned on them.
-  Owner's decision, 2026-10-31 (replaces the rule above): test sets are cheap to regenerate, so we learn from them. Test sets that
-  have been used may be read, analysed and used as data. An honest number then comes from a NEW test set, written fresh by LLM agents
-  (format of `training/sketch/llm_train/TRAIN_MSG_SPEC.md`, with spans) and not opened until it is scored by anyone who works
-  on the readers or the training data (its writers and its label checker, who never see a reader's output, excepted). Every reported number says which test set
-  produced it and whether that set had been read before.
+- Owner's decision, 2026-11-01 (replaces every earlier rule about hidden test sets): there is no hidden test set. Every annotated
+  message (training data, the former test sets, fresh sets, production feedback) is data and may be read, analysed and trained on.
+  The owner is the judge. Worlds are measured on the data they are trained on and on similar data: the goal is that they read it
+  well. VSS worlds learn transformations in a vector space, not facts; the system's job is to discover new worlds fast and to
+  improve them from production feedback.
 
 ## The VSS reader: what is given and what is learned
 
