@@ -1,0 +1,5 @@
+
+/tmp/claude-0/-home-claude/8941735c-db18-5907-b7c8-a224e2065054/scratchpad/review: 253 messages, 1126 gold wires
+  rules messages fully right 17.4% · wires right 70.4% (793/1126) · act found 87.8% · extra wires 182
+  vss   messages fully right 19.0% · wires right 65.6% (739/1126) · act found 85.6% · extra wires 66
+  per act (rules · vss · n): set 147·154·195, move 89·104·181, connect 106·55·173, create 54·44·66, extreme 57·57·59, check 49·43·52, path 35·20·38, count 28·27·30, connected 24·15·28, fact: 12·20·23, nearest 19·17·22, list 20·12·22, rename 6·15·21, arrange 5·7·18, duplicate 16·16·17, degree 5·11·16, disconnect 10·9·13, delete 8·11·12, describe 10·10·12, align 10·10·12, resize 8·10·11, undo 10·10·10, label 3·7·10, exists 3·4·9, forget 9·7·9, redo 7·7·8, toFront 4·6·8, cycle 7·6·8, neighbors 5·5·7, distribute 5·0·7, swap 4·6·6, property 5·5·6, rule: 3·3·5, toBack 4·5·5, reachable 5·1·5, rules 1·0·2

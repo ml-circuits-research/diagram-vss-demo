@@ -428,3 +428,77 @@ then `MODEL=kinds_p80_s0 node error_analysis.mjs <folder holding dev_all.jsonl>`
   `ib.py` -> `ib_<tag>_self-next-prev-pos[_min2].json` (3b)
 - `maps.py` -> `maps_<tag>.json`, `maps_<tag>_rule.json`, `rule_<tag>.json` (sign test), `kinds_<tag>.json` (the rule's kind map)
 - `stats.py` -> `stats_out.txt` (every number of this file)
+
+## 6. Training test on the old data against comb1_p80_s0 (pre-registered 2026-10-31, written before the training)
+
+The coordinator's protocol: one training on the old data, against the new baseline `comb1_p80_s0` (CAL_FALLBACK=train QCOLOR=1
+MARKER=0, `--frac 0.8`, seed 0, 2 epochs; llm_score.mjs on the old dev file `review/dev.jsonl`: SEG=gold 65.5%, own cut 52.7%; fit
+68.8%).
+
+The kind map, rebuilt for this baseline (`kinds_comb1.json`; scripts of this folder, nothing hand-edited):
+- step 1 of the rule (sign test) was re-run on comb1_p80_s0 itself (`abl_comb1.json`; the old fit split `fitset/fit.jsonl`, which is
+  identical to the current `front.split_of(m, 0.8)` of DATA=old: 947 / 947 messages). 13 words keep a kind of their own: the, to,
+  labeled, and, with, of, named, a, it, called, lines, are, directly. Against fix_p80_s0 (16 words) `from`, `shape`, `shapes`, `i`,
+  `pixels` no longer pass and `lines`, `are` do: with MARKER=0 a role's presence is no longer written only by own-kind words.
+- step 2 (annotation clusters, `ib.py --min 2`, comb1's front end): the profiles are identical to those of fix_p80_s0 (same 2-fold
+  curve), K* = 37 clusters over the 232 words seen >= 2 times plus UNK; with the 13 words taken out: 27 shared kinds.
+- Result: 13 own + 27 shared kinds + 18 legend kinds (incl. VERB) + `unknown` = K 59 (comb1: 106). 231 words have a non-legend kind,
+  143 of them `unknown` in comb1 (+1 not in its catalog). Route book estimated from the training rows: dense 10.8 MB (comb1 34.7),
+  reached rows 3869 (comb1 4672), sparse 4.0 MB (4.8).
+- Read time on comb1 without retraining (the rule's map, each shared kind read with the rows of its most frequent kinded word,
+  pessimistic): fit 2976 -> 2957 (-25 / +6), dev 743 -> 736 (-8 / +1) requests fully right (error_analysis rule).
+
+The switch: `KINDMAP=<file.json>` in `msg_to_world.py` (implemented as specified in section 5; default unchanged: with KINDMAP unset the
+10 files of the world (legend.json, kinds.tsv, world.json, split_hints.json, front.json, examples/train.sop, examples/calib.sop,
+raw/sentences.txt, status.json, REAL_WORLD.md) are byte-identical to those of the unedited script, with the default settings and with
+QCOLOR=1 MARKER=0, `--frac 0.8`; the latter's legend sha256 cbf20196... = comb1_p80_s0's).
+
+- Hypothesis: the kinds of the rule (K 59 instead of 106) read as well as the frequency cut-off 8 on the comb1 settings.
+- One change: KINDMAP=diagnosis_kinds/kinds_comb1.json; everything else as comb1_p80_s0:
+  `cd training/sketch && SOP_PYTHON=/home/claude/venv/bin/python3 CAL_FALLBACK=train QCOLOR=1 MARKER=0 KINDMAP=$PWD/diagnosis_kinds/kinds_comb1.json PREFIX=kinds SEED=0 ./run_curve.sh 0.8`
+  -> `docs/model/kinds_p80_s0`.
+- Measure: llm_score.mjs (VSS, wires right) on `review/dev.jsonl` with SEG=gold and with the own cut, as COMBINED.md.
+- Criterion: dev SEG=gold >= 64.5% AND own cut >= 51.7% (each at most 1.0 point under comb1). If missed: stop and report.
+- Also reported (not part of the criterion): K, dense / sparse route-book size, fit (fitset, SEG=gold and own cut), and the dev
+  requests containing a word that gets a kind for the first time (read alone from the span: right in comb1 / in kinds).
+
+### Result (model `docs/model/kinds_p80_s0`; run log `runs/kinds_p80_D1024_e2_s0.log`; written after the training)
+
+The training ran as pre-registered (no other training running; llm_train/REAL_WORLD.md restored afterwards). The world: kinds 59 in the
+trainer ("kinds 59; vocab 2627"), 3870 of 10720 phase-table rows reached (comb1: 4673 of 34173), same legend (sha256 cbf20196...),
+same front end as comb1 (front.json byte-identical), 3902 training rows.
+
+llm_score.mjs, VSS column, wires right; dev file `review/dev.jsonl` (1126 requests, read before; not a fresh test set). comb1_p80_s0
+re-scored here on the dev file: identical to COMBINED.md; its fit numbers are COMBINED.md's (not re-run).
+
+| file | comb1_p80_s0 (K 106) | kinds_p80_s0 (K 59) | criterion |
+|---|---:|---:|---|
+| dev, SEG=gold (cut as annotated) | 65.5% (738/1126), extra 64 | **65.6% (739/1126)**, extra 66 | >= 64.5%: pass |
+| dev, own cut | 52.7% (593/1126), extra 328 | **53.0% (597/1126)**, extra 329 | >= 51.7%: pass |
+| fit, SEG=gold (report only) | 68.8% (2961/4305) | 69.1% (2974/4305) | |
+| fit, own cut (report only) | 52.0% (2239/4305) | 52.0% (2238/4305) | |
+
+Criterion: SEG=gold >= 64.5% AND own cut >= 51.7%. Got 65.6% and 53.0%: **PASS** on both. The kinds of the rule read as well as the
+cut-off 8 (+0.1 and +0.3 points: inside the tolerance, not a measured gain; the seed spread is not known).
+
+Route book: dense 10,815,872 bytes (comb1 34,735,916: 3.2x smaller); sparse (not exported here) estimated 3870 x 1024 = 4.0 MB (comb1
+4673 rows = 4.8 MB).
+
+Each request read alone from its span (error_analysis rule, `ablate.mjs --dump`; `scores/base_comb1.jsonl`, `scores/base_kinds.jsonl`;
+llm_score outputs in `scores/score_<model>_<gold|own>_<dev|fit>.txt`): dev 743 -> 745 fully right (13 right -> wrong, 15 wrong -> right), fit 2976 -> 2994 (28 / 46). Status changes are mostly
+ok <-> abstain (dev 64 ok -> abstain, 46 abstain -> ok).
+
+| dev requests (read alone) | n | comb1 right | kinds right | right -> wrong | wrong -> right |
+|---|---:|---:|---:|---:|---:|
+| containing a word that gets a kind for the first time (144 words, `unknown` in comb1) | 75 | 31 | 30 | 3 | 2 |
+| containing a word whose own kind became a shared kind (74 words) | 397 | 233 | 229 | 8 | 4 |
+| all | 1126 | 743 | 745 | 13 | 15 |
+
+On fit the same two groups: 411 requests 174 -> 182 (3 / 11) and 1518 requests 908 -> 918 (10 / 20). The newly kinded words are rare
+in dev (75 requests; most frequent: connected, around, my 4 each; change, ones, go, previous 3), so their effect on dev is not
+measurable here (-1, 3 vs 2 flips). The words that lost their own kind lose 4 dev requests (8 vs 4 flips) and gain 10 on fit; the
+total is +2 dev, +18 fit.
+
+What this does and does not show: one seed, one dev file that has been read before; the result says the 47 kinds removed (106 -> 59)
+were not needed by this reader on the old data, not that the new kinds help. Not run: the all-data version (`kinds_data2.json`
+would have to be rebuilt on a comb1-type all-data model first, as step 1 of the rule was rebuilt here).

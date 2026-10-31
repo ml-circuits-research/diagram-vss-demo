@@ -1,0 +1,18 @@
+[splits] written to /home/claude/diagram-vss-demo/training/sketch/runs/kinds_p80_D1024_e2_s0/splits.json before training: calibration_heldout_formulations 210, heldout_formulations 172, train 3902
+[schema] roles ['object', 'shape', 'color', 'size', 'name', 'text', 'relation', 'landmark', 'landmark2', 'region', 'direction', 'amount', 'quantity', 'axis', 'layout', 'source', 'target', 'style', 'arrow', 'edge', 'pairing', 'superlative', 'comparison', 'members', 'targets'] (core []), max depth 0, event negation False
+[train] seed 0: 3902 training rows x 2 epoch(s) -> 7804 steps' sentences; D=1024; kinds 59; vocab 2627; predicate lemma not found in 804 targets
+[train] phase table: 3870 of 10720 rows reached by the training sentences, held and trained; the other 6850 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.72 GB (peak 0.72 GB) | cpu | MemAvailable 5.9 GB
+[trace] text: swap n_bakery with n_dairy
+[trace] tokens/kinds: swap/VERB n_bakery/NAME with/with n_dairy/NAME
+[trace] gold frame: {"event": "swap", "lemma": "swap", "neg": false, "roles": {"object": ["entity", "n_bakery", null, null], "target": ["entity", "n_dairy", null, null]}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 56.69 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[train seed 0] start: RSS 0.82 GB (peak 0.82 GB) | cpu | MemAvailable 5.8 GB
+[train seed 0] step 500 sent 4000/7804 loss -0.694 (657s) | RSS 1.07 GB (peak 1.52 GB) | cpu | MemAvailable 6.0 GB
+[train seed 0] end: RSS 1.14 GB (peak 1.53 GB) | cpu | MemAvailable 5.6 GB (1363s)
+[export] route book written | RSS 1.14 GB (peak 1.53 GB) | cpu | MemAvailable 5.6 GB
+[export] numpy reader vs torch states: max relative difference 7.29e-08 (float32 phases in the route book)
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.703 | residual 0.191
+[eval] seed 0 train (sample): FULL catalog candidates 0.780 | residual 0.143
+[mem] after seed 0: RSS 1.17 GB (peak 1.53 GB) | cpu | MemAvailable 5.5 GB
+[done] model written to /home/claude/diagram-vss-demo/training/sketch/worlds/real/model; REPORT.md and metrics.json there; run log /home/claude/diagram-vss-demo/training/sketch/runs/kinds_p80_D1024_e2_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)

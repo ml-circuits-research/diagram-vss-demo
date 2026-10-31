@@ -8,6 +8,7 @@
 // MODEL=fix_p80_s0 node ablate.mjs <out.json> <name>=<file.jsonl> [<name>=<file.jsonl> ...] [--single] [--maps maps.json]
 //   --single: one run per own-kind word (word -> unknown)
 //   --maps: a JSON object {label: {word: kind}}: one run per label (several words changed together)
+//   --dump <file>: one JSON line per request of the baseline reading (set, id, wi, ok, status, tokens)
 import { readFileSync, writeFileSync } from "node:fs";
 const R = "/home/claude/diagram-vss-demo/";
 const { load } = await import(R + "docs/js/vss.js");
@@ -62,6 +63,7 @@ for (const [n, ms] of sets) {
   base[n] = ms.map(readMsg);
   base[n].forEach((rs, i) => { for (const r of rs) for (const t of r.tokens) { const k = t.toLowerCase(); (index[k] = index[k] || new Set()).add(`${n}\t${i}`); } });
 }
+if (args.includes("--dump")) writeFileSync(args[args.indexOf("--dump") + 1], sets.map(([n, ms]) => base[n].map((rs, i) => rs.map((q) => JSON.stringify({ set: n, id: ms[i].id, wi: q.wi, ok: q.ok, status: q.status, tokens: q.tokens })).join("\n")).filter(Boolean).join("\n")).join("\n") + "\n");
 const summ = (n) => { const rs = base[n].flat(); return { requests: rs.length, right: rs.filter((r) => r.ok).length }; };
 const result = { model: process.env.MODEL, baseline: Object.fromEntries(sets.map(([n]) => [n, summ(n)])), seconds_baseline: (Date.now() - t0) / 1000, runs: {} };
 console.error(JSON.stringify(result.baseline), result.seconds_baseline, "s");

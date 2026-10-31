@@ -1,0 +1,5 @@
+
+/tmp/claude-0/-home-claude/8941735c-db18-5907-b7c8-a224e2065054/scratchpad/fitset: 947 messages, 4305 gold wires
+  rules messages fully right 20.3% · wires right 68.1% (2931/4305) · act found 87.7% · extra wires 652
+  vss   messages fully right 29.4% · wires right 69.1% (2974/4305) · act found 87.3% · extra wires 203
+  per act (rules · vss · n): set 513·557·707, connect 384·295·688, move 327·377·609, extreme 255·289·295, create 235·202·284, check 158·160·188, fact: 51·92·108, path 96·63·107, count 86·76·96, arrange 38·45·93, nearest 75·83·90, list 63·55·75, connected 65·57·73, duplicate 51·58·64, rename 24·58·63, exists 28·27·51, property 29·30·48, delete 24·30·47, resize 36·36·47, degree 18·39·42, describe 29·36·41, reachable 35·10·39, cycle 35·34·38, rule: 19·17·37, label 5·19·36, undo 33·31·35, swap 27·30·34, align 22·22·33, neighbors 19·19·32, disconnect 24·18·32, toFront 19·25·31, toBack 19·28·31, forget 30·22·30, distribute 13·10·29, rules 20·1·26, redo 26·23·26

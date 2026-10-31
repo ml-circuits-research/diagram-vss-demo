@@ -1,0 +1,2590 @@
+{
+ "model": "comb1_p80_s0",
+ "baseline": {
+  "fit": {
+   "requests": 4305,
+   "right": 2976
+  },
+  "dev": {
+   "requests": 1126,
+   "right": 743
+  }
+ },
+ "seconds_baseline": 22.555,
+ "runs": {
+  "a": {
+   "map": {
+    "a": "unknown"
+   },
+   "fit": {
+    "req_with": 896,
+    "tok": 904,
+    "rw": 43,
+    "wr": 10,
+    "right_after": 2943,
+    "ex_rw": [
+     "draw a small black rectangle labeled n_trap between n_wall1 and n_wall2",
+     "draw a medium blue hexagon labeled n_carry between n_mid and n_support",
+     "draw a large white square labeled n_returns next_to the n_fiction section"
+    ],
+    "ex_wr": [
+     "make the black rectangle to a tiny gray circle",
+     "connect n_fox to n_rabbit with a dotted line",
+     "connect n_anna to n_peter with a dotted line"
+    ],
+    "why": {
+     "a role read before is now absent": 21,
+     "same roles, other filler": 15,
+     "an extra role": 5,
+     "status no-sense": 2
+    }
+   },
+   "dev": {
+    "req_with": 221,
+    "tok": 223,
+    "rw": 6,
+    "wr": 2,
+    "right_after": 739,
+    "ex_rw": [
+     "draw a purple circle named n_bias above the n_hidden shape",
+     "draw a medium gold square labeled n_scoreboard between n_teama and n_teamb",
+     "draw a tiny orange triangle named n_hops next_to the n_mash"
+    ],
+    "ex_wr": [
+     "connect chain n_review to n_payout with a dashed arrow",
+     "connect n_stop5 to n_stop6 with a solid line"
+    ],
+    "why": {
+     "same roles, other filler": 4,
+     "a role read before is now absent": 2
+    }
+   }
+  },
+  "an": {
+   "map": {
+    "an": "unknown"
+   },
+   "fit": {
+    "req_with": 18,
+    "tok": 19,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 2975,
+    "ex_rw": [
+     "connect n_floor1 to n_floor2 with an arrow , chain n_floor2 to n_lobby2 with an arrow"
+    ],
+    "ex_wr": [],
+    "why": {
+     "same roles, other filler": 1
+    }
+   },
+   "dev": {
+    "req_with": 4,
+    "tok": 4,
+    "rw": 0,
+    "wr": 1,
+    "right_after": 744,
+    "ex_rw": [],
+    "ex_wr": [
+     "connect n_treated to n_followup with an arrow"
+    ]
+   }
+  },
+  "and": {
+   "map": {
+    "and": "unknown"
+   },
+   "fit": {
+    "req_with": 620,
+    "tok": 623,
+    "rw": 54,
+    "wr": 4,
+    "right_after": 2926,
+    "ex_rw": [
+     "draw a large orange hexagon labeled n_review between n_build and n_test",
+     "connect n_ideas , n_draft and n_final connect next next",
+     "connect n_root to n_left and n_right with plain lines"
+    ],
+    "ex_wr": [
+     "connect n_customer , n_order and n_product connect next next",
+     "connect n_art and n_science to n_renaissance with dotted lines",
+     "are n_battery2 and n_bulb connected_q"
+    ],
+    "why": {
+     "a role read before is now absent": 34,
+     "same roles, other filler": 5,
+     "an extra role": 15
+    }
+   },
+   "dev": {
+    "req_with": 172,
+    "tok": 173,
+    "rw": 7,
+    "wr": 6,
+    "right_after": 742,
+    "ex_rw": [
+     "connect n_bath to n_dryer2 and n_brush with solid arrows",
+     "draw a medium gold square labeled n_scoreboard between n_teama and n_teamb",
+     "connect n_chief to n_elder and n_youth with a dashed line"
+    ],
+    "ex_wr": [
+     "are n_squat and n_rowing connected_q",
+     "connect n_sensor1 and n_sensor2 to n_hub with solid lines",
+     "connect n_pasta , n_sauce and n_cheese connect next next"
+    ],
+    "why": {
+     "an extra role": 5,
+     "a role read before is now absent": 2
+    }
+   }
+  },
+  "any": {
+   "map": {
+    "any": "unknown"
+   },
+   "fit": {
+    "req_with": 17,
+    "tok": 17,
+    "rw": 2,
+    "wr": 0,
+    "right_after": 2974,
+    "ex_rw": [
+     "whether there's any cycle_q",
+     "forget any default rules"
+    ],
+    "ex_wr": [],
+    "why": {
+     "status no-sense": 2
+    }
+   },
+   "dev": {
+    "req_with": 3,
+    "tok": 3,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "are": {
+   "map": {
+    "are": "unknown"
+   },
+   "fit": {
+    "req_with": 108,
+    "tok": 108,
+    "rw": 7,
+    "wr": 0,
+    "right_after": 2969,
+    "ex_rw": [
+     "are n_center and n_goalie connected_q",
+     "are n_save and n_cancel connected_q",
+     "are n_dome and n_tunnel2 connected_q"
+    ],
+    "ex_wr": [],
+    "why": {
+     "status no-sense": 7
+    }
+   },
+   "dev": {
+    "req_with": 38,
+    "tok": 38,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "arrow": {
+   "map": {
+    "arrow": "unknown"
+   },
+   "fit": {
+    "req_with": 49,
+    "tok": 50,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 11,
+    "tok": 11,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "arrows": {
+   "map": {
+    "arrows": "unknown"
+   },
+   "fit": {
+    "req_with": 31,
+    "tok": 31,
+    "rw": 2,
+    "wr": 0,
+    "right_after": 2974,
+    "ex_rw": [
+     "connect n_menu to n_sales and n_support with solid arrows",
+     "connect n_parent1 and n_parent2 to n_child , both with arrows"
+    ],
+    "ex_wr": [],
+    "why": {
+     "an extra role": 2
+    }
+   },
+   "dev": {
+    "req_with": 10,
+    "tok": 10,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 742,
+    "ex_rw": [
+     "connect n_bath to n_dryer2 and n_brush with solid arrows"
+    ],
+    "ex_wr": [],
+    "why": {
+     "an extra role": 1
+    }
+   }
+  },
+  "as": {
+   "map": {
+    "as": "unknown"
+   },
+   "fit": {
+    "req_with": 13,
+    "tok": 13,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 3,
+    "tok": 3,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "at": {
+   "map": {
+    "at": "unknown"
+   },
+   "fit": {
+    "req_with": 15,
+    "tok": 15,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 3,
+    "tok": 3,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 742,
+    "ex_rw": [
+     "is_there squares left at all"
+    ],
+    "ex_wr": [],
+    "why": {
+     "status no-sense": 1
+    }
+   }
+  },
+  "axis": {
+   "map": {
+    "axis": "unknown"
+   },
+   "fit": {
+    "req_with": 15,
+    "tok": 15,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 2,
+    "tok": 2,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "back": {
+   "map": {
+    "back": "unknown"
+   },
+   "fit": {
+    "req_with": 14,
+    "tok": 14,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 3,
+    "tok": 3,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "be": {
+   "map": {
+    "be": "unknown"
+   },
+   "fit": {
+    "req_with": 48,
+    "tok": 48,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 9,
+    "tok": 9,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "both": {
+   "map": {
+    "both": "unknown"
+   },
+   "fit": {
+    "req_with": 37,
+    "tok": 38,
+    "rw": 3,
+    "wr": 0,
+    "right_after": 2973,
+    "ex_rw": [
+     "connect n_pc1 and n_pc2 to n_printer , both with dashed lines",
+     "connect n_parent1 and n_parent2 to n_child , both with arrows",
+     "resize the n_heater and the n_filter , both"
+    ],
+    "ex_wr": [],
+    "why": {
+     "an extra role": 2,
+     "a role read before is now absent": 1
+    }
+   },
+   "dev": {
+    "req_with": 12,
+    "tok": 12,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "box": {
+   "map": {
+    "box": "unknown"
+   },
+   "fit": {
+    "req_with": 9,
+    "tok": 9,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 3,
+    "tok": 3,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "by": {
+   "map": {
+    "by": "unknown"
+   },
+   "fit": {
+    "req_with": 12,
+    "tok": 12,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 2,
+    "tok": 2,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "called": {
+   "map": {
+    "called": "unknown"
+   },
+   "fit": {
+    "req_with": 64,
+    "tok": 64,
+    "rw": 25,
+    "wr": 1,
+    "right_after": 2952,
+    "ex_rw": [
+     "draw a medium gray rectangle called n_footer below the n_nav",
+     "draw yellow star called n_osaka , both below n_travel",
+     "draw a tiny gray circle called n_phobos next_to n_mars"
+    ],
+    "ex_wr": [
+     "draw a new teal hexagon called n_audit"
+    ],
+    "why": {
+     "a role read before is now absent": 23,
+     "same roles, other filler": 1,
+     "status no-sense": 1
+    }
+   },
+   "dev": {
+    "req_with": 11,
+    "tok": 11,
+    "rw": 4,
+    "wr": 0,
+    "right_after": 739,
+    "ex_rw": [
+     "draw a brown ellipse called n_turkey above n_dinner",
+     "draw a yellow star called n_flower above the n_leaf",
+     "draw star called n_tape next_to n_moving"
+    ],
+    "ex_wr": [],
+    "why": {
+     "a role read before is now absent": 4
+    }
+   }
+  },
+  "can": {
+   "map": {
+    "can": "unknown"
+   },
+   "fit": {
+    "req_with": 45,
+    "tok": 45,
+    "rw": 2,
+    "wr": 0,
+    "right_after": 2974,
+    "ex_rw": [
+     "which pages can i reach_q n_seed",
+     "can n_flour be path_q the n_cafe"
+    ],
+    "ex_wr": [],
+    "why": {
+     "other event": 1,
+     "same roles, other filler": 1
+    }
+   },
+   "dev": {
+    "req_with": 4,
+    "tok": 4,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "check": {
+   "map": {
+    "check": "unknown"
+   },
+   "fit": {
+    "req_with": 10,
+    "tok": 10,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 1,
+    "tok": 1,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "diagram": {
+   "map": {
+    "diagram": "unknown"
+   },
+   "fit": {
+    "req_with": 12,
+    "tok": 12,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 0,
+    "tok": 0,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "directly": {
+   "map": {
+    "directly": "unknown"
+   },
+   "fit": {
+    "req_with": 13,
+    "tok": 13,
+    "rw": 5,
+    "wr": 0,
+    "right_after": 2971,
+    "ex_rw": [
+     "is n_grill connected_q n_plating directly",
+     "is n_step2 connected_q n_welcome directly",
+     "is n_goalie connected_q n_forward directly"
+    ],
+    "ex_wr": [],
+    "why": {
+     "other event": 5
+    }
+   },
+   "dev": {
+    "req_with": 2,
+    "tok": 2,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 742,
+    "ex_rw": [
+     "is n_protein connected_q n_dna directly"
+    ],
+    "ex_wr": [],
+    "why": {
+     "other event": 1
+    }
+   }
+  },
+  "do": {
+   "map": {
+    "do": "unknown"
+   },
+   "fit": {
+    "req_with": 17,
+    "tok": 17,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 3,
+    "tok": 3,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "does": {
+   "map": {
+    "does": "unknown"
+   },
+   "fit": {
+    "req_with": 35,
+    "tok": 35,
+    "rw": 4,
+    "wr": 0,
+    "right_after": 2972,
+    "ex_rw": [
+     "does n_nurse connected_q n_bed2 directly",
+     "does n_camp is_q next_to the n_river",
+     "does n_start3 is_q next_to n_mile5"
+    ],
+    "ex_wr": [],
+    "why": {
+     "status no-sense": 1,
+     "a role read before is now absent": 3
+    }
+   },
+   "dev": {
+    "req_with": 9,
+    "tok": 9,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "each": {
+   "map": {
+    "each": "unknown"
+   },
+   "fit": {
+    "req_with": 11,
+    "tok": 11,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 3,
+    "tok": 3,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "evenly": {
+   "map": {
+    "evenly": "unknown"
+   },
+   "fit": {
+    "req_with": 15,
+    "tok": 15,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 0,
+    "tok": 0,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "every": {
+   "map": {
+    "every": "unknown"
+   },
+   "fit": {
+    "req_with": 16,
+    "tok": 16,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 2975,
+    "ex_rw": [
+     "every new circle from_now_on is huge"
+    ],
+    "ex_wr": [],
+    "why": {
+     "other event": 1
+    }
+   },
+   "dev": {
+    "req_with": 5,
+    "tok": 5,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "exist": {
+   "map": {
+    "exist": "unknown"
+   },
+   "fit": {
+    "req_with": 8,
+    "tok": 8,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 2,
+    "tok": 2,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "for": {
+   "map": {
+    "for": "unknown"
+   },
+   "fit": {
+    "req_with": 16,
+    "tok": 16,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 3,
+    "tok": 3,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "four": {
+   "map": {
+    "four": "unknown"
+   },
+   "fit": {
+    "req_with": 9,
+    "tok": 9,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 4,
+    "tok": 4,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "from": {
+   "map": {
+    "from": "unknown"
+   },
+   "fit": {
+    "req_with": 131,
+    "tok": 132,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 2975,
+    "ex_rw": [
+     "arrange n_steps , n_calories and n_goal arrange row , from the top to the bottom , uh , a column is better"
+    ],
+    "ex_wr": [],
+    "why": {
+     "same roles, other filler": 1
+    }
+   },
+   "dev": {
+    "req_with": 41,
+    "tok": 41,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 742,
+    "ex_rw": [
+     "n_mix , n_bake and n_decorate arrange row from left to right"
+    ],
+    "ex_wr": [],
+    "why": {
+     "same roles, other filler": 1
+    }
+   }
+  },
+  "front": {
+   "map": {
+    "front": "unknown"
+   },
+   "fit": {
+    "req_with": 7,
+    "tok": 8,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 1,
+    "tok": 1,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "give": {
+   "map": {
+    "give": "unknown"
+   },
+   "fit": {
+    "req_with": 14,
+    "tok": 14,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 8,
+    "tok": 8,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "goes": {
+   "map": {
+    "goes": "unknown"
+   },
+   "fit": {
+    "req_with": 16,
+    "tok": 20,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 5,
+    "tok": 5,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "has": {
+   "map": {
+    "has": "unknown"
+   },
+   "fit": {
+    "req_with": 31,
+    "tok": 31,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 9,
+    "tok": 9,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "have": {
+   "map": {
+    "have": "unknown"
+   },
+   "fit": {
+    "req_with": 44,
+    "tok": 44,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 9,
+    "tok": 9,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "here": {
+   "map": {
+    "here": "unknown"
+   },
+   "fit": {
+    "req_with": 14,
+    "tok": 14,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 0,
+    "tok": 0,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "i": {
+   "map": {
+    "i": "unknown"
+   },
+   "fit": {
+    "req_with": 20,
+    "tok": 20,
+    "rw": 5,
+    "wr": 1,
+    "right_after": 2972,
+    "ex_rw": [
+     "forget the rules i set earlier",
+     "is_q n_nucleus inside , i mean , next_to n_cell",
+     "redo whatever i just undid"
+    ],
+    "ex_wr": [
+     "which shape can i reach_q n_edge"
+    ],
+    "why": {
+     "status no-sense": 4,
+     "other event": 1
+    }
+   },
+   "dev": {
+    "req_with": 3,
+    "tok": 3,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 742,
+    "ex_rw": [
+     "make the center one gold . . . i mean n_cube2"
+    ],
+    "ex_wr": [],
+    "why": {
+     "status no-sense": 1
+    }
+   }
+  },
+  "if": {
+   "map": {
+    "if": "unknown"
+   },
+   "fit": {
+    "req_with": 10,
+    "tok": 10,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 1,
+    "tok": 1,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "in": {
+   "map": {
+    "in": "unknown"
+   },
+   "fit": {
+    "req_with": 127,
+    "tok": 127,
+    "rw": 4,
+    "wr": 0,
+    "right_after": 2972,
+    "ex_rw": [
+     "connect n_calc1 to n_calc2 to n_stats in a chain",
+     "n_keynote , n_break , n_workshop and n_lunch , in chain , connect next next",
+     "n_math , n_reading , n_recess and n_lunch , connect chain in chain"
+    ],
+    "ex_wr": [],
+    "why": {
+     "a role read before is now absent": 1,
+     "same roles, other filler": 3
+    }
+   },
+   "dev": {
+    "req_with": 23,
+    "tok": 23,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 742,
+    "ex_rw": [
+     "line up the n_bowl , n_vase and n_plate in a arrange column"
+    ],
+    "ex_wr": [],
+    "why": {
+     "an extra role": 1
+    }
+   }
+  },
+  "it": {
+   "map": {
+    "it": "unknown"
+   },
+   "fit": {
+    "req_with": 137,
+    "tok": 137,
+    "rw": 32,
+    "wr": 1,
+    "right_after": 2945,
+    "ex_rw": [
+     "make it orange",
+     "make it huge",
+     "resize it"
+    ],
+    "ex_wr": [
+     "make the n_tomato to a huge green circle , nope , make it a large red star"
+    ],
+    "why": {
+     "a role read before is now absent": 29,
+     "same roles, other filler": 2,
+     "status no-sense": 1
+    }
+   },
+   "dev": {
+    "req_with": 33,
+    "tok": 33,
+    "rw": 7,
+    "wr": 0,
+    "right_after": 736,
+    "ex_rw": [
+     "make it large",
+     "n_plane2 is above it",
+     "send it send"
+    ],
+    "ex_wr": [],
+    "why": {
+     "a role read before is now absent": 6,
+     "same roles, other filler": 1
+    }
+   }
+  },
+  "just": {
+   "map": {
+    "just": "unknown"
+   },
+   "fit": {
+    "req_with": 9,
+    "tok": 9,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 2975,
+    "ex_rw": [
+     "redo whatever i just undid"
+    ],
+    "ex_wr": [],
+    "why": {
+     "status no-sense": 1
+    }
+   },
+   "dev": {
+    "req_with": 1,
+    "tok": 1,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "labeled": {
+   "map": {
+    "labeled": "unknown"
+   },
+   "fit": {
+    "req_with": 147,
+    "tok": 147,
+    "rw": 125,
+    "wr": 0,
+    "right_after": 2851,
+    "ex_rw": [
+     "draw a small yellow circle labeled n_light next_to the n_photosynthesis shape",
+     "draw a small pink star labeled n_gifts above the n_cake",
+     "draw a large black star labeled n_twist right_of n_scene2"
+    ],
+    "ex_wr": [],
+    "why": {
+     "a role read before is now absent": 125
+    }
+   },
+   "dev": {
+    "req_with": 36,
+    "tok": 36,
+    "rw": 29,
+    "wr": 0,
+    "right_after": 714,
+    "ex_rw": [
+     "draw a small white rectangle labeled n_review next_to the n_doing box",
+     "draw a large orange rectangle labeled n_art right_of n_lunch",
+     "draw a small teal hexagon labeled n_plug next_to the n_lamp"
+    ],
+    "ex_wr": [],
+    "why": {
+     "a role read before is now absent": 29
+    }
+   }
+  },
+  "last": {
+   "map": {
+    "last": "unknown"
+   },
+   "fit": {
+    "req_with": 23,
+    "tok": 23,
+    "rw": 2,
+    "wr": 0,
+    "right_after": 2974,
+    "ex_rw": [
+     "undo that last change",
+     "undo that last connection"
+    ],
+    "ex_wr": [],
+    "why": {
+     "status no-sense": 2
+    }
+   },
+   "dev": {
+    "req_with": 10,
+    "tok": 10,
+    "rw": 2,
+    "wr": 0,
+    "right_after": 741,
+    "ex_rw": [
+     "undo the last colour change",
+     "redo my last change"
+    ],
+    "ex_wr": [],
+    "why": {
+     "status no-sense": 2
+    }
+   }
+  },
+  "line": {
+   "map": {
+    "line": "unknown"
+   },
+   "fit": {
+    "req_with": 87,
+    "tok": 87,
+    "rw": 6,
+    "wr": 4,
+    "right_after": 2974,
+    "ex_rw": [
+     "connect n_fridge to n_raw with a dotted line",
+     "connect n_battery2 to n_resistor with a solid line , chain n_resistor to n_bulb",
+     "connect n_piston to n_crank with a solid line"
+    ],
+    "ex_wr": [
+     "connect n_fox to n_rabbit with a dotted line",
+     "connect n_roomc to n_exit9 with a dashed line",
+     "connect n_base2 to n_rover2 with a dashed line"
+    ],
+    "why": {
+     "a role read before is now absent": 6
+    }
+   },
+   "dev": {
+    "req_with": 18,
+    "tok": 18,
+    "rw": 2,
+    "wr": 2,
+    "right_after": 743,
+    "ex_rw": [
+     "connect n_tray to n_chair with a plain line",
+     "line up the n_bowl , n_vase and n_plate in a arrange column"
+    ],
+    "ex_wr": [
+     "connect n_central to n_market with a solid line",
+     "connect n_stop5 to n_stop6 with a solid line"
+    ],
+    "why": {
+     "a role read before is now absent": 1,
+     "an extra role": 1
+    }
+   }
+  },
+  "lines": {
+   "map": {
+    "lines": "unknown"
+   },
+   "fit": {
+    "req_with": 68,
+    "tok": 68,
+    "rw": 12,
+    "wr": 0,
+    "right_after": 2964,
+    "ex_rw": [
+     "connect n_lift to n_trail1 and n_trail2 with dashed lines",
+     "connect n_atom to n_electron and n_proton with dashed lines",
+     "connect n_ana to n_ben and n_chloe with dotted lines"
+    ],
+    "ex_wr": [],
+    "why": {
+     "an extra role": 10,
+     "same roles, other filler": 1,
+     "a role read before is now absent": 1
+    }
+   },
+   "dev": {
+    "req_with": 22,
+    "tok": 22,
+    "rw": 2,
+    "wr": 1,
+    "right_after": 742,
+    "ex_rw": [
+     "connect n_desk1 and n_desk2 to n_board with dotted lines",
+     "connect n_rent to n_food and n_savings with dotted lines"
+    ],
+    "ex_wr": [
+     "connect n_entrance2 to n_stall and n_coat with dashed lines"
+    ],
+    "why": {
+     "an extra role": 2
+    }
+   }
+  },
+  "link": {
+   "map": {
+    "link": "unknown"
+   },
+   "fit": {
+    "req_with": 14,
+    "tok": 14,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 5,
+    "tok": 5,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "map": {
+   "map": {
+    "map": "unknown"
+   },
+   "fit": {
+    "req_with": 11,
+    "tok": 11,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 2975,
+    "ex_rw": [
+     "move n_rover to the bottom of the map"
+    ],
+    "ex_wr": [],
+    "why": {
+     "a role read before is now absent": 1
+    }
+   },
+   "dev": {
+    "req_with": 2,
+    "tok": 2,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "me": {
+   "map": {
+    "me": "unknown"
+   },
+   "fit": {
+    "req_with": 57,
+    "tok": 57,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 2975,
+    "ex_rw": [
+     "tell me what degree_q n_ups is"
+    ],
+    "ex_wr": [],
+    "why": {
+     "other event": 1
+    }
+   },
+   "dev": {
+    "req_with": 11,
+    "tok": 11,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "named": {
+   "map": {
+    "named": "unknown"
+   },
+   "fit": {
+    "req_with": 58,
+    "tok": 58,
+    "rw": 35,
+    "wr": 0,
+    "right_after": 2941,
+    "ex_rw": [
+     "draw a tiny gold star named n_coin above the n_key",
+     "draw a large yellow ellipse named n_villain next_to the n_hero",
+     "draw a medium orange rectangle named n_bird above the n_animal"
+    ],
+    "ex_wr": [],
+    "why": {
+     "a role read before is now absent": 35
+    }
+   },
+   "dev": {
+    "req_with": 14,
+    "tok": 14,
+    "rw": 8,
+    "wr": 0,
+    "right_after": 735,
+    "ex_rw": [
+     "draw a purple circle named n_bias above the n_hidden shape",
+     "draw a small pink diamond named n_deliver right_of of the n_pack shape",
+     "draw a small red triangle named n_defender next_to the n_keeper"
+    ],
+    "ex_wr": [],
+    "why": {
+     "a role read before is now absent": 8
+    }
+   }
+  },
+  "new": {
+   "map": {
+    "new": "unknown"
+   },
+   "fit": {
+    "req_with": 11,
+    "tok": 11,
+    "rw": 3,
+    "wr": 0,
+    "right_after": 2973,
+    "ex_rw": [
+     "draw a new blue square named n_dad left_of of n_mom",
+     "every new circle from_now_on is huge",
+     "draw a new orange circle labeled n_music below n_clip3"
+    ],
+    "ex_wr": [],
+    "why": {
+     "a role read before is now absent": 1,
+     "other event": 1,
+     "same roles, other filler": 1
+    }
+   },
+   "dev": {
+    "req_with": 3,
+    "tok": 3,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "no": {
+   "map": {
+    "no": "unknown"
+   },
+   "fit": {
+    "req_with": 8,
+    "tok": 8,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 3,
+    "tok": 3,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "not": {
+   "map": {
+    "not": "unknown"
+   },
+   "fit": {
+    "req_with": 38,
+    "tok": 38,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 9,
+    "tok": 9,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "now": {
+   "map": {
+    "now": "unknown"
+   },
+   "fit": {
+    "req_with": 85,
+    "tok": 85,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 25,
+    "tok": 25,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "of": {
+   "map": {
+    "of": "unknown"
+   },
+   "fit": {
+    "req_with": 187,
+    "tok": 189,
+    "rw": 40,
+    "wr": 0,
+    "right_after": 2936,
+    "ex_rw": [
+     "move the red circle left_of of n_desk2",
+     "move n_earth right_of of n_mars",
+     "move n_ship right_of of n_paint"
+    ],
+    "ex_wr": [],
+    "why": {
+     "a role read before is now absent": 2,
+     "an extra role": 37,
+     "other event": 1
+    }
+   },
+   "dev": {
+    "req_with": 47,
+    "tok": 47,
+    "rw": 10,
+    "wr": 0,
+    "right_after": 733,
+    "ex_rw": [
+     "move n_drinks left_of of n_snacks",
+     "move n_cellos left_of of n_violins",
+     "move n_bench right_of of n_treadmill"
+    ],
+    "ex_wr": [],
+    "why": {
+     "an extra role": 8,
+     "other event": 2
+    }
+   }
+  },
+  "on": {
+   "map": {
+    "on": "unknown"
+   },
+   "fit": {
+    "req_with": 46,
+    "tok": 46,
+    "rw": 3,
+    "wr": 0,
+    "right_after": 2973,
+    "ex_rw": [
+     "draw a label t_dna on n_nucleus",
+     "move the label t_spin on it",
+     "move the label t_novels on n_fiction"
+    ],
+    "ex_wr": [],
+    "why": {
+     "other event": 3
+    }
+   },
+   "dev": {
+    "req_with": 15,
+    "tok": 15,
+    "rw": 2,
+    "wr": 0,
+    "right_after": 741,
+    "ex_rw": [
+     "move the label t_book on n_boxes",
+     "move the label t_lost on the n_hat"
+    ],
+    "ex_wr": [],
+    "why": {
+     "other event": 2
+    }
+   }
+  },
+  "once": {
+   "map": {
+    "once": "unknown"
+   },
+   "fit": {
+    "req_with": 24,
+    "tok": 24,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 5,
+    "tok": 5,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "one": {
+   "map": {
+    "one": "unknown"
+   },
+   "fit": {
+    "req_with": 79,
+    "tok": 80,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 30,
+    "tok": 30,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 742,
+    "ex_rw": [
+     "make the center one gold . . . i mean n_cube2"
+    ],
+    "ex_wr": [],
+    "why": {
+     "status no-sense": 1
+    }
+   }
+  },
+  "pixels": {
+   "map": {
+    "pixels": "unknown"
+   },
+   "fit": {
+    "req_with": 26,
+    "tok": 26,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 2975,
+    "ex_rw": [
+     "move n_shelf3 20 pixels down , ok maybe 30"
+    ],
+    "ex_wr": [],
+    "why": {
+     "status no-sense": 1
+    }
+   },
+   "dev": {
+    "req_with": 12,
+    "tok": 12,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "place": {
+   "map": {
+    "place": "unknown"
+   },
+   "fit": {
+    "req_with": 8,
+    "tok": 8,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 1,
+    "tok": 1,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "put": {
+   "map": {
+    "put": "unknown"
+   },
+   "fit": {
+    "req_with": 33,
+    "tok": 33,
+    "rw": 1,
+    "wr": 2,
+    "right_after": 2977,
+    "ex_rw": [
+     "draw a pink star named n_button and put it right_of the n_fabric"
+    ],
+    "ex_wr": [
+     "put n_entrance move bottom",
+     "put n_noun move center of the screen"
+    ],
+    "why": {
+     "a role read before is now absent": 1
+    }
+   },
+   "dev": {
+    "req_with": 8,
+    "tok": 8,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "reached": {
+   "map": {
+    "reached": "unknown"
+   },
+   "fit": {
+    "req_with": 28,
+    "tok": 28,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 3,
+    "tok": 3,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "remove": {
+   "map": {
+    "remove": "unknown"
+   },
+   "fit": {
+    "req_with": 8,
+    "tok": 8,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 2975,
+    "ex_rw": [
+     "undo that remove"
+    ],
+    "ex_wr": [],
+    "why": {
+     "status no-sense": 1
+    }
+   },
+   "dev": {
+    "req_with": 0,
+    "tok": 0,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "rules": {
+   "map": {
+    "rules": "unknown"
+   },
+   "fit": {
+    "req_with": 25,
+    "tok": 25,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 2975,
+    "ex_rw": [
+     "which all the rules for me"
+    ],
+    "ex_wr": [],
+    "why": {
+     "a role read before is now absent": 1
+    }
+   },
+   "dev": {
+    "req_with": 8,
+    "tok": 8,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "shape": {
+   "map": {
+    "shape": "unknown"
+   },
+   "fit": {
+    "req_with": 157,
+    "tok": 157,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 40,
+    "tok": 40,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "shapes": {
+   "map": {
+    "shapes": "unknown"
+   },
+   "fit": {
+    "req_with": 14,
+    "tok": 14,
+    "rw": 2,
+    "wr": 0,
+    "right_after": 2974,
+    "ex_rw": [
+     "which shapes reach_q n_ideas",
+     "which shapes reach_q n_check1"
+    ],
+    "ex_wr": [],
+    "why": {
+     "other event": 2
+    }
+   },
+   "dev": {
+    "req_with": 8,
+    "tok": 8,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "should": {
+   "map": {
+    "should": "unknown"
+   },
+   "fit": {
+    "req_with": 17,
+    "tok": 17,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 5,
+    "tok": 5,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "show": {
+   "map": {
+    "show": "unknown"
+   },
+   "fit": {
+    "req_with": 14,
+    "tok": 14,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 5,
+    "tok": 5,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "tell": {
+   "map": {
+    "tell": "unknown"
+   },
+   "fit": {
+    "req_with": 25,
+    "tok": 25,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 2975,
+    "ex_rw": [
+     "tell me what degree_q n_ups is"
+    ],
+    "ex_wr": [],
+    "why": {
+     "other event": 1
+    }
+   },
+   "dev": {
+    "req_with": 3,
+    "tok": 3,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "that": {
+   "map": {
+    "that": "unknown"
+   },
+   "fit": {
+    "req_with": 41,
+    "tok": 41,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 11,
+    "tok": 11,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "the": {
+   "map": {
+    "the": "unknown"
+   },
+   "fit": {
+    "req_with": 1526,
+    "tok": 1780,
+    "rw": 284,
+    "wr": 8,
+    "right_after": 2700,
+    "ex_rw": [
+     "move the n_lb to the top of the page",
+     "is the n_logo is_q bigger the n_header",
+     "move n_export to the top"
+    ],
+    "ex_wr": [
+     "make the n_tomato to a huge green circle , nope , make it a large red star",
+     "resize the n_trail and the n_cafe",
+     "align the n_grill and the n_table horizontally"
+    ],
+    "why": {
+     "status no-sense": 54,
+     "a role read before is now absent": 171,
+     "an extra role": 13,
+     "other event": 10,
+     "same roles, other filler": 36
+    }
+   },
+   "dev": {
+    "req_with": 422,
+    "tok": 494,
+    "rw": 82,
+    "wr": 2,
+    "right_after": 663,
+    "ex_rw": [
+     "move the n_post to the bottom of the court",
+     "move n_alto below the n_director",
+     "is_q the n_tenor a square"
+    ],
+    "ex_wr": [
+     "arrange the n_problem , n_solution and n_market arrange row",
+     "where_is is the n_barn relative to the n_coop"
+    ],
+    "why": {
+     "a role read before is now absent": 56,
+     "an extra role": 3,
+     "status no-sense": 19,
+     "same roles, other filler": 3,
+     "other event": 1
+    }
+   }
+  },
+  "them": {
+   "map": {
+    "them": "unknown"
+   },
+   "fit": {
+    "req_with": 88,
+    "tok": 88,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 2975,
+    "ex_rw": [
+     "n_dev to n_staging to n_prod , connect chain them"
+    ],
+    "ex_wr": [],
+    "why": {
+     "a role read before is now absent": 1
+    }
+   },
+   "dev": {
+    "req_with": 21,
+    "tok": 21,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "then": {
+   "map": {
+    "then": "unknown"
+   },
+   "fit": {
+    "req_with": 32,
+    "tok": 33,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 12,
+    "tok": 12,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "there": {
+   "map": {
+    "there": "unknown"
+   },
+   "fit": {
+    "req_with": 46,
+    "tok": 46,
+    "rw": 2,
+    "wr": 0,
+    "right_after": 2974,
+    "ex_rw": [
+     "is there is_there green",
+     "is there is_there above the n_lobby"
+    ],
+    "ex_wr": [],
+    "why": {
+     "other event": 2
+    }
+   },
+   "dev": {
+    "req_with": 13,
+    "tok": 13,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 742,
+    "ex_rw": [
+     "is there a way to path_q n_input to n_output right now"
+    ],
+    "ex_wr": [],
+    "why": {
+     "other event": 1
+    }
+   }
+  },
+  "thing": {
+   "map": {
+    "thing": "unknown"
+   },
+   "fit": {
+    "req_with": 12,
+    "tok": 12,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 4,
+    "tok": 4,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "this": {
+   "map": {
+    "this": "unknown"
+   },
+   "fit": {
+    "req_with": 9,
+    "tok": 9,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 0,
+    "tok": 0,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "those": {
+   "map": {
+    "those": "unknown"
+   },
+   "fit": {
+    "req_with": 11,
+    "tok": 11,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 1,
+    "tok": 1,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "three": {
+   "map": {
+    "three": "unknown"
+   },
+   "fit": {
+    "req_with": 30,
+    "tok": 30,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 5,
+    "tok": 5,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "to": {
+   "map": {
+    "to": "unknown"
+   },
+   "fit": {
+    "req_with": 905,
+    "tok": 1049,
+    "rw": 160,
+    "wr": 17,
+    "right_after": 2833,
+    "ex_rw": [
+     "is n_carol connected_q to n_bob",
+     "connect n_dog to n_animal with an arrow",
+     "connect n_mixer to n_speaker with a dotted line"
+    ],
+    "ex_wr": [
+     "connect n_anna to n_peter with a dotted line",
+     "connect n_boat to n_buoy1 , chain n_buoy1 to n_buoy2",
+     "connect n_thread to n_needle with a solid line , chain n_needle to n_bobbin"
+    ],
+    "why": {
+     "other event": 17,
+     "an extra role": 22,
+     "a role read before is now absent": 121
+    }
+   },
+   "dev": {
+    "req_with": 237,
+    "tok": 263,
+    "rw": 33,
+    "wr": 0,
+    "right_after": 710,
+    "ex_rw": [
+     "connect n_idle to n_running with an arrow",
+     "connect n_intake to n_triage with an arrow",
+     "is n_intake connected_q to n_fixed"
+    ],
+    "ex_wr": [],
+    "why": {
+     "a role read before is now absent": 26,
+     "other event": 7
+    }
+   }
+  },
+  "too": {
+   "map": {
+    "too": "unknown"
+   },
+   "fit": {
+    "req_with": 12,
+    "tok": 12,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 5,
+    "tok": 5,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "two": {
+   "map": {
+    "two": "unknown"
+   },
+   "fit": {
+    "req_with": 8,
+    "tok": 8,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 2,
+    "tok": 2,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "uh": {
+   "map": {
+    "uh": "unknown"
+   },
+   "fit": {
+    "req_with": 9,
+    "tok": 9,
+    "rw": 3,
+    "wr": 0,
+    "right_after": 2973,
+    "ex_rw": [
+     "move n_scanner right_of of n_shelfb , uh , wait , left_of of n_shelfa",
+     "move n_east right_of of n_north , uh , no , left_of",
+     "arrange n_steps , n_calories and n_goal arrange row , from the top to the bottom , uh , a column is better"
+    ],
+    "ex_wr": [],
+    "why": {
+     "same roles, other filler": 3
+    }
+   },
+   "dev": {
+    "req_with": 5,
+    "tok": 5,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "we": {
+   "map": {
+    "we": "unknown"
+   },
+   "fit": {
+    "req_with": 21,
+    "tok": 21,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 4,
+    "tok": 4,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "what": {
+   "map": {
+    "what": "unknown"
+   },
+   "fit": {
+    "req_with": 62,
+    "tok": 62,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 2975,
+    "ex_rw": [
+     "redo what i undid before"
+    ],
+    "ex_wr": [],
+    "why": {
+     "status no-sense": 1
+    }
+   },
+   "dev": {
+    "req_with": 8,
+    "tok": 8,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "what's": {
+   "map": {
+    "what's": "unknown"
+   },
+   "fit": {
+    "req_with": 44,
+    "tok": 44,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 11,
+    "tok": 11,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "who": {
+   "map": {
+    "who": "unknown"
+   },
+   "fit": {
+    "req_with": 38,
+    "tok": 38,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 10,
+    "tok": 10,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "whole": {
+   "map": {
+    "whole": "unknown"
+   },
+   "fit": {
+    "req_with": 8,
+    "tok": 8,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 2976,
+    "ex_rw": [],
+    "ex_wr": []
+   },
+   "dev": {
+    "req_with": 1,
+    "tok": 1,
+    "rw": 0,
+    "wr": 0,
+    "right_after": 743,
+    "ex_rw": [],
+    "ex_wr": []
+   }
+  },
+  "with": {
+   "map": {
+    "with": "unknown"
+   },
+   "fit": {
+    "req_with": 225,
+    "tok": 226,
+    "rw": 47,
+    "wr": 5,
+    "right_after": 2934,
+    "ex_rw": [
+     "connect n_mixer to n_speaker with a dotted line",
+     "connect n_root to n_left and n_right with plain lines",
+     "connect n_pump2 to n_cold with a dotted line"
+    ],
+    "ex_wr": [
+     "connect n_roomc to n_exit9 with a dashed line",
+     "connect n_house1 to n_house2 with a dotted line",
+     "connect n_thread to n_needle with a solid line , chain n_needle to n_bobbin"
+    ],
+    "why": {
+     "an extra role": 46,
+     "a role read before is now absent": 1
+    }
+   },
+   "dev": {
+    "req_with": 62,
+    "tok": 62,
+    "rw": 12,
+    "wr": 3,
+    "right_after": 734,
+    "ex_rw": [
+     "connect n_intake to n_triage with an arrow",
+     "connect n_acid to n_salt with a dotted line",
+     "connect n_tray to n_chair with a plain line"
+    ],
+    "ex_wr": [
+     "connect n_treated to n_followup with an arrow",
+     "connect n_central to n_market with a solid line",
+     "connect n_stop5 to n_stop6 with a solid line"
+    ],
+    "why": {
+     "an extra role": 12
+    }
+   }
+  },
+  "you": {
+   "map": {
+    "you": "unknown"
+   },
+   "fit": {
+    "req_with": 9,
+    "tok": 9,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 2975,
+    "ex_rw": [
+     "could you forget the default rules"
+    ],
+    "ex_wr": [],
+    "why": {
+     "status no-sense": 1
+    }
+   },
+   "dev": {
+    "req_with": 2,
+    "tok": 2,
+    "rw": 1,
+    "wr": 0,
+    "right_after": 742,
+    "ex_rw": [
+     "could you forget the default rules"
+    ],
+    "ex_wr": [],
+    "why": {
+     "status no-sense": 1
+    }
+   }
+  }
+ },
+ "own_kinds": [
+  "a",
+  "an",
+  "and",
+  "any",
+  "are",
+  "arrow",
+  "arrows",
+  "as",
+  "at",
+  "axis",
+  "back",
+  "be",
+  "both",
+  "box",
+  "by",
+  "called",
+  "can",
+  "check",
+  "diagram",
+  "directly",
+  "do",
+  "does",
+  "each",
+  "evenly",
+  "every",
+  "exist",
+  "for",
+  "four",
+  "from",
+  "front",
+  "give",
+  "goes",
+  "has",
+  "have",
+  "here",
+  "i",
+  "if",
+  "in",
+  "it",
+  "just",
+  "labeled",
+  "last",
+  "line",
+  "lines",
+  "link",
+  "map",
+  "me",
+  "named",
+  "new",
+  "no",
+  "not",
+  "now",
+  "of",
+  "on",
+  "once",
+  "one",
+  "pixels",
+  "place",
+  "put",
+  "reached",
+  "remove",
+  "rules",
+  "shape",
+  "shapes",
+  "should",
+  "show",
+  "tell",
+  "that",
+  "the",
+  "them",
+  "then",
+  "there",
+  "thing",
+  "this",
+  "those",
+  "three",
+  "to",
+  "too",
+  "two",
+  "uh",
+  "we",
+  "what",
+  "what's",
+  "who",
+  "whole",
+  "with",
+  "you"
+ ],
+ "seconds_total": 144.808
+}

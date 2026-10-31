@@ -16,6 +16,8 @@ Writes worlds/real/{legend.json, kinds.tsv, world.json, split_hints.json, front.
 CENTRES=1 (the centre reader, research/attention/port/NOTES.md): the legend's reader block gets "centres": true, the requests' tokens are
 taken from the WHOLE message as front.normalize_message reads it (centres_rows.py), and examples/messages.jsonl holds one line per message
 (its tokens, and per request its span as a token range, its centre and its row); REAL_WORLD.md is written into the world folder.
+KINDMAP=<file.json> (off by default; diagnosis_kinds/KINDS.md): the kinds of the words that are neither legend value tokens nor event
+tokens come from that kind map ({"map": {word: kind}}) instead of "seen >= --freq times -> own kind"; the training rows do not change.
 Run: python3 msg_to_world.py [--frac 0.8] [--freq 8]"""
 import argparse, collections, datetime, json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -59,8 +61,19 @@ def main():
         toks, _ = nf(row)(row["text"], list(row["names"]) + row["created"])
         cnt.update(t for t in toks if FR.is_word(t))
     kinds = dict(base)
-    for t, c in cnt.items():
-        if c >= a.freq and t not in kinds: kinds[t] = t
+    # KINDMAP=<file.json> (off by default; diagnosis_kinds/KINDS.md): the kinds of the other words come from a kind map {"map": {word:
+    # kind}} written from the training data (diagnosis_kinds/maps.py: own kind for the words whose ablation passes the sign test, the
+    # annotation cluster's kind for the other words seen >= 2 times) instead of "seen >= --freq times -> own kind". A map never
+    # overrides a legend value token or an event token; a word not in the map gets no entry (kind `unknown`).
+    KINDMAP = os.environ.get("KINDMAP"); kindmap_sha = None
+    if KINDMAP:
+        km = json.load(open(KINDMAP))["map"]; kindmap_sha = G.sha256_file(KINDMAP)
+        clash = sorted(w for w in km if w in base)
+        if clash: raise SystemExit(f"KINDMAP {KINDMAP}: entries for legend value / event tokens: {clash[:10]}")
+        kinds.update(km)
+    else:
+        for t, c in cnt.items():
+            if c >= a.freq and t not in kinds: kinds[t] = t
     lexicon = set(kinds)
     rows, lost_why, dropped, by_ev = [], collections.Counter(), collections.Counter(), collections.Counter(); row_key = []
     for m, w, row in items:
@@ -85,8 +98,10 @@ def main():
               "reader": {"predicate_role": True, "occupancy_marker": os.environ.get("MARKER", "1") != "0", "definite_dets": [], "set_roles": ["members", "targets"], **({"centres": True} if CENTRES else {})}}
     lp = os.path.join(out, "legend.json"); json.dump(legend, open(lp, "w"), indent=1); sha = G.sha256_file(lp)
     with open(os.path.join(out, "kinds.tsv"), "w") as fh:
+        rule = (f"the other words -> the kind map KINDMAP={KINDMAP} ({kindmap_sha})" if KINDMAP else
+                f"tokens seen >= {a.freq} times in the training spans -> own kind")
         fh.write("# word\tkind: LEARNED by training/sketch/msg_to_world.py (legend value tokens -> their question's kind, event tokens -> VERB, "
-                 f"tokens seen >= {a.freq} times in the training spans -> own kind; everything else unknown)\n")
+                 f"{rule}; everything else unknown)\n")
         for w in sorted(kinds): fh.write(f"{w}\t{kinds[w]}\n")
     json.dump(F, open(os.path.join(out, "front.json"), "w"))
     json.dump({"name": "real", "language": "en", "description": "SOP Sketchpad legend, world built from annotated realistic messages", "created": datetime.date.today().isoformat(),
@@ -140,8 +155,12 @@ def main():
            f"Front end learned from the same messages: {len(F['values'])} value n-grams, {len(F['triggers'])} trigger rules, {len(F['segmenter'])} segmenter weights; params {json.dumps(P)}.", "",
            f"Rows: {len(rows)}. Dropped (cannot be trained): {sum(dropped.values())} {dict(dropped)}. Negative examples (text outside the spans with an action token): {n_neg}.", "",
            *([f"Centre reader (CENTRES=1): {len(msg_items)} messages in examples/messages.jsonl; {dict(n_cent)}.", ""] if CENTRES else []),
+           (f"Kinds: {len(kc)}; lexicon {len(lexicon)} words (legend value tokens {len(vk)}, event tokens {len(evtok)}, other words from the kind map "
+            f"KINDMAP={KINDMAP} ({kindmap_sha}): {len(kinds) - len(base)} words).") if KINDMAP else
            f"Kinds: {len(kc)}; lexicon {len(lexicon)} words (legend value tokens {len(vk)}, event tokens {len(evtok)}, own-kind tokens seen >= {a.freq} times).", "",
            "Own-kind tokens: " + ", ".join(sorted(t for t, c in kinds.items() if c == t)), "",
+           *(["Shared kinds (kind: words): " + "; ".join(f"{k}: {' '.join(sorted(w for w, x in kinds.items() if x == k))}"
+                                                       for k in sorted({x for w, x in kinds.items() if x != w and w not in base})), ""] if KINDMAP else []),
            "Roles left out because their words are not in the normalized span (rows kept):", "", "| what | n |", "|---|---|"] + \
           [f"| {x} | {n} |" for x, n in lost_why.most_common(40)] + ["", "| event | rows |", "|---|---|"] + [f"| {e} | {n} |" for e, n in by_ev.most_common()]
     open(os.path.join(out, "REAL_WORLD.md") if CENTRES else os.path.join(HERE, "llm_train", "REAL_WORLD.md"), "w").write("\n".join(rep) + "\n")
