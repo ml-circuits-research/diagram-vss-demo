@@ -73,7 +73,14 @@ export async function formalize(text, ctx, rulesFormalize) {
       if (main.args.action === "rename" && main.args.name) c.names = c.names.concat([String(main.args.name)]);
     }
   }
-  return { nodes, notes: cut.corrections ? cut.corrections.concat(notes) : notes, clauses, ms: performance.now() - t0 };
+  // the text left out: every piece of the message that no request was read from (chatter, or text of another world); for now it is
+  // only reported; later these zones go to the other worlds
+  const used = clauses.filter((c) => c.reading).map((c) => c.src), ignored = [];
+  let rest = text;
+  for (const u of used) { const i = rest.indexOf(u); if (i >= 0) rest = rest.slice(0, i) + "\u0000" + rest.slice(i + u.length); }
+  for (const z of rest.split("\u0000").map((x) => x.replace(/^[\s.,!?;:]+|[\s.,!?;:]+$/g, "")).filter((x) => x.length > 2)) ignored.push(z);
+  if (ignored.length) notes.push("Ignored (not understood): " + ignored.map((z) => `“${z}”`).join(", "));
+  return { nodes, notes: cut.corrections ? cut.corrections.concat(notes) : notes, clauses, ignored, ms: performance.now() - t0 };
 }
 
 export function goldNodes(row, ctx) {
