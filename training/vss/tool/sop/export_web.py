@@ -102,6 +102,7 @@ def export(model_dir, out_dir, bits=8):
         blobs.append(({"name": name, "kind": "float", "bits": 32, "shape": list(v.shape)}, np.asarray(v, dtype="<f4").tobytes()))
     hdr = {"cats": rb.cats, "codes": rb.codes, "pos_max": rb.pos_max, "vo_nmax": rb.vo_nmax, "D": rb.D, "bits": bits}
     if rb.centre_kinds is not None: hdr["centre_kinds"] = rb.centre_kinds          # the centre reader (legend reader.centres)
+    if getattr(rb, "centre_tokens", None) is not None: hdr["centre_tokens"] = rb.centre_tokens   # run 2: phase rows keyed by the centre's token
     write_bin(os.path.join(out_dir, "routebook.bin"), hdr, blobs)
     # ---- stars.bin
     stars = star_keys(rd); keys = sorted(stars); M = np.stack([np.angle(stars[k]) for k in keys])

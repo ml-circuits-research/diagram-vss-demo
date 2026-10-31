@@ -575,7 +575,7 @@ export class Reader {
   }
   // ---------------- the centre reader (legend reader.centres; infer.Reader.centre_chart / centre_members / read_message)
   centreChart(tokens) {
-    const [kept, cidx, unknown] = this.encode(tokens), R = this.rb.centreAddresses(cidx), D = this.D, S = R.centres.map(() => cz(D));
+    const [kept, cidx, unknown] = this.encode(tokens), R = this.rb.centreAddresses(cidx, kept.map((i) => this.lemma(tokens[i]))), D = this.D, S = R.centres.map(() => cz(D));
     const madd = (x, a, F) => { for (let d = 0; d < D; d++) { x.re[d] += a.re[d] * F.re[d] - a.im[d] * F.im[d]; x.im[d] += a.re[d] * F.im[d] + a.im[d] * F.re[d]; } };
     kept.forEach((i, j) => {
       const F = this.st.id(this.ident(tokens[i])); if (!F) return;

@@ -16,6 +16,7 @@ export class Routebook {
     this.C = this.cats.length;
     // the centre reader (legend reader.centres; infer.Routebook.centre_addresses): phases cthR, cthL, cthC, cbgL, cbgR; floats cA, cDist, cbeta, cN
     this.centreKinds = header.centre_kinds || null;
+    this.centreTokens = header.centre_tokens || null;     // run 2 (sop train --centre_key event): phase rows keyed by the centre's token, last row '*' shared
     for (const n of ["cthR", "cthL", "cthC", "cbgL", "cbgR", "cA", "cDist", "cbeta", "cN"]) this[n] = g(n);
     // cos / sin tables of the arrays used only through exp(i phase) (Float32Array: half the memory, error ~1e-7, far below the 1e-4 parity bound)
     const tab = (x) => { if (!x) return null; const n = x.data.length, c = new Float32Array(n), s = new Float32Array(n); for (let i = 0; i < n; i++) { c[i] = Math.cos(x.data[i]); s[i] = Math.sin(x.data[i]); } return { c, s }; };
@@ -24,12 +25,15 @@ export class Routebook {
   has(code) { return this.codes.includes(code); }
   /** the centre reader's structure and addresses of a message (the twin of infer.Routebook.centre_addresses, same formulas, same order of
    *  operations, float64 cos / sin): c = kind indices -> {centres, ci, lc, rc, nul, wL, wR, wS, aL, aR, aC}; linear in the tokens */
-  centreAddresses(c) {
+  centreAddresses(c, lem = null) {
     const T = c.length, D = this.D, K = this.C, erow = new Map();
     this.centreKinds.forEach((k, e) => { if (this.catId.has(k)) erow.set(this.catId.get(k), e); });
     const isc = c.map((x) => erow.has(x)), centres = [], ci = new Int32Array(T).fill(-1);
     for (let t = 0; t < T; t++) if (isc[t]) { ci[t] = centres.length; centres.push(t); }
     const lc = new Int32Array(T).fill(-1), rc = new Int32Array(T).fill(-1);
+    let ce;
+    if (this.centreTokens) { const tr = new Map(this.centreTokens.map((w, i) => [w, i])); ce = centres.map((p) => (tr.has(lem[p]) ? tr.get(lem[p]) : this.centreTokens.length - 1)); }
+    else ce = centres.map((p) => erow.get(c[p]));
     let last = -1; for (let t = 0; t < T; t++) { if (isc[t]) last = ci[t]; else lc[t] = last; }
     let nxt = -1; for (let t = T - 1; t >= 0; t--) { if (isc[t]) nxt = ci[t]; else rc[t] = nxt; }
     const kp = (t) => (t >= 1 ? c[t - 1] : K), kn = (t) => (t + 1 < T ? c[t + 1] : K + 1), kp2 = (t) => (t >= 2 ? c[t - 2] : K), kn2 = (t) => (t + 2 < T ? c[t + 2] : K + 1);
@@ -52,7 +56,7 @@ export class Routebook {
       bg.push({ re, im });
     }
     const PR = new Map(), PL = new Map(), tR = this.cthR.data, tL = this.cthL.data;
-    for (const e of [...new Set(centres.map((p) => erow.get(c[p])))].sort((x, y) => x - y)) {
+    for (const e of [...new Set(ce)].sort((x, y) => x - y)) {
       const R = new Float64Array((T + 1) * D), L = new Float64Array((T + 1) * D);
       for (let t = 0; t < T; t++) { const o = (e * K + c[t]) * D; for (let d = 0; d < D; d++) { R[(t + 1) * D + d] = R[t * D + d] + tR[o + d]; L[(t + 1) * D + d] = L[t * D + d] + tL[o + d]; } }
       PR.set(e, R); PL.set(e, L);
@@ -61,18 +65,18 @@ export class Routebook {
     for (let t = 0; t < T; t++) {
       let x = zero(), y = zero();
       if (lc[t] >= 0) {
-        const p = centres[lc[t]], R = PR.get(erow.get(c[p])), w = wL[t], g = bg[t];
+        const p = centres[lc[t]], R = PR.get(ce[lc[t]]), w = wL[t], g = bg[t];
         for (let d = 0; d < D; d++) { const ph = R[(t + 1) * D + d] - R[(p + 1) * D + d]; x.re[d] = w * (Math.cos(ph) + g.re[d]); x.im[d] = w * (Math.sin(ph) + g.im[d]); }
       }
       if (rc[t] >= 0) {
-        const p = centres[rc[t]], L = PL.get(erow.get(c[p])), w = wR[t], g = bg[t];
+        const p = centres[rc[t]], L = PL.get(ce[rc[t]]), w = wR[t], g = bg[t];
         for (let d = 0; d < D; d++) { const ph = L[p * D + d] - L[t * D + d]; y.re[d] = w * (Math.cos(ph) + g.re[d]); y.im[d] = w * (Math.sin(ph) + g.im[d]); }
       }
       aL.push(x); aR.push(y);
     }
     const tC = this.cthC.data;
     centres.forEach((p, j) => {
-      const o = erow.get(c[p]) * D, w = wS[j], g = bg[p], x = zero();
+      const o = ce[j] * D, w = wS[j], g = bg[p], x = zero();
       for (let d = 0; d < D; d++) { x.re[d] = w * (Math.cos(tC[o + d]) + g.re[d]); x.im[d] = w * (Math.sin(tC[o + d]) + g.im[d]); }
       aC.push(x);
     });

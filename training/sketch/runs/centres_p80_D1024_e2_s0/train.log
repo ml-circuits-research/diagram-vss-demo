@@ -1,0 +1,13 @@
+[splits] written to /home/claude/diagram-vss-demo/training/sketch/runs/centres_p80_D1024_e2_s0/splits.json before training: calibration_heldout_formulations 237, heldout_formulations 143, train 3898
+[schema] roles ['object', 'shape', 'color', 'size', 'name', 'text', 'relation', 'landmark', 'landmark2', 'region', 'direction', 'amount', 'quantity', 'axis', 'layout', 'source', 'target', 'style', 'arrow', 'edge', 'pairing', 'superlative', 'comparison', 'members', 'targets'] (core []), max depth 0, event negation False
+[train] seed 0: CENTRE reader: 864 training messages, 3922 annotated requests, 5292 centres (3582 matched to a request, 1710 not a request); centre kinds ['VERB']; kinds 103; vocab 5310; D=1024
+[train seed 0] start: RSS 1.01 GB | cpu | MemAvailable 6.3 GB
+[train seed 0] epoch 0 step 1 messages 2/864 loss terms {'cos': 0.005, 'null': 0.693, 'self': 0.72, 'attL': 0.837, 'attR': 0.309} (0s) | RSS 1.45 GB | cpu | MemAvailable 5.9 GB
+[train seed 0] epoch 1 step 500 messages 286/864 loss terms {'cos': -0.752, 'null': 0.304, 'self': 0.305, 'attL': 0.149, 'attR': 0.031} (55s) | RSS 1.53 GB | cpu | MemAvailable 5.8 GB
+[train seed 0] end: 751 steps, last loss terms {'cos': -0.802, 'null': 0.079, 'self': 0.079, 'attL': 0.091, 'attR': 0.008} | RSS 1.53 GB | cpu | MemAvailable 5.9 GB (83s)
+[export] numpy reader vs torch centre states: max relative difference 1.28e-07
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.112 | residual 0.578
+[eval] seed 0 train (sample): FULL catalog candidates 0.067 | residual 0.539
+[mem] after seed 0: RSS 2.52 GB | cpu | MemAvailable 4.8 GB
+[done] model written to /home/claude/diagram-vss-demo/training/sketch/worlds_centres/real/model; REPORT.md and metrics.json there; run log /home/claude/diagram-vss-demo/training/sketch/runs/centres_p80_D1024_e2_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)

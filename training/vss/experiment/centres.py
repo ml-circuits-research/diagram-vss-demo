@@ -27,12 +27,17 @@ def E(ph): return torch.polar(torch.ones_like(ph), ph)
 
 
 class CentreModel(torch.nn.Module):
-    def __init__(self, cats, centre_kinds, F, D, rng, device="cpu"):
+    def __init__(self, cats, centre_kinds, F, D, rng, device="cpu", centre_tokens=None):
         """cats: the kind names (route book order); centre_kinds: the kinds that make a centre; F: the word stars (V x D complex numpy, the
-        vocabulary order of the training shim); rng: numpy generator for the initial phases (uniform in [-pi, pi), as V8)"""
+        vocabulary order of the training shim); rng: numpy generator for the initial phases (uniform in [-pi, pi), as V8).
+        centre_tokens (run 2, --centre_key event): the relative phases are keyed by the centre's TOKEN (its lemma: one row per event
+        token of the legend, plus a shared last row '*' for any other centre token) instead of by the centre's kind; the batch then
+        carries the row of every centre (b["ce"])"""
         super().__init__()
         self.cats = list(cats); K = len(self.cats); self.K = K; self.D = D; self.device = device
-        self.centre_kinds = [k for k in centre_kinds if k in self.cats]; Ek = len(self.centre_kinds)
+        self.centre_kinds = [k for k in centre_kinds if k in self.cats]
+        self.centre_tokens = list(centre_tokens) + ["*"] if centre_tokens else None
+        Ek = len(self.centre_tokens) if self.centre_tokens else len(self.centre_kinds)
         erow = torch.full((K,), -1, dtype=torch.long)
         for e, k in enumerate(self.centre_kinds): erow[self.cats.index(k)] = e
         self.register_buffer("erow", erow)
@@ -65,7 +70,8 @@ class CentreModel(torch.nn.Module):
         bg = (E(self.bgL[b["kp"], k]) + E(self.bgR[k, b["kn"]])) * Fi
         S = torch.zeros(C, D, dtype=CDT)
         if C == 0: return S, (wL, wR, wS, n)
-        ec = self.erow[k[ct]]; used = torch.unique(ec); comp = torch.zeros(len(self.centre_kinds), dtype=torch.long); comp[used] = torch.arange(len(used))
+        ec = b["ce"] if self.centre_tokens else self.erow[k[ct]]; used = torch.unique(ec)
+        comp = torch.zeros(self.thR.shape[0], dtype=torch.long); comp[used] = torch.arange(len(used))
         PR = torch.stack([torch.cat([torch.zeros(1, D, dtype=torch.float64), torch.cumsum(self.thR[e][k].double(), 0)]) for e in used.tolist()])
         PL = torch.stack([torch.cat([torch.zeros(1, D, dtype=torch.float64), torch.cumsum(self.thL[e][k].double(), 0)]) for e in used.tolist()])
         lcs = b["lc"].clamp(min=0); rcs = b["rc"].clamp(min=0); ctL = ct[lcs]; ctR = ct[rcs]
@@ -96,7 +102,8 @@ class CentreModel(torch.nn.Module):
         """the arrays of the route book (infer.Routebook): phases wrapped to [-pi, pi), the rest as float64"""
         wrap = lambda x: np.angle(np.exp(1j * x.detach().cpu().numpy().astype(np.float64))).astype(np.float32)
         f = lambda x: x.detach().cpu().numpy().astype(np.float64)
-        return {"cats": np.array(self.cats), "codes": np.array(["centres"]), "centre_kinds": np.array(self.centre_kinds),
+        out = {"centre_tokens": np.array(self.centre_tokens)} if self.centre_tokens else {}
+        return {**out, "cats": np.array(self.cats), "codes": np.array(["centres"]), "centre_kinds": np.array(self.centre_kinds),
                 "cthR": wrap(self.thR), "cthL": wrap(self.thL), "cthC": wrap(self.thC), "cbgL": wrap(self.bgL), "cbgR": wrap(self.bgR),
                 "cA": f(self.A), "cDist": f(self.Dist), "cbeta": f(self.beta), "cN": f(self.N)}
 
@@ -119,14 +126,14 @@ def batch(msgs, K):
     """msgs: list of dicts {k (kind indices), ids (vocabulary indices), isc (centre flags), req (per centre: the request index or -1),
     label (per token: the request index whose span holds it, or -1)}. -> dict of flat tensors, matched centre indices and their
     (message, request) pairs in that order"""
-    k, ids, kp, kn, kp2, kn2, lc, rc, gl, gr, ctok, isreq, matched, pairs = [], [], [], [], [], [], [], [], [], [], [], [], [], []
+    k, ids, kp, kn, kp2, kn2, lc, rc, gl, gr, ctok, isreq, matched, pairs, ce = [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
     off = cb = 0
     for mi, m in enumerate(msgs):
         ks = list(m["k"]); T = len(ks); cent, L, R = structure(ks, m["isc"])
         k += ks; ids += list(m["ids"])
         kp += [K] + ks[:-1]; kn += ks[1:] + [K + 1]; kp2 += ([K, K] + ks)[:T]; kn2 += (ks[2:] + [K + 1, K + 1])[:T]
         for j, p in enumerate(cent):
-            ctok.append(off + p); r = m["req"][j]; isreq.append(1.0 if r >= 0 else 0.0)
+            ctok.append(off + p); r = m["req"][j]; isreq.append(1.0 if r >= 0 else 0.0); ce.append(m["ce"][j] if "ce" in m else 0)
             if r >= 0: matched.append(cb + j); pairs.append((mi, r))
         for t in range(T):
             lc.append(cb + L[t] if L[t] >= 0 else -1); rc.append(cb + R[t] if R[t] >= 0 else -1)
@@ -136,4 +143,4 @@ def batch(msgs, K):
         off += T; cb += len(cent)
     L_ = lambda x: torch.tensor(np.array(x, dtype=np.int64)); F_ = lambda x: torch.tensor(np.array(x, dtype=np.float32))
     return {"k": L_(k), "ids": L_(ids), "kp": L_(kp), "kn": L_(kn), "kp2": L_(kp2), "kn2": L_(kn2), "lc": L_(lc), "rc": L_(rc),
-            "gl": F_(gl), "gr": F_(gr), "ctok": L_(ctok), "isreq": F_(isreq), "matched": L_(matched)}, pairs
+            "gl": F_(gl), "gr": F_(gr), "ctok": L_(ctok), "isreq": F_(isreq), "matched": L_(matched), "ce": L_(ce)}, pairs

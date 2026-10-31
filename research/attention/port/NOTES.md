@@ -68,7 +68,10 @@ residual and status identical; export-web of an old model byte-identical).
 On 215 dev spans of the one-request model (Python npz vs browser export) the set-role presence differed in 27 readings; with the fix 17
 remain (the rest are the 8-bit export and Python's missing sentence candidates). The fix changes only the Python side (train.py's own
 evaluation); llm_score.mjs uses the browser reader. Python parity readers must be built with sentence_candidates=True (as vss.js in
-llm_score.mjs).
+llm_score.mjs). What the fix (commit bf5229e) does NOT change: the calibration. train.py's calibrate() reads with no sentence filter
+(filt=None), so read_set_role gets filt=None and role_cands(r, None) = the same catalog candidates as before; the presence, set-member,
+attribute and determiner thresholds of every model trained after it are computed as for fix_p80_s0. It changes the Python formalize()
+path only: the numbers sop train writes in REPORT.md / metrics.json, and the residual statistics in background.npz (read by no reader).
 
 ## Parity (Python numpy vs browser, same exported numbers)
 
@@ -79,3 +82,166 @@ V8's cos / sin / exp may differ in the last bit and numpy's matrix products sum 
 property).
 - mini model (D 64, 30 unit steps, only to test the code), 253 dev messages, 1494 centres: all exact fields identical; max |null diff|
   1.1e-16, residual 5.6e-16, state 2.2e-16.
+- trained model centres_p80_s0 (D 1024), the same 253 dev messages, 1494 centres: all exact fields identical; max |null diff| 1.1e-16,
+  residual 1.1e-15, state 1.6e-16. (A first run showed 136 differences, all line order only: the browser writes `_margin.members` right
+  after a set role's line, Python later; Python's frame_wires now writes it in the same place. A difference of the one-request writer too.)
+
+## The registered run (one run, seed 0) and its result: FAIL
+
+Model centres_p80_s0: `CENTRES=1 PREFIX=centres SOP_PYTHON=<venv python> training/sketch/run_curve.sh 0.8` (world
+training/sketch/worlds_centres/real, the 80% fit split = 947 messages, of them 864 trained and 83 for calibration (calib.sop, halved per
+message); 3922 annotated requests in the trained messages, 5292 centres, 3582 matched to a request, 1710 not; D 1024, 2 epochs, 751 steps,
+83 s of training on CPU; numpy vs torch states 1.3e-07). Exported to docs/model/centres_p80_s0 (routebook.bin 22.5 MB, the one-request
+fix_p80_s0 has 34.7 MB). The training data are the same messages as fix_p80_s0's (llm_train/*_msg; the new *_msg2 / sonnet_long folders
+are not in the glob), with no negative rows (NEGATIVES=0; the text outside the spans is inside the messages).
+
+Dev: the 253 held-out training messages (id hash >= 0.8), 1126 gold wires, llm_score.mjs, the browser reader:
+
+| reader | cut | correct | not done | done wrong | extra wires | messages fully right |
+|---|---|---|---|---|---|---|
+| fix_p80_s0 (one request) | annotated spans (SEG=gold) | 60.5% | 15.3% | 24.2% | 71 | 14.2% |
+| fix_p80_s0 | hard centres (vss-centers.js, default) | 46.5% | - | - | 335 | 2.4% |
+| **centres_p80_s0** | **its own (SEG=centres-model)** | **47.7%** | **19.1%** | **33.2%** | **143** | **4.0%** |
+| rules (reference) | rules | 70.4% | 12.2% | 17.4% | 182 | 17.4% |
+
+Criterion (fixed before the run): >= 58% and <= 100 extra wires. **Both missed: 47.7% (-10.3 points), 143 extra.** Against the hard
+centres, about the same accuracy (+1.2 points) and fewer extra wires (335 -> 143). Ignored text reported: 1053 spans, 7255 tokens in the
+253 messages. Per AGENTS.md rule 3 the run stops here (coordinator's decision (a)); no change was made after seeing these numbers except
+the line-order fix above (output text only, no number changes).
+
+sop train's own REPORT.md for this model says FULL 0.112 (held-out half of calib.sop) / 0.067 (training sample): there every
+annotated span is read ALONE as a message (decision 11). That is not what the model was trained on (a span alone has other neighbours:
+BOS / EOS bigrams and null context; e.g. "make n_order a large blue diamond" alone: its centre is rejected), so those numbers do not
+measure the model; the model is not usable as a one-span reader. The measure is llm_score.mjs SEG=centres-model.
+
+## Root causes of the misses (error_analysis.mjs SEG=centres-model; first cause that explains a miss; % of the 1126 requests)
+
+| cause | % | where it sits |
+|---|---|---|
+| X0 no event token in the span | 8.8 | front end (learned triggers; the one-request reader: 8.2) |
+| X1 every centre in the span rejected (null >= 0.5) ("delete the old Done box", "What is next to the Shelf") | 6.1 | model: the null probability |
+| H a name (5.0) or a value (4.6) of the span not taken by the centre (attachment < 0.5) | 9.6 | model: the attachment |
+| G role wrong, mostly lists: a set role filled where the gold has one shape ("connect Idle to Running" -> from = [Idle, Running]) | 8.2 | model: addresses (below) |
+| F role missed ("make Triage huge" -> no target) | 7.2 | model / thresholds |
+| B wrong action or type | 4.4 | model |
+| E name not reachable (pronouns, $new) 3.1, D value not reachable 2.5, G description 1.2, C reader refuses 0.7 | 7.5 | front end / context |
+
+Fully right in this analysis 48.1% (llm_score's alignment: 47.7%). Cut of the matched centre against its span (punctuation not counted):
+exact 523, missing span words 392, taking words outside it 50. Extra readings: 60 accepted centres outside every span, 44 second
+accepted centres inside one span.
+
+Reading: the cut itself (X1 + H, 15.7 points) and the reading (G + F + B, about 20 points) both cost more than the 10.3 points missing.
+The list / twin-role errors (G) and the role misses (F) are the error class that B's E3d removed in the synthetic world by keying the
+relative phases by the centre's kind; this port does not have it (next section).
+
+## A deviation of this port from E3d (decision 1), found after the run
+
+In B's world every event had its own kind (ACT_<event>), so "phases keyed by the centre's kind" gave one phase table per EVENT. In world
+real every event token has the one kind VERB, so this port has ONE table: it is in effect B's E3c (no keying), not E3d. The address of
+"the first name after the action word" must then serve source (connect), object (make, move), members (arrange): the error class above.
+
+## Pre-registration of a second run (written 2026-10-31 before any implementation; registered as RUN 2 by the owner's decision the same day: the owner approved B's E3d, run 1 was E3c because of the one-kind collapse)
+
+Run 2, fixed now, before the code is written: model centres2_p80_s0 = `CENTRES=1 CENTRE_KEY=event PREFIX=centres2 run_curve.sh 0.8`
+(seed 0, the same world worlds_centres/real rebuilt by the same script, the same 80% fit split); `sop train --centre_key event`
+(default `kind` = run 1). The table of rows = the legend's event tokens (`Legend.all_verbs()`, sorted: 44 in world real) plus one shared
+row `*` for a centre token outside it (none in world real); a centre's row = its token's lemma. cthR, cthL and cthC are keyed by that row.
+Measured once on the same dev copy (scratchpad dev20c/dev.jsonl, 253 messages), the same scoring (llm_score.mjs SEG=centres-model, the
+scorer of run 1, so that the numbers compare with 47.7% / 143), then error_analysis.mjs SEG=centres-model. One run; if it misses, stop.
+
+- Hypothesis: with the centre-relative phases keyed by the centre's EVENT TOKEN (as E3d is in B's world), the address-confusion errors
+  drop (G role wrong / lists 8.2%, F role missed 7.2%), and the requests fully right rise to the criterion.
+- The one change: cthR, cthL (and cthC) get one row per legend event token that is a centre (44 in world real), selected by the centre's
+  token (its lemma), instead of one row per centre kind. In code: the `erow` map of experiment/centres.py, infer.Routebook.centre_addresses
+  and routebook.js centreAddresses goes from kind -> row to centre token -> row (a centre token outside the table, impossible for the
+  legend's verbs, would take a shared row). Nothing else changes: the world (worlds_centres/real, the same kinds, the same messages and
+  rows), the front end, the null and attachment formulas, the loss, batches (>= 8 matched centres), lr 0.02, 2 epochs, D 1024, seed 0,
+  attach / null thresholds 0.5, the calibration rule, the scorer.
+- Criterion (the same as run 1): VSS cutting by itself >= 58% requests fully right on the same 253 dev messages, extra wires <= 100.
+  One run; if it misses, stop and report.
+- Cost: route book +9.1 M phases (cthR, cthL: 44 x 103 x 1024 each instead of 1 x 103 x 1024), routebook.bin 22.5 MB -> about 31.6 MB at
+  8 bits (+40%; still under fix_p80_s0's 34.7 MB). Training: one prefix scan per event token present in a batch instead of one, and Adam
+  on 31.6 M instead of 22.5 M parameters: estimated 2-4 min instead of 83 s (an estimate, not measured). Reading: one prefix sum per
+  event token present in the message (still linear in the tokens).
+- Kinds: AGENTS.md says "the trigger word of a request -> the verb kind of its action", which reads as one kind PER ACTION; the world
+  builder (msg_to_world.py) gives every event token the one kind VERB. The faithful port of E3d does NOT need per-event kinds in the
+  world: E3d keys only the centre-relative phases by the centre, and in B's world the centre's kind happened to be its event. Per-event
+  phase tables in the centre reader are enough and keep the world identical to run 1's (one change at a time). Per-event kinds in the
+  world would change every reader (the one-request model's path / bigram / chainL tables are keyed by kinds; K 103 -> about 146) and the
+  baselines would have to be retrained: a separate decision for the owner, not part of this second run.
+
+## Linear cost (measured; trained model, D 1024, CPU, one message of N tokens = the dev messages' normalized tokens repeated)
+
+| N tokens | centres (accepted) | numpy: states s | numpy: read_message s (states + every reading) | numpy us / token | numpy peak RSS MB | browser (node) readMessage s | browser us / token | node RSS after MB |
+|---|---|---|---|---|---|---|---|---|
+| 100 | 8 (6) | 0.065 | 0.075 | 752 | 250 | 0.108 | 1084 | 345 |
+| 1 000 | 89 (67) | 0.575 | 0.381 | 381 | 324 | 0.376 | 376 | 388 |
+| 10 000 | 938 (697) | 4.06 | 5.69 | 569 | 1 226 | 4.25 | 425 | 896 |
+
+Time grows linearly (per token at 10 000 within 1.5x of 1 000 in numpy, 1.1x in the browser). Memory is linear too but large: about 90 KB
+per token in numpy and 55 KB in the browser at D 1024, because the per-token addresses (aL, aR), the bigram terms and the prefix sums
+(T x D complex each) are kept for the residual of each centre; 1 M tokens would need B's streamed computation (states_stream: running
+prefix sums kept only at the centres), not built here. Scripts: scratchpad port/scale.py, scale.mjs (not in the repository).
+
+## Open problems
+
+1. The run failed both criteria. The deviation from E3d above is the first candidate; the pre-registered second run tests it.
+2. The front end finds no action word in 8.8% of the requests (the same cause as for the one-request reader: data, step 3 of the plan).
+3. The null probability rejects 6.1% of the requests and lets 60 false centres through; the attachment leaves out a name or value of
+   9.6% of the requests (threshold 0.5 on weights trained against the spans).
+4. Memory per token (above); the browser keeps every per-token address of the message.
+5. Python and the browser agree on every output, and on the numbers to 1e-15, not bit for bit (libm / V8 last-bit differences and the
+   order of sums in numpy's matrix products; the one-request reader has the same property).
+6. bf5229e (set roles read over the sentence's words in Python) does not change calibration (see above); a comparison between this model
+   and fix_p80_s0 on llm_score.mjs mixes only one change (the centre reader), since the browser reader was unchanged.
+7. Mechanical tokenization: "I'm" inside a sentence becomes the name n_i_m (front end, both readers; not changed here).
+
+## Files changed (working tree; agents do not commit since 2026-10-31 ~09:40; three earlier commits bf5229e, 28cda8a, 03ff6e5 are on main)
+
+- training/sketch/msg_to_world.py: CENTRES=1 path (legend reader.centres, requests' tokens from the message, examples/messages.jsonl,
+  REAL_WORLD.md into the world folder); unchanged with CENTRES unset (checked: the built world folder is identical to the HEAD script's).
+- training/sketch/run_curve.sh: CENTRES=1 -> world worlds_centres/real, NEGATIVES=0, docs/model/real never replaced; with CENTRES unset
+  every command line identical (checked with stubbed commands).
+- training/sketch/llm_score.mjs, training/sketch/error_analysis.mjs: SEG=centres-model; other modes byte-identical outputs on
+  fix_p80_s0 (default 46.5% / 335, SEG=gold 60.5% / 71, error analysis 61.0%; stdout and --dump compared with the HEAD scripts).
+- training/vss/tool/sop/infer.py: the set role's `_margin.<role>` line written right after the role's line (as the browser).
+- .gitignore: training/sketch/worlds_centres/.
+- research/attention/port/NOTES.md (this file); docs/model/centres_p80_s0/ (the exported model, 28 MB).
+
+## Run 2 (pre-registered above): phases keyed by the centre's event token. Result: FAIL
+
+Built (working tree): `--centre_key event` in sop train (train.py), CentreModel(centre_tokens) in experiment/centres.py (rows = the 44
+legend event tokens + '*', the batch carries each centre's row), Routebook.centre_addresses(c, lem) in infer.py and centreAddresses(c, lem)
+in routebook.js (the route book carries `centre_tokens`; without it the kind keying of run 1 is used), export_web.py header
+`centre_tokens`, run_curve.sh CENTRE_KEY=event. Parity on a mini event-keyed model (D 64, 30 unit steps) and on the trained model, the
+253 dev messages, 1494 centres: all exact fields identical, numbers within 1e-15 (run 1's model re-checked with the new code: identical).
+Found on the way: Python's fmt printed -0.0 as "-0.000", the browser "0.000"; Python now adds 0.0 first (changes Python output only for
+an exact -0.0).
+
+Model centres2_p80_s0 (`CENTRES=1 CENTRE_KEY=event PREFIX=centres2 run_curve.sh 0.8`, the same world rebuilt, seed 0, D 1024, 2 epochs,
+751 steps, 237 s of training (run 1: 83 s), final cos -0.854 (run 1: -0.802); routebook.bin 31.8 MB (run 1: 22.5 MB). It replaced run
+1's npz in worlds_centres/real/model; run 1's export stays in docs/model/centres_p80_s0.
+
+| reader on dev (253 messages, 1126 gold wires; llm_score.mjs, the scorer of run 1) | correct | not done | done wrong | extra wires |
+|---|---|---|---|---|
+| fix_p80_s0, annotated spans | 60.5% | 15.3% | 24.2% | 71 |
+| centres_p80_s0 (run 1, E3c in effect) | 47.7% | 19.1% | 33.2% | 143 |
+| **centres2_p80_s0 (run 2, E3d)** | **50.6%** | **18.5%** | **30.9%** | **144** |
+
+Criterion >= 58% and <= 100 extra wires: **both missed** (50.6%, 144). Run 2 vs run 1: +2.9 points, extras unchanged. Stopped (one run).
+
+Root causes, run 2 (error_analysis.mjs SEG=centres-model, % of the 1126 requests; run 1 in brackets): X0 no event token in the span 8.8
+(8.8), X1 every centre rejected by the null 6.1 (6.1), H a name / value of the span not taken by the centre 10.5 (9.6), G role wrong 7.9
+(8.2), F role missed 4.2 (7.2), B wrong action 4.5 (4.4), C reader refuses 0.0 (0.7), D / E / G-description 7.1 (6.8). Extras: 60
+accepted centres outside every span, 44 second centres in a span (both as run 1). Fully right in the analysis 50.9%.
+What changed: role missed -3.0 and reader refusals -0.7 points (the keying helps where an address had to serve two roles); what did not:
+the list / twin-role errors ("connect Bias to Hidden" -> from = [Bias, Hidden]: the set role members filled beside source; connect is
+right in 18 of 173 requests, rules 106, the one-request reader on annotated spans 43; the open owner decision on twin list roles) and
+everything that sits in the cut (null, attachment) and the front end, which the keying does not touch (X0 + X1 + H = 25.4 points).
+
+Files changed for run 2 (working tree, in addition to the list above): training/vss/experiment/centres.py, training/vss/tool/sop/train.py
+(`--centre_key`), training/vss/tool/sop/infer.py (centre_tokens rows; fmt of -0.0), training/vss/tool/sop/export_web.py (header
+centre_tokens), docs/js/vss/routebook.js and docs/js/vss/reader.js (centre_tokens rows, lemmas passed), training/sketch/run_curve.sh
+(CENTRE_KEY); new docs/model/centres2_p80_s0/ (37 MB). With CENTRES unset nothing changed in behaviour, checked after these changes:
+fix_p80_s0 SEG=gold 60.5% / 71, default 46.5% / 335 (--dump byte-identical to the HEAD scripts'), the browser's one-request reader
+identical on all 1126 dev spans (SOP text, residual, status) to the code before the port, run_curve.sh command lines identical.

@@ -25,7 +25,30 @@ const lex = new Set(Object.keys(vss.model.lexicon || {})), verbEvent = new Map()
 for (const e of vss.model.legend.events) for (const v of e.verbs) verbEvent.set(v, e.id);
 const sys = K.createSystem();
 
+// SEG=centres-model: the message is read by a CENTRE model (legend reader.centres; research/attention/port/NOTES.md): one normalization
+// of the whole message (front.js normalizeMessage), one reading (vss.readMessage): every accepted centre whose reading is ok / abstain is
+// a request, in text order; the model cuts by itself (no annotated span, no hard-centre search). The ignored token spans are counted.
+const IGN = { spans: 0, tokens: 0, msgs: 0 };
+function vssCentresModel(text, ctx) {
+  const { tokens, src, info } = FRONT.normalizeMessage(text, ctx.names, F), r = vss.readMessage(tokens.join(" "));
+  const seq = { s: 0, m: 0 }, c = { names: ctx.names, last: [], refs: new Map() }, nodes = [];
+  IGN.msgs++; IGN.spans += r.ignored.length; IGN.tokens += r.ignored.reduce((a, [x, y]) => a + y - x, 0);
+  for (const k of r.centres) {
+    if (!k.accepted || k.status === "unknown-event" || k.status === "no-sense") continue;
+    const reading = readingFromWires(k.wires, k.token, k.tokens), out = reading ? toNodes(reading, info, c, seq) : { nodes: [] };
+    const srcText = text.slice(Math.min(...k.members.map((i) => src[i][0])), Math.max(...k.members.map((i) => src[i][1])));
+    out.nodes.forEach((n) => { if (n.type !== "mention") Object.defineProperty(n, "src", { value: srcText, enumerable: false }); }); nodes.push(...out.nodes);
+    const main = out.nodes[out.nodes.length - 1];
+    if (main && main.args) {
+      if (main.args.action === "create") { if (main.args.name && !main.args.count) c.refs.set(String(main.args.name).toLowerCase(), { ref: main.id }); c.last = [{ ref: main.id }]; }
+      else if (main.args.target != null && !Array.isArray(main.args.target)) c.last = [main.args.target];
+    }
+  }
+  return nodes;
+}
+
 function vssFormalize(text, ctx) {
+  if (process.env.SEG === "centres-model") return vssCentresModel(text, ctx);
   // SEG=gold: the annotated spans (held-out TRAINING messages only: the test sets have none): the reading quality without the cut
   const segs = process.env.SEG === "gold" && ctx.spans ? ctx.spans.map((src) => ({ src }))
     : process.env.SEG === "tagger" && F ? FRONT.segment(text, ctx.names, F).map((src) => ({ src }))        // labelled reference only
@@ -97,5 +120,6 @@ for (const d of dirs) {
   report[d] = { n, tot }; ALL.n += n; for (const f of ["rules", "vss"]) for (const k of ["exact", "right", "wrongAligned", "missed", "acts", "extra", "gold"]) ALL[f][k] += tot[f][k]; if (verbose) dump.slice(0, 12).forEach((x) => console.log(`  ${x.id} ${x.text}\n     rules: ${x.rules.join(" | ") || "ok"}\n     vss:   ${x.vss.join(" | ") || "ok"}`));
   if (dumpAt >= 0) writeFileSync(argv[dumpAt + 1].replace(/(\.json)?$/, `_${d.split("/").filter(Boolean).pop()}.json`), JSON.stringify(dump, null, 1));
 }
+if (process.env.SEG === "centres-model") console.log(`\ncentres-model: ignored text (tokens taken by no accepted centre read ok / abstain): ${IGN.spans} spans, ${IGN.tokens} tokens in ${IGN.msgs} messages`);
 if (dirs.length > 1) { const n = ALL.n, pc = (x, T) => (x / T.gold * 100).toFixed(1) + "%", line = (f) => { const T = ALL[f]; return `${f.padEnd(5)} correct ${pc(T.right, T)} · not done ${pc(T.missed, T)} · done wrong ${pc(T.wrongAligned, T)} · plus ${T.extra} extra wires not asked for (${pc(T.extra, T)} of the gold count) · messages fully right ${(T.exact / n * 100).toFixed(1)}%`; };
   console.log(`\nALL (${dirs.join(" + ")}): ${n} messages, ${ALL.rules.gold} gold wires`); console.log("  " + line("rules")); console.log("  " + line("vss")); }

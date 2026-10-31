@@ -43,6 +43,8 @@ class Routebook:
         # logits cA (K x K x 3: word kind, centre kind, side 0 = word left of its centre / 1 = right / 2 = the centre itself), cDist (3 x 16),
         # cbeta (2 x K: the cost of every word in between, per side), null logits cN (5 x (K+2): the word, previous, next, -2, +2)
         self.centre_kinds = [str(c) for c in z["centre_kinds"]] if "centre_kinds" in z.files else None
+        # run 2 (sop train --centre_key event): the phase rows are keyed by the centre's token (its lemma), the last row '*' shared
+        self.centre_tokens = [str(c) for c in z["centre_tokens"]] if "centre_tokens" in z.files else None
         for n in ("cthR", "cthL", "cthC", "cbgL", "cbgR", "cA", "cDist", "cbeta", "cN"): setattr(self, n, opt(n))
         self.rel = z["rel"].astype(float) if "rel" in z.files else None
         self.pos = z["pos"].astype(float) if "pos" in z.files else None; self.pc = z["pc"].astype(float) if "pc" in z.files else None
@@ -55,7 +57,7 @@ class Routebook:
         self.cue_mask = z["cue_mask"].astype(float) if "cue_mask" in z.files else (np.zeros(len(self.cats)) if self.vo is not None else None)
         self.D = self.path.shape[1] if self.path is not None else self.cthC.shape[1]
 
-    def centre_addresses(self, c):
+    def centre_addresses(self, c, lem=None):
         """the centre reader's structure and addresses of a message (c: kind indices, length T), linear in T: every token whose kind is a
         centre kind is a centre; every other token is attached to at most the nearest centre on its left (lc) and on its right (rc).
         Returns dict: centres (token positions), ci (centre index of a centre token, else -1), lc / rc (centre index or -1), null (T),
@@ -65,12 +67,16 @@ class Routebook:
           wR_t   = sigmoid(cA[k_t, k_rc, 0] + cDist[0, min(rc-t, 15)] + sum_{t<j<rc} cbeta[0, k_j]) * (1 - null_t)
           wS_c   = sigmoid(cA[k_c, k_c, 2] + cDist[2, 0]) * (1 - null_c)
           aL_t   = wL_t * (exp(i sum_{lc<j<=t} cthR[e_lc, k_j]) + bg_t),  aR_t = wR_t * (exp(i sum_{t<=j<rc} cthL[e_rc, k_j]) + bg_t)
-          aC_c   = wS_c * (exp(i cthC[e_c]) + bg_c),  bg_t = exp(i cbgL[k_t-1, k_t]) + exp(i cbgR[k_t, k_t+1]);  e = the centre's kind row.
+          aC_c   = wS_c * (exp(i cthC[e_c]) + bg_c),  bg_t = exp(i cbgL[k_t-1, k_t]) + exp(i cbgR[k_t, k_t+1]);  e = the centre's kind row,
+          or, when the route book has centre_tokens (run 2), the row of the centre's token lem[c] (the last row '*' for any other token).
         Sums of a run are differences of prefix sums (one per centre kind present). The twin of experiment/centres.CentreModel.states."""
         c = np.asarray(c, dtype=int); T, D, K = len(c), self.D, len(self.cats)
         erow = {self.cat_id[k]: e for e, k in enumerate(self.centre_kinds) if k in self.cat_id}
         isc = np.array([int(x) in erow for x in c], dtype=bool)
         centres = [t for t in range(T) if isc[t]]; ci = np.full(T, -1); ci[centres] = np.arange(len(centres))
+        if self.centre_tokens is not None:
+            trow = {w: i for i, w in enumerate(self.centre_tokens)}; ce = [trow.get(lem[p], len(self.centre_tokens) - 1) for p in centres]
+        else: ce = [erow[int(c[p])] for p in centres]
         lc = np.full(T, -1); rc = np.full(T, -1); last = -1
         for t in range(T):
             if isc[t]: last = int(ci[t])
@@ -92,15 +98,15 @@ class Routebook:
         wS = np.array([sigmoid(self.cA[c[p], c[p], 2] + self.cDist[2, 0]) * keep[p] for p in centres])
         bg = E(self.cbgL[kp, c]) + E(self.cbgR[c, kn]) if T else np.zeros((0, D), complex)
         PR, PL = {}, {}
-        for e in sorted({erow[int(c[p])] for p in centres}):
+        for e in sorted(set(ce)):
             PR[e] = np.concatenate([np.zeros((1, D)), np.cumsum(self.cthR[e][c], 0)]); PL[e] = np.concatenate([np.zeros((1, D)), np.cumsum(self.cthL[e][c], 0)])
         aL = np.zeros((T, D), complex); aR = np.zeros((T, D), complex); aC = np.zeros((len(centres), D), complex)
         for t in range(T):
             if lc[t] >= 0:
-                p = pos[lc[t]]; e = erow[int(c[p])]; aL[t] = wL[t] * (E(PR[e][t + 1] - PR[e][p + 1]) + bg[t])
+                p = pos[lc[t]]; e = ce[lc[t]]; aL[t] = wL[t] * (E(PR[e][t + 1] - PR[e][p + 1]) + bg[t])
             if rc[t] >= 0:
-                p = pos[rc[t]]; e = erow[int(c[p])]; aR[t] = wR[t] * (E(PL[e][p] - PL[e][t]) + bg[t])
-        for j, p in enumerate(centres): aC[j] = wS[j] * (E(self.cthC[erow[int(c[p])]]) + bg[p])
+                p = pos[rc[t]]; e = ce[rc[t]]; aR[t] = wR[t] * (E(PL[e][p] - PL[e][t]) + bg[t])
+        for j, p in enumerate(centres): aC[j] = wS[j] * (E(self.cthC[ce[j]]) + bg[p])
         return {"centres": centres, "ci": ci, "lc": lc, "rc": rc, "null": null, "wL": wL, "wR": wR, "wS": wS, "aL": aL, "aR": aR, "aC": aC}
 
     def vorder_index(self, c):
@@ -572,6 +578,7 @@ class Reader:
                 for it in fl[1:]:
                     en = soplang.Wire(next(ids), "entity"); en.set("head", it[1]); later.append(en); refs.append(("ref", en.id))
                 ev.set(r, ("&", refs))
+                if r in mg: ev.set(f"_margin.{r}", fmt(mg[r]))     # right after the set line, as docs/js/vss/reader.js frameWires (line order only)
             elif fl[0] == "entity":
                 en = soplang.Wire(next(ids), "entity"); later.append(en); ev.set(r, ("ref", en.id)); en.set("head", fl[1])
                 if fl[2] is not None:
@@ -716,7 +723,7 @@ class Reader:
         """-> (kept, unknown, R, S): R = Routebook.centre_addresses of the kept tokens (indices into kept), S = one state per centre (C x D),
         accumulated token by token in text order (the JS twin adds in the same order)"""
         kept, cidx, unknown = self.encode(tokens)
-        R = self.rb.centre_addresses(cidx); C = len(R["centres"]); S = np.zeros((C, self.D), complex)
+        R = self.rb.centre_addresses(cidx, [self.lemma(tokens[i]) for i in kept]); C = len(R["centres"]); S = np.zeros((C, self.D), complex)
         for j, i in enumerate(kept):
             F = self.st.id(self.ident(tokens[i]))
             if R["ci"][j] >= 0: S[R["ci"][j]] += R["aC"][R["ci"][j]] * F; continue
@@ -863,7 +870,7 @@ class Reader:
         return wires, f, info
 
 
-def fmt(x): return f"{x:.3f}"
+def fmt(x): return f"{x + 0.0:.3f}"     # + 0.0: -0.0 prints 0.000, as the browser's toFixed (docs/js/vss/reader.js fmt)
 
 
 def idgen(prefix="w", start=1):

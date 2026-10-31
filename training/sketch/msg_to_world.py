@@ -13,6 +13,9 @@
 - Negative examples (off by default; NEGATIVES=1 on; plan step 1 failed its criterion, ERROR_ANALYSIS.md): every sentence outside the annotated spans whose normalized form carries an
   action token becomes a wire of that event with no roles and `_negative=true` (target = minus its compiled state, vss-demo R81).
 Writes worlds/real/{legend.json, kinds.tsv, world.json, split_hints.json, front.json, examples/train.sop} and llm_train/REAL_WORLD.md.
+CENTRES=1 (the centre reader, research/attention/port/NOTES.md): the legend's reader block gets "centres": true, the requests' tokens are
+taken from the WHOLE message as front.normalize_message reads it (centres_rows.py), and examples/messages.jsonl holds one line per message
+(its tokens, and per request its span as a token range, its centre and its row); REAL_WORLD.md is written into the world folder.
 Run: python3 msg_to_world.py [--frac 0.8] [--freq 8]"""
 import argparse, collections, datetime, json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -36,7 +39,16 @@ def main():
     vk = FR.value_kinds(); evtok = {v for vs in G.EVENTS.values() for v in vs}
     base = dict(vk); base.update({v: "VERB" for v in evtok})
     items = []
-    for m in msgs:
+    CENTRES = os.environ.get("CENTRES") == "1"; msg_items = []
+    if CENTRES:      # the centre reader: one message normalization, every request's tokens taken from it (centres_rows.py)
+        import centres_rows as CR
+        for m in msgs:
+            toks_m, src_m, info_m, its = CR.message_items(m, F); msg_items.append((m, toks_m, its))
+            for wi, w, rng, centre, created in its:
+                if rng: items.append((m, w, {"text": w["span"], "names": m.get("names") or [], "created": created, "wire": {"type": w["type"], "args": w["args"]},
+                                         "_toks": toks_m[rng[0]:rng[1]], "_info": info_m, "_key": (m["id"], wi)}))
+    nf = lambda row: (lambda text, names: (list(row["_toks"]), row["_info"])) if "_toks" in row else norm
+    for m in ([] if CENTRES else msgs):
         created = []
         for w in m["wires"]:
             if w.get("span") and w["span"] in m["text"]:
@@ -44,20 +56,20 @@ def main():
             if w["type"] == "command" and w["args"].get("action") == "create" and w["args"].get("name"): created.append(w["args"]["name"])
     cnt = collections.Counter()
     for m, w, row in items:
-        toks, _ = norm(row["text"], list(row["names"]) + row["created"])
+        toks, _ = nf(row)(row["text"], list(row["names"]) + row["created"])
         cnt.update(t for t in toks if FR.is_word(t))
     kinds = dict(base)
     for t, c in cnt.items():
         if c >= a.freq and t not in kinds: kinds[t] = t
     lexicon = set(kinds)
-    rows, lost_why, dropped, by_ev = [], collections.Counter(), collections.Counter(), collections.Counter()
+    rows, lost_why, dropped, by_ev = [], collections.Counter(), collections.Counter(), collections.Counter(); row_key = []
     for m, w, row in items:
         lost = []
-        try: text, roles, ev = convert(row, lexicon, soft=True, lost=lost, norm=norm)
+        try: text, roles, ev = convert(row, lexicon, soft=True, lost=lost, norm=nf(row))
         except Skip as e: dropped[str(e).split(":")[0]] += 1; continue
         if not (set(G.EVENTS[ev]) & set(text.split())) and not roles: dropped["no event token and no role (zero target)"] += 1; continue
         for x in lost: lost_why["event token not found" if x.startswith("verb of") else x.split(" ")[0]] += 1
-        rows.append((ev, text, roles, m["id"])); by_ev[ev] += 1
+        rows.append((ev, text, roles, m["id"])); by_ev[ev] += 1; row_key.append(row.get("_key"))
     out = a.out
     for d in ("examples", "raw", "audit", "model", "runs", "versions", "requests"): os.makedirs(os.path.join(out, d), exist_ok=True)
     for f in os.listdir(os.path.join(out, "examples")): os.remove(os.path.join(out, "examples", f))
@@ -67,7 +79,7 @@ def main():
               "events": [{"id": e, "verbs": vs, "roles": [r for r, _ in ROLES if r in roles_of[e]], "required": []} for e, vs in G.EVENTS.items()],
               "operators": ["not"], "moods": ["command"], "kinds": {"source": "lexicon", "lexicon": "kinds.tsv"},
               "values": [{"kind": "NUM", "pattern": "\\d+"}, {"kind": "NAME", "pattern": "n_[a-z0-9_]+"}, {"kind": "TEXT", "pattern": "t_[a-z0-9_]+"}],
-              "reader": {"predicate_role": True, "occupancy_marker": True, "definite_dets": [], "set_roles": ["members", "targets"]}}
+              "reader": {"predicate_role": True, "occupancy_marker": True, "definite_dets": [], "set_roles": ["members", "targets"], **({"centres": True} if CENTRES else {})}}
     lp = os.path.join(out, "legend.json"); json.dump(legend, open(lp, "w"), indent=1); sha = G.sha256_file(lp)
     with open(os.path.join(out, "kinds.tsv"), "w") as fh:
         fh.write("# word\tkind: LEARNED by training/sketch/msg_to_world.py (legend value tokens -> their question's kind, event tokens -> VERB, "
@@ -87,9 +99,19 @@ def main():
     # (heldout_sentence_share 0: DECISIONS.md 2).
     cal = lambda mid: int(G.hashlib.sha256((mid + "|cal").encode()).hexdigest()[:8], 16) / 2 ** 32 < CAL_SHARE
     docs = {f: G.soplang.Doc(directives=[("world", "real", None), ("legend", sha, None), ("generated", "training/sketch/msg_to_world.py from llm_train/*_msg", None)]) for f in ("train.sop", "calib.sop")}
-    for ev, text, roles, mid in rows:
+    wire_of = {}
+    for ri, (ev, text, roles, mid) in enumerate(rows):
         ids = iter(f"w{k + i}" for i in range(1, 100)); ws = G.wires_for(ev, roles, text, f"msg.{mid[:2]}", ids, world="real", source="llm")
         k += len(ws); docs["calib.sop" if cal(mid) else "train.sop"].wires += ws
+        if row_key[ri] is not None: wire_of[row_key[ri]] = f"examples/{'calib.sop' if cal(mid) else 'train.sop'}#{ws[0].id}"
+    n_cent = collections.Counter()
+    if CENTRES:      # examples/messages.jsonl: the training rows of the centre reader (sop train, legend reader.centres)
+        with open(os.path.join(out, "examples", "messages.jsonl"), "w") as fh:
+            for m, toks_m, its in msg_items:
+                reqs = [{"row": wire_of.get((m["id"], wi)), "tokens": list(rng), "centre": centre} for wi, w, rng, centre, _ in its if rng]
+                n_cent["requests with a span"] += len(reqs); n_cent["with a centre"] += sum(1 for q in reqs if q["centre"] is not None)
+                n_cent["with a row"] += sum(1 for q in reqs if q["row"]); n_cent["event tokens in the messages"] += sum(1 for t in toks_m if t in evtok)
+                fh.write(json.dumps({"id": m["id"], "split": "calib" if cal(m["id"]) else "train", "tokens": toks_m, "requests": reqs}) + "\n")
     # NEGATIVE examples (NEGATIVES=1 turns them on; off by default since plan step 1 failed its criterion, ERROR_ANALYSIS.md): the sentences of the training messages that lie outside
     # every annotated span (front.requests). When the normalized sentence carries an action token E (the first one), it becomes a wire of
     # event E with no roles and `_negative=true`: sop train uses MINUS its compiled state as the target (vss-demo R81), so the reader
@@ -114,11 +136,12 @@ def main():
     rep = [f"# World `real`: built from {len(msgs)} training messages ({len(items)} requests with a span)", "",
            f"Front end learned from the same messages: {len(F['values'])} value n-grams, {len(F['triggers'])} trigger rules, {len(F['segmenter'])} segmenter weights; params {json.dumps(P)}.", "",
            f"Rows: {len(rows)}. Dropped (cannot be trained): {sum(dropped.values())} {dict(dropped)}. Negative examples (text outside the spans with an action token): {n_neg}.", "",
+           *([f"Centre reader (CENTRES=1): {len(msg_items)} messages in examples/messages.jsonl; {dict(n_cent)}.", ""] if CENTRES else []),
            f"Kinds: {len(kc)}; lexicon {len(lexicon)} words (legend value tokens {len(vk)}, event tokens {len(evtok)}, own-kind tokens seen >= {a.freq} times).", "",
            "Own-kind tokens: " + ", ".join(sorted(t for t, c in kinds.items() if c == t)), "",
            "Roles left out because their words are not in the normalized span (rows kept):", "", "| what | n |", "|---|---|"] + \
           [f"| {x} | {n} |" for x, n in lost_why.most_common(40)] + ["", "| event | rows |", "|---|---|"] + [f"| {e} | {n} |" for e, n in by_ev.most_common()]
-    open(os.path.join(HERE, "llm_train", "REAL_WORLD.md"), "w").write("\n".join(rep) + "\n")
+    open(os.path.join(out, "REAL_WORLD.md") if CENTRES else os.path.join(HERE, "llm_train", "REAL_WORLD.md"), "w").write("\n".join(rep) + "\n")
     print("\n".join(rep[:9]))
 
 

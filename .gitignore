@@ -8,3 +8,5 @@ training/sketch/__pycache__/
 node_modules/
 training/sketch/worlds/real/
 research/attention/**/*.pt
+training/sketch/worlds_centres/
+.claude/worktrees/

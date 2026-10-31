@@ -537,8 +537,9 @@ def message_splits(msgs, rows, seed):
     return out
 
 
-def message_example(m, legend, wk, shim, centre_kinds, cat_id):
-    """a message -> the centre model's input: kinds, vocabulary ids, centre flags, the request of each centre, the request of each token"""
+def message_example(m, legend, wk, shim, centre_kinds, cat_id, centre_tokens=None):
+    """a message -> the centre model's input: kinds, vocabulary ids, centre flags, the request of each centre, the request of each token;
+    with centre_tokens (--centre_key event) also the phase-table row of each centre (its lemma's index, else the shared last row)"""
     kind = lambda t: wk.get(t) or wk.get(t.lower()) or legend.kind(t) or UNKNOWN_KIND
     toks = m["tokens"]; k = [cat_id[kind(t)] if kind(t) in cat_id else cat_id[UNKNOWN_KIND] for t in toks]
     isc = [kind(t) in centre_kinds for t in toks]; cent = [i for i in range(len(toks)) if isc[i]]
@@ -548,7 +549,10 @@ def message_example(m, legend, wk, shim, centre_kinds, cat_id):
             if label[i] < 0: label[i] = j
         if q.get("centre") is not None and isc[q["centre"]]: creq[q["centre"]] = j
     ids = [shim.idx[t] if t in shim.idx else shim.idx["<unknown>"] for t in toks]
-    return {"k": k, "ids": ids, "isc": isc, "req": [creq.get(p, -1) for p in cent], "label": label}
+    out = {"k": k, "ids": ids, "isc": isc, "req": [creq.get(p, -1) for p in cent], "label": label}
+    if centre_tokens is not None:
+        row = {w: i for i, w in enumerate(centre_tokens)}; out["ce"] = [row.get(legend.lemma_of(toks[p]), len(centre_tokens)) for p in cent]
+    return out
 
 
 def train_centres(a, legend, rows, msgs, splits, schema, seed, model_dir, run_dir, st, comp, wk, shim, kinds_report):
@@ -565,8 +569,10 @@ def train_centres(a, legend, rows, msgs, splits, schema, seed, model_dir, run_di
     cats = sorted(set(wk.values())); cat_id = {c: i for i, c in enumerate(cats)}
     verbs = set(legend.all_verbs())
     centre_kinds = sorted({k for w, k in wk.items() if w in verbs or legend.lemma_of(w) in verbs})
+    key = getattr(a, "centre_key", "kind")                 # run 2: the relative phases keyed by the centre's event token (B's E3d)
+    centre_tokens = sorted(legend.all_verbs()) if key == "event" else None
     tr = [m for m in msgs if m.get("_split") == "train"]
-    ex = [message_example(m, legend, wk, shim, set(centre_kinds), cat_id) for m in tr]
+    ex = [message_example(m, legend, wk, shim, set(centre_kinds), cat_id, centre_tokens) for m in tr]
     tgt = []
     for m in tr:
         tgt.append([comp.wire(by[q["row"]]["wire"], by[q["row"]]["by"], by[q["row"]]["tokens"]) if q["row"] in by else None for q in m["requests"]])
@@ -574,10 +580,11 @@ def train_centres(a, legend, rows, msgs, splits, schema, seed, model_dir, run_di
         e["req"] = [r if r >= 0 and T[r] is not None else -1 for r in e["req"]]
     nreq = sum(len(m["requests"]) for m in tr); nmat = sum(sum(1 for r in e["req"] if r >= 0) for e in ex); ncent = sum(len(e["req"]) for e in ex)
     print(f"[train] seed {seed}: CENTRE reader: {len(tr)} training messages, {nreq} annotated requests, {ncent} centres ({nmat} matched to a request, "
-          f"{ncent - nmat} not a request); centre kinds {centre_kinds}; kinds {len(cats)}; vocab {len(shim.vocab)}; D={a.D}", flush=True)
+          f"{ncent - nmat} not a request); centre kinds {centre_kinds}; phases keyed by the centre's {key}" + (f" ({len(centre_tokens)} event tokens + '*')" if centre_tokens else "")
+          + f"; kinds {len(cats)}; vocab {len(shim.vocab)}; D={a.D}", flush=True)
     ident = (lambda w: legend.lemma_of(w)) if legend.reader.get("identity") == "lemma" else (lambda w: w)
     F = np.array([st.id(ident(w)) for w in shim.vocab])
-    m = CM.CentreModel(cats, centre_kinds, F, a.D, np.random.default_rng(200 + seed))
+    m = CM.CentreModel(cats, centre_kinds, F, a.D, np.random.default_rng(200 + seed), centre_tokens=centre_tokens)
     opt = torch.optim.Adam(m.parameters(), lr=a.lr, betas=(0.9, 0.999), eps=1e-8)
     rng = np.random.default_rng(seed); t0 = time.time(); step = 0; last = {}
     print(f"[train seed {seed}] start: {trainer.mem_line()}", flush=True)
@@ -610,7 +617,7 @@ def train_centres(a, legend, rows, msgs, splits, schema, seed, model_dir, run_di
     with open(os.path.join(model_dir, "catalog.json"), "w") as f: json.dump(catalog, f, indent=1, sort_keys=True)
     cfg = {"world": a.world_name, "D": a.D, "seed": seed, "star_version": getattr(a, "star_version", 1), "language": a.language, "legend_sha256": legend.sha, "legend_version": legend.version,
            "training_code_commit": a.commit, "trained": datetime.datetime.now().isoformat(timespec="seconds"), "codes": ["centres"],
-           "reader_kind": "centres (one state per centre; experiment/centres.py)", "centre_kinds": centre_kinds, "attach_threshold": 0.5, "null_threshold": 0.5,
+           "reader_kind": "centres (one state per centre; experiment/centres.py)", "centre_kinds": centre_kinds, "centre_key": key, "attach_threshold": 0.5, "null_threshold": 0.5,
            "depth_estimator": a.depth_estimator, "presence_readout": "decided", "batch": a.batch, "batch_unit": "matched centres (>= batch per step)",
            "lr": a.lr, "epochs": a.epochs, "n_train_steps": step, "n_train_messages": len(tr),
            "decoder": getattr(a, "decoder", "contract"), **activate.DECODERS[getattr(a, "decoder", "contract")], "activation": None,
@@ -951,6 +958,8 @@ def main(argv=None):
                     "(activate.py: need signals on the training annotation, acceptance on selection rows the trials did not train on); the trials, "
                     "numbers and decision go to config.json 'activation' and run_dir/activation.json. 'off' (default): reader.codes / --codes as declared")
     ap.add_argument("--activate_eps", type=float, default=0.01, help="the tolerance of the acceptance test (FULL accuracy units)")
+    ap.add_argument("--centre_key", default="kind", choices=["kind", "event"], help="the centre reader only (legend reader.centres): the "
+                    "centre-relative phases keyed by the centre's kind (run 1) or by its event token (run 2, B's E3d; research/attention/port/NOTES.md)")
     a = ap.parse_args(argv)
     wd = os.path.abspath(a.world); a.world_name = os.path.basename(wd.rstrip("/"))
     legend = Legend(os.path.join(wd, "legend.json"))
