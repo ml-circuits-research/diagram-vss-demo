@@ -1,0 +1,228 @@
+
+######## fix (fix_p80_s0)
+baseline {'fit': {'requests': 4305, 'right': 2835}, 'dev': {'requests': 1126, 'right': 693}}
+| rank | word | fit tokens | fit right->wrong | fit wrong->right | fit net | dev tokens | dev right->wrong | dev wrong->right | dev net | sign test p (fit) |
+| 1 | the | 1780 | 209 | 4 | 205 | 494 | 71 | 4 | 67 | 6.46e-57 * |
+| 2 | to | 1049 | 190 | 10 | 180 | 263 | 38 | 1 | 37 | 1.47e-44 * |
+| 3 | of | 189 | 56 | 0 | 56 | 47 | 15 | 0 | 15 | 1.39e-17 * |
+| 4 | and | 623 | 54 | 6 | 48 | 173 | 10 | 5 | 5 | 4.86e-11 * |
+| 5 | it | 137 | 39 | 0 | 39 | 33 | 10 | 1 | 9 | 1.82e-12 * |
+| 6 | a | 904 | 41 | 3 | 38 | 223 | 13 | 2 | 11 | 8.09e-10 * |
+| 7 | named | 58 | 30 | 0 | 30 | 14 | 7 | 0 | 7 | 9.31e-10 * |
+| 8 | called | 64 | 24 | 0 | 24 | 11 | 3 | 0 | 3 | 5.96e-08 * |
+| 9 | labeled | 147 | 23 | 0 | 23 | 36 | 9 | 0 | 9 | 1.19e-07 * |
+| 10 | from | 132 | 17 | 0 | 17 | 41 | 9 | 0 | 9 | 7.63e-06 * |
+| 11 | shape | 157 | 11 | 0 | 11 | 40 | 1 | 0 | 1 | 0.000488 * |
+| 12 | with | 226 | 10 | 2 | 8 | 62 | 2 | 0 | 2 | 0.0193 * |
+| 13 | directly | 13 | 7 | 0 | 7 | 2 | 1 | 0 | 1 | 0.00781 * |
+| 14 | shapes | 14 | 5 | 0 | 5 | 8 | 2 | 0 | 2 | 0.0312 * |
+| 15 | i | 20 | 5 | 0 | 5 | 3 | 1 | 0 | 1 | 0.0312 * |
+| 16 | pixels | 26 | 5 | 0 | 5 | 12 | 1 | 1 | 0 | 0.0312 * |
+| 17 | can | 45 | 4 | 0 | 4 | 4 | 0 | 0 | 0 | 0.0625 |
+| 18 | in | 127 | 5 | 1 | 4 | 23 | 0 | 1 | -1 | 0.109 |
+| 19 | has | 31 | 3 | 0 | 3 | 9 | 3 | 0 | 3 | 0.125 |
+| 20 | are | 108 | 3 | 0 | 3 | 38 | 2 | 2 | 0 | 0.125 |
+| 21 | arrow | 50 | 3 | 0 | 3 | 11 | 0 | 1 | -1 | 0.125 |
+| 22 | last | 23 | 2 | 0 | 2 | 10 | 2 | 0 | 2 | 0.25 |
+| 23 | what's | 44 | 2 | 0 | 2 | 11 | 0 | 0 | 0 | 0.25 |
+| 24 | does | 35 | 2 | 0 | 2 | 9 | 0 | 0 | 0 | 0.25 |
+| 25 | any | 17 | 2 | 0 | 2 | 3 | 0 | 0 | 0 | 0.25 |
+| 26 | just | 9 | 2 | 0 | 2 | 1 | 0 | 0 | 0 | 0.25 |
+| 27 | on | 46 | 1 | 0 | 1 | 15 | 3 | 0 | 3 | 0.5 |
+| 28 | there | 46 | 1 | 0 | 1 | 13 | 1 | 0 | 1 | 0.5 |
+| 29 | check | 10 | 1 | 0 | 1 | 1 | 1 | 0 | 1 | 0.5 |
+| 30 | you | 9 | 1 | 0 | 1 | 2 | 1 | 0 | 1 | 0.5 |
+| ... |
+| 58 | we | 21 | 0 | 0 | 0 | 4 | 0 | 0 | 0 | 1 |
+| 59 | goes | 20 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 1 |
+| 60 | do | 17 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 1 |
+| 61 | should | 17 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 1 |
+| 62 | for | 16 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 1 |
+| 63 | axis | 15 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 |
+| 64 | evenly | 15 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 65 | back | 14 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 1 |
+| 66 | give | 14 | 0 | 0 | 0 | 8 | 0 | 0 | 0 | 1 |
+| 67 | here | 14 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 68 | link | 14 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 1 |
+| 69 | show | 14 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 1 |
+| 70 | as | 13 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 1 |
+| 71 | by | 12 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 |
+| 72 | diagram | 12 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 73 | too | 12 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 1 |
+| 74 | each | 11 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 1 |
+| 75 | map | 11 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 |
+| 76 | those | 11 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| 77 | if | 10 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| 78 | box | 9 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 1 |
+| 79 | four | 9 | 0 | 0 | 0 | 4 | 0 | 0 | 0 | 1 |
+| 80 | this | 9 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 81 | exist | 8 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 |
+| 82 | front | 8 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| 83 | no | 8 | 0 | 0 | 0 | 3 | 0 | 0 | 0 | 1 |
+| 84 | place | 8 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| 85 | two | 8 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 |
+| 86 | whole | 8 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| 87 | line | 87 | 1 | 2 | -1 | 18 | 0 | 0 | 0 | 0.875 |
+spearman fit net vs dev net SignificanceResult(statistic=np.float64(0.5696157818976928), pvalue=np.float64(8.523857849673597e-09))
+spearman fit net vs fit tokens SignificanceResult(statistic=np.float64(0.5913594503717954), pvalue=np.float64(1.6308854395766325e-09))
+net <= 0 on fit: 41 of 87 ; total fit flips of all single ablations rw 775 wr 28
+  fit tokens 8-15: 34 words, sign-test kept 2, net>0 8, mean net 0.6
+  fit tokens 16-31: 18 words, sign-test kept 2, net>0 10, mean net 1.2
+  fit tokens 32-63: 17 words, sign-test kept 1, net>0 12, mean net 2.8
+  fit tokens 64-127: 8 words, sign-test kept 1, net>0 6, mean net 4.1
+  fit tokens 128-1000000000: 10 words, sign-test kept 10, net>0 10, mean net 62.5
+dev net of the sign-test words: 179 (each: 15 of 16 positive); of the others: 10
+
+raw rows: null sd 0.0229
+  path: pairs 3741, final cos mean 0.002 p99 0.058 max 0.178; pairs > 0.5: 0; top [('one/shape', 0.18), ('labeled/named', 0.16), ('does/the', 0.14), ('place/put', 0.14), ("the/what's", 0.13)]
+  bg0: pairs 435, final cos mean 0.002 p99 0.050 max 0.075; pairs > 0.5: 0; top [('place/who', 0.08), ('does/just', 0.06), ("a/what's", 0.05), ('arrows/just', 0.05), ('can/do', 0.05)]
+  bg_in: pairs 2138, final cos mean 0.001 p99 0.051 max 0.223; pairs > 0.5: 0; top [('it/shape', 0.22), ('arrow/line', 0.09), ('me/to', 0.07), ('exist/it', 0.07), ('be/directly', 0.07)]
+  bg_out: pairs 2223, final cos mean 0.030 p99 0.339 max 0.779; pairs > 0.5: 7; top [('called/named', 0.78), ('does/the', 0.75), ('from/then', 0.67), ('of/the', 0.54), ('has/the', 0.52)]
+  A_in: pairs 3421, final cos mean 0.000 p99 0.038 max 0.142; pairs > 0.5: 0; top [('it/them', 0.14), ('it/shape', 0.13), ('shape/shapes', 0.08), ('do/does', 0.06), ('as/what', 0.06)]
+  A_out: pairs 3499, final cos mean 0.012 p99 0.134 max 0.276; pairs > 0.5: 0; top [("the/what's", 0.28), ('any/show', 0.25), ('me/the', 0.25), ('any/me', 0.24), ('can/reached', 0.23)]
+  L_in: pairs 3499, final cos mean 0.000 p99 0.039 max 0.092; pairs > 0.5: 0; top [('it/shape', 0.09), ('directly/labeled', 0.07), ('it/shapes', 0.06), ('both/directly', 0.06), ('labeled/reached', 0.06)]
+  L_out: pairs 3421, final cos mean 0.014 p99 0.122 max 0.223; pairs > 0.5: 0; top [('last/the', 0.22), ('the/whole', 0.21), ('are/the', 0.2), ('do/we', 0.2), ('do/have', 0.19)]
+functional profile snr >= 3: out_role 34 in_role 5 in_presence 82 of 87
+m2 writes nothing: ['diagram', 'now', 'this', 'those']
+m2 clusters 0.9: [['at', 'do', 'for', 'have', 'not', 'once', 'we'], ['be', 'can', 'reached'], ['any', 'you'], ['as', 'tell'], ['called', 'named'], ['does', 'the'], ['every', 'new'], ['from', 'then']]
+m2 clusters 0.75: [['are', 'as', 'at', 'box', 'do', 'exist', 'for', 'front', 'give', 'have', 'no', 'not', 'on', 'once', 'tell', 'that', 'there', 'we'], ['back', 'be', 'both', 'can', 'reached', 'remove', 'too', 'with'], ['does', 'every', 'new', 'the'], ['just', 'me', 'what', "what's"], ['any', 'evenly', 'you'], ['goes', 'place', 'put'], ['it', 'shape', 'shapes'], ['called', 'named'], ['check', 'directly'], ['from', 'then'], ['of', 'uh'], ['one', 'who'], ['rules', 'whole']]
+m2 top components: {'a': ['out:size', 'pres:shape', 'pres:object'], 'an': ['pres:target', 'pres:source', 'pres:landmark'], 'and': ['out:members', 'pres:members', 'pres:targets'], 'any': ['out:pred', 'pres:object', 'out:object'], 'are': ['pres:object', 'pres:landmark', 'out:color'], 'arrow': ['pres:target', 'pres:source', 'out:text'], 'arrows': ['pres:members', 'pres:pairing', 'pres:target'], 'as': ['pres:object', 'pres:color', 'pres:style'], 'at': ['pres:object', 'pres:region', 'pres:text'], 'axis': ['pres:axis', 'pres:members', 'pres:object'], 'back': ['pres:target', 'pres:source', 'pres:style'], 'be': ['pres:source', 'pres:target', 'pres:color'], 'both': ['pres:source', 'pres:color', 'pres:members'], 'box': ['pres:object', 'out:color', 'pres:relation'], 'by': ['out:amount', 'pres:amount', 'pres:object'], 'called': ['out:name', 'pres:name', 'pres:object'], 'can': ['pres:source', 'pres:target', 'out:target'], 'check': ['pres:object', 'pres:comparison', 'pres:landmark'], 'directly': ['pres:landmark', 'pres:object', 'pres:target'], 'do': ['pres:object', 'pres:shape', 'pres:layout'], 'does': ['out:object', 'pres:object', 'pres:landmark'], 'each': ['pres:pairing', 'pres:edge', 'pres:targets'], 'evenly': ['out:pred', 'pres:axis', 'pres:members'], 'every': ['pres:object', 'out:object', 'pres:color'], 'exist': ['pres:object', 'pres:shape', 'pres:landmark'], 'for': ['pres:object', 'pres:shape', 'pres:target'], 'four': ['pres:pairing', 'pres:layout', 'pres:notcolor'], 'from': ['out:source', 'pres:source', 'pres:target'], 'front': ['pres:object', 'pres:color', 'pres:region'], 'give': ['pres:object', 'pres:text', 'out:object'], 'goes': ['pres:object', 'pres:region', 'pres:relation'], 'has': ['out:pred', 'pres:superlative', 'out:target'], 'have': ['pres:object', 'pres:region', 'pres:edge'], 'here': ['pres:superlative', 'pres:object', 'pres:landmark2'], 'i': ['pres:source', 'pres:landmark', 'pres:object'], 'if': ['pres:object', 'out:object', 'pres:relation'], 'in': ['pres:members', 'pres:pairing', 'pres:object'], 'it': ['pres:object', 'in:object', 'in:landmark'], 'just': ['out:pred', 'pres:object', 'pres:target'], 'labeled': ['out:text', 'pres:text', 'pres:size'], 'last': ['pres:object', 'pres:size', 'pres:region'], 'line': ['in:edge', 'pres:edge', 'pres:style'], 'lines': ['pres:style', 'pres:targets', 'pres:source'], 'link': ['out:members', 'pres:members', 'pres:source'], 'map': ['pres:region', 'pres:landmark', 'pres:object'], 'me': ['pres:object', 'out:pred', 'out:object'], 'named': ['out:name', 'pres:name', 'pres:object'], 'new': ['out:object', 'pres:object', 'pres:color'], 'no': ['pres:object', 'pres:arrow', 'pres:style'], 'not': ['pres:object', 'pres:edge', 'pres:direction'], 'of': ['pres:landmark', 'pres:object', 'pres:relation'], 'on': ['pres:object', 'pres:axis', 'pres:region'], 'once': ['pres:object', 'pres:pairing', 'pres:source'], 'one': ['pres:superlative', 'pres:pairing', 'pres:name'], 'pixels': ['pres:amount', 'out:direction', 'pres:direction'], 'place': ['pres:region', 'pres:object', 'pres:name'], 'put': ['pres:object', 'pres:region', 'out:object'], 'reached': ['pres:source', 'pres:target', 'pres:object'], 'remove': ['pres:source', 'pres:target', 'pres:object'], 'rules': ['pres:object', 'pres:color', 'pres:arrow'], 'shape': ['in:object', 'pres:object', 'pres:superlative'], 'shapes': ['in:object', 'pres:object', 'pres:source'], 'should': ['pres:object', 'pres:color', 'pres:targets'], 'show': ['pres:object', 'pres:landmark2', 'pres:superlative'], 'tell': ['pres:object', 'pres:superlative', 'pres:source'], 'that': ['pres:object', 'pres:arrow', 'pres:shape'], 'the': ['out:object', 'pres:object', 'out:landmark'], 'them': ['in:members', 'pres:members', 'in:targets'], 'then': ['out:source', 'pres:source', 'pres:target'], 'there': ['pres:object', 'pres:relation', 'pres:color'], 'thing': ['pres:object', 'pres:superlative', 'pres:color'], 'three': ['pres:axis', 'pres:source', 'pres:object'], 'to': ['out:target', 'pres:source', 'pres:members'], 'too': ['pres:target', 'pres:source', 'pres:amount'], 'two': ['pres:landmark', 'pres:object', 'pres:relation'], 'uh': ['pres:landmark', 'pres:relation', 'pres:object'], 'we': ['pres:object', 'pres:landmark2', 'pres:relation'], 'what': ['pres:object', 'out:pred', 'pres:landmark'], "what's": ['pres:object', 'out:pred', 'pres:superlative'], 'who': ['pres:superlative', 'pres:object', 'pres:comparison'], 'whole': ['pres:object', 'pres:color', 'pres:shape'], 'with': ['pres:target', 'pres:source', 'pres:style'], 'you': ['out:pred', 'out:arrow', 'out:region']}
+ib K* 36 clusters: [['as', 'at', 'exist', 'for', 'front', 'have', 'not', 'we'], ['an', 'by', 'each', 'no', 'too', 'uh'], ['any', 'has', 'just', 'me', "what's", 'you'], ['diagram', 'here', 'map', 'now', 'thing'], ['be', 'can', 'reached', 'remove'], ['box', 'i', 'shapes', 'there'], ['check', 'give', 'place', 'put'], ['does', 'every', 'if', 'new'], ['four', 'those', 'three', 'two'], ['last', 'rules', 'this', 'whole'], ['show', 'tell', 'what', 'who'], ['are', 'do', 'that'], ['arrow', 'arrows'], ['axis', 'pixels'], ['back', 'both'], ['called', 'named'], ['directly', 'once'], ['evenly', 'on'], ['goes', 'should'], ['link', 'then']] singletons ['UNK', 'a', 'and', 'from', 'in', 'it', 'labeled', 'line', 'lines', 'of', 'one', 'shape', 'the', 'them', 'to', 'with']
+ARI m2(0.75) vs ib K*: 0.268 m2 vs significance-merge m3: 0.032
+m2 cosine of pairs inside ib clusters: mean 0.588 (n 108) vs all pairs 0.179
+pairs in one ib cluster with m2 cosine >= 0.75: [('an', 'too'), ('any', 'just'), ('any', 'you'), ('are', 'do'), ('as', 'at'), ('as', 'exist'), ('as', 'for'), ('as', 'front'), ('as', 'have'), ('as', 'not'), ('as', 'we'), ('at', 'exist'), ('at', 'for'), ('at', 'front'), ('at', 'have'), ('at', 'not'), ('at', 'we'), ('be', 'can'), ('be', 'reached'), ('be', 'remove'), ('box', 'there'), ('called', 'named'), ('can', 'reached'), ('can', 'remove'), ('do', 'that'), ('does', 'every'), ('does', 'new'), ('every', 'new'), ('exist', 'for'), ('exist', 'front'), ('exist', 'have'), ('exist', 'not'), ('exist', 'we'), ('for', 'front'), ('for', 'have'), ('for', 'not'), ('for', 'we'), ('front', 'have'), ('front', 'not'), ('front', 'we'), ('has', 'you'), ('have', 'not'), ('have', 'we'), ('just', 'me'), ('just', "what's"), ('me', "what's"), ('not', 'we'), ('place', 'put'), ('reached', 'remove'), ('rules', 'whole'), ('tell', 'what')]
+
+| map | own kinds left | K | dense route book MB | reached rows (sparse MB) | fit right->wrong | fit wrong->right | fit net | dev right->wrong | dev wrong->right | dev net | dev right after |
+| current | 87 | 106 | 34.7 | 4641 (4.8) | 0 | 0 | 0 | 0 | 0 | 0 | 693 |
+| drop_sign | 16 | 35 | 3.8 | 1346 (1.4) | 106 | 3 | -103 | 29 | 6 | -23 | 670 |
+| drop_all | 0 | 19 | 1.1 | 452 (0.5) | 1386 | 15 | -1371 | 361 | 7 | -354 | 339 |
+| drop_net<1 | 46 | 65 | 13.1 | 2805 (2.9) | 12 | 2 | -10 | 6 | 0 | -6 | 687 |
+| drop_net<2 | 26 | 45 | 6.3 | 1753 (1.8) | 42 | 2 | -40 | 13 | 2 | -11 | 682 |
+| drop_net<3 | 21 | 40 | 5.0 | 1589 (1.6) | 60 | 2 | -58 | 16 | 2 | -14 | 679 |
+| drop_net<5 | 16 | 35 | 3.8 | 1346 (1.4) | 106 | 3 | -103 | 29 | 6 | -23 | 670 |
+| drop_net<10 | 11 | 30 | 2.8 | 1156 (1.2) | 144 | 3 | -141 | 33 | 7 | -26 | 667 |
+| drop_net<20 | 9 | 28 | 2.5 | 1031 (1.1) | 180 | 3 | -177 | 43 | 7 | -36 | 657 |
+| drop_net<40 | 4 | 23 | 1.7 | 744 (0.8) | 431 | 3 | -428 | 106 | 5 | -101 | 592 |
+| ib | 35 | 54 | 9.1 | 3100 (3.2) | 61 | 2 | -59 | 17 | 0 | -17 | 676 |
+| sign_ib | 40 | 59 | 10.8 | 3227 (3.3) | 22 | 2 | -20 | 8 | 0 | -8 | 685 |
+| ib_min2 | 36 | 55 | 9.4 | 3731 (3.8) | 65 | 6 | -59 | 13 | 2 | -11 | 682 |
+| m2_09 | 69 | 88 | 24.0 | 4018 (4.1) | 36 | 0 | -36 | 5 | 0 | -5 | 688 |
+| rule | 40 | 59 | 10.8 | 3889 (4.0) | 26 | 6 | -20 | 5 | 2 | -3 | 690 |
+| drop_sign_detail | 16 | 35 | 3.8 | 1346 (1.4) | 106 | 3 | -103 | 29 | 6 | -23 | 670 |
+| the_detail | 86 | 105 | 34.1 | 4337 (4.4) | 209 | 4 | -205 | 71 | 4 | -67 | 626 |
+rule as trained (kinds_fix.json): K 60, dense 11.2 MB, reached rows 3915 (sparse 4.0 MB); words with a non-legend kind 231; catalog words that had no kind and get one: 143
+
+######## data2 (data2_p80_s0)
+baseline {'fit': {'requests': 10215, 'right': 6271}, 'dev': {'requests': 2568, 'right': 1516}}
+| rank | word | fit tokens | fit right->wrong | fit wrong->right | fit net | dev tokens | dev right->wrong | dev wrong->right | dev net | sign test p (fit) |
+| 1 | the | 4096 | 372 | 20 | 352 | 1108 | 118 | 7 | 111 | 1.93e-85 * |
+| 2 | to | 2122 | 355 | 28 | 327 | 515 | 81 | 8 | 73 | 1.4e-73 * |
+| 3 | a | 1815 | 246 | 14 | 232 | 455 | 66 | 6 | 60 | 2.96e-56 * |
+| 4 | of | 365 | 76 | 2 | 74 | 84 | 20 | 0 | 20 | 1.02e-20 * |
+| 5 | named | 135 | 73 | 0 | 73 | 27 | 20 | 0 | 20 | 1.06e-22 * |
+| 6 | called | 180 | 69 | 0 | 69 | 45 | 19 | 0 | 19 | 1.69e-21 * |
+| 7 | it | 444 | 78 | 14 | 64 | 115 | 26 | 2 | 24 | 3.08e-12 * |
+| 8 | shapes | 114 | 54 | 0 | 54 | 36 | 17 | 0 | 17 | 5.55e-17 * |
+| 9 | and | 1536 | 64 | 24 | 40 | 376 | 14 | 5 | 9 | 1.19e-05 * |
+| 10 | from | 356 | 34 | 0 | 34 | 88 | 14 | 0 | 14 | 5.82e-11 * |
+| 11 | once | 38 | 27 | 0 | 27 | 9 | 5 | 0 | 5 | 7.45e-09 * |
+| 12 | labeled | 147 | 25 | 0 | 25 | 36 | 6 | 0 | 6 | 2.98e-08 * |
+| 13 | does | 162 | 24 | 0 | 24 | 33 | 8 | 0 | 8 | 5.96e-08 * |
+| 14 | old | 41 | 23 | 0 | 23 | 7 | 4 | 0 | 4 | 1.19e-07 * |
+| 15 | shape | 311 | 22 | 0 | 22 | 83 | 6 | 0 | 6 | 2.38e-07 * |
+| 16 | as | 78 | 14 | 1 | 13 | 21 | 6 | 0 | 6 | 0.000488 * |
+| 17 | with | 396 | 19 | 6 | 13 | 101 | 4 | 0 | 4 | 0.00732 * |
+| 18 | are | 430 | 10 | 0 | 10 | 107 | 5 | 0 | 5 | 0.000977 * |
+| 19 | directly | 26 | 8 | 0 | 8 | 6 | 2 | 0 | 2 | 0.00391 * |
+| 20 | i | 94 | 8 | 0 | 8 | 24 | 1 | 0 | 1 | 0.00391 * |
+| 21 | no | 99 | 9 | 1 | 8 | 25 | 0 | 2 | -2 | 0.0107 * |
+| 22 | pixels | 57 | 7 | 0 | 7 | 21 | 6 | 1 | 5 | 0.00781 * |
+| 23 | lines | 104 | 7 | 0 | 7 | 31 | 0 | 0 | 0 | 0.00781 * |
+| 24 | on | 134 | 6 | 0 | 6 | 43 | 3 | 0 | 3 | 0.0156 * |
+| 25 | one | 193 | 7 | 1 | 6 | 65 | 1 | 1 | 0 | 0.0352 * |
+| 26 | into | 51 | 6 | 0 | 6 | 8 | 0 | 0 | 0 | 0.0156 * |
+| 27 | wait | 40 | 6 | 0 | 6 | 5 | 0 | 0 | 0 | 0.0156 * |
+| 28 | about | 10 | 5 | 0 | 5 | 5 | 2 | 0 | 2 | 0.0312 * |
+| 29 | rules | 82 | 5 | 0 | 5 | 22 | 1 | 0 | 1 | 0.0312 * |
+| 30 | arrows | 82 | 5 | 0 | 5 | 15 | 0 | 0 | 0 | 0.0312 * |
+| ... |
+| 138 | i'd | 11 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| 139 | stack | 11 | 0 | 0 | 0 | 5 | 0 | 0 | 0 | 1 |
+| 140 | bit | 10 | 0 | 0 | 0 | 6 | 0 | 0 | 0 | 1 |
+| 141 | him | 10 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| 142 | same | 10 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| 143 | way | 10 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| 144 | around | 9 | 0 | 0 | 0 | 6 | 0 | 0 | 0 | 1 |
+| 145 | but | 9 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| 146 | change | 9 | 0 | 0 | 0 | 8 | 0 | 0 | 0 | 1 |
+| 147 | linked | 9 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| 148 | please | 9 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 149 | these | 9 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 150 | connection | 8 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 |
+| 151 | defaults | 8 | 0 | 0 | 0 | 2 | 0 | 0 | 0 | 1 |
+| 152 | far | 8 | 0 | 0 | 0 | 4 | 0 | 0 | 0 | 1 |
+| 153 | hall | 8 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| 154 | hmm | 8 | 0 | 0 | 0 | 4 | 0 | 0 | 0 | 1 |
+| 155 | list | 8 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| 156 | long | 8 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 157 | loop | 8 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 158 | page | 8 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| 159 | sheet | 8 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| 160 | stop | 8 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 1 |
+| 161 | have | 142 | 0 | 0 | 0 | 27 | 0 | 1 | -1 | 1 |
+| 162 | back | 48 | 0 | 1 | -1 | 9 | 0 | 0 | 0 | 1 |
+| 163 | along | 19 | 0 | 1 | -1 | 3 | 0 | 0 | 0 | 1 |
+| 164 | axis | 18 | 0 | 1 | -1 | 3 | 0 | 0 | 0 | 1 |
+| 165 | things | 14 | 0 | 1 | -1 | 2 | 0 | 0 | 0 | 1 |
+| 166 | then | 59 | 1 | 2 | -1 | 18 | 0 | 1 | -1 | 0.875 |
+| 167 | that | 169 | 1 | 4 | -3 | 34 | 0 | 1 | -1 | 0.969 |
+spearman fit net vs dev net SignificanceResult(statistic=np.float64(0.5214516183833462), pvalue=np.float64(4.998025826834124e-13))
+spearman fit net vs fit tokens SignificanceResult(statistic=np.float64(0.505329506841413), pvalue=np.float64(3.2912371202344743e-12))
+net <= 0 on fit: 82 of 167 ; total fit flips of all single ablations rw 1781 wr 132
+  fit tokens 8-15: 59 words, sign-test kept 1, net>0 18, mean net 0.5
+  fit tokens 16-31: 36 words, sign-test kept 1, net>0 16, mean net 0.8
+  fit tokens 32-63: 33 words, sign-test kept 5, net>0 19, mean net 2.8
+  fit tokens 64-127: 14 words, sign-test kept 7, net>0 12, mean net 8.1
+  fit tokens 128-1000000000: 25 words, sign-test kept 16, net>0 20, mean net 55.3
+dev net of the sign-test words: 423 (each: 24 of 30 positive); of the others: 8
+
+raw rows: null sd 0.0216
+  path: pairs 13861, final cos mean 0.004 p99 0.080 max 0.385; pairs > 0.5: 0; top [('one/shape', 0.39), ('park/put', 0.38), ('does/the', 0.35), ("the/what's", 0.28), ('called/named', 0.28)]
+  bg0: pairs 1275, final cos mean 0.003 p99 0.060 max 0.093; pairs > 0.5: 0; top [("the/what's", 0.09), ('it/shapes', 0.08), ('it/stack', 0.08), ("what/what's", 0.08), ('does/the', 0.07)]
+  bg_in: pairs 8359, final cos mean 0.001 p99 0.051 max 0.206; pairs > 0.5: 0; top [('it/shape', 0.21), ('everything/it', 0.18), ('everything/shape', 0.18), ('shape/shapes', 0.14), ('arrow/line', 0.13)]
+  bg_out: pairs 8187, final cos mean 0.040 p99 0.441 max 0.941; pairs > 0.5: 52; top [('called/named', 0.94), ('does/the', 0.86), ('put/the', 0.76), ('of/the', 0.76), ('and/feeds', 0.75)]
+  A_in: pairs 13340, final cos mean 0.000 p99 0.045 max 0.213; pairs > 0.5: 0; top [('are/there', 0.21), ('are/it', 0.2), ('are/does', 0.17), ('are/rules', 0.17), ('are/come', 0.15)]
+  A_out: pairs 12372, final cos mean 0.014 p99 0.171 max 0.442; pairs > 0.5: 0; top [('are/me', 0.44), ('its/me', 0.42), ('me/the', 0.42), ('check/its', 0.41), ("me/what's", 0.4)]
+  L_in: pairs 12372, final cos mean 0.000 p99 0.034 max 0.085; pairs > 0.5: 0; top [('everything/shape', 0.08), ('it/shape', 0.08), ('active/come', 0.07), ('shape/shapes', 0.06), ('default/four', 0.06)]
+  L_out: pairs 13340, final cos mean 0.030 p99 0.303 max 0.679; pairs > 0.5: 17; top [('last/my', 0.68), ('my/rules', 0.61), ('connections/my', 0.6), ('my/whole', 0.6), ('are/my', 0.59)]
+functional profile snr >= 3: out_role 62 in_role 8 in_presence 154 of 167
+m2 writes nothing: ['active', 'again', 'anywhere', 'colour', 'defaults', 'my', 'old', 'set', 'that', 'this', 'total', 'undid']
+m2 clusters 0.9: [['come', 'do', 'for', 'have', 'not', 'once', 'show', 'tell', 'we'], ['an', 'back', 'still'], ['canvas', 'corner', 'page'], ['does', 'how', 'throw'], ['its', 'others', 'you'], ['park', 'place', 'put'], ['along', 'axis'], ['arrow', 'loop'], ['bit', 'little'], ['called', 'named'], ['diagram', 'whole'], ['everything', 'shape'], ['from', 'then'], ["i'd", 'like'], ['labeled', 'labelled'], ['new', 'the'], ['remove', 'zap'], ['stop', 'who'], ['too', 'well']]
+m2 clusters 0.75: [['axe', 'box', 'check', 'come', 'do', 'exist', 'for', 'front', 'give', 'have', "i'd", 'like', 'me', 'no', 'not', 'on', 'once', 'out', 'plan', 'sheet', 'show', 'tell', 'there', 'wait', 'we'], ['an', 'back', 'remove', 'still', 'too', 'well', 'zap'], ['any', 'anything', 'has', 'its', 'others', "what's", 'you'], ['does', 'every', 'how', 'new', 'now', 'the', 'throw'], ['also', 'arrow', 'can', 'loop'], ['canvas', 'corner', 'map', 'page'], ['everything', 'it', 'shape', 'shapes'], ['node', 'one', 'stop', 'who'], ['along', 'axis', 'evenly'], ['park', 'place', 'put'], ['and', 'feeds'], ['are', 'be'], ['arrows', 'order'], ['bit', 'little'], ['both', 'please'], ['called', 'named'], ['default', 'earlier'], ['diagram', 'whole'], ['directly', 'linked'], ['far', 'pixels'], ['from', 'then'], ['goes', 'side'], ['hall', 'her'], ['hmm', 'i'], ['into', 'to'], ['just', 'sits'], ['labeled', 'labelled'], ['leads', 'same'], ['list', 'what'], ['mean', 'two'], ['step', 'thing']]
+m2 top components: {'a': ['out:size', 'pres:shape', 'pres:object'], 'about': ['pres:amount', 'pres:direction', 'pres:color'], 'along': ['pres:axis', 'pres:members', 'pres:pairing'], 'also': ['pres:target', 'pres:source', 'out:pred'], 'an': ['pres:target', 'pres:source', 'pres:color'], 'and': ['out:members', 'pres:members', 'pres:targets'], 'another': ['pres:pairing', 'pres:landmark', 'pres:members'], 'any': ['out:pred', 'pres:object', 'out:object'], 'anything': ['out:pred', 'pres:object', 'pres:relation'], 'are': ['pres:object', 'out:color', 'out:object'], 'around': ['out:members', 'pres:object', 'pres:pairing'], 'arrow': ['pres:source', 'pres:target', 'in:edge'], 'arrows': ['pres:members', 'pres:pairing', 'pres:object'], 'as': ['pres:object', 'out:text', 'pres:text'], 'at': ['pres:object', 'pres:region', 'pres:source'], 'axe': ['pres:object', 'pres:target', 'pres:source'], 'axis': ['pres:axis', 'pres:members', 'pres:object'], 'back': ['pres:target', 'pres:source', 'pres:style'], 'be': ['pres:object', 'out:pred', 'pres:color'], 'bit': ['pres:shape', 'pres:object', 'pres:size'], 'board': ['pres:object', 'pres:layout', 'pres:landmark'], 'both': ['pres:target', 'pres:source', 'pres:members'], 'box': ['pres:object', 'out:pred', 'pres:name'], 'but': ['pres:landmark', 'pres:style', 'pres:target'], 'by': ['out:amount', 'pres:amount', 'pres:object'], 'called': ['out:name', 'pres:name', 'pres:object'], 'can': ['pres:source', 'pres:target', 'out:target'], 'canvas': ['pres:region', 'pres:object', 'pres:relation'], 'change': ['pres:shape', 'pres:color', 'pres:object'], 'check': ['pres:object', 'pres:comparison', 'pres:landmark'], 'come': ['pres:object', 'pres:source', 'pres:layout'], 'connection': ['pres:target', 'pres:source', 'pres:edge'], 'connections': ['pres:object', 'pres:landmark2', 'pres:color'], 'corner': ['pres:region', 'pres:object', 'pres:relation'], 'could': ['pres:object', 'pres:landmark', 'pres:quantity'], 'default': ['pres:object', 'pres:shape', 'pres:quantity'], 'diagram': ['pres:object', 'pres:landmark', 'pres:layout'], 'directly': ['pres:landmark', 'pres:object', 'pres:style'], 'do': ['pres:object', 'pres:landmark', 'pres:depth'], 'does': ['out:object', 'pres:object', 'pres:landmark'], 'each': ['pres:source', 'pres:targets', 'pres:object'], 'earlier': ['pres:object', 'pres:amount', 'pres:color'], 'evenly': ['pres:axis', 'out:pred', 'pres:members'], 'every': ['pres:object', 'out:object', 'pres:color'], 'everything': ['pres:object', 'in:object', 'pres:landmark'], 'exist': ['pres:object', 'pres:shape', 'pres:landmark'], 'far': ['pres:object', 'pres:amount', 'pres:members'], 'feeds': ['out:members', 'pres:members', 'pres:layout'], 'first': ['out:object', 'pres:relation', 'pres:text'], 'flow': ['pres:target', 'pres:object', 'pres:members'], 'for': ['pres:object', 'pres:color', 'pres:targets'], 'four': ['pres:pairing', 'pres:layout', 'pres:object'], 'from': ['out:source', 'pres:source', 'pres:target'], 'front': ['pres:object', 'pres:region', 'pres:color'], 'give': ['pres:object', 'pres:text', 'out:object'], 'go': ['pres:members', 'pres:layout', 'out:pred'], 'goes': ['pres:object', 'pres:members', 'pres:region'], 'hall': ['out:color', 'pres:color', 'pres:object'], 'has': ['out:pred', 'pres:superlative', 'pres:object'], 'have': ['pres:object', 'pres:region', 'pres:edge'], 'her': ['out:color', 'pres:color', 'pres:object'], 'here': ['pres:object', 'pres:superlative', 'pres:landmark'], 'him': ['pres:color', 'pres:direction', 'pres:amount'], 'hmm': ['pres:object', 'pres:source', 'pres:landmark'], 'how': ['out:object', 'pres:object', 'pres:pairing'], 'i': ['pres:object', 'pres:color', 'pres:source'], "i'd": ['pres:object', 'pres:size', 'pres:region'], 'if': ['pres:object', 'out:object', 'pres:target'], 'in': ['pres:pairing', 'pres:members', 'pres:object'], 'into': ['out:target', 'out:members', 'pres:members'], 'it': ['pres:object', 'in:object', 'out:size'], 'its': ['out:pred', 'out:target', 'out:comparison'], 'just': ['out:pred', 'pres:object', 'out:relation'], 'labeled': ['out:text', 'pres:text', 'pres:size'], 'labelled': ['out:text', 'pres:text', 'pres:landmark'], 'last': ['pres:object', 'pres:landmark', 'pres:size'], 'leads': ['pres:members', 'pres:layout', 'pres:target'], 'like': ['pres:object', 'pres:region', 'pres:size'], 'line': ['in:edge', 'pres:edge', 'pres:style'], 'lines': ['pres:style', 'pres:targets', 'pres:arrow'], 'link': ['out:members', 'pres:pairing', 'pres:source'], 'linked': ['pres:object', 'pres:landmark', 'pres:source'], 'links': ['pres:targets', 'pres:source', 'pres:object'], 'list': ['pres:source', 'pres:object', 'pres:target'], 'little': ['pres:object', 'pres:shape', 'pres:color'], 'long': ['pres:shape', 'out:color', 'pres:object'], 'loop': ['pres:source', 'pres:target', 'pres:object'], 'map': ['pres:region', 'pres:landmark', 'pres:object'], 'me': ['pres:object', 'out:pred', 'out:object'], 'mean': ['pres:object', 'pres:relation', 'pres:landmark'], 'more': ['pres:object', 'pres:target', 'pres:landmark'], 'named': ['out:name', 'pres:name', 'pres:object'], 'new': ['out:object', 'pres:object', 'pres:color'], 'no': ['pres:object', 'pres:color', 'pres:arrow'], 'node': ['pres:superlative', 'pres:style', 'pres:object'], 'not': ['pres:object', 'pres:source', 'pres:pairing'], 'now': ['out:object', 'pres:object', 'pres:superlative'], 'of': ['out:object', 'pres:object', 'pres:landmark'], 'on': ['pres:object', 'pres:region', 'pres:axis'], 'once': ['pres:object', 'pres:members', 'pres:target'], 'one': ['pres:superlative', 'pres:landmark', 'pres:pairing'], 'ones': ['out:color', 'pres:color', 'pres:size'], 'order': ['pres:pairing', 'pres:members', 'pres:style'], 'other': ['pres:pairing', 'pres:members', 'pres:object'], 'others': ['out:pred', 'pres:object', 'pres:relation'], 'out': ['pres:object', 'pres:axis', 'pres:source'], 'page': ['pres:region', 'pres:object', 'pres:landmark'], 'park': ['pres:region', 'pres:object', 'out:object'], 'pixels': ['pres:amount', 'pres:object', 'pres:direction'], 'place': ['pres:object', 'pres:region', 'out:object'], 'plan': ['pres:object', 'pres:relation', 'pres:region'], 'please': ['pres:target', 'pres:source', 'pres:members'], 'put': ['pres:object', 'out:object', 'pres:region'], 'remove': ['pres:source', 'pres:object', 'pres:target'], 'rules': ['pres:object', 'in:source', 'pres:color'], 'same': ['pres:members', 'pres:size', 'pres:object'], 'shape': ['in:object', 'pres:object', 'pres:superlative'], 'shapes': ['pres:object', 'in:object', 'pres:source'], 'sheet': ['pres:object', 'pres:region', 'pres:target'], 'should': ['pres:object', 'out:pred', 'pres:targets'], 'show': ['pres:object', 'pres:landmark2', 'pres:layout'], 'side': ['pres:members', 'pres:object', 'pres:layout'], 'sits': ['out:pred', 'out:relation', 'pres:object'], 'so': ['out:pred', 'pres:target', 'pres:members'], 'stack': ['pres:layout', 'out:members', 'pres:members'], 'step': ['pres:superlative', 'pres:object', 'pres:depth'], 'still': ['pres:target', 'pres:source', 'pres:object'], 'stop': ['pres:superlative', 'pres:landmark', 'pres:object'], 'tell': ['pres:object', 'pres:landmark', 'pres:text'], 'the': ['out:object', 'pres:object', 'pres:landmark'], 'them': ['in:members', 'pres:members', 'in:source'], 'then': ['out:source', 'pres:source', 'out:members'], 'there': ['pres:object', 'pres:relation', 'pres:color'], 'these': ['pres:pairing', 'pres:landmark', 'pres:superlative'], 'thing': ['pres:object', 'pres:superlative', 'pres:color'], 'things': ['pres:object', 'pres:relation', 'pres:source'], 'those': ['pres:target', 'pres:style', 'pres:members'], 'three': ['pres:axis', 'pres:object', 'pres:layout'], 'throw': ['pres:object', 'out:object', 'pres:landmark'], 'to': ['out:target', 'pres:source', 'pres:target'], 'too': ['pres:target', 'pres:source', 'pres:object'], 'two': ['pres:relation', 'pres:landmark', 'pres:object'], 'uh': ['pres:object', 'pres:size', 'pres:landmark'], 'wait': ['pres:object', 'pres:color', 'pres:layout'], 'want': ['pres:object', 'pres:color', 'out:members'], 'way': ['pres:color', 'pres:shape', 'pres:object'], 'we': ['pres:object', 'pres:color', 'pres:pairing'], 'well': ['pres:target', 'pres:source', 'pres:color'], 'what': ['pres:source', 'pres:object', 'out:pred'], "what's": ['out:pred', 'pres:object', 'pres:superlative'], 'who': ['pres:superlative', 'pres:object', 'pres:landmark'], 'whole': ['pres:object', 'pres:layout', 'pres:landmark'], 'with': ['pres:target', 'pres:source', 'pres:style'], 'you': ['out:pred', 'pres:object', 'pres:target'], 'zap': ['pres:target', 'pres:object', 'pres:source']}
+ib K* 72 clusters: [['about', 'change', 'colour', 'far', 'for', 'more', 'ones', 'way'], ['board', 'diagram', 'map', 'plan', 'step', 'this', 'total', 'undid'], ['again', 'connections', 'him', 'my', 'that', 'things'], ['check', 'give', 'place', 'show', 'stack', 'tell'], ['any', 'anything', 'its', 'others', 'you'], ['box', 'exist', 'front', 'not', 'we'], ['but', 'loop', 'please', 'too', 'well'], ['default', 'defaults', 'earlier', 'rules', 'set'], ['active', 'last', 'old', 'whole'], ['anywhere', 'do', 'her', 'two'], ['axe', 'connection', 'remove', 'zap'], ['axis', 'canvas', 'corner', 'page'], ['bit', 'have', 'little', 'sheet'], ['every', 'if', 'list', 'new'], ['has', 'node', 'stop', "what's"], ['how', "i'd", 'like', 'want'], ['also', 'so', 'still'], ['another', 'arrows', 'order'], ['around', 'linked', 'other'], ['be', 'hall', 'should'], ['both', 'flow', 'go'], ['by', 'same', 'side'], ['first', 'links', 'out'], ['four', 'these', 'those'], ['here', 'now', 'thing'], ['hmm', 'long', 'mean'], ['no', 'uh', 'wait'], ['park', 'put', 'throw'], ['along', 'evenly'], ['called', 'named'], ['come', 'does'], ['could', 'who'], ['feeds', 'leads'], ['just', 'sits'], ['labeled', 'labelled'], ['link', 'then']] singletons ['UNK', 'a', 'an', 'and', 'are', 'arrow', 'as', 'at', 'back', 'can', 'directly', 'each', 'everything', 'from', 'goes', 'i', 'in', 'into', 'it', 'line', 'lines', 'me', 'of', 'on', 'once', 'one', 'pixels', 'shape', 'shapes', 'the', 'them', 'there', 'three', 'to', 'what', 'with']
+ARI m2(0.75) vs ib K*: 0.133 m2 vs significance-merge m3: 0.033
+m2 cosine of pairs inside ib clusters: mean 0.507 (n 166) vs all pairs 0.158
+pairs in one ib cluster with m2 cosine >= 0.75: [('along', 'evenly'), ('also', 'still'), ('any', 'anything'), ('any', 'its'), ('any', 'others'), ('any', 'you'), ('anything', 'its'), ('anything', 'others'), ('anything', 'you'), ('arrows', 'order'), ('axe', 'remove'), ('axe', 'zap'), ('bit', 'little'), ('box', 'front'), ('box', 'not'), ('box', 'we'), ('called', 'named'), ('canvas', 'corner'), ('canvas', 'page'), ('check', 'show'), ('check', 'tell'), ('corner', 'page'), ('default', 'earlier'), ('every', 'new'), ('exist', 'front'), ('exist', 'not'), ('exist', 'we'), ('front', 'not'), ('front', 'we'), ('give', 'show'), ('give', 'tell'), ('has', "what's"), ('have', 'little'), ('have', 'sheet'), ("i'd", 'like'), ("i'd", 'want'), ('its', 'others'), ('its', 'you'), ('just', 'sits'), ('labeled', 'labelled'), ('no', 'wait'), ('node', 'stop'), ('not', 'we'), ('others', 'you'), ('park', 'put'), ('park', 'throw'), ('put', 'throw'), ('remove', 'zap'), ('show', 'tell'), ('too', 'well')]
+
+| map | own kinds left | K | dense route book MB | reached rows (sparse MB) | fit right->wrong | fit wrong->right | fit net | dev right->wrong | dev wrong->right | dev net | dev right after |
+| current | 167 | 186 | 106.7 | 11769 (12.1) | 0 | 0 | 0 | 0 | 0 | 0 | 1516 |
+| drop_sign | 30 | 49 | 7.5 | 2767 (2.8) | 210 | 17 | -193 | 46 | 10 | -36 | 1480 |
+| drop_all | 0 | 19 | 1.1 | 568 (0.6) | 2801 | 47 | -2754 | 705 | 18 | -687 | 829 |
+| drop_net<1 | 85 | 104 | 33.4 | 6442 (6.6) | 38 | 9 | -29 | 11 | 3 | -8 | 1508 |
+| drop_net<2 | 59 | 78 | 18.9 | 4834 (5.0) | 75 | 9 | -66 | 21 | 3 | -18 | 1498 |
+| drop_net<3 | 42 | 61 | 11.6 | 3541 (3.6) | 133 | 12 | -121 | 38 | 6 | -32 | 1484 |
+| drop_net<5 | 32 | 51 | 8.1 | 2974 (3.0) | 189 | 16 | -173 | 44 | 7 | -37 | 1479 |
+| drop_net<10 | 18 | 37 | 4.3 | 1852 (1.9) | 313 | 18 | -295 | 68 | 11 | -57 | 1459 |
+| drop_net<20 | 15 | 34 | 3.6 | 1582 (1.6) | 395 | 20 | -375 | 87 | 8 | -79 | 1437 |
+| drop_net<40 | 9 | 28 | 2.5 | 1281 (1.3) | 593 | 19 | -574 | 130 | 8 | -122 | 1394 |
+| ib | 71 | 90 | 25.1 | 8202 (8.4) | 134 | 7 | -127 | 27 | 1 | -26 | 1490 |
+| sign_ib | 80 | 99 | 30.3 | 8735 (8.9) | 40 | 5 | -35 | 10 | 1 | -9 | 1507 |
+| ib_min2 | 73 | 92 | 26.2 | 9491 (9.7) | 156 | 13 | -143 | 33 | 4 | -29 | 1487 |
+| m2_09 | 124 | 143 | 63.1 | 9689 (9.9) | 154 | 5 | -149 | 32 | 2 | -30 | 1486 |
+| rule | 87 | 106 | 34.7 | 10383 (10.6) | 39 | 16 | -23 | 13 | 4 | -9 | 1508 |
+| drop_sign_detail | 30 | 49 | 7.5 | 2767 (2.8) | 210 | 17 | -193 | 47 | 10 | -37 | 1480 |
+rule as trained (kinds_data2.json): K 110, dense 37.4 MB, reached rows 10627 (sparse 10.9 MB); words with a non-legend kind 422; catalog words that had no kind and get one: 253
+
+words own kind in both models: 86 spearman of fit net (fix on old fit vs data2 on all fit): SignificanceResult(statistic=np.float64(0.7310383892838934), pvalue=np.float64(1.3370437700377352e-15))
+sign-test words: fix only [] data2 only ['about', 'are', 'arrows', 'as', 'does', 'into', 'lines', 'no', 'old', 'on', 'once', 'one', 'rules', 'wait'] both 16
