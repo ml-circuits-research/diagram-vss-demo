@@ -236,12 +236,14 @@ class Reader:
         if self.legend.reader["predicate_role"]: tops.append(self.best(Sn * K * np.conj(self.st.op("pred")), self.verb_cands())[2])
         return float(np.mean(tops)) if tops else 0.0
 
-    def read_set_role(self, Sn, key, r, core, presence):
+    def read_set_role(self, Sn, key, r, core, presence, filt=None):
         """a SET role (legend reader.set_roles, e.g. WikiSQL's conditions): every candidate of the sentence's table is a member when its ratio
         (cosine after unbinding the role / the structure score) reaches the member threshold set on calibration rows (thresholds.set_member,
         by the calibration rule); the margin = the gap between the weakest member and the strongest non-member (cosine); the presence margin =
         the smallest |ratio - threshold| over the candidates"""
-        ws, M = self.role_cands(r); out = {"margins": {}}
+        # filt: the sentence's words (the sentence-candidates decoder), as for every other role and as docs/js/vss/reader.js readSetRole
+        # (2026-10-31, found by the centre parity test: the set role read the whole catalog here, the sentence's words in the browser)
+        ws, M = self.role_cands(r, filt); out = {"margins": {}}
         if not ws: out.update(presence=0.0, present=False); return out
         sc = np.real(M.conj() @ (Sn * key)); ratio = sc / core if core > 1e-9 else sc * 0
         thr = self.th.get("set_member", {}).get(r)
@@ -264,7 +266,7 @@ class Reader:
 
     def read_role(self, Sn, K, r, core, filt=None, presence="decided"):
         key = K * np.conj(self.st.role(r))
-        if r in self.set_roles: return self.read_set_role(Sn, key, r, core, presence)
+        if r in self.set_roles: return self.read_set_role(Sn, key, r, core, presence, filt)
         if r in self.closed or r in self.table_roles:
             w, mg, top = self.best(Sn * key, self.role_cands(r, filt)); out = {"margins": {}, "presence": top / core if core > 1e-9 else 0.0, "present": w is not None}
             if w is not None: out["filler"] = ["word", w]; out["margins"][r] = mg
