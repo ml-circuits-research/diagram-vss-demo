@@ -34,6 +34,25 @@ export class VSS {
              undecided: undecidedOf(wires[0]), presenceQueries: presenceQueriesOf(wires[0]), offers: offersOf(wires[0]),
              timings: { chart_ms: info.ms_chart, total_ms: performance.now() - t0 } };
   }
+  /** a whole message (normalized tokens, or their text) with a centre model (legend reader.centres) -> {tokens, centres, ignored}:
+   *  centres in text order, each {pos, token, null, accepted, members (token indices), and when accepted: text, sop, wires, frame, status,
+   *  residual, unplaced}; ignored = the token spans [a, b) no accepted centre took (its reading ok / abstain) */
+  readMessage(tokens, opts = {}) {
+    if (!this.reader.centres) throw new Error("vss.js: readMessage needs a centre model (legend reader.centres)");
+    const m = this.reader.readMessage(tokens, opts.sentence ?? 0, idgen("w", opts.start || 1), opts);
+    const dir = opts.directives || [["world", this.model.world || "?"], ["legend", this.model.legend_sha256]];
+    const centres = m.centres.map((c) => {
+      const o = { pos: c.pos, token: c.token, null: c.null, accepted: c.accepted, members: c.members };
+      if (c.accepted) {
+        const { wires, frame, decoded, info } = c.result;
+        Object.assign(o, { text: c.text, sop: write(dir, wires), wires, shape: frame.shape, status: info.status, residual: info.residual, margins: decoded.margins || {},
+          frame: { speakers: decoded.speakers, neg: decoded.neg, event: decoded.event, roles: decoded.roles, shape: frame.shape, lemma: decoded.lemma ?? null },
+          unplaced: info.unplaced.map((i) => info.tokens[i]), tokens: info.tokens });
+      }
+      return o;
+    });
+    return { tokens: m.tokens, centres, ignored: m.ignored };
+  }
 }
 
 /** the adjacency rule's queries of the top wire (`_undecided.<role>=a|b`, addendum q-formalisation 10) -> { role: [a, b] } */

@@ -74,6 +74,7 @@ export class Reader {
     if (this.tableRoles.size || rr.value_identity === "bundle_alnum")
       throw new Error("vss.js: table roles and bundle_alnum value identities (the WikiSQL world) are not ported");   // set roles: ported here (diagram-vss-demo)
     this.sentenceCandidates = !!opts.sentenceCandidates; this.sentTokens = []; this._cands = new Map(); this.sqrtD = Math.sqrt(this.D); this.filt = null;
+    this.centres = !!rr.centres;          // the centre reader (legend reader.centres, chosen by the world): readMessage
   }
   // ---------------- words
   wordEntry(tok) { return this.words.get(tok) || this.words.get(tok.toLowerCase()) || null; }
@@ -523,12 +524,12 @@ export class Reader {
     if (req.some((r) => f.roles[r] === undefined || f.roles[r] === null || Reader.headOf(f.roles[r]) === null || Reader.headOf(f.roles[r]) === undefined)) return true;
     return (f.speakers || []).some((sp) => sp === null || sp === undefined);
   }
-  residualExplained(S, tokens, kept, placed) {
+  residualExplained(S, tokens, kept, placed, addrOf = null) {
     if (!kept.length) return 1.0;
     const ex = [];
     kept.forEach((i, j) => { const k = this.kind(tokens[i]), t = tokens[i]; if ((!this.contentKinds.has(k) && k !== "unknown") || placed.has(t) || placed.has(this.lemma(t))) ex.push(j); });
     if (!ex.length) return 1.0;
-    const [, cidx] = this.encode(tokens), addr = this.rb.addresses(cidx), D = this.D, rec = cz(D);
+    const addr = addrOf ? addrOf() : this.rb.addresses(this.encode(tokens)[1]), D = this.D, rec = cz(D);
     for (const j of ex) {
       const F = this.st.id(this.ident(tokens[kept[j]])); if (!F) continue; const a = addr[j];
       for (let d = 0; d < D; d++) { rec.re[d] += a.re[d] * F.re[d] - a.im[d] * F.im[d]; rec.im[d] += a.re[d] * F.im[d] + a.im[d] * F.re[d]; }
@@ -562,7 +563,60 @@ export class Reader {
   }
   /** one sentence -> {wires, frame, info} (infer.Reader.formalize) */
   formalize(text, sentence, ids, opts = {}) {
-    const t0 = performance.now(), tokens = tokenize(text), [S, kept, unknown] = this.chart(tokens), t1 = performance.now();
+    const t0 = performance.now(), tokens = tokenize(text);
+    if (this.centres) {          // a centre model reads one text as a message: the first accepted centre whose reading is ok / abstain (infer.py)
+      const m = this.readMessage(tokens, sentence, ids, opts);
+      for (const c of m.centres) if (c.accepted && (c.info.status === "ok" || c.info.status === "abstain")) return c.result;
+      for (const c of m.centres) if (c.accepted) return c.result;
+      return this.formalizeState(text, sentence, ids, opts, tokens, cz(this.D), [], [], () => [], t0, performance.now());
+    }
+    const [S, kept, unknown] = this.chart(tokens), t1 = performance.now();
+    return this.formalizeState(text, sentence, ids, opts, tokens, S, kept, unknown, null, t0, t1);
+  }
+  // ---------------- the centre reader (legend reader.centres; infer.Reader.centre_chart / centre_members / read_message)
+  centreChart(tokens) {
+    const [kept, cidx, unknown] = this.encode(tokens), R = this.rb.centreAddresses(cidx), D = this.D, S = R.centres.map(() => cz(D));
+    const madd = (x, a, F) => { for (let d = 0; d < D; d++) { x.re[d] += a.re[d] * F.re[d] - a.im[d] * F.im[d]; x.im[d] += a.re[d] * F.im[d] + a.im[d] * F.re[d]; } };
+    kept.forEach((i, j) => {
+      const F = this.st.id(this.ident(tokens[i])); if (!F) return;
+      if (R.ci[j] >= 0) { madd(S[R.ci[j]], R.aC[R.ci[j]], F); return; }
+      if (R.lc[j] >= 0) madd(S[R.lc[j]], R.aL[j], F);
+      if (R.rc[j] >= 0) madd(S[R.rc[j]], R.aR[j], F);
+    });
+    return [kept, unknown, R, S];
+  }
+  centreMembers(R, k, attach = 0.5) {
+    const out = [R.centres[k]];
+    for (let j = 0; j < R.lc.length; j++) if ((R.lc[j] === k && R.wL[j] >= attach) || (R.rc[j] === k && R.wR[j] >= attach)) out.push(j);
+    return out.sort((a, b) => a - b);
+  }
+  /** a whole message (normalized tokens or a text) -> {tokens, centres: [{pos, token, null, accepted, members, text, result}], ignored: [[a, b)]} */
+  readMessage(tokensIn, sentence = 0, ids = null, opts = {}) {
+    const tokens = typeof tokensIn === "string" ? tokenize(tokensIn) : tokensIn;
+    ids = ids || (function* () { let i = 1; for (;;) yield `w${i++}`; })();
+    const [kept, unknown, R, S] = this.centreChart(tokens), unk = new Set(unknown), out = [], taken = new Set();
+    R.centres.forEach((p, k) => {
+      const mem = this.centreMembers(R, k), toks = mem.map((j) => tokens[kept[j]]);
+      const rec = { pos: kept[p], token: tokens[kept[p]], null: R.nul[p], accepted: R.nul[p] < 0.5, members: mem.map((j) => kept[j]) };
+      if (rec.accepted) {
+        const addr = mem.map((j) => (j === p ? R.aC[k] : R.lc[j] === k ? R.aL[j] : R.aR[j])), t0 = performance.now();
+        rec.text = toks.join(" ");
+        rec.result = this.formalizeState(rec.text, sentence, ids, opts, toks, S[k], mem.map((_, n) => n), mem.map((j, n) => [j, n]).filter(([j]) => unk.has(kept[j])).map(([, n]) => n), () => addr, t0, t0);
+        rec.info = rec.result.info;
+        if (rec.info.status === "ok" || rec.info.status === "abstain") for (const i of rec.members) taken.add(i);
+      }
+      out.push(rec);
+    });
+    const ignored = [], P = new Set([".", ",", "!", "?", ";", ":"]); let a = null;
+    for (let i = 0; i <= tokens.length; i++) {
+      if (i < tokens.length && !taken.has(i)) { if (a === null) a = i; continue; }
+      if (a !== null) { let b = i; while (a < b && P.has(tokens[a])) a++; while (b > a && P.has(tokens[b - 1])) b--; if (a < b) ignored.push([a, b]); a = null; }
+    }
+    return { tokens, centres: out, ignored };
+  }
+  /** the decoder and the bookkeeping of formalize() on a given state (infer.Reader.formalize_state); addrOf() -> the addresses of the kept
+   *  tokens (null: recomputed from the tokens by the route book, the one-request reader) */
+  formalizeState(text, sentence, ids, opts, tokens, S, kept, unknown, addrOf, t0, t1) {
     const estimator = opts.estimator || this.cfg.depth_estimator || "gates", presence = opts.presence || this.cfg.presence_readout || "decided";
     this.filt = this.cfg.candidates === "sentence" ? new Set(tokens.concat(tokens.map((t) => t.toLowerCase()))) : null;   // the sentence-candidates decoder (R46)
     let f;
@@ -574,7 +628,7 @@ export class Reader {
         const placed0 = this.placedWords(f);
         const ex = []; kept.forEach((i, j) => { if (placed0.has(tokens[i]) || placed0.has(this.lemma(tokens[i]))) ex.push(j); });
         if (ex.length && ex.length < kept.length) {
-          const [, cidx] = this.encode(tokens), addr = this.rb.addresses(cidx), D = this.D, S2 = { re: Float64Array.from(S.re), im: Float64Array.from(S.im) };
+          const addr = addrOf ? addrOf() : this.rb.addresses(this.encode(tokens)[1]), D = this.D, S2 = { re: Float64Array.from(S.re), im: Float64Array.from(S.im) };
           for (const j of ex) {
             const F = this.st.id(this.ident(tokens[kept[j]])); if (!F) continue; const a = addr[j];
             for (let d = 0; d < D; d++) { S2.re[d] -= a.re[d] * F.re[d] - a.im[d] * F.im[d]; S2.im[d] -= a.re[d] * F.im[d] + a.im[d] * F.re[d]; }
@@ -637,7 +691,7 @@ export class Reader {
     const si = top.lines.findIndex((l) => l.key === "_sentence");
     top.lines.splice(si >= 0 ? si + 1 : 0, 0, line("_world", this.cfg.world || "?"));
     const mode = this.cfg.residual || "compiled";                      // "compiled" (the paper's) | "explained" (R41)
-    const res = f.shape === "ok" ? (mode === "explained" ? (this.frameIncomplete(f) ? 1.0 : this.residualExplained(S, tokens, kept, placed)) : this.residual(S, wires, tokens)) : 1.0;
+    const res = f.shape === "ok" ? (mode === "explained" ? (this.frameIncomplete(f) ? 1.0 : this.residualExplained(S, tokens, kept, placed, addrOf)) : this.residual(S, wires, tokens)) : 1.0;
     top.set("_residual", fmt(res));
     if (unplaced.length) top.set("_unplaced", unplaced.map((i) => tokens[i]).join(","));
     for (const [r, [a, b]] of Object.entries(undecided)) top.set(`_undecided.${r}`, `${a}|${b}`);

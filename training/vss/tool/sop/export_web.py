@@ -21,8 +21,8 @@ import argparse, hashlib, json, os, sys
 import numpy as np
 
 MAGIC = b"VSSBIN1\n"
-PHASE_ARRAYS = ("path", "bg0", "bg", "A", "L", "rel", "pos", "pc", "vo")
-FLOAT_ARRAYS = ("logits", "rel_mask", "taker_mask", "verb_mask", "cue_mask")
+PHASE_ARRAYS = ("path", "bg0", "bg", "A", "L", "rel", "pos", "pc", "vo", "cthR", "cthL", "cthC", "cbgL", "cbgR")
+FLOAT_ARRAYS = ("logits", "rel_mask", "taker_mask", "verb_mask", "cue_mask", "cA", "cDist", "cbeta", "cN")   # c*: the centre reader
 DECODER_OPS = ("pred", "says.scope", "says.speaker", "not", "attr", "det", "wide", "q", "quantity", "must", "may", "if.condition",
                "if.consequence", "and.next")
 
@@ -100,7 +100,9 @@ def export(model_dir, out_dir, bits=8):
         v = getattr(rb, name, None)
         if v is None: continue
         blobs.append(({"name": name, "kind": "float", "bits": 32, "shape": list(v.shape)}, np.asarray(v, dtype="<f4").tobytes()))
-    write_bin(os.path.join(out_dir, "routebook.bin"), {"cats": rb.cats, "codes": rb.codes, "pos_max": rb.pos_max, "vo_nmax": rb.vo_nmax, "D": rb.D, "bits": bits}, blobs)
+    hdr = {"cats": rb.cats, "codes": rb.codes, "pos_max": rb.pos_max, "vo_nmax": rb.vo_nmax, "D": rb.D, "bits": bits}
+    if rb.centre_kinds is not None: hdr["centre_kinds"] = rb.centre_kinds          # the centre reader (legend reader.centres)
+    write_bin(os.path.join(out_dir, "routebook.bin"), hdr, blobs)
     # ---- stars.bin
     stars = star_keys(rd); keys = sorted(stars); M = np.stack([np.angle(stars[k]) for k in keys])
     write_bin(os.path.join(out_dir, "stars.bin"), {"keys": keys, "D": rd.D, "bits": bits},

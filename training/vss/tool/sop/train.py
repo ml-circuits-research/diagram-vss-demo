@@ -429,8 +429,13 @@ def train_one(a, legend, rows, splits, schema, seed, model_dir, run_dir):
             k = legend.kind(t); n_tok += 1
             if k is None: n_unk += 1; k = UNKNOWN_KIND                       # spec 6.3: no kind in the lexicon -> kind `unknown`
             wk.setdefault(t, k)
+    centres = bool(legend.reader.get("centres")); msgs = getattr(a, "messages", None) or []
+    for mm in msgs:                                                          # the centre reader trains on whole messages: their words too
+        for t in mm["tokens"]: wk.setdefault(t, legend.kind(t) or UNKNOWN_KIND)
     wk.setdefault("<unknown>", UNKNOWN_KIND)                                 # the category exists in every route book (unseen words at inference)
     shim = Shim(wk); kinds_report = {"tokens": n_tok, "unknown_kind_tokens": n_unk, "unknown_share": n_unk / max(1, n_tok)}
+    if centres:
+        return train_centres(a, legend, rows, msgs, splits, schema, seed, model_dir, run_dir, st, comp, wk, shim, kinds_report)
     train = [r for r in rows if r.get("split") == "train" and r["frame"]["shape"] != "unknown"]
     order = []
     rng = np.random.default_rng(seed)
@@ -505,6 +510,144 @@ def train_one(a, legend, rows, splits, schema, seed, model_dir, run_dir):
             worst = max(worst, float(np.linalg.norm(St - Sn) / np.linalg.norm(St)))
     print(f"[export] numpy reader vs torch states: max relative difference {worst:.2e} (float32 phases in the route book)", flush=True)
     assert worst < 1e-3, "numpy inference does not reproduce the trained model"
+    rd, calrep = calibrate_and_finish(a, legend, rows, schema, seed, model_dir, run_dir, cfg, train, rd)
+    gates = {c: float(g) for c, g in zip(m.cats, torch.sigmoid(m.logits).detach().cpu().numpy())}
+    return rd, {"t_train_s": round(t_train, 1), "calibration": calrep, "gates": gates, "numpy_torch_diff": worst, "kinds": kinds_report}
+
+
+def load_messages(world_dir):
+    """examples/messages.jsonl (training/sketch/msg_to_world.py, CENTRES=1): one line per WHOLE message, the training row of the centre
+    reader: {id, split (train | calib), tokens (normalized message), requests: [{row (the row id of its wire), tokens [a, b) (its span),
+    centre (the token position of its action token, or null when the front end found none in the span)}]}"""
+    p = os.path.join(world_dir, "examples", "messages.jsonl")
+    return [json.loads(l) for l in open(p) if l.strip()] if os.path.exists(p) else []
+
+
+def message_splits(msgs, rows, seed):
+    """the centre reader is trained, calibrated and reported per MESSAGE: a message of examples/calib.sop goes to the calibration half or
+    the reported half by a hash of its id (the row-level halving would split one message across both); its rows follow it"""
+    by = {r["id"]: r for r in rows}
+    for m in msgs:
+        s = "train" if m["split"] == "train" else ("calibration_heldout_formulations" if h01(seed, "calform", m["id"]) < 0.5 else "heldout_formulations")
+        m["_split"] = s
+        for q in m["requests"]:
+            if q["row"] in by: by[q["row"]]["split"] = s
+    out = collections.defaultdict(list)
+    for r in rows: out[r["split"]].append(r["id"])
+    return out
+
+
+def message_example(m, legend, wk, shim, centre_kinds, cat_id):
+    """a message -> the centre model's input: kinds, vocabulary ids, centre flags, the request of each centre, the request of each token"""
+    kind = lambda t: wk.get(t) or wk.get(t.lower()) or legend.kind(t) or UNKNOWN_KIND
+    toks = m["tokens"]; k = [cat_id[kind(t)] if kind(t) in cat_id else cat_id[UNKNOWN_KIND] for t in toks]
+    isc = [kind(t) in centre_kinds for t in toks]; cent = [i for i in range(len(toks)) if isc[i]]
+    label = [-1] * len(toks); creq = {}
+    for j, q in enumerate(m["requests"]):
+        for i in range(q["tokens"][0], q["tokens"][1]):
+            if label[i] < 0: label[i] = j
+        if q.get("centre") is not None and isc[q["centre"]]: creq[q["centre"]] = j
+    ids = [shim.idx[t] if t in shim.idx else shim.idx["<unknown>"] for t in toks]
+    return {"k": k, "ids": ids, "isc": isc, "req": [creq.get(p, -1) for p in cent], "label": label}
+
+
+def train_centres(a, legend, rows, msgs, splits, schema, seed, model_dir, run_dir, st, comp, wk, shim, kinds_report):
+    """the centre reader (legend reader.centres): one training row = one WHOLE message with one target per annotated request (the
+    compiled state of its wire, the same frames as today, aligned to the request's centre = its action token), the words outside every
+    span attached to no centre, and the spans as the attachment target (experiment/centres.py; research/attention/port/NOTES.md).
+    Batches: messages in shuffled order, a batch closed when it holds >= --batch matched centres (about as many states per step as the
+    one-request rows had). Then the same export, calibration (each calibration row read from the state of its centre) and reports."""
+    import torch
+    import trainer, centres as CM
+    from .infer import Reader
+    torch.manual_seed(seed)
+    by = {r["id"]: r for r in rows}
+    cats = sorted(set(wk.values())); cat_id = {c: i for i, c in enumerate(cats)}
+    verbs = set(legend.all_verbs())
+    centre_kinds = sorted({k for w, k in wk.items() if w in verbs or legend.lemma_of(w) in verbs})
+    tr = [m for m in msgs if m.get("_split") == "train"]
+    ex = [message_example(m, legend, wk, shim, set(centre_kinds), cat_id) for m in tr]
+    tgt = []
+    for m in tr:
+        tgt.append([comp.wire(by[q["row"]]["wire"], by[q["row"]]["by"], by[q["row"]]["tokens"]) if q["row"] in by else None for q in m["requests"]])
+    for e, m, T in zip(ex, tr, tgt):        # a centre matched to a request whose row was not built (dropped by msg_to_world) trains as no request
+        e["req"] = [r if r >= 0 and T[r] is not None else -1 for r in e["req"]]
+    nreq = sum(len(m["requests"]) for m in tr); nmat = sum(sum(1 for r in e["req"] if r >= 0) for e in ex); ncent = sum(len(e["req"]) for e in ex)
+    print(f"[train] seed {seed}: CENTRE reader: {len(tr)} training messages, {nreq} annotated requests, {ncent} centres ({nmat} matched to a request, "
+          f"{ncent - nmat} not a request); centre kinds {centre_kinds}; kinds {len(cats)}; vocab {len(shim.vocab)}; D={a.D}", flush=True)
+    ident = (lambda w: legend.lemma_of(w)) if legend.reader.get("identity") == "lemma" else (lambda w: w)
+    F = np.array([st.id(ident(w)) for w in shim.vocab])
+    m = CM.CentreModel(cats, centre_kinds, F, a.D, np.random.default_rng(200 + seed))
+    opt = torch.optim.Adam(m.parameters(), lr=a.lr, betas=(0.9, 0.999), eps=1e-8)
+    rng = np.random.default_rng(seed); t0 = time.time(); step = 0; last = {}
+    print(f"[train seed {seed}] start: {trainer.mem_line()}", flush=True)
+    for ep in range(a.epochs):
+        order = list(rng.permutation(len(tr))) if (ep > 0 or a.shuffle) else list(range(len(tr)))
+        i = 0
+        while i < len(order):
+            chunk, nm = [], 0
+            while i < len(order) and (nm < a.batch or not chunk):
+                chunk.append(order[i]); nm += sum(1 for r in ex[order[i]]["req"] if r >= 0); i += 1
+            b, pairs = CM.batch([ex[j] for j in chunk], len(cats))
+            T = torch.tensor(np.array([tgt[chunk[mi]][r] for mi, r in pairs]), dtype=CM.CDT) if pairs else torch.zeros(0, a.D, dtype=CM.CDT)
+            loss, terms = m.loss(b, T)
+            assert torch.isfinite(loss), f"non-finite loss at step {step}"
+            opt.zero_grad(set_to_none=True); loss.backward(); opt.step(); step += 1
+            last = {k: round(float(v.item()), 3) for k, v in terms.items()}
+            del loss, terms, b, T
+            if step % a.log_every == 0 or step == 1:
+                print(f"[train seed {seed}] epoch {ep} step {step} messages {i}/{len(order)} loss terms {last} ({time.time() - t0:.0f}s) | {trainer.mem_line()}", flush=True)
+    t_train = time.time() - t0
+    print(f"[train seed {seed}] end: {step} steps, last loss terms {last} | {trainer.mem_line()} ({t_train:.0f}s)", flush=True)
+    os.makedirs(model_dir, exist_ok=True)
+    np.savez_compressed(os.path.join(model_dir, "routebook.npz"), **m.export())
+    shutil.copyfile(legend.path, os.path.join(model_dir, "legend.json"))
+    lexf = legend.raw.get("kinds", {}).get("lexicon", "kinds.tsv")
+    if os.path.exists(os.path.join(legend.dir, lexf)): shutil.copyfile(os.path.join(legend.dir, lexf), os.path.join(model_dir, os.path.basename(lexf)))
+    catalog = {"seed": seed, "star_seed": a.star_seed, "star_version": getattr(a, "star_version", 1),
+               "words": {w: ({"kind": k, "lemma": legend.lemma[w]} if w in legend.lemma else {"kind": k}) for w, k in sorted(wk.items())},
+               "schema": schema, "kinds_report": kinds_report, "identity_table": None}
+    with open(os.path.join(model_dir, "catalog.json"), "w") as f: json.dump(catalog, f, indent=1, sort_keys=True)
+    cfg = {"world": a.world_name, "D": a.D, "seed": seed, "star_version": getattr(a, "star_version", 1), "language": a.language, "legend_sha256": legend.sha, "legend_version": legend.version,
+           "training_code_commit": a.commit, "trained": datetime.datetime.now().isoformat(timespec="seconds"), "codes": ["centres"],
+           "reader_kind": "centres (one state per centre; experiment/centres.py)", "centre_kinds": centre_kinds, "attach_threshold": 0.5, "null_threshold": 0.5,
+           "depth_estimator": a.depth_estimator, "presence_readout": "decided", "batch": a.batch, "batch_unit": "matched centres (>= batch per step)",
+           "lr": a.lr, "epochs": a.epochs, "n_train_steps": step, "n_train_messages": len(tr),
+           "decoder": getattr(a, "decoder", "contract"), **activate.DECODERS[getattr(a, "decoder", "contract")], "activation": None,
+           "thresholds": {"tau": a.tau, "tau_source": "stated (the repository's v16 value), not fitted on any rows", "no_sense_share": 0.5,
+                          "no_sense_source": "stated", "no_fit_residual": 0.9, "no_fit_source": "stated (dispatcher only, spec section 9)",
+                          "presence": {}, "attr_presence": {}, "det_presence": {}, "scope_term": None, "set_member": {}}}
+    with open(os.path.join(model_dir, "config.json"), "w") as f: json.dump(cfg, f, indent=1)
+    rd = Reader(model_dir); worst = 0.0
+    with torch.no_grad():                   # numpy (inference) vs torch (training) agreement on three messages
+        for e, mm in [(e, mm) for e, mm in zip(ex, tr) if any(e["isc"])][:3]:
+            b, _ = CM.batch([e], len(cats)); St = m.states(b)[0].numpy(); _, _, _, Sn = rd.centre_chart(mm["tokens"])
+            worst = max(worst, float(np.linalg.norm(St - Sn) / np.linalg.norm(Sn)))
+    print(f"[export] numpy reader vs torch centre states: max relative difference {worst:.2e}", flush=True)
+    assert worst < 1e-3, "numpy inference does not reproduce the trained centre model"
+    # each row is read for calibration from the state of the centre matched to it in its message (the members by the learned attachment)
+    row_msg = {q["row"]: (mm, q) for mm in msgs for q in mm["requests"] if q.get("centre") is not None}
+    cache = {}
+    def chart_of(row):
+        if row["id"] not in row_msg: return None
+        mm, q = row_msg[row["id"]]
+        if mm["id"] not in cache: cache[mm["id"]] = rd.centre_chart(mm["tokens"])
+        kept, _, R, S = cache[mm["id"]]
+        k = next((j for j, p in enumerate(R["centres"]) if kept[p] == q["centre"]), None)
+        if k is None: return None
+        return S[k], [mm["tokens"][kept[j]] for j in rd.centre_members(R, k)]
+    train_rows = [r for r in rows if r.get("split") == "train" and r["frame"]["shape"] != "unknown"]
+    rd, calrep = calibrate_and_finish(a, legend, rows, schema, seed, model_dir, run_dir, cfg, train_rows, rd, chart_of)
+    return rd, {"t_train_s": round(t_train, 1), "calibration": calrep, "gates": {}, "numpy_torch_diff": worst, "kinds": kinds_report,
+                "centres": {"messages": len(tr), "requests": nreq, "centres": ncent, "matched": nmat, "steps": step}}
+
+
+def calibrate_and_finish(a, legend, rows, schema, seed, model_dir, run_dir, cfg, train, rd, chart_of=None):
+    """the presence thresholds set on calibration rows (rule 25), config.json rewritten with them, background.npz; -> (reader, calibration report).
+    chart_of(row) -> (state, tokens) the row is read with, or None to leave the row out (default: the chart of the row's own tokens; the
+    centre reader passes the state of the centre matched to the row in its message)"""
+    from .infer import Reader
+    chart_of = chart_of or (lambda row: (rd.chart(row["tokens"])[0], row["tokens"]))
     # calibration rows (rule 25): a sample of the TRAINING split, never the scored rows
     pos = [r for r in train if not r.get("negative")]      # calibration rows: never a negative example
     cal_rows = [pos[i] for i in sorted(np.random.default_rng(1234 + seed).choice(len(pos), min(a.n_cal, len(pos)), replace=False))]
@@ -514,11 +657,13 @@ def train_one(a, legend, rows, splits, schema, seed, model_dir, run_dir):
         for row in crow:
             g = row["frame"]
             if g["shape"] != "ok": continue
-            S, kept, _, _ = rd.chart(row["tokens"])
-            f = rd.read(S, row["tokens"], force=(len(g["speakers"]), g["neg"]), table=row.get("table"))
+            cs = chart_of(row)
+            if cs is None: continue
+            S, toks = cs
+            f = rd.read(S, toks, force=(len(g["speakers"]), g["neg"]), table=row.get("table"))
             # diagram-vss-demo patch: attribute / determiner ratios read with every role read (presence 'all'), so that a role whose
             # training rate is under 0.5 (landmark, source, target) still gets its ratios measured on the rows that fill it
-            fa = rd.read(S, row["tokens"], force=(len(g["speakers"]), g["neg"]), table=row.get("table"), presence="all")
+            fa = rd.read(S, toks, force=(len(g["speakers"]), g["neg"]), table=row.get("table"), presence="all")
             st_ = legend.reader.get("scope_terms") or {}
             for r in legend.reader.get("set_roles") or []:      # set members: the gold members vs the other candidates of the table
                 mr = f["presence"].get(r + ".members") or {}; gold = set(world.filler_heads(g["roles"].get(r)))
@@ -578,8 +723,7 @@ def train_one(a, legend, rows, splits, schema, seed, model_dir, run_dir):
     pres = {k: np.array(v["present"] + v["absent"]) for (kk, r), v in stats.items() for k in [f"{kk}:{r}"]}
     np.savez(os.path.join(model_dir, "background.npz"), residual=np.array(resid), residual_mean=np.mean(resid) if resid else 1.0,
              residual_std=np.std(resid) if resid else 0.0, **{f"presence_{k}": v for k, v in pres.items()})
-    gates = {c: float(g) for c, g in zip(m.cats, torch.sigmoid(m.logits).detach().cpu().numpy())}
-    return rd, {"t_train_s": round(t_train, 1), "calibration": calrep, "gates": gates, "numpy_torch_diff": worst, "kinds": kinds_report}
+    return rd, calrep
 
 
 def store_presence_ratios(rd, rows, cal_rows, schema, seed, run_dir):
@@ -840,6 +984,12 @@ def main(argv=None):
         splits = collections.defaultdict(list)
         for r in rows: splits[r["split"]].append(r["id"])
         defs["reused_from"] = a.splits
+    a.messages = None
+    if legend.reader.get("centres"):         # the centre reader: whole messages (examples/messages.jsonl), split per message
+        a.messages = load_messages(wd)
+        if not a.messages: print("legend reader.centres is set but examples/messages.jsonl is missing or empty"); status("FAILED", reason="no messages"); return 1
+        splits = message_splits(a.messages, rows, a.seed)
+        defs["centres"] = "split per message: examples/calib.sop messages halved by hash (seed, 'calform', message id); rows follow their message"
     texts = collections.defaultdict(list)
     for r in rows: texts[r["split"]].append(r["text"])
     with open(os.path.join(a.run_dir, "splits.json"), "w") as f: json.dump({"definitions": defs, "rows": splits, "texts": texts}, f, indent=1)

@@ -14,11 +14,70 @@ export class Routebook {
     this.rel = g("rel"); this.relMask = g("rel_mask"); this.takerMask = g("taker_mask"); this.pos = g("pos"); this.pc = g("pc");
     this.vo = g("vo"); this.verbMask = g("verb_mask"); this.cueMask = g("cue_mask"); this.voNmax = header.vo_nmax === undefined || header.vo_nmax === null ? null : header.vo_nmax;
     this.C = this.cats.length;
+    // the centre reader (legend reader.centres; infer.Routebook.centre_addresses): phases cthR, cthL, cthC, cbgL, cbgR; floats cA, cDist, cbeta, cN
+    this.centreKinds = header.centre_kinds || null;
+    for (const n of ["cthR", "cthL", "cthC", "cbgL", "cbgR", "cA", "cDist", "cbeta", "cN"]) this[n] = g(n);
     // cos / sin tables of the arrays used only through exp(i phase) (Float32Array: half the memory, error ~1e-7, far below the 1e-4 parity bound)
     const tab = (x) => { if (!x) return null; const n = x.data.length, c = new Float32Array(n), s = new Float32Array(n); for (let i = 0; i < n; i++) { c[i] = Math.cos(x.data[i]); s[i] = Math.sin(x.data[i]); } return { c, s }; };
     this.tBg0 = tab(this.bg0); this.tBg = tab(this.bg); this.tA = tab(this.A); this.tL = tab(this.L); this.tRel = tab(this.rel);
   }
   has(code) { return this.codes.includes(code); }
+  /** the centre reader's structure and addresses of a message (the twin of infer.Routebook.centre_addresses, same formulas, same order of
+   *  operations, float64 cos / sin): c = kind indices -> {centres, ci, lc, rc, nul, wL, wR, wS, aL, aR, aC}; linear in the tokens */
+  centreAddresses(c) {
+    const T = c.length, D = this.D, K = this.C, erow = new Map();
+    this.centreKinds.forEach((k, e) => { if (this.catId.has(k)) erow.set(this.catId.get(k), e); });
+    const isc = c.map((x) => erow.has(x)), centres = [], ci = new Int32Array(T).fill(-1);
+    for (let t = 0; t < T; t++) if (isc[t]) { ci[t] = centres.length; centres.push(t); }
+    const lc = new Int32Array(T).fill(-1), rc = new Int32Array(T).fill(-1);
+    let last = -1; for (let t = 0; t < T; t++) { if (isc[t]) last = ci[t]; else lc[t] = last; }
+    let nxt = -1; for (let t = T - 1; t >= 0; t--) { if (isc[t]) nxt = ci[t]; else rc[t] = nxt; }
+    const kp = (t) => (t >= 1 ? c[t - 1] : K), kn = (t) => (t + 1 < T ? c[t + 1] : K + 1), kp2 = (t) => (t >= 2 ? c[t - 2] : K), kn2 = (t) => (t + 2 < T ? c[t + 2] : K + 1);
+    const N = this.cN.data, W = K + 2, A = this.cA.data, Di = this.cDist.data, B = this.cbeta.data;
+    const nul = new Float64Array(T), keep = new Float64Array(T);
+    for (let t = 0; t < T; t++) { nul[t] = sigmoid(N[c[t]] + N[W + kp(t)] + N[2 * W + kn(t)] + N[3 * W + kp2(t)] + N[4 * W + kn2(t)]); keep[t] = 1 - nul[t]; }
+    const QR = new Float64Array(T + 1), QL = new Float64Array(T + 1);
+    for (let t = 0; t < T; t++) { QR[t + 1] = QR[t] + B[K + c[t]]; QL[t + 1] = QL[t] + B[c[t]]; }
+    const a3 = (i, j, s) => A[(i * K + j) * 3 + s];
+    const wL = new Float64Array(T), wR = new Float64Array(T);
+    for (let t = 0; t < T; t++) {
+      if (lc[t] >= 0) { const p = centres[lc[t]]; wL[t] = sigmoid(a3(c[t], c[p], 1) + Di[16 + Math.min(t - p, 15)] + (QR[t] - QR[p + 1])) * keep[t]; }
+      if (rc[t] >= 0) { const p = centres[rc[t]]; wR[t] = sigmoid(a3(c[t], c[p], 0) + Di[Math.min(p - t, 15)] + (QL[p] - QL[t + 1])) * keep[t]; }
+    }
+    const wS = centres.map((p) => sigmoid(a3(c[p], c[p], 2) + Di[32]) * keep[p]);
+    const bL = this.cbgL.data, bR = this.cbgR.data, bg = [];
+    for (let t = 0; t < T; t++) {
+      const re = new Float64Array(D), im = new Float64Array(D), o1 = (kp(t) * K + c[t]) * D, o2 = (c[t] * W + kn(t)) * D;
+      for (let d = 0; d < D; d++) { re[d] = Math.cos(bL[o1 + d]) + Math.cos(bR[o2 + d]); im[d] = Math.sin(bL[o1 + d]) + Math.sin(bR[o2 + d]); }
+      bg.push({ re, im });
+    }
+    const PR = new Map(), PL = new Map(), tR = this.cthR.data, tL = this.cthL.data;
+    for (const e of [...new Set(centres.map((p) => erow.get(c[p])))].sort((x, y) => x - y)) {
+      const R = new Float64Array((T + 1) * D), L = new Float64Array((T + 1) * D);
+      for (let t = 0; t < T; t++) { const o = (e * K + c[t]) * D; for (let d = 0; d < D; d++) { R[(t + 1) * D + d] = R[t * D + d] + tR[o + d]; L[(t + 1) * D + d] = L[t * D + d] + tL[o + d]; } }
+      PR.set(e, R); PL.set(e, L);
+    }
+    const zero = () => ({ re: new Float64Array(D), im: new Float64Array(D) }), aL = [], aR = [], aC = [];
+    for (let t = 0; t < T; t++) {
+      let x = zero(), y = zero();
+      if (lc[t] >= 0) {
+        const p = centres[lc[t]], R = PR.get(erow.get(c[p])), w = wL[t], g = bg[t];
+        for (let d = 0; d < D; d++) { const ph = R[(t + 1) * D + d] - R[(p + 1) * D + d]; x.re[d] = w * (Math.cos(ph) + g.re[d]); x.im[d] = w * (Math.sin(ph) + g.im[d]); }
+      }
+      if (rc[t] >= 0) {
+        const p = centres[rc[t]], L = PL.get(erow.get(c[p])), w = wR[t], g = bg[t];
+        for (let d = 0; d < D; d++) { const ph = L[p * D + d] - L[t * D + d]; y.re[d] = w * (Math.cos(ph) + g.re[d]); y.im[d] = w * (Math.sin(ph) + g.im[d]); }
+      }
+      aL.push(x); aR.push(y);
+    }
+    const tC = this.cthC.data;
+    centres.forEach((p, j) => {
+      const o = erow.get(c[p]) * D, w = wS[j], g = bg[p], x = zero();
+      for (let d = 0; d < D; d++) { x.re[d] = w * (Math.cos(tC[o + d]) + g.re[d]); x.im[d] = w * (Math.sin(tC[o + d]) + g.im[d]); }
+      aC.push(x);
+    });
+    return { centres, ci, lc, rc, nul, wL, wR, wS, aL, aR, aC };
+  }
   /** c: category indices (length T) -> Array of T complex vectors */
   addresses(c) {
     const T = c.length, D = this.D, C = this.C, P = this.path ? this.path.data : null;

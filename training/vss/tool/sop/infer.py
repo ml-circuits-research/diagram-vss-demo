@@ -35,8 +35,15 @@ class Routebook:
         z = np.load(path, allow_pickle=False)
         self.cats = [str(c) for c in z["cats"]]; self.cat_id = {c: i for i, c in enumerate(self.cats)}
         self.codes = [str(c) for c in z["codes"]]
-        self.path, self.bg0, self.bg = z["path"].astype(float), z["bg0"].astype(float), z["bg"].astype(float)
-        self.A, self.L, self.logits = z["A"].astype(float), z["L"].astype(float), z["logits"].astype(float)
+        opt = lambda n: z[n].astype(float) if n in z.files else None
+        self.path, self.bg0, self.bg = opt("path"), opt("bg0"), opt("bg")
+        self.A, self.L, self.logits = opt("A"), opt("L"), opt("logits")
+        # the centre reader (legend reader.centres; research/attention/port/NOTES.md): phases cthR / cthL (E x K x D, E = the centre kinds),
+        # cthC (E x D), bigrams cbgL ((K+2) x K x D, previous kind or BOS=K) and cbgR (K x (K+2) x D, next kind or EOS=K+1); attachment
+        # logits cA (K x K x 3: word kind, centre kind, side 0 = word left of its centre / 1 = right / 2 = the centre itself), cDist (3 x 16),
+        # cbeta (2 x K: the cost of every word in between, per side), null logits cN (5 x (K+2): the word, previous, next, -2, +2)
+        self.centre_kinds = [str(c) for c in z["centre_kinds"]] if "centre_kinds" in z.files else None
+        for n in ("cthR", "cthL", "cthC", "cbgL", "cbgR", "cA", "cDist", "cbeta", "cN"): setattr(self, n, opt(n))
         self.rel = z["rel"].astype(float) if "rel" in z.files else None
         self.pos = z["pos"].astype(float) if "pos" in z.files else None; self.pc = z["pc"].astype(float) if "pc" in z.files else None
         self.pos_max = int(z["pos_max"]) if "pos_max" in z.files else None
@@ -46,7 +53,55 @@ class Routebook:
         self.verb_mask = z["verb_mask"].astype(float) if "verb_mask" in z.files else None
         self.vo_nmax = int(z["vo_nmax"]) if "vo_nmax" in z.files else None
         self.cue_mask = z["cue_mask"].astype(float) if "cue_mask" in z.files else (np.zeros(len(self.cats)) if self.vo is not None else None)
-        self.D = self.path.shape[1]
+        self.D = self.path.shape[1] if self.path is not None else self.cthC.shape[1]
+
+    def centre_addresses(self, c):
+        """the centre reader's structure and addresses of a message (c: kind indices, length T), linear in T: every token whose kind is a
+        centre kind is a centre; every other token is attached to at most the nearest centre on its left (lc) and on its right (rc).
+        Returns dict: centres (token positions), ci (centre index of a centre token, else -1), lc / rc (centre index or -1), null (T),
+        wL / wR (T: weight to lc / rc), wS (per centre), aL / aR (T x D: the address of token t in the state of lc / rc), aC (C x D).
+          null_t = sigmoid(cN[0,k_t] + cN[1,k_t-1] + cN[2,k_t+1] + cN[3,k_t-2] + cN[4,k_t+2])        (BOS = K, EOS = K+1)
+          wL_t   = sigmoid(cA[k_t, k_lc, 1] + cDist[1, min(t-lc, 15)] + sum_{lc<j<t} cbeta[1, k_j]) * (1 - null_t)
+          wR_t   = sigmoid(cA[k_t, k_rc, 0] + cDist[0, min(rc-t, 15)] + sum_{t<j<rc} cbeta[0, k_j]) * (1 - null_t)
+          wS_c   = sigmoid(cA[k_c, k_c, 2] + cDist[2, 0]) * (1 - null_c)
+          aL_t   = wL_t * (exp(i sum_{lc<j<=t} cthR[e_lc, k_j]) + bg_t),  aR_t = wR_t * (exp(i sum_{t<=j<rc} cthL[e_rc, k_j]) + bg_t)
+          aC_c   = wS_c * (exp(i cthC[e_c]) + bg_c),  bg_t = exp(i cbgL[k_t-1, k_t]) + exp(i cbgR[k_t, k_t+1]);  e = the centre's kind row.
+        Sums of a run are differences of prefix sums (one per centre kind present). The twin of experiment/centres.CentreModel.states."""
+        c = np.asarray(c, dtype=int); T, D, K = len(c), self.D, len(self.cats)
+        erow = {self.cat_id[k]: e for e, k in enumerate(self.centre_kinds) if k in self.cat_id}
+        isc = np.array([int(x) in erow for x in c], dtype=bool)
+        centres = [t for t in range(T) if isc[t]]; ci = np.full(T, -1); ci[centres] = np.arange(len(centres))
+        lc = np.full(T, -1); rc = np.full(T, -1); last = -1
+        for t in range(T):
+            if isc[t]: last = int(ci[t])
+            else: lc[t] = last
+        nxt = -1
+        for t in range(T - 1, -1, -1):
+            if isc[t]: nxt = int(ci[t])
+            else: rc[t] = nxt
+        kp = np.concatenate([[K], c[:-1]]).astype(int) if T else c; kn = np.concatenate([c[1:], [K + 1]]).astype(int) if T else c
+        kp2 = np.concatenate([[K, K], c])[:T].astype(int); kn2 = np.concatenate([c, [K + 1, K + 1]])[2:].astype(int)
+        N = self.cN; null = sigmoid(N[0, c] + N[1, kp] + N[2, kn] + N[3, kp2] + N[4, kn2]) if T else np.zeros(0); keep = 1 - null
+        QR = np.concatenate([[0.0], np.cumsum(self.cbeta[1, c])]); QL = np.concatenate([[0.0], np.cumsum(self.cbeta[0, c])])
+        pos = np.array(centres, dtype=int); wL = np.zeros(T); wR = np.zeros(T)
+        for t in range(T):
+            if lc[t] >= 0:
+                p = pos[lc[t]]; wL[t] = sigmoid(self.cA[c[t], c[p], 1] + self.cDist[1, min(t - p, 15)] + (QR[t] - QR[p + 1])) * keep[t]
+            if rc[t] >= 0:
+                p = pos[rc[t]]; wR[t] = sigmoid(self.cA[c[t], c[p], 0] + self.cDist[0, min(p - t, 15)] + (QL[p] - QL[t + 1])) * keep[t]
+        wS = np.array([sigmoid(self.cA[c[p], c[p], 2] + self.cDist[2, 0]) * keep[p] for p in centres])
+        bg = E(self.cbgL[kp, c]) + E(self.cbgR[c, kn]) if T else np.zeros((0, D), complex)
+        PR, PL = {}, {}
+        for e in sorted({erow[int(c[p])] for p in centres}):
+            PR[e] = np.concatenate([np.zeros((1, D)), np.cumsum(self.cthR[e][c], 0)]); PL[e] = np.concatenate([np.zeros((1, D)), np.cumsum(self.cthL[e][c], 0)])
+        aL = np.zeros((T, D), complex); aR = np.zeros((T, D), complex); aC = np.zeros((len(centres), D), complex)
+        for t in range(T):
+            if lc[t] >= 0:
+                p = pos[lc[t]]; e = erow[int(c[p])]; aL[t] = wL[t] * (E(PR[e][t + 1] - PR[e][p + 1]) + bg[t])
+            if rc[t] >= 0:
+                p = pos[rc[t]]; e = erow[int(c[p])]; aR[t] = wR[t] * (E(PL[e][p] - PL[e][t]) + bg[t])
+        for j, p in enumerate(centres): aC[j] = wS[j] * (E(self.cthC[erow[int(c[p])]]) + bg[p])
+        return {"centres": centres, "ci": ci, "lc": lc, "rc": rc, "null": null, "wL": wL, "wR": wR, "wS": wS, "aL": aL, "aR": aR, "aC": aC}
 
     def vorder_index(self, c):
         """(side, vcat, ordinal, valid) per token, as V8.vorder_index: side 1 = after the nearest verb to the left (counted from it), side 0 =
@@ -135,6 +190,8 @@ class Reader:
         self.content_kinds = set(self.schema.get("content_kinds", []))
         rr = self.legend.reader; self.closed = rr.get("closed_values") or {}; self.table_roles = set(rr.get("table_roles") or []); self.set_roles = set(rr.get("set_roles") or [])
         self._table = None
+        self.centres = bool(rr.get("centres"))           # the centre reader (legend reader.centres, chosen by the world): read_message
+        if self.centres and self.rb.centre_kinds is None: raise ModelError("legend reader.centres is set but the route book has no centre arrays")
 
     # ---------------- words
     def kind(self, tok):
@@ -644,7 +701,70 @@ class Reader:
         if token_kinds is not None:
             self._ctx_kinds = dict(zip(tokens, token_kinds)) if isinstance(token_kinds, (list, tuple)) else dict(token_kinds)
         else: self._ctx_kinds = None
+        if self.centres:           # a centre model reads one text as a message: the first accepted centre whose reading is ok / abstain
+            m = self.read_message(tokens, sentence, ids, filt=filt, force=force, force_depth=force_depth, estimator=estimator, presence=presence)
+            for c in m["centres"]:
+                if c["accepted"] and c["info"]["status"] in ("ok", "abstain"): return c["wires"], c["frame"], c["info"]
+            for c in m["centres"]:
+                if c["accepted"]: return c["wires"], c["frame"], c["info"]
+            return self.formalize_state(text, sentence, ids, tokens, np.zeros(self.D, complex), [], [], np.zeros((0, self.D), complex), filt, force, force_depth, estimator, presence, table)
         S, kept, unknown, addr = self.chart(tokens)
+        return self.formalize_state(text, sentence, ids, tokens, S, kept, unknown, addr, filt, force, force_depth, estimator, presence, table, token_kinds)
+
+    # ---------------- the centre reader (legend reader.centres; research/attention/port/NOTES.md)
+    def centre_chart(self, tokens):
+        """-> (kept, unknown, R, S): R = Routebook.centre_addresses of the kept tokens (indices into kept), S = one state per centre (C x D),
+        accumulated token by token in text order (the JS twin adds in the same order)"""
+        kept, cidx, unknown = self.encode(tokens)
+        R = self.rb.centre_addresses(cidx); C = len(R["centres"]); S = np.zeros((C, self.D), complex)
+        for j, i in enumerate(kept):
+            F = self.st.id(self.ident(tokens[i]))
+            if R["ci"][j] >= 0: S[R["ci"][j]] += R["aC"][R["ci"][j]] * F; continue
+            if R["lc"][j] >= 0: S[R["lc"][j]] += R["aL"][j] * F
+            if R["rc"][j] >= 0: S[R["rc"][j]] += R["aR"][j] * F
+        return kept, unknown, R, S
+
+    def centre_members(self, R, ci, attach=0.5):
+        """the kept-token indices a centre takes, in text order: the centre and every token attached to it with weight >= attach
+        (0.5: the attachment is trained against the annotated spans, so the weights are probabilities; B's zone rule 1)"""
+        p = R["centres"][ci]; out = [p]
+        for j in range(len(R["lc"])):
+            if (R["lc"][j] == ci and R["wL"][j] >= attach) or (R["rc"][j] == ci and R["wR"][j] >= attach): out.append(j)
+        return sorted(out)
+
+    def read_message(self, tokens, sentence=0, ids=None, filt=None, force=None, force_depth=None, estimator=None, presence=None):
+        """a whole message (normalized tokens, or a text) -> {"tokens", "centres": [...] in text order, "ignored": [[a, b), ...]}.
+        Per centre: pos (token index), null (its null probability), accepted (null < 0.5), members (token indices it takes), and, when
+        accepted, wires / frame / info of its reading: the state S_c read by the same decoder as one request (formalize_state) with the
+        members as its sentence. `ignored` = the maximal runs of tokens taken by no accepted centre whose reading is ok / abstain,
+        trimmed of punctuation: the text the reader hands back as not understood. Linear in the tokens (one state per centre)."""
+        if isinstance(tokens, str): tokens = tokenize(tokens)
+        ids = ids if ids is not None else idgen(); self._ctx_kinds = None
+        kept, unknown, R, S = self.centre_chart(tokens); unk = set(unknown); out = []; taken = set()
+        for k, p in enumerate(R["centres"]):
+            mem = self.centre_members(R, k); toks = [tokens[kept[j]] for j in mem]
+            rec = {"pos": kept[p], "token": tokens[kept[p]], "null": float(R["null"][p]), "accepted": bool(R["null"][p] < 0.5), "members": [kept[j] for j in mem]}
+            if rec["accepted"]:
+                addr = np.array([R["aC"][k] if j == p else (R["aL"][j] if R["lc"][j] == k else R["aR"][j]) for j in mem])
+                w, f, info = self.formalize_state(" ".join(toks), sentence, ids, toks, S[k], list(range(len(mem))), [n for n, j in enumerate(mem) if kept[j] in unk],
+                                                  addr, filt, force, force_depth, estimator, presence, None)
+                rec.update(wires=w, frame=f, info=info, text=" ".join(toks))
+                if info["status"] in ("ok", "abstain"): taken |= set(rec["members"])
+            out.append(rec)
+        ign, a = [], None
+        for i in range(len(tokens) + 1):
+            if i < len(tokens) and i not in taken: a = i if a is None else a; continue
+            if a is not None:
+                b = i
+                while a < b and tokens[a] in ".,!?;:": a += 1
+                while b > a and tokens[b - 1] in ".,!?;:": b -= 1
+                if a < b: ign.append([a, b])
+                a = None
+        return {"tokens": tokens, "centres": out, "ignored": ign}
+
+    def formalize_state(self, text, sentence, ids, tokens, S, kept, unknown, addr, filt=None, force=None, force_depth=None, estimator=None, presence=None, table=None, token_kinds=None):
+        """the decoder and the bookkeeping of formalize() on a given state: S and addr (the addresses of the kept tokens, so that
+        sum_j addr[j] * star(tokens[kept[j]]) = S), tokens = the sentence (for a centre: the tokens it takes)"""
         if filt is None and self.cfg.get("candidates") == "sentence":     # the sentence-candidates decoder (R46): a role's filler is a word of the sentence
             filt = set(tokens) | {t.lower() for t in tokens}
         # a model without the key predates round 3: its primary estimator was the open-gate count
