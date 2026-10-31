@@ -1,0 +1,2 @@
+sop train /home/claude/diagram-vss-demo/training/sketch/worlds/real --D 512 --seed 0 --seeds 1 --epochs 2 --shuffle --device cpu --candidate_sets catalog --n_eval 600 --no_ckpt --star_version 2 --threshold_rule fit --calibrate_on_heldout_formulations --run_dir /home/claude/diagram-vss-demo/training/sketch/runs/d512_p80_D512_e2_s0
+commit 40e5d86

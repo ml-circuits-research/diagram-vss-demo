@@ -75,11 +75,14 @@ def main():
         for t, c in cnt.items():
             if c >= a.freq and t not in kinds: kinds[t] = t
     lexicon = set(kinds)
+    FAMILY = {e for e in os.environ.get("FAMILY", "").split(",") if e}
+    if FAMILY - set(G.EVENTS): raise SystemExit(f"FAMILY: unknown events {sorted(FAMILY - set(G.EVENTS))}")
     rows, lost_why, dropped, by_ev = [], collections.Counter(), collections.Counter(), collections.Counter(); row_key = []
     for m, w, row in items:
         lost = []
         try: text, roles, ev = convert(row, lexicon, soft=True, lost=lost, norm=nf(row))
         except Skip as e: dropped[str(e).split(":")[0]] += 1; continue
+        if FAMILY and ev not in FAMILY: continue     # FAMILY=<events>: only the rows of these events (INTERFERENCE.md); default: every row
         if not (set(G.EVENTS[ev]) & set(text.split())) and not roles: dropped["no event token and no role (zero target)"] += 1; continue
         for x in lost: lost_why["event token not found" if x.startswith("verb of") else x.split(" ")[0]] += 1
         rows.append((ev, text, roles, m["id"])); by_ev[ev] += 1; row_key.append(row.get("_key"))
