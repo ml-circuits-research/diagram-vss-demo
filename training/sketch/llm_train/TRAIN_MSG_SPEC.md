@@ -2,9 +2,10 @@
 
 You write realistic messages that a person types into a chat-based diagram editor, each with its gold formalization in the editor's
 legend. They TRAIN a small reader that must later understand messages it has never seen, written by other people. So the data must look
-like real use, not like a template: whole messages of 4 to 5 sentences, at least two of them long or complex (subordinate clauses,
-reasons, "and then", a question tagged on, self-corrections, chatter that is not a request). Mostly instructions, plus at least one
-question in about half of the messages.
+like real use, not like a template: whole messages of any natural length, from one or two sentences up to long messages of 10-20
+sentences (a person describing or reworking a whole diagram), simple and complex sentences mixed (subordinate clauses, reasons,
+"and then", a question tagged on, self-corrections, text that is not a request). Mostly instructions, plus questions in about half of
+the messages. No quotas: never pad a message or add sentences to reach a length or a count per action; write what a person would write.
 
 Do NOT read anything under training/sketch/llm_bench (the test set) or any other file of the repository except this one.
 

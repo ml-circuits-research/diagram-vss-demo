@@ -25,7 +25,8 @@ Read this first. These rules come from mistakes already made here; each says wha
 ## Data: realistic, never invented by us
 
 - Training data and test data are realistic messages written by LLM agents (or people), in the style of real use: whole messages of
-  4-5 sentences with chatter, self-corrections, typos, many domains and personas. Specs: `training/sketch/llm_bench/SPEC.md` (test),
+  any natural length (one sentence up to 10-20; owner, 2026-10-31: long messages are needed and the centre reader must handle them),
+  with text that is not a request, self-corrections, typos, many domains and personas. No quotas, no padding. Specs: `training/sketch/llm_bench/SPEC.md` (test),
   `training/sketch/llm_train/TRAIN_MSG_SPEC.md` (training).
 - The training data must be the same KIND of text as the test data (whole messages, not isolated one-line clauses). A mismatch there
   was measured once: 10.6% of the test words never occurred in clause-only training data, mostly connectives (also, because, since).
