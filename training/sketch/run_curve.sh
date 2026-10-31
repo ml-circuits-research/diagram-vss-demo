@@ -9,15 +9,15 @@
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"; REPO="$(cd "$HERE/../.." && pwd)"; SOP="$REPO/training/vss/tool/bin/sop"; W="$HERE/worlds/real"
 cd "$HERE"; export VSA_MIN_AVAILABLE_GB="${VSA_MIN_AVAILABLE_GB:-1.5}"   # the trainer's memory guard (default 4 GB) stops on this 7 GB machine
-PREFIX="${PREFIX:-real}"; SEED="${SEED:-0}"; CENTRES="${CENTRES:-0}"
+PREFIX="${PREFIX:-real}"; SEED="${SEED:-0}"; CENTRES="${CENTRES:-0}"; EPOCHS="${EPOCHS:-2}"   # EPOCHS: training epochs (default 2)
 OUT=(); KEY=(); if [ "$CENTRES" = "1" ]; then W="$HERE/worlds_centres/real"; OUT=(--out "$W"); export CENTRES NEGATIVES=0; fi
 if [ "$CENTRES" = "1" ] && [ -n "${CENTRE_KEY:-}" ]; then KEY=(--centre_key "$CENTRE_KEY"); fi   # CENTRE_KEY=event: run 2 (NOTES.md)
 for F in "$@"; do
   P=$(python3 -c "print(int(round(float('$F')*100)))")
   python3 msg_to_world.py --frac "$F" "${OUT[@]}" | head -5
   "$SOP" check --legend "$W/legend.json" "$W"/examples/*.sop | tail -1
-  RUN="${PREFIX}_p${P}_D1024_e2_s${SEED}"; rm -rf "runs/$RUN"
-  "$SOP" train "$W" --D 1024 --seed "$SEED" --seeds 1 --epochs 2 --shuffle --device cpu --candidate_sets catalog --n_eval 600 --no_ckpt \
+  RUN="${PREFIX}_p${P}_D1024_e${EPOCHS}_s${SEED}"; rm -rf "runs/$RUN"
+  "$SOP" train "$W" --D 1024 --seed "$SEED" --seeds 1 --epochs "$EPOCHS" --shuffle --device cpu --candidate_sets catalog --n_eval 600 --no_ckpt \
     --star_version 2 --threshold_rule fit --calibrate_on_heldout_formulations --run_dir "$HERE/runs/$RUN" "${KEY[@]}" > "runs/$RUN.log" 2>&1
   rm -rf "$REPO/docs/model/${PREFIX}_p${P}_s${SEED}"
   "$SOP" export-web --model "$W/model" --out "$REPO/docs/model/${PREFIX}_p${P}_s${SEED}" --bits 8 > /dev/null
