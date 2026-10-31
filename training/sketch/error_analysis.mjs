@@ -13,6 +13,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { load } from "../../docs/js/vss.js";
 import * as FRONT from "../../docs/js/front.js";
 import { readingFromWires, toNodes } from "../../docs/js/vss-adapter.js";
+import { vssCentres } from "../../docs/js/vss-centers.js";
 import { canon, canonWant } from "../../docs/js/bench-canon.js";
 const dirArg = process.argv[2], nEx = +(process.argv[process.argv.indexOf("--examples") + 1] || 4);
 const dir = new URL(`../../docs/model/${process.env.MODEL}/`, import.meta.url);
@@ -28,11 +29,16 @@ const cause = {}, ex = {}, unk = { right: [0, 0], wrong: [0, 0] }, byStatus = {}
 // read right, nothing. Also counted: the cut of the matched centre against the span (members missing span words / taking words outside
 // it), and the EXTRA readings (accepted centres read ok / abstain outside every span, or a second one inside a span), by where they are.
 const CM = process.env.SEG === "centres-model", cut = { missing: 0, outside: 0, exact: 0 }, extra = {}, exEx = {};
+// SEG=q1: the requests are read as the q1 cut (docs/js/vss-centers.js, opts.cut "q1"; diagnosis_cut/CUT.md) cuts the message: each gold
+// request is read from the unused stretch that overlaps its span most (X0q: no stretch overlaps it); a stretch matched to no request is an
+// EXTRA reading, counted by where it lies; the H causes (a name / value of the span left out of the stretch) as for the centre model.
+const Q1 = process.env.SEG === "q1";
 const addX = (c, e) => { extra[c] = (extra[c] || 0) + 1; (exEx[c] = exEx[c] || []).length < nEx && exEx[c].push(e); };
 const add = (c, e) => { cause[c] = (cause[c] || 0) + 1; (ex[c] = ex[c] || []).length < nEx && ex[c].push(e); };
 for (const m of rows) {
   const ctx = { names: m.names || [], last: [], refs: new Map() }, seq = { s: 0, m: 0 }, created = [];
-  let MN = null, used = new Set(), taken = new Set();
+  let MN = null, used = new Set(), taken = new Set(), QS = null;
+  if (Q1) QS = vssCentres(m.text, ctx.names, F, vss, { cut: "q1", spans: true });
   if (CM) {
     const nm = FRONT.normalizeMessage(m.text, ctx.names, F); MN = { ...nm, r: vss.readMessage(nm.tokens.join(" ")) };
     const spans = []; for (const w of m.wires) { const s0 = w.span ? m.text.indexOf(w.span) : -1; if (s0 >= 0) spans.push([s0, s0 + w.span.length]); }
@@ -48,6 +54,15 @@ for (const m of rows) {
     const names = ctx.names.concat(created);
     let spanToks = null;
     let { tokens, info } = CM ? { tokens: [], info: MN.info } : FRONT.normalize(w.span, names, F), rC = null;
+    if (Q1) {
+      const s0 = m.text.indexOf(w.span), e0 = s0 + w.span.length;
+      let pick = -1, best = 0;
+      QS.forEach((q, j) => { const ov = Math.min(e0, q.c1) - Math.max(s0, q.c0); if (!used.has(j) && ov > best) { best = ov; pick = j; } });
+      if (pick < 0) { add("X0q no stretch of the q1 cut overlaps the span", `${w.span}`); continue; }
+      used.add(pick); const q = QS[pick];
+      if (q.c0 === s0 && q.c1 === e0) cut.exact++; else { if (q.c0 > s0 || q.c1 < e0) cut.missing++; if (q.c0 < s0 || q.c1 > e0) cut.outside++; }
+      spanToks = tokens; ({ tokens, info } = FRONT.normalize(q.src, names, F));
+    }
     if (CM) {
       const s0 = m.text.indexOf(w.span), e0 = s0 + w.span.length, inSpan = (i) => MN.src[i][0] >= s0 && MN.src[i][0] < e0;
       const ks = MN.r.centres.map((k, j) => [k, j]).filter(([k]) => inSpan(k.pos));
@@ -85,12 +100,12 @@ for (const m of rows) {
       if (["target", "from", "to", "anchor"].includes(k) && String(v).startsWith("mention(")) add((got[k] ?? "∅") === "∅" ? "F role missed" : "G description read differently", e + `  canon got ${k}=${got[k]}`);
       else if (["target", "from", "to", "anchor"].includes(k)) {
         const nameToks = v.split(",").filter((x) => !x.startsWith("mention(") && x !== "$new").map((x) => "n_" + x.replace(/[^a-z0-9]+/g, "_"));
-        if (CM && nameToks.some((t) => !tokens.includes(t) && spanToks.includes(t))) add("H cut: a name of the span not taken by the centre", e);
+        if ((CM || Q1) && nameToks.some((t) => !tokens.includes(t) && spanToks.includes(t))) add("H cut: a name of the span not taken by the centre", e);
         else if (nameToks.length && nameToks.some((t) => !tokens.includes(t))) add("E name not reachable", e);
         else if ((got[k] ?? "∅") === "∅") add("F role missed", e); else add("G role wrong", e);
       } else {
         const inSpan = tokens.some((t) => t.replace(/^not_/, "") === v || t === v + "s" || t.replace(/_/g, "") === v.replace(/_/g, ""));
-        const inMsgSpan = CM && spanToks.some((t) => t.replace(/^not_/, "") === v || t === v + "s" || t.replace(/_/g, "") === v.replace(/_/g, ""));
+        const inMsgSpan = (CM || Q1) && spanToks.some((t) => t.replace(/^not_/, "") === v || t === v + "s" || t.replace(/_/g, "") === v.replace(/_/g, ""));
         if (!inSpan && inMsgSpan && !["count", "distance"].includes(k)) add("H cut: a value of the span not taken by the centre", e);
         else if (!inSpan && !["count", "distance"].includes(k)) add("D value not reachable", e);
         else if ((got[k] ?? "∅") === "∅") add("F role missed", e); else add("G role wrong", e);
@@ -99,12 +114,17 @@ for (const m of rows) {
     if (main && main.args.action === "create" && main.args.name) created.push(String(main.args.name));
     if (main && main.args.target != null && !Array.isArray(main.args.target)) ctx.last = [main.args.target];
   }
+  if (Q1) QS.forEach((q, j) => {
+    if (used.has(j)) return;
+    const inSpan = m.wires.some((w) => { const s0 = w.span ? m.text.indexOf(w.span) : -1; return s0 >= 0 && q.c0 < s0 + w.span.length && s0 < q.c1; });
+    addX(inSpan ? "extra: a q1 stretch matched to no request, overlapping a span" : "extra: a q1 stretch outside every span", `"${q.src}"`);
+  });
 }
-console.log(`${n} gold requests ${CM ? "read as the centre model cuts the whole message (SEG=centres-model)" : "read alone from their spans"}; fully right ${right} (${(100 * right / n).toFixed(1)}%)`);
+console.log(`${n} gold requests ${CM ? "read as the centre model cuts the whole message (SEG=centres-model)" : Q1 ? "read as the q1 cut cuts the whole message (SEG=q1)" : "read alone from their spans"}; fully right ${right} (${(100 * right / n).toFixed(1)}%)`);
 console.log("reader status:", JSON.stringify(byStatus));
 console.log(`words without a kind of their own (read as unknown): right requests ${(100 * unk.right[0] / unk.right[1]).toFixed(1)}%, wrong requests ${(100 * unk.wrong[0] / unk.wrong[1]).toFixed(1)}%`);
-if (CM) {
-  console.log(`\ncut of the matched centre against the span (punctuation not counted): exact ${cut.exact}, missing span words ${cut.missing}, taking words outside the span ${cut.outside}`);
+if (CM || Q1) {
+  console.log(`\ncut of the matched ${Q1 ? "stretch" : "centre"} against the span (${Q1 ? "character offsets" : "punctuation not counted"}): exact ${cut.exact}, missing span words ${cut.missing}, taking words outside the span ${cut.outside}`);
   for (const [c, k] of Object.entries(extra).sort()) { console.log(`${c}: ${k}`); for (const e of exEx[c]) console.log("   " + e.slice(0, 330)); }
 }
 for (const [c, k] of Object.entries(cause).sort()) { console.log(`\n${c}: ${k} (${(100 * k / n).toFixed(1)}% of all requests)`); for (const e of ex[c]) console.log("   " + e.slice(0, 330)); }

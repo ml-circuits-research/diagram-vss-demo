@@ -56,12 +56,13 @@ export function readClause(src, ctx, seq) {
   return Object.assign(out, { reading, normalized: text, vss: { status: r.status, sop: r.sop, margins: r.margins, residual: r.residual, ms: r.timings.total_ms, unplaced: r.unplaced } });
 }
 
-/** a whole message; the VSS reader cuts it into requests by its action words (a model without front.json: the rules' cut, `rulesFormalize`) */
-export async function formalize(text, ctx, rulesFormalize) {
+/** a whole message; the VSS reader cuts it into requests by its action words (a model without front.json: the rules' cut, `rulesFormalize`).
+ *  opts.cut: "q1" -> the q1 cut of vss-centers.js (training/sketch/diagnosis_cut/CUT.md); omitted -> the default cut, unchanged */
+export async function formalize(text, ctx, rulesFormalize, opts = {}) {
   if (!state.vss) await load();
   const t0 = performance.now(), seq = { s: 0, m: 0 };
   // the message is cut by the VSS reader itself (one state per action word, vss-centers.js); no separate tagger (owner's decision)
-  const cut = state.front ? { segments: vssCentres(text, ctx.names || [], state.front, state.vss).map((src) => ({ src, id: null })), nodes: [], corrections: [] } : rulesFormalize(text, ctx);
+  const cut = state.front ? { segments: vssCentres(text, ctx.names || [], state.front, state.vss, opts.cut ? { cut: opts.cut } : {}).map((src) => ({ src, id: null })), nodes: [], corrections: [] } : rulesFormalize(text, ctx);
   const c = { names: ctx.names || [], last: (ctx.last || []).slice(), refs: new Map() };
   const nodes = [], notes = [], clauses = [];
   for (const seg of cut.segments || []) {

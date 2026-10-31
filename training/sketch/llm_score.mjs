@@ -47,11 +47,13 @@ function vssCentresModel(text, ctx) {
   return nodes;
 }
 
+const SEGQ1 = process.env.SEG === "q1";
 function vssFormalize(text, ctx) {
   if (process.env.SEG === "centres-model") return vssCentresModel(text, ctx);
   // SEG=gold: the annotated spans (held-out TRAINING messages only: the test sets have none): the reading quality without the cut
   const segs = process.env.SEG === "gold" && ctx.spans ? ctx.spans.map((src) => ({ src }))
     : process.env.SEG === "tagger" && F ? FRONT.segment(text, ctx.names, F).map((src) => ({ src }))        // labelled reference only
+    : SEGQ1 && F ? vssCentres(text, ctx.names, F, vss, { cut: "q1", confident: process.env.CONFIDENT === "1" }).map((src) => ({ src }))   // SEG=q1: the q1 cut (diagnosis_cut/CUT.md)
     : F ? vssCentres(text, ctx.names, F, vss, { confident: process.env.CONFIDENT === "1" }).map((src) => ({ src }))   // default: the VSS reader's own cut
     : sys.formalize(text, ctx).segments;
   const seq = { s: 0, m: 0 }, c = { names: ctx.names, last: [], refs: new Map() }, nodes = [];

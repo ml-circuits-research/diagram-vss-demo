@@ -202,3 +202,57 @@ Next, by measured size (all decoding except where said):
 - Centre model (centres2): its losses sit in the reading of the right members (47, of which 14 from `normalizeMessage` giving a
   sentence's first word the context of the `.` before it instead of B; fixing that changes its training rows, so it needs retraining),
   the null (30) and the attachment (45 cut short + 40 stopped by `is`). The one-request reader with Q1 is already above it.
+
+## 7. Q1 implemented (working tree on fe7e599) and the pre-registered test (written 2026-10-31 before any score on fresh1)
+
+Implementation (default unchanged):
+- `docs/js/vss-centers.js`: `vssCentres(text, names, F, vss, { cut: "q1" })` calls the new `vssCentresQ1` (also exported; `spans: true`
+  returns `{src, c0, c1}`). Without `cut` the old code runs, untouched. The one constant: `MAX_JOIN = 3` (centres per stretch). No other
+  number: the score, the role rule (from the legend's event roles) and the tie rule (fewer dropped readable centres) have none.
+- `training/sketch/llm_score.mjs`: `SEG=q1`. `training/sketch/error_analysis.mjs`: `SEG=q1` (each gold request read from the unused q1
+  stretch that overlaps its span most; X0q when none; extra stretches counted). `docs/js/vss-formalizer.js`:
+  `formalize(text, ctx, rulesFormalize, { cut: "q1" })`; the callers in ui.js pass nothing (default cut).
+- Checks (old dev file, fix_p80_s0): default own cut 47.1% (530/1126), 335 extra wires, and SEG=gold 61.0% / 71, with stdout and
+  `--dump` byte-identical to the scripts before the change; error_analysis.mjs default and SEG=centres-model (centres2_p80_s0) output
+  byte-identical. The q1 cut gives the same stretches as the analysis copy (cutstats.mjs `CUT=scan=ltr,G=3,score=noev,tie=keep,minrole=legend`)
+  in 253 / 253 messages; llm_score SEG=q1 54.8% (617/1126), 109 extra wires (= section 5).
+
+Pre-registration (one measurement, nothing changed after it):
+- Test set: `training/sketch/llm_bench/fresh1` (two folders, `sonnet` and `haiku`; 1000 messages), never scored before. It is scored
+  only; its messages and per-message outputs are not opened by this agent (no `--dump`, no `-v`): aggregate lines only.
+- Models: kinds_p80_s0 and comb1_p80_s0, as exported in docs/model.
+- Commands, for each model M: `MODEL=M node llm_score.mjs llm_bench/fresh1/sonnet llm_bench/fresh1/haiku` (default own cut),
+  the same with `SEG=q1`, and with `SEG=gold` (reading alone, reported only; meaningful only if the rows carry spans).
+- Hypothesis: the q1 cut loses fewer requests than the default cut on messages never seen, as on the three dev files.
+- Criterion, per model, on the whole of fresh1 (llm_score's ALL line over both folders): wires right with SEG=q1 minus wires right with
+  the default cut >= +3.0 points, AND extra wires with SEG=q1 < extra wires with the default cut. PASS if both models meet both
+  conditions; otherwise FAIL (reported per model). Each half (sonnet, haiku) is reported, not part of the criterion.
+- Every scoring run is appended to `training/sketch/TEST_LOG.md`.
+
+### Result on fresh1 (one run each, nothing changed after it): FAIL
+
+llm_score.mjs, main scorer; wires right (extra wires). All rows of fresh1 carry spans (500 + 500 messages), so SEG=gold is the reading alone.
+
+| model | half | rules | SEG=gold | default own cut | q1 | q1 - default |
+|---|---|---|---|---|---|---|
+| kinds_p80_s0 | sonnet (3030) | 69.8% (427) | 57.0% (210) | 47.7% (837) | 50.6% (397) | +2.9 |
+| kinds_p80_s0 | haiku (2514) | 78.7% (321) | 66.8% (182) | 59.9% (814) | 59.1% (324) | -0.8 |
+| kinds_p80_s0 | **all (5544)** | 73.8% (748) | 61.4% (392) | **53.2% (1651)** | **54.4% (721)** | **+1.2** |
+| comb1_p80_s0 | sonnet | 69.8% (427) | 56.5% (211) | 47.7% (836) | 50.1% (387) | +2.4 |
+| comb1_p80_s0 | haiku | 78.7% (321) | 66.5% (181) | 59.7% (814) | 60.1% (324) | +0.4 |
+| comb1_p80_s0 | **all** | 73.8% (748) | 61.1% (392) | **53.1% (1650)** | **54.6% (711)** | **+1.5** |
+
+Criterion: +3.0 points AND fewer extra wires, per model. Extra wires: met for both (1651 -> 721, 1650 -> 711). Points: +1.2 and +1.5,
+NOT met. **FAIL.** No change was made after the numbers (AGENTS.md experiments rule 3).
+
+Root-cause note from aggregate numbers only (the per-act counts llm_score prints; no message or per-message output was opened):
+- "not done" rose 16.0% -> 24.9% (kinds) while "done wrong" fell 30.8% -> 20.6%: q1 trades wrong readings for missing ones.
+- By action (kinds, wires right default -> q1, of n): describe 99 -> 8 of 104, count 115 -> 76 of 255, connected 89 -> 74 of 123;
+  gains: path 10 -> 57 of 174, nearest 38 -> 65 of 66, property 8 -> 36 of 56, move +21, fact +19, check +19 (comb1 the same pattern:
+  describe 100 -> 7, count 116 -> 102).
+- The describe loss is part 3 of Q1 (a reading that fills none of its event's roles is not a request unless the legend's event has no
+  roles): `describe` has the role `object` in the legend, but "describe the diagram"-type requests fill none, and are dropped. On the
+  old dev file this was visible but small (describe 10 -> 7 of 12). Count questions with no filled role ("how many shapes are there")
+  are hit by the same rule. Describe alone is 91 wires = 1.6 points of the 3.0. A rule from the legend that says which roles an event
+  needs is not in the legend today (it lists roles, not required ones); whether to learn "required" from the annotated data, or to drop
+  part 3, is a new decision and a new pre-registration, not a patch of this run.
