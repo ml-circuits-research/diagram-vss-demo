@@ -95,7 +95,8 @@ def export(model_dir, out_dir, bits=8):
     for name in PHASE_ARRAYS:
         v = getattr(rb, name, None)
         if v is None: continue
-        blobs.append(({"name": name, "kind": "phase", "bits": bits, "shape": list(v.shape)}, quantize(v, bits)))
+        # float64 as before (infer.Routebook keeps bg / A / L as stored, float32; the conversion is exact), one table at a time
+        blobs.append(({"name": name, "kind": "phase", "bits": bits, "shape": list(v.shape)}, quantize(np.asarray(v, dtype=float), bits)))
     for name in FLOAT_ARRAYS:
         v = getattr(rb, name, None)
         if v is None: continue

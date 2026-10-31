@@ -16,8 +16,12 @@ Spec section 6 (steps 3-7) as implemented here: kinds (6.3, with the `unknown` k
 training, the lexical bag baseline on the same rows (6.4), training with the reference trainer (6.5), the evaluation fields of 6.6 (per role,
 FULL with the structure estimated and given, occupancy in three cases, calibration, held-out formulations, new identities, baselines). Steps
 1-2 and 6b-8 are the skill's (skills/train-world/scripts/loop.py).
+Memory (2026-10-31): bounded by one step. The targets and the encoded sentences are built per batch; the phase table (3 K^2 + 4 K + 41 rows
+of D float64 for K kinds) is never held whole: only the rows the training sentences reach are trained (LeanTheta, Compact), the others keep
+their initial values and are redrawn for the route book; each batch is computed at its own longest sentence (--pad_to_longest: the corpus'
+longest, bit for bit the previous trainer); the torch model is freed before calibration and the reader's route book is loaded once.
 """
-import argparse, collections, datetime, hashlib, json, os, shutil, subprocess, sys, tempfile, time
+import argparse, collections, copy, datetime, hashlib, json, os, shutil, subprocess, sys, tempfile, time
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.dirname(os.path.dirname(HERE)); EXP = os.path.join(REPO, "experiment")
@@ -376,13 +380,18 @@ def chance(reader, schema):
 
 
 # ------------------------------------------------------------------ export
-def export_routebook(m, path):
-    """the learned route book; with the position code also pos (40 x D), pc (K x D) and pos_max (B7)"""
+def export_routebook(m, path, lean=None):
+    """the learned route book; with the position code also pos (40 x D), pc (K x D) and pos_max (B7). lean (a LeanTheta): the phase
+    table is not held whole; its tables are written from the held rows and the redrawn initial rows (LeanTheta.export)"""
     import torch
-    th = (m.theta * m.root_mask).detach().cpu().numpy()
     wrap = lambda x: np.angle(np.exp(1j * x)).astype(np.float32)
-    z = {"cats": np.array(m.cats), "codes": np.array(m.codes), "path": wrap(th[m.ipath.cpu().numpy()]), "bg0": wrap(th[m.ibg0.cpu().numpy()]),
-         "bg": wrap(th[m.ibg.cpu().numpy()]), "A": wrap(th[m.iA.cpu().numpy()]), "L": wrap(th[m.iL.cpu().numpy()]),
+    if lean is None:
+        th = (m.theta * m.root_mask).detach().cpu().numpy()
+        tabs = {"path": wrap(th[m.ipath.cpu().numpy()]), "bg0": wrap(th[m.ibg0.cpu().numpy()]), "bg": wrap(th[m.ibg.cpu().numpy()]),
+                "A": wrap(th[m.iA.cpu().numpy()]), "L": wrap(th[m.iL.cpu().numpy()])}
+    else:
+        tabs = lean.export({"path": m.ipath, "bg0": m.ibg0, "bg": m.ibg, "A": m.iA, "L": m.iL}, wrap)
+    z = {"cats": np.array(m.cats), "codes": np.array(m.codes), **tabs,
          "logits": m.logits.detach().cpu().numpy().astype(np.float64), "gates": torch.sigmoid(m.logits).detach().cpu().numpy()}
     if getattr(m, "rel", None) is not None:
         z.update(rel=wrap(m.rel.detach().cpu().numpy()), rel_mask=m.rel_mask.cpu().numpy(), taker_mask=m.taker_mask.cpu().numpy())
@@ -393,14 +402,107 @@ def export_routebook(m, path):
     np.savez_compressed(path, **z)
 
 
-class Trimmed:
-    """the model as trainer.train_loop sees it, with each batch cut to its own longest sentence (exact: padded positions contribute nothing);
-    used with --length_buckets, where the batches are of similar length"""
-    def __init__(self, m): self.m = m
+# ------------------------------------------------------------------ memory-bounded training (the model, the batches)
+STREAM_ROWS = 1024       # rows of the phase table drawn per chunk when it is regenerated (8 MB at D = 1024)
+
+
+class LeanTheta:
+    """the phase table theta of experiment/v8_gates.V8 (P x D float64; P = 3 K^2 + 4 K + 41 rows for K kinds: path, bigram, A and L per
+    kind pair) WITHOUT the table itself. Only the rows that a training sentence reads with a non-zero weight are held, as one trainable
+    parameter in the order of their row number (row 0, the root, first). Every other row has a gradient of exactly 0 at every step, so Adam
+    leaves it at its initial value for the whole training: it is redrawn from the generator when the route book is written, never held.
+    The initial values are those of V8's constructor, np.random.default_rng(200 + seed): V2 draws its table (P2 x D, P2 = K^2 + K + 1) and
+    the identities (V x D), both discarded; then V4's table (P4 x D, row 0 set to 0), V5's position rows 16-39 (24 x D) and V6's L rows
+    (K^2 x D) are drawn one after the other, so theta's rows are ONE contiguous stream of P x D uniform draws (same doubles, same order)."""
+    def __init__(self, P, D, rng, skip_rows, held_rows, dtype, device):
+        import torch
+        for r0 in range(0, skip_rows, STREAM_ROWS): rng.uniform(-np.pi, np.pi, (min(STREAM_ROWS, skip_rows - r0), D))
+        self.P, self.D, self.state0 = P, D, copy.deepcopy(rng.bit_generator.state)
+        self.rows = np.unique(np.concatenate([[0], np.asarray(held_rows, dtype=np.int64)]))
+        self.full2c = np.full(P, len(self.rows), dtype=np.int64); self.full2c[self.rows] = np.arange(len(self.rows))   # full row -> held row (or len = not held)
+        vals = np.empty((len(self.rows), D))
+        for r0, ch in self._stream(rng):
+            sel = (self.rows >= r0) & (self.rows < r0 + len(ch)); vals[sel] = ch[self.rows[sel] - r0]
+        vals[0] = 0.0                                                         # V4: th[0] = 0 (the root)
+        self.theta = torch.nn.Parameter(torch.tensor(vals, dtype=dtype, device=device)); del vals
+
+    def _stream(self, rng):
+        for r0 in range(0, self.P, STREAM_ROWS): yield r0, rng.uniform(-np.pi, np.pi, (min(STREAM_ROWS, self.P - r0), self.D))
+
+    def export(self, tables, wrap):
+        """{name: index tensor of full rows} -> {name: wrap(theta[index]) as float32}, one pass over the regenerated stream"""
+        rng = np.random.default_rng(); rng.bit_generator.state = self.state0
+        flat = {n: t.cpu().numpy().reshape(-1) for n, t in tables.items()}
+        out = {n: np.empty((len(f), self.D), dtype=np.float32) for n, f in flat.items()}
+        held = self.theta.detach().cpu().numpy()
+        for n, f in flat.items():
+            c = self.full2c[f]; h = np.nonzero(c < len(self.rows))[0]
+            for i in range(0, len(h), STREAM_ROWS): out[n][h[i:i + STREAM_ROWS]] = wrap(held[c[h[i:i + STREAM_ROWS]]])
+        for r0, ch in self._stream(rng):
+            for n, f in flat.items():
+                sel = np.nonzero((f >= r0) & (f < r0 + len(ch)) & (self.full2c[f] == len(self.rows)))[0]
+                if len(sel): out[n][sel] = wrap(ch[f[sel] - r0])
+        return {n: out[n].reshape(tuple(tables[n].shape) + (self.D,)) for n in tables}
+
+
+def reached_rows(m, sents):
+    """the rows of V8's phase table that the sentences read with a non-zero weight (V8.states): path m[c_k]; bigram bg0[c_0] and
+    bg[c_(k-1), c_k]; chain A[c_q, c_k] for q < k; chainL also L[c_q, c_k] for q > k. Padded positions and the other pairs of the T x T
+    chain tensors are read with weight 0 (gradient exactly 0)."""
+    ip, ib0, ib, iA, iL = (t.cpu().numpy() for t in (m.ipath, m.ibg0, m.ibg, m.iA, m.iL)); out = set()
+    for toks in {tuple(s) for s in sents}:
+        c = np.array([m.cat_id[m.w.cat[t]] for t in toks]); n = len(c); up = np.triu_indices(n, 1)
+        if "path" in m.codes: out.update(ip[c].tolist())
+        if "bigram" in m.codes: out.add(int(ib0[c[0]])); out.update(ib[c[:-1], c[1:]].tolist())
+        if "chain" in m.codes or "chainL" in m.codes: out.update(iA[c[:, None], c[None, :]][up].tolist())
+        if "chainL" in m.codes: out.update(iL[c[None, :], c[:, None]][up].tolist())
+    return np.array(sorted(out), dtype=np.int64)
+
+
+def build_v8(v8, shim, D, seed, codes, device, sents):
+    """experiment/v8_gates.V8 as train_one used to build it (V8(shim, D, np.random.default_rng(200 + seed), codes, device, 'closed')), with
+    the same initial values, and the generator left in the same state, but without its whole-table copies: the constructor builds the
+    STRUCTURE at D = 1 (names, kinds, index tables), then LeanTheta draws the phases at the real D and holds only the rows the training
+    sentences reach. Returns (model, lean). With the position code (its rows come from a second generator) the full constructor is used
+    and only its unused numpy copies are freed: (model, None)."""
+    import torch
+    rng = np.random.default_rng(200 + seed)
+    if "pos" in codes:
+        m = v8.V8(shim, D, rng, list(codes), device, gate_init="closed")
+        m.np_model.theta = m.np_model._m = m.np_model._v = m.np_model.F = None       # v4.V4's numpy table, Adam moments, identities: unused
+        return m, None
+    m = v8.V8(shim, 1, np.random.default_rng(0), list(codes), device, gate_init="closed")
+    K = len(m.cats); P2 = 1 + K * K + K; P = m.theta.shape[0]
+    assert P == P2 + K + (K + 1) * K + 16 + K + 24 + K * K, "phase table layout differs from v2 / v4 / v5 / v6"
+    m.np_model = None; m.D = D
+    lean = LeanTheta(P, D, rng, P2 + len(shim.vocab), reached_rows(m, sents), m.dtype, device)
+    m.theta = lean.theta; m.rng = rng
+    m.root_mask = torch.ones(len(lean.rows), 1, dtype=m.dtype, device=device); m.root_mask[0] = 0
+    return m, lean
+
+
+class Compact:
+    """the model as trainer.train_loop sees it with a LeanTheta: each batch gets a small phase table of its own, the held rows it reads
+    plus one zero row for the entries no training sentence reads with a non-zero weight (padded positions, chain pairs q >= k), and
+    V8.states runs unchanged on it (a shallow copy of the model with the batch's table and index tables)"""
+    def __init__(self, m, lean, v8):
+        import torch
+        self.m, self.lean, self.v8 = m, lean, v8; self.f2c = torch.tensor(lean.full2c, device=m.device); self.nh = len(lean.rows)
     @property
-    def theta(self): return self.m.theta
-    def states(self, cats, ids, mask):
-        T = int(mask.sum(1).max().item()); return self.m.states(cats[:, :T], ids[:, :T], mask[:, :T])
+    def theta(self): return self.lean.theta
+    def states(self, cats, ids, mask, t_used=None):
+        import torch
+        m = self.m; c = cats if t_used is None else cats[:, :t_used]
+        tabs = {"ipath": m.ipath, "ibg0": m.ibg0, "ibg": m.ibg, "iA": m.iA, "iL": m.iL}
+        read = torch.cat([m.ipath[c].reshape(-1), m.ibg0[c[:, :1]].reshape(-1), m.ibg[c[:, :-1], c[:, 1:]].reshape(-1),
+                          m.iA[c.unsqueeze(2), c.unsqueeze(1)].reshape(-1), m.iL[c.unsqueeze(1), c.unsqueeze(2)].reshape(-1)])
+        held = torch.unique(self.f2c[read]); held = held[held < self.nh]
+        c2b = torch.full((self.nh + 1,), len(held), dtype=torch.long, device=m.device); c2b[held] = torch.arange(len(held), device=m.device)
+        v = copy.copy(m)
+        for n, t in tabs.items(): setattr(v, n, c2b[self.f2c[t]])
+        v.theta = torch.cat([self.lean.theta[held], torch.zeros(1, self.lean.D, dtype=m.dtype, device=m.device)])
+        v.root_mask = torch.ones(len(held) + 1, 1, dtype=m.dtype, device=m.device)
+        return self.v8.V8.states(v, cats, ids, mask, t_used=t_used)
 
 
 class Shim:
@@ -448,14 +550,26 @@ def train_one(a, legend, rows, splits, schema, seed, model_dir, run_dir):
         for e in range(a.epochs): order += list(rng.permutation(len(train)) if e > 0 or a.shuffle else range(len(train)))
     if a.max_train: order = order[:a.max_train]
     sents = [list(train[i]["tokens"]) for i in order]
-    targets = np.array([comp.wire(train[i]["wire"], train[i]["by"], train[i]["tokens"]) * (-1.0 if train[i].get("negative") else 1.0) for i in order])
+    # memory bounded by one step: the targets (one compiled state per step, complex128) and the encoded batches are built per batch from
+    # `order` when the loop needs them, not for every step at once; the missing-lemma count of the [train] line is the same count (each
+    # training row compiled once, counted once per step it appears in)
+    def target(j):
+        r = train[order[j]]; return comp.wire(r["wire"], r["by"], r["tokens"]) * (-1.0 if r.get("negative") else 1.0)
+    miss = {}
+    for i in order:
+        if i not in miss: n0 = comp.missing_lemma; comp.wire(train[i]["wire"], train[i]["by"], train[i]["tokens"]); miss[i] = comp.missing_lemma - n0
+    comp.missing_lemma = sum(miss[i] for i in order); del miss
     n_neg = sum(1 for r in train if r.get("negative"))
     if n_neg: print(f"[train] seed {seed}: {n_neg} NEGATIVE examples among the {len(train)} training rows (target = minus the anchor state; R81)")
     print(f"[train] seed {seed}: {len(train)} training rows x {a.epochs} epoch(s) -> {len(sents)} steps' sentences; D={a.D}; kinds {len(set(wk.values()))}; "
           f"vocab {len(shim.vocab)}; predicate lemma not found in {comp.missing_lemma} targets", flush=True)
     ident = (lambda w: legend.lemma_of(w)) if legend.reader.get("identity") == "lemma" else (lambda w: w)   # reader.identity (legend.py)
     F = np.array([st.id(ident(w)) for w in shim.vocab])
-    m = v8.V8(shim, a.D, np.random.default_rng(200 + seed), list(a.code_list), a.device, gate_init="closed"); m.set_F(F)
+    m, lean = build_v8(v8, shim, a.D, seed, a.code_list, a.device, sents); m.set_F(F)
+    del F; m.F_np = None; st.cache.clear()           # the torch copy is the one used; the stars are recomputed (identical) when needed
+    if lean is not None:
+        print(f"[train] phase table: {len(lean.rows)} of {lean.P} rows reached by the training sentences, held and trained; the other "
+              f"{lean.P - len(lean.rows)} keep their initial values (gradient exactly 0) and are redrawn for the route book | {trainer.mem_line()}", flush=True)
     if "pos" in a.code_list:
         m.pos_max = max(len(s_) for s_ in sents)        # the position term is OMITTED beyond the trained length (B7 (b), the stated behaviour)
         print(f"[train] position code (declared by the legend / --codes): positions 0-{m.pos_max - 1} trained, omitted beyond")
@@ -476,15 +590,30 @@ def train_one(a, legend, rows, splits, schema, seed, model_dir, run_dir):
     if r0 is not None:
         print(f"[trace] text: {r0['text']}\n[trace] tokens/kinds: " + " ".join(f"{t}/{legend.kind(t)}" for t in r0['tokens']))
         print(f"[trace] gold frame: {world.canon(r0['frame'])}")
-        print(f"[trace] target |S_world| = {np.linalg.norm(targets[0]):.2f} (sqrt(D) per unit term = {np.sqrt(a.D):.1f}); initial gates all {float(torch.sigmoid(m.logits[0])):.2f} (closed start)")
-    cats, ids, mask = m.encode(sents); tgt = torch.tensor(targets, dtype=m.F.dtype, device=m.device)
+        print(f"[trace] target |S_world| = {np.linalg.norm(target(0)):.2f} (sqrt(D) per unit term = {np.sqrt(a.D):.1f}); initial gates all {float(torch.sigmoid(m.logits[0])):.2f} (closed start)")
+    # a batch = the sentences order[i:j], encoded as m.encode(sents) encoded them (padded to the longest sentence of all steps, Tg); V8.states
+    # computes the D-dimensional terms on the batch's own longest sentence only (t_used: the same function; the gates' gradient can differ
+    # in the last bit, V8.states), unless --pad_to_longest (every batch computed at the full width Tg, bit for bit the previous trainer);
+    # with --length_buckets each batch has its own width, as before
+    Tg = max((len(s_) for s_ in sents), default=0)
+    def batch_fn(i, j):
+        cb, ib, mb = m.encode(sents[i:j]); T = cb.shape[1]; kw = {}
+        if not a.length_buckets and T < Tg:
+            pad = lambda x: torch.cat([x, torch.zeros(x.shape[0], Tg - T, dtype=x.dtype, device=x.device)], 1)
+            cb, ib, mb = pad(cb), pad(ib), pad(mb); kw = {} if getattr(a, "pad_to_longest", False) else {"t_used": T}
+        return cb, ib, mb, torch.tensor(np.array([target(k) for k in range(i, j)]), dtype=m.F.dtype, device=m.device), kw
     t0 = time.time()
-    tm = Trimmed(m) if a.length_buckets else m
-    trainer.train_loop(tm, params, cats, ids, mask, tgt, a.batch, a.lr, log_every=a.log_every, ckpt=None if a.no_ckpt else os.path.join(run_dir, f"ckpt_seed{seed}.pt"),
-                       resume=a.resume, tag=f" seed {seed}")
+    tm = Compact(m, lean, v8) if lean is not None else m
+    trainer.train_loop(tm, params, None, None, None, None, a.batch, a.lr, log_every=a.log_every, ckpt=None if a.no_ckpt else os.path.join(run_dir, f"ckpt_seed{seed}.pt"),
+                       resume=a.resume, tag=f" seed {seed}", batch_fn=batch_fn, n=len(sents), stop_after=getattr(a, 'stop_after', 0), loss_every_step=getattr(a, 'loss_every_step', False))
     t_train = time.time() - t0
     os.makedirs(model_dir, exist_ok=True)
-    export_routebook(m, os.path.join(model_dir, "routebook.npz"))
+    export_routebook(m, os.path.join(model_dir, "routebook.npz"), lean)
+    print(f"[export] route book written | {trainer.mem_line()}", flush=True)
+    if getattr(a, "stop_after", 0):      # debugging / equivalence checks: the route book after stop_after steps, then the run ends
+        z = np.load(os.path.join(model_dir, "routebook.npz"))
+        for k in sorted(z.files): print(f"[stop_after] routebook {k} {z[k].dtype} {z[k].shape} sha256 {hashlib.sha256(np.ascontiguousarray(z[k]).tobytes()).hexdigest()[:16]}")
+        print(f"[stop_after] stopped after {a.stop_after} steps: no calibration, no evaluation | {trainer.mem_line()}", flush=True); sys.exit(0)
     shutil.copyfile(legend.path, os.path.join(model_dir, "legend.json"))
     lexf = legend.raw.get("kinds", {}).get("lexicon", "kinds.tsv")
     if os.path.exists(os.path.join(legend.dir, lexf)): shutil.copyfile(os.path.join(legend.dir, lexf), os.path.join(model_dir, os.path.basename(lexf)))
@@ -506,12 +635,13 @@ def train_one(a, legend, rows, splits, schema, seed, model_dir, run_dir):
     rd = Reader(model_dir); worst = 0.0
     with torch.no_grad():
         for s in sents[:3]:
-            St = m.states(*m.encode([s]))[0].cpu().numpy(); Sn, _, _, _ = rd.chart(s)
+            St = tm.states(*m.encode([s]))[0].cpu().numpy(); Sn, _, _, _ = rd.chart(s)
             worst = max(worst, float(np.linalg.norm(St - Sn) / np.linalg.norm(St)))
     print(f"[export] numpy reader vs torch states: max relative difference {worst:.2e} (float32 phases in the route book)", flush=True)
     assert worst < 1e-3, "numpy inference does not reproduce the trained model"
-    rd, calrep = calibrate_and_finish(a, legend, rows, schema, seed, model_dir, run_dir, cfg, train, rd)
     gates = {c: float(g) for c, g in zip(m.cats, torch.sigmoid(m.logits).detach().cpu().numpy())}
+    del tm, m, lean, params                  # the torch model is not used after the export: freed before calibration and evaluation
+    rd, calrep = calibrate_and_finish(a, legend, rows, schema, seed, model_dir, run_dir, cfg, train, rd)
     return rd, {"t_train_s": round(t_train, 1), "calibration": calrep, "gates": gates, "numpy_torch_diff": worst, "kinds": kinds_report}
 
 
@@ -723,7 +853,7 @@ def calibrate_and_finish(a, legend, rows, schema, seed, model_dir, run_dir, cfg,
     th["presence_margin"] = ("|presence ratio - threshold| (ratio units), on the wire as _presence_margin.<role> (SOP Lang keys carry one dot); the role's _margin = min(identity "
                              "margin, presence margin): a near-threshold reading abstains")
     with open(os.path.join(model_dir, "config.json"), "w") as f: json.dump(cfg, f, indent=1)
-    rd = Reader(model_dir); resid = []
+    rd = Reader(model_dir, routebook=rd.rb); resid = []      # the same route book file: its tables are not loaded a second time
     if getattr(a, "store_presence_ratios", False): store_presence_ratios(rd, rows, cal_rows, schema, seed, run_dir)
     ids = (f"c{i}" for i in range(10 ** 9))
     for row in cal_rows: resid.append(rd.formalize(row["text"], 0, ids)[2]["residual"])
@@ -942,6 +1072,12 @@ def main(argv=None):
     ap.add_argument("--candidate_sets", default="both", choices=["both", "catalog"], help="'catalog' = skip the experiment-candidate pass")
     ap.add_argument("--length_buckets", action="store_true", help="batches of similar length in shuffled bucket order, each trimmed to its "
                     "longest sentence (as experiment/v11_wikisql; real text with long sentences); off by default (the constructed worlds' regime)")
+    ap.add_argument("--stop_after", type=int, default=0, help="debugging / equivalence checks: stop training after this many steps, write the "
+                    "route book (its arrays' sha256 printed) and end the run (no calibration, no evaluation); 0 (default) = off")
+    ap.add_argument("--pad_to_longest", action="store_true", help="compute every batch at the width of the longest training sentence, as the "
+                    "trainer did before 2026-10-31 (bit for bit; memory and time per step grow with the longest sentence); default: each batch at "
+                    "its own longest sentence (the same function, the gates' gradient can differ in the last bit)")
+    ap.add_argument("--loss_every_step", action="store_true", help="debugging / equivalence checks: print every step's loss in full precision")
     ap.add_argument("--no_ckpt", action="store_true", help="no checkpoint file (the run folder keeps logs, metrics, splits, command only)")
     ap.add_argument("--run_dir", help="write this run's folder here instead of <world>/runs/<timestamp>")
     ap.add_argument("--eval_only", action="store_true", help="re-score the saved model/ (no training): metrics.json and REPORT.md rewritten")

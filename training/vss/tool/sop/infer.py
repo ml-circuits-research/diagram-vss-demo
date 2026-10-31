@@ -36,8 +36,11 @@ class Routebook:
         self.cats = [str(c) for c in z["cats"]]; self.cat_id = {c: i for i, c in enumerate(self.cats)}
         self.codes = [str(c) for c in z["codes"]]
         opt = lambda n: z[n].astype(float) if n in z.files else None
-        self.path, self.bg0, self.bg = opt("path"), opt("bg0"), opt("bg")
-        self.A, self.L, self.logits = opt("A"), opt("L"), opt("logits")
+        # the K x K x D tables bg, A, L are kept as stored (float32) and converted to float64 per sentence, on the rows it reads: the same
+        # float64 values (float32 -> float64 is exact), half the memory of converting the whole tables
+        keep = lambda n: z[n] if n in z.files else None
+        self.path, self.bg0, self.bg = opt("path"), opt("bg0"), keep("bg")
+        self.A, self.L, self.logits = keep("A"), keep("L"), opt("logits")
         # the centre reader (legend reader.centres; research/attention/port/NOTES.md): phases cthR / cthL (E x K x D, E = the centre kinds),
         # cthC (E x D), bigrams cbgL ((K+2) x K x D, previous kind or BOS=K) and cbgR (K x (K+2) x D, next kind or EOS=K+1); attachment
         # logits cA (K x K x 3: word kind, centre kind, side 0 = word left of its centre / 1 = right / 2 = the centre itself), cDist (3 x 16),
@@ -131,14 +134,14 @@ class Routebook:
         """c: category indices (T,) -> addresses (T, D): the sum of the codes' terms before the identity, as V8.states"""
         c = np.asarray(c, dtype=int); T, D = len(c), self.D; terms = np.zeros((T, D), dtype=complex)
         if "path" in self.codes: terms += E(np.cumsum(self.path[c], 0))
-        if "bigram" in self.codes: terms += E(np.concatenate([self.bg0[c[:1]], self.bg[c[:-1], c[1:]]], 0))
+        if "bigram" in self.codes: terms += E(np.concatenate([self.bg0[c[:1]], self.bg[c[:-1], c[1:]].astype(float)], 0))
         if "pos" in self.codes and self.pos is not None:     # B7: the position code, omitted beyond the trained length (pos_max)
             posidx = np.minimum(np.arange(T), 39); pt = E(self.pos[posidx] + self.pc[c])
             if self.pos_max is not None: pt = pt * (posidx < self.pos_max)[:, None]
             terms += pt
         if "chainL" in self.codes or "chain" in self.codes:
             g = sigmoid(self.logits)[c]; u = np.log1p(-g + 1e-9); Sx = np.concatenate([[0.0], np.cumsum(u)])
-            EA = E(self.A[c[:, None], c[None, :]])                                # EA[q, k] = A[c_q, c_k]
+            EA = E(self.A[c[:, None], c[None, :]].astype(float))                  # EA[q, k] = A[c_q, c_k]
             addr = np.zeros((T, D), dtype=complex)
             for k in range(T):
                 p_root = np.exp(Sx[k])
@@ -146,7 +149,7 @@ class Routebook:
                 p = g[:k] * np.exp(Sx[k] - Sx[1:k + 1])
                 addr[k] = p_root + (p[:, None] * addr[:k] * EA[:k, k]).sum(0)
             if "chainL" in self.codes:
-                EL = E(self.L[c[None, :], c[:, None]])                            # EL[k, q] = L[c_q, c_k]
+                EL = E(self.L[c[None, :], c[:, None]].astype(float))              # EL[k, q] = L[c_q, c_k]
                 addrL = np.zeros_like(addr)
                 for k in range(T):
                     acc = np.exp(Sx[T] - Sx[k + 1]) * addr[k]
@@ -167,7 +170,7 @@ class Routebook:
 
 
 class Reader:
-    def __init__(self, model_dir, legend_path=None, force=False, sentence_candidates=False):
+    def __init__(self, model_dir, legend_path=None, force=False, sentence_candidates=False, routebook=None):
         """sentence_candidates (default off: the existing behaviour): the candidates of a role are the catalog words of the role's kinds AND the
         sentence's own tokens whose kind is one of them (new labels and numbers read without retraining; mirrored by app/src/vss.js)"""
         self.dir = model_dir; self.sentence_candidates = bool(sentence_candidates); self._sent_tokens = ()
@@ -183,7 +186,9 @@ class Reader:
             other = Legend(legend_path)
             if other.sha != self.legend.sha and not force:
                 raise ModelError(f"legend mismatch: {legend_path} is {other.sha}, the model was trained with {self.legend.sha} (--force to inspect)")
-        self.rb = Routebook(os.path.join(model_dir, "routebook.npz")); self.D = self.rb.D
+        # routebook: an already loaded Routebook of this same model_dir/routebook.npz (sop train re-reads config.json after the calibration;
+        # the route book file is unchanged), so that two copies of its tables are never held at once
+        self.rb = routebook if routebook is not None else Routebook(os.path.join(model_dir, "routebook.npz")); self.D = self.rb.D
         self.st = world.Stars(self.cfg["seed"], self.D, self.cat.get("star_seed", world.GLOBAL_STAR_SEED), self.cat.get("identity_table"),
                               self.cfg.get("star_version", 1), self.cat.get("star_table"))
         self.comp = world.Compiler(self.legend, self.st)

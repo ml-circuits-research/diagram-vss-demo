@@ -57,7 +57,14 @@ class V8(v6.V6):
             cats[b, :len(toks)] = torch.tensor([self.cat_id[w.cat[t]] for t in toks]); ids[b, :len(toks)] = torch.tensor([w.idx[t] for t in toks]); mask[b, :len(toks)] = 1
         return cats.to(self.device), ids.to(self.device), mask.to(self.device)
 
-    def states(self, cats, ids, mask):
+    def states(self, cats, ids, mask, t_used=None):
+        """t_used (default None = the full width): the D-dimensional terms are computed on the first t_used positions only (a batch padded
+        to the corpus' longest sentence, cut to its own longest one; tool/sop/train.py). The same function: the padded positions add nothing
+        to any term, except the 1e-9 of log1p(-g + 1e-9) in the product over the following positions (prod_{i>k} (1 - g_i)), so the gate
+        sums Sx (B x T scalars) are still taken over the full padded width. Measured: states, loss and the theta gradient bit-identical;
+        the gates' gradient can differ in the last bit (autograd adds its pieces in another order without the padded positions' nodes)."""
+        cats_w, mask_w = cats, mask; Tw = cats.shape[1]                                  # the full padded width
+        if t_used is not None and t_used < Tw: cats, ids, mask = cats[:, :t_used], ids[:, :t_used], mask[:, :t_used]
         th = self.theta * self.root_mask; B, T = cats.shape; one = torch.ones((), dtype=self.dtype, device=self.device)
         E = lambda ph: torch.polar(torch.ones_like(ph), ph)
         terms = 0
@@ -70,7 +77,7 @@ class V8(v6.V6):
             if getattr(self, "pos_max", None) is not None: pterm = pterm * (posidx < self.pos_max).to(pterm.dtype).unsqueeze(0).unsqueeze(-1)   # B7 (b): the position term is OMITTED beyond the trained range, not drawn at random
             terms = terms + pterm
         if "chainL" in self.codes or "chain" in self.codes:
-            g = torch.sigmoid(self.logits)[cats] * mask                                   # B x T
+            g = torch.sigmoid(self.logits)[cats_w] * mask_w                               # B x Tw (Tw = T unless t_used)
             u = torch.log1p(-g + 1e-9); Sx = torch.cat([torch.zeros(B, 1, dtype=self.dtype, device=self.device), torch.cumsum(u, 1)], 1)   # Sx[i] = sum_{j<i} u_j
             EA = E(th[self.iA[cats.unsqueeze(2), cats.unsqueeze(1)]])                   # B x T(q) x T(k) x D : A[c_q, c_k]
             addrs = []                                                                 # lists, not in-place writes (autograd)
@@ -85,14 +92,14 @@ class V8(v6.V6):
                 EL = E(th[self.iL[cats.unsqueeze(1), cats.unsqueeze(2)]])               # B x T(k) x T(q) x D : L[c_q, c_k]
                 addrLs = []
                 for k in range(T):
-                    r = torch.exp(Sx[:, T] - Sx[:, k + 1])                                # prod_{i>k} (1-g_i)
+                    r = torch.exp(Sx[:, Tw] - Sx[:, k + 1])                               # prod_{i>k} (1-g_i), over the full padded width
                     acc = r.unsqueeze(-1).to(EA.dtype) * addr[:, k]
                     if k < T - 1:
-                        pL = g[:, k + 1:] * torch.exp(Sx[:, k + 1:T] - Sx[:, k + 1].unsqueeze(1))   # g_q prod_{k<i<q}(1-g_i)
+                        pL = (g[:, k + 1:] if T == Tw else g[:, k + 1:T]) * torch.exp(Sx[:, k + 1:T] - Sx[:, k + 1].unsqueeze(1))   # g_q prod_{k<i<q}(1-g_i)
                         acc = acc + torch.einsum("bq,bqd->bd", pL.to(EA.dtype), addr[:, k + 1:] * EL[:, k, k + 1:])
                     addrLs.append(acc)
                 addrL = torch.stack(addrLs, 1)
-                gk = g.unsqueeze(-1).to(EA.dtype); addr = gk * addr + (1 - gk) * addrL
+                gk = (g if T == Tw else g[:, :T]).unsqueeze(-1).to(EA.dtype); addr = gk * addr + (1 - gk) * addrL
             terms = terms + addr
         if getattr(self, "vo", None) is not None:                                        # the verb-order route (set_vorder)
             side, vcat, ordinal, valid = self.vorder_index(cats, mask)
