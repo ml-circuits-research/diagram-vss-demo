@@ -76,3 +76,8 @@ Causes of the misses, fix_p80_s0 (error_analysis.mjs; read alone, 61.0% fully ri
 | role wrong (mostly lists) | 8.4 |
 
 Reader status: ok 731, abstain 294, unknown-event 83, no-sense 18. Words with no kind of their own: 1.7% (right) vs 5.5% (wrong).
+
+The tagger is out of the pipeline (owner's decision): the browser and llm_score.mjs now cut by the VSS reader's own centres
+(vss-centers.js). With fix_p80_s0 on the same dev requests: 46.5% fully right, 335 extra wires (annotated cut 60.5% / 71). The gap
+is the centres' false and missed action words; the centre attention (research/attention/PROPOSAL.md) and the text outside the spans
+as negative training examples are the next steps.

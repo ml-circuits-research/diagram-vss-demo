@@ -28,8 +28,9 @@ const sys = K.createSystem();
 function vssFormalize(text, ctx) {
   // SEG=gold: the annotated spans (held-out TRAINING messages only: the test sets have none): the reading quality without the cut
   const segs = process.env.SEG === "gold" && ctx.spans ? ctx.spans.map((src) => ({ src }))
-    : process.env.SEG === "centres" && F ? vssCentres(text, ctx.names, F, vss, { confident: process.env.CONFIDENT === "1" }).map((src) => ({ src }))      // the VSS reader's own cut
-    : F ? FRONT.segment(text, ctx.names, F).map((src) => ({ src })) : sys.formalize(text, ctx).segments;
+    : process.env.SEG === "tagger" && F ? FRONT.segment(text, ctx.names, F).map((src) => ({ src }))        // labelled reference only
+    : F ? vssCentres(text, ctx.names, F, vss, { confident: process.env.CONFIDENT === "1" }).map((src) => ({ src }))   // default: the VSS reader's own cut
+    : sys.formalize(text, ctx).segments;
   const seq = { s: 0, m: 0 }, c = { names: ctx.names, last: [], refs: new Map() }, nodes = [];
   for (const seg of segs) {
     const nm = c.names.concat([...c.refs.keys()]);

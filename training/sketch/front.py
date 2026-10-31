@@ -319,7 +319,9 @@ def learn(msgs, params=None):
     V = learn_values(reqs, P["val_min_count"], P["val_min_prec"])
     vt = set(value_kinds())
     T = learn_triggers(reqs, chatter, V, P["trig_min_count"], P["trig_share"], P["trig_min_prec"], vt)
-    S = train_segmenter(msgs, P["seg_epochs"])
+    # the BIO tagger (train_segmenter) is NOT part of the pipeline (owner's decision, 2026-10-31); it is trained only on request, as a
+    # labelled reference: FRONT_TAGGER=1
+    S = train_segmenter(msgs, P["seg_epochs"]) if os.environ.get("FRONT_TAGGER") == "1" else {}
     return {"about": "front.json: the learned front end of the VSS world `real` (training/sketch/front.py); learned from " + str(len(msgs)) + " training messages",
             "params": P, "values": dict(sorted(V.items())), "triggers": T, "segmenter": dict(sorted(S.items()))}
 

@@ -25,7 +25,7 @@ Nothing else maps language to the legend. No word lists, no synonym tables, no s
 
 ## 3. Learned from the annotated training messages (front.py)
 
-1. Segmenter: a greedy averaged-perceptron BIO tagger over the message's tokens (B = first token of a request, I = inside, O = chatter),
+1. (NOT part of the pipeline since 2026-10-31, owner's decision; kept only as a labelled reference, FRONT_TAGGER=1) Segmenter: a greedy averaged-perceptron BIO tagger over the message's tokens (B = first token of a request, I = inside, O = chatter),
    trained on the spans. VSS reads one request at a time (its state is one D-dimensional vector: long inputs blur).
 2. Values: word n-grams (1-3) -> legend value tokens, from the co-occurrence of a span's n-grams with its wire's gold values; kept by
    count and precision, shortest n-gram first; applied longest first.
@@ -39,7 +39,7 @@ llm_train/FRONT_SELECTION.md). The frequency cut-off for own kinds (8) is not se
 
 ## 4. Reading
 
-The message is cut by the segmenter; each request is normalized and read; a request with no event token or with status
+The message is cut by the VSS reader itself (vss-centers.js: one state per action word; the centre attention of research/attention/PROPOSAL.md is the planned replacement); each request is normalized and read; a request with no event token or with status
 `unknown-event` / `no-sense` is not executed and reported as not understood; the other requests of the message are executed.
 
 ## 5. Adding words and constructions later
