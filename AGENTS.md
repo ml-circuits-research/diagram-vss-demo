@@ -114,6 +114,9 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
 - Approval is needed only for changes the owner did not propose: a new learned component (a tagger, a classifier, any model
   besides the VSS reader), a new layer in the pipeline, or replacing one. Propose it with the reason and the alternative, then wait.
   (2026-10-30: a perceptron segmenter was added without asking; the owner decided it is not part of the architecture.)
+- A fix whose cause is measured and that uses what the reader already has (an existing option, a calibration rule, a converter
+  bug, a front-end learning rule) needs no approval: pre-register it, run it, report it. (2026-10-31: the owner had to say this
+  about the occupancy-marker switch.)
 
 - Do not take decisions that move away from real use without asking; state assumptions explicitly, with concrete examples.
 - Explain in plain words, without jargon; no needless cleverness. If something was a mistake, say so plainly and fix it.
