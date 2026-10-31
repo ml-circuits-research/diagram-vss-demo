@@ -87,6 +87,9 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
 - No vague words ("mechanism", "component", "signal") when a concrete one exists: say what it is and what it does.
 - Do not dramatize or inflate: no "architecture change" for what is new training data or a bug fix.
 - Short, literal answers; no guessing games; when unsure, say "I don't know" and how to find out.
+- Use the exact terms of the code and the data, not metaphors: VSS has no notion of "chatter"; the annotation has text outside every
+  span; the tagger labels tokens B / I / O; the VSS reader returns a status: `ok`, `abstain` (a margin under 0.05: uncertain, still
+  executed today), `unknown-event` (no action word found), `no-sense` (more than half of the tokens could not be placed). Say which one.
 
 ## Working with the owner
 
