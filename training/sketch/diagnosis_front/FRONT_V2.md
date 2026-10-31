@@ -123,3 +123,81 @@ Not part of the criterion: the own cut got worse on old (47.1% -> 45.3%, extra w
   count such occurrences as false for pattern rules, or let an `ins` rule fire only when no event token stands in the request.
 - The gain on the other dev files is smaller (msg2 +2.9, long +1.7 points; cause A 22.5 -> 19.6, 16.6 -> 12.7): their missing action words are mostly in classes 2 and 4 (one-off verbs, request forms the old data has not seen).
 - This result is on a dev file of the training distribution; it says nothing yet about the test sets.
+
+# Step 2 (fv3): pattern rules count the spans that already have a verb against themselves
+
+Pre-registered 2026-10-31, before any training of the new model. One run, no knobs turned after the numbers.
+
+## Cause and change
+
+fv2's own cut got worse (47.1% -> 45.3%, extra wires 335 -> 386) because a pattern rule (`NAME to NAME`, `the NAME a`) inserts an event token also in spans that already
+have a verb ("Connect Idle to Running" -> `connect connect`); dev spans with 2+ event tokens on the message path rose 245 -> 317.
+Change (learning only, `learn_triggers`, the same rule for every pattern rule; `apply_triggers` / `normalize_message` and the JS twin are unchanged, so no new parity code):
+an occurrence of a pattern phrase in a span of the SAME event that has its own trigger elsewhere (outside the pattern's occurrence) counts as a false occurrence of that rule
+(it is redundant there), exactly like an occurrence in chatter or in a span of another event. It is part of `FRONT_V2=1`; `FRONT_V2_OLD_PATTERN=1` gives the fv2 front end again
+(checked: byte-identical to the fv2 fit-split `front.json` and equal to `docs/model/fv2_p80_s0/front.json`). Switch off (`FRONT_V2` unset): byte-identical to before.
+
+## Front-end counts without training (learned from the fit split; fit 4305 spans, dev 1126)
+
+| front end | pattern rules | fit (a) | fit (b) | fit (c) | fit 2+ tokens | dev (a) | dev (b) | dev (c) | dev 2+ tokens |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| FRONT_V2 off (fix_p80_s0) | 0 | 328 | 397 | 135 | 986 | 92 | 112 | 40 | 245 |
+| fv2 | 109 | 174 | 392 | 133 | 1281 | 60 | 109 | 43 | 317 |
+| fv3 | 90 | 188 | 389 | 128 | 1044 | 64 | 108 | 40 | 261 |
+
+(a) spans with no event token; (b) rule firings outside every span; (c) spans with an event token, none = gold; "2+ tokens": annotated spans with more than one event
+token in `normalize_message` output. Script: `measure_v3.py` (this folder). fv3 keeps 28 of the 32 dev spans fv2 gained (dev (a) 92 -> 64) and brings the multiplicity back near the baseline (261 against 245).
+
+## Hypothesis
+
+With the redundant pattern firings gone, the own cut is no worse than fix_p80_s0 while the reading alone keeps most of fv2's gain (fv2: 63.5%).
+
+## Training and measures
+
+`SOP_PYTHON=/home/claude/venv/bin/python3 PREFIX=fv3 SEED=0 FRONT_V2=1 ./run_curve.sh 0.8` (old data, 2 epochs; `docs/model/fv3_p80_s0`); `REAL_WORLD.md` restored afterwards.
+Measures as for fv2, on the old dev file, main scorer: `llm_score.mjs` SEG=gold and own cut, `error_analysis.mjs`; msg2 and long dev reported only.
+
+## Criterion (old dev file, all three)
+
+1. reading alone (SEG=gold) wires right >= 62.5%;
+2. own cut wires right >= 47.1% (not worse than fix_p80_s0);
+3. extra wires with the own cut <= 335 (fix_p80_s0: 335).
+
+Otherwise fail; report, no second try.
+
+## Result (fv3; one run, nothing changed after seeing the numbers)
+
+Training: `PREFIX=fv3 SEED=0 FRONT_V2=1 ./run_curve.sh 0.8` (nothing else training before; 4282 rows, 112 value n-grams, 1676 rules, 90 of them pattern rules); `REAL_WORLD.md` restored.
+Front-end parity for the fv3 fit-split `front.json`: 2640/2640 identical (JS unchanged). The trained `front.json` equals the one measured above.
+Main scorer, old dev (1126 wires), wires right (extra wires):
+
+| | fix_p80_s0 | fv2_p80_s0 | fv3_p80_s0 |
+|---|---|---|---|
+| SEG=gold | 61.0% (x71) | 63.5% (x72) | **64.2% (x72)** |
+| own cut | 47.1% (x335) | 45.3% (x386) | **44.2% (x407)** |
+| cause A | 8.2% | 5.3% | 5.7% |
+| fully right requests (error_analysis) | 61.5% | 63.9% | 64.5% |
+
+msg2 / long (not criterion): SEG=gold 46.8% (x98) / 46.6% (x48), own cut 38.4% (x455) / 34.3% (x258); fix_p80_s0: 45.7 / 47.4 and 40.3 / 37.0.
+
+## Criterion
+
+1. SEG=gold >= 62.5%: 64.2%. Met.
+2. own cut >= 47.1%: 44.2%. NOT met.
+3. extra wires with the own cut <= 335: 407. NOT met.
+
+**FAIL.** The reading alone improved again (64.2%); the own cut is worse than fv2 (45.3% -> 44.2%, extra wires 386 -> 407). No second try.
+
+## Root-cause note (what the 2+ token hypothesis missed)
+
+- The change did what it was meant to at the front end (dev spans with 2+ event tokens 317 -> 261) but the extra wires of the own cut did not fall with it.
+  Extra wires by where their source text lies (old dev, own cut), outside every span / inside a span: fix 90 / 245, fv2 89 / 297, fv3 89 / 318.
+  So the whole rise is inside annotated spans: the cut makes a second centre inside a request. Examples (fv3): "Is Start still connected to Check" -> a second reading "Start still connected to";
+  "Which shape is the leftmost right now" -> "shape is the"; "Connect Idle to Running with an arrow" -> a second reading "Idle to Running with an arrow, dotted".
+  Most of these are not pattern-rule insertions: they come from plain rules of the cut path (`is`, `connected to`).
+- Ablation at scoring time only (fv3 model, its front.json with rules removed; not a valid fix since the model was trained with them; old dev, own cut): all rules 44.2% (x407);
+  without the 90 pattern rules 46.7% (x369); without the rules that use `prev2` 45.7% (x367). Both rule kinds add centres; neither alone explains the whole gap to 47.1% (x335).
+  SEG=gold: 63.3% (x68) and 64.0% (x74), so the reading itself does not depend on them much.
+- Where the cause sits: the own cut (`vssCentres`) turns every firing of a learned rule into a centre, and v2 learns 1.7 times as many rules (1676 against 961), which fire more often inside a span.
+  The front-end counts we pre-registered (a, b, spans with 2+ tokens) do not measure that; the measure that does is the number of centres per annotated span in the cut path.
+  Any next step has to be measured there first, and the cut, not the rules, may be the place to change (it is the debt already listed: the cut is the limit of the full pipeline).

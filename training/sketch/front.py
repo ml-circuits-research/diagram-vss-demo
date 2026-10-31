@@ -351,7 +351,7 @@ def learn_triggers(reqs, chatter, V, min_count, share, min_prec, value_tokens):
         if new: p2 = ctx(toks[pos - 2] if pos > 1 else None); ks = [(ph, p, n, p2), (ph, p, "*", p2)] + ks
         return ks
     for m, w, sp, names in reqs:
-        tok = event_token(w); toks = apply_values([x[0] for x in tokenize(sp, names)[0]], V); own = None
+        tok = event_token(w); toks = apply_values([x[0] for x in tokenize(sp, names)[0]], V); own = None; region = None
         if new: toks = pform(toks)
         if tok and w.get("trigger"):
             full = [x for x in apply_values([x[0] for x in tokenize(w["trigger"], names)[0]], V) if x not in ".,!?;:"]
@@ -359,25 +359,29 @@ def learn_triggers(reqs, chatter, V, min_count, share, min_prec, value_tokens):
             if new and not tt and full: tt = pform(full)   # NAMEPH: the trigger starts with a name: a pattern over NAME
             pos = next((k for k in range(len(toks) - len(tt) + 1) if tt and toks[k:k + len(tt)] == tt), None)
             if pos is not None:
-                own = tt; ph = " ".join(tt); phrases.add(ph)
+                own = tt; ph = " ".join(tt); phrases.add(ph); region = (pos, pos + len(tt))
                 for key in keys(ph, toks, pos, len(tt)): tp[key][tok] += 1
-        spans.append((toks, tok, own))
+        spans.append((toks, tok, own, region))
     chat = [apply_values([x[0] for x in tokenize(s, names)[0]], V) for s, names in chatter]
     if new: chat = [pform(t) for t in chat]
     occ, occ_c = collections.defaultdict(collections.Counter), collections.Counter()
-    def scan(toks, hit, own=None):
+    redundant = new and os.environ.get("FRONT_V2_OLD_PATTERN") != "1"
+    occ_red = collections.Counter()   # pattern phrase occurrences in a span of the SAME event that has its own trigger elsewhere (REDUNDANT)
+    def scan(toks, hit, own=None, region=None, ev=None):
         for ph in phrases:
             pt = ph.split()
             if own and len(own) > len(pt): continue
             for i in range(len(toks) - len(pt) + 1):
                 if toks[i:i + len(pt)] == pt:
-                    for key in keys(ph, toks, i, len(pt)): hit(key)
-    for toks, ev, own in spans: scan(toks, lambda key: occ[key].update([ev]), own)
+                    for key in keys(ph, toks, i, len(pt)):
+                        hit(key)
+                        if redundant and region and "NAME" in pt and not (region[0] <= i < region[1]): occ_red[(key, ev)] += 1
+    for toks, ev, own, region in spans: scan(toks, lambda key: occ[key].update([ev]), own, region, ev)
     for toks in chat: scan(toks, lambda key: occ_c.update([key]))
     rules = []
     for key, c in tp.items():
         n = sum(c.values()); tok, k = c.most_common(1)[0]
-        fp = occ_c[key] + sum(v for e, v in occ[key].items() if e != tok)
+        fp = occ_c[key] + sum(v for e, v in occ[key].items() if e != tok) + occ_red[(key, tok)]   # REDUNDANT: pattern rules also lose where a span already has its own trigger
         prec = n / (n + fp)
         if n >= min_count and k / n >= share and prec >= min_prec:
             e = {"p": key[0], "prev": key[1], "next": key[2], "tok": tok, "n": n, "prec": round(prec, 3)}
