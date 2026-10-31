@@ -14,6 +14,9 @@ Audit of 2026-10-30, written after the owner asked what else had been done witho
    pairing=all, the training spec none). Status: open question to the owner (a unification pass touches the test sets).
 6. Test-set messages were read to explain unknown words (the "feeds", "flows into" examples, the 10.6% unseen-word figure). Nothing
    was tuned on them. Status: not to happen again (AGENTS.md).
+   2026-10-31: the label checker of sonnet_msg2 ran one recursive grep from the repository root that printed 3 lines of
+   training/sketch/llm_bench/sonnet/LABEL_FIXES.md (the gold of test messages s-0296, s-0433, s-0356) and one line of the test SPEC.
+   It reported it and says it did not use them. Status: noted; agents are told to search only under llm_train/.
 7. Training and test messages are written by the same model families (Sonnet, Haiku). Status: noted; human-written messages would be
    the real check.
 

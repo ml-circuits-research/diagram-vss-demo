@@ -76,3 +76,11 @@ Values:
 - "connect A to B and B to C" (a continuing sequence) -> one connect: from "A,B,C", pairing "chain".
 - Several to one ("arrows from Water and Salt to Mix", "Bus and Tram both go to Metro") -> ONE connect: from "Water,Salt", to "Mix",
   no pairing (the mirror of one to several; one request, one wire, one span).
+- Verb ellipsis ("Paint Mon red, Tue gold and Wed teal"): each request gets its OWN span ("Tue gold"), never a span shared by
+  two wires. Its trigger is a word of its own span, as in the existing data (390 elided-verb wires counted 2026-10-31): set / create /
+  fact / label / rename / rule -> the leading words of the span (136 of 137, "Tue"); move -> its position or direction phrase (180 of
+  205); extreme / nearest -> the superlative word (12 of 12). connect is not settled ("Core to" 21, leading name 12 of 33).
+- A request the legend cannot express gets no wire (e.g. restyling or recolouring an existing link: `connect` on two shapes already
+  linked only reports that the link exists, docs/js/logic.js).
+- A chain that closes a loop ("A to B, B to C, C to A") -> a chain from "A,B,C" plus a separate connect from "C" to "A" (4 of 4 in
+  the existing data; a repeated name inside one chain makes a self-loop in logic.js).
