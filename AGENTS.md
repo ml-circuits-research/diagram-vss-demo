@@ -64,6 +64,13 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
 - Also report separately the requests whose trigger word was seen in training and those whose trigger was not.
 - One change at a time, and every number states which model, which data and which test set produced it.
 
+## Agents: model and effort per task
+
+- Opus, effort high: changes to the VSS model, trainer or reader (architecture work), independent reviews of such work.
+- Sonnet, effort medium: pipeline wiring, running trainings and evaluations, error analyses, label reviews, writing data.
+- Haiku, effort medium: simple data writing and mechanical checks.
+- The coordinator states the model and effort when launching an agent and reviews every result before it is reported.
+
 ## Experiments
 
 1. Before an experiment, write and show the owner: the hypothesis, how it is measured, and the threshold that means "it worked".
