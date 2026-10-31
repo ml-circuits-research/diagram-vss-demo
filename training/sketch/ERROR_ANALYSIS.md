@@ -81,3 +81,51 @@ The tagger is out of the pipeline (owner's decision): the browser and llm_score.
 (vss-centers.js). With fix_p80_s0 on the same dev requests: 46.5% fully right, 335 extra wires (annotated cut 60.5% / 71). The gap
 is the centres' false and missed action words; the centre attention (research/attention/PROPOSAL.md) and the text outside the spans
 as negative training examples are the next steps.
+
+## Plan step 1: text outside the spans as negative training examples (model neg_p80_s0, 80% fit split, seed 0): FAILED
+
+Change (one): msg_to_world.py adds, for every sentence of a training message that touches no annotated span and whose normalized form
+carries an action token, one wire of that event with no roles and `_negative=true` (sop train: target = minus its compiled state,
+vss-demo R81). Negatives go to train.sop only (never calib.sop), none from the calibration messages; sop train keeps them in the
+`train` split and leaves them out of the schema, the calibration rows and the evaluation (checked in train.py; no patch needed).
+Off by default since the step failed (`NEGATIVES=1` turns them on). Same 947 messages and 4282 positive rows as fix_p80_s0; 168 negatives among 4068 training rows.
+Trained with run_curve.sh (D 1024, 2 epochs, held-out calibration) and training/vss/tool/sop/infer.py as it was before bf5229e.
+
+Criterion fixed before training: own-cut extra wires < 150 AND reading alone >= 60%. Dev = the 253 held-out training messages,
+1126 requests.
+
+| | fix_p80_s0 | neg_p80_s0 |
+|---|---|---|
+| VSS, requests cut as annotated (the reading alone, llm_score SEG=gold) | 60.5% | 62.4% |
+| extra wires, annotated cut | 71 | 66 |
+| VSS, requests cut by its own centres (vss-centers.js) | 46.5% | 47.3% |
+| extra wires, own cut | 335 | **333** |
+| error_analysis.mjs, read alone, fully right | 61.0% | 63.0% |
+| sop train heldout_formulations FULL | 0.610 | 0.610 |
+
+Result: reading alone >= 60% holds; extra wires 333, not < 150. The step failed. (The +1.9 points on the reading alone are one seed;
+the spread between seeds is not measured yet: plan step 5.)
+
+Root causes (measured on the same dev messages, both models):
+
+1. Most extra wires do not come from the text the negatives cover. Each extra wire's source text placed in its message:
+   inside an annotated span (one request cut into several, or a stretch of a request read on its own) 261 / 261; in a sentence that
+   touches no span 51 / 51; in the outside part of a sentence that also holds a span 23 / 21 (fix / neg). So even a perfect
+   rejection of the outside sentences would have left about 260 extra wires: the criterion could not be met by this change.
+2. The negative target cannot change what the cut decides. vss-centers.js drops a centre only when the reader's status is
+   `unknown-event` (no event token, decided by the words) or `no-sense` (more than half of the tokens unplaced, decided by placing);
+   no status reads the sign or size of the predicate term, which is all a negative trains. On the 168 trained negatives themselves:
+   fix_p80_s0 no-sense 109, ok + abstain 59; neg_p80_s0 no-sense 108, ok + abstain 60. Mean residual on them 0.82 / 0.84 (positives
+   0.15 / 0.16), but the residual does not separate the cut's extra stretches from the annotated spans (median 0.00 for both, upper
+   quartile 0.40 vs 0.42), because the cut picks the short stretch that explains itself.
+3. The word "is" is the largest single source: 136 of the 333 extra wires are `fact` wires (the event token of `fact` is "is"),
+   mostly 1-3 word stretches inside questions ("which shape is the biggest" -> "shape is the": 22; "Is": 17; "Who is the": 4).
+   Next: path 33, connect 28, check 22, move 19, list 17.
+4. The reading alone (unchanged causes, neg_p80_s0, % of requests): role wrong (mostly lists) 7.2; no action word 8.2; role missed
+   6.7; wrong action or type 6.0; name not reachable 4.3; value not reachable 2.2; description read differently 1.6; no-sense 0.9.
+
+What this means for the plan: the extra wires are a cut problem (which stretch belongs to which centre, and words like "is" that are
+an event token in one construction and not in another), not a "the reader has never seen non-requests" problem. Negative examples
+as built here do not reach the decision that makes the extra wires. Step 2 (centre attention: attachment of every word to a centre,
+trained on the spans) addresses cause 1 and 3 directly; whether a status that reads the predicate term should exist is a reader
+decision for the owner, not tuned here.

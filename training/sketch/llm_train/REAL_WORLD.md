@@ -1,8 +1,8 @@
 # World `real`: built from 947 training messages (4305 requests with a span)
 
-Front end learned from the same messages: 119 value n-grams, 961 trigger rules, 9829 segmenter weights; params {"seg_epochs": 8, "val_min_count": 5, "val_min_prec": 0.8, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}.
+Front end learned from the same messages: 119 value n-grams, 961 trigger rules, 0 segmenter weights; params {"seg_epochs": 8, "val_min_count": 5, "val_min_prec": 0.8, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}.
 
-Rows: 4282. Dropped (cannot be trained): 23 {'no event token and no role (zero target)': 23}.
+Rows: 4282. Dropped (cannot be trained): 23 {'no event token and no role (zero target)': 23}. Negative examples (text outside the spans with an action token): 168.
 
 Kinds: 102; lexicon 236 words (legend value tokens 105, event tokens 44, own-kind tokens seen >= 8 times).
 

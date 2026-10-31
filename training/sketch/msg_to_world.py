@@ -10,6 +10,8 @@
 - Kinds: a legend value token -> the kind of its legend question (front.value_kinds); an event token -> VERB; every other token seen at
   least --freq times in the training spans -> a kind of its own; all other words -> no entry (the reader's kind `unknown`).
 - Rows are dropped only when they cannot be trained at all (no event token and no role: a zero target); they are counted.
+- Negative examples (off by default; NEGATIVES=1 on; plan step 1 failed its criterion, ERROR_ANALYSIS.md): every sentence outside the annotated spans whose normalized form carries an
+  action token becomes a wire of that event with no roles and `_negative=true` (target = minus its compiled state, vss-demo R81).
 Writes worlds/real/{legend.json, kinds.tsv, world.json, split_hints.json, front.json, examples/train.sop} and llm_train/REAL_WORLD.md.
 Run: python3 msg_to_world.py [--frac 0.8] [--freq 8]"""
 import argparse, collections, datetime, json, os, sys
@@ -19,6 +21,7 @@ import front as FR
 from llm_to_world import convert, Skip
 
 CAL_SHARE = 0.08
+G_EVENT_OF = {v: e for e, vs in G.EVENTS.items() for v in vs}
 ROLES = G.ROLES + [("members", "which shapes, as a list?"), ("targets", "to which shapes, as a list?")]   # set roles (lists of shapes)
 
 
@@ -87,13 +90,30 @@ def main():
     for ev, text, roles, mid in rows:
         ids = iter(f"w{k + i}" for i in range(1, 100)); ws = G.wires_for(ev, roles, text, f"msg.{mid[:2]}", ids, world="real", source="llm")
         k += len(ws); docs["calib.sop" if cal(mid) else "train.sop"].wires += ws
+    # NEGATIVE examples (NEGATIVES=1 turns them on; off by default since plan step 1 failed its criterion, ERROR_ANALYSIS.md): the sentences of the training messages that lie outside
+    # every annotated span (front.requests). When the normalized sentence carries an action token E (the first one), it becomes a wire of
+    # event E with no roles and `_negative=true`: sop train uses MINUS its compiled state as the target (vss-demo R81), so the reader
+    # learns that these sentences are not requests of this world. Sentences with no action token are already unreadable (status
+    # unknown-event) and add nothing. Negatives go to train.sop only, never to calib.sop: sop train puts every train.sop row in the
+    # `train` split and leaves negatives out of the schema, the calibration rows and the evaluation. The messages whose requests are in
+    # calib.sop give no negatives either, so that those messages stay entirely unseen.
+    n_neg = 0
+    if os.environ.get("NEGATIVES", "0") == "1":
+        for m in msgs:
+            if cal(m["id"]): continue
+            for text, names in FR.requests([m])[1]:
+                toks, _ = norm(text, names); evs = [t for t in toks if t in evtok]
+                if not evs: continue
+                ids = iter(f"w{k + i}" for i in range(1, 100))
+                ws = G.wires_for(G_EVENT_OF[evs[0]], {}, " ".join(toks), "msg.neg", ids, world="real", source="llm-outside-spans")
+                ws[0].set("_negative", "true"); k += len(ws); docs["train.sop"].wires += ws; n_neg += 1
     for f, d in docs.items(): open(os.path.join(out, "examples", f), "w").write(G.soplang.write(d))
     open(os.path.join(out, "raw", "sentences.txt"), "w").write("\n".join(r[1] for r in rows) + "\n")
     if not os.path.exists(os.path.join(out, "status.json")): json.dump({"label": None, "note": "never trained"}, open(os.path.join(out, "status.json"), "w"))
     kc = collections.Counter(kinds.values())
     rep = [f"# World `real`: built from {len(msgs)} training messages ({len(items)} requests with a span)", "",
            f"Front end learned from the same messages: {len(F['values'])} value n-grams, {len(F['triggers'])} trigger rules, {len(F['segmenter'])} segmenter weights; params {json.dumps(P)}.", "",
-           f"Rows: {len(rows)}. Dropped (cannot be trained): {sum(dropped.values())} {dict(dropped)}.", "",
+           f"Rows: {len(rows)}. Dropped (cannot be trained): {sum(dropped.values())} {dict(dropped)}. Negative examples (text outside the spans with an action token): {n_neg}.", "",
            f"Kinds: {len(kc)}; lexicon {len(lexicon)} words (legend value tokens {len(vk)}, event tokens {len(evtok)}, own-kind tokens seen >= {a.freq} times).", "",
            "Own-kind tokens: " + ", ".join(sorted(t for t, c in kinds.items() if c == t)), "",
            "Roles left out because their words are not in the normalized span (rows kept):", "", "| what | n |", "|---|---|"] + \

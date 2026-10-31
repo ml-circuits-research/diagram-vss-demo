@@ -1,0 +1,21 @@
+[splits] written to /home/claude/diagram-vss-demo/training/sketch/runs/neg_p80_D1024_e2_s0/splits.json before training: calibration_heldout_formulations 210, heldout_formulations 172, train 4068
+[schema] roles ['object', 'shape', 'color', 'size', 'name', 'text', 'relation', 'landmark', 'landmark2', 'region', 'direction', 'amount', 'quantity', 'axis', 'layout', 'source', 'target', 'style', 'arrow', 'edge', 'pairing', 'superlative', 'comparison', 'members', 'targets'] (core []), max depth 0, event negation False
+[train] seed 0: 168 NEGATIVE examples among the 4068 training rows (target = minus the anchor state; R81)
+[train] seed 0: 4068 training rows x 2 epoch(s) -> 8136 steps' sentences; D=1024; kinds 106; vocab 3094; predicate lemma not found in 800 targets
+[trace] text: which from n_ex1
+[trace] tokens/kinds: which/VERB from/from n_ex1/NAME
+[trace] gold frame: {"event": "reachable", "lemma": null, "neg": false, "roles": {"source": ["entity", "n_ex1", null, null]}, "scope": null, "shape": "ok", "speakers": []}
+/home/claude/diagram-vss-demo/training/vss/tool/sop/train.py:474: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  print(f"[trace] target |S_world| = {np.linalg.norm(targets[0]):.2f} (sqrt(D) per unit term = {np.sqrt(a.D):.1f}); initial gates all {float(torch.sigmoid(m.logits[0])):.2f} (closed start)")
+[trace] target |S_world| = 45.26 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[train seed 0] start: RSS 1.99 GB | cpu | MemAvailable 4.0 GB
+[train seed 0] step 500 sent 4000/8136 loss -0.643 (1035s) | RSS 2.97 GB | cpu | MemAvailable 4.2 GB
+[train seed 0] step 1000 sent 8000/8136 loss -0.746 (1994s) | RSS 2.97 GB | cpu | MemAvailable 4.3 GB
+[train seed 0] end: RSS 2.96 GB | cpu | MemAvailable 4.2 GB (2022s)
+[export] numpy reader vs torch states: max relative difference 5.09e-08 (float32 phases in the route book)
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.610 | residual 0.250
+[eval] seed 0 train (sample): FULL catalog candidates 0.643 | residual 0.189
+[mem] after seed 0: RSS 1.36 GB | cpu | MemAvailable 6.1 GB
+[done] model written to /home/claude/diagram-vss-demo/training/sketch/worlds/real/model; REPORT.md and metrics.json there; run log /home/claude/diagram-vss-demo/training/sketch/runs/neg_p80_D1024_e2_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)
