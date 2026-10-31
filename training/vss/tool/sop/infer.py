@@ -59,6 +59,17 @@ class Routebook:
         self.vo_nmax = int(z["vo_nmax"]) if "vo_nmax" in z.files else None
         self.cue_mask = z["cue_mask"].astype(float) if "cue_mask" in z.files else (np.zeros(len(self.cats)) if self.vo is not None else None)
         self.D = self.path.shape[1] if self.path is not None else self.cthC.shape[1]
+        # a SPARSE route book (export_web --sparse, loaded by export_web.routebook_from_bin): bg / A / L hold only their trained rows and
+        # <name>_rowmap (K x K) gives the stored row of every kind pair, -1 = absent (never trained: its value was the initial random one).
+        # An absent row contributes nothing. None = dense (every row stored), as a trained model's routebook.npz
+        self.bg_rowmap = self.A_rowmap = self.L_rowmap = None
+
+    def pair_rows(self, name, i, j):
+        """the phases of table bg / A / L at the kind pairs (i, j) (index arrays of one shape) as float64, and the presence mask of those
+        rows (None: all present; a dense route book)"""
+        t, rm = getattr(self, name), getattr(self, name + "_rowmap", None)
+        if rm is None: return t[i, j].astype(float), None
+        r = rm[i, j]; return t[np.maximum(r, 0)].astype(float), r >= 0
 
     def centre_addresses(self, c, lem=None):
         """the centre reader's structure and addresses of a message (c: kind indices, length T), linear in T: every token whose kind is a
@@ -134,14 +145,18 @@ class Routebook:
         """c: category indices (T,) -> addresses (T, D): the sum of the codes' terms before the identity, as V8.states"""
         c = np.asarray(c, dtype=int); T, D = len(c), self.D; terms = np.zeros((T, D), dtype=complex)
         if "path" in self.codes: terms += E(np.cumsum(self.path[c], 0))
-        if "bigram" in self.codes: terms += E(np.concatenate([self.bg0[c[:1]], self.bg[c[:-1], c[1:]].astype(float)], 0))
+        if "bigram" in self.codes:
+            ph, on = self.pair_rows("bg", c[:-1], c[1:]); eb = E(ph)
+            if on is not None: eb = eb * on[:, None]                              # an absent bigram row: no term
+            terms += np.concatenate([E(self.bg0[c[:1]]), eb], 0)
         if "pos" in self.codes and self.pos is not None:     # B7: the position code, omitted beyond the trained length (pos_max)
             posidx = np.minimum(np.arange(T), 39); pt = E(self.pos[posidx] + self.pc[c])
             if self.pos_max is not None: pt = pt * (posidx < self.pos_max)[:, None]
             terms += pt
         if "chainL" in self.codes or "chain" in self.codes:
             g = sigmoid(self.logits)[c]; u = np.log1p(-g + 1e-9); Sx = np.concatenate([[0.0], np.cumsum(u)])
-            EA = E(self.A[c[:, None], c[None, :]].astype(float))                  # EA[q, k] = A[c_q, c_k]
+            ph, on = self.pair_rows("A", c[:, None], c[None, :]); EA = E(ph)      # EA[q, k] = A[c_q, c_k]
+            if on is not None: EA = EA * on[..., None]                            # an absent A row: that chain term is left out
             addr = np.zeros((T, D), dtype=complex)
             for k in range(T):
                 p_root = np.exp(Sx[k])
@@ -149,7 +164,8 @@ class Routebook:
                 p = g[:k] * np.exp(Sx[k] - Sx[1:k + 1])
                 addr[k] = p_root + (p[:, None] * addr[:k] * EA[:k, k]).sum(0)
             if "chainL" in self.codes:
-                EL = E(self.L[c[None, :], c[:, None]].astype(float))              # EL[k, q] = L[c_q, c_k]
+                ph, on = self.pair_rows("L", c[None, :], c[:, None]); EL = E(ph)  # EL[k, q] = L[c_q, c_k]
+                if on is not None: EL = EL * on[..., None]                        # an absent L row: that chain term is left out
                 addrL = np.zeros_like(addr)
                 for k in range(T):
                     acc = np.exp(Sx[T] - Sx[k + 1]) * addr[k]
@@ -174,7 +190,7 @@ class Reader:
         """sentence_candidates (default off: the existing behaviour): the candidates of a role are the catalog words of the role's kinds AND the
         sentence's own tokens whose kind is one of them (new labels and numbers read without retraining; mirrored by app/src/vss.js)"""
         self.dir = model_dir; self.sentence_candidates = bool(sentence_candidates); self._sent_tokens = ()
-        need = ["config.json", "legend.json", "catalog.json", "routebook.npz"]
+        need = ["config.json", "legend.json", "catalog.json"] + (["routebook.npz"] if routebook is None else [])
         for n in need:
             if not os.path.exists(os.path.join(model_dir, n)): raise ModelError(f"model incomplete: {n} missing in {model_dir}")
         with open(os.path.join(model_dir, "config.json")) as f: self.cfg = json.load(f)

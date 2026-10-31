@@ -15,13 +15,22 @@ a multiple of 4, then the arrays at the offsets the header gives (relative to th
 q = round((wrap(phase) + pi) / (2 pi) * 256) mod 256 per byte, dequantized as q * 2 pi / 256 - pi; bits 4 packs two 16-level values per
 byte (low nibble first); bits 32 stores float32 phases unchanged. Phases are wrapped to [-pi, pi): every phase array is used through
 exp(i phase) only (path through exp(i cumsum), invariant to multiples of 2 pi), so wrapping changes nothing but the stored range.
-Usage: sop export-web --model <model dir> --out <dir> [--bits 8|4|32]
+Sparse route book (--sparse; manifest format vss-web-2): the K x K tables bg, A and L keep only the rows that training changed. Training
+changes only the rows some training sentence reads (train.py LeanTheta); every other row keeps its initial random value (pure noise when a
+reader meets that kind pair). A row is "trained" when its stored value differs from its initial value, regenerated here from the seed
+(untrained_rows: the V8 phase table stream). Such a table is written as an index array "<name>.rows" (kind "index", uint32 LE, the sorted
+flat row numbers i * K + j that are stored) and the table itself (header "rows": "<name>.rows", "absent": "zero", "shape" the FULL shape)
+holding only those rows in that order. Reading rule for an absent row: it contributes nothing (the bigram term of that token is left out;
+a chain term over that A or L pair is left out). path and bg0 stay dense.
+Usage: sop export-web --model <model dir> --out <dir> [--bits 8|4|32] [--sparse]
+       sop export-web --from-web <export-web dir> --out <dir> --sparse     (an existing dense export made sparse, values byte for byte)
 """
 import argparse, hashlib, json, os, sys
 import numpy as np
 
 MAGIC = b"VSSBIN1\n"
 PHASE_ARRAYS = ("path", "bg0", "bg", "A", "L", "rel", "pos", "pc", "vo", "cthR", "cthL", "cthC", "cbgL", "cbgR")
+SPARSE_TABLES = ("bg", "A", "L")       # the K x K x D tables a sparse export stores row by row
 FLOAT_ARRAYS = ("logits", "rel_mask", "taker_mask", "verb_mask", "cue_mask", "cA", "cDist", "cbeta", "cN")   # c*: the centre reader
 DECODER_OPS = ("pred", "says.scope", "says.speaker", "not", "attr", "det", "wide", "q", "quantity", "must", "may", "if.condition",
                "if.consequence", "and.next")
@@ -61,16 +70,76 @@ def write_bin(path, header, blobs):
 
 
 def read_bin(path):
-    """-> (header, {name: numpy array}) with phases DEQUANTIZED to float64 (what the browser reads)"""
+    """-> (header, {name: numpy array}) with phases DEQUANTIZED to float64 (what the browser reads). A sparse table <name> comes back as
+    its stored rows (n x D) plus <name>_rowmap (the full shape without D: the stored row of every kind pair, -1 = absent); the index
+    arrays themselves are not returned"""
     raw = open(path, "rb").read()
     assert raw[:8] == MAGIC, f"{path}: not a vss binary"
     n = int.from_bytes(raw[8:12], "little"); header = json.loads(raw[12:12 + n]); start = 12 + n + ((-(12 + n)) % 4)
+    blob = lambda a: raw[start + a["offset"]: start + a["offset"] + a["nbytes"]]
+    index = {a["name"]: np.frombuffer(blob(a), dtype="<u4").astype(np.int64) for a in header["arrays"] if a["kind"] == "index"}
     out = {}
     for a in header["arrays"]:
-        buf = raw[start + a["offset"]: start + a["offset"] + a["nbytes"]]; count = int(np.prod(a["shape"])) if a["shape"] else 1
-        v = dequantize(buf, a["bits"], count) if a["kind"] == "phase" else np.frombuffer(buf, dtype="<f4", count=count).astype(np.float64)
-        out[a["name"]] = v.reshape(a["shape"])
+        if a["kind"] == "index": continue
+        rows = index[a["rows"]] if a.get("rows") else None
+        shape = [len(rows), a["shape"][-1]] if rows is not None else a["shape"]
+        count = int(np.prod(shape)) if shape else 1
+        v = dequantize(blob(a), a["bits"], count) if a["kind"] == "phase" else np.frombuffer(blob(a), dtype="<f4", count=count).astype(np.float64)
+        out[a["name"]] = v.reshape(shape)
+        if rows is not None:
+            rm = np.full(int(np.prod(a["shape"][:-1])), -1, dtype=np.int64); rm[rows] = np.arange(len(rows)); out[a["name"] + "_rowmap"] = rm.reshape(a["shape"][:-1])
     return header, out
+
+
+def routebook_from_bin(path):
+    """an infer.Routebook built from an exported routebook.bin (dense or sparse), on exactly the numbers the browser reads"""
+    from .infer import Routebook
+    header, arr = read_bin(path); rb = Routebook.__new__(Routebook)
+    rb.cats = list(header["cats"]); rb.cat_id = {c: i for i, c in enumerate(rb.cats)}; rb.codes = list(header["codes"])
+    for n in PHASE_ARRAYS + FLOAT_ARRAYS + tuple(t + "_rowmap" for t in SPARSE_TABLES): setattr(rb, n, arr.get(n))
+    rb.pos_max = header.get("pos_max"); rb.vo_nmax = header.get("vo_nmax")
+    rb.centre_kinds = header.get("centre_kinds"); rb.centre_tokens = header.get("centre_tokens")
+    if rb.vo is not None and rb.cue_mask is None: rb.cue_mask = np.zeros(len(rb.cats))
+    rb.D = header["D"]
+    return rb
+
+
+def untrained_rows(cats, codes, D, seed, n_vocab, row_equal):
+    """{name: bool array over the flat rows of the K x K table} for bg, A, L: True = the stored row is still its initial random value.
+    The initial values are regenerated as train.py LeanTheta draws them (V8's constructor stream: np.random.default_rng(200 + seed), the
+    P2 x D table and the n_vocab x D identities of V2 skipped, then the P x D phase table); the row numbers come from V8's index tables
+    (built at D = 1, no phases kept). row_equal(name, sel, init) -> bool per selected row: the stored row sel[i] equals init[i] (init:
+    float32 wrapped initial phases, as export_routebook writes them). Refuses a model whose layout or stream it does not reproduce."""
+    if "pos" in codes: raise ValueError("sparse export: models with the position code draw part of their table from a second generator; not supported")
+    sys.path.insert(0, EXP)
+    import v8_gates as v8
+    from .train import Shim, STREAM_ROWS
+    m = v8.V8(Shim({c: c for c in cats}), 1, np.random.default_rng(0), list(codes), "cpu", gate_init="closed")
+    if list(m.cats) != list(cats): raise ValueError("sparse export: the kinds of V8 differ from the route book's")
+    K = len(cats); P2 = 1 + K * K + K; P = m.theta.shape[0]
+    idx = {"bg": m.ibg.numpy().reshape(-1), "A": m.iA.numpy().reshape(-1), "L": m.iL.numpy().reshape(-1)}
+    same = {n: np.zeros(len(f), dtype=bool) for n, f in idx.items()}
+    rng = np.random.default_rng(200 + seed)
+    for r0 in range(0, P2 + n_vocab, STREAM_ROWS): rng.uniform(-np.pi, np.pi, (min(STREAM_ROWS, P2 + n_vocab - r0), D))
+    for r0 in range(0, P, STREAM_ROWS):
+        ch = rng.uniform(-np.pi, np.pi, (min(STREAM_ROWS, P - r0), D))
+        for n, f in idx.items():
+            sel = np.nonzero((f >= r0) & (f < r0 + len(ch)))[0]
+            if len(sel): same[n][sel] = row_equal(n, sel, wrap(ch[f[sel] - r0]).astype(np.float32))
+    if not any(v.any() for v in same.values()):
+        raise ValueError("sparse export: no row equals its regenerated initial value (seed, vocabulary size or table layout differ); use the dense export")
+    return same
+
+
+EXP = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "experiment")
+
+
+def sparse_blobs(name, table, keep, bits):
+    """(index blob, table blob) of a sparse table: keep = bool over its flat rows"""
+    rows = np.nonzero(keep)[0].astype("<u4"); D = table.shape[-1]
+    return [({"name": name + ".rows", "kind": "index", "bits": 32, "shape": [len(rows)]}, rows.tobytes()),
+            ({"name": name, "kind": "phase", "bits": bits, "shape": list(table.shape), "rows": name + ".rows", "absent": "zero"},
+             quantize(np.asarray(table, dtype=float).reshape(-1, D)[rows], bits))]
 
 
 def star_keys(reader):
@@ -87,14 +156,20 @@ def star_keys(reader):
     return out
 
 
-def export(model_dir, out_dir, bits=8):
+def export(model_dir, out_dir, bits=8, sparse=False):
     from .infer import Reader
     rd = Reader(model_dir); os.makedirs(out_dir, exist_ok=True); rb = rd.rb
     # ---- routebook.bin
-    blobs = []
+    blobs = []; untrained = None
+    if sparse:     # the stored float32 rows against the regenerated float32 initial rows, exactly
+        tabs = {n: np.asarray(getattr(rb, n)).reshape(-1, rb.D) for n in SPARSE_TABLES}
+        untrained = untrained_rows(rb.cats, rb.codes, rb.D, rd.cfg["seed"], len(rd.words),
+                                   lambda n, sel, init: (tabs[n][sel].astype(np.float32) == init).all(1))
     for name in PHASE_ARRAYS:
         v = getattr(rb, name, None)
         if v is None: continue
+        if untrained is not None and name in untrained:
+            blobs += sparse_blobs(name, np.asarray(v), ~untrained[name], bits); continue
         # float64 as before (infer.Routebook keeps bg / A / L as stored, float32; the conversion is exact), one table at a time
         blobs.append(({"name": name, "kind": "phase", "bits": bits, "shape": list(v.shape)}, quantize(np.asarray(v, dtype=float), bits)))
     for name in FLOAT_ARRAYS:
@@ -104,6 +179,7 @@ def export(model_dir, out_dir, bits=8):
     hdr = {"cats": rb.cats, "codes": rb.codes, "pos_max": rb.pos_max, "vo_nmax": rb.vo_nmax, "D": rb.D, "bits": bits}
     if rb.centre_kinds is not None: hdr["centre_kinds"] = rb.centre_kinds          # the centre reader (legend reader.centres)
     if getattr(rb, "centre_tokens", None) is not None: hdr["centre_tokens"] = rb.centre_tokens   # run 2: phase rows keyed by the centre's token
+    if untrained is not None: hdr["sparse"] = {"rule": "zero", "tables": list(SPARSE_TABLES)}
     write_bin(os.path.join(out_dir, "routebook.bin"), hdr, blobs)
     # ---- stars.bin
     stars = star_keys(rd); keys = sorted(stars); M = np.stack([np.angle(stars[k]) for k in keys])
@@ -120,20 +196,72 @@ def export(model_dir, out_dir, bits=8):
              "star_version": rd.cfg.get("star_version", 1), "identity_table": bool(rd.cat.get("identity_table"))},
              "schema": rd.schema, "background": bg, "bits": bits}
     with open(os.path.join(out_dir, "model.json"), "w") as f: json.dump(model, f, separators=(",", ":"))
+    man = {"format": "vss-web-2" if sparse else "vss-web-1", "legend_sha256": L.sha, "training_code_commit": rd.cfg.get("training_code_commit"),
+           "bits": bits, "star_version": rd.cfg.get("star_version", 1), "D": rd.D, "n_stars": len(keys)}
+    if untrained is not None: man["sparse"] = sparse_summary(untrained)
+    return write_manifest(out_dir, man)
+
+
+def sparse_summary(untrained):
+    return {"rule": "zero", "stored_rows": {n: int((~v).sum()) for n, v in untrained.items()}, "rows": {n: int(len(v)) for n, v in untrained.items()}}
+
+
+def write_manifest(out_dir, man):
     files = ["model.json", "routebook.bin", "stars.bin"]
-    man = {"format": "vss-web-1", "legend_sha256": L.sha, "training_code_commit": rd.cfg.get("training_code_commit"), "bits": bits,
-           "star_version": rd.cfg.get("star_version", 1), "D": rd.D, "n_stars": len(keys),
-           "files": {fn: {"sha256": hashlib.sha256(open(os.path.join(out_dir, fn), "rb").read()).hexdigest(), "bytes": os.path.getsize(os.path.join(out_dir, fn))} for fn in files}}
+    man = dict(man, files={fn: {"sha256": hashlib.sha256(open(os.path.join(out_dir, fn), "rb").read()).hexdigest(), "bytes": os.path.getsize(os.path.join(out_dir, fn))} for fn in files})
     with open(os.path.join(out_dir, "manifest.json"), "w") as f: json.dump(man, f, indent=1)
     return man
 
 
+def sparsify_web(src, out_dir):
+    """an existing DENSE export (model.json, routebook.bin, stars.bin, manifest.json, front.json if any) -> a sparse export in out_dir:
+    the stored bytes of every kept row and of every other array unchanged; untrained rows found by comparing the stored bytes with the
+    regenerated initial rows quantized exactly as export() quantizes them (wrap -> float32 -> wrap -> bits)"""
+    import shutil
+    raw = open(os.path.join(src, "routebook.bin"), "rb").read()
+    assert raw[:8] == MAGIC, "not a vss binary"
+    n = int.from_bytes(raw[8:12], "little"); hdr = json.loads(raw[12:12 + n]); start = 12 + n + ((-(12 + n)) % 4)
+    if hdr.get("sparse"): raise ValueError(f"{src}: already sparse")
+    model = json.load(open(os.path.join(src, "model.json"))); man0 = json.load(open(os.path.join(src, "manifest.json")))
+    meta = {a["name"]: a for a in hdr["arrays"]}; D = hdr["D"]
+    blob = lambda a: raw[start + a["offset"]: start + a["offset"] + a["nbytes"]]
+    def rowbytes(a):
+        if a["bits"] == 32: return 4 * D
+        if (D * a["bits"]) % 8: raise ValueError("rows not byte aligned")
+        return D * a["bits"] // 8
+    stored = {t: np.frombuffer(blob(meta[t]), dtype=np.uint8).reshape(-1, rowbytes(meta[t])) for t in SPARSE_TABLES}
+    def row_equal(name, sel, init):
+        q = np.frombuffer(quantize(np.asarray(init, dtype=float), meta[name]["bits"]), dtype=np.uint8).reshape(len(sel), -1)
+        return (q == stored[name][sel]).all(1)
+    untrained = untrained_rows(hdr["cats"], hdr["codes"], D, model["config"]["seed"], len(model["catalog"]["words"]), row_equal)
+    blobs = []
+    for a in hdr["arrays"]:
+        m = {k: v for k, v in a.items() if k not in ("offset", "nbytes")}
+        if a["name"] in untrained:
+            rows = np.nonzero(~untrained[a["name"]])[0].astype("<u4")
+            blobs.append(({"name": a["name"] + ".rows", "kind": "index", "bits": 32, "shape": [len(rows)]}, rows.tobytes()))
+            blobs.append((dict(m, rows=a["name"] + ".rows", absent="zero"), stored[a["name"]][rows].tobytes()))
+        else: blobs.append((m, blob(a)))
+    h = {k: v for k, v in hdr.items() if k != "arrays"}; h["sparse"] = {"rule": "zero", "tables": list(SPARSE_TABLES)}
+    os.makedirs(out_dir, exist_ok=True); write_bin(os.path.join(out_dir, "routebook.bin"), h, blobs)
+    for fn in ("model.json", "stars.bin", "front.json"):
+        if os.path.exists(os.path.join(src, fn)): shutil.copyfile(os.path.join(src, fn), os.path.join(out_dir, fn))
+    man = {k: v for k, v in man0.items() if k != "files"}; man["format"] = "vss-web-2"; man["sparse"] = sparse_summary(untrained)
+    man["sparse"]["from"] = {"routebook.bin": man0["files"]["routebook.bin"]}
+    return write_manifest(out_dir, man)
+
+
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="sop export-web"); ap.add_argument("--model", required=True); ap.add_argument("--out", required=True)
-    ap.add_argument("--bits", type=int, default=8, choices=[4, 8, 32]); a = ap.parse_args(argv)
-    man = export(a.model, a.out, a.bits)
+    ap = argparse.ArgumentParser(prog="sop export-web"); ap.add_argument("--model"); ap.add_argument("--from-web", dest="from_web")
+    ap.add_argument("--out", required=True); ap.add_argument("--bits", type=int, default=8, choices=[4, 8, 32])
+    ap.add_argument("--sparse", action="store_true", help="store only the trained rows of bg, A, L (format vss-web-2)"); a = ap.parse_args(argv)
+    if (a.model is None) == (a.from_web is None): ap.error("give exactly one of --model, --from-web")
+    if a.from_web and not a.sparse: ap.error("--from-web is for --sparse (it keeps the values byte for byte)")
+    man = sparsify_web(a.from_web, a.out) if a.from_web else export(a.model, a.out, a.bits, a.sparse)
+    if man.get("sparse"):
+        sp = man["sparse"]; print("export-web: sparse route book, stored rows " + ", ".join(f"{k} {sp['stored_rows'][k]}/{sp['rows'][k]}" for k in sp["rows"]))
     tot = sum(f["bytes"] for f in man["files"].values())
-    print(f"export-web: {a.model} -> {a.out} (bits {a.bits}, D {man['D']}, star_version {man['star_version']}, {man['n_stars']} stars): "
+    print(f"export-web: {a.model or a.from_web} -> {a.out} (bits {man['bits']}, D {man['D']}, star_version {man['star_version']}, {man['n_stars']} stars): "
           + ", ".join(f"{k} {v['bytes'] / 1e6:.3f} MB" for k, v in man["files"].items()) + f"; total {tot / 1e6:.3f} MB")
     if man["star_version"] == 1:
         print("export-web: NOTE star_version 1 — the browser reads only the exported stars; words outside the catalog get no identity "

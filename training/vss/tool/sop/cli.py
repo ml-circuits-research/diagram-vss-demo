@@ -9,7 +9,7 @@ cli.py — the `sop` command (spec 5).
   sop profile   <world> [--seed 0] [--json]   (the nature of the world: need signals of the routes, diagnostics; activate.py)
   sop train     <world> [...]            (torch; see train.py)
   sop export    [--out dir] [--n N] ...  (the repository's three constructed worlds as world folders; tool/export_worlds.py)
-  sop export-web --model <dir> --out <dir> [--bits 8|4|32]   (the files app/src/vss.js loads; export_web.py)
+  sop export-web --model <dir> --out <dir> [--bits 8|4|32] [--sparse]   (the files app/src/vss.js loads; export_web.py)
 Exit codes: 0 ok; 1 input / validation error; 2 model missing or legend mismatch. Output is deterministic for the same model and input.
 """
 import argparse, json, os, re, sys

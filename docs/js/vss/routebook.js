@@ -21,6 +21,12 @@ export class Routebook {
     // cos / sin tables of the arrays used only through exp(i phase) (Float32Array: half the memory, error ~1e-7, far below the 1e-4 parity bound)
     const tab = (x) => { if (!x) return null; const n = x.data.length, c = new Float32Array(n), s = new Float32Array(n); for (let i = 0; i < n; i++) { c[i] = Math.cos(x.data[i]); s[i] = Math.sin(x.data[i]); } return { c, s }; };
     this.tBg0 = tab(this.bg0); this.tBg = tab(this.bg); this.tA = tab(this.A); this.tL = tab(this.L); this.tRel = tab(this.rel);
+    // a sparse route book (export_web --sparse; tool/sop/infer.py Routebook.pair_rows): bg / A / L hold only their trained rows; rowOf maps a
+    // kind pair i * C + j to its stored row, -1 = absent (never trained), and an absent row contributes nothing. null = dense
+    const ro = (x) => (x && x.rowOf ? x.rowOf : null);
+    this.rowBg = ro(this.bg); this.rowA = ro(this.A); this.rowL = ro(this.L);
+    // the stored row of a kind pair (or -1); dense: the pair's own row
+    this.row = (rowOf, pair) => (rowOf ? rowOf[pair] : pair);
   }
   has(code) { return this.codes.includes(code); }
   /** the centre reader's structure and addresses of a message (the twin of infer.Routebook.centre_addresses, same formulas, same order of
@@ -95,7 +101,9 @@ export class Routebook {
     }
     if (this.has("bigram")) {
       for (let k = 0; k < T; k++) {
-        const t = terms[k], o = k === 0 ? c[0] * D : (c[k - 1] * C + c[k]) * D, tb = k === 0 ? this.tBg0 : this.tBg;
+        const t = terms[k], r = k === 0 ? c[0] : this.row(this.rowBg, c[k - 1] * C + c[k]), tb = k === 0 ? this.tBg0 : this.tBg;
+        if (r < 0) continue;                              // an absent bigram row: no term
+        const o = r * D;
         for (let d = 0; d < D; d++) { t.re[d] += tb.c[o + d]; t.im[d] += tb.s[o + d]; }
       }
     }
@@ -116,7 +124,9 @@ export class Routebook {
         const re = new Float64Array(D), im = new Float64Array(D), pRoot = Math.exp(Sx[k]);
         re.fill(pRoot);
         for (let j = 0; j < k; j++) {
-          const p = g[j] * Math.exp(Sx[k] - Sx[j + 1]), o = (c[j] * C + c[k]) * D, a = addr[j];
+          const r = this.row(this.rowA, c[j] * C + c[k]);
+          if (r < 0) continue;                            // an absent A row: that chain term is left out
+          const p = g[j] * Math.exp(Sx[k] - Sx[j + 1]), o = r * D, a = addr[j];
           for (let d = 0; d < D; d++) {
             const er = tA.c[o + d], ei = tA.s[o + d];
             re[d] += p * (a.re[d] * er - a.im[d] * ei); im[d] += p * (a.re[d] * ei + a.im[d] * er);
@@ -131,7 +141,9 @@ export class Routebook {
           const s = Math.exp(Sx[T] - Sx[k + 1]), re = new Float64Array(D), im = new Float64Array(D), a = addr[k];
           for (let d = 0; d < D; d++) { re[d] = s * a.re[d]; im[d] = s * a.im[d]; }
           for (let q = k + 1; q < T; q++) {
-            const p = g[q] * Math.exp(Sx[q] - Sx[k + 1]), o = (c[q] * C + c[k]) * D, b = addr[q];
+            const r = this.row(this.rowL, c[q] * C + c[k]);
+            if (r < 0) continue;                          // an absent L row: that chain term is left out
+            const p = g[q] * Math.exp(Sx[q] - Sx[k + 1]), o = r * D, b = addr[q];
             for (let d = 0; d < D; d++) {
               const er = tL.c[o + d], ei = tL.s[o + d];
               re[d] += p * (b.re[d] * er - b.im[d] * ei); im[d] += p * (b.re[d] * ei + b.im[d] * er);

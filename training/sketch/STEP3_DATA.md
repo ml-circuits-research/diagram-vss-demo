@@ -128,3 +128,5 @@ error_analysis causes (share of all gold requests read alone from their spans):
 
 The exported model docs/model/data2_p80_s0 is NOT in git: its routebook.bin is 101.7 MB, over GitHub's 100 MB file limit (the route
 book grows with the square of the number of kinds: 186 here, 106 before). It stays in the workspace; size is an open problem for the demo.
+Update (MODEL_SIZE.md): docs/model/data2_p80_s0 is now the SPARSE export of the same model (only the trained rows of bg / A / L;
+routebook.bin 12.2 MB); the numbers above were measured on the dense export (sparse: identical on old and msg2 SEG=gold, +1 wire on long).
