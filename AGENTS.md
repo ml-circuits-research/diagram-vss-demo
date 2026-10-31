@@ -39,7 +39,8 @@ Read this first. These rules come from mistakes already made here; each says wha
   data, rules, cues or lexicon entries. Nothing is tuned on them.
   Owner's decision, 2026-10-31 (replaces the rule above): test sets are cheap to regenerate, so we learn from them. Test sets that
   have been used may be read, analysed and used as data. An honest number then comes from a NEW test set, written fresh by LLM agents
-  under `training/sketch/llm_bench/SPEC.md` and not opened by anyone until it is scored. Every reported number says which test set
+  (format of `training/sketch/llm_train/TRAIN_MSG_SPEC.md`, with spans) and not opened until it is scored by anyone who works
+  on the readers or the training data (its writers and its label checker, who never see a reader's output, excepted). Every reported number says which test set
   produced it and whether that set had been read before.
 
 ## The VSS reader: what is given and what is learned
