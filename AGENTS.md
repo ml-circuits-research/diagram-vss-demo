@@ -33,6 +33,8 @@ Read this first. These rules come from mistakes already made here; each says wha
 - Never drop realistic training examples because the current pipeline cannot read them. If the pipeline cannot read them, that is a
   finding to report, not a filter to apply.
 - Template-generated sentences (`training/sketch/generate.py`) are at most a secondary, clearly labelled variant, never the base.
+- A data writer saves its texts BEFORE annotating (one file per batch, ids and texts only); the coordinator checks that the annotated
+  texts are identical to the saved ones. (2026-10-31: two writers edited about 50 texts to fit their annotation; one did not report it.)
 - The test sets (`llm_bench/sonnet`, `llm_bench/haiku`, `docs/bench/blind.json`, `hand_broad`) are never read while writing training
   data, rules, cues or lexicon entries. Nothing is tuned on them.
 
