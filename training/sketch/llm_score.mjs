@@ -11,7 +11,7 @@ import * as FRONT from "../../docs/js/front.js";
 import { vssCentres } from "../../docs/js/vss-centers.js";
 import { existsSync } from "node:fs";
 import { readingFromWires, toNodes } from "../../docs/js/vss-adapter.js";
-import { canon } from "../../docs/js/bench-canon.js";
+import { canon, canonWant } from "../../docs/js/bench-canon.js";
 const require = createRequire(import.meta.url);
 const K = require("../../docs/js/logic.js");
 const argv = process.argv.slice(2), verbose = argv.includes("-v"), dumpAt = argv.indexOf("--dump");
@@ -70,7 +70,6 @@ function vssFormalize(text, ctx) {
   }
   return nodes;
 }
-const low = (v) => Array.isArray(v) ? v.map((x) => String(x).toLowerCase()).join(",") : String(v).toLowerCase();
 const actOf = (type, args) => `${type}:${args.action || args.ask || ""}`;
 
 function align(pred, gold) {          // LCS on act labels
@@ -82,7 +81,7 @@ function align(pred, gold) {          // LCS on act labels
 }
 function scoreMessage(nodes, row) {
   const mains = nodes.filter((n) => n.type !== "mention").map((n) => ({ act: actOf(n.type, n.args), got: canon(n, nodes), n }));
-  const gold = row.wires.map((w) => ({ act: actOf(w.type, w.args), want: Object.fromEntries(Object.entries(w.args).map(([k, v]) => [k, low(v)])) }));
+  const gold = row.wires.map((w) => ({ act: actOf(w.type, w.args), want: canonWant(w.type, w.args) }));
   const pairs = align(mains, gold); let right = 0; const bad = [];
   for (const [i, j] of pairs) {
     const miss = Object.entries(gold[j].want).filter(([k, v]) => (mains[i].got[k] ?? "∅") !== v).map(([k, v]) => `${k}:${mains[i].got[k] ?? "∅"}≠${v}`);
@@ -107,7 +106,7 @@ for (const d of dirs) {
       T.exact += s.exact; T.right += s.right; T.wrongAligned += s.wrongAligned; T.missed += s.missed; T.acts += s.acts; T.extra += s.extra; T.gold += s.gold; rec[f] = s.bad;
       // per gold act: right?
       const mains = out[f].filter((n) => n.type !== "mention").map((n) => ({ act: actOf(n.type, n.args), got: canon(n, out[f]) }));
-      const gold = r.wires.map((w) => ({ act: actOf(w.type, w.args), want: Object.fromEntries(Object.entries(w.args).map(([k, v]) => [k, low(v)])) }));
+      const gold = r.wires.map((w) => ({ act: actOf(w.type, w.args), want: canonWant(w.type, w.args) }));
       const pairs = align(mains, gold), ok = new Set(pairs.filter(([i, j]) => Object.entries(gold[j].want).every(([k, v]) => (mains[i].got[k] ?? "∅") === v)).map((p) => p[1]));
       gold.forEach((g, j) => { const b = T.byAct[g.act] = T.byAct[g.act] || [0, 0]; b[1]++; if (ok.has(j)) b[0]++; });
     }
