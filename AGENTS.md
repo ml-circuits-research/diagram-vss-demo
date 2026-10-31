@@ -81,6 +81,13 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
 - Fixes are made where the cause is, in a way that stays right in the long term (the same rule for every role, the same code path in
   Python and JS), never a special case that only moves a number.
 
+## Talking to the owner
+
+- Call things by their name: data is data, a model is a model, a threshold is a threshold. Never call training data a "component".
+- No vague words ("mechanism", "component", "signal") when a concrete one exists: say what it is and what it does.
+- Do not dramatize or inflate: no "architecture change" for what is new training data or a bug fix.
+- Short, literal answers; no guessing games; when unsure, say "I don't know" and how to find out.
+
 ## Working with the owner
 
 - Architecture changes need the owner's approval BEFORE they are built: a new learned component (a tagger, a classifier, any model
