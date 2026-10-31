@@ -245,6 +245,12 @@ class Reader:
         if not ws: out.update(presence=0.0, present=False); return out
         sc = np.real(M.conj() @ (Sn * key)); ratio = sc / core if core > 1e-9 else sc * 0
         thr = self.th.get("set_member", {}).get(r)
+        # diagram-vss-demo patch: the role's own presence threshold (calibrated on this very ratio.max) decides first whether the set role
+        # is in the sentence at all, as for every other role; before, a set role was "present" whenever one candidate passed the member
+        # threshold, so "connect Bias to Hidden" also filled the list role with both names
+        pthr = (self.th.get("presence") or {}).get(r)
+        if presence != "all" and pthr is not None and float(ratio.max()) < pthr:
+            out.update(presence=float(ratio.max()), present=False, presence_margin=float(pthr - ratio.max())); return out
         mem = [i for i in range(len(ws)) if (ratio[i] >= thr if thr is not None else i == int(np.argmax(sc)))]
         if presence == "all" and not mem: mem = [int(np.argmax(sc))]
         out["presence"] = float(ratio.max()); out["member_ratios"] = {w: float(x) for w, x in zip(ws, ratio)}; out["present"] = bool(mem)

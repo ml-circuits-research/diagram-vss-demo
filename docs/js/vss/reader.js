@@ -206,6 +206,9 @@ export class Reader {
     const x = cmul(Sn, key), sc = M.map((m) => cdotRe(m, x)), ratio = sc.map((v) => (core > 1e-9 ? v / core : 0 * v));
     const thr = (this.th.set_member || {})[r];
     let i0 = 0; sc.forEach((v, i) => { if (v > sc[i0]) i0 = i; });
+    // the role's own presence threshold decides first whether the set role is in the sentence (the twin of the infer.py patch)
+    const pthr = (this.th.presence || {})[r], top = Math.max(...ratio);
+    if (presence !== "all" && pthr !== undefined && pthr !== null && top < pthr) { out.presence = top; out.present = false; out.presence_margin = pthr - top; return out; }
     let mem = ws.map((_, i) => i).filter((i) => (thr !== undefined && thr !== null ? ratio[i] >= thr : i === i0));
     if (presence === "all" && !mem.length) mem = [i0];
     out.presence = Math.max(...ratio); out.member_ratios = Object.fromEntries(ws.map((w, i) => [w, ratio[i]])); out.present = mem.length > 0;

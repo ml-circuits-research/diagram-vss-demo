@@ -34,7 +34,7 @@ for (const m of rows) {
     const unknownShare = words.length ? words.filter((t) => !Object.hasOwn(lex, t)).length / words.length : 0;
     const r = vss.read(tokens.join(" ")); byStatus[r.status] = (byStatus[r.status] || 0) + 1;
     const verb = tokens.find((t) => verbs.has(t)) || null;
-    const reading = r.status === "unknown-event" || r.status === "no-sense" ? null : readingFromWires(r.wires, verb);
+    const reading = r.status === "unknown-event" || r.status === "no-sense" ? null : readingFromWires(r.wires, verb, tokens);
     const out = reading ? toNodes(reading, info, ctx, seq) : { nodes: [] };
     const main = out.nodes.filter((x) => x.type !== "mention").pop();
     const got = main ? canon(main, out.nodes) : {}, want = Object.fromEntries(Object.entries(w.args).map(([k, v]) => [k, low(v)]));

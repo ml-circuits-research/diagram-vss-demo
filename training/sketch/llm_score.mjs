@@ -35,7 +35,7 @@ function vssFormalize(text, ctx) {
     const nm = c.names.concat([...c.refs.keys()]);
     const { tokens, info: ni } = F ? FRONT.normalize(seg.src, nm, F) : normalize(C, lex, seg.src, nm), r = vss.read(tokens.join(" "));
     const verb = tokens.find((t) => verbEvent.has(t)) || null;
-    const reading = r.status === "unknown-event" || r.status === "no-sense" ? null : readingFromWires(r.wires, verb);
+    const reading = r.status === "unknown-event" || r.status === "no-sense" ? null : readingFromWires(r.wires, verb, tokens);
     const out = reading ? toNodes(reading, ni, c, seq) : { nodes: [] };
     out.nodes.forEach((n) => { if (n.type !== "mention") Object.defineProperty(n, "src", { value: seg.src, enumerable: false }); }); nodes.push(...out.nodes);
     const main = out.nodes[out.nodes.length - 1];

@@ -73,6 +73,14 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
 4. One change, one measurement, one report in plain words.
 (2026-10-30: the VSS-native cut scored exact-span F1 0.24 vs 0.92 for the tagger; a weight was then tuned on the fly to 0.38. Wrong.)
 
+## Root-cause analysis after every evaluation
+
+- Every evaluation of a reader is followed by a root-cause analysis of its misses (training/sketch/error_analysis.mjs for VSS: each
+  miss classified by the first cause that explains it, with counts and examples, and WHERE the cause sits: data, front end, our
+  code, calibration, model). Decisions follow the causes, not the totals.
+- Fixes are made where the cause is, in a way that stays right in the long term (the same rule for every role, the same code path in
+  Python and JS), never a special case that only moves a number.
+
 ## Working with the owner
 
 - Architecture changes need the owner's approval BEFORE they are built: a new learned component (a tagger, a classifier, any model

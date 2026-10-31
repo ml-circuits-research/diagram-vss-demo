@@ -49,7 +49,7 @@ export function readClause(src, ctx, seq) {
   const text = tokens.join(" ");
   const r = state.vss.read(text);
   const verb = tokens.find((t) => state.verbEvent.has(t)) || r.frame.lemma || null;
-  const reading = r.status === "unknown-event" || r.status === "no-sense" ? null : readingFromWires(r.wires, verb);
+  const reading = r.status === "unknown-event" || r.status === "no-sense" ? null : readingFromWires(r.wires, verb, tokens);
   const out = reading ? toNodes(reading, ninfo, ctx, seq) : { nodes: [], notes: [`VSS could not read “${src}” (${r.status})`] };
   if (reading && Object.keys(reading.offered || {}).length) out.notes.push("accepted the reader's offer: " + Object.entries(reading.offered).map(([k, v]) => `${k}=${v}`).join(", "));
   return Object.assign(out, { reading, normalized: text, vss: { status: r.status, sop: r.sop, margins: r.margins, residual: r.residual, ms: r.timings.total_ms, unplaced: r.unplaced } });

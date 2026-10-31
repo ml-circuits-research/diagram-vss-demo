@@ -23,3 +23,16 @@ little information here: spans are short and their words mostly have kinds; most
 Reading: about 30 of the ~46 missing points sit in our pipeline (list-role thresholds, triggers, values, calibration), not in the VSS
 core. They are fixable with the protocol already prepared (held-out calibration) and with the learned front end; the rest (~15 points:
 wrong type, refusals, swaps, part of the missed roles) is the model.
+
+## Fixes verified without retraining (same model, same 1126 requests)
+
+| change | fully right |
+|---|---|
+| before | 53.7% |
+| a set role (list) is first judged present by its own presence threshold, as every other role (infer.py and reader.js; before, one member above the member threshold made the list "present", so "connect Bias to Hidden" also filled the list with both names) | 54.4% |
+| a list's members ordered by their position in the text (a VSS set is unordered; "arrange C, G and D" came back as C, D, G) | 55.4% |
+
+What is left in "role wrong" (113): lists still misread by the model (the first member of a chain missed; "connect Hub to Lamp and
+Sensor" filling both the source list and the target list: 92), source and target swapped on "disconnect A from B", self-corrections.
+These, the action words not recognized (front end), the values not reachable (front end) and the missed roles (thresholds calibrated
+in-sample) need a rebuild and a retraining with the corrected labels and the held-out calibration.

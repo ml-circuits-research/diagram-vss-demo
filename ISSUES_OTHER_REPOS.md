@@ -46,3 +46,9 @@ Nothing changed or copied from it directly (training/vss comes from vss-demo, wh
   (training/vss/tool/sop/train.py, "diagram-vss-demo patch"): the members of set fillers count as entities.
 - `app/src/vss/reader.js` refuses worlds with set roles ("not ported"). Ported here (docs/js/vss/reader.js `readSetRole`, the frame ->
   wires step writes `$a & $b`).
+
+### 6. Set roles ignore their presence threshold; set members lose their order
+- `tool/sop/infer.py` `read_set_role` (and the reader): a set role is "present" as soon as one candidate passes the member threshold;
+  the role's presence threshold (calibrated on the same ratio) is never applied. Patched here in training/vss and docs/js/vss.
+- A set filler is sorted (json order), so the members' order in the sentence is lost; for lists whose order matters (chains) the
+  order must come from the text positions (done here in docs/js/vss-adapter.js).

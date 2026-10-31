@@ -13,7 +13,7 @@ const QUESTIONS = new Set(["count", "exists", "list", "property", "describe", "n
 const SUPER = { biggest: "biggest", smallest: "smallest", leftmost: "leftmost", rightmost: "rightmost", topmost: "topmost", bottommost: "bottommost", mostconnected: "mostConnected", leastconnected: "leastConnected", closest: "closest", farthest: "farthest" };
 
 /** VSS wires -> { event, roles, verb }; roles: role -> string | {head, attr, det} */
-export function readingFromWires(wires, verb) {
+export function readingFromWires(wires, verb, tokens = null) {
   const top = wires[0]; if (!top) return null;
   const byId = new Map(wires.map((w) => [w.id, w])), roles = {};
   for (const l of top.lines) {
@@ -34,7 +34,7 @@ export function readingFromWires(wires, verb) {
     if (roles[role] != null) continue;
     roles[role] = ENTITY_ROLES.has(role) ? { head: word } : word; offered[role] = word;
   }
-  return { event: top.type, roles, verb: verb || top.value("_verb"), offered };
+  return { event: top.type, roles, verb: verb || top.value("_verb"), offered, tokens };
 }
 const ENTITY_ROLES = new Set(["object", "landmark", "landmark2", "source", "target", "edge"]);
 
@@ -81,7 +81,9 @@ export function toNodes(reading, info, ctx, seq) {
       if (anc.length) args.anchor = anc.length === 1 ? anc[0] : anc;
     }
   };
-  const list = (v) => { const xs = [].concat(v || []).map((e) => ref(e)).filter((x) => x !== undefined); return xs.length ? xs : undefined; };
+  // a VSS set role is unordered; a list's order is the order of its members in the text (the reader knows the tokens)
+  const pos = (e) => { const h = e && (e.head || e); const i = (reading.tokens || []).indexOf(h); return i < 0 ? 1e9 : i; };
+  const list = (v) => { const xs = [].concat(v || []).slice().sort((a, b) => pos(a) - pos(b)).map((e) => ref(e)).filter((x) => x !== undefined); return xs.length ? xs : undefined; };
   const ev = reading.event, args = {};
   let type = COMMANDS.has(ev) ? "command" : QUESTIONS.has(ev) ? "question" : ev === "fact" ? "fact" : ev === "rule" ? "rule" : null;
   if (!type) return { nodes, notes: [`unknown event ${ev}`] };
