@@ -40,13 +40,19 @@ export function applyValues(toks, V) {
   }
   return out;
 }
+// a rule phrase may contain NAME (a pattern rule, field "ins"): it matches any name token; the rule may also condition on the second token to the left ("prev2")
+const pform = (toks) => toks.map((x) => (x.startsWith("n_") ? "NAME" : x));
 export function applyTriggers(toks, T) {
+  const tp = pform(toks);
   for (const e of T) {
     const ph = e.p.split(" ");
     for (let i = 0; i + ph.length <= toks.length; i++) {
-      if (!ph.every((x, k) => toks[i + k] === x)) continue;
-      const p = ctx(i > 0 ? toks[i - 1] : null), n = ctx(i + ph.length < toks.length ? toks[i + ph.length] : null);
-      if ((e.prev === "*" || e.prev === p) && (e.next === "*" || e.next === n)) return toks.slice(0, i).concat([e.tok], e.keep || [], toks.slice(i + ph.length));
+      if (!ph.every((x, k) => tp[i + k] === x)) continue;
+      const p = ctx(i > 0 ? toks[i - 1] : null), n = ctx(i + ph.length < toks.length ? toks[i + ph.length] : null), p2 = ctx(i > 1 ? toks[i - 2] : null);
+      if ((e.prev === "*" || e.prev === p) && (e.next === "*" || e.next === n) && (e.prev2 === undefined || e.prev2 === "*" || e.prev2 === p2)) {
+        if (e.ins) return toks.slice(0, i).concat([e.tok], toks.slice(i));   // pattern rule: the event token in front, the words stay
+        return toks.slice(0, i).concat([e.tok], e.keep || [], toks.slice(i + ph.length));
+      }
     }
   }
   return toks;
@@ -73,17 +79,18 @@ export function normalizeMessage(text, names, F) {
   }
   const byFirst = new Map();
   for (const e of F.triggers) { const f = e.p.split(" ")[0]; if (!byFirst.has(f)) byFirst.set(f, []); byFirst.get(f).push(e); }
-  const out = [], osrc = []; i = 0;
+  const out = [], osrc = [], pv = pform(vals); i = 0;
   while (i < vals.length) {
     let hit = null;
-    for (const e of byFirst.get(vals[i]) || []) {
+    for (const e of byFirst.get(pv[i]) || []) {
       const ph = e.p.split(" "), L = ph.length;
-      if (i + L > vals.length || !ph.every((x, k) => vals[i + k] === x)) continue;
-      const p = ctx(i > 0 ? vals[i - 1] : null), n = ctx(i + L < vals.length ? vals[i + L] : null);
-      if ((e.prev === "*" || e.prev === p) && (e.next === "*" || e.next === n)) { hit = e; break; }
+      if (i + L > vals.length || !ph.every((x, k) => pv[i + k] === x)) continue;
+      const p = ctx(i > 0 ? vals[i - 1] : null), n = ctx(i + L < vals.length ? vals[i + L] : null), p2 = ctx(i > 1 ? vals[i - 2] : null);
+      if ((e.prev === "*" || e.prev === p) && (e.next === "*" || e.next === n) && (e.prev2 === undefined || e.prev2 === "*" || e.prev2 === p2)) { hit = e; break; }
     }
     if (!hit) { out.push(vals[i]); osrc.push(src[i]); i++; continue; }
     const L = hit.p.split(" ").length, s = [src[i][0], src[i + L - 1][1]];
+    if (hit.ins) { out.push(hit.tok); osrc.push([s[0], s[1]]); out.push(vals[i]); osrc.push(src[i]); i++; continue; }   // pattern rule: the event token in front, then the words
     for (const t of [hit.tok].concat(hit.keep || [])) { out.push(t); osrc.push([s[0], s[1]]); }
     i += L;
   }

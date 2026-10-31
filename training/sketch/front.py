@@ -13,7 +13,18 @@ docs/js/front.js (parity: parity_front.mjs).
 4. TRIGGERS (learned): the annotated trigger phrase (value-normalized, cut at the first name) with its neighbours -> the event's token;
    precision counts the phrase's occurrences in chatter and in spans of other events; context backs off (prev,next) -> (*,next) ->
    (prev,*) -> (*,*); rules tried longest phrase first, then the most specific context. Value tokens inside a phrase stay (role fillers).
-The thresholds are parameters chosen on held-out training messages (select_front.py), never on the test sets."""
+The thresholds are parameters chosen on held-out training messages (select_front.py), never on the test sets.
+
+FRONT_V2=1 (learning only; default off, then everything below is exactly as before) switches on three learning changes found by the root-cause
+analysis of the front end (diagnosis_front/FRONT_DIAG.md, pre-registration diagnosis_front/FRONT_V2.md):
+  MASK   (learn_values)   a word n-gram that overlaps an annotated trigger without being inside it is no evidence for a value (it still
+                          counts in the denominator): "make all the" -> all ate the verb "make".
+  CTX2   (learn_triggers) a rule may also condition on the second token to the left (rule field "prev2"): "Can X be reached from" vs
+                          "What can be reached from".
+  NAMEPH (learn_triggers) a trigger that starts with a name ("Bank to Fraud", "the Hero a") is not dropped: it becomes a pattern over the
+                          placeholder NAME ("NAME to NAME"); such a rule (field "ins") INSERTS the event token in front of the matched
+                          words (the names stay).
+Applying a front.json is the same code either way (the new rule fields are read when present); only learning is behind the switch."""
 import collections, hashlib, json, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 
@@ -55,6 +66,9 @@ def value_kinds():
             if k == "shape": out.setdefault(value_token(k, v, True), "SHAPE")
     out["all"] = "QUANT"   # the legend's quantifier=all (mentions: "every square", "all the boxes")
     return out
+
+
+def v2(): return os.environ.get("FRONT_V2") == "1"
 
 
 def slug(s): return re.sub(r"[^a-z0-9]+", "_", s.lower()).strip("_") or "x"
@@ -112,13 +126,19 @@ def apply_values(toks, V):
     return out
 
 
+def pform(toks): return ["NAME" if x.startswith("n_") else x for x in toks]   # a phrase over NAME matches any name token
+
+
 def apply_triggers(toks, T):
+    tp = pform(toks)
     for e in T:
         ph = e["p"].split()
         for i in range(len(toks) - len(ph) + 1):
-            if toks[i:i + len(ph)] != ph: continue
-            p = ctx(toks[i - 1] if i > 0 else None); n = ctx(toks[i + len(ph)] if i + len(ph) < len(toks) else None)
-            if e["prev"] in ("*", p) and e["next"] in ("*", n): return toks[:i] + [e["tok"]] + list(e.get("keep", [])) + toks[i + len(ph):]
+            if tp[i:i + len(ph)] != ph: continue
+            p = ctx(toks[i - 1] if i > 0 else None); n = ctx(toks[i + len(ph)] if i + len(ph) < len(toks) else None); p2 = ctx(toks[i - 2] if i > 1 else None)
+            if e["prev"] in ("*", p) and e["next"] in ("*", n) and e.get("prev2", "*") in ("*", p2):
+                if e.get("ins"): return toks[:i] + [e["tok"]] + toks[i:]          # pattern rule: the event token goes in front, the words stay
+                return toks[:i] + [e["tok"]] + list(e.get("keep", [])) + toks[i + len(ph):]
     return toks
 
 
@@ -148,16 +168,19 @@ def normalize_message(text, names, F):
         else: vals.append(toks[i][0]); src.append([toks[i][1], toks[i][2]]); i += 1
     by_first = {}
     for e in F["triggers"]: by_first.setdefault(e["p"].split()[0], []).append(e)
+    pv = pform(vals)
     out, osrc, i = [], [], 0
     while i < len(vals):
         hit = None
-        for e in by_first.get(vals[i], ()):
+        for e in by_first.get(pv[i], ()):
             ph = e["p"].split(); L = len(ph)
-            if vals[i:i + L] != ph: continue
-            p = ctx(vals[i - 1] if i > 0 else None); n = ctx(vals[i + L] if i + L < len(vals) else None)
-            if e["prev"] in ("*", p) and e["next"] in ("*", n): hit = e; break
+            if pv[i:i + L] != ph: continue
+            p = ctx(vals[i - 1] if i > 0 else None); n = ctx(vals[i + L] if i + L < len(vals) else None); p2 = ctx(vals[i - 2] if i > 1 else None)
+            if e["prev"] in ("*", p) and e["next"] in ("*", n) and e.get("prev2", "*") in ("*", p2): hit = e; break
         if hit is None: out.append(vals[i]); osrc.append(src[i]); i += 1; continue
         L = len(hit["p"].split()); s = [src[i][0], src[i + L - 1][1]]
+        if hit.get("ins"):   # pattern rule: the event token in front, then the words themselves
+            out.append(hit["tok"]); osrc.append(list(s)); out.append(vals[i]); osrc.append(src[i]); i += 1; continue
         for t in [hit["tok"]] + list(hit.get("keep", [])): out.append(t); osrc.append(list(s))
         i += L
     info["numbers"] = {x: int(x) for x in out if x.isdigit()}
@@ -282,13 +305,29 @@ def requests(msgs):
     return reqs, chatter
 
 
+def trigger_region(w, toks, names):
+    """(start, end) of the annotated trigger among the raw tokens of its span, or None"""
+    if not w.get("trigger"): return None
+    tr = [x[0] for x in tokenize(w["trigger"], names)[0] if x[0] not in ".,!?;:"]
+    pos = next((k for k in range(len(toks) - len(tr) + 1) if tr and toks[k:k + len(tr)] == tr), None)
+    return None if pos is None else (pos, pos + len(tr))
+
+
 def learn_values(reqs, min_count, min_prec):
+    mask = v2()
     co, occ = collections.defaultdict(collections.Counter), collections.Counter()
     for m, w, sp, names in reqs:
         toks = [x[0] for x in tokenize(sp, names)[0]]; gv = gold_values(w)
         grams = {" ".join(toks[i:i + n]) for n in (1, 2, 3) for i in range(len(toks) - n + 1) if all(is_word(x) for x in toks[i:i + n])}
+        ok = grams
+        if mask:   # MASK: an n-gram that overlaps the annotated trigger without being inside it is no evidence for a value (it still counts in occ)
+            reg = trigger_region(w, toks, names)
+            if reg:
+                ok = {" ".join(toks[i:i + n]) for n in (1, 2, 3) for i in range(len(toks) - n + 1) if all(is_word(x) for x in toks[i:i + n])
+                      and not (i < reg[1] and i + n > reg[0] and not (i >= reg[0] and i + n <= reg[1]))}
         for g in grams:
             occ[g] += 1
+            if g not in ok: continue
             for v in gv:
                 if not v.isdigit() or not g.isdigit(): co[g][v] += 1
     V = {}
@@ -304,20 +343,27 @@ def learn_values(reqs, min_count, min_prec):
 
 
 def learn_triggers(reqs, chatter, V, min_count, share, min_prec, value_tokens):
+    new = v2()   # CTX2 (second token to the left) and NAMEPH (name-initial pattern rules), see the docstring
     tp = collections.defaultdict(collections.Counter); phrases = set(); spans = []
+    def keys(ph, toks, pos, L):
+        p = ctx(toks[pos - 1] if pos > 0 else None); n = ctx(toks[pos + L] if pos + L < len(toks) else None)
+        ks = [(ph, p, n, "*"), (ph, "*", n, "*"), (ph, p, "*", "*"), (ph, "*", "*", "*")]
+        if new: p2 = ctx(toks[pos - 2] if pos > 1 else None); ks = [(ph, p, n, p2), (ph, p, "*", p2)] + ks
+        return ks
     for m, w, sp, names in reqs:
         tok = event_token(w); toks = apply_values([x[0] for x in tokenize(sp, names)[0]], V); own = None
+        if new: toks = pform(toks)
         if tok and w.get("trigger"):
-            tt = apply_values([x[0] for x in tokenize(w["trigger"], names)[0]], V)
-            tt = [x for x in tt if x not in ".,!?;:"]
-            cut = next((k for k, x in enumerate(tt) if x.startswith("n_")), len(tt)); tt = tt[:cut]
+            full = [x for x in apply_values([x[0] for x in tokenize(w["trigger"], names)[0]], V) if x not in ".,!?;:"]
+            cut = next((k for k, x in enumerate(full) if x.startswith("n_")), len(full)); tt = full[:cut]
+            if new and not tt and full: tt = pform(full)   # NAMEPH: the trigger starts with a name: a pattern over NAME
             pos = next((k for k in range(len(toks) - len(tt) + 1) if tt and toks[k:k + len(tt)] == tt), None)
             if pos is not None:
                 own = tt; ph = " ".join(tt); phrases.add(ph)
-                p = ctx(toks[pos - 1] if pos > 0 else None); n = ctx(toks[pos + len(tt)] if pos + len(tt) < len(toks) else None)
-                for key in ((ph, p, n), (ph, "*", n), (ph, p, "*"), (ph, "*", "*")): tp[key][tok] += 1
+                for key in keys(ph, toks, pos, len(tt)): tp[key][tok] += 1
         spans.append((toks, tok, own))
     chat = [apply_values([x[0] for x in tokenize(s, names)[0]], V) for s, names in chatter]
+    if new: chat = [pform(t) for t in chat]
     occ, occ_c = collections.defaultdict(collections.Counter), collections.Counter()
     def scan(toks, hit, own=None):
         for ph in phrases:
@@ -325,8 +371,7 @@ def learn_triggers(reqs, chatter, V, min_count, share, min_prec, value_tokens):
             if own and len(own) > len(pt): continue
             for i in range(len(toks) - len(pt) + 1):
                 if toks[i:i + len(pt)] == pt:
-                    p = ctx(toks[i - 1] if i > 0 else None); n = ctx(toks[i + len(pt)] if i + len(pt) < len(toks) else None)
-                    for key in ((ph, p, n), (ph, "*", n), (ph, p, "*"), (ph, "*", "*")): hit(key)
+                    for key in keys(ph, toks, i, len(pt)): hit(key)
     for toks, ev, own in spans: scan(toks, lambda key: occ[key].update([ev]), own)
     for toks in chat: scan(toks, lambda key: occ_c.update([key]))
     rules = []
@@ -336,11 +381,14 @@ def learn_triggers(reqs, chatter, V, min_count, share, min_prec, value_tokens):
         prec = n / (n + fp)
         if n >= min_count and k / n >= share and prec >= min_prec:
             e = {"p": key[0], "prev": key[1], "next": key[2], "tok": tok, "n": n, "prec": round(prec, 3)}
-            kv = [x for x in key[0].split() if x in value_tokens]
-            if kv: e["keep"] = kv
+            if key[3] != "*": e["prev2"] = key[3]
+            if "NAME" in key[0].split(): e["ins"] = True
+            else:
+                kv = [x for x in key[0].split() if x in value_tokens]
+                if kv: e["keep"] = kv
             rules.append(e)
-    spec = lambda e: (e["prev"] != "*") + (e["next"] != "*")
-    rules.sort(key=lambda e: (-len(e["p"].split()), -spec(e), -e["n"], e["p"], e["prev"], e["next"]))
+    spec = lambda e: (e["prev"] != "*") + (e["next"] != "*") + (e.get("prev2", "*") != "*")
+    rules.sort(key=lambda e: (-len(e["p"].split()), -spec(e), -e["n"], e["p"], e["prev"], e["next"], e.get("prev2", "*")))
     return rules
 
 
@@ -357,7 +405,7 @@ def learn(msgs, params=None):
     # labelled reference: FRONT_TAGGER=1
     S = train_segmenter(msgs, P["seg_epochs"]) if os.environ.get("FRONT_TAGGER") == "1" else {}
     return {"about": "front.json: the learned front end of the VSS world `real` (training/sketch/front.py); learned from " + str(len(msgs)) + " training messages",
-            "params": P, "values": dict(sorted(V.items())), "triggers": T, "segmenter": dict(sorted(S.items()))}
+            "params": P, "values": dict(sorted(V.items())), "triggers": T, "segmenter": dict(sorted(S.items())), **({"v2": ["MASK", "CTX2", "NAMEPH"]} if v2() else {})}
 
 
 # The training folders, in one place. DATA=old (or unset): the first two (exactly the original behaviour); DATA=all: all five.
