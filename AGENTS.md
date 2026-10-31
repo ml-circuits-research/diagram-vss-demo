@@ -9,6 +9,8 @@ Read this first. These rules come from mistakes already made here; each says wha
 - Other repositories (ml-circuits-research/vss-demo, vsa-semantic-space, ...) are research repositories: never push or open PRs there
   without asking. Copy what is useful into this repository and change the copy. Problems found there go in `ISSUES_OTHER_REPOS.md`.
 - Do not commit files that a running process is still writing (training runs, agents writing data). Commit them when they are final.
+- Agents do not commit or push. An agent leaves its changes in the working tree and reports the files it changed; the coordinator
+  reviews them and commits (owner's rule, 2026-10-31: commits made by agents skip the review).
 
 ## Scope: what the editor is
 
@@ -69,7 +71,7 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
 - Opus, effort high: changes to the VSS model, trainer or reader (architecture work), independent reviews of such work.
 - Sonnet, effort medium: pipeline wiring, running trainings and evaluations, error analyses, label reviews, writing data.
 - Haiku, effort medium: simple data writing and mechanical checks.
-- The coordinator states the model and effort when launching an agent and reviews every result before it is reported.
+- The coordinator states the model and effort when launching an agent, reviews every result before it is reported, and makes the commits.
 
 ## Experiments
 
@@ -103,7 +105,7 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
 - What the owner proposes or asks for IS approved: do it, do not ask again.
 - Approval is needed only for changes the owner did not propose: a new learned component (a tagger, a classifier, any model
   besides the VSS reader), a new layer in the pipeline, or replacing one. Propose it with the reason and the alternative, then wait.
-  (2026-10-30: a perceptron segmenter was added without asking; it stays only as a labelled baseline until the owner decides.)
+  (2026-10-30: a perceptron segmenter was added without asking; the owner decided it is not part of the architecture.)
 
 - Do not take decisions that move away from real use without asking; state assumptions explicitly, with concrete examples.
 - Explain in plain words, without jargon; no needless cleverness. If something was a mistake, say so plainly and fix it.
