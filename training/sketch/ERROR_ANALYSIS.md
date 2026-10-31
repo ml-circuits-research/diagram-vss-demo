@@ -36,3 +36,17 @@ What is left in "role wrong" (113): lists still misread by the model (the first 
 Sensor" filling both the source list and the target list: 92), source and target swapped on "disconnect A from B", self-corrections.
 These, the action words not recognized (front end), the values not reachable (front end) and the missed roles (thresholds calibrated
 in-sample) need a rebuild and a retraining with the corrected labels and the held-out calibration.
+
+## Two front-end changes tried, measured without training, reverted (2026-10-31)
+
+Front end learned on the 80% fit split, measured on the 1126 dev requests (event token present / right, request fully readable by the
+converter, triggers firing in the 312 chatter sentences):
+
+| front end | no event token | wrong event token | fully readable | false triggers in chatter |
+|---|---|---|---|---|
+| as committed | 8.2% | 16.6% | 79.7% | 55 |
+| no value n-gram over annotated trigger words + rules ordered by the lower bound of their precision | 8.0% | 16.5% | 78.2% | 67 |
+| no value n-gram over annotated trigger words only | 8.0% | 16.2% | 78.4% | 67 |
+
+Neither is better on balance (fewer readable requests, more false triggers); both reverted. The front end's remaining misses are
+mostly data coverage (rare verbs: "slide", "touch") and questions whose action is spread over the sentence ("are X and Y connected").
