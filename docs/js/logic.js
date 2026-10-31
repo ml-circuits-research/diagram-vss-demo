@@ -145,7 +145,23 @@ class Engine {
   run(nodes, opts) {
     const overrides = (opts && opts.overrides) || {};
     const partial = !(opts && opts.partial === false);       // default: run what can run, report the rest (one transaction per message)
-    const before = this.world.snapshot(); const env = {}; const steps = []; let changed = false;
+    let before = this.world.snapshot(); const env = {}; const steps = []; let changed = false;
+    // undo / redo step over the last executed ACTION, including actions of this same message. L = this message's executed actions
+    // (each with the state before it), R = the ones undone here (for redo). With none of this message's own left to step over, they fall
+    // back to the previous turns (world.undo / world.redo); after such a fallback the message's history restarts from the new state.
+    const L = [], R = [];
+    const hist = {
+      undo: () => {
+        const e = L.pop();
+        if (e) { R.push({ e, after: this.world.snapshot() }); this.world.restore(e.mark); e.step.patches = []; return 'action'; }
+        this.world.undo(); before = this.world.snapshot(); R.length = 0; return 'turn';
+      },
+      redo: () => {
+        const r = R.pop();
+        if (r) { this.world.restore(r.after); r.e.step.patches = r.e.patches; L.push(r.e); return 'action'; }
+        this.world.redo(); before = this.world.snapshot(); L.length = 0; return 'turn';
+      }
+    };
     const failed = new Map();                                    // wire id -> error (its own, or the wire it depends on)
     const fr = this.world.state.frame || { x: 0, y: 0 }; FR.x = fr.x; FR.y = fr.y;
     const refsOf = (v, out) => { if (isRef(v)) out.push(v.ref); else if (Array.isArray(v)) v.forEach(x => refsOf(x, out)); return out; };
@@ -161,17 +177,18 @@ class Engine {
         if (!this.wireTypes.get(node.type).plugin.enabled) throw new SOPError(`Wire type "${node.type}" belongs to the "${this.wireTypes.get(node.type).plugin.title}" plugin, which is switched off.`);
         const args = {}; for (const [k, v] of Object.entries(node.args)) args[k] = this.resolve(v, env);
         const h = this.match(node.type, args); step.plugin = h.plugin.name;
-        const ctx = { world: this.world, engine: this, node, env, emit: p => { this.world.apply(p); step.patches.push(p); changed = true; } };
+        const ctx = { world: this.world, engine: this, node, env, undo: hist.undo, redo: hist.redo, emit: p => { this.world.apply(p); step.patches.push(p); changed = true; } };
         const out = h.run(args, ctx) || {};
         Object.assign(step, { value: out.value, answer: out.answer, notes: out.notes, lowering: out.lowering, highlight: out.highlight });
         env[node.id] = out.value;
+        if (step.patches.length) { L.push({ step, mark, patches: step.patches }); R.length = 0; }
       } catch (e) {
         if (!partial) { this.world.restore(before); return { ok: false, steps, error: e }; }
         if (nPatch()) { this.world.restore(mark); step.patches = []; }   // a wire is applied whole or not at all
         step.error = e; failed.set(node.id, e);
       }
     }
-    if (changed && steps.some(st => st.patches.length)) this.world.commit(before);
+    if (changed && L.length) this.world.commit(before);
     const errors = steps.filter(st => st.error).map(st => ({ node: st.node, error: st.error, dependents: steps.filter(x => x.skipped && failed.get(x.node.id) === st.error).map(x => x.node) }));
     const done = steps.filter(st => !st.error && !st.skipped).length;
     return { ok: !errors.length, partial: errors.length > 0 && done > 0, steps, env, changed: steps.some(st => st.patches.length), errors, error: errors.length ? errors[0].error : null };
@@ -426,11 +443,11 @@ const corePlugin = {
 
 const historyPlugin = {
   name: 'history', title: 'History',
-  description: 'Undo and redo. Every turn is one transaction, so undo reverts a whole sentence.',
+  description: 'Undo and redo. Undo and redo step over the last executed action, including actions of the same message; with none left in the message they step over the previous turn.',
   legend: { action: { ask: 'What should happen?', kind: 'enum', values: { undo: ['undo', 'revert'], redo: ['redo', 'reapply', 're-apply'] } } },
   handlers: [
-    { type: 'command', when: { action: 'undo' }, run(a, ctx) { const n = Math.max(1, +a.count || 1); for (let i = 0; i < n; i++) ctx.world.undo(); return { notes: [`reverted ${n} turn${n > 1 ? 's' : ''}`] }; } },
-    { type: 'command', when: { action: 'redo' }, run(a, ctx) { const n = Math.max(1, +a.count || 1); for (let i = 0; i < n; i++) ctx.world.redo(); return { notes: [`re-applied ${n} turn${n > 1 ? 's' : ''}`] }; } }
+    { type: 'command', when: { action: 'undo' }, run(a, ctx) { const n = Math.max(1, +a.count || 1); for (let i = 0; i < n; i++) ctx.undo(); return { notes: [`reverted ${n} turn${n > 1 ? 's' : ''}`] }; } },
+    { type: 'command', when: { action: 'redo' }, run(a, ctx) { const n = Math.max(1, +a.count || 1); for (let i = 0; i < n; i++) ctx.redo(); return { notes: [`re-applied ${n} turn${n > 1 ? 's' : ''}`] }; } }
   ]
 };
 
@@ -565,7 +582,7 @@ const connectionsPlugin = {
     { type: 'command', when: { action: 'connect' }, run(a, ctx) {
       const W = ctx.world, notes = []; let from = names(a.from), to = names(a.to);
       if (a.pairing || (!to.length && from.length > 1)) {
-        const list = from.concat(to).map(n => need(W, n)).sort((p, q) => p.order - q.order);
+        const seen = new Set(), list = from.concat(to).map(n => need(W, n)).filter(x => !seen.has(x) && seen.add(x));   // the order the text gives
         if (list.length < 2) throw new SOPError('Pairing needs at least two shapes, e.g. "connect the circles in a chain".');
         const pairs = a.pairing === 'all' ? list.flatMap((x, i) => list.slice(i + 1).map(y => [x, y])) : list.slice(1).map((y, i) => [list[i], y]);
         for (const [x, y] of pairs) {

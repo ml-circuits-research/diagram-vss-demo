@@ -58,7 +58,7 @@ export function canonWant(type, args) {
   for (const [k, v] of Object.entries(args || {})) el[k] = (Array.isArray(v) ? v : parts(v)).map((x) => String(x).toLowerCase());
   return finish(type, el);
 }
-/** score one formalizer output against a row: { ok, per: {key: {got, want, ok}} }. A row with `wires` (a message of several clauses)
+/** score one formalizer output against a row (a row, or a wire of a `wires` row, holds its gold arguments in `gold` or `args`): { ok, per: {key: {got, want, ok}} }. A row with `wires` (a message of several clauses)
  *  is compared wire by wire, in order, on the non-mention wires; otherwise the last non-mention wire is the reading. */
 export function score(nodes, row) {
   if (row.wires) {
@@ -78,7 +78,7 @@ function score1(nodes, row, all) {
   const got = main ? canon(main, all || nodes) : {}, per = {};
   let ok = !!main && main.type === row.type;
   per._type = { got: main ? main.type : "∅", want: row.type, ok: !!main && main.type === row.type };
-  for (const [k, want] of Object.entries(canonWant(row.type, row.gold))) { const g = got[k] ?? "∅"; per[k] = { got: g, want, ok: g === want }; if (g !== want) ok = false; }
+  for (const [k, want] of Object.entries(canonWant(row.type, row.gold ?? row.args))) { const g = got[k] ?? "∅"; per[k] = { got: g, want, ok: g === want }; if (g !== want) ok = false; }
   return { ok, per };
 }
 if (typeof window !== "undefined") window.BenchCanon = { canon, canonWant, score };
