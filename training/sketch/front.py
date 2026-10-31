@@ -130,6 +130,40 @@ def normalize(text, names, F):
     return t, info
 
 
+def normalize_message(text, names, F):
+    """a WHOLE message for the centre reader (research/attention/port/NOTES.md): -> (tokens, src, info), src[i] = [start, end) of token i
+    in the text. Differences from normalize() (one request): (1) a word read as a name anywhere in the message is a name everywhere in it
+    (a second tokenization with those names known: "Hub is red. connect Hub to Lamp"); (2) EVERY trigger rule that fires is applied, left
+    to right: at each position the first rule (in the learned order) whose phrase and context match there fires, the phrase is replaced by
+    the event token (and its kept value tokens) and the scan goes on after it; contexts are read on the value-normalized tokens. Linear in
+    the tokens (rules indexed by their first word). The JS twin is docs/js/front.js normalizeMessage."""
+    toks0, info0 = tokenize(text, names)
+    toks, info = tokenize(text, list(names) + [info0["names"][t] for t in info0["names"]])
+    V = F["values"]; vals, src, i = [], [], 0
+    while i < len(toks):
+        for n in (3, 2, 1):
+            g = [x[0] for x in toks[i:i + n]]
+            if len(g) == n and all(is_word(x) for x in g) and " ".join(g) in V:
+                vals.append(V[" ".join(g)]); src.append([toks[i][1], toks[i + n - 1][2]]); i += n; break
+        else: vals.append(toks[i][0]); src.append([toks[i][1], toks[i][2]]); i += 1
+    by_first = {}
+    for e in F["triggers"]: by_first.setdefault(e["p"].split()[0], []).append(e)
+    out, osrc, i = [], [], 0
+    while i < len(vals):
+        hit = None
+        for e in by_first.get(vals[i], ()):
+            ph = e["p"].split(); L = len(ph)
+            if vals[i:i + L] != ph: continue
+            p = ctx(vals[i - 1] if i > 0 else None); n = ctx(vals[i + L] if i + L < len(vals) else None)
+            if e["prev"] in ("*", p) and e["next"] in ("*", n): hit = e; break
+        if hit is None: out.append(vals[i]); osrc.append(src[i]); i += 1; continue
+        L = len(hit["p"].split()); s = [src[i][0], src[i + L - 1][1]]
+        for t in [hit["tok"]] + list(hit.get("keep", [])): out.append(t); osrc.append(list(s))
+        i += L
+    info["numbers"] = {x: int(x) for x in out if x.isdigit()}
+    return out, osrc, info
+
+
 # ---------------------------------------------------------------- 2. segmenter
 def seg_feats(toks, i, prev_label):
     w = lambda k: ctx(toks[k]) if 0 <= k < len(toks) else ("<s>" if k < 0 else "</s>")
