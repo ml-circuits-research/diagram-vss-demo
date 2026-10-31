@@ -84,3 +84,21 @@ Values:
   linked only reports that the link exists, docs/js/logic.js).
 - A chain that closes a loop ("A to B, B to C, C to A") -> a chain from "A,B,C" plus a separate connect from "C" to "A" (4 of 4 in
   the existing data; a repeated name inside one chain makes a self-loop in logic.js).
+
+## Rules fixed on 2026-10-31 (audit patterns P1-P3; every change is logged in `LABEL_FIXES_PATTERNS.md`)
+
+- "line" -> `arrow: "none"`. The editor's cue list maps `line` to no arrowhead (logic.js:561). A connect whose text says "line" / "lines"
+  (dashed line, dotted line, solid line, a line, a plain line) and does not say "arrow" gets `arrow: "none"`. A text with "arrow" keeps
+  no arrow key (a plain arrow) or its own value ("two-way" -> both). Count: 401 connects say "line" without "arrow" (the 406 spans matching the word, minus 5 that are not the rule: hm-0271, hm-0310, sm-0290 and the shape names
+in hm2-0162, hm2-0384); 85 already had `arrow: "none"`, the other 316 had no arrow key and were changed (sonnet_msg 28, haiku_msg 125, sonnet_msg2 21,
+  haiku_msg2 14, sonnet_long 59, fresh1/sonnet 36, fresh1/haiku 33). Not changed: a chain whose "line" belongs to its first link only (hm-0271,
+  hm-0310), "label the Scope line" (sm-0290, an existing link), a shape named Line / Line1.
+- "next to X" / "beside X" in a question is spatial: the legend lists them as cues of position=near. "Which shapes are next to X",
+  "what is next to X" -> `list`, `position: near`, `anchor: X` (17 questions changed). `neighbors` only when the question itself asks
+  for connections / links ("what is linked to X", "who is connected to X", "what is connected to X"). "Is A next to B" stays `check`
+  with position near.
+- "the copies / clones / the new ones" after a duplicate (or create) in the same message -> `$new` (the value of the latest create /
+  duplicate wire = exactly the new shapes), with the original in front when the text includes it ("Sensor,$new"). Never
+  `mention(quantifier=all,recency=newest)`: with quantifier=all the editor ignores recency and matches every shape (23 wires changed,
+  all in the sonnet folders). A single copy picked among several ("the copy at the right", "the last one") stays `mention(recency=newest)`.
+  Open: copies from two duplicate wires in one message (sl-0060) cannot be written with one `$new`.
