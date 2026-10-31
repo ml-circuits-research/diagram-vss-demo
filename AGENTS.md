@@ -93,7 +93,8 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
 
 ## Working with the owner
 
-- Architecture changes need the owner's approval BEFORE they are built: a new learned component (a tagger, a classifier, any model
+- What the owner proposes or asks for IS approved: do it, do not ask again.
+- Approval is needed only for changes the owner did not propose: a new learned component (a tagger, a classifier, any model
   besides the VSS reader), a new layer in the pipeline, or replacing one. Propose it with the reason and the alternative, then wait.
   (2026-10-30: a perceptron segmenter was added without asking; it stays only as a labelled baseline until the owner decides.)
 
