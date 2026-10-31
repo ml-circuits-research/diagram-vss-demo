@@ -10,3 +10,4 @@ training/sketch/worlds/real/
 research/attention/**/*.pt
 training/sketch/worlds_centres/
 .claude/worktrees/
+docs/model/data2_p80_s0/
