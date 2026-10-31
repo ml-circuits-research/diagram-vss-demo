@@ -114,7 +114,9 @@ export function segDecode(toks, W) {
   }
   return labels;
 }
-export function segment(text, names, F) {
+export function segment(text, names, F) { return segmentSpans(text, names, F).map(([s, e]) => text.slice(s, e)); }
+/** the same units as character ranges [start, end) of `text` (the composer, vss-composer.js, needs the offsets) */
+export function segmentSpans(text, names, F) {
   const [toks] = tokenize(text, names), labels = segDecode(toks.map((x) => x[0]), F.segmenter), spans = []; let cur = null;
   toks.forEach(([, s, e], k) => {
     const L = labels[k];
@@ -122,5 +124,5 @@ export function segment(text, names, F) {
     else if (L === "I") cur[1] = e;
     else cur = null;
   });
-  return spans.map(([s, e]) => text.slice(s, e));
+  return spans;
 }

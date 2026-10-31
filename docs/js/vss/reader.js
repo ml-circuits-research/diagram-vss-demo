@@ -56,7 +56,7 @@ export class Legend {
 }
 
 // ---------------- frames (world.frame_of / filler_words subset used by the reader)
-function fillerWords(fl) {
+export function fillerWords(fl) {
   if (!fl) return [];
   if (fl[0] === "word" || fl[0] === "negword") return [fl[1]];
   if (fl[0] === "entity") return [fl[1], fl[3]].filter((x) => x) .concat(fillerWords(fl[2]));

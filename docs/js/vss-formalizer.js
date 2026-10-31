@@ -1,23 +1,26 @@
 // vss-formalizer.js: the VSS formalizer of the demo. Clauses come from the rules segmenter (the same cut every formalizer gets); each
 // clause is normalized (snorm.js), read by the VSS reader trained on the sketch world (vss.js, model in ../model/real/ with its learned front end front.js / front.json), and turned into
 // the demo's wires (vss-adapter.js). Exposes window.VSSFormalizer = { load, formalize, readClause, info }.
+// Option (off by default): formalize(text, ctx, rules, { composer: true }) -> the composer (vss-composer.js): the cutter
+// (../model/micro/cutter.json), the micro-worlds of ../model/micro/registry.json, the router and the fallback world; loaded on first use.
 import { load as loadVSS } from "./vss.js";
 import { compile, normalize } from "./snorm.js";
 import * as FRONT from "./front.js";
 import { vssCentres } from "./vss-centers.js";
 import { readingFromWires, readingFromGold, toNodes } from "./vss-adapter.js";
+import { loadComposer, nextContext } from "./vss-composer.js";
 
 const state = { vss: null, table: null, lexicon: null, verbs: null, verbEvent: null, bytes: 0, loadMs: 0, base: null };
 
-async function fetchSize(url) { const r = await fetch(url); if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`); const b = await r.arrayBuffer(); state.bytes += b.byteLength; return b; }
+async function fetchSize(url, acc = state) { const r = await fetch(url); if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`); const b = await r.arrayBuffer(); acc.bytes += b.byteLength; return b; }
 // hosts that serve no binary files get the .bin files as base64 text parts listed in bin-parts.json; the manifest's sha256 still checks them
-async function fetchBin(base, name) {
-  try { return await fetchSize(new URL(name, base)); } catch (e) {
-    const parts = JSON.parse(new TextDecoder().decode(await fetchSize(new URL("bin-parts.json", base))))[name];
+async function fetchBin(base, name, acc = state) {
+  try { return await fetchSize(new URL(name, base), acc); } catch (e) {
+    const parts = JSON.parse(new TextDecoder().decode(await fetchSize(new URL("bin-parts.json", base), acc)))[name];
     if (!parts) throw e;
     let b64 = ""; for (const p of parts) { const r = await fetch(new URL(p, base)); if (!r.ok) throw new Error(`${p}: HTTP ${r.status}`); b64 += await r.text(); }
     const bin = atob(b64), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
-    state.bytes += u8.byteLength; return u8.buffer;
+    acc.bytes += u8.byteLength; return u8.buffer;
   }
 }
 
@@ -35,6 +38,27 @@ export async function load(base = new URL("../model/real/", import.meta.url).hre
   for (const e of m.legend.events || []) { state.verbs[e.id] = e.verbs || []; for (const v of e.verbs || []) state.verbEvent.set(v, e.id); }
   state.loadMs = performance.now() - t0;
   return info();
+}
+
+// ---- the composer (option `composer` of formalize): every model folder of the registry, loaded with the same fetch code
+const comp = { c: null, loading: null, bytes: 0, loadMs: 0 };
+async function modelAt(base) {
+  const cache = new Map();
+  const readFile = async (name) => { if (!cache.has(name)) cache.set(name, name.endsWith(".bin") ? await fetchBin(base, name, comp) : await fetchSize(new URL(name, base), comp)); const b = cache.get(name); return name.endsWith(".json") ? new TextDecoder().decode(b) : b; };
+  const vss = await loadVSS(null, { readFile, sentenceCandidates: true });
+  let F = null; try { F = JSON.parse(await readFile("front.json")); } catch (e) { F = null; }
+  return { vss, F };
+}
+/** load the composer: root = the docs/model/ folder (registry at micro/registry.json, model folders relative to root) */
+export async function loadComposerAt(root = new URL("../model/", import.meta.url).href) {
+  if (comp.c) return comp.c;
+  if (!comp.loading) comp.loading = (async () => {
+    const t0 = performance.now(), json = async (u) => JSON.parse(new TextDecoder().decode(await fetchSize(new URL(u, root), comp)));
+    const registry = await json("micro/registry.json"), cutter = await json(registry.cutter);
+    comp.c = await loadComposer(registry, cutter, (name) => modelAt(new URL(name.replace(/\/?$/, "/"), root).href));
+    comp.loadMs = performance.now() - t0; return comp.c;
+  })();
+  return comp.loading;
 }
 
 export function info() {
@@ -59,6 +83,10 @@ export function readClause(src, ctx, seq) {
 /** a whole message; the VSS reader cuts it into requests by its action words (a model without front.json: the rules' cut, `rulesFormalize`).
  *  opts.cut: "q1" -> the q1 cut of vss-centers.js (training/sketch/diagnosis_cut/CUT.md); omitted -> the default cut, unchanged */
 export async function formalize(text, ctx, rulesFormalize, opts = {}) {
+  if (opts.composer) {          // the composer: units of the cutter, routed to the micro-worlds or the fallback; each unit carries its world
+    const c = await loadComposerAt(typeof opts.composer === "string" ? opts.composer : undefined);
+    return c.formalize(text, ctx);
+  }
   if (!state.vss) await load();
   const t0 = performance.now(), seq = { s: 0, m: 0 };
   // the message is cut by the VSS reader itself (one state per action word, vss-centers.js); no separate tagger (owner's decision)
@@ -68,13 +96,7 @@ export async function formalize(text, ctx, rulesFormalize, opts = {}) {
   for (const seg of cut.segments || []) {
     const r = readClause(seg.src, c, seq);
     nodes.push(...r.nodes); notes.push(...r.notes); clauses.push({ src: seg.src, normalized: r.normalized, vss: r.vss, reading: r.reading, rules: seg.id ? cut.nodes.find((n) => n.id === seg.id) : null });
-    const main = r.nodes[r.nodes.length - 1];
-    if (main && main.args) {
-      if (main.args.action === "create") { if (main.args.name != null && !main.args.count) c.refs.set(String(main.args.name).toLowerCase(), { ref: main.id }); c.last = [{ ref: main.id }]; }
-      else if (main.args.target != null && !Array.isArray(main.args.target)) c.last = [main.args.target];
-      else if (main.args.action === "connect" && main.args.to != null && !Array.isArray(main.args.to)) c.last = [main.args.to];
-      if (main.args.action === "rename" && main.args.name) c.names = c.names.concat([String(main.args.name)]);
-    }
+    nextContext(c, r.nodes[r.nodes.length - 1]);      // the context rule, shared with the composer (vss-composer.js)
   }
   // the text left out: every piece of the message that no request was read from (chatter, or text of another world); for now it is
   // only reported; later these zones go to the other worlds
@@ -92,4 +114,4 @@ export function goldNodes(row, ctx) {
 }
 
 export function ready() { return !!state.vss; }
-window.VSSFormalizer = { load, formalize, readClause, info, goldNodes, ready };
+window.VSSFormalizer = { load, formalize, readClause, info, goldNodes, ready, loadComposerAt };

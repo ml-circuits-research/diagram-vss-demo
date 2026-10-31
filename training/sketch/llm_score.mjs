@@ -2,6 +2,13 @@
 // Per message: the readers' non-mention wires are aligned to the gold wires in order (longest common subsequence on type + action/ask),
 // then an aligned wire counts as correct when every gold key matches (bench-canon.js canonical form).
 // Reports: messages fully right, wires right (of gold wires), act right (type + action/ask), extra wires, and per action/ask.
+// Per message (line "per message"): right (every gold wire right, no extra wire) / honest (some request not done, nothing wrong) /
+// wrong (at least one wrong or extra wire).
+// SEG=composer: the composer (docs/js/vss-composer.js): the cutter, the registry of micro-worlds, the router, the fallback world.
+//   REGISTRY=<file> (default docs/model/micro/registry.json); the fallback is MODEL when set, else the registry's "fallback";
+//   CUTTER=<file> (default the registry's "cutter"). Reported in addition: units per world, asked, ignored.
+// CUTTER=<file> with SEG=tagger: the units come from that file's `segmenter` (e.g. docs/model/micro/cutter.json) instead of the
+//   model's front.json (whose segmenter is empty unless FRONT_TAGGER=1 built it).
 // node llm_score.mjs <dir> [<dir> ...] [--dump out.json] [-v]
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -12,11 +19,16 @@ import { vssCentres } from "../../docs/js/vss-centers.js";
 import { existsSync } from "node:fs";
 import { readingFromWires, toNodes } from "../../docs/js/vss-adapter.js";
 import { canon, canonWant } from "../../docs/js/bench-canon.js";
+import { loadComposer } from "../../docs/js/vss-composer.js";
 const require = createRequire(import.meta.url);
 const K = require("../../docs/js/logic.js");
 const argv = process.argv.slice(2), verbose = argv.includes("-v"), dumpAt = argv.indexOf("--dump");
 const dirs = argv.filter((a, i) => !a.startsWith("-") && (dumpAt < 0 || i !== dumpAt + 1));
-const dir = new URL(`../../docs/model/${process.env.MODEL || "sketch"}/`, import.meta.url);
+const MODELS = new URL("../../docs/model/", import.meta.url), COMPOSER = process.env.SEG === "composer";
+const REG = COMPOSER ? JSON.parse(readFileSync(process.env.REGISTRY || new URL("micro/registry.json", MODELS), "utf8")) : null;
+const MODEL = COMPOSER ? process.env.MODEL || REG.fallback : process.env.MODEL || "sketch";   // SEG=composer: MODEL names the fallback
+const dir = new URL(`${MODEL}/`, MODELS);
+const CUT = process.env.CUTTER || (COMPOSER && REG.cutter ? new URL(REG.cutter, MODELS) : null), CUTF = CUT ? JSON.parse(readFileSync(CUT, "utf8")) : null;
 const readFile = async (n) => { const b = readFileSync(new URL(n, dir)); return n.endsWith(".json") ? b.toString("utf8") : b.buffer.slice(b.byteOffset, b.byteOffset + b.length); };
 // EXCL=1 / Q1B=1 (DECODE.md): the decode data learned from the training frames, decode.json in the model folder (tool/sop/decode_stats.py)
 const DEC = process.env.EXCL === "1" || process.env.Q1B === "1" ? JSON.parse(readFileSync(new URL("decode.json", dir), "utf8")) : null;
@@ -27,6 +39,35 @@ const C = F ? null : compile(JSON.parse(await readFile("normalize.json")));
 const lex = new Set(Object.keys(vss.model.lexicon || {})), verbEvent = new Map();
 for (const e of vss.model.legend.events) for (const v of e.verbs) verbEvent.set(v, e.id);
 const sys = K.createSystem();
+// the context carried from one request to the next in this scorer (names created earlier, `last`); SEG=composer uses the same rule
+function scorerUpdate(c, main) {
+  if (main && main.args) {
+    if (main.args.action === "create") { if (main.args.name && !main.args.count) c.refs.set(String(main.args.name).toLowerCase(), { ref: main.id }); c.last = [{ ref: main.id }]; }
+    else if (main.args.target != null && !Array.isArray(main.args.target)) c.last = [main.args.target];
+  }
+}
+let comp = null; const CSTAT = { units: 0, byWorld: {}, ask: 0, ignored: 0, ignoredNoToken: 0, multi: 0 };
+if (COMPOSER) {
+  const cache = new Map([[MODEL, { vss, F }]]);
+  const loadModel = async (name) => {
+    if (cache.has(name)) return cache.get(name);
+    const d = new URL(`${name}/`, MODELS), rf = async (n) => { const b = readFileSync(new URL(n, d)); return n.endsWith(".json") ? b.toString("utf8") : b.buffer.slice(b.byteOffset, b.byteOffset + b.length); };
+    const m = { vss: await load(null, { readFile: rf, sentenceCandidates: true }), F: existsSync(new URL("front.json", d)) ? JSON.parse(await rf("front.json")) : null };
+    cache.set(name, m); return m;
+  };
+  comp = await loadComposer(REG, CUTF, loadModel, { fallback: MODEL });
+  console.log(`composer: cutter ${CUT ? CUT.toString().replace(/^file:\/\//, "") : "-"} · fallback ${MODEL} · worlds ${comp.worlds.map((w) => `${w.id} [${[...w.events]}]`).join(", ") || "none"}`);
+}
+function composerFormalize(text, ctx) {
+  const out = comp.formalize(text, { names: ctx.names, last: [] }, { update: scorerUpdate });
+  for (const u of out.units) {
+    CSTAT.units++; if (u.tried.length > 1) CSTAT.multi++;
+    if (u.zone === "read") CSTAT.byWorld[u.world] = (CSTAT.byWorld[u.world] || 0) + 1;
+    else if (u.zone === "ask") CSTAT.ask++;
+    else { CSTAT.ignored++; if (u.reason === "no action token") CSTAT.ignoredNoToken++; }
+  }
+  return out.nodes;
+}
 
 // SEG=centres-model: the message is read by a CENTRE model (legend reader.centres; research/attention/port/NOTES.md): one normalization
 // of the whole message (front.js normalizeMessage), one reading (vss.readMessage): every accepted centre whose reading is ok / abstain is
@@ -53,9 +94,10 @@ function vssCentresModel(text, ctx) {
 const SEGQ1 = process.env.SEG === "q1";
 function vssFormalize(text, ctx) {
   if (process.env.SEG === "centres-model") return vssCentresModel(text, ctx);
+  if (COMPOSER) return composerFormalize(text, ctx);
   // SEG=gold: the annotated spans (held-out TRAINING messages only: the test sets have none): the reading quality without the cut
   const segs = process.env.SEG === "gold" && ctx.spans ? ctx.spans.map((src) => ({ src }))
-    : process.env.SEG === "tagger" && F ? FRONT.segment(text, ctx.names, F).map((src) => ({ src }))        // labelled reference only
+    : process.env.SEG === "tagger" && F ? FRONT.segment(text, ctx.names, CUTF || F).map((src) => ({ src }))        // the BIO cutter (CUTTER=<file>, else the model's front.json)
     : SEGQ1 && F ? vssCentres(text, ctx.names, F, vss, Object.assign({ cut: "q1", confident: process.env.CONFIDENT === "1" }, process.env.Q1B === "1" ? { roleless: DEC.roleless_ok } : {})).map((src) => ({ src }))   // SEG=q1: the q1 cut (diagnosis_cut/CUT.md)
     : F ? vssCentres(text, ctx.names, F, vss, { confident: process.env.CONFIDENT === "1" }).map((src) => ({ src }))   // default: the VSS reader's own cut
     : sys.formalize(text, ctx).segments;
@@ -67,11 +109,7 @@ function vssFormalize(text, ctx) {
     const reading = r.status === "unknown-event" || r.status === "no-sense" ? null : readingFromWires(r.wires, verb, tokens);
     const out = reading ? toNodes(reading, ni, c, seq) : { nodes: [] };
     out.nodes.forEach((n) => { if (n.type !== "mention") Object.defineProperty(n, "src", { value: seg.src, enumerable: false }); }); nodes.push(...out.nodes);
-    const main = out.nodes[out.nodes.length - 1];
-    if (main && main.args) {
-      if (main.args.action === "create") { if (main.args.name && !main.args.count) c.refs.set(String(main.args.name).toLowerCase(), { ref: main.id }); c.last = [{ ref: main.id }]; }
-      else if (main.args.target != null && !Array.isArray(main.args.target)) c.last = [main.args.target];
-    }
+    scorerUpdate(c, out.nodes[out.nodes.length - 1]);
   }
   return nodes;
 }
@@ -98,17 +136,20 @@ function scoreMessage(nodes, row) {
   return { right, wrongAligned: pairs.length - right, missed: gold.length - pairs.length, acts: pairs.length, gold: gold.length, extra: mains.length - pairs.length, exact: right === gold.length && mains.length === gold.length, bad, perAct: gold.map((g, j) => [g.act, pairs.some(([i, jj]) => jj === j && !bad.some((b) => false))]) };
 }
 
-const report = {}, ALL = { n: 0, rules: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0 }, vss: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0 } };
+const report = {}, ALL = { n: 0, rules: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0 }, vss: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0 } };
+// one message's outcome: right (all gold wires right, no extra) / wrong (a wrong or an extra wire) / honest (the rest: requests not done, nothing wrong)
+const outcome = (s) => (s.exact ? "mRight" : s.wrongAligned > 0 || s.extra > 0 ? "mWrong" : "mHonest");
+const msgLine = (f, T, n) => `${f.padEnd(5)} per message: right ${(T.mRight / n * 100).toFixed(1)}% (${T.mRight}) · honest ${(T.mHonest / n * 100).toFixed(1)}% (${T.mHonest}) · wrong ${(T.mWrong / n * 100).toFixed(1)}% (${T.mWrong})`;
 for (const d of dirs) {
   const files = readdirSync(d).filter((f) => f.endsWith(".jsonl")).sort();
   const rows = files.flatMap((f) => readFileSync(`${d}/${f}`, "utf8").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l)));
-  const tot = { rules: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, byAct: {} }, vss: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, byAct: {} } }, dump = [];
+  const tot = { rules: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0, byAct: {} }, vss: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0, byAct: {} } }, dump = [];
   for (const r of rows) {
     const ctx = { names: r.names || [], last: [], spans: r.wires.every((w) => w.span) ? r.wires.map((w) => w.span) : null };
     const out = { rules: sys.formalize(r.text, ctx).nodes, vss: vssFormalize(r.text, ctx) }, rec = { id: r.id, text: r.text };
     for (const f of ["rules", "vss"]) {
       const s = scoreMessage(out[f], r), T = tot[f];
-      T.exact += s.exact; T.right += s.right; T.wrongAligned += s.wrongAligned; T.missed += s.missed; T.acts += s.acts; T.extra += s.extra; T.gold += s.gold; rec[f] = s.bad;
+      T.exact += s.exact; T.right += s.right; T.wrongAligned += s.wrongAligned; T.missed += s.missed; T.acts += s.acts; T.extra += s.extra; T.gold += s.gold; T[outcome(s)]++; rec[f] = s.bad;
       // per gold act: right?
       const mains = out[f].filter((n) => n.type !== "mention").map((n) => ({ act: actOf(n.type, n.args), got: canon(n, out[f]) }));
       const gold = r.wires.map((w) => ({ act: actOf(w.type, w.args), want: canonWant(w.type, w.args) }));
@@ -119,11 +160,14 @@ for (const d of dirs) {
   }
   const n = rows.length, line = (f) => { const T = tot[f]; return `${f.padEnd(5)} messages fully right ${(T.exact / n * 100).toFixed(1)}% · wires right ${(T.right / T.gold * 100).toFixed(1)}% (${T.right}/${T.gold}) · act found ${(T.acts / T.gold * 100).toFixed(1)}% · extra wires ${T.extra}`; };
   console.log(`\n${d}: ${n} messages, ${tot.rules.gold} gold wires`); console.log("  " + line("rules")); console.log("  " + line("vss"));
+  console.log("  " + msgLine("rules", tot.rules, n)); console.log("  " + msgLine("vss", tot.vss, n));
   const acts = Object.keys(tot.rules.byAct).sort((a, b) => tot.rules.byAct[b][1] - tot.rules.byAct[a][1]);
   console.log("  per act (rules · vss · n): " + acts.map((a) => `${a.split(":").pop() || a} ${tot.rules.byAct[a][0]}·${(tot.vss.byAct[a] || [0])[0]}·${tot.rules.byAct[a][1]}`).join(", "));
-  report[d] = { n, tot }; ALL.n += n; for (const f of ["rules", "vss"]) for (const k of ["exact", "right", "wrongAligned", "missed", "acts", "extra", "gold"]) ALL[f][k] += tot[f][k]; if (verbose) dump.slice(0, 12).forEach((x) => console.log(`  ${x.id} ${x.text}\n     rules: ${x.rules.join(" | ") || "ok"}\n     vss:   ${x.vss.join(" | ") || "ok"}`));
+  report[d] = { n, tot }; ALL.n += n; for (const f of ["rules", "vss"]) for (const k of ["exact", "right", "wrongAligned", "missed", "acts", "extra", "gold", "mRight", "mHonest", "mWrong"]) ALL[f][k] += tot[f][k]; if (verbose) dump.slice(0, 12).forEach((x) => console.log(`  ${x.id} ${x.text}\n     rules: ${x.rules.join(" | ") || "ok"}\n     vss:   ${x.vss.join(" | ") || "ok"}`));
   if (dumpAt >= 0) writeFileSync(argv[dumpAt + 1].replace(/(\.json)?$/, `_${d.split("/").filter(Boolean).pop()}.json`), JSON.stringify(dump, null, 1));
 }
 if (process.env.SEG === "centres-model") console.log(`\ncentres-model: ignored text (tokens taken by no accepted centre read ok / abstain): ${IGN.spans} spans, ${IGN.tokens} tokens in ${IGN.msgs} messages`);
 if (dirs.length > 1) { const n = ALL.n, pc = (x, T) => (x / T.gold * 100).toFixed(1) + "%", line = (f) => { const T = ALL[f]; return `${f.padEnd(5)} correct ${pc(T.right, T)} · not done ${pc(T.missed, T)} · done wrong ${pc(T.wrongAligned, T)} · plus ${T.extra} extra wires not asked for (${pc(T.extra, T)} of the gold count) · messages fully right ${(T.exact / n * 100).toFixed(1)}%`; };
-  console.log(`\nALL (${dirs.join(" + ")}): ${n} messages, ${ALL.rules.gold} gold wires`); console.log("  " + line("rules")); console.log("  " + line("vss")); }
+  console.log(`\nALL (${dirs.join(" + ")}): ${n} messages, ${ALL.rules.gold} gold wires`); console.log("  " + line("rules")); console.log("  " + line("vss"));
+  console.log("  " + msgLine("rules", ALL.rules, n)); console.log("  " + msgLine("vss", ALL.vss, n)); }
+if (COMPOSER) console.log(`\ncomposer units: ${CSTAT.units} (read by several candidate worlds: ${CSTAT.multi}) · read per world: ${Object.entries(CSTAT.byWorld).map(([w, k]) => `${w} ${k}`).join(", ") || "none"} · asked ${CSTAT.ask} · ignored ${CSTAT.ignored} (no action token ${CSTAT.ignoredNoToken})`);

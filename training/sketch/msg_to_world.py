@@ -18,6 +18,12 @@ taken from the WHOLE message as front.normalize_message reads it (centres_rows.p
 (its tokens, and per request its span as a token range, its centre and its row); REAL_WORLD.md is written into the world folder.
 KINDMAP=<file.json> (off by default; diagnosis_kinds/KINDS.md): the kinds of the words that are neither legend value tokens nor event
 tokens come from that kind map ({"map": {word: kind}}) instead of "seen >= --freq times -> own kind"; the training rows do not change.
+WORLD_EVENTS=<comma list of events> (off by default; a micro-world of the composer, docs/js/vss-composer.js, research/hier/HIER.md):
+only the rows of those events AND a legend that lists only those events (HIER.md trap 1: with FAMILY the legend keeps every event, so
+another event's token can become this world's predicate). The kinds (lexicon) and the front end stay those learned from all messages
+(an event token of another event keeps the kind VERB but is no predicate of this world). Needs --out (never worlds/real); REAL_WORLD.md
+is written into the output folder, llm_train/REAL_WORLD.md is not touched; the world's name is the output folder's name (sop train
+reads it from the folder). Not combined with CENTRES or FAMILY.
 Run: python3 msg_to_world.py [--frac 0.8] [--freq 8]"""
 import argparse, collections, datetime, json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -77,12 +83,18 @@ def main():
     lexicon = set(kinds)
     FAMILY = {e for e in os.environ.get("FAMILY", "").split(",") if e}
     if FAMILY - set(G.EVENTS): raise SystemExit(f"FAMILY: unknown events {sorted(FAMILY - set(G.EVENTS))}")
+    WEV = {e for e in os.environ.get("WORLD_EVENTS", "").split(",") if e}     # WORLD_EVENTS (see the docstring); empty: every event
+    if WEV - set(G.EVENTS): raise SystemExit(f"WORLD_EVENTS: unknown events {sorted(WEV - set(G.EVENTS))}")
+    if WEV and (CENTRES or FAMILY): raise SystemExit("WORLD_EVENTS is not combined with CENTRES or FAMILY")
+    if WEV and os.path.abspath(a.out) == os.path.abspath(os.path.join(HERE, "worlds", "real")): raise SystemExit("WORLD_EVENTS needs --out <folder> (not worlds/real)")
+    WNAME = os.path.basename(os.path.normpath(a.out)) if WEV else "real"   # sop train takes the world's name from its folder
     rows, lost_why, dropped, by_ev = [], collections.Counter(), collections.Counter(), collections.Counter(); row_key = []
     for m, w, row in items:
         lost = []
         try: text, roles, ev = convert(row, lexicon, soft=True, lost=lost, norm=nf(row))
         except Skip as e: dropped[str(e).split(":")[0]] += 1; continue
         if FAMILY and ev not in FAMILY: continue     # FAMILY=<events>: only the rows of these events (INTERFERENCE.md); default: every row
+        if WEV and ev not in WEV: continue           # WORLD_EVENTS=<events>: the same, and the legend below lists only these events
         if not (set(G.EVENTS[ev]) & set(text.split())) and not roles: dropped["no event token and no role (zero target)"] += 1; continue
         for x in lost: lost_why["event token not found" if x.startswith("verb of") else x.split(" ")[0]] += 1
         rows.append((ev, text, roles, m["id"])); by_ev[ev] += 1; row_key.append(row.get("_key"))
@@ -92,7 +104,7 @@ def main():
     roles_of = collections.defaultdict(set)
     for ev, _, roles, _ in rows: roles_of[ev] |= set(roles)
     legend = {"version": 1, "roles": [{"id": r, "question": q} for r, q in ROLES],
-              "events": [{"id": e, "verbs": vs, "roles": [r for r, _ in ROLES if r in roles_of[e]], "required": []} for e, vs in G.EVENTS.items()],
+              "events": [{"id": e, "verbs": vs, "roles": [r for r, _ in ROLES if r in roles_of[e]], "required": []} for e, vs in G.EVENTS.items() if not WEV or e in WEV],
               "operators": ["not"], "moods": ["command"], "kinds": {"source": "lexicon", "lexicon": "kinds.tsv"},
               "values": [{"kind": "NUM", "pattern": "\\d+"}, {"kind": "NAME", "pattern": "n_[a-z0-9_]+"}, {"kind": "TEXT", "pattern": "t_[a-z0-9_]+"}],
               # MARKER=0 (off by default; owner's decision 2026-10-31, CAPACITY.md S5): no occupancy marker, so a single role's presence is read
@@ -107,7 +119,7 @@ def main():
                  f"{rule}; everything else unknown)\n")
         for w in sorted(kinds): fh.write(f"{w}\t{kinds[w]}\n")
     json.dump(F, open(os.path.join(out, "front.json"), "w"))
-    json.dump({"name": "real", "language": "en", "description": "SOP Sketchpad legend, world built from annotated realistic messages", "created": datetime.date.today().isoformat(),
+    json.dump({"name": WNAME, "language": "en", "description": "SOP Sketchpad legend, world built from annotated realistic messages", "created": datetime.date.today().isoformat(),
                "version": 1, "min_examples": 500, "max_versions_per_run": 3, "second_look_escalate": 0.05, "second_look_retrain": 0.05}, open(os.path.join(out, "world.json"), "w"), indent=1)
     json.dump({"heldout_sentence_share": 0.0, "new_identities": "none: realistic messages, names are not controlled",
                "file_splits": {"examples/calib.sop": "heldout_formulations"}, "template_splits": {},
@@ -119,10 +131,10 @@ def main():
     # --calibrate_on_heldout_formulations uses half of them for the thresholds and reports the other half. Every other row is trained on
     # (heldout_sentence_share 0: DECISIONS.md 2).
     cal = lambda mid: int(G.hashlib.sha256((mid + "|cal").encode()).hexdigest()[:8], 16) / 2 ** 32 < CAL_SHARE
-    docs = {f: G.soplang.Doc(directives=[("world", "real", None), ("legend", sha, None), ("generated", "training/sketch/msg_to_world.py from llm_train/*_msg", None)]) for f in ("train.sop", "calib.sop")}
+    docs = {f: G.soplang.Doc(directives=[("world", WNAME, None), ("legend", sha, None), ("generated", "training/sketch/msg_to_world.py from llm_train/*_msg", None)]) for f in ("train.sop", "calib.sop")}
     wire_of = {}
     for ri, (ev, text, roles, mid) in enumerate(rows):
-        ids = iter(f"w{k + i}" for i in range(1, 100)); ws = G.wires_for(ev, roles, text, f"msg.{mid[:2]}", ids, world="real", source="llm")
+        ids = iter(f"w{k + i}" for i in range(1, 100)); ws = G.wires_for(ev, roles, text, f"msg.{mid[:2]}", ids, world=WNAME, source="llm")
         k += len(ws); docs["calib.sop" if cal(mid) else "train.sop"].wires += ws
         if row_key[ri] is not None: wire_of[row_key[ri]] = f"examples/{'calib.sop' if cal(mid) else 'train.sop'}#{ws[0].id}"
     n_cent = collections.Counter()
@@ -146,15 +158,16 @@ def main():
             if cal(m["id"]): continue
             for text, names in FR.requests([m])[1]:
                 toks, _ = norm(text, names); evs = [t for t in toks if t in evtok]
-                if not evs: continue
+                if not evs or (WEV and G_EVENT_OF[evs[0]] not in WEV): continue
                 ids = iter(f"w{k + i}" for i in range(1, 100))
-                ws = G.wires_for(G_EVENT_OF[evs[0]], {}, " ".join(toks), "msg.neg", ids, world="real", source="llm-outside-spans")
+                ws = G.wires_for(G_EVENT_OF[evs[0]], {}, " ".join(toks), "msg.neg", ids, world=WNAME, source="llm-outside-spans")
                 ws[0].set("_negative", "true"); k += len(ws); docs["train.sop"].wires += ws; n_neg += 1
     for f, d in docs.items(): open(os.path.join(out, "examples", f), "w").write(G.soplang.write(d))
     open(os.path.join(out, "raw", "sentences.txt"), "w").write("\n".join(r[1] for r in rows) + "\n")
     if not os.path.exists(os.path.join(out, "status.json")): json.dump({"label": None, "note": "never trained"}, open(os.path.join(out, "status.json"), "w"))
     kc = collections.Counter(kinds.values())
     rep = [f"# World `real`: built from {len(msgs)} training messages ({len(items)} requests with a span)", "",
+           *([f"WORLD_EVENTS={','.join(sorted(WEV))}: only the rows of these events; the legend lists only these events.", ""] if WEV else []),
            f"Front end learned from the same messages: {len(F['values'])} value n-grams, {len(F['triggers'])} trigger rules, {len(F['segmenter'])} segmenter weights; params {json.dumps(P)}.", "",
            f"Rows: {len(rows)}. Dropped (cannot be trained): {sum(dropped.values())} {dict(dropped)}. Negative examples (text outside the spans with an action token): {n_neg}.", "",
            *([f"Centre reader (CENTRES=1): {len(msg_items)} messages in examples/messages.jsonl; {dict(n_cent)}.", ""] if CENTRES else []),
@@ -166,7 +179,7 @@ def main():
                                                        for k in sorted({x for w, x in kinds.items() if x != w and w not in base})), ""] if KINDMAP else []),
            "Roles left out because their words are not in the normalized span (rows kept):", "", "| what | n |", "|---|---|"] + \
           [f"| {x} | {n} |" for x, n in lost_why.most_common(40)] + ["", "| event | rows |", "|---|---|"] + [f"| {e} | {n} |" for e, n in by_ev.most_common()]
-    open(os.path.join(out, "REAL_WORLD.md") if CENTRES else os.path.join(HERE, "llm_train", "REAL_WORLD.md"), "w").write("\n".join(rep) + "\n")
+    open(os.path.join(out, "REAL_WORLD.md") if CENTRES or WEV else os.path.join(HERE, "llm_train", "REAL_WORLD.md"), "w").write("\n".join(rep) + "\n")
     print("\n".join(rep[:9]))
 
 

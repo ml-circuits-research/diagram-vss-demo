@@ -1,0 +1,6 @@
+{
+ "about": "the registry of the composer (docs/js/vss-composer.js): micro-worlds (events -> model folder, relative to docs/model/), the cutter and the fallback world. Add a world: train it (training/sketch/train_micro.sh), then add one line {\"world\", \"events\", \"model\"} to worlds.",
+ "cutter": "micro/cutter.json",
+ "fallback": "kinds_p80_s0",
+ "worlds": []
+}
