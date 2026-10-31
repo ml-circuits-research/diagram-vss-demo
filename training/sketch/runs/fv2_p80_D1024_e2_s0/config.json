@@ -1,0 +1,156 @@
+{
+ "world": "real",
+ "D": 1024,
+ "seed": 0,
+ "star_version": 2,
+ "language": "en",
+ "legend_sha256": "sha256:12cf77be5d58182af4fda4b5d601a2ed8189d02ee5252ca12713fa506f7c30c3",
+ "legend_version": 1,
+ "training_code_commit": "bced516-dirty",
+ "trained": "2026-10-31T16:33:53",
+ "codes": [
+  "path",
+  "chainL",
+  "bigram"
+ ],
+ "gate_init": "closed",
+ "depth_estimator": "kinds",
+ "presence_readout": "decided",
+ "batch": 8,
+ "lr": 0.02,
+ "epochs": 2,
+ "n_train_steps_sentences": 7800,
+ "decoder": "contract",
+ "candidates": "sentence",
+ "undecided_adjacent": true,
+ "residual": "explained",
+ "presence_query": true,
+ "activation": null,
+ "thresholds": {
+  "tau": 0.05,
+  "tau_source": "stated (the repository's v16 value), not fitted on any rows",
+  "no_sense_share": 0.5,
+  "no_sense_source": "stated",
+  "no_fit_residual": 0.9,
+  "no_fit_source": "stated (dispatcher only, spec section 9)",
+  "presence": {
+   "object": 0.10207277997153186,
+   "shape": 0.043454886000451186,
+   "color": 0.09780300378292348,
+   "size": 0.22461971541200149,
+   "name": 0.22226813010588808,
+   "text": 0.02541140790302722,
+   "relation": 0.11365936107661337,
+   "landmark": 0.15553821680940233,
+   "landmark2": 0.22089695780322005,
+   "region": 0.1472677197369226,
+   "direction": null,
+   "amount": null,
+   "quantity": 0.07037693943988763,
+   "axis": 0.18125663992766716,
+   "layout": 0.3186751537231235,
+   "source": 0.2570138578111697,
+   "target": 0.24019806412891254,
+   "style": 0.06684072892782703,
+   "arrow": null,
+   "edge": 0.3076270387588944,
+   "pairing": 0.4302618112867156,
+   "superlative": 0.17030195144921345,
+   "comparison": 0.21399972395226086,
+   "members": 0.29796144062590396,
+   "targets": 0.20941979157921925
+  },
+  "attr_presence": {
+   "edge": null,
+   "object": 0.3155932773698009
+  },
+  "det_presence": {
+   "object": null
+  },
+  "scope_term": null,
+  "set_member": {
+   "members": 0.11593236270109045,
+   "targets": 0.09317613822457729
+  },
+  "calibration_split": "train (a sample of 400 training sentences, rng 1234+seed) + the CALIBRATION half of the held-out formulations (213 sentences, splits calibration_*), disjoint from the reported half (rule 25)",
+  "rule": "FITTED: per role, the threshold that maximises the balanced present / absent accuracy on the calibration rows (judgment 752853c \u00a72); the pooled midpoint of the same rows is kept as thresholds_pooled_midpoint, the comparison",
+  "presence_margin": "|presence ratio - threshold| (ratio units), on the wire as _presence_margin.<role> (SOP Lang keys carry one dot); the role's _margin = min(identity margin, presence margin): a near-threshold reading abstains"
+ },
+ "thresholds_training_rows_only": {
+  "presence": {
+   "object": 0.1137328335230133,
+   "shape": 0.3568244378846075,
+   "color": 0.12676223438626466,
+   "size": 0.39699072103127275,
+   "name": 0.22226813010588808,
+   "text": 0.04257746343226869,
+   "relation": 0.11365936107661337,
+   "landmark": 0.11836931598645045,
+   "landmark2": 0.22089695780322005,
+   "region": 0.1472677197369226,
+   "direction": null,
+   "amount": null,
+   "quantity": 0.07037693943988763,
+   "axis": 0.18125663992766716,
+   "layout": 0.3186751537231235,
+   "source": 0.09146479534269505,
+   "target": 0.24019806412891254,
+   "style": 0.14056081518184005,
+   "arrow": null,
+   "edge": 0.3076270387588944,
+   "pairing": 0.4302618112867156,
+   "superlative": 0.26353861337563866,
+   "comparison": null,
+   "members": 0.29796144062590396,
+   "targets": 0.23036620357534782
+  },
+  "attr_presence": {
+   "edge": null,
+   "object": 0.3534906784555173
+  },
+  "det_presence": {
+   "object": null
+  },
+  "scope_term": null,
+  "set_member": {
+   "members": 0.13038385408494613,
+   "targets": 0.09317613822457729
+  },
+  "calibration_split": "train (a sample of 400 training sentences, rng 1234+seed); never the scored rows (rule 25)"
+ },
+ "thresholds_pooled_midpoint": {
+  "presence": {
+   "object": 0.5443831114454731,
+   "shape": 0.33643470033868844,
+   "color": 0.34176475307957843,
+   "size": 0.35316562959620235,
+   "name": 0.23317811214584122,
+   "text": 0.3095038384144515,
+   "relation": 0.37230231384927226,
+   "landmark": 0.39370696150545803,
+   "landmark2": 0.16936512991619607,
+   "region": 0.30040900965712697,
+   "quantity": 0.18201708059146254,
+   "axis": 0.32235293778807905,
+   "layout": 0.4103421914895225,
+   "source": 0.35327582208279307,
+   "target": 0.3350417920145228,
+   "style": 0.24762983255135634,
+   "edge": 0.3204106356931972,
+   "pairing": 0.42615853767969447,
+   "superlative": 0.4326143629969976,
+   "comparison": 0.2769103869719555,
+   "members": 0.4820098102342243,
+   "targets": 0.16170517904816603
+  },
+  "attr_presence": {
+   "object": 0.39940196880272766
+  },
+  "det_presence": {},
+  "scope_term": null,
+  "set_member": {
+   "members": 0.2833360927401835,
+   "targets": 0.11455023668120248
+  }
+ }
+}

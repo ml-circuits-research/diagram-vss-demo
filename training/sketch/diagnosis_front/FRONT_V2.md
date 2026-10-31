@@ -67,3 +67,59 @@ Baseline `fix_p80_s0`, MAIN scorer: reading alone 61.0% (extra wires 71); cause 
 
 PASS only if all three hold. Otherwise: fail; report the numbers and the causes (error_analysis), no patches, no second try. A pass on this file says
 nothing about the test sets; a new test set is needed for an honest number.
+
+## Training log
+
+One run, as pre-registered: `SOP_PYTHON=/home/claude/venv/bin/python3 PREFIX=fv2 SEED=0 FRONT_V2=1 ./run_curve.sh 0.8` (code commit a4ba566, old data, 2 epochs, D 1024, seed 0).
+World: 947 messages, 4305 requests, 4282 rows (23 dropped, as for fix_p80_s0), 112 value n-grams, 1695 trigger rules. Model: `docs/model/fv2_p80_s0`.
+`llm_train/REAL_WORLD.md` restored with `git checkout` after the build. Baseline re-scored before training: `fix_p80_s0` gives 61.0% (x71) with SEG=gold and 47.1% (x335)
+with the own cut on the old dev file, as expected.
+
+## Result (nothing changed after seeing the numbers)
+
+Main scorer. Wires right, extra wires in brackets.
+
+| dev | rules | fix_p80_s0 SEG=gold | fv2_p80_s0 SEG=gold | fix_p80_s0 own cut | fv2_p80_s0 own cut |
+|---|---|---|---|---|---|
+| old (1126 wires) | 70.4% (x182) | 61.0% (x71) | **63.5% (x72)** | 47.1% (x335) | 45.3% (x386) |
+| msg2 (923) | 65.4% (x207) | 45.7% (x96) | 48.6% (x97) | 40.3% (x414) | 39.9% (x451) |
+| long (519) | 56.3% (x98) | 47.4% (x46) | 49.1% (x51) | 37.0% (x243) | 36.8% (x254) |
+
+error_analysis causes (share of requests read alone from their spans), fix -> fv2:
+
+| cause | old | msg2 | long |
+|---|---|---|---|
+| A action word not recognized | 8.2% -> **5.3%** | 22.5% -> 19.6% | 16.6% -> 12.7% |
+| B wrong action or type | 6.5% -> 6.5% | 11.1% -> 11.2% | 9.2% -> 10.2% |
+| C reader refuses | 0.8% -> 0.9% | 2.5% -> 2.5% | 0.4% -> 0.4% |
+| D value not reachable | 2.2% -> 2.0% | 2.0% -> 2.0% | 2.3% -> 2.7% |
+| E name not reachable | 4.1% -> 4.3% | 2.1% -> 2.3% | 8.1% -> 8.3% |
+| F role missed | 7.2% -> 7.3% | 7.9% -> 7.5% | 5.8% -> 5.8% |
+| G role wrong (+ description) | 7.9% (+1.6%) -> 8.1% (+1.8%) | 5.4% -> 5.3% | 10.0% -> 9.6% |
+| fully right requests | 61.5% -> 63.9% | 46.5% -> 49.6% | 46.6% -> 49.3% |
+
+## Criterion (old dev file)
+
+1. reading alone (SEG=gold, main scorer) >= 62.5%: 63.5%. Met.
+2. cause A <= 6.0%: 5.3%. Met.
+3. extra wires with SEG=gold <= 80: 72. Met.
+
+**PASS.** The front-end prediction held: dev spans without an event token 92 -> 60 (cause A 92 -> 60 requests), and the reading rose 61.0% -> 63.5% (+2.5 points; +28 wires).
+Not part of the criterion: the own cut got worse on old (47.1% -> 45.3%, extra wires 335 -> 386).
+
+## Root-cause note
+
+- Where the +28 wires came from (old dev, SEG=gold, wires right per action, fix -> fv2): set 145 -> 159, move 102 -> 111, connect 43 -> 48, reachable 1 -> 4, fact 17 -> 19;
+  lost: check 40 -> 36, create 48 -> 47, count 21 -> 20, arrange 8 -> 7. That is the pattern of the front-end changes: NAMEPH gives `set`/`move`/`connect`/`fact` to name-initial requests
+  ("Bank to Fraud ...", "the Hero a ..."), CTX2 gives `reachable`/`path` their event. The route book was trained on such streams for the first time and reads them.
+- What is left of cause A (60 requests on old dev; all the cases the diagnosis put outside this change): real verbs seen once or never ("slide", "touch", "push", "sit to the right of", "go to the left of"),
+  position words ("below" alone), opener ambiguities ("Does Shed exist as a hexagon", "Show me all the gold shapes"), and question forms "Are Login and Home connected" (trigger after the names).
+  By gold event: move 15, set 12, connect 9, create 4, degree 4, connected 3, check 3. These are classes 1c, 2 and 4 of FRONT_DIAG.md; none of the three changes was meant to reach them.
+- Why the own cut got worse (45.3%, extra wires +51): an inserted event token fires inside spans that already have a verb. In the message path, spans with more than one event token rise 245 -> 317 (dev),
+  e.g. "Connect Idle to Running with an arrow" -> `connect connect` (the verb, and `NAME to NAME` inserting `connect` again), "Which shape is the leftmost right now" -> `which is extreme_q`.
+  Each extra event token is a second centre, and a second reading is an extra wire. Firings outside every span did NOT rise (rule firings outside spans on dev: 112 -> 109; only 1 of them is a pattern rule),
+  so it is not chatter. Cause in our code: `learn_triggers` counts a pattern phrase as false only in chatter and in spans of OTHER events; its occurrences in spans of the SAME event that already have their own trigger
+  (a real verb) count neither for nor against it, so `NAME to NAME` gets a high precision although in a span with a verb it is redundant. Fix to try (not done: no second try under the protocol, a new pre-registration is needed):
+  count such occurrences as false for pattern rules, or let an `ins` rule fire only when no event token stands in the request.
+- The gain on the other dev files is smaller (msg2 +2.9, long +1.7 points; cause A 22.5 -> 19.6, 16.6 -> 12.7): their missing action words are mostly in classes 2 and 4 (one-off verbs, request forms the old data has not seen).
+- This result is on a dev file of the training distribution; it says nothing yet about the test sets.
