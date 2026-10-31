@@ -274,6 +274,60 @@ Checks that the default is unchanged:
 - Not covered: the questions' `notColor` (37 fit / dev rows) is lost before the converter: the learned front end does not produce the
   `not_<colour>` token ("which ones aren't blue" -> `which blue`). Front end, a separate item.
 
+## 6. The pre-registered trainings (2026-10-31; code a78f3f7 + the MARKER switch; old data, --frac 0.8, seed 0, 2 epochs)
+
+Each run: `SOP_PYTHON=/home/claude/venv/bin/python3 <SWITCH> PREFIX=<p> ./run_curve.sh 0.8` (the `sop` script needs the venv's
+python for torch); llm_train/REAL_WORLD.md restored after each build (checked identical to the saved copy). Scored on the dev file
+(`scratchpad/review/dev.jsonl`, 253 messages, 1126 requests, read before) by `runs6s7/score.sh`: llm_score.mjs SEG=gold and own cut,
+error_analysis.mjs, and ea_dump.mjs for the per-request criteria. Reference: fix_p80_s0 scored the same way.
+
+| model | llm_score SEG=gold (wires right) | own cut | extra wires gold / own | error_analysis reading alone |
+|---|---|---|---|---|
+| fix_p80_s0 | 61.0% (687) | 47.1% (530) | 71 / 335 | 61.5% (693) |
+| s6_p80_s0 (CAL_FALLBACK=train) | 62.0% (698) | 47.9% (539) | 71 / 335 | 62.5% (704) |
+| s7_p80_s0 (QCOLOR=1) | 62.7% (706) | 48.8% (549) | 67 / 334 | 63.4% (714) |
+
+**S6: PASS.** No fresh baseline was needed: s6's routebook.bin and stars.bin are byte-identical to fix_p80_s0's (sha256
+ebf0ebac… / 0f7006e6…), and so are its catalog, schema and legend. front.json differs only in the segmenter weights (the tagger, which
+is no longer trained by default; values and triggers identical; no scorer above uses it). Thresholds: presence of direction 0.332,
+amount 0.261, arrow 0.171 and object.det 0.255 are now fitted (all were null); edge.attr stays null (fewer than 5 present rows even
+with the training rows); every other threshold equal to the last bit (differences of 1e-16 from the current reader's arithmetic, not
+from the switch). (b) the 36 dev requests holding one of those roles: 9 -> 20 right (+11, needed +8); (c) right -> wrong: 0 (allowed
+4). Status counts unchanged. The 11 are all "the first / the newest / the oldest <shape>" (object.det), e.g. "Make the newest square
+green", "Delete the first hexagon". direction / amount / arrow gained nothing on dev.
+
+**S7: PASS.** (a) the 19 dev count / exists / list questions with a colour and no shape word: 0 -> 15 right (needed 10); the 4 still
+wrong are read with another action ("Show me what is blue" -> fact; "Exists any red thing", "exists a pink one", "is anything gold": no
+exists token). (b) the other 1107 dev requests: 62.60% -> 63.14% (+0.54 points; 20 gained, 14 lost: retraining noise, the route book
+changed), within the stated -1.0 point. The world has 4284 rows (2 more than before: two colour questions whose only role was the
+colour were dropped as zero-target rows before).
+
+**Marker off (owner's decision): PASS.** Switch `MARKER=0` in `training/sketch/msg_to_world.py` (the legend's reader block gets
+`occupancy_marker: false`; default unchanged: the world built with the HEAD msg_to_world.py and with the edited one, MARKER unset,
+DATA=old, --frac 0.8, is byte-identical in its 10 files, `s7build/hm_old_1.txt` = `hm_new_1.txt`; MARKER=0 changes only legend.json,
+sha 13e56355…, and the two .sop files' legend line). Run `MARKER=0 PREFIX=m0 ./run_curve.sh 0.8` -> docs/model/m0_p80_s0.
+Pre-registered (coordinator): llm_score SEG=gold >= 62.0% AND object read in >= 2/3 of the dev requests of the form "VERB NAME".
+Count first: 6 dev requests have kinds exactly `VERB NAME` (none has an own-kind word): "shrink Kitchen", "Describe Guest2",
+"Describe Moving", "Delete Trap2", "Enlarge Booth2", "Describe Probe2"; baseline fix_p80_s0 reads the object in 0 of 6 (command right
+4 of 6, through the offer rule).
+
+| | fix_p80_s0 | m0_p80_s0 | criterion |
+|---|---|---|---|
+| llm_score SEG=gold, wires right | 61.0% (687) | **63.6% (716)** | >= 62.0% |
+| "VERB NAME": object read | 0 / 6 | **6 / 6** (command 6 / 6) | >= 4 / 6 |
+| llm_score own cut | 47.1% (530), extra 335 | 50.0% (563), extra 328 | (not a criterion) |
+| error_analysis reading alone | 61.5% (693) | 63.9% (720) | |
+| dev requests without an own-kind word | 100 / 203 | 123 / 203 | |
+| dev requests with one | 593 / 923 | 597 / 923 | |
+| status ok / abstain / unknown-event / no-sense | 731 / 294 / 83 / 18 | 791 / 237 / 84 / 14 | |
+
+Root-cause note: 48 dev requests gained (connect 18, move 9, set 5: roles now read whose presence only shared-kind words carried),
+21 lost (move 7, create 5, connected 3). The losses are of two kinds: the second landmark of "between X and Y" now missed (5: create /
+move "... between Seat1 and Seat2" -> anchor Seat1 only), and "Are X and Y (directly) linked" read with no object / landmark (3), plus
+"check whether Warmup is smaller than Lesson" (no target). These are presence decisions of roles whose evidence was an own-kind word
+("between", "and"), now read from the candidate's own score: next item for the error analysis of this model, not tuned here. The
+`is X extreme_q topmost` label gap that failed the small-world test does not show on dev (extreme 56 / 59 right before and after).
+
 ## Files (all in this folder)
 
 - `ea_dump.mjs`: error_analysis.mjs, one JSON row per request with tokens, kinds, decoded frame, presence (-> fit_rows.jsonl, dev_rows.jsonl)
@@ -285,3 +339,4 @@ Checks that the default is unchanged:
 - `excl_pairs.py` (-> excl_pairs.json), `ea_dump_excl.mjs` (-> *_rows_excl*.jsonl): the exclusion decode, for the record
 - `build_tiny.py`, `run_tiny.sh`, `eval_tiny.py`, `tiny_missobj.py`, `tiny/<world>/` (worlds, models, logs), `tiny_<world>_e<N>.txt` (results; `*_m0`: marker off)
 - `s7build/` (build.sh, the three world builds, hashes h_*.txt), `s6check/` (run.sh, the HEAD tool copy, the three tiny models and logs)
+- `runs6s7/` (score.sh, run logs, per-model scores *_llm_score_gold.txt, *_llm_score_own.txt, *_error_analysis.txt, *_dev_rows.jsonl, REAL_WORLD.md.saved)

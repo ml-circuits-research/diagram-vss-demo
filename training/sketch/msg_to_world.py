@@ -79,7 +79,10 @@ def main():
               "events": [{"id": e, "verbs": vs, "roles": [r for r, _ in ROLES if r in roles_of[e]], "required": []} for e, vs in G.EVENTS.items()],
               "operators": ["not"], "moods": ["command"], "kinds": {"source": "lexicon", "lexicon": "kinds.tsv"},
               "values": [{"kind": "NUM", "pattern": "\\d+"}, {"kind": "NAME", "pattern": "n_[a-z0-9_]+"}, {"kind": "TEXT", "pattern": "t_[a-z0-9_]+"}],
-              "reader": {"predicate_role": True, "occupancy_marker": True, "definite_dets": [], "set_roles": ["members", "targets"], **({"centres": True} if CENTRES else {})}}
+              # MARKER=0 (off by default; owner's decision 2026-10-31, CAPACITY.md S5): no occupancy marker, so a single role's presence is read
+              # from the deposit that carries its word (role * F(filler), the rule of the set roles) and the training target has no marker term;
+              # with the marker only a word of a one-word kind can write the presence ("delete X": the object is never read)
+              "reader": {"predicate_role": True, "occupancy_marker": os.environ.get("MARKER", "1") != "0", "definite_dets": [], "set_roles": ["members", "targets"], **({"centres": True} if CENTRES else {})}}
     lp = os.path.join(out, "legend.json"); json.dump(legend, open(lp, "w"), indent=1); sha = G.sha256_file(lp)
     with open(os.path.join(out, "kinds.tsv"), "w") as fh:
         fh.write("# word\tkind: LEARNED by training/sketch/msg_to_world.py (legend value tokens -> their question's kind, event tokens -> VERB, "
