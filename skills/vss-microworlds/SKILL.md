@@ -19,7 +19,7 @@ Repository: ml-circuits-research/diagram-vss-demo (local: /home/claude/diagram-v
 ## What counts (owner's rules)
 
 - The owner is the judge. There is no hidden test set: every annotated message is data. Measure on the data the worlds are trained on; reading it well is the goal.
-- Per message: right / honest (asked, or left to reasoning) / wrong; per request: correct / not done / done wrong, plus extra wires (commands nobody asked for). Weigh "wrong" first.
+- The measure is per requested action only: done right / done wrong / not done, plus extra (actions nobody requested). Weigh "done wrong" and "extra" first. No per-message scores (owner, 2026-11-01). The cutter is measured by the errors it causes (training/sketch/composer_errors.mjs), not by span F1.
 - Measured fixes that use what exists need no approval; a new kind of component does.
 
 ## Tools (training/sketch)
@@ -36,15 +36,14 @@ Repository: ml-circuits-research/diagram-vss-demo (local: /home/claude/diagram-v
 3. **Data**: a world with fewer than ~150 rows or missing constructions gets more annotated messages (skills/llm-annotated-data in this repository), then a label check.
 4. **Train**: `SOP_PYTHON=/home/claude/venv/bin/python3 DATA=spans bash training/sketch/train_micro.sh <world> <events>`. Times measured on the 8 GB machine with 2 trainings at once: ~700 rows 30 min, ~2400 rows 1 h, ~3000 rows 1.5-2 h, plus up to 1.5 h of silent evaluation after training for the largest. At most 2 trainings at once (peak RSS ~1.5 GB each plus the system). Watch with `ps -eo rss,args | grep "sop train" | grep -v grep` (never `pgrep -f`, it matches itself). Write one line per finished step to a STATUS file: the container can restart and kill everything.
 5. **Judge the world on its own rows** against the fallback on the same rows: keep it as a candidate when done wrong is not higher and correct is higher. 90% fit is the goal, not a gate (round 1: only superlatives 96.6 and history 95.3 reached it; most worlds were 60-88% and still beat the fallback, e.g. graph 88.3 vs 42.7).
-6. **Wire, greedy**: order the candidates by their gain over the fallback (done wrong first, then correct); add one at a time to a scratch registry and score the composer on all data. Keep a world when per-message wrong falls (or stays equal with right rising) AND per-request done wrong does not rise AND per-request correct does not fall by more than ~0.5 point; when the criteria disagree, write both rows down and let the coordinator decide (round 1: `check` cut 10 wrong messages only through fewer extras and cost 35 right ones; the coordinator left it out). A world that looks neutral alone can help with others: after the pass, retry the dropped ones once. Then write the final registry.
-7. **Report** to the owner in Romanian: worlds added, fit vs fallback, the greedy table, the composer before / after (per message and per request, ALL and per data folder), units still read by the fallback, ignored and asked units, and the hand-written rules on the same data for comparison.
+6. **Wire, greedy**: order the candidates by their gain over the fallback (done wrong first, then correct); add one at a time to a scratch registry and score the composer on all data. Keep a world when done wrong + extra falls and done right does not fall by more than ~0.5 point; when the criteria disagree, write both rows down and let the coordinator decide (round 1: `check` cut 31 extras and cost 1.6 points of done right; the coordinator left it out). A world that looks neutral alone can help with others: after the pass, retry the dropped ones once. Then write the final registry.
+7. **Report** to the owner in Romanian: worlds added, fit vs fallback, the greedy table, the composer before / after (per requested action: right / wrong / not done, extra; ALL and per data folder), units still read by the fallback, ignored and asked units, and the hand-written rules on the same data for comparison.
 
 ## Known traps
 
 - **The shared micro front end**: every world's front.json is learned from all data (DATA), not from the world's rows. A trigger rule can lose precision on more data and disappear: round 1, `is` before a name -> `is_q` (check) has precision 0.23 on 3640 messages (also in connected / path / extreme spans) and is dropped by the 0.6 filter, so the check world reads 30% of its rows as unknown-event. Check the reader status counts of every world (error_analysis.mjs "reader status"); unknown-event above ~10% points to the front end, not the world.
 - Split worlds (connect_single / lists / chain) fit better alone but did not help the composer (more units misrouted): measure the composer, not only the fit.
-- The per-message numbers move little per world (a message has ~5 requests); the biggest gains come from the most frequent actions (connect: wrong 983 -> 858 messages of 1531).
-- Long messages (dev_new/long, 10-20 sentences) stay 0% fully right per message: report them per request.
+- The biggest gains come from the most frequent actions (round 1: connect cut done wrong from 17.8% to 14.5% of requests).
 
 ## Agents
 

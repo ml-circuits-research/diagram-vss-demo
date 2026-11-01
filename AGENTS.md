@@ -71,6 +71,11 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
 - The real error is a formalization that is wrong: a command executed with the wrong action, the wrong shape or the wrong value.
   Decisions weigh "done wrong" first, then "correct"; "not done / asked" is the honest outcome. Do not chase perfection on
   pieces the reasoning layer or a question to the user can supply.
+- The measure (owner, 2026-11-01): per requested action only: of the actions that had to be done, how many are done right, how
+  many are done wrong, how many are not done; and how many actions nobody requested are done (extra). Per-message scores ("fully
+  right messages") are not reported: a long message with 12 requests is almost never fully right, and that says nothing.
+- The cutter is measured by the errors it causes (requested actions done wrong or not done, and extras, that come from a bad cut),
+  not by span-match scores.
 
 ## Fair comparison
 
