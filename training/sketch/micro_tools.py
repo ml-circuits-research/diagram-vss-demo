@@ -35,7 +35,7 @@ def main():
         print("\n".join(os.path.join(HERE, d) for d in DIRS)); return
     if a.cmd == "gold":
         B = build(a.arg); E = set(B["events"].split(",")); shape = B.get("ROW_SHAPE") or ""
-        if not shape and a.arg.startswith("connect_"): shape = a.arg.split("_", 1)[1]
+        if not shape and a.arg.split("_", 1)[-1] in ("single", "lists", "chain") and a.arg.startswith("connect_"): shape = a.arg.split("_", 1)[1]   # round-1 split worlds (BUILD.json without ROW_SHAPE)
         sys.path.insert(0, HERE); import msg_to_world as MW
         out = a.out or os.path.join(HERE, "worlds_micro_gold", a.arg); os.makedirs(out, exist_ok=True); n = k = 0
         with open(os.path.join(out, "all.jsonl"), "w") as fo:
