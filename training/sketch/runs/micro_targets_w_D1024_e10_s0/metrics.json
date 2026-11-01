@@ -1,0 +1,2426 @@
+{
+ "world": "targets_w",
+ "legend": "sha256:baad370a13024a2713d806b581fd90f03d8fab646958d558092c03cf89809891",
+ "legend_version": 1,
+ "seeds": [
+  0
+ ],
+ "label": "BUILT",
+ "splits": {
+  "heldout_formulations": 35,
+  "calibration_heldout_formulations": 48,
+  "train": 786
+ },
+ "chance": {
+  "object": 0.00145985401459854,
+  "quantity": 0.25,
+  "members": 0.0015527950310559005,
+  "predicate": 0.25
+ },
+ "lexical_ranks": {
+  "object": 0,
+  "quantity": -1,
+  "members": -1
+ },
+ "per_seed": [
+  {
+   "heldout_formulations": {
+    "catalog candidates": {
+     "n": 35,
+     "of": 35,
+     "acc": {
+      "FULL": 0.8285714285714286,
+      "presence object: present read present": 0.967741935483871,
+      "presence object: share of 'present' readings that abstain": 0.0,
+      "presence object: share of true 'present' readings that abstain": 0.0,
+      "presence quantity: absent read absent": 1.0,
+      "presence members: absent read absent": 1.0,
+      "structure (depth, negation)": 0.9714285714285714,
+      "depth estimate: fit (check)": 1.0,
+      "set members: exact": 0.9714285714285714,
+      "set targets: exact": 1.0,
+      "predicate (surface lemma)": 0.9428571428571428,
+      "event type (synonym table)": 0.9428571428571428,
+      "role object": 0.8571428571428571,
+      "head object": 0.9142857142857143,
+      "lexical order head object": 0.9714285714285714,
+      "lexical bag head object": 0.9428571428571428,
+      "occupancy: known filler": 0.95,
+      "role quantity": 1.0,
+      "head quantity": 1.0,
+      "lexical order head quantity": 0.8,
+      "lexical bag head quantity": 1.0,
+      "occupancy: not given": 0.9846153846153847,
+      "role members": 0.9714285714285714,
+      "head members": 0.9714285714285714,
+      "lexical order head members": 0.9714285714285714,
+      "lexical bag head members": 0.9714285714285714,
+      "heads FULL (model)": 0.9142857142857143,
+      "heads FULL (lexical order baseline)": 0.7714285714285715,
+      "heads FULL (lexical bag baseline, trained on the same training rows)": 0.9428571428571428,
+      "FULL [depth given]": 0.8285714285714286,
+      "FULL [depth and negation given]": 0.8285714285714286,
+      "FULL [presence not decided]": 0.8,
+      "role object [presence not decided]": 0.8857142857142857,
+      "role quantity [presence not decided]": 1.0,
+      "role members [presence not decided]": 0.9142857142857143,
+      "heads FULL (model) [presence not decided]": 0.8857142857142857,
+      "FULL [pooled midpoint (comparison)]": 0.8285714285714286,
+      "role object [pooled midpoint (comparison)]": 0.8571428571428571,
+      "role quantity [pooled midpoint (comparison)]": 1.0,
+      "role members [pooled midpoint (comparison)]": 0.9714285714285714,
+      "heads FULL (model) [pooled midpoint (comparison)]": 0.9142857142857143,
+      "presence object: present read present [pooled midpoint (comparison)]": 0.967741935483871,
+      "presence quantity: absent read absent [pooled midpoint (comparison)]": 1.0,
+      "presence members: absent read absent [pooled midpoint (comparison)]": 1.0,
+      "occupancy: unknown filler": 0.95,
+      "presence quantity: present read present": 1.0,
+      "presence quantity: share of 'present' readings that abstain": 0.0,
+      "presence quantity: share of true 'present' readings that abstain": 0.0,
+      "presence quantity: present read present [pooled midpoint (comparison)]": 1.0,
+      "presence object: absent read absent": 0.6666666666666666,
+      "presence object: absent read absent [pooled midpoint (comparison)]": 0.6666666666666666,
+      "presence object: share of FALSE 'present' readings that abstain": 0.0,
+      "presence members: present read present": 1.0,
+      "presence members: share of 'present' readings that abstain": 0.0,
+      "presence members: share of true 'present' readings that abstain": 0.0,
+      "set members: first gold member in the decoded set": 1.0,
+      "presence members: present read present [pooled midpoint (comparison)]": 1.0,
+      "determiner identity (outside FULL when the legend excludes it)": 1.0
+     },
+     "calibration": {
+      "predicate": {
+       "n": 35,
+       "acc": 0.9428571428571428,
+       "margin_mean": 0.6117440430628791,
+       "margin_p10": 0.5344591592896426,
+       "tau": 0.05,
+       "coverage": 0.9714285714285714,
+       "confident_wrong": 0.02857142857142857,
+       "abstain_right": 0.0,
+       "abstain_wrong": 0.02857142857142857,
+       "acc_at_coverage": {
+        "0.00": [
+         0.9428571428571428,
+         1.0
+        ],
+        "0.02": [
+         0.9705882352941176,
+         0.9714285714285714
+        ],
+        "0.05": [
+         0.9705882352941176,
+         0.9714285714285714
+        ],
+        "0.10": [
+         0.9705882352941176,
+         0.9714285714285714
+        ],
+        "0.15": [
+         0.9705882352941176,
+         0.9714285714285714
+        ]
+       }
+      },
+      "role object": {
+       "n": 32,
+       "acc": 0.875,
+       "margin_mean": 0.4037457243432785,
+       "margin_p10": 0.22960227190983196,
+       "tau": 0.05,
+       "coverage": 0.96875,
+       "confident_wrong": 0.09375,
+       "abstain_right": 0.0,
+       "abstain_wrong": 0.03125,
+       "acc_at_coverage": {
+        "0.00": [
+         0.875,
+         1.0
+        ],
+        "0.02": [
+         0.9032258064516129,
+         0.96875
+        ],
+        "0.05": [
+         0.9032258064516129,
+         0.96875
+        ],
+        "0.10": [
+         0.9032258064516129,
+         0.96875
+        ],
+        "0.15": [
+         0.9032258064516129,
+         0.96875
+        ]
+       }
+      },
+      "roles (pooled)": {
+       "n": 40,
+       "acc": 0.875,
+       "margin_mean": 0.42988144984414767,
+       "margin_p10": 0.28032681367514495,
+       "tau": 0.05,
+       "coverage": 0.975,
+       "confident_wrong": 0.1,
+       "abstain_right": 0.0,
+       "abstain_wrong": 0.025,
+       "acc_at_coverage": {
+        "0.00": [
+         0.875,
+         1.0
+        ],
+        "0.02": [
+         0.8974358974358975,
+         0.975
+        ],
+        "0.05": [
+         0.8974358974358975,
+         0.975
+        ],
+        "0.10": [
+         0.8974358974358975,
+         0.975
+        ],
+        "0.15": [
+         0.8974358974358975,
+         0.975
+        ]
+       }
+      },
+      "role quantity": {
+       "n": 7,
+       "acc": 1.0,
+       "margin_mean": 0.5697954612709902,
+       "margin_p10": 0.52479797763309,
+       "tau": 0.05,
+       "coverage": 1.0,
+       "confident_wrong": 0.0,
+       "abstain_right": 0.0,
+       "abstain_wrong": 0.0,
+       "acc_at_coverage": {
+        "0.00": [
+         1.0,
+         1.0
+        ],
+        "0.02": [
+         1.0,
+         1.0
+        ],
+        "0.05": [
+         1.0,
+         1.0
+        ],
+        "0.10": [
+         1.0,
+         1.0
+        ],
+        "0.15": [
+         1.0,
+         1.0
+        ]
+       }
+      },
+      "role members": {
+       "n": 1,
+       "acc": 0.0,
+       "margin_mean": 0.28682658588406756,
+       "margin_p10": 0.28682658588406756,
+       "tau": 0.05,
+       "coverage": 1.0,
+       "confident_wrong": 1.0,
+       "abstain_right": 0.0,
+       "abstain_wrong": 0.0,
+       "acc_at_coverage": {
+        "0.00": [
+         0.0,
+         1.0
+        ],
+        "0.02": [
+         0.0,
+         1.0
+        ],
+        "0.05": [
+         0.0,
+         1.0
+        ],
+        "0.10": [
+         0.0,
+         1.0
+        ],
+        "0.15": [
+         0.0,
+         1.0
+        ]
+       }
+      }
+     },
+     "residual_mean": 0.15786894124913498,
+     "status": {
+      "ok": 34,
+      "unknown-event": 1
+     },
+     "worst_formulations": [
+      {
+       "formulation": "delete the old COLOR SHAPE",
+       "n": 2,
+       "FULL": 0.0
+      },
+      {
+       "formulation": "scrap NAME",
+       "n": 1,
+       "FULL": 0.0
+      },
+      {
+       "formulation": "bring NAME send",
+       "n": 1,
+       "FULL": 0.0
+      },
+      {
+       "formulation": "push it to the very bring of the stack",
+       "n": 1,
+       "FULL": 0.0
+      },
+      {
+       "formulation": "delete NAME and NAME from the map",
+       "n": 1,
+       "FULL": 0.0
+      }
+     ],
+     "full_rows": [
+      [
+       "examples/calib.sop#w27",
+       true
+      ],
+      [
+       "examples/calib.sop#w82",
+       true
+      ],
+      [
+       "examples/calib.sop#w84",
+       true
+      ],
+      [
+       "examples/calib.sop#w160",
+       true
+      ],
+      [
+       "examples/calib.sop#w210",
+       true
+      ],
+      [
+       "examples/calib.sop#w308",
+       true
+      ],
+      [
+       "examples/calib.sop#w442",
+       true
+      ],
+      [
+       "examples/calib.sop#w588",
+       true
+      ],
+      [
+       "examples/calib.sop#w608",
+       true
+      ],
+      [
+       "examples/calib.sop#w704",
+       true
+      ],
+      [
+       "examples/calib.sop#w728",
+       true
+      ],
+      [
+       "examples/calib.sop#w744",
+       true
+      ],
+      [
+       "examples/calib.sop#w786",
+       false
+      ],
+      [
+       "examples/calib.sop#w796",
+       true
+      ],
+      [
+       "examples/calib.sop#w816",
+       true
+      ],
+      [
+       "examples/calib.sop#w926",
+       true
+      ],
+      [
+       "examples/calib.sop#w978",
+       true
+      ],
+      [
+       "examples/calib.sop#w1036",
+       true
+      ],
+      [
+       "examples/calib.sop#w1084",
+       true
+      ],
+      [
+       "examples/calib.sop#w1086",
+       false
+      ],
+      [
+       "examples/calib.sop#w1090",
+       false
+      ],
+      [
+       "examples/calib.sop#w1158",
+       true
+      ],
+      [
+       "examples/calib.sop#w1183",
+       true
+      ],
+      [
+       "examples/calib.sop#w1187",
+       true
+      ],
+      [
+       "examples/calib.sop#w1271",
+       true
+      ],
+      [
+       "examples/calib.sop#w1326",
+       true
+      ],
+      [
+       "examples/calib.sop#w1388",
+       false
+      ],
+      [
+       "examples/calib.sop#w1393",
+       true
+      ],
+      [
+       "examples/calib.sop#w1430",
+       true
+      ],
+      [
+       "examples/calib.sop#w1432",
+       true
+      ],
+      [
+       "examples/calib.sop#w1455",
+       false
+      ],
+      [
+       "examples/calib.sop#w1522",
+       false
+      ],
+      [
+       "examples/calib.sop#w1524",
+       true
+      ],
+      [
+       "examples/calib.sop#w1575",
+       true
+      ],
+      [
+       "examples/calib.sop#w1579",
+       true
+      ]
+     ]
+    }
+   },
+   "train (sample)": {
+    "catalog candidates": {
+     "n": 300,
+     "of": 786,
+     "acc": {
+      "FULL": 0.9633333333333334,
+      "presence object: present read present": 1.0,
+      "presence object: share of 'present' readings that abstain": 0.054982817869415807,
+      "presence object: share of true 'present' readings that abstain": 0.04861111111111111,
+      "presence quantity: present read present": 1.0,
+      "presence quantity: share of 'present' readings that abstain": 0.0,
+      "presence quantity: share of true 'present' readings that abstain": 0.0,
+      "presence members: absent read absent": 1.0,
+      "structure (depth, negation)": 0.98,
+      "depth estimate: fit (check)": 1.0,
+      "set members: exact": 0.9866666666666667,
+      "set targets: exact": 1.0,
+      "predicate (surface lemma)": 0.9766666666666667,
+      "event type (synonym table)": 0.9766666666666667,
+      "role object": 0.9733333333333334,
+      "head object": 0.9733333333333334,
+      "lexical order head object": 0.98,
+      "lexical bag head object": 1.0,
+      "occupancy: known filler": 0.9857954545454546,
+      "role quantity": 1.0,
+      "head quantity": 1.0,
+      "lexical order head quantity": 0.8033333333333333,
+      "lexical bag head quantity": 0.9866666666666667,
+      "role members": 0.9866666666666667,
+      "head members": 0.9866666666666667,
+      "lexical order head members": 0.9866666666666667,
+      "lexical bag head members": 0.9866666666666667,
+      "occupancy: not given": 0.9944852941176471,
+      "heads FULL (model)": 0.97,
+      "heads FULL (lexical order baseline)": 0.7833333333333333,
+      "heads FULL (lexical bag baseline, trained on the same training rows)": 0.9733333333333334,
+      "FULL [depth given]": 0.9633333333333334,
+      "FULL [depth and negation given]": 0.9633333333333334,
+      "presence quantity: absent read absent": 1.0,
+      "presence object: absent read absent": 0.5,
+      "presence members: present read present": 1.0,
+      "presence members: share of 'present' readings that abstain": 0.0,
+      "presence members: share of true 'present' readings that abstain": 0.0,
+      "set members: first gold member in the decoded set": 0.25,
+      "occupancy: unknown filler": 1.0,
+      "presence object: share of FALSE 'present' readings that abstain": 0.6666666666666666,
+      "determiner identity (outside FULL when the legend excludes it)": 1.0
+     },
+     "calibration": {
+      "predicate": {
+       "n": 300,
+       "acc": 0.9766666666666667,
+       "margin_mean": 0.6510341886735863,
+       "margin_p10": 0.5497813034018759,
+       "tau": 0.05,
+       "coverage": 0.9966666666666667,
+       "confident_wrong": 0.02,
+       "abstain_right": 0.0,
+       "abstain_wrong": 0.0033333333333333335,
+       "acc_at_coverage": {
+        "0.00": [
+         0.9766666666666667,
+         1.0
+        ],
+        "0.02": [
+         0.979933110367893,
+         0.9966666666666667
+        ],
+        "0.05": [
+         0.979933110367893,
+         0.9966666666666667
+        ],
+        "0.10": [
+         0.9898648648648649,
+         0.9866666666666667
+        ],
+        "0.15": [
+         0.9898648648648649,
+         0.9866666666666667
+        ]
+       }
+      },
+      "role object": {
+       "n": 293,
+       "acc": 0.9829351535836177,
+       "margin_mean": 0.40869218255146395,
+       "margin_p10": 0.34490775005382446,
+       "tau": 0.05,
+       "coverage": 0.9522184300341296,
+       "confident_wrong": 0.017064846416382253,
+       "abstain_right": 0.04778156996587031,
+       "abstain_wrong": 0.0,
+       "acc_at_coverage": {
+        "0.00": [
+         0.9829351535836177,
+         1.0
+        ],
+        "0.02": [
+         0.982078853046595,
+         0.9522184300341296
+        ],
+        "0.05": [
+         0.982078853046595,
+         0.9522184300341296
+        ],
+        "0.10": [
+         0.982078853046595,
+         0.9522184300341296
+        ],
+        "0.15": [
+         0.982078853046595,
+         0.9522184300341296
+        ]
+       }
+      },
+      "roles (pooled)": {
+       "n": 356,
+       "acc": 0.9747191011235955,
+       "margin_mean": 0.43095898385814696,
+       "margin_p10": 0.3457028438342959,
+       "tau": 0.05,
+       "coverage": 0.9606741573033708,
+       "confident_wrong": 0.025280898876404494,
+       "abstain_right": 0.03932584269662921,
+       "abstain_wrong": 0.0,
+       "acc_at_coverage": {
+        "0.00": [
+         0.9747191011235955,
+         1.0
+        ],
+        "0.02": [
+         0.9736842105263158,
+         0.9606741573033708
+        ],
+        "0.05": [
+         0.9736842105263158,
+         0.9606741573033708
+        ],
+        "0.10": [
+         0.9765395894428153,
+         0.9578651685393258
+        ],
+        "0.15": [
+         0.9765395894428153,
+         0.9578651685393258
+        ]
+       }
+      },
+      "role quantity": {
+       "n": 59,
+       "acc": 1.0,
+       "margin_mean": 0.5592252424651099,
+       "margin_p10": 0.5265496910501075,
+       "tau": 0.05,
+       "coverage": 1.0,
+       "confident_wrong": 0.0,
+       "abstain_right": 0.0,
+       "abstain_wrong": 0.0,
+       "acc_at_coverage": {
+        "0.00": [
+         1.0,
+         1.0
+        ],
+        "0.02": [
+         1.0,
+         1.0
+        ],
+        "0.05": [
+         1.0,
+         1.0
+        ],
+        "0.10": [
+         1.0,
+         1.0
+        ],
+        "0.15": [
+         1.0,
+         1.0
+        ]
+       }
+      },
+      "role members": {
+       "n": 4,
+       "acc": 0.0,
+       "margin_mean": 0.17007486511997452,
+       "margin_p10": 0.0884873090591845,
+       "tau": 0.05,
+       "coverage": 1.0,
+       "confident_wrong": 1.0,
+       "abstain_right": 0.0,
+       "abstain_wrong": 0.0,
+       "acc_at_coverage": {
+        "0.00": [
+         0.0,
+         1.0
+        ],
+        "0.02": [
+         0.0,
+         1.0
+        ],
+        "0.05": [
+         0.0,
+         1.0
+        ],
+        "0.10": [
+         0.0,
+         0.75
+        ],
+        "0.15": [
+         0.0,
+         0.75
+        ]
+       }
+      }
+     },
+     "residual_mean": 0.08785481226981412,
+     "status": {
+      "ok": 278,
+      "unknown-event": 4,
+      "abstain": 16,
+      "no-sense": 2
+     },
+     "worst_formulations": [
+      {
+       "formulation": "duplicate NAME and NAME once each",
+       "n": 2,
+       "FULL": 0.0
+      },
+      {
+       "formulation": "put NAME and NAME bring top the n_oven",
+       "n": 1,
+       "FULL": 0.0
+      },
+      {
+       "formulation": "a second NAME please , same kind",
+       "n": 1,
+       "FULL": 0.0
+      },
+      {
+       "formulation": "delete NAME and NAME",
+       "n": 1,
+       "FULL": 0.0
+      },
+      {
+       "formulation": "make a copy of NAME",
+       "n": 1,
+       "FULL": 0.0
+      }
+     ],
+     "full_rows": [
+      [
+       "examples/train.sop#w5",
+       true
+      ],
+      [
+       "examples/train.sop#w7",
+       true
+      ],
+      [
+       "examples/train.sop#w9",
+       true
+      ],
+      [
+       "examples/train.sop#w13",
+       true
+      ],
+      [
+       "examples/train.sop#w17",
+       true
+      ],
+      [
+       "examples/train.sop#w21",
+       true
+      ],
+      [
+       "examples/train.sop#w39",
+       true
+      ],
+      [
+       "examples/train.sop#w43",
+       true
+      ],
+      [
+       "examples/train.sop#w45",
+       true
+      ],
+      [
+       "examples/train.sop#w51",
+       true
+      ],
+      [
+       "examples/train.sop#w53",
+       true
+      ],
+      [
+       "examples/train.sop#w55",
+       true
+      ],
+      [
+       "examples/train.sop#w59",
+       true
+      ],
+      [
+       "examples/train.sop#w71",
+       false
+      ],
+      [
+       "examples/train.sop#w78",
+       true
+      ],
+      [
+       "examples/train.sop#w86",
+       true
+      ],
+      [
+       "examples/train.sop#w92",
+       true
+      ],
+      [
+       "examples/train.sop#w118",
+       true
+      ],
+      [
+       "examples/train.sop#w120",
+       true
+      ],
+      [
+       "examples/train.sop#w128",
+       true
+      ],
+      [
+       "examples/train.sop#w132",
+       true
+      ],
+      [
+       "examples/train.sop#w134",
+       true
+      ],
+      [
+       "examples/train.sop#w138",
+       true
+      ],
+      [
+       "examples/train.sop#w140",
+       true
+      ],
+      [
+       "examples/train.sop#w146",
+       true
+      ],
+      [
+       "examples/train.sop#w148",
+       true
+      ],
+      [
+       "examples/train.sop#w164",
+       true
+      ],
+      [
+       "examples/train.sop#w168",
+       true
+      ],
+      [
+       "examples/train.sop#w170",
+       true
+      ],
+      [
+       "examples/train.sop#w174",
+       true
+      ],
+      [
+       "examples/train.sop#w184",
+       true
+      ],
+      [
+       "examples/train.sop#w186",
+       true
+      ],
+      [
+       "examples/train.sop#w192",
+       true
+      ],
+      [
+       "examples/train.sop#w196",
+       true
+      ],
+      [
+       "examples/train.sop#w202",
+       false
+      ],
+      [
+       "examples/train.sop#w204",
+       true
+      ],
+      [
+       "examples/train.sop#w220",
+       true
+      ],
+      [
+       "examples/train.sop#w229",
+       true
+      ],
+      [
+       "examples/train.sop#w235",
+       false
+      ],
+      [
+       "examples/train.sop#w238",
+       true
+      ],
+      [
+       "examples/train.sop#w246",
+       true
+      ],
+      [
+       "examples/train.sop#w252",
+       true
+      ],
+      [
+       "examples/train.sop#w262",
+       true
+      ],
+      [
+       "examples/train.sop#w266",
+       true
+      ],
+      [
+       "examples/train.sop#w274",
+       true
+      ],
+      [
+       "examples/train.sop#w280",
+       true
+      ],
+      [
+       "examples/train.sop#w288",
+       true
+      ],
+      [
+       "examples/train.sop#w294",
+       true
+      ],
+      [
+       "examples/train.sop#w296",
+       true
+      ],
+      [
+       "examples/train.sop#w300",
+       true
+      ],
+      [
+       "examples/train.sop#w312",
+       true
+      ],
+      [
+       "examples/train.sop#w314",
+       true
+      ],
+      [
+       "examples/train.sop#w320",
+       true
+      ],
+      [
+       "examples/train.sop#w322",
+       true
+      ],
+      [
+       "examples/train.sop#w326",
+       true
+      ],
+      [
+       "examples/train.sop#w332",
+       true
+      ],
+      [
+       "examples/train.sop#w336",
+       true
+      ],
+      [
+       "examples/train.sop#w348",
+       true
+      ],
+      [
+       "examples/train.sop#w361",
+       true
+      ],
+      [
+       "examples/train.sop#w365",
+       true
+      ],
+      [
+       "examples/train.sop#w369",
+       true
+      ],
+      [
+       "examples/train.sop#w377",
+       true
+      ],
+      [
+       "examples/train.sop#w389",
+       true
+      ],
+      [
+       "examples/train.sop#w393",
+       false
+      ],
+      [
+       "examples/train.sop#w411",
+       true
+      ],
+      [
+       "examples/train.sop#w417",
+       true
+      ],
+      [
+       "examples/train.sop#w419",
+       true
+      ],
+      [
+       "examples/train.sop#w423",
+       true
+      ],
+      [
+       "examples/train.sop#w446",
+       false
+      ],
+      [
+       "examples/train.sop#w450",
+       true
+      ],
+      [
+       "examples/train.sop#w454",
+       true
+      ],
+      [
+       "examples/train.sop#w461",
+       true
+      ],
+      [
+       "examples/train.sop#w471",
+       true
+      ],
+      [
+       "examples/train.sop#w475",
+       true
+      ],
+      [
+       "examples/train.sop#w477",
+       false
+      ],
+      [
+       "examples/train.sop#w494",
+       true
+      ],
+      [
+       "examples/train.sop#w498",
+       true
+      ],
+      [
+       "examples/train.sop#w500",
+       true
+      ],
+      [
+       "examples/train.sop#w510",
+       true
+      ],
+      [
+       "examples/train.sop#w512",
+       true
+      ],
+      [
+       "examples/train.sop#w518",
+       true
+      ],
+      [
+       "examples/train.sop#w530",
+       true
+      ],
+      [
+       "examples/train.sop#w532",
+       true
+      ],
+      [
+       "examples/train.sop#w534",
+       true
+      ],
+      [
+       "examples/train.sop#w538",
+       true
+      ],
+      [
+       "examples/train.sop#w540",
+       true
+      ],
+      [
+       "examples/train.sop#w542",
+       true
+      ],
+      [
+       "examples/train.sop#w546",
+       true
+      ],
+      [
+       "examples/train.sop#w550",
+       true
+      ],
+      [
+       "examples/train.sop#w556",
+       true
+      ],
+      [
+       "examples/train.sop#w560",
+       true
+      ],
+      [
+       "examples/train.sop#w568",
+       true
+      ],
+      [
+       "examples/train.sop#w572",
+       true
+      ],
+      [
+       "examples/train.sop#w580",
+       true
+      ],
+      [
+       "examples/train.sop#w584",
+       true
+      ],
+      [
+       "examples/train.sop#w586",
+       true
+      ],
+      [
+       "examples/train.sop#w592",
+       true
+      ],
+      [
+       "examples/train.sop#w598",
+       true
+      ],
+      [
+       "examples/train.sop#w604",
+       true
+      ],
+      [
+       "examples/train.sop#w612",
+       true
+      ],
+      [
+       "examples/train.sop#w616",
+       false
+      ],
+      [
+       "examples/train.sop#w618",
+       true
+      ],
+      [
+       "examples/train.sop#w626",
+       true
+      ],
+      [
+       "examples/train.sop#w628",
+       true
+      ],
+      [
+       "examples/train.sop#w634",
+       true
+      ],
+      [
+       "examples/train.sop#w638",
+       true
+      ],
+      [
+       "examples/train.sop#w648",
+       true
+      ],
+      [
+       "examples/train.sop#w650",
+       true
+      ],
+      [
+       "examples/train.sop#w652",
+       true
+      ],
+      [
+       "examples/train.sop#w656",
+       true
+      ],
+      [
+       "examples/train.sop#w662",
+       true
+      ],
+      [
+       "examples/train.sop#w672",
+       true
+      ],
+      [
+       "examples/train.sop#w676",
+       true
+      ],
+      [
+       "examples/train.sop#w686",
+       true
+      ],
+      [
+       "examples/train.sop#w692",
+       true
+      ],
+      [
+       "examples/train.sop#w698",
+       true
+      ],
+      [
+       "examples/train.sop#w700",
+       true
+      ],
+      [
+       "examples/train.sop#w708",
+       true
+      ],
+      [
+       "examples/train.sop#w718",
+       true
+      ],
+      [
+       "examples/train.sop#w722",
+       true
+      ],
+      [
+       "examples/train.sop#w726",
+       false
+      ],
+      [
+       "examples/train.sop#w736",
+       true
+      ],
+      [
+       "examples/train.sop#w742",
+       true
+      ],
+      [
+       "examples/train.sop#w746",
+       true
+      ],
+      [
+       "examples/train.sop#w748",
+       true
+      ],
+      [
+       "examples/train.sop#w760",
+       true
+      ],
+      [
+       "examples/train.sop#w766",
+       true
+      ],
+      [
+       "examples/train.sop#w770",
+       true
+      ],
+      [
+       "examples/train.sop#w772",
+       true
+      ],
+      [
+       "examples/train.sop#w774",
+       true
+      ],
+      [
+       "examples/train.sop#w778",
+       true
+      ],
+      [
+       "examples/train.sop#w784",
+       true
+      ],
+      [
+       "examples/train.sop#w788",
+       true
+      ],
+      [
+       "examples/train.sop#w792",
+       true
+      ],
+      [
+       "examples/train.sop#w794",
+       true
+      ],
+      [
+       "examples/train.sop#w798",
+       true
+      ],
+      [
+       "examples/train.sop#w800",
+       true
+      ],
+      [
+       "examples/train.sop#w810",
+       true
+      ],
+      [
+       "examples/train.sop#w812",
+       true
+      ],
+      [
+       "examples/train.sop#w814",
+       true
+      ],
+      [
+       "examples/train.sop#w820",
+       true
+      ],
+      [
+       "examples/train.sop#w824",
+       true
+      ],
+      [
+       "examples/train.sop#w826",
+       true
+      ],
+      [
+       "examples/train.sop#w832",
+       true
+      ],
+      [
+       "examples/train.sop#w842",
+       true
+      ],
+      [
+       "examples/train.sop#w846",
+       true
+      ],
+      [
+       "examples/train.sop#w848",
+       true
+      ],
+      [
+       "examples/train.sop#w860",
+       true
+      ],
+      [
+       "examples/train.sop#w866",
+       true
+      ],
+      [
+       "examples/train.sop#w868",
+       true
+      ],
+      [
+       "examples/train.sop#w870",
+       true
+      ],
+      [
+       "examples/train.sop#w878",
+       true
+      ],
+      [
+       "examples/train.sop#w884",
+       true
+      ],
+      [
+       "examples/train.sop#w890",
+       true
+      ],
+      [
+       "examples/train.sop#w892",
+       true
+      ],
+      [
+       "examples/train.sop#w904",
+       true
+      ],
+      [
+       "examples/train.sop#w906",
+       true
+      ],
+      [
+       "examples/train.sop#w908",
+       true
+      ],
+      [
+       "examples/train.sop#w910",
+       true
+      ],
+      [
+       "examples/train.sop#w912",
+       true
+      ],
+      [
+       "examples/train.sop#w914",
+       true
+      ],
+      [
+       "examples/train.sop#w922",
+       true
+      ],
+      [
+       "examples/train.sop#w924",
+       true
+      ],
+      [
+       "examples/train.sop#w940",
+       true
+      ],
+      [
+       "examples/train.sop#w946",
+       true
+      ],
+      [
+       "examples/train.sop#w950",
+       true
+      ],
+      [
+       "examples/train.sop#w958",
+       true
+      ],
+      [
+       "examples/train.sop#w966",
+       true
+      ],
+      [
+       "examples/train.sop#w984",
+       true
+      ],
+      [
+       "examples/train.sop#w988",
+       true
+      ],
+      [
+       "examples/train.sop#w998",
+       true
+      ],
+      [
+       "examples/train.sop#w1002",
+       true
+      ],
+      [
+       "examples/train.sop#w1010",
+       true
+      ],
+      [
+       "examples/train.sop#w1018",
+       true
+      ],
+      [
+       "examples/train.sop#w1032",
+       true
+      ],
+      [
+       "examples/train.sop#w1042",
+       true
+      ],
+      [
+       "examples/train.sop#w1056",
+       true
+      ],
+      [
+       "examples/train.sop#w1062",
+       true
+      ],
+      [
+       "examples/train.sop#w1064",
+       true
+      ],
+      [
+       "examples/train.sop#w1066",
+       true
+      ],
+      [
+       "examples/train.sop#w1078",
+       true
+      ],
+      [
+       "examples/train.sop#w1092",
+       true
+      ],
+      [
+       "examples/train.sop#w1094",
+       true
+      ],
+      [
+       "examples/train.sop#w1105",
+       true
+      ],
+      [
+       "examples/train.sop#w1107",
+       true
+      ],
+      [
+       "examples/train.sop#w1109",
+       true
+      ],
+      [
+       "examples/train.sop#w1113",
+       true
+      ],
+      [
+       "examples/train.sop#w1115",
+       true
+      ],
+      [
+       "examples/train.sop#w1123",
+       true
+      ],
+      [
+       "examples/train.sop#w1129",
+       true
+      ],
+      [
+       "examples/train.sop#w1131",
+       true
+      ],
+      [
+       "examples/train.sop#w1135",
+       true
+      ],
+      [
+       "examples/train.sop#w1151",
+       true
+      ],
+      [
+       "examples/train.sop#w1162",
+       true
+      ],
+      [
+       "examples/train.sop#w1168",
+       true
+      ],
+      [
+       "examples/train.sop#w1170",
+       true
+      ],
+      [
+       "examples/train.sop#w1172",
+       true
+      ],
+      [
+       "examples/train.sop#w1174",
+       true
+      ],
+      [
+       "examples/train.sop#w1178",
+       true
+      ],
+      [
+       "examples/train.sop#w1180",
+       true
+      ],
+      [
+       "examples/train.sop#w1194",
+       true
+      ],
+      [
+       "examples/train.sop#w1196",
+       true
+      ],
+      [
+       "examples/train.sop#w1198",
+       true
+      ],
+      [
+       "examples/train.sop#w1204",
+       true
+      ],
+      [
+       "examples/train.sop#w1211",
+       true
+      ],
+      [
+       "examples/train.sop#w1221",
+       true
+      ],
+      [
+       "examples/train.sop#w1225",
+       true
+      ],
+      [
+       "examples/train.sop#w1229",
+       true
+      ],
+      [
+       "examples/train.sop#w1246",
+       true
+      ],
+      [
+       "examples/train.sop#w1261",
+       true
+      ],
+      [
+       "examples/train.sop#w1263",
+       true
+      ],
+      [
+       "examples/train.sop#w1267",
+       true
+      ],
+      [
+       "examples/train.sop#w1274",
+       true
+      ],
+      [
+       "examples/train.sop#w1280",
+       true
+      ],
+      [
+       "examples/train.sop#w1282",
+       true
+      ],
+      [
+       "examples/train.sop#w1286",
+       true
+      ],
+      [
+       "examples/train.sop#w1294",
+       true
+      ],
+      [
+       "examples/train.sop#w1300",
+       true
+      ],
+      [
+       "examples/train.sop#w1310",
+       true
+      ],
+      [
+       "examples/train.sop#w1314",
+       true
+      ],
+      [
+       "examples/train.sop#w1316",
+       true
+      ],
+      [
+       "examples/train.sop#w1319",
+       true
+      ],
+      [
+       "examples/train.sop#w1321",
+       true
+      ],
+      [
+       "examples/train.sop#w1328",
+       true
+      ],
+      [
+       "examples/train.sop#w1334",
+       true
+      ],
+      [
+       "examples/train.sop#w1336",
+       true
+      ],
+      [
+       "examples/train.sop#w1338",
+       true
+      ],
+      [
+       "examples/train.sop#w1342",
+       true
+      ],
+      [
+       "examples/train.sop#w1344",
+       true
+      ],
+      [
+       "examples/train.sop#w1348",
+       true
+      ],
+      [
+       "examples/train.sop#w1356",
+       true
+      ],
+      [
+       "examples/train.sop#w1364",
+       true
+      ],
+      [
+       "examples/train.sop#w1380",
+       true
+      ],
+      [
+       "examples/train.sop#w1397",
+       true
+      ],
+      [
+       "examples/train.sop#w1405",
+       true
+      ],
+      [
+       "examples/train.sop#w1407",
+       true
+      ],
+      [
+       "examples/train.sop#w1411",
+       true
+      ],
+      [
+       "examples/train.sop#w1413",
+       true
+      ],
+      [
+       "examples/train.sop#w1417",
+       false
+      ],
+      [
+       "examples/train.sop#w1422",
+       true
+      ],
+      [
+       "examples/train.sop#w1424",
+       true
+      ],
+      [
+       "examples/train.sop#w1428",
+       true
+      ],
+      [
+       "examples/train.sop#w1434",
+       true
+      ],
+      [
+       "examples/train.sop#w1440",
+       true
+      ],
+      [
+       "examples/train.sop#w1442",
+       true
+      ],
+      [
+       "examples/train.sop#w1446",
+       true
+      ],
+      [
+       "examples/train.sop#w1452",
+       false
+      ],
+      [
+       "examples/train.sop#w1459",
+       true
+      ],
+      [
+       "examples/train.sop#w1461",
+       true
+      ],
+      [
+       "examples/train.sop#w1463",
+       true
+      ],
+      [
+       "examples/train.sop#w1465",
+       true
+      ],
+      [
+       "examples/train.sop#w1469",
+       true
+      ],
+      [
+       "examples/train.sop#w1475",
+       true
+      ],
+      [
+       "examples/train.sop#w1481",
+       true
+      ],
+      [
+       "examples/train.sop#w1485",
+       true
+      ],
+      [
+       "examples/train.sop#w1487",
+       true
+      ],
+      [
+       "examples/train.sop#w1491",
+       true
+      ],
+      [
+       "examples/train.sop#w1495",
+       true
+      ],
+      [
+       "examples/train.sop#w1503",
+       true
+      ],
+      [
+       "examples/train.sop#w1505",
+       true
+      ],
+      [
+       "examples/train.sop#w1507",
+       true
+      ],
+      [
+       "examples/train.sop#w1509",
+       true
+      ],
+      [
+       "examples/train.sop#w1520",
+       true
+      ],
+      [
+       "examples/train.sop#w1530",
+       true
+      ],
+      [
+       "examples/train.sop#w1532",
+       true
+      ],
+      [
+       "examples/train.sop#w1534",
+       true
+      ],
+      [
+       "examples/train.sop#w1536",
+       true
+      ],
+      [
+       "examples/train.sop#w1538",
+       false
+      ],
+      [
+       "examples/train.sop#w1541",
+       true
+      ],
+      [
+       "examples/train.sop#w1547",
+       true
+      ],
+      [
+       "examples/train.sop#w1549",
+       true
+      ],
+      [
+       "examples/train.sop#w1551",
+       true
+      ],
+      [
+       "examples/train.sop#w1553",
+       true
+      ],
+      [
+       "examples/train.sop#w1555",
+       true
+      ],
+      [
+       "examples/train.sop#w1563",
+       true
+      ],
+      [
+       "examples/train.sop#w1565",
+       true
+      ],
+      [
+       "examples/train.sop#w1581",
+       true
+      ],
+      [
+       "examples/train.sop#w1583",
+       true
+      ],
+      [
+       "examples/train.sop#w1587",
+       true
+      ],
+      [
+       "examples/train.sop#w1601",
+       true
+      ],
+      [
+       "examples/train.sop#w1603",
+       true
+      ],
+      [
+       "examples/train.sop#w1615",
+       true
+      ],
+      [
+       "examples/train.sop#w1617",
+       true
+      ],
+      [
+       "examples/train.sop#w1623",
+       true
+      ],
+      [
+       "examples/train.sop#w1628",
+       true
+      ],
+      [
+       "examples/train.sop#w1634",
+       true
+      ],
+      [
+       "examples/train.sop#w1641",
+       true
+      ],
+      [
+       "examples/train.sop#w1643",
+       true
+      ],
+      [
+       "examples/train.sop#w1647",
+       true
+      ],
+      [
+       "examples/train.sop#w1649",
+       true
+      ],
+      [
+       "examples/train.sop#w1671",
+       true
+      ],
+      [
+       "examples/train.sop#w1679",
+       true
+      ],
+      [
+       "examples/train.sop#w1683",
+       true
+      ],
+      [
+       "examples/train.sop#w1689",
+       true
+      ],
+      [
+       "examples/train.sop#w1693",
+       true
+      ],
+      [
+       "examples/train.sop#w1695",
+       true
+      ],
+      [
+       "examples/train.sop#w1699",
+       true
+      ],
+      [
+       "examples/train.sop#w1712",
+       true
+      ],
+      [
+       "examples/train.sop#w1716",
+       true
+      ],
+      [
+       "examples/train.sop#w1720",
+       true
+      ]
+     ]
+    }
+   }
+  }
+ ],
+ "training": [
+  {
+   "t_train_s": 1376.9,
+   "calibration": {
+    "set_member:members": {
+     "threshold": null,
+     "n_present": 2,
+     "n_absent": 228618,
+     "rule": "one class missing in the calibration rows: read by the training rate (always / never)"
+    },
+    "presence:object": {
+     "mean_present": 1.0053518928155196,
+     "mean_absent": 0.1765116903934176,
+     "threshold": 0.576975457066344,
+     "pooled_midpoint": 0.5909317916044686,
+     "rule": "fit",
+     "n_present": 432,
+     "n_absent": 16
+    },
+    "attr_presence:object": {
+     "mean_present": 0.8985844725902582,
+     "mean_absent": 0.06573982360152639,
+     "threshold": 0.4546971656381239,
+     "pooled_midpoint": 0.4821621480958923,
+     "rule": "fit",
+     "n_present": 12,
+     "n_absent": 428,
+     "fallback": "CAL_FALLBACK=train: calibration rows + the training rows that hold the missing class (in sample)"
+    },
+    "det_presence:object": {
+     "mean_present": 0.9338440983548479,
+     "mean_absent": 0.020528335448685833,
+     "threshold": 0.47937586016820377,
+     "pooled_midpoint": 0.4771862169017669,
+     "rule": "fit",
+     "n_present": 16,
+     "n_absent": 416
+    },
+    "presence:quantity": {
+     "mean_present": 0.9869077168909491,
+     "mean_absent": 0.005731888187931789,
+     "threshold": 0.4006759250518251,
+     "pooled_midpoint": 0.49631980253944047,
+     "rule": "fit",
+     "n_present": 89,
+     "n_absent": 359
+    },
+    "presence:members": {
+     "mean_present": 1.082789684402464,
+     "mean_absent": 0.08478622072403243,
+     "threshold": 0.5033323979173862,
+     "pooled_midpoint": 0.5837879525632482,
+     "rule": "fit",
+     "n_present": 6,
+     "n_absent": 455,
+     "fallback": "CAL_FALLBACK=train: calibration rows + the training rows that hold the missing class (in sample)"
+    }
+   },
+   "gates": {
+    "ARROW": 0.11920292202211755,
+    "AXIS": 0.11920292202211755,
+    "COLOR": 0.05271360527903114,
+    "DIR": 0.15727646153427277,
+    "LAYOUT": 0.11371496138604155,
+    "NAME": 0.6595624805547193,
+    "NOTCOLOR": 0.11920292202211755,
+    "NUM": 0.6860465592087553,
+    "PAIR": 0.11920292202211755,
+    "POS": 0.6727029425360618,
+    "QUANT": 0.5586650276760101,
+    "RECENT": 0.6163779155690978,
+    "SHAPE": 0.40963799406484885,
+    "SIZE": 0.11920292202211755,
+    "STYLE": 0.11920292202211755,
+    "SUPER": 0.11920292202211755,
+    "VERB": 0.6671254934356671,
+    "a": 0.03664996775829747,
+    "and": 0.05091185072171211,
+    "are": 0.09670874439856385,
+    "c10_three": 0.053216446356908344,
+    "c11_what": 0.6139363496958925,
+    "c12_that": 0.06508291632516477,
+    "c13_one": 0.6434417596886512,
+    "c14_uh": 0.007044180571111207,
+    "c15_on": 0.056312324044573675,
+    "c16_new": 0.7478969869913565,
+    "c17_be": 0.05649191012677156,
+    "c18_does": 0.06565979763640543,
+    "c19_goes": 0.07745950464224888,
+    "c1_have": 0.14860905315854847,
+    "c20_arrow": 0.11920292202211755,
+    "c21_arrowheads": 0.11920292202211755,
+    "c22_from": 0.35801258642930395,
+    "c23_in": 0.028211454065494267,
+    "c24_line": 0.11920292202211755,
+    "c25_pixels": 0.11920292202211755,
+    "c26_shape": 0.05187618677556391,
+    "c27_them": 0.20740084215619503,
+    "c2_now": 0.07713855403334578,
+    "c3_rules": 0.04668468486313757,
+    "c4_then": 0.6142899771486359,
+    "c5_me": 0.034337297549306145,
+    "c6_both": 0.05305420587820817,
+    "c7_i": 0.012567189710264293,
+    "c8_what's": 0.06958867079595324,
+    "c9_an": 0.07605981089487289,
+    "called": 0.11920292202211755,
+    "directly": 0.11920292202211755,
+    "it": 0.6434112342621799,
+    "labeled": 0.11920292202211755,
+    "lines": 0.11920292202211755,
+    "named": 0.11920292202211755,
+    "of": 0.019668007876450067,
+    "the": 0.7692951050344768,
+    "to": 0.18139224526391384,
+    "unknown": 0.3394477111068932,
+    "with": 0.11920292202211755
+   },
+   "numpy_torch_diff": 5.641201840991976e-08,
+   "kinds": {
+    "tokens": 3221,
+    "unknown_kind_tokens": 223,
+    "unknown_share": 0.06923315740453276
+   }
+  }
+ ],
+ "labels_rule22": "every number BUILT by this run",
+ "mean_over_seeds": {
+  "heldout_formulations": {
+   "catalog candidates": {
+    "FULL": {
+     "mean": 0.8285714285714286,
+     "std": 0.0
+    },
+    "presence object: present read present": {
+     "mean": 0.967741935483871,
+     "std": 0.0
+    },
+    "presence object: share of 'present' readings that abstain": {
+     "mean": 0.0,
+     "std": 0.0
+    },
+    "presence object: share of true 'present' readings that abstain": {
+     "mean": 0.0,
+     "std": 0.0
+    },
+    "presence quantity: absent read absent": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "presence members: absent read absent": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "structure (depth, negation)": {
+     "mean": 0.9714285714285714,
+     "std": 0.0
+    },
+    "depth estimate: fit (check)": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "set members: exact": {
+     "mean": 0.9714285714285714,
+     "std": 0.0
+    },
+    "set targets: exact": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "predicate (surface lemma)": {
+     "mean": 0.9428571428571428,
+     "std": 0.0
+    },
+    "event type (synonym table)": {
+     "mean": 0.9428571428571428,
+     "std": 0.0
+    },
+    "role object": {
+     "mean": 0.8571428571428571,
+     "std": 0.0
+    },
+    "head object": {
+     "mean": 0.9142857142857143,
+     "std": 0.0
+    },
+    "lexical order head object": {
+     "mean": 0.9714285714285714,
+     "std": 0.0
+    },
+    "lexical bag head object": {
+     "mean": 0.9428571428571428,
+     "std": 0.0
+    },
+    "occupancy: known filler": {
+     "mean": 0.95,
+     "std": 0.0
+    },
+    "role quantity": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "head quantity": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "lexical order head quantity": {
+     "mean": 0.8,
+     "std": 0.0
+    },
+    "lexical bag head quantity": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "occupancy: not given": {
+     "mean": 0.9846153846153847,
+     "std": 0.0
+    },
+    "role members": {
+     "mean": 0.9714285714285714,
+     "std": 0.0
+    },
+    "head members": {
+     "mean": 0.9714285714285714,
+     "std": 0.0
+    },
+    "lexical order head members": {
+     "mean": 0.9714285714285714,
+     "std": 0.0
+    },
+    "lexical bag head members": {
+     "mean": 0.9714285714285714,
+     "std": 0.0
+    },
+    "heads FULL (model)": {
+     "mean": 0.9142857142857143,
+     "std": 0.0
+    },
+    "heads FULL (lexical order baseline)": {
+     "mean": 0.7714285714285715,
+     "std": 0.0
+    },
+    "heads FULL (lexical bag baseline, trained on the same training rows)": {
+     "mean": 0.9428571428571428,
+     "std": 0.0
+    },
+    "FULL [depth given]": {
+     "mean": 0.8285714285714286,
+     "std": 0.0
+    },
+    "FULL [depth and negation given]": {
+     "mean": 0.8285714285714286,
+     "std": 0.0
+    },
+    "FULL [presence not decided]": {
+     "mean": 0.8,
+     "std": 0.0
+    },
+    "role object [presence not decided]": {
+     "mean": 0.8857142857142857,
+     "std": 0.0
+    },
+    "role quantity [presence not decided]": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "role members [presence not decided]": {
+     "mean": 0.9142857142857143,
+     "std": 0.0
+    },
+    "heads FULL (model) [presence not decided]": {
+     "mean": 0.8857142857142857,
+     "std": 0.0
+    },
+    "FULL [pooled midpoint (comparison)]": {
+     "mean": 0.8285714285714286,
+     "std": 0.0
+    },
+    "role object [pooled midpoint (comparison)]": {
+     "mean": 0.8571428571428571,
+     "std": 0.0
+    },
+    "role quantity [pooled midpoint (comparison)]": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "role members [pooled midpoint (comparison)]": {
+     "mean": 0.9714285714285714,
+     "std": 0.0
+    },
+    "heads FULL (model) [pooled midpoint (comparison)]": {
+     "mean": 0.9142857142857143,
+     "std": 0.0
+    },
+    "presence object: present read present [pooled midpoint (comparison)]": {
+     "mean": 0.967741935483871,
+     "std": 0.0
+    },
+    "presence quantity: absent read absent [pooled midpoint (comparison)]": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "presence members: absent read absent [pooled midpoint (comparison)]": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "occupancy: unknown filler": {
+     "mean": 0.95,
+     "std": 0.0
+    },
+    "presence quantity: present read present": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "presence quantity: share of 'present' readings that abstain": {
+     "mean": 0.0,
+     "std": 0.0
+    },
+    "presence quantity: share of true 'present' readings that abstain": {
+     "mean": 0.0,
+     "std": 0.0
+    },
+    "presence quantity: present read present [pooled midpoint (comparison)]": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "presence object: absent read absent": {
+     "mean": 0.6666666666666666,
+     "std": 0.0
+    },
+    "presence object: absent read absent [pooled midpoint (comparison)]": {
+     "mean": 0.6666666666666666,
+     "std": 0.0
+    },
+    "presence object: share of FALSE 'present' readings that abstain": {
+     "mean": 0.0,
+     "std": 0.0
+    },
+    "presence members: present read present": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "presence members: share of 'present' readings that abstain": {
+     "mean": 0.0,
+     "std": 0.0
+    },
+    "presence members: share of true 'present' readings that abstain": {
+     "mean": 0.0,
+     "std": 0.0
+    },
+    "set members: first gold member in the decoded set": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "presence members: present read present [pooled midpoint (comparison)]": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "determiner identity (outside FULL when the legend excludes it)": {
+     "mean": 1.0,
+     "std": 0.0
+    }
+   }
+  },
+  "train (sample)": {
+   "catalog candidates": {
+    "FULL": {
+     "mean": 0.9633333333333334,
+     "std": 0.0
+    },
+    "presence object: present read present": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "presence object: share of 'present' readings that abstain": {
+     "mean": 0.054982817869415807,
+     "std": 0.0
+    },
+    "presence object: share of true 'present' readings that abstain": {
+     "mean": 0.04861111111111111,
+     "std": 0.0
+    },
+    "presence quantity: present read present": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "presence quantity: share of 'present' readings that abstain": {
+     "mean": 0.0,
+     "std": 0.0
+    },
+    "presence quantity: share of true 'present' readings that abstain": {
+     "mean": 0.0,
+     "std": 0.0
+    },
+    "presence members: absent read absent": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "structure (depth, negation)": {
+     "mean": 0.98,
+     "std": 0.0
+    },
+    "depth estimate: fit (check)": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "set members: exact": {
+     "mean": 0.9866666666666667,
+     "std": 0.0
+    },
+    "set targets: exact": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "predicate (surface lemma)": {
+     "mean": 0.9766666666666667,
+     "std": 0.0
+    },
+    "event type (synonym table)": {
+     "mean": 0.9766666666666667,
+     "std": 0.0
+    },
+    "role object": {
+     "mean": 0.9733333333333334,
+     "std": 0.0
+    },
+    "head object": {
+     "mean": 0.9733333333333334,
+     "std": 0.0
+    },
+    "lexical order head object": {
+     "mean": 0.98,
+     "std": 0.0
+    },
+    "lexical bag head object": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "occupancy: known filler": {
+     "mean": 0.9857954545454546,
+     "std": 0.0
+    },
+    "role quantity": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "head quantity": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "lexical order head quantity": {
+     "mean": 0.8033333333333333,
+     "std": 0.0
+    },
+    "lexical bag head quantity": {
+     "mean": 0.9866666666666667,
+     "std": 0.0
+    },
+    "role members": {
+     "mean": 0.9866666666666667,
+     "std": 0.0
+    },
+    "head members": {
+     "mean": 0.9866666666666667,
+     "std": 0.0
+    },
+    "lexical order head members": {
+     "mean": 0.9866666666666667,
+     "std": 0.0
+    },
+    "lexical bag head members": {
+     "mean": 0.9866666666666667,
+     "std": 0.0
+    },
+    "occupancy: not given": {
+     "mean": 0.9944852941176471,
+     "std": 0.0
+    },
+    "heads FULL (model)": {
+     "mean": 0.97,
+     "std": 0.0
+    },
+    "heads FULL (lexical order baseline)": {
+     "mean": 0.7833333333333333,
+     "std": 0.0
+    },
+    "heads FULL (lexical bag baseline, trained on the same training rows)": {
+     "mean": 0.9733333333333334,
+     "std": 0.0
+    },
+    "FULL [depth given]": {
+     "mean": 0.9633333333333334,
+     "std": 0.0
+    },
+    "FULL [depth and negation given]": {
+     "mean": 0.9633333333333334,
+     "std": 0.0
+    },
+    "presence quantity: absent read absent": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "presence object: absent read absent": {
+     "mean": 0.5,
+     "std": 0.0
+    },
+    "presence members: present read present": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "presence members: share of 'present' readings that abstain": {
+     "mean": 0.0,
+     "std": 0.0
+    },
+    "presence members: share of true 'present' readings that abstain": {
+     "mean": 0.0,
+     "std": 0.0
+    },
+    "set members: first gold member in the decoded set": {
+     "mean": 0.25,
+     "std": 0.0
+    },
+    "occupancy: unknown filler": {
+     "mean": 1.0,
+     "std": 0.0
+    },
+    "presence object: share of FALSE 'present' readings that abstain": {
+     "mean": 0.6666666666666666,
+     "std": 0.0
+    },
+    "determiner identity (outside FULL when the legend excludes it)": {
+     "mean": 1.0,
+     "std": 0.0
+    }
+   }
+  }
+ }
+}

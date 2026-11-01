@@ -43,6 +43,7 @@ Repository: ml-circuits-research/diagram-vss-demo (local: /home/claude/diagram-v
 ## Known traps
 
 - **The shared micro front end**: every world's front.json is learned from all data (DATA), not from the world's rows. A trigger rule can lose precision on more data and disappear: round 1, `is` before a name -> `is_q` (check) has precision 0.23 on 3640 messages (also in connected / path / extreme spans) and is dropped by the 0.6 filter, so the check world reads 30% of its rows as unknown-event. Check the reader status counts of every world (error_analysis.mjs "reader status"); unknown-event above ~10% points to the front end, not the world.
+- **The 6 h wall-clock guard** (VSA_MAX_HOURS, default 6) counts training plus the silent evaluation and saves no checkpoint: Plan A's connect_w trained 3.77 h and was killed during the evaluation, after the route book was written and before the export, so it was lost. Set `VSA_MAX_HOURS=12` for any world above ~2500 rows of connect or ~4000 rows of anything else.
 - Split worlds (connect_single / lists / chain) fit better alone but did not help the composer (more units misrouted): measure the composer, not only the fit.
 - The biggest gains come from the most frequent actions (round 1: connect cut done wrong from 17.8% to 14.5% of requests).
 

@@ -1,0 +1,93 @@
+{
+ "world": "facts_w",
+ "D": 1024,
+ "seed": 0,
+ "star_version": 2,
+ "language": "en",
+ "legend_sha256": "sha256:0607adbd3437155a54c55389b6e03b5e5237cf47a5984aec73ac14dba29b0664",
+ "legend_version": 1,
+ "training_code_commit": "f9dc7da",
+ "trained": "2026-11-01T17:56:34",
+ "codes": [
+  "path",
+  "chainL",
+  "bigram"
+ ],
+ "gate_init": "closed",
+ "depth_estimator": "kinds",
+ "presence_readout": "decided",
+ "batch": 8,
+ "lr": 0.02,
+ "epochs": 10,
+ "n_train_steps_sentences": 9940,
+ "decoder": "contract",
+ "candidates": "sentence",
+ "undecided_adjacent": true,
+ "residual": "explained",
+ "presence_query": true,
+ "activation": null,
+ "thresholds": {
+  "tau": 0.05,
+  "tau_source": "stated (the repository's v16 value), not fitted on any rows",
+  "no_sense_share": 0.5,
+  "no_sense_source": "stated",
+  "no_fit_residual": 0.9,
+  "no_fit_source": "stated (dispatcher only, spec section 9)",
+  "presence": {
+   "object": 0.6927214942822827,
+   "shape": 0.4691219459950449,
+   "color": 0.5956586978873348,
+   "size": 0.6311637928176428,
+   "relation": 0.5675983443936479,
+   "landmark": 0.21225543252541332,
+   "landmark2": 0.26279580910468014,
+   "members": 0.19199211901447144
+  },
+  "attr_presence": {},
+  "det_presence": {},
+  "scope_term": null,
+  "set_member": {
+   "members": 0.13666949121683258
+  },
+  "calibration_split": "train (a sample of 400 training sentences, rng 1234+seed) + the CALIBRATION half of the held-out formulations (55 sentences, splits calibration_*), disjoint from the reported half (rule 25)",
+  "rule": "FITTED: per role, the threshold that maximises the balanced present / absent accuracy on the calibration rows (judgment 752853c \u00a72); the pooled midpoint of the same rows is kept as thresholds_pooled_midpoint, the comparison",
+  "presence_margin": "|presence ratio - threshold| (ratio units), on the wire as _presence_margin.<role> (SOP Lang keys carry one dot); the role's _margin = min(identity margin, presence margin): a near-threshold reading abstains"
+ },
+ "thresholds_training_rows_only": {
+  "presence": {
+   "object": 0.6927214942822827,
+   "shape": 0.6104623425120972,
+   "color": 0.5956586978873348,
+   "size": 0.6311637928176428,
+   "relation": 0.5129471512410051,
+   "landmark": 0.21225543252541332,
+   "landmark2": 0.26279580910468014,
+   "members": 0.31634690531716114
+  },
+  "attr_presence": {},
+  "det_presence": {},
+  "scope_term": null,
+  "set_member": {
+   "members": 0.1520229567820543
+  },
+  "calibration_split": "train (a sample of 400 training sentences, rng 1234+seed); never the scored rows (rule 25)"
+ },
+ "thresholds_pooled_midpoint": {
+  "presence": {
+   "object": 0.8933770035174946,
+   "shape": 0.5110516219123765,
+   "color": 0.6724865635347909,
+   "size": 0.7833413557298803,
+   "relation": 0.568036137134869,
+   "landmark": 0.5522028346475217,
+   "landmark2": 0.2390748281556787,
+   "members": 0.6965481112654757
+  },
+  "attr_presence": {},
+  "det_presence": {},
+  "scope_term": null,
+  "set_member": {
+   "members": 0.5867591542560298
+  }
+ }
+}

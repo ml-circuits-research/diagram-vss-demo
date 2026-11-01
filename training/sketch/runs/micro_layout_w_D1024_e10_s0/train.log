@@ -1,0 +1,18 @@
+[splits] written to /home/claude/diagram-vss-demo/training/sketch/runs/micro_layout_w_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 39, heldout_formulations 41, train 732
+[schema] roles ['object', 'axis', 'layout', 'members'] (core []), max depth 0, event negation False
+[train] seed 0: 732 training rows x 10 epoch(s) -> 7320 steps' sentences; D=1024; kinds 58; vocab 1380; predicate lemma not found in 300 targets
+[train] phase table: 1805 of 10365 rows reached by the training sentences, held and trained; the other 8560 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.61 GB (peak 0.61 GB) | cpu | MemAvailable 5.7 GB
+[trace] text: lined row arrange row
+[trace] tokens/kinds: lined/None row/LAYOUT arrange/VERB row/LAYOUT
+[trace] gold frame: {"event": "arrange", "lemma": "arrange", "neg": false, "roles": {"layout": ["word", "row"]}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 45.54 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[train seed 0] start: RSS 0.71 GB (peak 0.71 GB) | cpu | MemAvailable 5.7 GB
+[train seed 0] step 500 sent 4000/7320 loss -0.908 (1244s) | RSS 0.98 GB (peak 1.41 GB) | cpu | MemAvailable 5.5 GB
+[train seed 0] end: RSS 0.94 GB (peak 1.41 GB) | cpu | MemAvailable 5.3 GB (2390s)
+[export] route book written | RSS 0.94 GB (peak 1.41 GB) | cpu | MemAvailable 5.3 GB
+[export] numpy reader vs torch states: max relative difference 8.48e-08 (float32 phases in the route book)
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.707 | residual 0.204
+[eval] seed 0 train (sample): FULL catalog candidates 0.770 | residual 0.182
+[mem] after seed 0: RSS 0.95 GB (peak 1.41 GB) | cpu | MemAvailable 5.3 GB
+[done] model written to /home/claude/diagram-vss-demo/training/sketch/worlds_micro/layout_w/model; REPORT.md and metrics.json there; run log /home/claude/diagram-vss-demo/training/sketch/runs/micro_layout_w_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)
