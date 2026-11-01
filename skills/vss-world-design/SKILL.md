@@ -29,12 +29,19 @@ are the measurements that will turn the hypotheses into rules or drop them. Use 
 7. **Cost grows with rows; connect rows are the slowest.** connect_s: 3427 rows, 2 h 25 min of training. The trainer's own
    evaluation adds hours and changes nothing in the model: N_EVAL=150 EVAL_MODES=primary for big worlds.
 
+8. **Which actions get mixed up is measurable and concentrated.** Tool: `python3 action_confusion.py --groups <files>`. It is the
+   cutter perceptron with one label per event, scored on a 20% test split. Of 4685 gold requests, 516 were confused, and a few
+   pairs carry most of them: extreme/nearest 74, check/connected 30, move/set 23, resize/set 22, count/degree 21, cycle/path 17.
+   Share of the confusions that fall inside one world: GROUPS_16 20.0%, GROUPS_6 (by roles) 46.9%, GROUPS_7 (by confusion) 64.5%.
+   The data contradicts grouping by roles in two places:
+   - check, cycle and exists are questions about the graph, like path and connected;
+   - toFront and toBack get mixed up with move.
+
 ## Hypotheses (being measured)
 
-- **Merge actions that the cutter confuses.** If the cutter often sends A's units to B's world, the two belong in one world: the
-  world then decides between them with the whole unit in view. Measure: confusion between the cutter's world labels
-  (train_cutter.py --worlds) on the gold spans.
-- **Merge actions with the same roles** (shapes: create / set / resize; links: connect / disconnect). Plan B (GROUPS_6) tests this.
+- **Merge actions that the cutter confuses** (GROUPS_7, Plan B). The world then chooses between them with the whole unit in view,
+  and router ties between worlds become fewer. Plan A, variant 3: 450 units were decided by registry order.
+- Grouping by roles alone (GROUPS_6) was replaced by GROUPS_7 before training, on measurement 8.
 - **Split again only where a rare action loses.** For each action inside a merged world, compare done right / done wrong with its
   own small world (e.g. disconnect inside links6 vs disconnect_w, 169 rows vs ~3400 connect rows). If it loses, first check its
   data (too few rows, labels that disagree), then the split.
@@ -45,7 +52,8 @@ are the measurements that will turn the hypotheses into rules or drop them. Use 
 
 ## Procedure (current)
 
-1. Start from groups by meaning (the actions people mix up in their sentences), not from one world per action.
+1. Start from groups by meaning, not from one world per action. Run `action_confusion.py` on the annotated data and group the
+   pairs that are confused often. Leave the big commands apart while their confusion is under ~3% of their requests.
 2. Per world: gold rows (`micro_tools.py gold`). Check the border labels with the neighbouring worlds by script. Fix the labels
    (skills/llm-annotated-data); never edit the texts. Add data where an action has under ~150 rows.
 3. Train with its own front (DATA=spans FRONT_ROWS=world). Big worlds: VSA_MAX_HOURS=16, N_EVAL=150 EVAL_MODES=primary.

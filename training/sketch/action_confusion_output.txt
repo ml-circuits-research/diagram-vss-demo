@@ -1,0 +1,78 @@
+# action_confusion: train 3668 messages, test 972 (4685 gold requests), 35 events, epochs 8
+
+## Per event: share read as itself, and what it is taken for
+| event (n) | right | taken for |
+|---|---|---|
+| set (847) | 96.8% | move 9, fact 6, resize 3, label 3, connect 3, redo 1, create 1, arrange 1 |
+| connect (722) | 94.7% | create 10, set 10, arrange 6, move 5, label 2, fact 2, rename 1, toFront 1, align 1 |
+| move (609) | 92.9% | set 14, fact 6, connect 5, arrange 5, toBack 3, align 2, distribute 1, forget 1, create 1, rename 1, swap 1, toFront 1, resize 1, duplicate 1 |
+| extreme (258) | 87.2% | nearest 13, degree 7, check 6, property 2, describe 1, move 1, cycle 1, fact 1, path 1 |
+| create (209) | 96.7% | set 2, forget 1, fact 1, redo 1, duplicate 1, reachable 1 |
+| check (203) | 93.6% | connected 6, path 3, fact 1, redo 1, connect 1, nearest 1 |
+| fact (169) | 89.9% | set 9, move 4, connect 3, arrange 1 |
+| connected (124) | 77.4% | check 24, path 2, cycle 1, exists 1 |
+| count (120) | 89.2% | degree 11, describe 1, move 1 |
+| path (120) | 85.0% | check 11, reachable 1, connect 1, connected 1, property 1, neighbors 1, exists 1, nearest 1 |
+| list (116) | 91.4% | property 3, describe 2, neighbors 2, nearest 1, degree 1, extreme 1 |
+| nearest (91) | 24.2% | extreme 61, check 4, degree 2, forget 1, list 1 |
+| arrange (91) | 73.6% | move 10, connect 10, align 1, set 1, list 1, create 1 |
+| rename (76) | 98.7% | connect 1 |
+| resize (69) | 65.2% | set 19, move 2, extreme 1, connect 1, align 1 |
+| describe (62) | 95.2% | list 1, count 1, property 1 |
+| degree (61) | 63.9% | count 10, extreme 3, connected 3, property 2, check 2, path 1, neighbors 1 |
+| duplicate (60) | 98.3% | move 1 |
+| exists (58) | 87.9% | path 5, list 1, connected 1 |
+| neighbors (56) | 57.1% | list 12, degree 2, connected 2, property 2, set 1, extreme 1, reachable 1, exists 1, move 1, path 1 |
+| label (53) | 90.6% | move 3, set 2 |
+| undo (52) | 96.2% | connect 1, set 1 |
+| delete (47) | 91.5% | disconnect 2, redo 1, undo 1 |
+| property (43) | 62.8% | extreme 6, neighbors 4, degree 4, describe 1, list 1 |
+| distribute (40) | 92.5% | move 1, arrange 1, connect 1 |
+| rule (39) | 97.4% | set 1 |
+| toFront (37) | 54.1% | move 14, set 2, toBack 1 |
+| swap (35) | 100.0% |  |
+| align (35) | 91.4% | set 1, forget 1, connect 1 |
+| disconnect (35) | 85.7% | delete 3, move 1, create 1 |
+| cycle (34) | 32.4% | path 17, exists 3, check 1, toFront 1, connected 1 |
+| forget (34) | 100.0% |  |
+| toBack (32) | 81.2% | move 6 |
+| reachable (28) | 71.4% | path 4, extreme 2, describe 1, list 1 |
+| redo (20) | 95.0% | arrange 1 |
+
+## Pairs confused most (both directions)
+| pair | confusions |
+|---|---|
+| extreme / nearest | 74 |
+| check / connected | 30 |
+| move / set | 23 |
+| resize / set | 22 |
+| count / degree | 21 |
+| cycle / path | 17 |
+| arrange / connect | 16 |
+| arrange / move | 15 |
+| move / toFront | 15 |
+| fact / set | 15 |
+| list / neighbors | 14 |
+| check / path | 14 |
+| connect / set | 13 |
+| connect / move | 10 |
+| connect / create | 10 |
+| fact / move | 10 |
+| degree / extreme | 10 |
+| move / toBack | 9 |
+| extreme / property | 8 |
+| neighbors / property | 6 |
+| check / extreme | 6 |
+| degree / property | 6 |
+| exists / path | 6 |
+| connect / fact | 5 |
+| check / nearest | 5 |
+| label / set | 5 |
+| path / reachable | 5 |
+| delete / disconnect | 5 |
+| list / property | 4 |
+| move / resize | 3 |
+
+worlds_micro/GROUPS_6.json: 6 groups; confusions inside one group 242 of 516 (46.9%), across groups 274
+
+worlds_micro/GROUPS_16.json: 16 groups; confusions inside one group 103 of 516 (20.0%), across groups 413
