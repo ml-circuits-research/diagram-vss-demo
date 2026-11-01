@@ -55,7 +55,8 @@ export async function loadComposerAt(root = new URL("../model/", import.meta.url
   if (!comp.loading) comp.loading = (async () => {
     const t0 = performance.now(), json = async (u) => JSON.parse(new TextDecoder().decode(await fetchSize(new URL(u, root), comp)));
     const registry = await json("micro/registry.json"), cutter = await json(registry.cutter);
-    comp.c = await loadComposer(registry, cutter, (name) => modelAt(new URL(name.replace(/\/?$/, "/"), root).href));
+    const context = registry.router === "cutter" ? await json(registry.context || "context/weights.json") : undefined;   // CandidateRouter needs the context filler
+    comp.c = await loadComposer(registry, cutter, (name) => modelAt(new URL(name.replace(/\/?$/, "/"), root).href), { context });
     comp.loadMs = performance.now() - t0; return comp.c;
   })();
   return comp.loading;
