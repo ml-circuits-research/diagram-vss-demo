@@ -1,0 +1,69 @@
+{
+ "_about": "GROUPS_16: the current micro-worlds: the 15 of docs/model/micro/registry.json (in registry order) + check (docs/model/micro/check, trained, not registered). Events of no world (swap) -> the cutter's fallback label. train_cutter.py --worlds worlds_micro/GROUPS_16.json",
+ "create": [
+  "create"
+ ],
+ "move": [
+  "move"
+ ],
+ "graph": [
+  "path",
+  "reachable",
+  "connected"
+ ],
+ "facts": [
+  "fact",
+  "rule"
+ ],
+ "resize": [
+  "resize"
+ ],
+ "filters": [
+  "count",
+  "exists",
+  "list"
+ ],
+ "superlatives": [
+  "extreme",
+  "nearest"
+ ],
+ "history": [
+  "undo",
+  "redo",
+  "forget",
+  "cycle"
+ ],
+ "describe": [
+  "describe",
+  "property",
+  "neighbors",
+  "degree"
+ ],
+ "naming": [
+  "rename",
+  "label"
+ ],
+ "targets": [
+  "delete",
+  "duplicate",
+  "toFront",
+  "toBack"
+ ],
+ "layout": [
+  "arrange",
+  "align",
+  "distribute"
+ ],
+ "set": [
+  "set"
+ ],
+ "connect": [
+  "connect"
+ ],
+ "disconnect": [
+  "disconnect"
+ ],
+ "check": [
+  "check"
+ ]
+}

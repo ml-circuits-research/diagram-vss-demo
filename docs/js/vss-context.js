@@ -205,7 +205,8 @@ export class Context {
     return { scores, best, margin, pick: best, decision: "fill" };
   }
 
-  /** one produced request: raw = rawNodes(...) of its unit; span [c0, c1] of the unit in the message; opts.oracle(gap, cands) -> index.
+  /** one produced request: raw = rawNodes(...) of its unit; span [c0, c1] of the unit in the message; opts.oracle(gap, cands) -> index;
+   *  opts.dry: try the request without entering it into the context (chooseReading).
    *  -> {main (resolved, ids of raw nodes), gaps: [{key, kind, cands, ...decision}], asked} */
   step(raw, c0, c1, opts = {}) {
     if (!raw || !raw.main) return null;
@@ -263,7 +264,7 @@ export class Context {
       if (g.index != null && Array.isArray(a[g.key])) { a[g.key].splice(g.index, 1); if (a[g.key].length === 1) a[g.key] = a[g.key][0]; } else delete a[g.key];
     }
     const asked = gaps.some((g) => g.decision === "ask");
-    this.update(main, act);
+    if (!opts.dry) this.update(main, act);
     return { main, gaps, asked };
   }
 
@@ -291,4 +292,18 @@ export class Context {
     if (a.action === "set" || a.action === "fact") { const ks = this.keysOf(a.target); if (ks) for (const x of ks) for (const k of ["shape", "color", "size"]) if (a[k] != null) this.ents.get(x).attrs[k] = a[k]; }
     this.prevMain = mainKey; this.hist.push({ act, keys: keysHere });
   }
+}
+
+// ---------------------------------------------------------------- a tie of readings (the composer with router "cutter", ROUTER_V2.md)
+/** Several VSS readings of one unit that leave the same fewest words not understood (vss-composer.js, router "cutter"): the VSS layer
+ *  does not ask; this layer decides from the message context. Each reading (raw = rawNodes(...)) is tried on the context without changing
+ *  it (step, dry). A reading FITS when the context completes it (no gap left to ask). One reading fits -> it wins ("context"). Several
+ *  fit, or none -> the first of them in the given order wins ("order": the caller's order is the cutter's rank; as with margin 0 for the
+ *  gaps, the first-ranked is taken rather than asking; when none fits, the step that follows asks about its gap).
+ *  -> {index, by: "context" | "order", fits: [bool]} */
+export function chooseReading(ctx, raws, c0, c1) {
+  const fits = raws.map((raw) => { const st = ctx.step(raw, c0, c1, { dry: true }); return !!st && !st.asked; });
+  const ok = fits.map((f, i) => (f ? i : -1)).filter((i) => i >= 0);
+  if (ok.length === 1) return { index: ok[0], by: "context", fits };
+  return { index: ok.length ? ok[0] : 0, by: "order", fits };
 }

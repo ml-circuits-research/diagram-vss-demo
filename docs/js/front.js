@@ -114,6 +114,66 @@ export function segDecode(toks, W) {
   }
   return labels;
 }
+/** segDecode with any label set (the cutter with worlds: B-<world> I O; ties go to the first label, as in segDecode) -> {labels, scores}
+ *  (scores[i] = {label: score} at token i). Twin of front.py seg_decode_labels. */
+export function segDecodeLabels(toks, W, LB) {
+  const labels = [], scores = []; let prev = "<s>";
+  for (let i = 0; i < toks.length; i++) {
+    const fs = segFeats(toks, i, prev), sc = {}; let best = null, bl = null;
+    for (const L of LB) { let s = 0; for (const f of fs) s += W[f + "\t" + L] || 0; sc[L] = s; if (best === null || s > best) { best = s; bl = L; } }
+    labels.push(bl); scores.push(sc); prev = bl;
+  }
+  return { labels, scores };
+}
+/** the units of the cutter with worlds (C = cutter_worlds.json {labels, worlds, segmenter}, training/sketch/train_cutter.py --worlds) as
+ *  character ranges, each with the worlds ranked by the score of their B-<world> label at the unit's first token (equal scores: label
+ *  order): -> [{c0, c1, worlds: [{world, score}, ...]}]. A unit starts at a B-<world> label (or an I after O, as in segmentSpans). Twin of
+ *  front.py segment_worlds. segmentSpans (the cutter without worlds) is unchanged. */
+export function segmentWorlds(text, names, C) {
+  const [toks] = tokenize(text, names), { labels, scores } = segDecodeLabels(toks.map((x) => x[0]), C.segmenter, C.labels), out = []; let cur = null;
+  toks.forEach(([, s, e], k) => {
+    const L = labels[k];
+    if (L.startsWith("B") || (L === "I" && cur === null)) {
+      const ws = C.worlds.map((w, i) => ({ world: w, score: scores[k]["B-" + w], i })).sort((a, b) => (b.score - a.score) || (a.i - b.i)).map(({ world, score }) => ({ world, score }));
+      cur = { c0: s, c1: e, worlds: ws }; out.push(cur);
+    } else if (L === "I") cur.c1 = e;
+    else cur = null;
+  });
+  return out;
+}
+/** normalize() step by step, with the surface tokens each normalized token stands for (the replay of training/sketch/
+ *  words_not_understood.mjs trace): -> {tokens, info, surface (tokenize output), surf (per token: indices into surface)}. The tokens are
+ *  those of normalize(); a trigger token stands for its phrase (a pattern rule "ins": the phrase without its names, which stay tokens). */
+export function normalizeTrace(text, names, F) {
+  const [tk, info] = tokenize(text, names);
+  let toks = tk.map((x, i) => ({ t: x[0], surf: [i] })), out = [], i = 0;
+  while (i < toks.length) {
+    let hit = false;
+    for (const n of [3, 2, 1]) {
+      const g = toks.slice(i, i + n), ts = g.map((x) => x.t);
+      if (g.length === n && ts.every(isWord) && Object.hasOwn(F.values, ts.join(" "))) { out.push({ t: F.values[ts.join(" ")], surf: g.flatMap((x) => x.surf) }); i += n; hit = true; break; }
+    }
+    if (!hit) out.push(toks[i++]);
+  }
+  toks = out;
+  const tp = pform(toks.map((x) => x.t));
+  outer: for (const e of F.triggers) {
+    const ph = e.p.split(" ");
+    for (let k = 0; k + ph.length <= toks.length; k++) {
+      if (!ph.every((x, q) => tp[k + q] === x)) continue;
+      const p = ctx(k > 0 ? toks[k - 1].t : null), n = ctx(k + ph.length < toks.length ? toks[k + ph.length].t : null), p2 = ctx(k > 1 ? toks[k - 2].t : null);
+      if ((e.prev === "*" || e.prev === p) && (e.next === "*" || e.next === n) && (e.prev2 === undefined || e.prev2 === "*" || e.prev2 === p2)) {
+        const phr = toks.slice(k, k + ph.length);
+        if (e.ins) toks = toks.slice(0, k).concat([{ t: e.tok, surf: phr.filter((x) => !x.t.startsWith("n_")).flatMap((x) => x.surf) }], toks.slice(k));
+        else toks = toks.slice(0, k).concat([{ t: e.tok, surf: phr.flatMap((x) => x.surf) }], (e.keep || []).map((t) => ({ t, surf: [] })), toks.slice(k + ph.length));
+        break outer;
+      }
+    }
+  }
+  const tokens = toks.map((x) => x.t);
+  info.numbers = Object.fromEntries(tokens.filter((x) => /^\d+$/.test(x)).map((x) => [x, +x]));
+  return { tokens, info, surface: tk, surf: toks.map((x) => x.surf) };
+}
 export function segment(text, names, F) { return segmentSpans(text, names, F).map(([s, e]) => text.slice(s, e)); }
 /** the same units as character ranges [start, end) of `text` (the composer, vss-composer.js, needs the offsets) */
 export function segmentSpans(text, names, F) {

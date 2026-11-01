@@ -7,6 +7,8 @@
 # Settings (environment; the defaults are the fallback kinds_p80_s0's build switches, on all the data of msg_to_world.py):
 #   DATA=all FRAC=1.0 QCOLOR=1 MARKER=0 KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0
 #   ROW_SHAPE=single|lists|chain (connect only: rows of one construction, msg_to_world.py shape_is).
+#   FRONT_ROWS=world: the world's front.json (value n-grams and trigger rules) learned only from the world's own rows (msg_to_world.py
+#   FRONT_ROWS; ROUTER_V2.md); unset = learned from all messages, as before. Recorded in BUILD.json.
 #   KINDMAP= (empty) -> the own-kind rule "seen >= --freq times". SOP_PYTHON: the Python with torch (sop train).
 # Then register it: add {"world": "<world>", "events": [<events>], "model": "micro/<world>"} to docs/model/micro/registry.json "worlds".
 set -euo pipefail
@@ -16,7 +18,7 @@ WORLD="$1"; EVENTS="$2"
 HERE="$(cd "$(dirname "$0")" && pwd)"; REPO="$(cd "$HERE/../.." && pwd)"; SOP="$REPO/training/vss/tool/bin/sop"
 W="$HERE/worlds_micro/$WORLD"; OUT="$REPO/docs/model/micro/$WORLD"
 cd "$HERE"; export VSA_MIN_AVAILABLE_GB="${VSA_MIN_AVAILABLE_GB:-1.5}"
-export DATA="${DATA:-all}" QCOLOR="${QCOLOR:-1}" MARKER="${MARKER:-0}" CAL_FALLBACK="${CAL_FALLBACK:-train}" WORLD_EVENTS="$EVENTS"
+export DATA="${DATA:-all}" QCOLOR="${QCOLOR:-1}" MARKER="${MARKER:-0}" CAL_FALLBACK="${CAL_FALLBACK:-train}" WORLD_EVENTS="$EVENTS" FRONT_ROWS="${FRONT_ROWS:-}"
 KINDMAP="${KINDMAP-diagnosis_kinds/kinds_comb1.json}"; if [ -n "$KINDMAP" ]; then export KINDMAP; else unset KINDMAP; fi
 FRAC="${FRAC:-1.0}"; D="${D:-1024}"; EPOCHS="${EPOCHS:-10}"; SEED="${SEED:-0}"
 python3 msg_to_world.py --frac "$FRAC" --out "$W" | sed -n 1,7p
@@ -29,7 +31,7 @@ rm -rf "$OUT"
 cp "$W/front.json" "$OUT/front.json"
 cat > "$OUT/BUILD.json" <<JSON
 {"world": "$WORLD", "events": "$EVENTS", "command": "training/sketch/train_micro.sh $WORLD $EVENTS", "DATA": "$DATA", "FRAC": "$FRAC", "QCOLOR": "$QCOLOR",
- "MARKER": "$MARKER", "ROW_SHAPE": "${ROW_SHAPE:-}", "KINDMAP": "${KINDMAP:-}", "CAL_FALLBACK": "$CAL_FALLBACK", "D": $D, "EPOCHS": $EPOCHS, "SEED": $SEED, "rows": $(grep -c . "$W/raw/sentences.txt"),
+ "MARKER": "$MARKER", "ROW_SHAPE": "${ROW_SHAPE:-}", "FRONT_ROWS": "$FRONT_ROWS", "KINDMAP": "${KINDMAP:-}", "CAL_FALLBACK": "$CAL_FALLBACK", "D": $D, "EPOCHS": $EPOCHS, "SEED": $SEED, "rows": $(grep -c . "$W/raw/sentences.txt"),
  "run_log": "training/sketch/runs/$RUN.log"}
 JSON
 echo "world $WORLD [$EVENTS] -> docs/model/micro/$WORLD ($(grep -c . "$W/raw/sentences.txt") rows); registry line:"

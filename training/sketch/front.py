@@ -209,6 +209,34 @@ def seg_decode(toks, W):
     return labels
 
 
+def seg_decode_labels(toks, W, labels):
+    """seg_decode with any label set (the cutter with worlds, train_cutter.py --worlds: B-<world> I O); ties go to the first label of
+    `labels`, as in seg_decode. -> (labels, per position {label: score}). The JS twin is front.js segDecodeLabels."""
+    out, scores, prev = [], [], "<s>"
+    for i in range(len(toks)):
+        fs = seg_feats(toks, i, prev); sc = {}; best, bl = None, None
+        for L in labels:
+            s = sum(W.get(f + "\t" + L, 0) for f in fs); sc[L] = s
+            if best is None or s > best: best, bl = s, L
+        out.append(bl); scores.append(sc); prev = bl
+    return out, scores
+
+
+def segment_worlds(text, names, C):
+    """the units of the cutter with worlds (C = cutter_worlds.json: {labels, worlds, segmenter}) with, per unit, the worlds ranked by the
+    score of their B-<world> label at the unit's first token: -> [(start, end, [(world, score), ...])]. A unit starts at a B-<world>
+    label (or at an I after O, as in segment). The JS twin is front.js segmentWorlds."""
+    toks, _ = tokenize(text, names)
+    labels, scores = seg_decode_labels([x[0] for x in toks], C["segmenter"], C["labels"]); spans, cur = [], None
+    for k, ((t, s, e), L) in enumerate(zip(toks, labels)):
+        if L.startswith("B") or (L == "I" and cur is None):
+            ws = sorted(((w, scores[k]["B-" + w]) for w in C["worlds"]), key=lambda x: -x[1])   # stable: label order on equal scores
+            cur = [s, e, ws]; spans.append(cur)
+        elif L == "I": cur[1] = e
+        else: cur = None
+    return [tuple(x) for x in spans]
+
+
 def segment(text, names, F):
     """-> the request spans of a message, as substrings of the text"""
     toks, _ = tokenize(text, names)
@@ -220,18 +248,20 @@ def segment(text, names, F):
     return [text[s:e] for s, e in spans]
 
 
-def train_segmenter(msgs, epochs):
+def train_segmenter(msgs, epochs, labels_set=LABELS, b_label=None):
+    """the BIO tagger. b_label (default None: the label is "B", exactly the original cutter): a function wire -> the B label of its span
+    (train_cutter.py --worlds: "B-<world>"), with labels_set the full label set in decode order (ties go to the first)."""
     data = []
     for m in msgs:
         toks, _ = tokenize(m["text"], m.get("names") or []); spans = []
         for w in m["wires"]:
             i = m["text"].find(w.get("span") or "\0")
-            if i >= 0: spans.append((i, i + len(w["span"])))
+            if i >= 0: spans.append((i, i + len(w["span"]), "B" if b_label is None else b_label(w)))
         labels = ["O"] * len(toks)
         # B = the first token inside its span
         for k, (t, s, e) in enumerate(toks):
             sp = next((x for x in spans if x[0] <= s and e <= x[1]), None)
-            if sp is not None: labels[k] = "B" if not any(sp[0] <= s2 and e2 <= sp[1] for _, s2, e2 in toks[:k]) else "I"
+            if sp is not None: labels[k] = sp[2] if not any(sp[0] <= s2 and e2 <= sp[1] for _, s2, e2 in toks[:k]) else "I"
         data.append(([x[0] for x in toks], labels))
     W, tot, last, c = collections.defaultdict(int), collections.defaultdict(int), collections.defaultdict(int), 0
     order = sorted(range(len(data)), key=lambda i: hashlib.sha256(str(i).encode()).hexdigest())
@@ -240,7 +270,7 @@ def train_segmenter(msgs, epochs):
             toks, gold = data[di]; prev = "<s>"
             for i in range(len(toks)):
                 c += 1; fs = seg_feats(toks, i, prev); best, bl = None, None
-                for L in LABELS:
+                for L in labels_set:
                     s = sum(W[f + "\t" + L] for f in fs)
                     if best is None or s > best: best, bl = s, L
                 if bl != gold[i]:
@@ -399,9 +429,14 @@ def learn_triggers(reqs, chatter, V, min_count, share, min_prec, value_tokens):
 DEFAULTS = {"seg_epochs": 5, "val_min_count": 2, "val_min_prec": 0.7, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}
 
 
-def learn(msgs, params=None):
+def learn(msgs, params=None, keep=None):
+    """keep (default None: every request and the text outside the spans, exactly as before): a function wire -> bool. With it the value
+    n-grams and the trigger rules are learned ONLY from the requests it keeps (a micro-world's own rows, msg_to_world.py FRONT_ROWS=world):
+    the text outside the spans and the requests of other events are not read, so a rule's precision is counted inside those rows only.
+    The names of every wire of the message still count as names (the tokenization of the rows is the same either way)."""
     P = dict(DEFAULTS, **(params or {}))
     reqs, chatter = requests(msgs)
+    if keep is not None: reqs, chatter = [r for r in reqs if keep(r[1])], []
     V = learn_values(reqs, P["val_min_count"], P["val_min_prec"])
     vt = set(value_kinds())
     T = learn_triggers(reqs, chatter, V, P["trig_min_count"], P["trig_share"], P["trig_min_prec"], vt)

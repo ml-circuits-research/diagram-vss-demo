@@ -9,6 +9,14 @@
 //   CUTTER=<file> (default the registry's "cutter"). Reported in addition: units per world, asked, ignored.
 // CUTTER=<file> with SEG=tagger: the units come from that file's `segmenter` (e.g. docs/model/micro/cutter.json) instead of the
 //   model's front.json (whose segmenter is empty unless FRONT_TAGGER=1 built it).
+// ROUTER=cutter with SEG=composer (ROUTER_V2.md; also when the registry says "router": "cutter"): the composer with the cutter's worlds as
+//   candidates, the fewest words not understood, ties and gaps to the context filler (vss-composer.js). The cutter is CUTTER, else the
+//   registry's "cutter" when the registry says "router": "cutter", else docs/model/micro/cutter_worlds.json; the filler's model is
+//   CONTEXT=<file>, else the registry's "context" (relative to docs/model/), else docs/model/context/weights.json. Requests the filler asks
+//   about are not executed (they count as not done); the extra "composer v2" line reports them.
+// PAIR=value: produced and gold actions are paired by layer_common.mjs pairValue (per action label, a maximum-weight matching: most pairs,
+//   then most gold keys right, then most letters shared by the unit and the gold span; the unit is node.span when the composer gives it,
+//   else the first occurrence of node.src in the text) instead of the order-only LCS. Default (unset or PAIR=order): the LCS, as before.
 // node llm_score.mjs <dir> [<dir> ...] [--dump out.json] [-v]
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -28,7 +36,11 @@ const MODELS = new URL("../../docs/model/", import.meta.url), COMPOSER = process
 const REG = COMPOSER ? JSON.parse(readFileSync(process.env.REGISTRY || new URL("micro/registry.json", MODELS), "utf8")) : null;
 const MODEL = COMPOSER ? process.env.MODEL || REG.fallback : process.env.MODEL || "sketch";   // SEG=composer: MODEL names the fallback
 const dir = new URL(`${MODEL}/`, MODELS);
-const CUT = process.env.CUTTER || (COMPOSER && REG.cutter ? new URL(REG.cutter, MODELS) : null), CUTF = CUT ? JSON.parse(readFileSync(CUT, "utf8")) : null;
+const ROUTER = COMPOSER ? process.env.ROUTER || REG.router || "token" : null, V2 = ROUTER === "cutter";
+const CUT = process.env.CUTTER || (V2 ? new URL(REG.router === "cutter" ? REG.cutter : "micro/cutter_worlds.json", MODELS) : COMPOSER && REG.cutter ? new URL(REG.cutter, MODELS) : null), CUTF = CUT ? JSON.parse(readFileSync(CUT, "utf8")) : null;
+const CTXF = V2 ? process.env.CONTEXT || new URL(REG.context || "context/weights.json", MODELS) : null, CTXM = CTXF ? JSON.parse(readFileSync(CTXF, "utf8")) : null;
+if (process.env.PAIR && !["value", "order"].includes(process.env.PAIR)) throw new Error(`PAIR=${process.env.PAIR}: expected value or order`);
+const PAIRV = process.env.PAIR === "value" ? (await import("./layer_common.mjs")).pairValue : null;
 const readFile = async (n) => { const b = readFileSync(new URL(n, dir)); return n.endsWith(".json") ? b.toString("utf8") : b.buffer.slice(b.byteOffset, b.byteOffset + b.length); };
 // EXCL=1 / Q1B=1 (DECODE.md): the decode data learned from the training frames, decode.json in the model folder (tool/sop/decode_stats.py)
 const DEC = process.env.EXCL === "1" || process.env.Q1B === "1" ? JSON.parse(readFileSync(new URL("decode.json", dir), "utf8")) : null;
@@ -47,6 +59,7 @@ function scorerUpdate(c, main) {
   }
 }
 let comp = null; const CSTAT = { units: 0, byWorld: {}, ask: 0, ignored: 0, ignoredNoToken: 0, multi: 0 };
+const V2STAT = { decided: {}, ignoredWhy: {}, tieSize: {} };
 if (COMPOSER) {
   const cache = new Map([[MODEL, { vss, F }]]);
   const loadModel = async (name) => {
@@ -55,8 +68,9 @@ if (COMPOSER) {
     const m = { vss: await load(null, { readFile: rf, sentenceCandidates: true }), F: existsSync(new URL("front.json", d)) ? JSON.parse(await rf("front.json")) : null };
     cache.set(name, m); return m;
   };
-  comp = await loadComposer(REG, CUTF, loadModel, { fallback: MODEL });
+  comp = await loadComposer(REG, CUTF, loadModel, V2 ? { fallback: MODEL, router: "cutter", context: CTXM } : { fallback: MODEL });
   console.log(`composer: cutter ${CUT ? CUT.toString().replace(/^file:\/\//, "") : "-"} · fallback ${MODEL} · worlds ${comp.worlds.map((w) => `${w.id} [${[...w.events]}]`).join(", ") || "none"}`);
+  if (V2) console.log(`composer v2: router cutter (top ${comp.k} of ${CUTF.worlds.length} cutter worlds) · fewest words not understood · ties and gaps: context filler ${CTXF.toString().replace(/^file:\/\//, "")} margin ${CTXM.margin}`);
 }
 function composerFormalize(text, ctx) {
   const out = comp.formalize(text, { names: ctx.names, last: [] }, { update: scorerUpdate });
@@ -65,6 +79,8 @@ function composerFormalize(text, ctx) {
     if (u.zone === "read") CSTAT.byWorld[u.world] = (CSTAT.byWorld[u.world] || 0) + 1;
     else if (u.zone === "ask") CSTAT.ask++;
     else { CSTAT.ignored++; if (u.reason === "no action token") CSTAT.ignoredNoToken++; }
+    if (V2) { const inc = (o, k) => { o[k] = (o[k] || 0) + 1; };
+      if (u.zone === "ignored") inc(V2STAT.ignoredWhy, u.reason); else { inc(V2STAT.decided, u.decidedBy); inc(V2STAT.tieSize, u.tie); } }
   }
   return out.nodes;
 }
@@ -122,10 +138,21 @@ function align(pred, gold) {          // LCS on act labels
   while (i < n && j < m) { if (pred[i].act === gold[j].act) { pairs.push([i, j]); i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) i++; else j++; }
   return pairs;
 }
+// PAIR=value (see the head of the file): pairValue of layer_common.mjs on this message's produced actions; default: align (LCS)
+function pairUp(mains, gold, row) {
+  if (!PAIRV) return align(mains, gold);
+  const used = new Set(), G = row.wires.map((w, j) => {
+    let s0 = -1;
+    if (w.span) { let from = 0; for (;;) { const k = row.text.indexOf(w.span, from); if (k < 0) break; if (!used.has(k)) { s0 = k; break; } from = k + 1; } if (s0 < 0) s0 = row.text.indexOf(w.span); used.add(s0); }
+    return { s: s0, e: s0 < 0 ? -1 : s0 + w.span.length, act: gold[j].act, want: gold[j].want, args: w.args };
+  });
+  const units = mains.map((m) => { if (m.n.span) return { c0: m.n.span[0], c1: m.n.span[1] }; const k = m.n.src ? row.text.indexOf(m.n.src) : -1; return k < 0 ? { c0: 0, c1: 0 } : { c0: k, c1: k + m.n.src.length }; });
+  return PAIRV({ text: row.text, gold: G, units, prods: mains.map((m, i) => ({ act: m.act, u: i, rawC: m.got })) });
+}
 function scoreMessage(nodes, row) {
   const mains = nodes.filter((n) => n.type !== "mention").map((n) => ({ act: actOf(n.type, n.args), got: canon(n, nodes), n }));
   const gold = row.wires.map((w) => ({ act: actOf(w.type, w.args), want: canonWant(w.type, w.args) }));
-  const pairs = align(mains, gold); let right = 0; const bad = [];
+  const pairs = pairUp(mains, gold, row); let right = 0; const bad = [];
   for (const [i, j] of pairs) {
     const miss = Object.entries(gold[j].want).filter(([k, v]) => (mains[i].got[k] ?? "∅") !== v).map(([k, v]) => `${k}:${mains[i].got[k] ?? "∅"}≠${v}`);
     if (!miss.length) right++; else bad.push(`${gold[j].act} ${miss.join(" ")}`);
@@ -151,9 +178,9 @@ for (const d of dirs) {
       const s = scoreMessage(out[f], r), T = tot[f];
       T.exact += s.exact; T.right += s.right; T.wrongAligned += s.wrongAligned; T.missed += s.missed; T.acts += s.acts; T.extra += s.extra; T.gold += s.gold; T[outcome(s)]++; rec[f] = s.bad;
       // per gold act: right?
-      const mains = out[f].filter((n) => n.type !== "mention").map((n) => ({ act: actOf(n.type, n.args), got: canon(n, out[f]) }));
+      const mains = out[f].filter((n) => n.type !== "mention").map((n) => ({ act: actOf(n.type, n.args), got: canon(n, out[f]), n }));
       const gold = r.wires.map((w) => ({ act: actOf(w.type, w.args), want: canonWant(w.type, w.args) }));
-      const pairs = align(mains, gold), ok = new Set(pairs.filter(([i, j]) => Object.entries(gold[j].want).every(([k, v]) => (mains[i].got[k] ?? "∅") === v)).map((p) => p[1]));
+      const pairs = pairUp(mains, gold, r), ok = new Set(pairs.filter(([i, j]) => Object.entries(gold[j].want).every(([k, v]) => (mains[i].got[k] ?? "∅") === v)).map((p) => p[1]));
       gold.forEach((g, j) => { const b = T.byAct[g.act] = T.byAct[g.act] || [0, 0]; b[1]++; if (ok.has(j)) b[0]++; });
     }
     dump.push(rec);
@@ -171,4 +198,6 @@ if (process.env.SEG === "centres-model") console.log(`\ncentres-model: ignored t
 if (dirs.length > 1) { const n = ALL.n, pc = (x, T) => (x / T.gold * 100).toFixed(1) + "%", line = (f) => { const T = ALL[f]; return `${f.padEnd(5)} correct ${pc(T.right, T)} · not done ${pc(T.missed, T)} · done wrong ${pc(T.wrongAligned, T)} · plus ${T.extra} extra wires not asked for (${pc(T.extra, T)} of the gold count) · messages fully right ${(T.exact / n * 100).toFixed(1)}%`; };
   console.log(`\nALL (${dirs.join(" + ")}): ${n} messages, ${ALL.rules.gold} gold wires`); console.log("  " + line("rules")); console.log("  " + line("vss"));
   console.log("  " + msgLine("rules", ALL.rules, n)); console.log("  " + msgLine("vss", ALL.vss, n)); }
+if (V2) console.log(`\ncomposer v2: units read, decided by: ${Object.entries(V2STAT.decided).map(([k, n]) => `${k} ${n}`).join(", ")} · readings tied at the fewest words not understood: ${Object.entries(V2STAT.tieSize).sort((a, b) => a[0] - b[0]).map(([k, n]) => `${k}: ${n}`).join(", ")} · asked by the context filler (not executed) ${CSTAT.ask} · ignored: ${Object.entries(V2STAT.ignoredWhy).map(([k, n]) => `${k} ${n}`).join(", ") || "none"}`);
+if (PAIRV) console.log(`pairing: PAIR=value (layer_common.mjs pairValue)`);
 if (COMPOSER) console.log(`\ncomposer units: ${CSTAT.units} (read by several candidate worlds: ${CSTAT.multi}) · read per world: ${Object.entries(CSTAT.byWorld).map(([w, k]) => `${w} ${k}`).join(", ") || "none"} · asked ${CSTAT.ask} · ignored ${CSTAT.ignored} (no action token ${CSTAT.ignoredNoToken})`);

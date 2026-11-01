@@ -24,6 +24,11 @@ another event's token can become this world's predicate). The kinds (lexicon) an
 (an event token of another event keeps the kind VERB but is no predicate of this world). Needs --out (never worlds/real); REAL_WORLD.md
 is written into the output folder, llm_train/REAL_WORLD.md is not touched; the world's name is the output folder's name (sop train
 reads it from the folder). Not combined with CENTRES or FAMILY.
+FRONT_ROWS=world (off by default; needs WORLD_EVENTS; owner's decision 2026-11-01, ROUTER_V2.md): the world's front end (value n-grams
+AND trigger rules) is learned ONLY from the world's own rows: the spans of the requests of its events (and of its ROW_SHAPE), with no text
+outside the spans and no request of another event (front.learn keep=...), so a trigger rule's precision is counted inside the world.
+The names of every wire still count as names; the kinds (lexicon) do not change. front.json gets a field "front_rows". Default (unset or
+FRONT_ROWS=all): the front end learned from all messages, exactly as before.
 Run: python3 msg_to_world.py [--frac 0.8] [--freq 8]"""
 import argparse, collections, datetime, json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -53,7 +58,18 @@ def main():
     a = ap.parse_args()
     msgs = [m for m in FR.load_msgs() if a.frac >= 1 or FR.split_of(m, a.frac)]
     P = json.load(open(os.path.join(HERE, "front_params.json")))
-    F = FR.learn(msgs, P)
+    FRONT_ROWS = os.environ.get("FRONT_ROWS", "") or "all"     # FRONT_ROWS=world (see the docstring); default all: exactly as before
+    if FRONT_ROWS not in ("all", "world"): raise SystemExit(f"FRONT_ROWS={FRONT_ROWS!r}: expected all or world")
+    if FRONT_ROWS == "all": F = FR.learn(msgs, P)
+    else:
+        from llm_to_world import QUESTION_EVENT
+        wev = {e for e in os.environ.get("WORLD_EVENTS", "").split(",") if e}; shp = os.environ.get("ROW_SHAPE", "")
+        if not wev: raise SystemExit("FRONT_ROWS=world needs WORLD_EVENTS")
+        ev_of = lambda w: w["args"].get("action") if w["type"] == "command" else QUESTION_EVENT.get(w["args"].get("ask")) if w["type"] == "question" else w["type"]
+        keep = lambda w: ev_of(w) in wev and (not shp or shape_is(shp, w["args"]))
+        F = FR.learn(msgs, P, keep=keep)
+        F["front_rows"] = {"rows": "world", "events": sorted(wev), "row_shape": shp, "requests": len([r for r in FR.requests(msgs)[0] if keep(r[1])])}
+        F["about"] = F["about"] + f"; FRONT_ROWS=world: values and triggers from the {F['front_rows']['requests']} requests of {','.join(sorted(wev))} only"
     norm = lambda text, names: FR.normalize(text, names, F)
     vk = FR.value_kinds(); evtok = {v for vs in G.EVENTS.values() for v in vs}
     base = dict(vk); base.update({v: "VERB" for v in evtok})
@@ -182,6 +198,7 @@ def main():
     kc = collections.Counter(kinds.values())
     rep = [f"# World `real`: built from {len(msgs)} training messages ({len(items)} requests with a span)", "",
            *([f"WORLD_EVENTS={','.join(sorted(WEV))}: only the rows of these events; the legend lists only these events.", ""] if WEV else []),
+           *([f"FRONT_ROWS=world: the front end below is learned only from the {F['front_rows']['requests']} requests of this world's events.", ""] if "front_rows" in F else []),
            f"Front end learned from the same messages: {len(F['values'])} value n-grams, {len(F['triggers'])} trigger rules, {len(F['segmenter'])} segmenter weights; params {json.dumps(P)}.", "",
            f"Rows: {len(rows)}. Dropped (cannot be trained): {sum(dropped.values())} {dict(dropped)}. Negative examples (text outside the spans with an action token): {n_neg}.", "",
            *([f"Centre reader (CENTRES=1): {len(msg_items)} messages in examples/messages.jsonl; {dict(n_cent)}.", ""] if CENTRES else []),

@@ -1,0 +1,50 @@
+{
+ "_about": "GROUPS_6 (owner, 2026-11-01): worlds regrouped by shared roles. Every legend event has a world (no fallback label). The owner's list names 'rules' under questions: a question ask=rules is the legend event list, already in questions. train_cutter.py --worlds worlds_micro/GROUPS_6.json",
+ "shapes": [
+  "create",
+  "set",
+  "resize",
+  "check",
+  "fact",
+  "rule"
+ ],
+ "links": [
+  "connect",
+  "disconnect",
+  "path",
+  "reachable",
+  "connected"
+ ],
+ "position": [
+  "move",
+  "swap",
+  "arrange",
+  "align",
+  "distribute"
+ ],
+ "manage": [
+  "delete",
+  "duplicate",
+  "rename",
+  "label",
+  "toFront",
+  "toBack"
+ ],
+ "questions": [
+  "count",
+  "exists",
+  "list",
+  "extreme",
+  "nearest",
+  "describe",
+  "neighbors",
+  "degree",
+  "property",
+  "cycle"
+ ],
+ "history": [
+  "undo",
+  "redo",
+  "forget"
+ ]
+}

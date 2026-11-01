@@ -23,11 +23,30 @@
 // Readable candidates equal on (a)-(d) whose events differ -> the unit is marked "ask" (both readings are shown, none is executed).
 // Units that are not read (no candidate reads them: no action token and no reading, or every reading unreadable) are "ignored" zones,
 // reported as the formalizer does today. No number in this file is tuned.
+//
+// ROUTER "cutter" (owner's decision 2026-11-01, training/sketch/ROUTER_V2.md; registry field "router": "cutter" or loadComposer opts.router;
+// the default "token" above is unchanged):
+//   1. the CUTTER WITH WORLDS (train_cutter.py --worlds: B-<world> labels; front.js segmentWorlds) cuts the message and ranks the worlds
+//      of each unit by their B-<world> score at the unit's first token; no phrase -> action table runs before the router;
+//   2. the candidates of a unit are the cutter's top ROUTER_K worlds (ROUTER_K = 3: the smallest k whose recall of the gold world is at
+//      least 97% in cutter_worlds_probe.py, 97.9%); "fallback" (the events no world holds) stands for the fallback model, and a fallback
+//      reading whose event a registered world holds is not counted (the fallback is a candidate only for the events no world holds);
+//   3. each candidate reads the unit with ITS OWN front end; the reading that leaves the FEWEST WORDS NOT UNDERSTOOD wins (the count of
+//      training/sketch/words_not_understood.mjs: the unit's surface words, punctuation excluded, that are not behind a role filler word, an
+//      accepted offer or the action token of the reading; an unreadable status understands no word); a reading that understands no word is
+//      not a reading (with no other, the unit is ignored: not understood);
+//   4. a tie goes to the post-VSS layer (vss-context.js chooseReading: the reading the message context can complete; else the cutter's
+//      order); the VSS layer never asks;
+//   5. the post-VSS context filler (vss-context.js Context with docs/model/context/weights.json) fills the reference gaps of the chosen
+//      reading; a request with a gap it cannot fill is asked (zone "ask"), not executed.
 import * as FRONT from "./front.js";
 import { fillerWords } from "./vss/reader.js";
 import { readingFromWires, toNodes } from "./vss-adapter.js";
+import { Context, rawNodes, chooseReading } from "./vss-context.js";
 
 const UNREADABLE = new Set(["unknown-event", "no-sense"]);
+export const ROUTER_K = 3;                       // router "cutter": candidates per unit (see the head of the file)
+const PUNCT = new Set([".", ",", "!", "?", ";", ":"]);
 
 /** one world: {id, events (Set | null for the fallback), vss, F, verbEvent} */
 export function makeWorld(id, events, vss, F) {
@@ -47,8 +66,8 @@ export function nextContext(c, main) {
 
 export class Composer {
   /** cutter: {segmenter}; fallback: makeWorld(..., null, ...); worlds: makeWorld(...) in registry order */
-  constructor({ cutter, fallback, worlds = [] }) {
-    this.cutter = cutter; this.fallback = fallback; this.worlds = worlds;
+  constructor({ cutter, fallback, worlds = [], router = "token", context = null, k = ROUTER_K }) {
+    this.cutter = cutter; this.fallback = fallback; this.worlds = worlds; this.router = router; this.contextModel = context; this.k = k;
     const fev = new Set(fallback.vss.model.legend.events.map((e) => e.id));
     for (const w of worlds) {
       const lev = new Set(w.vss.model.legend.events.map((e) => e.id));
@@ -58,6 +77,14 @@ export class Composer {
       if (off.length || missing.length) throw new Error(`composer: world ${w.id}: legend events [${[...lev]}] differ from the registry's [${[...w.events]}]`);
     }
     this.covered = new Set(worlds.flatMap((w) => [...w.events]));
+    if (router !== "token" && router !== "cutter") throw new Error(`composer: router ${router}: expected token or cutter`);
+    if (router === "cutter") {
+      if (!cutter || !Array.isArray(cutter.labels) || !Array.isArray(cutter.worlds)) throw new Error("composer: router cutter needs a cutter with worlds (train_cutter.py --worlds)");
+      if (!context) throw new Error("composer: router cutter needs the context filler's model (docs/model/context/weights.json)");
+      const G = cutter.grouping || {}, same = (a, b) => a.size === b.size && [...a].every((x) => b.has(x));
+      for (const w of worlds) if (!cutter.worlds.includes(w.id) || !same(new Set(G[w.id] || []), w.events)) throw new Error(`composer: world ${w.id} [${[...w.events]}] is not a world of the cutter (${cutter.command || "?"}); retrain it with this grouping`);
+      for (const cw of cutter.worlds) if (cw !== "fallback" && !worlds.some((w) => w.id === cw)) throw new Error(`composer: the cutter's world ${cw} is not in the registry`);
+    }
     this.valueTokens = new Set(Object.entries(fallback.vss.model.lexicon || {}).filter(([, e]) => /^[A-Z]+$/.test(e.kind) && e.kind !== "VERB").map(([w]) => w));
   }
 
@@ -115,8 +142,88 @@ export class Composer {
     return Object.assign(out, { zone: "read", world: chosen.world, event: chosen.event, status: chosen.status, chosen });
   }
 
+  // ---------------------------------------------------------------- router "cutter" (see the head of the file)
+  /** one world reads one unit with its own front end; -> the reading with its words not understood (wnu: {words, n, notU}) */
+  readWnu(w, src, names) {
+    const tr = FRONT.normalizeTrace(src, names, w.F), r = w.vss.read(tr.tokens.join(" "));
+    const x = { world: w.id, w, tokens: tr.tokens, info: tr.info, r, status: r.status, event: UNREADABLE.has(r.status) ? null : r.frame.event };
+    const und = new Set();
+    if (x.event) {
+      const U = new Set();
+      for (const fl of Object.values(r.frame.roles || {})) for (const t of fillerWords(fl)) U.add(t);
+      for (const t of Object.values(r.offers || {})) U.add(t);
+      const verb = tr.tokens.find((t) => w.verbEvent.has(t)) || r.frame.lemma || null;
+      tr.tokens.forEach((t, i) => { if (U.has(t) || (verb && t === verb)) for (const k of tr.surf[i]) und.add(k); });
+    }
+    const words = tr.surface.map((s, i) => [s[0], i]).filter(([t]) => !PUNCT.has(t)), notU = words.filter(([, i]) => !und.has(i)).map(([t]) => t);
+    x.wnu = { words: words.length, n: notU.length, notU };
+    // the fallback stands only for the events no registered world holds
+    if (w === this.fallback && x.event && this.covered.has(x.event)) x.held = true;
+    return x;
+  }
+
+  /** route one unit (router "cutter"); ranked: the cutter's worlds of the unit -> {zone "read" | "ignored", options (the tied best
+   *  readings, cutter order), tried, candidates, reason} */
+  routeCutter(src, names, ranked) {
+    const cands = ranked.slice(0, this.k), byId = new Map(this.worlds.map((w) => [w.id, w]));
+    const tried = cands.map((c) => this.readWnu(c.world === "fallback" ? this.fallback : byId.get(c.world), src, names));
+    const usable = tried.filter((x) => x.event && !x.held && x.wnu.n < x.wnu.words);
+    const out = { src, candidates: cands.map((c) => ({ world: c.world, score: c.score })),
+      tried: tried.map((x) => ({ world: x.world, event: x.event, status: x.status, words: x.wnu.words, notUnderstood: x.wnu.n, held: !!x.held })) };
+    if (!usable.length) {
+      const reason = tried.some((x) => x.held) && !tried.some((x) => x.event && !x.held) ? "only the fallback read it, with an event a world holds"
+        : tried.some((x) => x.event) ? "no candidate world understood any word" : "no candidate world could read it (" + [...new Set(tried.map((x) => x.status))].join(", ") + ")";
+      return Object.assign(out, { zone: "ignored", world: null, event: null, status: tried[0] ? tried[0].status : "no-sense", options: [], reason });
+    }
+    const min = Math.min(...usable.map((x) => x.wnu.n)), options = usable.filter((x) => x.wnu.n === min);
+    return Object.assign(out, { zone: "read", options });
+  }
+
+  /** a whole message with router "cutter" -> the same shape as formalize; units carry candidates, tried, decidedBy, gaps */
+  formalizeCutter(text, ctx = {}, opts = {}) {
+    const t0 = performance.now(), update = opts.update || nextContext, seq = { s: 0, m: 0 }, canvas = ctx.names || [];
+    const c = { names: canvas, last: (ctx.last || []).slice(), refs: new Map() }, filler = new Context({ text, canvas, model: this.contextModel });
+    const nodes = [], notes = [], units = [];
+    const rawOf = (x) => { const verb = x.tokens.find((t) => x.w.verbEvent.has(t)) || x.r.frame.lemma || null, reading = readingFromWires(x.r.wires, verb, x.tokens);
+      return { reading, raw: rawNodes(reading, x.info, canvas, seq) }; };
+    for (const cu of FRONT.segmentWorlds(text, canvas, this.cutter)) {
+      const { c0, c1 } = cu, src = text.slice(c0, c1), names = c.names.concat([...c.refs.keys()]);
+      const u = Object.assign({ c0, c1 }, this.routeCutter(src, names, cu.worlds));
+      units.push(u);
+      if (u.zone === "ignored") { notes.push(`VSS could not read “${src}” (${u.reason})`); delete u.options; continue; }
+      let x = u.options[0], R = null; u.tie = u.options.length; u.decidedBy = "words";
+      if (u.options.length > 1) {
+        const rs = u.options.map(rawOf), d = chooseReading(filler, rs.map((q) => q.raw), c0, c1);
+        x = u.options[d.index]; R = rs[d.index]; u.decidedBy = d.by; u.tiedWorlds = u.options.map((o, i) => ({ world: o.world, event: o.event, fits: d.fits[i] }));
+      }
+      if (!R) R = rawOf(x);
+      Object.assign(u, { world: x.world, event: x.event, status: x.status, normalized: x.tokens.join(" "), reading: R.reading, notUnderstood: x.wnu.notU,
+        vss: { status: x.r.status, sop: x.r.sop, margins: x.r.margins, residual: x.r.residual, unplaced: x.r.unplaced } });
+      delete u.options;
+      const st = filler.step(R.raw, c0, c1);
+      if (!st) { notes.push(`VSS read “${src}” as ${x.event} (world ${x.world}) but it gave no request`); continue; }
+      u.gaps = st.gaps.map((g) => ({ key: g.key, kind: g.kind, decision: g.decision }));
+      if (st.asked) {
+        u.zone = "ask"; u.askedBy = "context";
+        notes.push(`In “${src}” (${x.event}), which shape is meant by ` + st.gaps.filter((g) => g.decision === "ask").map((g) => g.key + (g.word ? " (" + g.word.replace(/^@/, "") + ")" : "")).join(", ") + "?");
+      } else {
+        const out = R.raw.nodes.filter((n) => n.type === "mention").concat([st.main]);
+        for (const n of out) { n.world = u.world; if (n.type !== "mention") Object.defineProperty(n, "src", { value: src, enumerable: false, configurable: true }); }
+        Object.defineProperty(st.main, "span", { value: [c0, c1], enumerable: false, configurable: true });
+        nodes.push(...out);
+      }
+      update(c, st.main);
+    }
+    let rest = text; const used = units.filter((u) => u.zone !== "ignored").map((u) => [u.c0, u.c1]);
+    for (const [a, b] of used.slice().reverse()) rest = rest.slice(0, a) + "\u0000" + rest.slice(b);
+    const ignored = rest.split("\u0000").map((x) => x.replace(/^[\s.,!?;:]+|[\s.,!?;:]+$/g, "")).filter((x) => x.length > 2);
+    if (ignored.length) notes.push("Ignored (not understood): " + ignored.map((z) => `“${z}”`).join(", "));
+    return { nodes, notes, units, clauses: units, ignored, asks: units.filter((u) => u.zone === "ask"), ms: performance.now() - t0 };
+  }
+
   /** a whole message -> {nodes, notes, units, clauses, ignored, asks, ms}. opts.update: the context rule (default nextContext) */
   formalize(text, ctx = {}, opts = {}) {
+    if (this.router === "cutter") return this.formalizeCutter(text, ctx, opts);
     const t0 = performance.now(), update = opts.update || nextContext, seq = { s: 0, m: 0 };
     const c = { names: ctx.names || [], last: (ctx.last || []).slice(), refs: new Map() };
     const nodes = [], notes = [], units = [];
@@ -144,12 +251,15 @@ export class Composer {
   }
 }
 
-/** registry + cutter + a model loader -> a Composer. loadModel(folder relative to docs/model/) -> Promise<{vss, F}> */
+/** registry + cutter + a model loader -> a Composer. loadModel(folder relative to docs/model/) -> Promise<{vss, F}>.
+ *  opts.router (else registry.router, else "token"); with "cutter": cutter = a cutter with worlds and opts.context = the context filler's
+ *  model (weights.json, parsed); opts.k (default ROUTER_K) */
 export async function loadComposer(registry, cutter, loadModel, opts = {}) {
   const fbName = opts.fallback || registry.fallback;
   if (!fbName) throw new Error("composer: the registry names no fallback");
   const fb = await loadModel(fbName), fallback = makeWorld(fbName, null, fb.vss, fb.F);
   const worlds = [];
   for (const e of registry.worlds || []) { const m = await loadModel(e.model); worlds.push(makeWorld(e.world, e.events, m.vss, m.F)); }
-  return new Composer({ cutter, fallback, worlds });
+  const router = opts.router || registry.router || "token";
+  return router === "token" ? new Composer({ cutter, fallback, worlds }) : new Composer({ cutter, fallback, worlds, router, context: opts.context, k: opts.k || ROUTER_K });
 }
