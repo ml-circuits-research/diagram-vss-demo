@@ -1,0 +1,19 @@
+[splits] written to /home/claude/diagram-vss-demo/training/sketch/runs/micro_graph_w_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 59, heldout_formulations 64, train 1156
+[schema] roles ['object', 'landmark', 'source', 'target'] (core []), max depth 0, event negation False
+[train] seed 0: 1156 training rows x 10 epoch(s) -> 11560 steps' sentences; D=1024; kinds 57; vocab 1953; predicate lemma not found in 560 targets
+[train] phase table: 983 of 10016 rows reached by the training sentences, held and trained; the other 9033 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.62 GB (peak 0.62 GB) | cpu | MemAvailable 6.2 GB
+[trace] text: does n_page1 connected_q n_page3 directly
+[trace] tokens/kinds: does/c18_does n_page1/NAME connected_q/VERB n_page3/NAME directly/directly
+[trace] gold frame: {"event": "connected", "lemma": "connected_q", "neg": false, "roles": {"landmark": ["entity", "n_page3", null, null], "object": ["entity", "n_page1", null, null]}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 55.45 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[train seed 0] start: RSS 0.73 GB (peak 0.73 GB) | cpu | MemAvailable 6.2 GB
+[train seed 0] step 500 sent 4000/11560 loss -0.695 (633s) | RSS 0.95 GB (peak 0.95 GB) | cpu | MemAvailable 5.9 GB
+[train seed 0] step 1000 sent 8000/11560 loss -0.817 (1094s) | RSS 0.95 GB (peak 0.95 GB) | cpu | MemAvailable 6.0 GB
+[train seed 0] end: RSS 0.95 GB (peak 0.95 GB) | cpu | MemAvailable 5.9 GB (1444s)
+[export] route book written | RSS 0.95 GB (peak 0.95 GB) | cpu | MemAvailable 5.9 GB
+[export] numpy reader vs torch states: max relative difference 9.26e-08 (float32 phases in the route book)
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.953 | residual 0.020
+[eval] seed 0 train (sample): FULL catalog candidates 0.927 | residual 0.053
+[mem] after seed 0: RSS 0.96 GB (peak 0.96 GB) | cpu | MemAvailable 5.9 GB
+[done] model written to /home/claude/diagram-vss-demo/training/sketch/worlds_micro/graph_w/model; REPORT.md and metrics.json there; run log /home/claude/diagram-vss-demo/training/sketch/runs/micro_graph_w_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)
