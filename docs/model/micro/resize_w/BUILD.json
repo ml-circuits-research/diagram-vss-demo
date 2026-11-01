@@ -1,0 +1,3 @@
+{"world": "resize_w", "events": "resize", "command": "training/sketch/train_micro.sh resize_w resize", "DATA": "spans", "FRAC": "1.0", "QCOLOR": "1",
+ "MARKER": "0", "ROW_SHAPE": "", "FRONT_ROWS": "world", "KINDMAP": "diagnosis_kinds/kinds_comb1.json", "CAL_FALLBACK": "train", "D": 1024, "EPOCHS": 10, "SEED": 0, "rows": 273,
+ "run_log": "training/sketch/runs/micro_resize_w_D1024_e10_s0.log"}
