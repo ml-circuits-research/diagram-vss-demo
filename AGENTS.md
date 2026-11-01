@@ -74,6 +74,9 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
 - The measure (owner, 2026-11-01): per requested action only: of the actions that had to be done, how many are done right, how
   many are done wrong, how many are not done; and how many actions nobody requested are done (extra). Per-message scores ("fully
   right messages") are not reported: a long message with 12 requests is almost never fully right, and that says nothing.
+- Questions to the user have a cost too (owner, 2026-11-01): ask as little as possible. In drawing a mistake is cheap (one undo), so
+  the post-VSS context filler (docs/js/vss-context.js) fills a gap whenever a candidate ranks first (margin 0) and asks only when
+  none fits. Other domains may weigh mistakes higher: the margin is a per-domain choice, stated in its weights file.
 - The cutter is measured by the errors it causes (requested actions done wrong or not done, and extras, that come from a bad cut),
   not by span-match scores.
 
