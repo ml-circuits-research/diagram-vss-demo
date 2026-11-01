@@ -1,0 +1,19 @@
+[splits] written to /home/claude/diagram-vss-demo/training/sketch/runs/micro_connect_chain_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 47, heldout_formulations 48, train 846
+[schema] roles ['source', 'style', 'arrow', 'edge', 'pairing', 'members'] (core []), max depth 0, event negation False
+[train] seed 0: 846 training rows x 10 epoch(s) -> 8460 steps' sentences; D=1024; kinds 57; vocab 1919; predicate lemma not found in 450 targets
+[train] phase table: 2112 of 10016 rows reached by the training sentences, held and trained; the other 7904 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.62 GB (peak 0.62 GB) | cpu | MemAvailable 4.8 GB
+[trace] text: connect n_grass to n_zebra and n_zebra to n_lion
+[trace] tokens/kinds: connect/VERB n_grass/NAME to/to n_zebra/NAME and/and n_zebra/NAME to/to n_lion/NAME
+[trace] gold frame: {"event": "connect", "lemma": "connect", "neg": false, "roles": {"members": ["set", ["entity", "n_grass", null, null], ["entity", "n_lion", null, null], ["entity", "n_zebra", null, null]]}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 63.01 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[train seed 0] start: RSS 0.73 GB (peak 0.73 GB) | cpu | MemAvailable 4.7 GB
+[train seed 0] step 500 sent 4000/8460 loss -0.885 (1421s) | RSS 1.35 GB (peak 2.81 GB) | cpu | MemAvailable 6.0 GB
+[train seed 0] step 1000 sent 8000/8460 loss -0.940 (1650s) | RSS 1.02 GB (peak 2.84 GB) | cpu | MemAvailable 6.3 GB
+[train seed 0] end: RSS 1.08 GB (peak 2.84 GB) | cpu | MemAvailable 6.3 GB (1677s)
+[export] route book written | RSS 1.08 GB (peak 2.84 GB) | cpu | MemAvailable 6.3 GB
+[export] numpy reader vs torch states: max relative difference 6.91e-08 (float32 phases in the route book)
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.708 | residual 0.252
+[eval] seed 0 train (sample): FULL catalog candidates 0.900 | residual 0.204
+[mem] after seed 0: RSS 1.09 GB (peak 2.84 GB) | cpu | MemAvailable 6.5 GB
+[done] model written to /home/claude/diagram-vss-demo/training/sketch/worlds_micro/connect_chain/model; REPORT.md and metrics.json there; run log /home/claude/diagram-vss-demo/training/sketch/runs/micro_connect_chain_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)

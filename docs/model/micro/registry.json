@@ -2,5 +2,129 @@
  "about": "the registry of the composer (docs/js/vss-composer.js): micro-worlds (events -> model folder, relative to docs/model/), the cutter and the fallback world. Add a world: train it (training/sketch/train_micro.sh), then add one line {\"world\", \"events\", \"model\"} to worlds.",
  "cutter": "micro/cutter.json",
  "fallback": "kinds_p80_s0",
- "worlds": []
+ "worlds": [
+  {
+   "world": "create",
+   "events": [
+    "create"
+   ],
+   "model": "micro/create"
+  },
+  {
+   "world": "move",
+   "events": [
+    "move"
+   ],
+   "model": "micro/move"
+  },
+  {
+   "world": "graph",
+   "events": [
+    "path",
+    "reachable",
+    "connected"
+   ],
+   "model": "micro/graph"
+  },
+  {
+   "world": "facts",
+   "events": [
+    "fact",
+    "rule"
+   ],
+   "model": "micro/facts"
+  },
+  {
+   "world": "resize",
+   "events": [
+    "resize"
+   ],
+   "model": "micro/resize"
+  },
+  {
+   "world": "filters",
+   "events": [
+    "count",
+    "exists",
+    "list"
+   ],
+   "model": "micro/filters"
+  },
+  {
+   "world": "superlatives",
+   "events": [
+    "extreme",
+    "nearest"
+   ],
+   "model": "micro/superlatives"
+  },
+  {
+   "world": "history",
+   "events": [
+    "undo",
+    "redo",
+    "forget",
+    "cycle"
+   ],
+   "model": "micro/history"
+  },
+  {
+   "world": "describe",
+   "events": [
+    "describe",
+    "property",
+    "neighbors",
+    "degree"
+   ],
+   "model": "micro/describe"
+  },
+  {
+   "world": "naming",
+   "events": [
+    "rename",
+    "label"
+   ],
+   "model": "micro/naming"
+  },
+  {
+   "world": "targets",
+   "events": [
+    "delete",
+    "duplicate",
+    "toFront",
+    "toBack"
+   ],
+   "model": "micro/targets"
+  },
+  {
+   "world": "layout",
+   "events": [
+    "arrange",
+    "align",
+    "distribute"
+   ],
+   "model": "micro/layout"
+  },
+  {
+   "world": "set",
+   "events": [
+    "set"
+   ],
+   "model": "micro/set"
+  },
+  {
+   "world": "connect",
+   "events": [
+    "connect"
+   ],
+   "model": "micro/connect"
+  },
+  {
+   "world": "disconnect",
+   "events": [
+    "disconnect"
+   ],
+   "model": "micro/disconnect"
+  }
+ ]
 }
