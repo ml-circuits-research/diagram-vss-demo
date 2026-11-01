@@ -1,0 +1,17 @@
+[splits] written to /home/claude/diagram-vss-demo/training/sketch/runs/micro_resize_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 11, heldout_formulations 6, train 194
+[schema] roles ['object', 'members'] (core []), max depth 0, event negation False
+[train] seed 0: 194 training rows x 10 epoch(s) -> 1940 steps' sentences; D=1024; kinds 57; vocab 548; predicate lemma not found in 340 targets
+[train] phase table: 434 of 10016 rows reached by the training sentences, held and trained; the other 9582 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.54 GB (peak 0.54 GB) | cpu | MemAvailable 5.7 GB
+[trace] text: resize n_later
+[trace] tokens/kinds: resize/VERB n_later/NAME
+[trace] gold frame: {"event": "resize", "lemma": "resize", "neg": false, "roles": {"object": ["entity", "n_later", null, null]}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 44.69 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[train seed 0] start: RSS 0.65 GB (peak 0.65 GB) | cpu | MemAvailable 5.7 GB
+[train seed 0] end: RSS 0.83 GB (peak 0.83 GB) | cpu | MemAvailable 6.0 GB (193s)
+[export] route book written | RSS 0.83 GB (peak 0.83 GB) | cpu | MemAvailable 6.0 GB
+[export] numpy reader vs torch states: max relative difference 6.11e-08 (float32 phases in the route book)
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.667 | residual 0.474
+[eval] seed 0 train (sample): FULL catalog candidates 0.825 | residual 0.236
+[mem] after seed 0: RSS 0.84 GB (peak 0.84 GB) | cpu | MemAvailable 6.0 GB
+[done] model written to /home/claude/diagram-vss-demo/training/sketch/worlds_micro/resize/model; REPORT.md and metrics.json there; run log /home/claude/diagram-vss-demo/training/sketch/runs/micro_resize_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)

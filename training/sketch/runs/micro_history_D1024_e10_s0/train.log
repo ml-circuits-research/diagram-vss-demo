@@ -1,0 +1,18 @@
+[splits] written to /home/claude/diagram-vss-demo/training/sketch/runs/micro_history_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 30, heldout_formulations 34, train 599
+[schema] roles [] (core []), max depth 0, event negation False
+[train] seed 0: 599 training rows x 10 epoch(s) -> 5990 steps' sentences; D=1024; kinds 57; vocab 492; predicate lemma not found in 0 targets
+[train] phase table: 772 of 10016 rows reached by the training sentences, held and trained; the other 9244 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.55 GB (peak 0.55 GB) | cpu | MemAvailable 6.7 GB
+[trace] text: redo the previous action
+[trace] tokens/kinds: redo/VERB the/the previous/c3_rules action/None
+[trace] gold frame: {"event": "redo", "lemma": "redo", "neg": false, "roles": {}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 32.00 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[train seed 0] start: RSS 0.66 GB (peak 0.66 GB) | cpu | MemAvailable 6.6 GB
+[train seed 0] step 500 sent 4000/5990 loss -0.949 (176s) | RSS 0.78 GB (peak 0.78 GB) | cpu | MemAvailable 5.9 GB
+[train seed 0] end: RSS 0.79 GB (peak 0.79 GB) | cpu | MemAvailable 5.9 GB (268s)
+[export] route book written | RSS 0.79 GB (peak 0.79 GB) | cpu | MemAvailable 5.9 GB
+[export] numpy reader vs torch states: max relative difference 6.56e-08 (float32 phases in the route book)
+[eval] seed 0 heldout_formulations: FULL catalog candidates 1.000 | residual 0.071
+[eval] seed 0 train (sample): FULL catalog candidates 0.997 | residual 0.049
+[mem] after seed 0: RSS 0.79 GB (peak 0.79 GB) | cpu | MemAvailable 5.9 GB
+[done] model written to /home/claude/diagram-vss-demo/training/sketch/worlds_micro/history/model; REPORT.md and metrics.json there; run log /home/claude/diagram-vss-demo/training/sketch/runs/micro_history_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)

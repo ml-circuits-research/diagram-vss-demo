@@ -414,7 +414,8 @@ def learn(msgs, params=None):
 
 # The training folders, in one place. DATA=old (or unset): the first two (exactly the original behaviour); DATA=all: all five.
 TRAIN_DIRS = {"old": ["sonnet_msg", "haiku_msg"],
-              "all": ["sonnet_msg", "haiku_msg", "sonnet_msg2", "haiku_msg2", "sonnet_long"]}
+              "all": ["sonnet_msg", "haiku_msg", "sonnet_msg2", "haiku_msg2", "sonnet_long"],
+              "everything": ["sonnet_msg", "haiku_msg", "sonnet_msg2", "haiku_msg2", "sonnet_long", "../llm_bench/fresh1/sonnet", "../llm_bench/fresh1/haiku"]}   # paths relative to llm_train/
 
 
 def train_dirs():
@@ -425,7 +426,7 @@ def train_dirs():
 
 def load_msgs(dirs=None):
     import glob
-    files = sorted(f for d in (dirs or train_dirs()) for f in glob.glob(os.path.join(HERE, "llm_train", d, "msg_*.jsonl")))   # sorted over all folders, as the old glob did
+    files = sorted(f for d in (dirs or train_dirs()) for pat in ("msg_*.jsonl", "batch_*.jsonl") for f in glob.glob(os.path.join(HERE, "llm_train", d, pat)))   # sorted over all folders, as the old glob did
     return [json.loads(l) for f in files for l in open(f) if l.strip()]
 
 

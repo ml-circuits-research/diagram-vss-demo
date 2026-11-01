@@ -1,0 +1,2 @@
+sop train /home/claude/diagram-vss-demo/training/sketch/worlds_micro/check --D 1024 --seed 0 --seeds 1 --epochs 10 --shuffle --device cpu --candidate_sets catalog --n_eval 600 --no_ckpt --star_version 2 --threshold_rule fit --calibrate_on_heldout_formulations --run_dir /home/claude/diagram-vss-demo/training/sketch/runs/micro_check_D1024_e10_s0
+commit 1bdf306

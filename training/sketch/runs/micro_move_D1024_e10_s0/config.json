@@ -1,0 +1,101 @@
+{
+ "world": "move",
+ "D": 1024,
+ "seed": 0,
+ "star_version": 2,
+ "language": "en",
+ "legend_sha256": "sha256:c94565dd3fcfdcaf60a63ab085879f0f8d5b9ff91e3e107af606062fbc35a894",
+ "legend_version": 1,
+ "training_code_commit": "3de6b02",
+ "trained": "2026-11-01T00:19:56",
+ "codes": [
+  "path",
+  "chainL",
+  "bigram"
+ ],
+ "gate_init": "closed",
+ "depth_estimator": "kinds",
+ "presence_readout": "decided",
+ "batch": 8,
+ "lr": 0.02,
+ "epochs": 10,
+ "n_train_steps_sentences": 21380,
+ "decoder": "contract",
+ "candidates": "sentence",
+ "undecided_adjacent": true,
+ "residual": "explained",
+ "presence_query": true,
+ "activation": null,
+ "thresholds": {
+  "tau": 0.05,
+  "tau_source": "stated (the repository's v16 value), not fitted on any rows",
+  "no_sense_share": 0.5,
+  "no_sense_source": "stated",
+  "no_fit_residual": 0.9,
+  "no_fit_source": "stated (dispatcher only, spec section 9)",
+  "presence": {
+   "object": 0.7397366844145017,
+   "relation": 0.2583762108870477,
+   "landmark": 0.29716279143910757,
+   "landmark2": 0.24393693953398027,
+   "region": 0.6343619064346121,
+   "direction": 0.32197262731141396,
+   "amount": 0.3542410062540812,
+   "members": 0.5950403721005297
+  },
+  "attr_presence": {
+   "object": null
+  },
+  "det_presence": {
+   "object": null
+  },
+  "scope_term": null,
+  "set_member": {
+   "members": 0.5089816547636337
+  },
+  "calibration_split": "train (a sample of 400 training sentences, rng 1234+seed) + the CALIBRATION half of the held-out formulations (109 sentences, splits calibration_*), disjoint from the reported half (rule 25)",
+  "rule": "FITTED: per role, the threshold that maximises the balanced present / absent accuracy on the calibration rows (judgment 752853c \u00a72); the pooled midpoint of the same rows is kept as thresholds_pooled_midpoint, the comparison",
+  "presence_margin": "|presence ratio - threshold| (ratio units), on the wire as _presence_margin.<role> (SOP Lang keys carry one dot); the role's _margin = min(identity margin, presence margin): a near-threshold reading abstains"
+ },
+ "thresholds_training_rows_only": {
+  "presence": {
+   "object": 0.7397366844145017,
+   "relation": 0.29463203343728095,
+   "landmark": 0.3205072917814118,
+   "landmark2": 0.24390235822584422,
+   "region": 0.6343619064346121,
+   "direction": 0.32197262731141396,
+   "amount": 0.7165235347964409,
+   "members": 0.49266998163398074
+  },
+  "attr_presence": {
+   "object": null
+  },
+  "det_presence": {
+   "object": null
+  },
+  "scope_term": null,
+  "set_member": {
+   "members": 0.5089816547636337
+  },
+  "calibration_split": "train (a sample of 400 training sentences, rng 1234+seed); never the scored rows (rule 25)"
+ },
+ "thresholds_pooled_midpoint": {
+  "presence": {
+   "object": 0.7329033084864686,
+   "relation": 0.45703004004939846,
+   "landmark": 0.5418452938573206,
+   "landmark2": 0.4768237138885483,
+   "region": 0.514294449854729,
+   "direction": 0.38905543369439183,
+   "amount": 0.4902188530029469,
+   "members": 1.521688359517759
+  },
+  "attr_presence": {},
+  "det_presence": {},
+  "scope_term": null,
+  "set_member": {
+   "members": 0.9956083651283522
+  }
+ }
+}

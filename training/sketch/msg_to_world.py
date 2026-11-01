@@ -36,6 +36,17 @@ G_EVENT_OF = {v: e for e, vs in G.EVENTS.items() for v in vs}
 ROLES = G.ROLES + [("members", "which shapes, as a list?"), ("targets", "to which shapes, as a list?")]   # set roles (lists of shapes)
 
 
+def shape_is(shape, a):
+    """ROW_SHAPE (off by default): the construction of a gold connect wire, from its args. single: one `from`, one `to`; lists: a list on one
+    side or both (`from` and `to` both given); chain: a `from` list and no `to` (A to B, B to C / one after the other / all to each other)."""
+    lst = lambda v: isinstance(v, list) or (isinstance(v, str) and "," in v)
+    fr, to = a.get("from"), a.get("to")
+    if a.get("action") != "connect": return False
+    if shape == "chain": return lst(fr) and to is None
+    if shape == "single": return fr is not None and to is not None and not lst(fr) and not lst(to)
+    return fr is not None and to is not None and (lst(fr) or lst(to))
+
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--freq", type=int, default=8); ap.add_argument("--out", default=os.path.join(HERE, "worlds", "real"))
     ap.add_argument("--frac", type=float, default=1.0, help="the training messages whose id hashes below this share (0.8 = the fit split; 0.2 / 0.4 / 0.8 = the learning curve)")
@@ -88,6 +99,8 @@ def main():
     if WEV and (CENTRES or FAMILY): raise SystemExit("WORLD_EVENTS is not combined with CENTRES or FAMILY")
     if WEV and os.path.abspath(a.out) == os.path.abspath(os.path.join(HERE, "worlds", "real")): raise SystemExit("WORLD_EVENTS needs --out <folder> (not worlds/real)")
     WNAME = os.path.basename(os.path.normpath(a.out)) if WEV else "real"   # sop train takes the world's name from its folder
+    SHAPE = os.environ.get("ROW_SHAPE", "")     # ROW_SHAPE (see shape_is): needs WORLD_EVENTS=connect; off by default
+    if SHAPE and (SHAPE not in ("single", "lists", "chain") or WEV != {"connect"}): raise SystemExit("ROW_SHAPE=single|lists|chain needs WORLD_EVENTS=connect")
     rows, lost_why, dropped, by_ev = [], collections.Counter(), collections.Counter(), collections.Counter(); row_key = []
     for m, w, row in items:
         lost = []
@@ -95,6 +108,7 @@ def main():
         except Skip as e: dropped[str(e).split(":")[0]] += 1; continue
         if FAMILY and ev not in FAMILY: continue     # FAMILY=<events>: only the rows of these events (INTERFERENCE.md); default: every row
         if WEV and ev not in WEV: continue           # WORLD_EVENTS=<events>: the same, and the legend below lists only these events
+        if SHAPE and not shape_is(SHAPE, row["wire"]["args"]): continue   # ROW_SHAPE=single|lists|chain (connect only): rows of one construction
         if not (set(G.EVENTS[ev]) & set(text.split())) and not roles: dropped["no event token and no role (zero target)"] += 1; continue
         for x in lost: lost_why["event token not found" if x.startswith("verb of") else x.split(" ")[0]] += 1
         rows.append((ev, text, roles, m["id"])); by_ev[ev] += 1; row_key.append(row.get("_key"))
