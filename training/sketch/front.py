@@ -358,7 +358,7 @@ def learn_values(reqs, min_count, min_prec):
         for g in grams:
             occ[g] += 1
             if g not in ok: continue
-            for v in gv:
+            for v in sorted(gv):   # sorted: a tie between two values is broken the same way in every run (gv is a set: its order follows the string hash)
                 if not v.isdigit() or not g.isdigit(): co[g][v] += 1
     V = {}
     for n in (1, 2, 3):
