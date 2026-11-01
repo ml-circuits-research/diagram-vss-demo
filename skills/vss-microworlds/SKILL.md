@@ -16,6 +16,20 @@ Repository: ml-circuits-research/diagram-vss-demo (local: /home/claude/diagram-v
 5. **Glue worlds** (later): context statements, parasitic fragments, meta about other units, where a whole formalization is one token.
 6. **Reasoning** after reading: pronouns, `$new`, verbless inheritance, asking.
 
+## Names of the variants (owner, 2026-11-01: name each by the difference that defines it, never "today's" or "new")
+
+A composer variant is named by three choices, written Router·Front·Grouping:
+- **Router.** `TokenRouter` sends a unit to the world of its action token, using the shared front end (llm_score ROUTER=token).
+  `CandidateRouter` lets the cutter propose its top 3 worlds; each one reads the unit, and the reading with the fewest words not
+  understood wins (ROUTER=cutter).
+- **Front.** `SharedFront`: each world's verbs and values are learned from all the data. `OwnFront`: they are learned from the
+  world's own rows only (FRONT_ROWS=world).
+- **Grouping.** The groups file used: `G16` (one world per action or small family), `G6` (by roles), `G7` (by measured confusion,
+  action_confusion.py).
+
+Plan A's three runs are TokenRouter·SharedFront·G16, CandidateRouter·SharedFront·G16 and CandidateRouter·OwnFront·G16.
+Plan B is CandidateRouter·OwnFront·G7.
+
 ## What counts (owner's rules)
 
 - The owner is the judge. There is no hidden test set: every annotated message is data. Measure on the data the worlds are trained on; reading it well is the goal.
