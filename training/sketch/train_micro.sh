@@ -11,6 +11,7 @@
 #   FRONT_ROWS; ROUTER_V2.md); unset = learned from all messages, as before. Recorded in BUILD.json.
 #   N_EVAL=600 EVAL_MODES=all: the trainer's own evaluation after training (metrics.json only; it does not change the model, and our
 #   decisions use llm_score.mjs). N_EVAL=150 EVAL_MODES=primary cuts hours from big worlds (connect: ~3 h of it). Recorded in BUILD.json.
+#   DEVICE=cpu: the torch device of sop train (cuda on a machine with an NVIDIA card: training/laptop/README.md). Recorded in BUILD.json.
 #   KINDMAP= (empty) -> the own-kind rule "seen >= --freq times". SOP_PYTHON: the Python with torch (sop train).
 # Then register it: add {"world": "<world>", "events": [<events>], "model": "micro/<world>"} to docs/model/micro/registry.json "worlds".
 set -euo pipefail
@@ -26,15 +27,15 @@ FRAC="${FRAC:-1.0}"; D="${D:-1024}"; EPOCHS="${EPOCHS:-10}"; SEED="${SEED:-0}"
 python3 msg_to_world.py --frac "$FRAC" --out "$W" | sed -n 1,7p
 "$SOP" check --legend "$W/legend.json" "$W"/examples/*.sop | tail -1
 RUN="micro_${WORLD}_D${D}_e${EPOCHS}_s${SEED}"; mkdir -p runs; rm -rf "runs/$RUN"
-N_EVAL="${N_EVAL:-600}"; EVAL_MODES="${EVAL_MODES:-all}"
-"$SOP" train "$W" --D "$D" --seed "$SEED" --seeds 1 --epochs "$EPOCHS" --shuffle --device cpu --candidate_sets catalog --n_eval "$N_EVAL" --eval_modes "$EVAL_MODES" --no_ckpt \
+N_EVAL="${N_EVAL:-600}"; EVAL_MODES="${EVAL_MODES:-all}"; DEVICE="${DEVICE:-cpu}"
+"$SOP" train "$W" --D "$D" --seed "$SEED" --seeds 1 --epochs "$EPOCHS" --shuffle --device "$DEVICE" --candidate_sets catalog --n_eval "$N_EVAL" --eval_modes "$EVAL_MODES" --no_ckpt \
   --star_version 2 --threshold_rule fit --calibrate_on_heldout_formulations --run_dir "$HERE/runs/$RUN" > "runs/$RUN.log" 2>&1
 rm -rf "$OUT"
 "$SOP" export-web --model "$W/model" --out "$OUT" --bits 8 --sparse > /dev/null
 cp "$W/front.json" "$OUT/front.json"
 cat > "$OUT/BUILD.json" <<JSON
 {"world": "$WORLD", "events": "$EVENTS", "command": "training/sketch/train_micro.sh $WORLD $EVENTS", "DATA": "$DATA", "FRAC": "$FRAC", "QCOLOR": "$QCOLOR",
- "MARKER": "$MARKER", "ROW_SHAPE": "${ROW_SHAPE:-}", "FRONT_ROWS": "$FRONT_ROWS", "KINDMAP": "${KINDMAP:-}", "CAL_FALLBACK": "$CAL_FALLBACK", "D": $D, "EPOCHS": $EPOCHS, "SEED": $SEED, "N_EVAL": $N_EVAL, "EVAL_MODES": "$EVAL_MODES", "rows": $(grep -c . "$W/raw/sentences.txt"),
+ "MARKER": "$MARKER", "ROW_SHAPE": "${ROW_SHAPE:-}", "FRONT_ROWS": "$FRONT_ROWS", "KINDMAP": "${KINDMAP:-}", "CAL_FALLBACK": "$CAL_FALLBACK", "D": $D, "EPOCHS": $EPOCHS, "SEED": $SEED, "N_EVAL": $N_EVAL, "EVAL_MODES": "$EVAL_MODES", "DEVICE": "$DEVICE", "rows": $(grep -c . "$W/raw/sentences.txt"),
  "run_log": "training/sketch/runs/$RUN.log"}
 JSON
 echo "world $WORLD [$EVENTS] -> docs/model/micro/$WORLD ($(grep -c . "$W/raw/sentences.txt") rows); registry line:"
