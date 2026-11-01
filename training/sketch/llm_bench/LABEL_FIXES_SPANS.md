@@ -582,3 +582,13 @@ Log (one line per message; old wires that changed -> new wires; format `c:` comm
 10. s-0376 w3 "Do the same for Yan": `connect $new -> Yan` although "the same" also means creating a Parent above Yan (not in the legend as one wire). Not changed.
 11. Span structure: fixed on 2026-10-31, see "Merged cumulative wires" above (haiku_spans 498 nested wires in 299 groups merged or given their own spans; s-0200 fixed; s-0324 was not nested). Nothing left. Open point from it: the `undo` count of h-0332 ("the last two changes") is not expressible in the args.
 12. s-0034 w0 ("i need 4 small squares") carries color lime from the next sentence ("make em lime"); s-0356 w0 and s-0372 w1 carry the final value of a self-correction; s-0227 w0 "far from" is written as bottomRight (the text says so). All left as written.
+
+## Pair consistency fixes (2026-11-01, PAIR_CONSISTENCY.md)
+
+158 wires in 97 messages, applied by the coordinator from training/sketch/pair_fixes_proposed.jsonl (each line: id, wire index, span,
+before, after, reason). Texts, ids, names and spans unchanged (checked by script against HEAD).
+- set -> fact, 146 wires (sonnet_spans): declarative "X is VALUE" (LABEL_CONVENTIONS: a statement "X is red" -> fact; elsewhere 633
+  fact vs 0 set).
+- fact -> set, 9 wires (s-0170, s-0211, s-0305): "X should be / must be VALUE" (set in 255 other wires).
+- s-0215 resize -> set ("make it large", 51 vs 1); sm-0005 arrange -> move (6 vs 1); s-0188 exists -> list (236 vs 1).
+Undecidable cases for the owner are listed in PAIR_CONSISTENCY.md.
