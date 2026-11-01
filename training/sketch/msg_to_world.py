@@ -29,6 +29,7 @@ AND trigger rules) is learned ONLY from the world's own rows: the spans of the r
 outside the spans and no request of another event (front.learn keep=...), so a trigger rule's precision is counted inside the world.
 The names of every wire still count as names; the kinds (lexicon) do not change. front.json gets a field "front_rows". Default (unset or
 FRONT_ROWS=all): the front end learned from all messages, exactly as before.
+HOLDOUT=<word,...> (off by default; experiments only): the messages containing these words are left out (see main).
 Run: python3 msg_to_world.py [--frac 0.8] [--freq 8]"""
 import argparse, collections, datetime, json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -57,6 +58,15 @@ def main():
     ap.add_argument("--frac", type=float, default=1.0, help="the training messages whose id hashes below this share (0.8 = the fit split; 0.2 / 0.4 / 0.8 = the learning curve)")
     a = ap.parse_args()
     msgs = [m for m in FR.load_msgs() if a.frac >= 1 or FR.split_of(m, a.frac)]
+    # HOLDOUT=<word,...> (off by default; an experiment only, never a shipped model: skills/vss-world-design, the abstraction test):
+    # every message whose text contains one of these words (whole word, any case) is left out of the world, the front end and the kinds,
+    # so the model never sees them; the legend still lists them (a legend value keeps its question's kind).
+    HOLDOUT = [w.lower() for w in os.environ.get("HOLDOUT", "").split(",") if w]
+    if HOLDOUT:
+        import re
+        hold = re.compile(r"\b(" + "|".join(map(re.escape, HOLDOUT)) + r")\b", re.I); n0 = len(msgs)
+        msgs = [m for m in msgs if not hold.search(m["text"])]
+        print(f"HOLDOUT={','.join(HOLDOUT)}: {n0 - len(msgs)} of {n0} messages left out")
     P = json.load(open(os.path.join(HERE, "front_params.json")))
     FRONT_ROWS = os.environ.get("FRONT_ROWS", "") or "all"     # FRONT_ROWS=world (see the docstring); default all: exactly as before
     if FRONT_ROWS not in ("all", "world"): raise SystemExit(f"FRONT_ROWS={FRONT_ROWS!r}: expected all or world")
@@ -70,6 +80,7 @@ def main():
         F = FR.learn(msgs, P, keep=keep)
         F["front_rows"] = {"rows": "world", "events": sorted(wev), "row_shape": shp, "requests": len([r for r in FR.requests(msgs)[0] if keep(r[1])])}
         F["about"] = F["about"] + f"; FRONT_ROWS=world: values and triggers from the {F['front_rows']['requests']} requests of {','.join(sorted(wev))} only"
+    if HOLDOUT: F["holdout"] = HOLDOUT; F["about"] = F["about"] + f"; HOLDOUT={','.join(HOLDOUT)}: messages with these words left out (experiment)"
     norm = lambda text, names: FR.normalize(text, names, F)
     vk = FR.value_kinds(); evtok = {v for vs in G.EVENTS.values() for v in vs}
     base = dict(vk); base.update({v: "VERB" for v in evtok})
