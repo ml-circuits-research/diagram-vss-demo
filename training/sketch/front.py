@@ -415,7 +415,9 @@ def learn(msgs, params=None):
 # The training folders, in one place. DATA=old (or unset): the first two (exactly the original behaviour); DATA=all: all five.
 TRAIN_DIRS = {"old": ["sonnet_msg", "haiku_msg"],
               "all": ["sonnet_msg", "haiku_msg", "sonnet_msg2", "haiku_msg2", "sonnet_long"],
-              "everything": ["sonnet_msg", "haiku_msg", "sonnet_msg2", "haiku_msg2", "sonnet_long", "../llm_bench/fresh1/sonnet", "../llm_bench/fresh1/haiku"]}   # paths relative to llm_train/
+              "everything": ["sonnet_msg", "haiku_msg", "sonnet_msg2", "haiku_msg2", "sonnet_long", "../llm_bench/fresh1/sonnet", "../llm_bench/fresh1/haiku"],   # paths relative to llm_train/
+              "spans": ["sonnet_msg", "haiku_msg", "sonnet_msg2", "haiku_msg2", "sonnet_long", "../llm_bench/fresh1/sonnet", "../llm_bench/fresh1/haiku",
+                        "../llm_bench/sonnet_spans", "../llm_bench/haiku_spans"]}   # every annotated folder with spans (micro_tools.py DIRS)
 
 
 def train_dirs():
