@@ -19,6 +19,8 @@ For long improvement sessions where a coordinator supervises several agents (Opu
 - **Commit yourself**, only reviewed results, with the numbers in the message; negative results are committed too, as negative results.
 - **Talk to the owner plainly**, in their language: what was measured, what it means, what is next; no inflated words, no guessing; when unsure, say so and how to find out. Ask only for decisions that are really theirs (a new kind of component, a change of goal); do what they proposed without asking again.
 
+- **Survive restarts.** The container can restart and kill every agent and training; only files survive. Tell long-running agents to work in a fixed scratch folder and append one line per finished step to a STATUS file there; commit finished results (trained models, data) as they complete, not at the end of the round.
+
 ## Traps seen
 
 - Thresholds chosen without knowing the noise, then pass/fail on 0.5-point differences.

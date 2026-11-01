@@ -29,3 +29,10 @@ Use when a learned reader needs more examples of real use: whole messages as peo
 - A chain that closes a loop: a chain plus a separate closing connect.
 - "with a line": the editor reads "line" as no arrowhead; decide one convention and apply it everywhere.
 - "next to X" in a question: neighbors vs a spatial list; "the copies": `$new`, not a quantifier mention.
+- Cumulative cuts: a writer may label one request as several nested wires ("make Rabbit big", "make Rabbit big and red", ...). Check by script that no two spans of a message overlap (search them in text order); merge each group into one wire per request (longest span, merged args), as the majority does (multi-attribute `set` as one wire: 841 vs 13). Seen in 299 of 500 messages of one Haiku set.
+
+## Checks to run by script after every writer and every label check
+
+- JSON per line; the same ids, texts, names and domains as the backup / texts file (field by field).
+- Every span an exact substring of the text, every trigger inside its span, wires in text order, no duplicate and no overlapping spans.
+- Counts before / after (messages, wires) match the report.
