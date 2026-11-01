@@ -1,0 +1,38 @@
+tokens: raw
+requests 22702: train 17913 (3669 message ids), test 4789 (966 ids); split by hash of the text; message ids in both: 0
+test requests whose exact span text also occurs in train: 621 of 4789
+gold worlds in test: set 886, connect 717, move 659, superlatives 351, filters 330, graph 262, describe 237, fallback 237, facts 221, targets 183, create 180, layout 178, history 159, naming 107, resize 53, disconnect 29
+features: 4429 unigrams+bigrams (document frequency >= 2 in train) + previous-world one-hot (17); L2 0.0001
+verbless requests in test: 669 of 4789 (14.0%); in all data 3161 of 22702
+
+### all test requests (n = 4789)
+| model | recall@1 | recall@2 | recall@3 |
+|---|---|---|---|
+| with previous world | 98.1% (97.6-98.4) | 99.6% (99.4-99.7) | 99.8% (99.7-99.9) |
+| without previous world | 97.7% (97.3-98.1) | 99.5% (99.3-99.7) | 99.8% (99.7-99.9) |
+| previous world only | 29.1% (27.8-30.4) | 45.1% (43.7-46.5) | 54.7% (53.3-56.1) |
+| majority world | 18.5% (17.4-19.6) | 33.5% (32.1-34.8) | 47.2% (45.8-48.6) |
+
+### verbless requests (no action token) (n = 669)
+| model | recall@1 | recall@2 | recall@3 |
+|---|---|---|---|
+| with previous world | 96.0% (94.2-97.2) | 99.0% (97.9-99.5) | 99.6% (98.7-99.8) |
+| without previous world | 94.0% (92.0-95.6) | 97.9% (96.5-98.7) | 99.6% (98.7-99.8) |
+| previous world only | 48.7% (45.0-52.5) | 67.6% (63.9-71.0) | 73.2% (69.8-76.5) |
+| majority world | 27.2% (24.0-30.7) | 55.2% (51.4-58.9) | 70.1% (66.5-73.5) |
+
+### requests with an action token (n = 4120)
+| model | recall@1 | recall@2 | recall@3 |
+|---|---|---|---|
+| with previous world | 98.4% (98.0-98.8) | 99.7% (99.5-99.8) | 99.9% (99.7-99.9) |
+| without previous world | 98.3% (97.9-98.7) | 99.8% (99.6-99.9) | 99.9% (99.7-99.9) |
+| previous world only | 25.9% (24.6-27.2) | 41.5% (40.0-43.0) | 51.7% (50.1-53.2) |
+| majority world | 17.1% (16.0-18.3) | 30.0% (28.6-31.4) | 43.5% (42.0-45.0) |
+
+Paired bootstrap over test messages (500 resamples): recall with minus without the previous world
+- all, recall@1: +0.4 points (CI +0.1 to +0.7)
+- all, recall@2: +0.1 points (CI -0.1 to +0.3)
+- all, recall@3: +0.0 points (CI +0.0 to +0.0)
+- verbless, recall@1: +1.9 points (CI +0.3 to +3.9)
+- verbless, recall@2: +1.0 points (CI -0.1 to +2.6)
+- verbless, recall@3: +0.0 points (CI +0.0 to +0.0)
