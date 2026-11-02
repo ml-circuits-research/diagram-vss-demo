@@ -4,7 +4,9 @@
    Navigation is the browser's history: every page is an entry (#help/<page>, or #help/<page>/<anchor> for a section), so Back, Forward,
    reload and shared links work. Closing (✕ or Esc) goes back to the entry the overlay was opened from; an overlay opened by a link
    (reload, shared URL) has no such entry, so closing removes the #help part instead. While it is open the app behind it is inert.
-   A sentence button (data-quick) closes the overlay and sends the sentence; a switch (data-plug) turns a capability on or off. */
+   A sentence button (data-quick) closes the overlay and sends the sentence; a switch (data-plug) turns a capability on or off.
+   The pages live in the same document as the app: an id of a page must not repeat an id of the app (index.html styles some ids,
+   e.g. the drawing's svg #canvas; on 2026-11-02 <h2 id="canvas"> took that style and covered the sidebar). training/sketch/test_help_overlay.py checks it. */
 (function (root) {
 'use strict';
 const $ = s => document.querySelector(s);
@@ -70,8 +72,9 @@ function show(route, y) {
   if (E.crumb) E.crumb.textContent = p.title;
   E.back.hidden = !((hist().help || 0) > 1);
   document.title = `${p.title} · Help · SOP Sketchpad`;
-  const a = route.anchor && document.getElementById(route.anchor);
-  if (a && E.page.contains(a)) a.scrollIntoView({ block: 'start' }); else E.main.scrollTop = y || 0;
+  // the anchor is looked up inside the page: an id of the app behind the overlay (canvas, docs, ...) must not hide it
+  const a = route.anchor && E.page.querySelector(`[id="${route.anchor}"]`);
+  if (a) a.scrollIntoView({ block: 'start' }); else E.main.scrollTop = y || 0;
   const cur = E.nav.querySelector('[aria-current]'); if (cur && cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest' });
   const h1 = $('#docs-title'); if (h1) h1.focus({ preventScroll: true });
 }

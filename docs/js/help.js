@@ -318,7 +318,7 @@ function where(env) {
     [['left of', 110, 128], ['right of', 330, 128], ['above', 220, 42], ['below', 220, 218]].forEach(([n, x, y]) => env.drawShape(g, shp(K, { name: n, size: 'small', x, y })));
   }, 'positions around a shape named Hub: left of, right of, above, below', 'mid')}
   ${says(['Draw a tiny orange triangle named T1 next to Start', 'Add a white ellipse named Note labeled "draft" below Done', 'Draw a teal square named Box between Start and Done'])}
-  <h2 id="canvas">A part of the canvas</h2>
+  <h2 id="canvas-parts">A part of the canvas</h2>
   <p>The canvas is 800 × 500 pixels. ${spots.map(v => `<code>${escH(words(v))}</code>`).join(', ')}; or exact coordinates, x from the left and y from the top.</p>
   ${pic(env, '0 0 800 500', (g, add) => {
     add('rect', { x: 2, y: 2, width: 796, height: 496, rx: 14, class: 'hcanvas' });

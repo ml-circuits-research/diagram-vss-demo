@@ -832,7 +832,7 @@ page('repository', 'Repository map', `
 <tr><td>root</td><td><code>AGENTS.md</code> (rules: read first), <code>README.md</code>, <code>DECISIONS.md</code>, <code>future-experiments.md</code>, <code>ISSUES_OTHER_REPOS.md</code>.</td></tr>
 </tbody></table></div>
 
-<h2 id="docs">Result documents of 2026-11-02 (<code>training/sketch/</code>)</h2>
+<h2 id="result-docs">Result documents of 2026-11-02 (<code>training/sketch/</code>)</h2>
 <div class="tw"><table>
 <thead><tr><th>Document</th><th>One line</th></tr></thead>
 <tbody>
