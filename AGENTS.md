@@ -63,7 +63,7 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
   requests (today the rules' segmenter) -> learned from the spans; the trigger context classes and the thresholds -> chosen on held-out
   training messages, not by hand.
 
-## What counts as an error (owner, 2026-10-31)
+## What counts as an error (owner, 2026-10-31; main metric 2026-11-02)
 
 - The reader's job is a truthful formalization, not a perfect one. A reference it cannot resolve from the request itself
   (a pronoun, "the new one", a name stated in an earlier sentence) is left as a reference for the reasoning layer, which fills it
@@ -74,9 +74,21 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
 - The measure (owner, 2026-11-01): per requested action only: of the actions that had to be done, how many are done right, how
   many are done wrong, how many are not done; and how many actions nobody requested are done (extra). Per-message scores ("fully
   right messages") are not reported: a long message with 12 requests is almost never fully right, and that says nothing.
-- Questions to the user have a cost too (owner, 2026-11-01): ask as little as possible. In drawing a mistake is cheap (one undo), so
-  the post-VSS context filler (docs/js/vss-context.js) fills a gap whenever a candidate ranks first (margin 0) and asks only when
-  none fits. Other domains may weigh mistakes higher: the margin is a per-domain choice, stated in its weights file.
+- **The main metric (owner, 2026-11-02; replaces "ask as little as possible" of 2026-11-01): do only what you are sure of, ask about
+  the rest.** The research question of this project is a reader that says clearly where it is not sure, not one that approximates
+  well: for approximations there are LLMs. In drawing a confident mistake costs one undo and is merely annoying; in a domain where
+  decisions have serious consequences (medicine, safety, money) it is what matters most. Better fearful and asking than confident
+  and wrong.
+  - The headline number of every reader is its **precision of execution**: of everything it executes (requested actions and extras),
+    the share done right. It is reported together with the **share of requests done right** at that precision, and the comparison
+    between readers is the share of requests done right at the same precision (the risk-coverage curve, RISK_COVERAGE.md); the
+    discrimination of the confidence (AUROC) is reported beside it.
+  - Every reader executes a request only when its own confidence clears a threshold, chosen on held-out data by the protocol written
+    before the run; below it, it asks, and says why it is not sure (which words, which step). "Not done / asked" is never counted as
+    an error; it is the price paid for precision, and it is reported.
+  - A reader without a confidence (the Rules) is measured the same way: what it executes and how much of it is right.
+  - The context filler may still rank candidates (vss-context.js), but whether its filling is executed is decided by the reader's
+    confidence, not by "a candidate ranks first".
 - The cutter is measured by the errors it causes (requested actions done wrong or not done, and extras, that come from a bad cut),
   not by span-match scores.
 
