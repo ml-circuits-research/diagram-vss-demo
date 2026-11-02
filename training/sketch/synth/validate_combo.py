@@ -25,6 +25,8 @@ Run: python3 training/sketch/synth/validate_combo.py [--raw DIR] [--rewritten DI
 import argparse, collections, glob, json, os, re, subprocess
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+import sys; sys.path.insert(0, HERE)
+import pin_logic   # the Rules copy the checks read (committed HEAD unless LOGIC_JS / LOGIC_REV say otherwise)
 SK = os.path.dirname(HERE)
 TOK = re.compile(r'"[^"]*"|“[^”]*”|(?<![\w])\'[^\']+\'(?![\w])|[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*')   # "Proxy's" -> Proxy, s
 

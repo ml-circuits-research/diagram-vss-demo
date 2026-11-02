@@ -1,0 +1,200 @@
+{"id": "sr-00030", "text": "list the squares", "how": "exact", "set": "llm_short"}
+{"id": "sr-00047", "text": "how many shapes are there?", "how": "exact", "set": "heldout_formulations"}
+{"id": "sr-00094", "text": "which shape is the lowest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-00140", "text": "Take that back.", "how": "exact", "set": "llm_short"}
+{"id": "sr-00172", "text": "Undo that.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-00190", "text": "which one is biggest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-00220", "text": "tidy up", "how": "exact", "set": "short3_texts"}
+{"id": "sr-00277", "text": "redo that", "how": "exact", "set": "llm_short"}
+{"id": "sr-00297", "text": "which shape is the largest?", "how": "exact", "set": "hand"}
+{"id": "sr-00316", "text": "how many connections are there", "how": "exact", "set": "llm_short"}
+{"id": "sr-00424", "text": "undo the last change!", "how": "exact", "set": "llm_short"}
+{"id": "sr-00518", "text": "Undo!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-00568", "text": "Any loops", "how": "exact", "set": "llm_short"}
+{"id": "sr-00630", "text": "describe everything?", "how": "exact", "set": "llm_short"}
+{"id": "sr-00650", "text": "which triangles are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-00655", "text": "Describe the canvas", "how": "exact", "set": "new_identities"}
+{"id": "sr-00658", "text": "describe everything?", "how": "exact", "set": "llm_short"}
+{"id": "sr-00666", "text": "Describe the canvas?", "how": "exact", "set": "new_identities"}
+{"id": "sr-00727", "text": "redo!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-00845", "text": "Which shapes are not magenta?", "how": "token set", "set": "seen"}
+{"id": "sr-00978", "text": "Is there a loop?", "how": "exact", "set": "llm_short"}
+{"id": "sr-01085", "text": "Which shape is the biggest", "how": "exact", "set": "llm_short"}
+{"id": "sr-01100", "text": "which shape is the smallest?", "how": "token set", "set": "llm_short"}
+{"id": "sr-01115", "text": "Any cycles?", "how": "exact", "set": "short3_texts"}
+{"id": "sr-01118", "text": "is there a cycle?", "how": "exact", "set": "llm_short"}
+{"id": "sr-01143", "text": "list the hexagons", "how": "exact", "set": "llm_short"}
+{"id": "sr-01160", "text": "redo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-01185", "text": "Tidy up!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-01269", "text": "get rid of the dots", "how": "exact", "set": "seen"}
+{"id": "sr-01352", "text": "undo the last change!", "how": "exact", "set": "llm_short"}
+{"id": "sr-01409", "text": "undo that.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-01496", "text": "is there a cycle", "how": "exact", "set": "llm_short"}
+{"id": "sr-01525", "text": "show me the rules", "how": "exact", "set": "llm_short"}
+{"id": "sr-01526", "text": "undo the last step.", "how": "exact", "set": "llm_short"}
+{"id": "sr-01568", "text": "Forget the rules", "how": "exact", "set": "llm_short"}
+{"id": "sr-01712", "text": "Any loops?", "how": "exact", "set": "llm_short"}
+{"id": "sr-01717", "text": "Tidy up!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-01815", "text": "Redo that.", "how": "exact", "set": "llm_short"}
+{"id": "sr-01985", "text": "Delete everything.", "how": "exact", "set": "llm_short"}
+{"id": "sr-02042", "text": "who has the fewest connections?", "how": "exact", "set": "llm_short"}
+{"id": "sr-02138", "text": "Undo the last step", "how": "exact", "set": "llm_short"}
+{"id": "sr-02141", "text": "is there a cycle?", "how": "exact", "set": "llm_short"}
+{"id": "sr-02196", "text": "add a hexagon", "how": "exact", "set": "broad"}
+{"id": "sr-02208", "text": "What's the bottommost one?", "how": "exact", "set": "llm_short"}
+{"id": "sr-02216", "text": "forget the defaults", "how": "exact", "set": "llm_short"}
+{"id": "sr-02244", "text": "How many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-02277", "text": "what's the topmost one?", "how": "exact", "set": "llm_short"}
+{"id": "sr-02325", "text": "Describe the diagram?", "how": "exact", "set": "llm_short"}
+{"id": "sr-02366", "text": "how many arrows are there", "how": "exact", "set": "fresh2"}
+{"id": "sr-02427", "text": "How many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-02519", "text": "undo the last step!", "how": "exact", "set": "llm_short"}
+{"id": "sr-02548", "text": "any cycles?", "how": "exact", "set": "short3_texts"}
+{"id": "sr-02599", "text": "reapply", "how": "exact", "set": "llm_short"}
+{"id": "sr-02682", "text": "Show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-02755", "text": "which shape is the smallest?", "how": "token set", "set": "llm_short"}
+{"id": "sr-02765", "text": "List the triangles", "how": "exact", "set": "llm_short"}
+{"id": "sr-02801", "text": "Show me the rules", "how": "exact", "set": "llm_short"}
+{"id": "sr-02824", "text": "Redo that", "how": "exact", "set": "llm_short"}
+{"id": "sr-02829", "text": "undo!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-02835", "text": "which is the topmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-02846", "text": "any loops", "how": "exact", "set": "llm_short"}
+{"id": "sr-02939", "text": "tidy up!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-02949", "text": "undo the last change", "how": "exact", "set": "llm_short"}
+{"id": "sr-03069", "text": "which shape is the leftmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-03079", "text": "How many arrows are there", "how": "exact", "set": "fresh2"}
+{"id": "sr-03114", "text": "How many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-03131", "text": "undo that", "how": "exact", "set": "short3_texts"}
+{"id": "sr-03185", "text": "Take that back", "how": "exact", "set": "llm_short"}
+{"id": "sr-03350", "text": "undo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-03404", "text": "please align the indigo diamonds horizontally.", "how": "exact", "set": "seen"}
+{"id": "sr-03432", "text": "How many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-03455", "text": "delete everything", "how": "exact", "set": "llm_short"}
+{"id": "sr-03543", "text": "Tidy up.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-03648", "text": "undo!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-03767", "text": "how many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-03775", "text": "take that back", "how": "exact", "set": "llm_short"}
+{"id": "sr-03950", "text": "forget the defaults!", "how": "exact", "set": "llm_short"}
+{"id": "sr-04002", "text": "which shape is the lowest", "how": "exact", "set": "llm_short"}
+{"id": "sr-04012", "text": "which shape has the most connections", "how": "exact", "set": "broad"}
+{"id": "sr-04201", "text": "What is on the canvas?", "how": "exact", "set": "llm_short"}
+{"id": "sr-04221", "text": "Reapply.", "how": "exact", "set": "llm_short"}
+{"id": "sr-04278", "text": "redo!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-04305", "text": "List the stars?", "how": "exact", "set": "llm_short"}
+{"id": "sr-04374", "text": "Redo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-04388", "text": "Undo the last step", "how": "exact", "set": "llm_short"}
+{"id": "sr-04428", "text": "What is on the canvas?", "how": "exact", "set": "llm_short"}
+{"id": "sr-04449", "text": "Forget the rules.", "how": "exact", "set": "llm_short"}
+{"id": "sr-04490", "text": "Redo, thanks", "how": "exact", "set": "llm_short"}
+{"id": "sr-04498", "text": "how many connections are there", "how": "exact", "set": "llm_short"}
+{"id": "sr-04558", "text": "How many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-04611", "text": "describe the diagram", "how": "exact", "set": "llm_short"}
+{"id": "sr-04731", "text": "List the squares?", "how": "exact", "set": "llm_short"}
+{"id": "sr-04838", "text": "redo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-04888", "text": "describe the diagram?", "how": "exact", "set": "llm_short"}
+{"id": "sr-05002", "text": "Describe the diagram?", "how": "exact", "set": "llm_short"}
+{"id": "sr-05124", "text": "Is there a loop", "how": "exact", "set": "llm_short"}
+{"id": "sr-05232", "text": "What's the bottommost one", "how": "exact", "set": "llm_short"}
+{"id": "sr-05368", "text": "tidy up", "how": "exact", "set": "short3_texts"}
+{"id": "sr-05371", "text": "undo the last change", "how": "exact", "set": "llm_short"}
+{"id": "sr-05402", "text": "Undo the last step", "how": "exact", "set": "llm_short"}
+{"id": "sr-05416", "text": "which shape has the most links?", "how": "exact", "set": "short3_texts"}
+{"id": "sr-05444", "text": "which shape is the leftmost", "how": "exact", "set": "llm_short"}
+{"id": "sr-05483", "text": "which is the topmost", "how": "exact", "set": "llm_short"}
+{"id": "sr-05524", "text": "which shape is closest to Ceo?", "how": "exact", "set": "llm_short"}
+{"id": "sr-05711", "text": "What's the bottommost one?", "how": "exact", "set": "llm_short"}
+{"id": "sr-05720", "text": "how many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-05757", "text": "how many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-05804", "text": "how many shapes do we have?", "how": "exact", "set": "heldout_formulations"}
+{"id": "sr-05824", "text": "Redo.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-05902", "text": "Forget the rules!", "how": "exact", "set": "llm_short"}
+{"id": "sr-05960", "text": "Show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-06037", "text": "redo.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-06089", "text": "Is there a cycle?", "how": "exact", "set": "llm_short"}
+{"id": "sr-06326", "text": "show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-06489", "text": "are there any cycles?", "how": "exact", "set": "seen"}
+{"id": "sr-06537", "text": "Take that back", "how": "exact", "set": "llm_short"}
+{"id": "sr-06582", "text": "Is there a hexagon?", "how": "exact", "set": "llm_short"}
+{"id": "sr-06621", "text": "undo the last change.", "how": "exact", "set": "llm_short"}
+{"id": "sr-06623", "text": "take that back", "how": "exact", "set": "llm_short"}
+{"id": "sr-06700", "text": "undo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-06812", "text": "How many arrows are there", "how": "exact", "set": "fresh2"}
+{"id": "sr-06827", "text": "align everything vertically.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-06831", "text": "Undo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-06866", "text": "which shape is the leftmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-06882", "text": "erase everything", "how": "exact", "set": "short3_texts"}
+{"id": "sr-06920", "text": "reapply", "how": "exact", "set": "llm_short"}
+{"id": "sr-06921", "text": "redo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-06965", "text": "Take that back.", "how": "exact", "set": "llm_short"}
+{"id": "sr-07057", "text": "How many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07088", "text": "how many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-07112", "text": "How many connections are there", "how": "exact", "set": "llm_short"}
+{"id": "sr-07139", "text": "which is the rightmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07191", "text": "show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07244", "text": "Is there a loop?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07274", "text": "Forget the defaults", "how": "exact", "set": "llm_short"}
+{"id": "sr-07295", "text": "is there a loop?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07315", "text": "Which shape is the largest?", "how": "exact", "set": "hand"}
+{"id": "sr-07328", "text": "Which shape is the largest?", "how": "exact", "set": "hand"}
+{"id": "sr-07345", "text": "delete the stars that are not yellow", "how": "exact", "set": "broad"}
+{"id": "sr-07409", "text": "how many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07435", "text": "how many diamonds do we have?", "how": "exact", "set": "heldout_formulations"}
+{"id": "sr-07679", "text": "describe everything?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07774", "text": "how many arrows are there", "how": "exact", "set": "fresh2"}
+{"id": "sr-07803", "text": "show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07806", "text": "undo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-07811", "text": "Redo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-07908", "text": "show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07945", "text": "what's the leftmost one?", "how": "exact", "set": "llm_short"}
+{"id": "sr-08006", "text": "reapply", "how": "exact", "set": "llm_short"}
+{"id": "sr-08092", "text": "how many diamonds do we have?", "how": "exact", "set": "heldout_formulations"}
+{"id": "sr-08200", "text": "are there any cycles?", "how": "exact", "set": "seen"}
+{"id": "sr-08213", "text": "Which shape is the smallest?", "how": "token set", "set": "llm_short"}
+{"id": "sr-08228", "text": "undo that!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-08253", "text": "Describe everything", "how": "exact", "set": "llm_short"}
+{"id": "sr-08293", "text": "Tidy up", "how": "exact", "set": "short3_texts"}
+{"id": "sr-08313", "text": "Any cycles?", "how": "exact", "set": "short3_texts"}
+{"id": "sr-08318", "text": "redo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-08403", "text": "Are there any cycles?", "how": "exact", "set": "seen"}
+{"id": "sr-08605", "text": "is there a loop?", "how": "exact", "set": "llm_short"}
+{"id": "sr-08630", "text": "Tidy up!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-08642", "text": "Undo the last step!", "how": "exact", "set": "llm_short"}
+{"id": "sr-08784", "text": "Show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-08807", "text": "I want you to redo", "how": "exact", "set": "new_identities"}
+{"id": "sr-08974", "text": "is there a cycle", "how": "exact", "set": "llm_short"}
+{"id": "sr-08988", "text": "tidy up!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-08989", "text": "Which is the topmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-09126", "text": "tidy up", "how": "exact", "set": "short3_texts"}
+{"id": "sr-09166", "text": "How many arrows are there", "how": "exact", "set": "fresh2"}
+{"id": "sr-09239", "text": "What is on the canvas?", "how": "exact", "set": "llm_short"}
+{"id": "sr-09304", "text": "How many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-09370", "text": "undo that!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-09407", "text": "how many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-09511", "text": "how many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-09546", "text": "Which shape is the leftmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-09582", "text": "how many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-09772", "text": "undo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-09815", "text": "redo that!", "how": "exact", "set": "llm_short"}
+{"id": "sr-09861", "text": "undo that!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-10009", "text": "describe the canvas?", "how": "exact", "set": "new_identities"}
+{"id": "sr-10021", "text": "undo the last change", "how": "exact", "set": "llm_short"}
+{"id": "sr-10067", "text": "Undo the last step!", "how": "exact", "set": "llm_short"}
+{"id": "sr-10104", "text": "are there any cycles?", "how": "exact", "set": "seen"}
+{"id": "sr-10143", "text": "reapply", "how": "exact", "set": "llm_short"}
+{"id": "sr-10415", "text": "which one is biggest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-10434", "text": "how many circles do we have?", "how": "exact", "set": "hand"}
+{"id": "sr-10460", "text": "can you add a triangle", "how": "exact", "set": "heldout_formulations"}
+{"id": "sr-10493", "text": "What's the leftmost one?", "how": "exact", "set": "llm_short"}
+{"id": "sr-10513", "text": "Take that back", "how": "exact", "set": "llm_short"}
+{"id": "sr-10540", "text": "what's the leftmost one", "how": "exact", "set": "llm_short"}
+{"id": "sr-10596", "text": "how many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-10622", "text": "Undo that", "how": "exact", "set": "short3_texts"}
+{"id": "sr-10738", "text": "Are there any hexagons", "how": "exact", "set": "broad"}
+{"id": "sr-10749", "text": "Forget the rules", "how": "exact", "set": "llm_short"}
+{"id": "sr-10799", "text": "which shape is the largest?", "how": "exact", "set": "hand"}
+{"id": "sr-10838", "text": "Undo the last step", "how": "exact", "set": "llm_short"}
+{"id": "sr-10886", "text": "Describe the canvas", "how": "exact", "set": "new_identities"}
+{"id": "sr-10935", "text": "what is on the canvas", "how": "exact", "set": "llm_short"}
+{"id": "sr-11098", "text": "undo that!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-11154", "text": "any loops?", "how": "exact", "set": "llm_short"}
+{"id": "sr-11187", "text": "take that back", "how": "exact", "set": "llm_short"}

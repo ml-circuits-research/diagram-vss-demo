@@ -1,0 +1,6116 @@
+{
+ "summary": {
+  "seed": 0,
+  "logic_js": "commit 576e88a",
+  "logic_js_sha256": "f9f2ac617b32694c",
+  "candidates": 12700,
+  "kept_by_rules": 11600,
+  "rejected": 1100,
+  "removed_overlap_exact": {
+   "llm_short": 116,
+   "heldout_formulations": 5,
+   "short3_texts": 42,
+   "hand": 5,
+   "new_identities": 5,
+   "seen": 6,
+   "broad": 4,
+   "fresh2": 13
+  },
+  "removed_overlap_tokenset": {
+   "seen": 1,
+   "llm_short": 3
+  },
+  "near_dup_jaccard08_reported": {
+   "llm_short": 33,
+   "new_identities": 8,
+   "seen": 5,
+   "short3_texts": 9,
+   "short3": 9,
+   "broad": 3,
+   "fresh2": 1,
+   "hand": 1,
+   "heldout_formulations": 2,
+   "blind": 1
+  },
+  "removed_duplicate_texts_within_synth": 566,
+  "topup_messages": 2,
+  "low_cues_after_topup": [],
+  "final": 9162,
+  "final_core": 7822,
+  "final_ops": 1340
+ },
+ "rejects_by_class": {
+  "R 'all' / 'them all' / 'the (whole) diagram' as the object is not read as all shapes ('all' only at the end of a clause)": 247,
+  "R a typo the Rules' spelling step does not fix (capitalised word, tie, or too short)": 129,
+  "C several to one (A and B to C): gold one connect from=A,B; Rules from=A to=B (C lost)": 104,
+  "R 'A to B and B to C' with wire / attach / tie: the second clause is lost (only connect/link/join/hook split, logic.js 1318)": 54,
+  "C connect A and B: gold from=A,B (training majority); Rules from=A to=B": 47,
+  "R verb ellipsis not split (opener before the verb, a position word outside the splitter's list, or a list target)": 45,
+  "R several objects in one create not split (an opener before the verb, logic.js 1310)": 38,
+  "R a clause merged into or split from its neighbour (other)": 33,
+  "C undo twice / 3 times: gold no count (no key in the conventions); Rules count": 28,
+  "C no axis word: gold no axis; Rules axis=horizontal (default)": 26,
+  "R one-letter names are not used by the clause splitters (logic.js 1315)": 25,
+  "R a rule with 'from now on' at the end is not read": 22,
+  "R rename followed by more words (thanks, please, then ...): the new name is read only at the end of the clause": 21,
+  "R spelling step: 'point' -> 'paint', 'part' -> 'park'": 21,
+  "R 'show me the connections': read as neighbors without a target": 21,
+  "R 'set the outline/border of X to C' read as a colour": 21,
+  "R 'what is the shape of X': 'the shape' becomes a description, the question is read as list": 20,
+  "G/R other (read the row)": 20,
+  "R 'what's written on X': 'written' corrected to the verb 'write'": 19,
+  "R a list of three names before a value ('paint A, B and C red', 'slide A, B and C up') is split into two requests": 18,
+  "R 'put the label \"x\" on <a description>' is read as a move (with a name it is a label)": 16,
+  "R 'is there a connection between A and B': read as exists": 16,
+  "R 'draw a two-way arrow ...': a hyphenated word before the arrow noun hides it (create)": 15,
+  "R 'label it \"x\"': 'label it' is taken as the label cue, the pronoun is lost": 14,
+  "R 'is B downstream of A': from/to read in text order": 14,
+  "R notColor of a described set in list/count is dropped": 12,
+  "R a verbless placement with a position word PLACE_ONLY does not list (by, around, close to, left side of, ...)": 11,
+  "C a shape filter on extreme: gold superlative only (conventions); Rules add shape": 9,
+  "R the word 'edge' in 'along the right edge' makes count/list count connections": 9,
+  "R group membership / groupOf not read (a closer after the group name, 'part of')": 7,
+  "R a rule frame not read": 4,
+  "R an undo / redo / forget clause whose word is not a verb cue (revert, take that back, cancel, ...) is merged into the next clause": 4,
+  "R an arrow named 'A - B' (spaced dash) in a question or with a typo is not read": 4,
+  "R 'both ways' after a description: 'both' is read as the pronoun 'them'": 3,
+  "R a question form read as another question": 2,
+  "R an unquoted one-word label corrected towards a cue word ('end' -> 'send', 'hot' -> 'dot')": 1
+ },
+ "rejects_by_cause": {
+  "requests: rules 1, gold 2": 113,
+  "requests: rules 0, gold 1": 77,
+  "command:align: rules miss target": 58,
+  "command:distribute: rules miss target": 51,
+  "command:arrange: rules miss target": 46,
+  "requests: rules 2, gold 3": 34,
+  "act: gold question:property, rules question:list": 21,
+  "requests: rules 1, gold 3": 20,
+  "#1 command:distribute: rules miss target": 19,
+  "requests: rules 2, gold 1": 18,
+  "command:rename: rules miss name": 18,
+  "#2 command:distribute: rules miss target": 17,
+  "requests: rules 3, gold 2": 14,
+  "act: gold question:connected, rules question:exists": 13,
+  "#2 command:label: rules miss target": 12,
+  "act: gold command:connect, rules command:create": 12,
+  "#2 command:align: rules miss target": 12,
+  "act: gold command:label, rules command:move": 11,
+  "act: gold question:list, rules question:neighbors": 11,
+  "#3 command:distribute: rules miss target": 10,
+  "command:align: rules add axis=horizontal": 10,
+  "#2 act: gold question:property, rules question:list": 10,
+  "#1 command:align: rules miss target": 10,
+  "command:distribute: rules add axis=horizontal": 10,
+  "#1 act: gold question:property, rules question:list": 10,
+  "act: gold question:groupOf, rules question:check": 10,
+  "act: gold question:neighbors, rules question:list": 8,
+  "command:undo: rules add count=2": 8,
+  "command:undo: rules add count=3": 8,
+  "#1 command:arrange: rules miss target": 8,
+  "question:list: rules miss notColor": 7,
+  "#1 command:undo: rules add count=2": 6,
+  "#2 act: gold question:list, rules question:neighbors": 5,
+  "requests: rules 4, gold 3": 5,
+  "#1 act: gold question:list, rules question:neighbors": 5,
+  "#2 command:arrange: rules miss target": 5,
+  "act: gold command:group, rules command:move": 5,
+  "command:distribute: rules miss target; rules add axis=horizontal": 4,
+  "#1 question:list: rules miss notColor": 4,
+  "#2 question:extreme: rules miss shape": 4,
+  "question:count: rules add kind=edge": 4,
+  "#1 question:extreme: rules miss shape": 3,
+  "#3 command:label: rules miss target": 3,
+  "#1 act: gold command:label, rules command:move": 3,
+  "#2 act: gold command:label, rules command:move": 3,
+  "#3 command:align: rules miss target": 3,
+  "#1 command:undo: rules add count=3": 3,
+  "command:set: rules miss outline; rules add color=brown": 3,
+  "command:set: rules miss outline; rules add color=gold": 3,
+  "act: gold command:group, rules command:create": 3,
+  "#2 command:rename: rules miss name": 2,
+  "#3 act: gold question:property, rules question:list": 2,
+  "#3 command:arrange: rules miss target": 2,
+  "#2 act: gold question:connected, rules question:exists": 2,
+  "#2 command:connect: rules miss arrow": 2,
+  "question:list: rules add kind=edge": 2,
+  "#1 command:distribute: rules add axis=horizontal": 2,
+  "#1 question:count: rules add kind=edge": 2,
+  "requests: rules 0, gold 2": 2,
+  "#2 act: gold question:neighbors, rules question:list": 2,
+  "#1 question:list: rules add kind=edge": 2,
+  "#1 act: gold command:connect, rules command:create": 2,
+  "command:align: rules miss target; rules add axis=horizontal": 2,
+  "#3 command:undo: rules add count=3": 2,
+  "#3 act: gold question:connected, rules question:exists": 2,
+  "#2 command:move: rules miss target": 2,
+  "question:extreme: rules miss shape": 2,
+  "command:set: rules miss outline; rules add color=lime": 2,
+  "act: gold question:property, rules question:connected": 2,
+  "command:set: rules miss outline; rules add color=white": 2,
+  "command:connect: to: gold c, rules x; from: gold f,x, rules f": 1,
+  "command:connect: rules add to=winger; from: gold te,winger, rules te": 1,
+  "#2 command:connect: rules miss pairing; rules add to=draft; from: gold decide,draft,submit, rules decide": 1,
+  "#1 command:connect: to: gold pantry, rules garage; from: gold studio,garage, rules studio": 1,
+  "command:connect: rules add to=retailer; from: gold courier,retailer, rules courier": 1,
+  "#2 question:path: from: gold closed, rules loading; to: gold loading, rules closed": 1,
+  "#2 command:connect: to: gold villain, rules epilogue; from: gold climax,epilogue, rules climax": 1,
+  "command:connect: to: gold resistor, rules diode; from: gold battery,diode, rules battery": 1,
+  "command:connect: rules add to=c; from: gold h,c, rules h": 1,
+  "command:connect: rules miss pairing; rules add to=ingest; from: gold loader,ingest,etl, rules loader": 1,
+  "#1 command:connect: to: gold mom, rules bob; from: gold aunt,bob, rules aunt": 1,
+  "command:connect: rules miss pairing; rules add to=atom; from: gold nucleus,atom,moon, rules nucleus": 1,
+  "command:connect: rules miss pairing; rules add to=billing; from: gold db,billing,queue, rules db": 1,
+  "#3 command:distribute: target: gold mention(quantifier=all), rules $new": 1,
+  "#3 command:connect: rules add to=sensor; from: gold motor,sensor, rules motor": 1,
+  "#2 command:set: rules miss target": 1,
+  "command:connect: to: gold vision, rules team; from: gold launch,team, rules launch": 1,
+  "command:connect: rules add to=gateway; from: gold nas,gateway, rules nas": 1,
+  "#1 command:connect: rules add to=metrics; from: gold branding,metrics, rules branding": 1,
+  "command:connect: to: gold rack3, rules router; from: gold gateway,router, rules gateway": 1,
+  "command:connect: rules add to=ticket9; from: gold doing,ticket9, rules doing": 1,
+  "#1 command:connect: to: gold oven, rules butter; from: gold batter,butter, rules batter": 1,
+  "command:connect: rules miss pairing; rules add to=q; from: gold x,q,z, rules x": 1,
+  "#1 command:connect: rules add to=vision; from: gold users,vision, rules users": 1,
+  "command:connect: to: gold heron, rules fish; from: gold algae,fish, rules algae": 1,
+  "#1 command:connect: rules add to=porch; from: gold closet,porch, rules closet": 1,
+  "command:connect: to: gold armed, rules open2; from: gold booting,open2, rules booting": 1,
+  "#2 command:align: target: gold mention(quantifier=all), rules mention(color=pink,quantifier=all,shape=diamond)": 1,
+  "command:connect: rules add to=coil; from: gold resistor,coil, rules resistor": 1,
+  "#1 command:rename: rules miss name": 1,
+  "command:connect: to: gold task7, rules blocked; from: gold story,blocked, rules story": 1,
+  "command:connect: to: gold legal, rules sales; from: gold ops,sales, rules ops": 1,
+  "#1 command:connect: to: gold check, rules approve; from: gold decide,approve, rules decide": 1,
+  "command:create: name: gold hazel, rules haezl": 1,
+  "#2 question:path: from: gold queue, rules bucket; to: gold bucket, rules queue": 1,
+  "command:create: rules miss name; anchor: gold mention(shape=circle), rules umbra": 1,
+  "#2 command:connect: rules add to=resistor; from: gold fuse,resistor, rules fuse": 1,
+  "command:connect: to: gold ingress, rules lambda; from: gold billing,lambda, rules billing": 1,
+  "command:connect: to: gold pantry, rules kitchen; from: gold office,kitchen, rules office": 1,
+  "#1 command:rename: name: gold umbra, rules ubbra": 1,
+  "#2 command:connect: rules miss pairing; rules add to=led; from: gold capacitor,led,diode, rules capacitor": 1,
+  "command:connect: rules miss pairing; rules add to=pluto; from: gold jupiter,pluto,comet, rules jupiter": 1,
+  "command:connect: to: gold flour, rules yeast; from: gold cream,yeast, rules cream": 1,
+  "command:connect: rules add to=c2; from: gold vcc,c2, rules vcc": 1,
+  "#2 question:exists: rules miss position,anchor; rules add target=armed": 1,
+  "command:connect: rules miss pairing; rules add to=capacitor; from: gold led,capacitor,diode, rules led": 1,
+  "command:connect: rules add to=search; from: gold toolbar,search, rules toolbar": 1,
+  "command:connect: to: gold squid, rules krill; from: gold otter,krill, rules otter": 1,
+  "question:path: from: gold sun, rules orbit; to: gold orbit, rules sun": 1,
+  "command:connect: to: gold queue, rules bucket; from: gold cdn,bucket, rules cdn": 1,
+  "#3 command:align: rules add axis=horizontal": 1,
+  "#1 command:label: rules add color=gold; label: gold cold, rules gold": 1,
+  "#2 command:connect: rules miss pairing; rules add to=twist; from: gold prologue,twist,villain, rules prologue": 1,
+  "command:connect: to: gold validate, rules parse; from: gold ingest,parse, rules ingest": 1,
+  "#2 command:connect: to: gold dungeon, rules volcano; from: gold harbor,volcano, rules harbor": 1,
+  "command:connect: to: gold bug42, rules sprint2; from: gold sprint1,sprint2, rules sprint1": 1,
+  "command:connect: rules miss pairing; rules add to=monitor; from: gold sink,monitor,source, rules sink": 1,
+  "command:connect: to: gold icing, rules flour; from: gold sugar,flour, rules sugar": 1,
+  "command:connect: rules miss pairing; rules add to=stop2; from: gold start,stop2,decide, rules start": 1,
+  "command:connect: rules miss pairing; rules add to=process; from: gold finish,process,reject, rules finish": 1,
+  "#1 command:connect: to: gold gateway, rules lan; from: gold switch1,lan, rules switch1": 1,
+  "question:path: from: gold warehouse, rules dock; to: gold dock, rules warehouse": 1,
+  "command:connect: to: gold deploy, rules train; from: gold enrich,train, rules enrich": 1,
+  "#2 act: gold command:swap, rules command:distribute": 1,
+  "command:connect: to: gold striker, rules guard; from: gold pivot,guard, rules pivot": 1,
+  "command:connect: to: gold epic, rules doing; from: gold sprint1,doing, rules sprint1": 1,
+  "command:connect: rules miss pairing; rules add to=led; from: gold sensor,led,relay, rules sensor": 1,
+  "command:connect: rules add to=closed; from: gold open2,closed, rules open2": 1,
+  "#2 command:align: target: gold mention(quantifier=all), rules mention(quantifier=all,shape=diamond)": 1,
+  "#2 command:connect: to: gold budget, rules vision; from: gold team,vision, rules team": 1,
+  "question:path: from: gold deployed, rules ticket9; to: gold ticket9, rules deployed": 1,
+  "#1 command:connect: rules miss pairing; rules add to=tackle; from: gold qb,tackle,guard, rules qb": 1,
+  "#2 command:connect: rules add to=etl; from: gold export,etl, rules export": 1,
+  "question:property: target: gold approve, rules apptove": 1,
+  "question:path: from: gold running, rules error; to: gold error, rules running": 1,
+  "#2 command:connect: to: gold y, rules c; from: gold q,c, rules q": 1,
+  "#2 command:connect: rules add to=modem; from: gold nas,modem, rules nas": 1,
+  "command:connect: rules miss pairing; rules add to=sensor; from: gold ground,sensor,diode, rules ground": 1,
+  "command:connect: to: gold attic, rules pantry; from: gold cellar,pantry, rules cellar": 1,
+  "command:connect: rules miss pairing; rules add to=castle; from: gold dungeon,castle,swamp, rules dungeon": 1,
+  "command:connect: to: gold finance, rules legal; from: gold cfo,legal, rules cfo": 1,
+  "#1 command:connect: to: gold saturn, rules jupiter; from: gold cell,jupiter, rules cell": 1,
+  "command:connect: to: gold mom, rules uncle; from: gold emma,uncle, rules emma": 1,
+  "command:connect: rules miss pairing; rules add to=e; from: gold b,e,y, rules b": 1,
+  "#2 command:rename: name: gold sage, rules pod2; target: gold pod2, rules mention()": 1,
+  "#2 command:connect: to: gold prologue, rules epilogue; from: gold ending,epilogue, rules ending": 1,
+  "#1 command:rename: name: gold lotus, rules ltous": 1,
+  "#3 command:rename: name: gold aster, rules testing; target: gold testing, rules mention()": 1,
+  "#1 command:connect: rules miss pairing; rules add to=launch; from: gold scope,launch,pricing, rules scope": 1,
+  "#2 act: gold command:connect, rules command:create": 1,
+  "#2 command:connect: rules miss pairing; rules add to=cell; from: gold venus,cell,orbit, rules venus": 1,
+  "command:connect: rules add to=pivot; from: gold keeper,pivot, rules keeper": 1,
+  "#2 command:connect: rules add to=ending; from: gold prologue,ending, rules prologue": 1,
+  "#2 command:connect: to: gold olivia, rules emma; from: gold sophia,emma, rules sophia": 1,
+  "#2 command:connect: rules miss pairing; rules add to=sophia; from: gold dad,sophia,grandma, rules dad": 1,
+  "#2 command:connect: rules miss pairing; rules add to=algae; from: gold seal,algae,fish, rules seal": 1,
+  "command:connect: to: gold salt, rules bowl; from: gold butter,bowl, rules butter": 1,
+  "#2 command:connect: to: gold avatar, rules button1; from: gold footer,button1, rules footer": 1,
+  "#1 command:connect: rules miss pairing; rules add to=intro; from: gold prologue,intro,scene2, rules prologue": 1,
+  "command:connect: rules add to=bug42; from: gold epic,bug42, rules epic": 1,
+  "command:connect: to: gold deployed, rules backlog; from: gold doing,backlog, rules doing": 1,
+  "command:connect: rules add to=users; from: gold idea,users, rules idea": 1,
+  "command:connect: to: gold check, rules reject; from: gold decide,reject, rules decide": 1,
+  "command:connect: to: gold pantry, rules office; from: gold garage,office, rules garage": 1,
+  "#2 command:connect: to: gold dhcp, rules modem; from: gold vpn,modem, rules vpn": 1,
+  "command:connect: rules add to=scene1; from: gold climax,scene1, rules climax": 1,
+  "question:path: from: gold diode, rules resistor; to: gold resistor, rules diode": 1,
+  "command:connect: to: gold studio, rules lounge; from: gold office,lounge, rules office": 1,
+  "command:connect: to: gold bathroom, rules studio; from: gold kitchen,studio, rules kitchen": 1,
+  "#1 command:connect: to: gold capacitor, rules fuse; from: gold resistor,fuse, rules resistor": 1,
+  "command:connect: to: gold yeast, rules batter; from: gold flour,batter, rules flour": 1,
+  "command:create: name: gold maple, rules malpe": 1,
+  "command:rename: name: gold kepler, rules kepker": 1,
+  "#1 command:connect: rules add to=cave; from: gold village,cave, rules village": 1,
+  "#2 command:connect: rules miss pairing; rules add to=sprint2; from: gold testing,sprint2,backlog, rules testing": 1,
+  "command:connect: rules miss pairing; rules add to=d; from: gold p,d,k, rules p": 1,
+  "command:connect: to: gold liam, rules uncle; from: gold alice,uncle, rules alice": 1,
+  "#1 command:connect: to: gold manager, rules intern; from: gold hr,intern, rules hr": 1,
+  "#2 command:rename: name: gold vault, rules vult": 1,
+  "command:connect: rules miss pairing; rules add to=decide; from: gold verify,decide,check, rules verify": 1,
+  "#1 command:move: rules miss position,anchor": 1,
+  "#3 act: gold command:connect, rules command:create": 1,
+  "command:connect: to: gold h, rules p; from: gold m,p, rules m": 1,
+  "#2 command:connect: rules miss pairing; rules add to=approve; from: gold process,approve,decide, rules process": 1,
+  "#2 command:align: rules add axis=horizontal": 1,
+  "#1 command:create: label: gold cold, rules gold": 1,
+  "#3 question:list: rules miss notColor": 1,
+  "command:connect: to: gold castle, rules swamp; from: gold camp,swamp, rules camp": 1,
+  "#1 command:connect: rules add to=bridge; from: gold mine,bridge, rules mine": 1,
+  "command:connect: rules add to=f; from: gold e,f, rules e": 1,
+  "command:connect: to: gold draft, rules begin; from: gold reject,begin, rules reject": 1,
+  "command:connect: to: gold sprint2, rules testing; from: gold backlog,testing, rules backlog": 1,
+  "command:connect: rules miss pairing; rules add to=header; from: gold search,header,footer, rules search": 1,
+  "command:connect: to: gold metrics, rules risks; from: gold team,risks, rules team": 1,
+  "#2 command:connect: to: gold sun, rules jupiter; from: gold earth,jupiter, rules earth": 1,
+  "#2 command:connect: rules miss pairing; rules add to=stopped; from: gold paused,stopped,ready, rules paused": 1,
+  "#1 command:connect: to: gold vision, rules budget; from: gold goals,budget, rules goals": 1,
+  "#2 command:connect: rules add to=bathroom; from: gold closet,bathroom, rules closet": 1,
+  "#1 command:connect: rules add to=ceo; from: gold cfo,ceo, rules cfo": 1,
+  "#2 command:connect: rules miss pairing; rules add to=loading; from: gold running,loading,waiting, rules running": 1,
+  "command:connect: to: gold crab, rules fish; from: gold seal,fish, rules seal": 1,
+  "#2 question:path: from: gold mention(color=indigo,recency=newest,shape=diamond), rules validate; to: gold validate, rules mention(color=indigo,recency=newest,shape=diamond)": 1,
+  "#2 command:connect: rules add to=ceo; from: gold lead,ceo, rules lead": 1,
+  "#2 command:align: target: gold mention(quantifier=all), rules vision,risks": 1,
+  "#2 command:connect: to: gold api, rules queue; from: gold lambda,queue, rules lambda": 1,
+  "command:connect: to: gold diode, rules c2; from: gold relay,c2, rules relay": 1,
+  "command:connect: to: gold z, rules p; from: gold k,p, rules k": 1,
+  "#2 command:connect: to: gold support, rules lead; from: gold cto,lead, rules cto": 1,
+  "#3 command:connect: to: gold icing, rules flour; from: gold bowl,flour, rules bowl": 1,
+  "command:connect: rules miss pairing; rules add to=sprint2; from: gold testing,sprint2,blocked, rules testing": 1,
+  "command:connect: rules add to=kelp; from: gold heron,kelp, rules heron": 1,
+  "command:connect: rules miss pairing; rules add to=cdn; from: gold worker,cdn,db, rules worker": 1,
+  "#2 command:connect: rules add to=grandpa; from: gold sophia,grandpa, rules sophia": 1,
+  "command:connect: to: gold b, rules z; from: gold x,z, rules x": 1,
+  "command:connect: rules miss pairing; rules add to=camp; from: gold village,camp,dungeon, rules village": 1,
+  "question:path: from: gold dough, rules yeast; to: gold yeast, rules dough": 1,
+  "#1 command:connect: to: gold kitchen, rules hallway; from: gold studio,hallway, rules studio": 1,
+  "#1 command:connect: rules add to=risks; from: gold idea,risks, rules idea": 1,
+  "command:create: rules miss name; anchor: gold mention(shape=hexagon), rules ember": 1,
+  "command:connect: to: gold coil, rules sensor; from: gold capacitor,sensor, rules capacitor": 1,
+  "#2 command:undo: rules add target=mention(color=yellow,quantifier=all)": 1,
+  "command:connect: to: gold fish, rules kelp; from: gold algae,kelp, rules algae": 1,
+  "command:set: rules miss size": 1,
+  "#2 command:connect: to: gold attic, rules hallway; from: gold cellar,hallway, rules cellar": 1,
+  "#1 command:connect: rules miss pairing; rules add to=scene3; from: gold intro,scene3,prologue, rules intro": 1,
+  "#1 command:connect: rules miss pairing; rules add to=blocked; from: gold deployed,blocked,doing, rules deployed": 1,
+  "command:move: rules add name=reay; target: gold relay, rules mention()": 1,
+  "#1 fact: rules miss color": 1,
+  "command:connect: to: gold ticket9, rules doing; from: gold blocked,doing, rules blocked": 1,
+  "command:connect: rules miss pairing; rules add to=branding; from: gold budget,branding,scope, rules budget": 1,
+  "command:connect: to: gold menu, rules navbar; from: gold footer,navbar, rules footer": 1,
+  "command:connect: rules add to=e; from: gold g,e, rules g": 1,
+  "command:connect: rules miss pairing; rules add to=b; from: gold g,b,m, rules g": 1,
+  "#2 question:path: from: gold sun, rules earth; to: gold earth, rules sun": 1,
+  "#3 command:connect: rules miss pairing; rules add to=squid; from: gold kelp,squid,heron, rules kelp": 1,
+  "command:move: rules miss position,anchor; target: gold mention(color=orange,quantifier=all,shape=square), rules mention(color=orange,quantifier=all,shape=square),hr": 1,
+  "#2 command:create: name: gold jasper, rules japer": 1,
+  "command:connect: rules add to=g; from: gold d,g, rules d": 1,
+  "#2 question:path: from: gold sensor, rules coil; to: gold coil, rules sensor": 1,
+  "question:path: from: gold stop2, rules check; to: gold check, rules stop2": 1,
+  "#1 command:connect: rules miss pairing; rules add to=bob; from: gold grandma,bob,olivia, rules grandma": 1,
+  "#1 command:connect: to: gold waiting, rules paused; from: gold loading,paused, rules loading": 1,
+  "command:connect: rules miss pairing; rules add to=plankton; from: gold algae,plankton,crab, rules algae": 1,
+  "command:connect: rules miss pairing; rules add to=squid; from: gold seal,squid,fish, rules seal": 1,
+  "command:connect: rules miss pairing; rules add to=safety; from: gold rb,safety,keeper, rules rb": 1,
+  "command:rename: name: gold willow, rules wiklow": 1,
+  "#1 command:connect: rules add to=intro; from: gold scene3,intro, rules scene3": 1,
+  "#2 command:connect: to: gold whisk, rules oven; from: gold sugar,oven, rules sugar": 1,
+  "command:connect: to: gold epic, rules sprint2; from: gold testing,sprint2, rules testing": 1,
+  "command:connect: rules miss pairing; rules add to=intro; from: gold scene3,intro,hero, rules scene3": 1,
+  "command:connect: to: gold recruiting, rules marketing; from: gold ops,marketing, rules ops": 1,
+  "#2 command:connect: rules add to=dhcp; from: gold gateway,dhcp, rules gateway": 1,
+  "command:connect: to: gold factory, rules depot; from: gold plant,depot, rules plant": 1,
+  "#2 command:connect: rules miss from": 1,
+  "#2 command:connect: to: gold navbar, rules button1; from: gold sidebar,button1, rules sidebar": 1,
+  "#2 command:align: target: gold mention(quantifier=all), rules mention(color=green,quantifier=all,shape=star)": 1,
+  "command:connect: rules add to=dhcp; from: gold lan,dhcp, rules lan": 1,
+  "#1 command:connect: to: gold coil, rules resistor; from: gold battery,resistor, rules battery": 1,
+  "command:rename: name: gold inbox, rules inobx": 1,
+  "command:connect: to: gold deploy, rules etl; from: gold sink,etl, rules sink": 1,
+  "command:connect: to: gold intern, rules manager; from: gold hr,manager, rules hr": 1,
+  "#1 command:connect: rules add to=parse; from: gold clean,parse, rules clean": 1,
+  "command:connect: rules add to=check; from: gold approve,check, rules approve": 1,
+  "command:connect: to: gold battery, rules led; from: gold resistor,led, rules resistor": 1,
+  "command:connect: rules miss pairing; rules add to=port; from: gold hub,port,warehouse, rules hub": 1,
+  "command:connect: to: gold c, rules d; from: gold q,d, rules q": 1,
+  "#2 command:connect: rules miss pairing; rules add to=uplink; from: gold firewall,uplink,vpn, rules firewall": 1,
+  "#3 act: gold question:list, rules question:neighbors": 1,
+  "#1 command:connect: rules miss from": 1,
+  "#2 command:connect: to: gold team, rules metrics; from: gold timeline,metrics, rules timeline": 1,
+  "#3 command:connect: to: gold pricing, rules launch; from: gold risks,launch, rules risks": 1,
+  "#1 command:connect: rules miss pairing; rules add to=pricing; from: gold launch,pricing,timeline, rules launch": 1,
+  "#1 command:connect: rules add to=p; from: gold f,p, rules f": 1,
+  "command:rename: rules miss target,name": 1,
+  "command:connect: rules miss pairing; rules add to=process; from: gold verify,process,finish, rules verify": 1,
+  "command:connect: rules miss pairing; rules add to=nucleus; from: gold jupiter,nucleus,saturn, rules jupiter": 1,
+  "#1 command:connect: to: gold dock, rules supplier; from: gold plant,supplier, rules plant": 1,
+  "command:connect: to: gold ops, rules manager; from: gold sales,manager, rules sales": 1,
+  "act: gold command:swap, rules command:set": 1,
+  "act: gold question:list, rules question:describe": 1,
+  "#2 command:undo: rules add target=c2": 1,
+  "command:connect: rules miss pairing; rules add to=search; from: gold navbar,search,header, rules navbar": 1,
+  "#1 command:connect: to: gold attic, rules studio; from: gold porch,studio, rules porch": 1,
+  "#2 command:connect: rules add to=wr1; from: gold tackle,wr1, rules tackle": 1,
+  "question:path: from: gold grandma, rules alice; to: gold alice, rules grandma": 1,
+  "#2 command:connect: to: gold recruiting, rules legal; from: gold hr,legal, rules hr": 1,
+  "#1 command:connect: to: gold carol, rules uncle; from: gold olivia,uncle, rules olivia": 1,
+  "command:connect: to: gold ceo, rules coo; from: gold hr,coo, rules hr": 1,
+  "#2 command:connect: to: gold depot, rules retailer; from: gold customs,retailer, rules customs": 1,
+  "#2 command:delete: rules miss target": 1,
+  "#3 question:check: rules miss position; target: gold wr2, rules wr2,center": 1,
+  "question:check: target: gold stopped, rules sopped": 1,
+  "command:label: rules miss target": 1,
+  "#2 command:set: rules miss outline; rules add color=lime": 1,
+  "command:label: rules miss from,to; rules add target=s3,redis": 1,
+  "#1 command:set: rules miss outline; rules add color=magenta": 1,
+  "#1 command:set: rules miss outline; rules add color=cyan": 1,
+  "#1 command:set: rules miss outline; rules add color=brown": 1,
+  "#2 act: gold command:create, rules command:delete": 1,
+  "command:set: rules miss outline; rules add color=teal": 1,
+  "command:create: rules miss outline": 1,
+  "command:set: rules miss outline; rules add color=gray": 1,
+  "command:set: rules miss outline; rules add color=purple": 1,
+  "command:set: rules miss outline; rules add color=red": 1,
+  "command:set: rules miss outline; rules add color=magenta": 1,
+  "command:group: name: gold cluster, rules cluser": 1,
+  "command:set: rules miss outline; rules add color=blue": 1,
+  "command:set: rules miss outline; rules add color=black": 1,
+  "act: gold command:label, rules command:connect": 1,
+  "command:set: rules miss outline; rules add color=cyan": 1,
+  "command:set: rules miss target": 1,
+  "command:connect: rules miss pairing; rules add to=vpn; from: gold proxy,vpn,modem, rules proxy": 1,
+  "#1 command:connect: rules add to=lead; from: gold cto,lead, rules cto": 1,
+  "command:rename: rules miss target": 1,
+  "#1 act: gold question:neighbors, rules question:list": 1,
+  "#2 command:connect: to: gold draft, rules review; from: gold retry,review, rules retry": 1,
+  "command:connect: rules miss pairing; rules add to=warehouse; from: gold customs,warehouse,supplier, rules customs": 1,
+  "#1 command:connect: rules miss pairing; rules add to=qb; from: gold tackle,qb,wr1, rules tackle": 1,
+  "#2 command:connect: to: gold noah, rules bob; from: gold aunt,bob, rules aunt": 1,
+  "#3 command:connect: rules miss arrow": 1,
+  "#2 question:path: from: gold clean, rules loader; to: gold loader, rules clean": 1,
+  "question:check: rules miss target": 1,
+  "#2 command:undo: rules add count=2": 1,
+  "#1 command:connect: rules add to=camp; from: gold dungeon,camp, rules dungeon": 1,
+  "command:connect: to: gold bedroom, rules kitchen; from: gold office,kitchen, rules office": 1,
+  "#1 command:connect: rules miss pairing; rules add to=closet; from: gold cellar,closet,pantry, rules cellar": 1,
+  "#2 command:connect: from: gold db,redis,billing,worker, rules db,redis,worker": 1,
+  "#1 command:connect: rules miss pairing; rules add to=e; from: gold h,e,d, rules h": 1,
+  "command:connect: to: gold navbar, rules card; from: gold header,card, rules header": 1,
+  "#1 command:connect: to: gold flour, rules sugar; from: gold oven,sugar, rules oven": 1,
+  "command:connect: to: gold vpn, rules dns; from: gold lan,dns, rules lan": 1,
+  "command:connect: rules add to=krill; from: gold whale,krill, rules whale": 1,
+  "command:rename: name: gold nimbus, rules cdn; target: gold cdn, rules mention()": 1,
+  "command:connect: rules add to=alice; from: gold liam,alice, rules liam": 1,
+  "command:connect: rules miss pairing; rules add to=forest; from: gold temple,forest,village, rules temple": 1,
+  "#2 command:connect: rules add to=cache; from: gold api,cache, rules api": 1,
+  "#2 command:connect: rules add to=winger; from: gold tackle,winger, rules tackle": 1,
+  "#1 command:align: rules add axis=horizontal": 1,
+  "command:connect: to: gold algae, rules seal; from: gold krill,seal, rules krill": 1,
+  "#1 command:connect: to: gold whisk, rules icing; from: gold mix,icing, rules mix": 1,
+  "#2 command:undo: rules add target=$new": 1,
+  "#1 command:connect: rules miss pairing; rules add to=booting; from: gold idle,booting,halted, rules idle": 1,
+  "#2 command:connect: to: gold rack3, rules router; from: gold lan,router, rules lan": 1,
+  "#3 command:arrange: target: gold mention(quantifier=all), rules mention(color=gold,quantifier=all)": 1,
+  "command:connect: rules miss pairing; rules add to=support; from: gold marketing,support,intern, rules marketing": 1,
+  "#3 command:connect: to: gold bowl, rules yeast; from: gold salt,yeast, rules salt": 1,
+  "#1 command:connect: to: gold nas, rules gateway; from: gold switch1,gateway, rules switch1": 1,
+  "#1 command:connect: to: gold mix, rules flour; from: gold dough,flour, rules dough": 1,
+  "#1 command:connect: to: gold users, rules team; from: gold vision,team, rules vision": 1,
+  "command:create: name: gold zenith, rules zrnith": 1,
+  "command:connect: rules miss pairing; rules add to=comet; from: gold jupiter,comet,sun, rules jupiter": 1,
+  "command:connect: to: gold begin, rules process; from: gold finish,process, rules finish": 1,
+  "#2 command:distribute: rules add axis=horizontal": 1,
+  "#1 command:connect: to: gold striker, rules tackle; from: gold safety,tackle, rules safety": 1,
+  "command:connect: rules miss to": 1,
+  "command:connect: rules add to=redis; from: gold api,redis, rules api": 1,
+  "command:connect: rules miss pairing; rules add to=proxy; from: gold uplink,proxy,vpn, rules uplink": 1,
+  "command:connect: to: gold idea, rules budget; from: gold research,budget, rules research": 1,
+  "command:connect: to: gold uplink, rules ap2; from: gold modem,ap2, rules modem": 1,
+  "command:connect: rules add to=team; from: gold idea,team, rules idea": 1
+ },
+ "requests_per_act_final": {
+  "command:align": 190,
+  "command:arrange": 301,
+  "command:connect": 871,
+  "command:create": 1806,
+  "command:delete": 613,
+  "command:disconnect": 273,
+  "command:distribute": 178,
+  "command:duplicate": 231,
+  "command:forget": 65,
+  "command:group": 205,
+  "command:label": 534,
+  "command:move": 1203,
+  "command:redo": 52,
+  "command:rename": 180,
+  "command:resize": 295,
+  "command:set": 1315,
+  "command:swap": 161,
+  "command:toBack": 143,
+  "command:toFront": 200,
+  "command:undo": 38,
+  "command:ungroup": 78,
+  "fact": 322,
+  "question:check": 380,
+  "question:connected": 119,
+  "question:count": 290,
+  "question:cycle": 75,
+  "question:degree": 90,
+  "question:describe": 88,
+  "question:exists": 204,
+  "question:extreme": 264,
+  "question:groupOf": 40,
+  "question:list": 242,
+  "question:members": 43,
+  "question:nearest": 163,
+  "question:neighbors": 113,
+  "question:path": 112,
+  "question:property": 323,
+  "question:reachable": 90,
+  "question:rules": 70,
+  "rule": 204
+ },
+ "tags": {
+  "act:align": {
+   "generated": 349,
+   "kept": 233,
+   "final": 189
+  },
+  "act:arrange": {
+   "generated": 457,
+   "kept": 374,
+   "final": 296
+  },
+  "act:check": {
+   "generated": 457,
+   "kept": 438,
+   "final": 378
+  },
+  "act:connect": {
+   "generated": 1209,
+   "kept": 942,
+   "final": 782
+  },
+  "act:connected": {
+   "generated": 168,
+   "kept": 145,
+   "final": 119
+  },
+  "act:count": {
+   "generated": 447,
+   "kept": 426,
+   "final": 287
+  },
+  "act:create": {
+   "generated": 1955,
+   "kept": 1857,
+   "final": 1578
+  },
+  "act:cycle": {
+   "generated": 160,
+   "kept": 153,
+   "final": 75
+  },
+  "act:degree": {
+   "generated": 119,
+   "kept": 114,
+   "final": 90
+  },
+  "act:delete": {
+   "generated": 803,
+   "kept": 754,
+   "final": 603
+  },
+  "act:describe": {
+   "generated": 160,
+   "kept": 153,
+   "final": 88
+  },
+  "act:disconnect": {
+   "generated": 377,
+   "kept": 359,
+   "final": 272
+  },
+  "act:distribute": {
+   "generated": 357,
+   "kept": 221,
+   "final": 178
+  },
+  "act:duplicate": {
+   "generated": 300,
+   "kept": 283,
+   "final": 230
+  },
+  "act:exists": {
+   "generated": 280,
+   "kept": 268,
+   "final": 203
+  },
+  "act:extreme": {
+   "generated": 478,
+   "kept": 455,
+   "final": 263
+  },
+  "act:fact": {
+   "generated": 397,
+   "kept": 381,
+   "final": 320
+  },
+  "act:forget": {
+   "generated": 136,
+   "kept": 129,
+   "final": 65
+  },
+  "act:group": {
+   "generated": 217,
+   "kept": 204,
+   "final": 204
+  },
+  "act:groupOf": {
+   "generated": 51,
+   "kept": 40,
+   "final": 40
+  },
+  "act:label": {
+   "generated": 635,
+   "kept": 578,
+   "final": 528
+  },
+  "act:list": {
+   "generated": 389,
+   "kept": 339,
+   "final": 241
+  },
+  "act:members": {
+   "generated": 54,
+   "kept": 54,
+   "final": 42
+  },
+  "act:move": {
+   "generated": 1469,
+   "kept": 1332,
+   "final": 1109
+  },
+  "act:nearest": {
+   "generated": 217,
+   "kept": 201,
+   "final": 161
+  },
+  "act:neighbors": {
+   "generated": 168,
+   "kept": 152,
+   "final": 113
+  },
+  "act:path": {
+   "generated": 161,
+   "kept": 140,
+   "final": 112
+  },
+  "act:property": {
+   "generated": 446,
+   "kept": 392,
+   "final": 320
+  },
+  "act:reachable": {
+   "generated": 115,
+   "kept": 108,
+   "final": 89
+  },
+  "act:redo": {
+   "generated": 124,
+   "kept": 117,
+   "final": 52
+  },
+  "act:rename": {
+   "generated": 275,
+   "kept": 230,
+   "final": 177
+  },
+  "act:resize": {
+   "generated": 386,
+   "kept": 358,
+   "final": 291
+  },
+  "act:rule": {
+   "generated": 292,
+   "kept": 254,
+   "final": 203
+  },
+  "act:rules": {
+   "generated": 157,
+   "kept": 151,
+   "final": 70
+  },
+  "act:set": {
+   "generated": 1504,
+   "kept": 1390,
+   "final": 1148
+  },
+  "act:swap": {
+   "generated": 202,
+   "kept": 190,
+   "final": 158
+  },
+  "act:toBack": {
+   "generated": 175,
+   "kept": 172,
+   "final": 143
+  },
+  "act:toFront": {
+   "generated": 252,
+   "kept": 239,
+   "final": 199
+  },
+  "act:undo": {
+   "generated": 141,
+   "kept": 98,
+   "final": 38
+  },
+  "act:ungroup": {
+   "generated": 96,
+   "kept": 86,
+   "final": 76
+  },
+  "addgframe:add {N} to the {G} group": {
+   "generated": 15,
+   "kept": 12,
+   "final": 12
+  },
+  "addgframe:add {N} to {G}": {
+   "generated": 12,
+   "kept": 12,
+   "final": 12
+  },
+  "addgframe:move {N} into {G}": {
+   "generated": 11,
+   "kept": 9,
+   "final": 9
+  },
+  "addgframe:put {N} in {G}": {
+   "generated": 17,
+   "kept": 13,
+   "final": 13
+  },
+  "anchor:desc": {
+   "generated": 348,
+   "kept": 327,
+   "final": 277
+  },
+  "anchor:name": {
+   "generated": 804,
+   "kept": 745,
+   "final": 607
+  },
+  "arrow:both=bidirectional": {
+   "generated": 10,
+   "kept": 8,
+   "final": 8
+  },
+  "arrow:both=both ways": {
+   "generated": 13,
+   "kept": 10,
+   "final": 9
+  },
+  "arrow:both=double-headed": {
+   "generated": 8,
+   "kept": 5,
+   "final": 5
+  },
+  "arrow:both=two headed": {
+   "generated": 14,
+   "kept": 10,
+   "final": 8
+  },
+  "arrow:both=two way": {
+   "generated": 16,
+   "kept": 9,
+   "final": 8
+  },
+  "arrow:both=two-way": {
+   "generated": 16,
+   "kept": 7,
+   "final": 7
+  },
+  "arrow:none=line": {
+   "generated": 64,
+   "kept": 55,
+   "final": 46
+  },
+  "arrow:none=lines": {
+   "generated": 34,
+   "kept": 23,
+   "final": 18
+  },
+  "arrow:none=plain": {
+   "generated": 33,
+   "kept": 30,
+   "final": 23
+  },
+  "arrow:none=undirected": {
+   "generated": 31,
+   "kept": 22,
+   "final": 18
+  },
+  "arrow:none=without an arrow": {
+   "generated": 11,
+   "kept": 11,
+   "final": 11
+  },
+  "arrow:none=without arrows": {
+   "generated": 16,
+   "kept": 16,
+   "final": 14
+  },
+  "axis:(none)": {
+   "generated": 32,
+   "kept": 0,
+   "final": 0
+  },
+  "axis:horizontal=horizontal": {
+   "generated": 98,
+   "kept": 60,
+   "final": 49
+  },
+  "axis:horizontal=horizontally": {
+   "generated": 119,
+   "kept": 86,
+   "final": 70
+  },
+  "axis:horizontal=in a row": {
+   "generated": 117,
+   "kept": 81,
+   "final": 66
+  },
+  "axis:vertical=in a column": {
+   "generated": 116,
+   "kept": 73,
+   "final": 53
+  },
+  "axis:vertical=vertical": {
+   "generated": 114,
+   "kept": 77,
+   "final": 62
+  },
+  "axis:vertical=vertically": {
+   "generated": 113,
+   "kept": 78,
+   "final": 68
+  },
+  "check:between": {
+   "generated": 45,
+   "kept": 41,
+   "final": 38
+  },
+  "check:color": {
+   "generated": 56,
+   "kept": 52,
+   "final": 44
+  },
+  "check:comparison": {
+   "generated": 67,
+   "kept": 65,
+   "final": 54
+  },
+  "check:notcolor": {
+   "generated": 44,
+   "kept": 44,
+   "final": 37
+  },
+  "check:region": {
+   "generated": 45,
+   "kept": 43,
+   "final": 37
+  },
+  "check:rel": {
+   "generated": 66,
+   "kept": 63,
+   "final": 54
+  },
+  "check:shape": {
+   "generated": 62,
+   "kept": 61,
+   "final": 50
+  },
+  "check:size": {
+   "generated": 53,
+   "kept": 49,
+   "final": 43
+  },
+  "clear:clear everything": {
+   "generated": 9,
+   "kept": 9,
+   "final": 6
+  },
+  "clear:clear the canvas": {
+   "generated": 7,
+   "kept": 7,
+   "final": 5
+  },
+  "clear:clear the diagram": {
+   "generated": 11,
+   "kept": 11,
+   "final": 5
+  },
+  "clear:delete everything": {
+   "generated": 8,
+   "kept": 8,
+   "final": 5
+  },
+  "clear:erase the whole diagram": {
+   "generated": 11,
+   "kept": 10,
+   "final": 5
+  },
+  "clear:reset the diagram": {
+   "generated": 8,
+   "kept": 8,
+   "final": 6
+  },
+  "clear:start over": {
+   "generated": 7,
+   "kept": 6,
+   "final": 4
+  },
+  "clear:wipe the canvas": {
+   "generated": 10,
+   "kept": 9,
+   "final": 2
+  },
+  "closer": {
+   "generated": 966,
+   "kept": 844,
+   "final": 709
+  },
+  "color:black=black": {
+   "generated": 298,
+   "kept": 273,
+   "final": 227
+  },
+  "color:blue=blue": {
+   "generated": 295,
+   "kept": 279,
+   "final": 228
+  },
+  "color:brown=brown": {
+   "generated": 296,
+   "kept": 273,
+   "final": 229
+  },
+  "color:cyan=aqua": {
+   "generated": 155,
+   "kept": 139,
+   "final": 109
+  },
+  "color:cyan=cyan": {
+   "generated": 142,
+   "kept": 128,
+   "final": 107
+  },
+  "color:gold=gold": {
+   "generated": 158,
+   "kept": 149,
+   "final": 117
+  },
+  "color:gold=golden": {
+   "generated": 153,
+   "kept": 137,
+   "final": 114
+  },
+  "color:gray=gray": {
+   "generated": 100,
+   "kept": 92,
+   "final": 79
+  },
+  "color:gray=grey": {
+   "generated": 98,
+   "kept": 91,
+   "final": 76
+  },
+  "color:gray=silver": {
+   "generated": 88,
+   "kept": 81,
+   "final": 70
+  },
+  "color:green=green": {
+   "generated": 291,
+   "kept": 277,
+   "final": 223
+  },
+  "color:indigo=indigo": {
+   "generated": 298,
+   "kept": 278,
+   "final": 228
+  },
+  "color:lime=lime": {
+   "generated": 292,
+   "kept": 269,
+   "final": 235
+  },
+  "color:magenta=fuchsia": {
+   "generated": 150,
+   "kept": 137,
+   "final": 115
+  },
+  "color:magenta=magenta": {
+   "generated": 153,
+   "kept": 140,
+   "final": 117
+  },
+  "color:navy=navy": {
+   "generated": 289,
+   "kept": 269,
+   "final": 237
+  },
+  "color:orange=orange": {
+   "generated": 298,
+   "kept": 275,
+   "final": 226
+  },
+  "color:pink=pink": {
+   "generated": 150,
+   "kept": 137,
+   "final": 111
+  },
+  "color:pink=rose": {
+   "generated": 148,
+   "kept": 132,
+   "final": 105
+  },
+  "color:purple=lilac": {
+   "generated": 102,
+   "kept": 98,
+   "final": 77
+  },
+  "color:purple=purple": {
+   "generated": 102,
+   "kept": 95,
+   "final": 82
+  },
+  "color:purple=violet": {
+   "generated": 92,
+   "kept": 83,
+   "final": 66
+  },
+  "color:red=crimson": {
+   "generated": 105,
+   "kept": 95,
+   "final": 75
+  },
+  "color:red=red": {
+   "generated": 99,
+   "kept": 93,
+   "final": 77
+  },
+  "color:red=scarlet": {
+   "generated": 99,
+   "kept": 90,
+   "final": 75
+  },
+  "color:teal=teal": {
+   "generated": 151,
+   "kept": 144,
+   "final": 115
+  },
+  "color:teal=turquoise": {
+   "generated": 141,
+   "kept": 134,
+   "final": 104
+  },
+  "color:white=white": {
+   "generated": 303,
+   "kept": 277,
+   "final": 232
+  },
+  "color:yellow=amber": {
+   "generated": 152,
+   "kept": 137,
+   "final": 115
+  },
+  "color:yellow=yellow": {
+   "generated": 158,
+   "kept": 149,
+   "final": 119
+  },
+  "comparison:bigger=bigger": {
+   "generated": 21,
+   "kept": 21,
+   "final": 19
+  },
+  "comparison:bigger=larger": {
+   "generated": 25,
+   "kept": 24,
+   "final": 19
+  },
+  "comparison:smaller=smaller": {
+   "generated": 21,
+   "kept": 20,
+   "final": 16
+  },
+  "connect:edge_noun": {
+   "generated": 158,
+   "kept": 137,
+   "final": 109
+  },
+  "connect:goes_to": {
+   "generated": 102,
+   "kept": 96,
+   "final": 85
+  },
+  "connect:label": {
+   "generated": 23,
+   "kept": 23,
+   "final": 18
+  },
+  "connect:many_one": {
+   "generated": 106,
+   "kept": 0,
+   "final": 0
+  },
+  "connect:one_many": {
+   "generated": 138,
+   "kept": 134,
+   "final": 110
+  },
+  "connect:pair": {
+   "generated": 223,
+   "kept": 214,
+   "final": 177
+  },
+  "connect:pair_and": {
+   "generated": 125,
+   "kept": 71,
+   "final": 60
+  },
+  "connect:pairing": {
+   "generated": 160,
+   "kept": 150,
+   "final": 121
+  },
+  "connect:sequence": {
+   "generated": 112,
+   "kept": 52,
+   "final": 44
+  },
+  "connframe:are {A} and {B} connected": {
+   "generated": 19,
+   "kept": 19,
+   "final": 15
+  },
+  "connframe:are {A} and {B} linked": {
+   "generated": 19,
+   "kept": 19,
+   "final": 15
+  },
+  "connframe:does {A} connect to {B}": {
+   "generated": 18,
+   "kept": 18,
+   "final": 13
+  },
+  "connframe:does {A} link to {B}": {
+   "generated": 23,
+   "kept": 21,
+   "final": 16
+  },
+  "connframe:is there a connection between {A} and {B}": {
+   "generated": 17,
+   "kept": 0,
+   "final": 0
+  },
+  "connframe:is {A} attached to {B}": {
+   "generated": 19,
+   "kept": 17,
+   "final": 17
+  },
+  "connframe:is {A} connected to {B}": {
+   "generated": 20,
+   "kept": 19,
+   "final": 14
+  },
+  "connframe:is {A} joined to {B}": {
+   "generated": 16,
+   "kept": 16,
+   "final": 15
+  },
+  "connframe:is {A} linked to {B}": {
+   "generated": 18,
+   "kept": 17,
+   "final": 14
+  },
+  "construction:one clause per object": {
+   "generated": 232,
+   "kept": 188,
+   "final": 155
+  },
+  "coords:at ({x}, {y})": {
+   "generated": 17,
+   "kept": 16,
+   "final": 16
+  },
+  "coords:at position {x}, {y}": {
+   "generated": 14,
+   "kept": 14,
+   "final": 14
+  },
+  "coords:at x {x}, y {y}": {
+   "generated": 15,
+   "kept": 15,
+   "final": 15
+  },
+  "coords:at x={x} y={y}": {
+   "generated": 16,
+   "kept": 16,
+   "final": 16
+  },
+  "coords:at {x}, {y}": {
+   "generated": 15,
+   "kept": 15,
+   "final": 15
+  },
+  "coords:to coordinates {x}, {y}": {
+   "generated": 15,
+   "kept": 14,
+   "final": 14
+  },
+  "coords:to {x},{y}": {
+   "generated": 14,
+   "kept": 14,
+   "final": 14
+  },
+  "count:digit": {
+   "generated": 97,
+   "kept": 92,
+   "final": 75
+  },
+  "count:word": {
+   "generated": 110,
+   "kept": 108,
+   "final": 86
+  },
+  "countframe:count all the {N}": {
+   "generated": 28,
+   "kept": 26,
+   "final": 20
+  },
+  "countframe:count the links": {
+   "generated": 28,
+   "kept": 27,
+   "final": 9
+  },
+  "countframe:count the {N}": {
+   "generated": 25,
+   "kept": 24,
+   "final": 18
+  },
+  "countframe:how many arrows are there": {
+   "generated": 23,
+   "kept": 23,
+   "final": 8
+  },
+  "countframe:how many connections are there": {
+   "generated": 25,
+   "kept": 23,
+   "final": 8
+  },
+  "countframe:how many edges do we have": {
+   "generated": 24,
+   "kept": 22,
+   "final": 7
+  },
+  "countframe:how many lines are there": {
+   "generated": 24,
+   "kept": 23,
+   "final": 9
+  },
+  "countframe:how many {N} are not {c}": {
+   "generated": 11,
+   "kept": 10,
+   "final": 8
+  },
+  "countframe:how many {N} are on the canvas": {
+   "generated": 26,
+   "kept": 26,
+   "final": 20
+  },
+  "countframe:how many {N} are there": {
+   "generated": 27,
+   "kept": 25,
+   "final": 19
+  },
+  "countframe:how many {N} are {P}": {
+   "generated": 29,
+   "kept": 27,
+   "final": 23
+  },
+  "countframe:how many {N} do we have": {
+   "generated": 29,
+   "kept": 26,
+   "final": 19
+  },
+  "countframe:how many {N} {P}": {
+   "generated": 29,
+   "kept": 27,
+   "final": 19
+  },
+  "countframe:how many {N} {R}": {
+   "generated": 29,
+   "kept": 27,
+   "final": 22
+  },
+  "countframe:what is the number of {N}": {
+   "generated": 26,
+   "kept": 26,
+   "final": 20
+  },
+  "create_layout:circle=as a ring": {
+   "generated": 9,
+   "kept": 9,
+   "final": 9
+  },
+  "create_layout:circle=in a circle layout": {
+   "generated": 9,
+   "kept": 9,
+   "final": 9
+  },
+  "create_layout:circle=in a ring": {
+   "generated": 12,
+   "kept": 11,
+   "final": 11
+  },
+  "create_layout:column=as a column": {
+   "generated": 6,
+   "kept": 6,
+   "final": 6
+  },
+  "create_layout:column=in a column": {
+   "generated": 6,
+   "kept": 6,
+   "final": 6
+  },
+  "create_layout:column=in a stack": {
+   "generated": 7,
+   "kept": 7,
+   "final": 7
+  },
+  "create_layout:column=stacked": {
+   "generated": 10,
+   "kept": 10,
+   "final": 10
+  },
+  "create_layout:grid=as a grid": {
+   "generated": 7,
+   "kept": 7,
+   "final": 7
+  },
+  "create_layout:grid=in a grid": {
+   "generated": 9,
+   "kept": 9,
+   "final": 9
+  },
+  "create_layout:grid=in a grid layout": {
+   "generated": 9,
+   "kept": 9,
+   "final": 9
+  },
+  "create_layout:row=as a row": {
+   "generated": 3,
+   "kept": 3,
+   "final": 3
+  },
+  "create_layout:row=in a line": {
+   "generated": 5,
+   "kept": 5,
+   "final": 5
+  },
+  "create_layout:row=in a row": {
+   "generated": 3,
+   "kept": 3,
+   "final": 3
+  },
+  "create_layout:row=in a row layout": {
+   "generated": 6,
+   "kept": 6,
+   "final": 6
+  },
+  "create_layout:row=side by side": {
+   "generated": 4,
+   "kept": 4,
+   "final": 4
+  },
+  "cycleframe:any cycles": {
+   "generated": 11,
+   "kept": 11,
+   "final": 7
+  },
+  "cycleframe:any loops": {
+   "generated": 11,
+   "kept": 11,
+   "final": 4
+  },
+  "cycleframe:are there any cycles": {
+   "generated": 12,
+   "kept": 12,
+   "final": 7
+  },
+  "cycleframe:are there any loops in the diagram": {
+   "generated": 13,
+   "kept": 13,
+   "final": 6
+  },
+  "cycleframe:are there loops": {
+   "generated": 9,
+   "kept": 9,
+   "final": 5
+  },
+  "cycleframe:do the arrows form a loop": {
+   "generated": 12,
+   "kept": 10,
+   "final": 4
+  },
+  "cycleframe:do the arrows go in a loop": {
+   "generated": 12,
+   "kept": 12,
+   "final": 9
+  },
+  "cycleframe:does the diagram have any cycles": {
+   "generated": 9,
+   "kept": 9,
+   "final": 4
+  },
+  "cycleframe:does the graph have a cycle": {
+   "generated": 11,
+   "kept": 9,
+   "final": 2
+  },
+  "cycleframe:is anything circular": {
+   "generated": 12,
+   "kept": 11,
+   "final": 6
+  },
+  "cycleframe:is the graph circular": {
+   "generated": 12,
+   "kept": 12,
+   "final": 5
+  },
+  "cycleframe:is there a cycle": {
+   "generated": 11,
+   "kept": 11,
+   "final": 3
+  },
+  "cycleframe:is there a cycle anywhere": {
+   "generated": 12,
+   "kept": 11,
+   "final": 8
+  },
+  "cycleframe:is there a loop": {
+   "generated": 13,
+   "kept": 12,
+   "final": 5
+  },
+  "degframe:how many arrows does {T} have": {
+   "generated": 13,
+   "kept": 13,
+   "final": 9
+  },
+  "degframe:how many connections does {T} have": {
+   "generated": 24,
+   "kept": 20,
+   "final": 17
+  },
+  "degframe:how many edges does {T} have": {
+   "generated": 14,
+   "kept": 13,
+   "final": 7
+  },
+  "degframe:how many lines does {T} have": {
+   "generated": 13,
+   "kept": 13,
+   "final": 12
+  },
+  "degframe:how many links does {T} have": {
+   "generated": 15,
+   "kept": 15,
+   "final": 12
+  },
+  "degframe:how many links has {T} got": {
+   "generated": 15,
+   "kept": 15,
+   "final": 11
+  },
+  "degframe:how many neighbors has {T} got": {
+   "generated": 15,
+   "kept": 15,
+   "final": 11
+  },
+  "degframe:how many neighbours does {T} have": {
+   "generated": 11,
+   "kept": 11,
+   "final": 11
+  },
+  "desc:all": {
+   "generated": 598,
+   "kept": 565,
+   "final": 480
+  },
+  "desc:bare": {
+   "generated": 315,
+   "kept": 303,
+   "final": 243
+  },
+  "desc:desc": {
+   "generated": 1321,
+   "kept": 1233,
+   "final": 1017
+  },
+  "desc:everything": {
+   "generated": 411,
+   "kept": 246,
+   "final": 194
+  },
+  "desc:notcolor": {
+   "generated": 339,
+   "kept": 327,
+   "final": 262
+  },
+  "desc:ones": {
+   "generated": 281,
+   "kept": 269,
+   "final": 223
+  },
+  "desc:recency": {
+   "generated": 1078,
+   "kept": 1015,
+   "final": 823
+  },
+  "desc:theplural": {
+   "generated": 539,
+   "kept": 508,
+   "final": 415
+  },
+  "descframe:describe everything": {
+   "generated": 7,
+   "kept": 7,
+   "final": 2
+  },
+  "descframe:describe the canvas": {
+   "generated": 7,
+   "kept": 7,
+   "final": 3
+  },
+  "descframe:describe the diagram": {
+   "generated": 8,
+   "kept": 8,
+   "final": 4
+  },
+  "descframe:describe {T}": {
+   "generated": 10,
+   "kept": 10,
+   "final": 9
+  },
+  "descframe:overview of the canvas": {
+   "generated": 7,
+   "kept": 7,
+   "final": 2
+  },
+  "descframe:overview of the diagram": {
+   "generated": 7,
+   "kept": 5,
+   "final": 3
+  },
+  "descframe:quick overview of the diagram please": {
+   "generated": 10,
+   "kept": 10,
+   "final": 6
+  },
+  "descframe:summarise the canvas for me": {
+   "generated": 8,
+   "kept": 7,
+   "final": 2
+  },
+  "descframe:summarise the drawing": {
+   "generated": 9,
+   "kept": 9,
+   "final": 4
+  },
+  "descframe:summarize the canvas": {
+   "generated": 10,
+   "kept": 9,
+   "final": 6
+  },
+  "descframe:summarize the diagram": {
+   "generated": 8,
+   "kept": 8,
+   "final": 6
+  },
+  "descframe:summarize what we have so far": {
+   "generated": 10,
+   "kept": 10,
+   "final": 4
+  },
+  "descframe:tell me about {T}": {
+   "generated": 9,
+   "kept": 9,
+   "final": 9
+  },
+  "descframe:what is on the canvas": {
+   "generated": 7,
+   "kept": 7,
+   "final": 3
+  },
+  "descframe:what is on the page": {
+   "generated": 10,
+   "kept": 9,
+   "final": 5
+  },
+  "descframe:what is on the screen right now": {
+   "generated": 10,
+   "kept": 10,
+   "final": 6
+  },
+  "descframe:what is {N}": {
+   "generated": 7,
+   "kept": 7,
+   "final": 6
+  },
+  "descframe:what's on the canvas": {
+   "generated": 8,
+   "kept": 6,
+   "final": 4
+  },
+  "descframe:what's on the diagram so far": {
+   "generated": 8,
+   "kept": 8,
+   "final": 4
+  },
+  "det:another": {
+   "generated": 33,
+   "kept": 31,
+   "final": 22
+  },
+  "det:one": {
+   "generated": 43,
+   "kept": 42,
+   "final": 38
+  },
+  "direction:down=down": {
+   "generated": 48,
+   "kept": 47,
+   "final": 41
+  },
+  "direction:down=downwards": {
+   "generated": 46,
+   "kept": 45,
+   "final": 36
+  },
+  "direction:left=left": {
+   "generated": 55,
+   "kept": 51,
+   "final": 41
+  },
+  "direction:left=to the left": {
+   "generated": 47,
+   "kept": 44,
+   "final": 34
+  },
+  "direction:right=right": {
+   "generated": 45,
+   "kept": 44,
+   "final": 35
+  },
+  "direction:right=to the right": {
+   "generated": 46,
+   "kept": 44,
+   "final": 36
+  },
+  "direction:up=up": {
+   "generated": 50,
+   "kept": 49,
+   "final": 43
+  },
+  "direction:up=upwards": {
+   "generated": 44,
+   "kept": 44,
+   "final": 36
+  },
+  "discall:delete all the arrows": {
+   "generated": 7,
+   "kept": 7,
+   "final": 3
+  },
+  "discall:delete every arrow": {
+   "generated": 8,
+   "kept": 7,
+   "final": 2
+  },
+  "discall:erase all links": {
+   "generated": 7,
+   "kept": 7,
+   "final": 4
+  },
+  "discall:get rid of all connections": {
+   "generated": 6,
+   "kept": 6,
+   "final": 4
+  },
+  "discall:remove all connections": {
+   "generated": 7,
+   "kept": 6,
+   "final": 2
+  },
+  "discall:remove all the lines": {
+   "generated": 9,
+   "kept": 8,
+   "final": 7
+  },
+  "discall:remove every connection": {
+   "generated": 7,
+   "kept": 7,
+   "final": 2
+  },
+  "distance:N pixel": {
+   "generated": 15,
+   "kept": 15,
+   "final": 14
+  },
+  "distance:N pixels": {
+   "generated": 14,
+   "kept": 14,
+   "final": 11
+  },
+  "distance:N points": {
+   "generated": 15,
+   "kept": 14,
+   "final": 12
+  },
+  "distance:N px": {
+   "generated": 11,
+   "kept": 11,
+   "final": 8
+  },
+  "distance:N units": {
+   "generated": 15,
+   "kept": 15,
+   "final": 13
+  },
+  "distance:Npx": {
+   "generated": 13,
+   "kept": 13,
+   "final": 10
+  },
+  "distance:by N": {
+   "generated": 29,
+   "kept": 28,
+   "final": 23
+  },
+  "distance:by N pixel": {
+   "generated": 13,
+   "kept": 12,
+   "final": 11
+  },
+  "distance:by N pixels": {
+   "generated": 16,
+   "kept": 15,
+   "final": 10
+  },
+  "distance:by N points": {
+   "generated": 12,
+   "kept": 12,
+   "final": 10
+  },
+  "distance:by N px": {
+   "generated": 17,
+   "kept": 17,
+   "final": 14
+  },
+  "distance:by N units": {
+   "generated": 8,
+   "kept": 7,
+   "final": 6
+  },
+  "distance:by Npx": {
+   "generated": 13,
+   "kept": 13,
+   "final": 9
+  },
+  "double:check2": {
+   "generated": 23,
+   "kept": 23,
+   "final": 23
+  },
+  "double:count2": {
+   "generated": 27,
+   "kept": 27,
+   "final": 27
+  },
+  "double:create2": {
+   "generated": 24,
+   "kept": 24,
+   "final": 24
+  },
+  "double:create_region": {
+   "generated": 28,
+   "kept": 28,
+   "final": 28
+  },
+  "double:fact2": {
+   "generated": 28,
+   "kept": 27,
+   "final": 27
+  },
+  "double:list_region": {
+   "generated": 22,
+   "kept": 22,
+   "final": 22
+  },
+  "double:move2": {
+   "generated": 19,
+   "kept": 19,
+   "final": 19
+  },
+  "double:move_region": {
+   "generated": 24,
+   "kept": 24,
+   "final": 24
+  },
+  "dupframe:make a copy of {T}": {
+   "generated": 44,
+   "kept": 40,
+   "final": 33
+  },
+  "dupframe:make {n} copies of {T}": {
+   "generated": 46,
+   "kept": 44,
+   "final": 35
+  },
+  "dupframe:{v} {T}": {
+   "generated": 55,
+   "kept": 50,
+   "final": 39
+  },
+  "dupframe:{v} {T} twice": {
+   "generated": 48,
+   "kept": 44,
+   "final": 38
+  },
+  "dupframe:{v} {T} {n} times": {
+   "generated": 48,
+   "kept": 48,
+   "final": 37
+  },
+  "dupframe:{v} {T} {w} times": {
+   "generated": 42,
+   "kept": 40,
+   "final": 34
+  },
+  "edgelabel:ask": {
+   "generated": 62,
+   "kept": 59,
+   "final": 59
+  },
+  "edgelabel:remove": {
+   "generated": 60,
+   "kept": 59,
+   "final": 59
+  },
+  "edgelabel:set": {
+   "generated": 75,
+   "kept": 73,
+   "final": 73
+  },
+  "edgelabel_frame:change the label of {E} to \"{L}\"": {
+   "generated": 13,
+   "kept": 13,
+   "final": 13
+  },
+  "edgelabel_frame:clear the label on {E}": {
+   "generated": 13,
+   "kept": 13,
+   "final": 13
+  },
+  "edgelabel_frame:delete the label from {E}": {
+   "generated": 8,
+   "kept": 8,
+   "final": 8
+  },
+  "edgelabel_frame:get rid of the label on {E}": {
+   "generated": 10,
+   "kept": 9,
+   "final": 9
+  },
+  "edgelabel_frame:label {E} \"{L}\"": {
+   "generated": 13,
+   "kept": 13,
+   "final": 13
+  },
+  "edgelabel_frame:label {E} '{L}'": {
+   "generated": 10,
+   "kept": 9,
+   "final": 9
+  },
+  "edgelabel_frame:label {E} as \"{L}\"": {
+   "generated": 14,
+   "kept": 14,
+   "final": 14
+  },
+  "edgelabel_frame:put the label \"{L}\" on {E}": {
+   "generated": 13,
+   "kept": 13,
+   "final": 13
+  },
+  "edgelabel_frame:remove the label of {E}": {
+   "generated": 11,
+   "kept": 11,
+   "final": 11
+  },
+  "edgelabel_frame:remove the text from {E}": {
+   "generated": 10,
+   "kept": 10,
+   "final": 10
+  },
+  "edgelabel_frame:unlabel {E}": {
+   "generated": 8,
+   "kept": 8,
+   "final": 8
+  },
+  "edgelabel_frame:what does {E} say": {
+   "generated": 17,
+   "kept": 16,
+   "final": 16
+  },
+  "edgelabel_frame:what is the label of {E}": {
+   "generated": 16,
+   "kept": 16,
+   "final": 16
+  },
+  "edgelabel_frame:what text is on {E}": {
+   "generated": 14,
+   "kept": 13,
+   "final": 13
+  },
+  "edgelabel_frame:what's the label on {E}": {
+   "generated": 15,
+   "kept": 14,
+   "final": 14
+  },
+  "edgelabel_frame:write \"{L}\" on {E}": {
+   "generated": 12,
+   "kept": 11,
+   "final": 11
+  },
+  "edgenoun:arrow": {
+   "generated": 37,
+   "kept": 32,
+   "final": 25
+  },
+  "edgenoun:connection": {
+   "generated": 32,
+   "kept": 30,
+   "final": 24
+  },
+  "edgenoun:connector": {
+   "generated": 47,
+   "kept": 44,
+   "final": 37
+  },
+  "edgenoun:edge": {
+   "generated": 40,
+   "kept": 40,
+   "final": 29
+  },
+  "edgenoun:line": {
+   "generated": 66,
+   "kept": 62,
+   "final": 49
+  },
+  "edgenoun:link": {
+   "generated": 35,
+   "kept": 30,
+   "final": 25
+  },
+  "edgenoun:wire": {
+   "generated": 41,
+   "kept": 34,
+   "final": 24
+  },
+  "edgeref:A-B": {
+   "generated": 24,
+   "kept": 19,
+   "final": 19
+  },
+  "edgeref:A\u2013B": {
+   "generated": 6,
+   "kept": 6,
+   "final": 6
+  },
+  "edgeref:the A->B arrow": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the A->B connection": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the A->B connector": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the A->B edge": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the A->B line": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the A->B link": {
+   "generated": 6,
+   "kept": 5,
+   "final": 5
+  },
+  "edgeref:the A->B wire": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the A\u2192B arrow": {
+   "generated": 3,
+   "kept": 3,
+   "final": 3
+  },
+  "edgeref:the A\u2192B connection": {
+   "generated": 3,
+   "kept": 3,
+   "final": 3
+  },
+  "edgeref:the A\u2192B connector": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the A\u2192B edge": {
+   "generated": 4,
+   "kept": 4,
+   "final": 4
+  },
+  "edgeref:the A\u2192B line": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "edgeref:the A\u2192B link": {
+   "generated": 4,
+   "kept": 4,
+   "final": 4
+  },
+  "edgeref:the A\u2192B wire": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "edgeref:the arrow between A and B": {
+   "generated": 6,
+   "kept": 6,
+   "final": 6
+  },
+  "edgeref:the arrow from A": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "edgeref:the arrow from A to B": {
+   "generated": 6,
+   "kept": 6,
+   "final": 6
+  },
+  "edgeref:the arrow into B": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "edgeref:the arrow leaving A": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "edgeref:the arrow out of A": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "edgeref:the connection between A and B": {
+   "generated": 4,
+   "kept": 4,
+   "final": 4
+  },
+  "edgeref:the connection from A": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the connection from A to B": {
+   "generated": 7,
+   "kept": 7,
+   "final": 7
+  },
+  "edgeref:the connection into B": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "edgeref:the connector between A and B": {
+   "generated": 6,
+   "kept": 6,
+   "final": 6
+  },
+  "edgeref:the connector from A": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the connector from A to B": {
+   "generated": 6,
+   "kept": 6,
+   "final": 6
+  },
+  "edgeref:the connector going into B": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the connector into B": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the connector out of A": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the edge between A and B": {
+   "generated": 3,
+   "kept": 3,
+   "final": 3
+  },
+  "edgeref:the edge from A": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "edgeref:the edge from A to B": {
+   "generated": 3,
+   "kept": 3,
+   "final": 3
+  },
+  "edgeref:the edge going into B": {
+   "generated": 6,
+   "kept": 6,
+   "final": 6
+  },
+  "edgeref:the edge into B": {
+   "generated": 3,
+   "kept": 3,
+   "final": 3
+  },
+  "edgeref:the edge leaving A": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the edge out of A": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the line between A and B": {
+   "generated": 10,
+   "kept": 10,
+   "final": 10
+  },
+  "edgeref:the line from A": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "edgeref:the line from A to B": {
+   "generated": 7,
+   "kept": 7,
+   "final": 7
+  },
+  "edgeref:the line going into B": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the line out of A": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "edgeref:the link between A and B": {
+   "generated": 7,
+   "kept": 7,
+   "final": 7
+  },
+  "edgeref:the link from A": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "edgeref:the link from A to B": {
+   "generated": 5,
+   "kept": 5,
+   "final": 5
+  },
+  "edgeref:the link going into B": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "edgeref:the link into B": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "edgeref:the link out of A": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "edgeref:the wire between A and B": {
+   "generated": 7,
+   "kept": 7,
+   "final": 7
+  },
+  "edgeref:the wire from A to B": {
+   "generated": 6,
+   "kept": 6,
+   "final": 6
+  },
+  "edgeref:the wire going into B": {
+   "generated": 3,
+   "kept": 3,
+   "final": 3
+  },
+  "edgeref:the wire into B": {
+   "generated": 3,
+   "kept": 3,
+   "final": 3
+  },
+  "edgeref:the wire leaving A": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "edgeref:the wire out of A": {
+   "generated": 5,
+   "kept": 5,
+   "final": 5
+  },
+  "ellipsis:connect": {
+   "generated": 97,
+   "kept": 91,
+   "final": 78
+  },
+  "ellipsis:move": {
+   "generated": 117,
+   "kept": 83,
+   "final": 69
+  },
+  "ellipsis:set": {
+   "generated": 131,
+   "kept": 107,
+   "final": 88
+  },
+  "endpoint:desc": {
+   "generated": 277,
+   "kept": 265,
+   "final": 221
+  },
+  "endpoint:name": {
+   "generated": 542,
+   "kept": 454,
+   "final": 373
+  },
+  "existsframe:any {N}": {
+   "generated": 38,
+   "kept": 37,
+   "final": 27
+  },
+  "existsframe:are any {N} {P}": {
+   "generated": 35,
+   "kept": 35,
+   "final": 28
+  },
+  "existsframe:are there any {N}": {
+   "generated": 32,
+   "kept": 32,
+   "final": 26
+  },
+  "existsframe:are there any {N} that are not {c}": {
+   "generated": 37,
+   "kept": 34,
+   "final": 25
+  },
+  "existsframe:are there {N} {R}": {
+   "generated": 34,
+   "kept": 31,
+   "final": 25
+  },
+  "existsframe:is there anything {P}": {
+   "generated": 31,
+   "kept": 31,
+   "final": 23
+  },
+  "existsframe:is there {a} {N1}": {
+   "generated": 33,
+   "kept": 30,
+   "final": 23
+  },
+  "existsframe:is there {a} {N1} {P}": {
+   "generated": 31,
+   "kept": 29,
+   "final": 22
+  },
+  "extframe:show me the {w} shape": {
+   "generated": 51,
+   "kept": 49,
+   "final": 33
+  },
+  "extframe:what has the {w}": {
+   "generated": 30,
+   "kept": 30,
+   "final": 20
+  },
+  "extframe:what is the {w} shape": {
+   "generated": 55,
+   "kept": 55,
+   "final": 25
+  },
+  "extframe:what's the {w} one": {
+   "generated": 51,
+   "kept": 45,
+   "final": 20
+  },
+  "extframe:which is the {w}": {
+   "generated": 52,
+   "kept": 51,
+   "final": 25
+  },
+  "extframe:which node has the {w}": {
+   "generated": 29,
+   "kept": 28,
+   "final": 21
+  },
+  "extframe:which node is the {w}": {
+   "generated": 54,
+   "kept": 52,
+   "final": 36
+  },
+  "extframe:which one is the {w}": {
+   "generated": 11,
+   "kept": 11,
+   "final": 6
+  },
+  "extframe:which one is {w}": {
+   "generated": 51,
+   "kept": 42,
+   "final": 27
+  },
+  "extframe:which shape has the {w}": {
+   "generated": 23,
+   "kept": 23,
+   "final": 10
+  },
+  "extframe:which shape is the {w}": {
+   "generated": 48,
+   "kept": 46,
+   "final": 25
+  },
+  "extframe:who has the {w}": {
+   "generated": 24,
+   "kept": 24,
+   "final": 16
+  },
+  "extreme:shape filter": {
+   "generated": 23,
+   "kept": 14,
+   "final": 12
+  },
+  "fact:between": {
+   "generated": 42,
+   "kept": 41,
+   "final": 30
+  },
+  "fact:color": {
+   "generated": 60,
+   "kept": 58,
+   "final": 49
+  },
+  "fact:combo": {
+   "generated": 42,
+   "kept": 40,
+   "final": 30
+  },
+  "fact:region": {
+   "generated": 41,
+   "kept": 41,
+   "final": 36
+  },
+  "fact:rel": {
+   "generated": 58,
+   "kept": 56,
+   "final": 44
+  },
+  "fact:shape": {
+   "generated": 48,
+   "kept": 45,
+   "final": 40
+  },
+  "fact:size": {
+   "generated": 47,
+   "kept": 43,
+   "final": 35
+  },
+  "fbframe:bring {T} forward": {
+   "generated": 31,
+   "kept": 29,
+   "final": 23
+  },
+  "fbframe:bring {T} in front": {
+   "generated": 37,
+   "kept": 34,
+   "final": 26
+  },
+  "fbframe:bring {T} to front": {
+   "generated": 31,
+   "kept": 27,
+   "final": 24
+  },
+  "fbframe:bring {T} to the front": {
+   "generated": 35,
+   "kept": 33,
+   "final": 24
+  },
+  "fbframe:raise {T}": {
+   "generated": 33,
+   "kept": 33,
+   "final": 28
+  },
+  "fbframe:send {T} backward": {
+   "generated": 29,
+   "kept": 29,
+   "final": 27
+  },
+  "fbframe:send {T} backwards": {
+   "generated": 30,
+   "kept": 29,
+   "final": 26
+  },
+  "fbframe:send {T} behind": {
+   "generated": 32,
+   "kept": 32,
+   "final": 25
+  },
+  "fbframe:send {T} to back": {
+   "generated": 34,
+   "kept": 33,
+   "final": 24
+  },
+  "fbframe:send {T} to the back": {
+   "generated": 30,
+   "kept": 29,
+   "final": 25
+  },
+  "forgetframe:cancel the rules": {
+   "generated": 11,
+   "kept": 9,
+   "final": 5
+  },
+  "forgetframe:clear the rules": {
+   "generated": 7,
+   "kept": 7,
+   "final": 6
+  },
+  "forgetframe:delete the default rules": {
+   "generated": 8,
+   "kept": 8,
+   "final": 4
+  },
+  "forgetframe:discard the default rules": {
+   "generated": 11,
+   "kept": 11,
+   "final": 5
+  },
+  "forgetframe:discard the rules": {
+   "generated": 11,
+   "kept": 11,
+   "final": 4
+  },
+  "forgetframe:disregard the defaults": {
+   "generated": 8,
+   "kept": 8,
+   "final": 5
+  },
+  "forgetframe:drop the defaults": {
+   "generated": 13,
+   "kept": 13,
+   "final": 7
+  },
+  "forgetframe:forget all rules": {
+   "generated": 9,
+   "kept": 9,
+   "final": 6
+  },
+  "forgetframe:forget every rule": {
+   "generated": 9,
+   "kept": 8,
+   "final": 6
+  },
+  "forgetframe:forget the defaults": {
+   "generated": 9,
+   "kept": 9,
+   "final": 5
+  },
+  "forgetframe:forget the rules": {
+   "generated": 9,
+   "kept": 9,
+   "final": 4
+  },
+  "forgetframe:remove all rules": {
+   "generated": 10,
+   "kept": 8,
+   "final": 1
+  },
+  "forgetframe:remove the default rules": {
+   "generated": 11,
+   "kept": 10,
+   "final": 2
+  },
+  "forgetframe:reset the defaults": {
+   "generated": 10,
+   "kept": 9,
+   "final": 5
+  },
+  "group:as anchor": {
+   "generated": 21,
+   "kept": 20,
+   "final": 20
+  },
+  "group:as target": {
+   "generated": 124,
+   "kept": 123,
+   "final": 107
+  },
+  "groupframe:bundle {L} as {G}": {
+   "generated": 20,
+   "kept": 20,
+   "final": 20
+  },
+  "groupframe:bundle {L} into {G}": {
+   "generated": 18,
+   "kept": 17,
+   "final": 17
+  },
+  "groupframe:group {L}": {
+   "generated": 17,
+   "kept": 16,
+   "final": 16
+  },
+  "groupframe:group {L} as a group called {G}": {
+   "generated": 22,
+   "kept": 22,
+   "final": 22
+  },
+  "groupframe:group {L} as {G}": {
+   "generated": 19,
+   "kept": 18,
+   "final": 18
+  },
+  "groupframe:group {L} into {G}": {
+   "generated": 21,
+   "kept": 21,
+   "final": 21
+  },
+  "groupframe:put {L} together": {
+   "generated": 22,
+   "kept": 22,
+   "final": 22
+  },
+  "groupframe:put {L} together as {G}": {
+   "generated": 24,
+   "kept": 23,
+   "final": 23
+  },
+  "groupqframe:are there any groups": {
+   "generated": 11,
+   "kept": 11,
+   "final": 5
+  },
+  "groupqframe:how many groups are there": {
+   "generated": 10,
+   "kept": 10,
+   "final": 3
+  },
+  "groupqframe:is {M} in a group": {
+   "generated": 11,
+   "kept": 11,
+   "final": 11
+  },
+  "groupqframe:is {M} part of any group": {
+   "generated": 10,
+   "kept": 0,
+   "final": 0
+  },
+  "groupqframe:list the groups": {
+   "generated": 9,
+   "kept": 9,
+   "final": 2
+  },
+  "groupqframe:what are the members of {G}": {
+   "generated": 11,
+   "kept": 11,
+   "final": 9
+  },
+  "groupqframe:what does {G} contain": {
+   "generated": 13,
+   "kept": 13,
+   "final": 8
+  },
+  "groupqframe:what group does {M} belong to": {
+   "generated": 10,
+   "kept": 10,
+   "final": 10
+  },
+  "groupqframe:what group is {M} in": {
+   "generated": 11,
+   "kept": 11,
+   "final": 11
+  },
+  "groupqframe:what groups are there": {
+   "generated": 10,
+   "kept": 10,
+   "final": 2
+  },
+  "groupqframe:what is in {G}": {
+   "generated": 11,
+   "kept": 11,
+   "final": 9
+  },
+  "groupqframe:which group is {M} in": {
+   "generated": 9,
+   "kept": 8,
+   "final": 8
+  },
+  "groupqframe:which shapes are in {G}": {
+   "generated": 9,
+   "kept": 9,
+   "final": 8
+  },
+  "groupqframe:who is in {G}": {
+   "generated": 11,
+   "kept": 11,
+   "final": 9
+  },
+  "kind:edge": {
+   "generated": 167,
+   "kept": 139,
+   "final": 48
+  },
+  "label:\"L\"": {
+   "generated": 26,
+   "kept": 24,
+   "final": 18
+  },
+  "label:labeled \"L\"": {
+   "generated": 20,
+   "kept": 20,
+   "final": 17
+  },
+  "label:labeled 'L'": {
+   "generated": 17,
+   "kept": 16,
+   "final": 13
+  },
+  "label:labeled L": {
+   "generated": 19,
+   "kept": 16,
+   "final": 16
+  },
+  "label:labelled \"L\"": {
+   "generated": 21,
+   "kept": 20,
+   "final": 15
+  },
+  "label:reading \"L\"": {
+   "generated": 25,
+   "kept": 25,
+   "final": 16
+  },
+  "label:saying \"L\"": {
+   "generated": 21,
+   "kept": 21,
+   "final": 18
+  },
+  "label:that says \"L\"": {
+   "generated": 25,
+   "kept": 24,
+   "final": 16
+  },
+  "label:titled \"L\"": {
+   "generated": 20,
+   "kept": 20,
+   "final": 19
+  },
+  "label:with the label \"L\"": {
+   "generated": 19,
+   "kept": 18,
+   "final": 16
+  },
+  "label:with the text \"L\"": {
+   "generated": 22,
+   "kept": 21,
+   "final": 19
+  },
+  "label:\u201cL\u201d": {
+   "generated": 20,
+   "kept": 19,
+   "final": 13
+  },
+  "labelframe:add a caption \"{L}\" to {T}": {
+   "generated": 21,
+   "kept": 21,
+   "final": 17
+  },
+  "labelframe:add a label \"{L}\" to {T}": {
+   "generated": 17,
+   "kept": 17,
+   "final": 15
+  },
+  "labelframe:add the text \"{L}\" to {T}": {
+   "generated": 18,
+   "kept": 18,
+   "final": 16
+  },
+  "labelframe:caption {T} \"{L}\"": {
+   "generated": 14,
+   "kept": 14,
+   "final": 11
+  },
+  "labelframe:inscribe \"{L}\" on {T}": {
+   "generated": 19,
+   "kept": 18,
+   "final": 14
+  },
+  "labelframe:label {T} \"{L}\"": {
+   "generated": 19,
+   "kept": 18,
+   "final": 16
+  },
+  "labelframe:label {T} '{L}'": {
+   "generated": 18,
+   "kept": 18,
+   "final": 16
+  },
+  "labelframe:label {T} as \"{L}\"": {
+   "generated": 19,
+   "kept": 18,
+   "final": 16
+  },
+  "labelframe:label {T} as {W}": {
+   "generated": 19,
+   "kept": 19,
+   "final": 16
+  },
+  "labelframe:label {T} with \"{L}\"": {
+   "generated": 17,
+   "kept": 14,
+   "final": 13
+  },
+  "labelframe:label {T} {W}": {
+   "generated": 18,
+   "kept": 17,
+   "final": 16
+  },
+  "labelframe:label {T} \u201c{L}\u201d": {
+   "generated": 17,
+   "kept": 16,
+   "final": 15
+  },
+  "labelframe:put \"{L}\" on {T}": {
+   "generated": 18,
+   "kept": 17,
+   "final": 15
+  },
+  "labelframe:put the label \"{L}\" on {T}": {
+   "generated": 17,
+   "kept": 0,
+   "final": 0
+  },
+  "labelframe:stamp \"{L}\" on {T}": {
+   "generated": 13,
+   "kept": 13,
+   "final": 12
+  },
+  "labelframe:tag {T} \"{L}\"": {
+   "generated": 19,
+   "kept": 18,
+   "final": 13
+  },
+  "labelframe:title {T} \"{L}\"": {
+   "generated": 16,
+   "kept": 15,
+   "final": 10
+  },
+  "labelframe:write \"{L}\" in {T}": {
+   "generated": 18,
+   "kept": 14,
+   "final": 12
+  },
+  "labelframe:write \"{L}\" on {T}": {
+   "generated": 16,
+   "kept": 16,
+   "final": 12
+  },
+  "layout:circle=as a ring": {
+   "generated": 26,
+   "kept": 17,
+   "final": 15
+  },
+  "layout:circle=in a circle": {
+   "generated": 20,
+   "kept": 15,
+   "final": 13
+  },
+  "layout:circle=in a ring": {
+   "generated": 30,
+   "kept": 20,
+   "final": 14
+  },
+  "layout:column=as a column": {
+   "generated": 20,
+   "kept": 18,
+   "final": 13
+  },
+  "layout:column=in a column": {
+   "generated": 22,
+   "kept": 18,
+   "final": 16
+  },
+  "layout:column=in a stack": {
+   "generated": 17,
+   "kept": 14,
+   "final": 13
+  },
+  "layout:column=vertically": {
+   "generated": 15,
+   "kept": 13,
+   "final": 12
+  },
+  "layout:grid=as a grid": {
+   "generated": 35,
+   "kept": 25,
+   "final": 21
+  },
+  "layout:grid=in a grid": {
+   "generated": 40,
+   "kept": 36,
+   "final": 28
+  },
+  "layout:grid=tidy": {
+   "generated": 90,
+   "kept": 75,
+   "final": 53
+  },
+  "layout:row=as a row": {
+   "generated": 20,
+   "kept": 16,
+   "final": 16
+  },
+  "layout:row=horizontally": {
+   "generated": 18,
+   "kept": 16,
+   "final": 12
+  },
+  "layout:row=in a line": {
+   "generated": 16,
+   "kept": 14,
+   "final": 12
+  },
+  "layout:row=in a row": {
+   "generated": 18,
+   "kept": 13,
+   "final": 9
+  },
+  "linked:count": {
+   "generated": 31,
+   "kept": 31,
+   "final": 31
+  },
+  "linked:create": {
+   "generated": 29,
+   "kept": 29,
+   "final": 29
+  },
+  "linked:fact": {
+   "generated": 33,
+   "kept": 32,
+   "final": 31
+  },
+  "listframe:list all arrows": {
+   "generated": 22,
+   "kept": 21,
+   "final": 7
+  },
+  "listframe:list all {N}": {
+   "generated": 22,
+   "kept": 19,
+   "final": 15
+  },
+  "listframe:list everything {P}": {
+   "generated": 21,
+   "kept": 19,
+   "final": 16
+  },
+  "listframe:list the {N}": {
+   "generated": 28,
+   "kept": 27,
+   "final": 15
+  },
+  "listframe:list the {N} that are not {nc}": {
+   "generated": 13,
+   "kept": 0,
+   "final": 0
+  },
+  "listframe:show all {N} {R}": {
+   "generated": 23,
+   "kept": 21,
+   "final": 16
+  },
+  "listframe:show me the connections": {
+   "generated": 22,
+   "kept": 0,
+   "final": 0
+  },
+  "listframe:show me the {N}": {
+   "generated": 22,
+   "kept": 22,
+   "final": 17
+  },
+  "listframe:show the {N}": {
+   "generated": 21,
+   "kept": 21,
+   "final": 18
+  },
+  "listframe:what is {P}": {
+   "generated": 20,
+   "kept": 19,
+   "final": 17
+  },
+  "listframe:what shapes are {c}": {
+   "generated": 22,
+   "kept": 22,
+   "final": 13
+  },
+  "listframe:which shapes are not {nc}": {
+   "generated": 23,
+   "kept": 23,
+   "final": 17
+  },
+  "listframe:which shapes are {c}": {
+   "generated": 23,
+   "kept": 22,
+   "final": 19
+  },
+  "listframe:which {N} are there": {
+   "generated": 25,
+   "kept": 25,
+   "final": 16
+  },
+  "listframe:which {N} are {P}": {
+   "generated": 19,
+   "kept": 18,
+   "final": 16
+  },
+  "listframe:which {N} are {R}": {
+   "generated": 23,
+   "kept": 20,
+   "final": 14
+  },
+  "name:called": {
+   "generated": 106,
+   "kept": 103,
+   "final": 86
+  },
+  "name:name it": {
+   "generated": 99,
+   "kept": 93,
+   "final": 75
+  },
+  "name:named": {
+   "generated": 99,
+   "kept": 93,
+   "final": 77
+  },
+  "name:with the name": {
+   "generated": 104,
+   "kept": 99,
+   "final": 79
+  },
+  "nearframe:what is the {s} {N} from {A}": {
+   "generated": 31,
+   "kept": 30,
+   "final": 25
+  },
+  "nearframe:what is {s} to {A}": {
+   "generated": 28,
+   "kept": 28,
+   "final": 20
+  },
+  "nearframe:what's the {s} shape to {A}": {
+   "generated": 26,
+   "kept": 24,
+   "final": 22
+  },
+  "nearframe:what's {s} to {A}": {
+   "generated": 24,
+   "kept": 23,
+   "final": 19
+  },
+  "nearframe:which one is {s} from {A}": {
+   "generated": 28,
+   "kept": 25,
+   "final": 19
+  },
+  "nearframe:which shape is {s} to {A}": {
+   "generated": 26,
+   "kept": 23,
+   "final": 18
+  },
+  "nearframe:which {N} is the {s} from {A}": {
+   "generated": 27,
+   "kept": 23,
+   "final": 19
+  },
+  "nearframe:which {N} is {s} to {A}": {
+   "generated": 28,
+   "kept": 26,
+   "final": 20
+  },
+  "neighframe:list the connections of {T}": {
+   "generated": 15,
+   "kept": 15,
+   "final": 11
+  },
+  "neighframe:neighbours of {T}": {
+   "generated": 18,
+   "kept": 16,
+   "final": 11
+  },
+  "neighframe:what are the neighbors of {T}": {
+   "generated": 15,
+   "kept": 15,
+   "final": 13
+  },
+  "neighframe:what does {T} connect to": {
+   "generated": 13,
+   "kept": 13,
+   "final": 8
+  },
+  "neighframe:what does {T} link to": {
+   "generated": 13,
+   "kept": 12,
+   "final": 10
+  },
+  "neighframe:what does {T} point to": {
+   "generated": 11,
+   "kept": 0,
+   "final": 0
+  },
+  "neighframe:what is attached to {T}": {
+   "generated": 13,
+   "kept": 13,
+   "final": 11
+  },
+  "neighframe:what is connected to {T}": {
+   "generated": 10,
+   "kept": 10,
+   "final": 9
+  },
+  "neighframe:what is joined to {T}": {
+   "generated": 17,
+   "kept": 17,
+   "final": 11
+  },
+  "neighframe:what's connected to {T}": {
+   "generated": 14,
+   "kept": 14,
+   "final": 8
+  },
+  "neighframe:which shapes are connected to {T}": {
+   "generated": 15,
+   "kept": 14,
+   "final": 9
+  },
+  "neighframe:who is linked to {T}": {
+   "generated": 15,
+   "kept": 14,
+   "final": 12
+  },
+  "notColor:black=are not black": {
+   "generated": 2,
+   "kept": 1,
+   "final": 1
+  },
+  "notColor:black=is not black": {
+   "generated": 4,
+   "kept": 4,
+   "final": 3
+  },
+  "notColor:black=not black": {
+   "generated": 20,
+   "kept": 18,
+   "final": 14
+  },
+  "notColor:blue=are not blue": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "notColor:blue=is not blue": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "notColor:blue=not blue": {
+   "generated": 23,
+   "kept": 22,
+   "final": 18
+  },
+  "notColor:brown=are not brown": {
+   "generated": 6,
+   "kept": 6,
+   "final": 4
+  },
+  "notColor:brown=is not brown": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "notColor:brown=not brown": {
+   "generated": 16,
+   "kept": 15,
+   "final": 13
+  },
+  "notColor:cyan=are not cyan": {
+   "generated": 3,
+   "kept": 3,
+   "final": 2
+  },
+  "notColor:cyan=is not cyan": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "notColor:cyan=not cyan": {
+   "generated": 22,
+   "kept": 20,
+   "final": 14
+  },
+  "notColor:gold=are not gold": {
+   "generated": 4,
+   "kept": 3,
+   "final": 3
+  },
+  "notColor:gold=is not gold": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "notColor:gold=not gold": {
+   "generated": 18,
+   "kept": 17,
+   "final": 14
+  },
+  "notColor:gray=are not gray": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "notColor:gray=is not gray": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "notColor:gray=not gray": {
+   "generated": 26,
+   "kept": 26,
+   "final": 19
+  },
+  "notColor:green=are not green": {
+   "generated": 4,
+   "kept": 4,
+   "final": 3
+  },
+  "notColor:green=is not green": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "notColor:green=not green": {
+   "generated": 20,
+   "kept": 15,
+   "final": 15
+  },
+  "notColor:indigo=are not indigo": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "notColor:indigo=is not indigo": {
+   "generated": 6,
+   "kept": 6,
+   "final": 4
+  },
+  "notColor:indigo=not indigo": {
+   "generated": 22,
+   "kept": 18,
+   "final": 13
+  },
+  "notColor:lime=are not lime": {
+   "generated": 3,
+   "kept": 3,
+   "final": 2
+  },
+  "notColor:lime=is not lime": {
+   "generated": 2,
+   "kept": 2,
+   "final": 1
+  },
+  "notColor:lime=not lime": {
+   "generated": 20,
+   "kept": 19,
+   "final": 16
+  },
+  "notColor:magenta=are not magenta": {
+   "generated": 2,
+   "kept": 2,
+   "final": 1
+  },
+  "notColor:magenta=is not magenta": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "notColor:magenta=not magenta": {
+   "generated": 22,
+   "kept": 20,
+   "final": 15
+  },
+  "notColor:navy=are not navy": {
+   "generated": 3,
+   "kept": 3,
+   "final": 3
+  },
+  "notColor:navy=is not navy": {
+   "generated": 3,
+   "kept": 3,
+   "final": 3
+  },
+  "notColor:navy=not navy": {
+   "generated": 18,
+   "kept": 18,
+   "final": 15
+  },
+  "notColor:orange=are not orange": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "notColor:orange=is not orange": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "notColor:orange=not orange": {
+   "generated": 20,
+   "kept": 19,
+   "final": 17
+  },
+  "notColor:pink=are not pink": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "notColor:pink=is not pink": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "notColor:pink=not pink": {
+   "generated": 26,
+   "kept": 26,
+   "final": 18
+  },
+  "notColor:purple=are not purple": {
+   "generated": 2,
+   "kept": 1,
+   "final": 1
+  },
+  "notColor:purple=is not purple": {
+   "generated": 2,
+   "kept": 2,
+   "final": 1
+  },
+  "notColor:purple=not purple": {
+   "generated": 19,
+   "kept": 19,
+   "final": 16
+  },
+  "notColor:red=are not red": {
+   "generated": 2,
+   "kept": 1,
+   "final": 0
+  },
+  "notColor:red=is not red": {
+   "generated": 5,
+   "kept": 5,
+   "final": 4
+  },
+  "notColor:red=not red": {
+   "generated": 20,
+   "kept": 20,
+   "final": 17
+  },
+  "notColor:teal=are not teal": {
+   "generated": 3,
+   "kept": 3,
+   "final": 2
+  },
+  "notColor:teal=is not teal": {
+   "generated": 4,
+   "kept": 4,
+   "final": 3
+  },
+  "notColor:teal=not teal": {
+   "generated": 16,
+   "kept": 16,
+   "final": 12
+  },
+  "notColor:white=are not white": {
+   "generated": 4,
+   "kept": 4,
+   "final": 2
+  },
+  "notColor:white=is not white": {
+   "generated": 2,
+   "kept": 2,
+   "final": 2
+  },
+  "notColor:white=not white": {
+   "generated": 24,
+   "kept": 22,
+   "final": 17
+  },
+  "notColor:yellow=are not yellow": {
+   "generated": 3,
+   "kept": 3,
+   "final": 2
+  },
+  "notColor:yellow=is not yellow": {
+   "generated": 1,
+   "kept": 1,
+   "final": 1
+  },
+  "notColor:yellow=not yellow": {
+   "generated": 24,
+   "kept": 21,
+   "final": 17
+  },
+  "noun+name:the box": {
+   "generated": 23,
+   "kept": 21,
+   "final": 19
+  },
+  "noun+name:the element": {
+   "generated": 27,
+   "kept": 24,
+   "final": 21
+  },
+  "noun+name:the node": {
+   "generated": 23,
+   "kept": 23,
+   "final": 21
+  },
+  "noun+name:the node called": {
+   "generated": 24,
+   "kept": 22,
+   "final": 20
+  },
+  "noun+name:the shape": {
+   "generated": 22,
+   "kept": 20,
+   "final": 16
+  },
+  "noun+name:the shape named": {
+   "generated": 28,
+   "kept": 22,
+   "final": 17
+  },
+  "opener": {
+   "generated": 2379,
+   "kept": 2119,
+   "final": 1772
+  },
+  "outline:give": {
+   "generated": 29,
+   "kept": 29,
+   "final": 29
+  },
+  "outline:make's": {
+   "generated": 23,
+   "kept": 22,
+   "final": 22
+  },
+  "outline:none": {
+   "generated": 20,
+   "kept": 20,
+   "final": 17
+  },
+  "outline:set the border of": {
+   "generated": 22,
+   "kept": 0,
+   "final": 0
+  },
+  "outline:with a C border": {
+   "generated": 21,
+   "kept": 20,
+   "final": 20
+  },
+  "pairing:all=all to each other": {
+   "generated": 21,
+   "kept": 20,
+   "final": 17
+  },
+  "pairing:all=every pair": {
+   "generated": 20,
+   "kept": 20,
+   "final": 17
+  },
+  "pairing:all=to each other": {
+   "generated": 18,
+   "kept": 17,
+   "final": 12
+  },
+  "pairing:chain=(A to B and B to C)": {
+   "generated": 112,
+   "kept": 52,
+   "final": 44
+  },
+  "pairing:chain=in a chain": {
+   "generated": 10,
+   "kept": 10,
+   "final": 8
+  },
+  "pairing:chain=in order": {
+   "generated": 11,
+   "kept": 10,
+   "final": 8
+  },
+  "pairing:chain=in sequence": {
+   "generated": 8,
+   "kept": 7,
+   "final": 6
+  },
+  "pairing:chain=one after other": {
+   "generated": 8,
+   "kept": 8,
+   "final": 7
+  },
+  "pairing:chain=one after the other": {
+   "generated": 9,
+   "kept": 8,
+   "final": 6
+  },
+  "pairing:next=each to the next": {
+   "generated": 17,
+   "kept": 16,
+   "final": 15
+  },
+  "pairing:next=each to the next one": {
+   "generated": 19,
+   "kept": 16,
+   "final": 13
+  },
+  "pairing:next=to the next one": {
+   "generated": 19,
+   "kept": 18,
+   "final": 12
+  },
+  "pathframe:can I get from {A} to {B}": {
+   "generated": 15,
+   "kept": 15,
+   "final": 12
+  },
+  "pathframe:can {A} reach {B}": {
+   "generated": 12,
+   "kept": 12,
+   "final": 10
+  },
+  "pathframe:does anything from {A} lead to {B}": {
+   "generated": 16,
+   "kept": 15,
+   "final": 11
+  },
+  "pathframe:does {A} flow to {B}": {
+   "generated": 15,
+   "kept": 15,
+   "final": 13
+  },
+  "pathframe:does {A} lead to {B}": {
+   "generated": 16,
+   "kept": 15,
+   "final": 11
+  },
+  "pathframe:does {A} reach {B}": {
+   "generated": 14,
+   "kept": 13,
+   "final": 11
+  },
+  "pathframe:is there a path from {A} to {B}": {
+   "generated": 17,
+   "kept": 17,
+   "final": 12
+  },
+  "pathframe:is there a route from {A} to {B}": {
+   "generated": 16,
+   "kept": 15,
+   "final": 13
+  },
+  "pathframe:is there a way to go from {A} to {B}": {
+   "generated": 13,
+   "kept": 11,
+   "final": 10
+  },
+  "pathframe:is {B} downstream of {A}": {
+   "generated": 14,
+   "kept": 0,
+   "final": 0
+  },
+  "pathframe:is {B} reachable from {A}": {
+   "generated": 13,
+   "kept": 12,
+   "final": 9
+  },
+  "position:above=above": {
+   "generated": 72,
+   "kept": 66,
+   "final": 60
+  },
+  "position:above=on top of": {
+   "generated": 80,
+   "kept": 66,
+   "final": 53
+  },
+  "position:above=over": {
+   "generated": 80,
+   "kept": 70,
+   "final": 57
+  },
+  "position:below=below": {
+   "generated": 54,
+   "kept": 47,
+   "final": 38
+  },
+  "position:below=beneath": {
+   "generated": 57,
+   "kept": 46,
+   "final": 42
+  },
+  "position:below=under": {
+   "generated": 58,
+   "kept": 50,
+   "final": 43
+  },
+  "position:below=underneath": {
+   "generated": 61,
+   "kept": 52,
+   "final": 42
+  },
+  "position:between=between": {
+   "generated": 545,
+   "kept": 519,
+   "final": 424
+  },
+  "position:bottom=along the bottom": {
+   "generated": 20,
+   "kept": 20,
+   "final": 20
+  },
+  "position:bottom=at the bottom": {
+   "generated": 27,
+   "kept": 26,
+   "final": 22
+  },
+  "position:bottom=at the bottom edge": {
+   "generated": 21,
+   "kept": 20,
+   "final": 18
+  },
+  "position:bottom=on the bottom": {
+   "generated": 25,
+   "kept": 25,
+   "final": 22
+  },
+  "position:bottomLeft=in the bottom left": {
+   "generated": 17,
+   "kept": 17,
+   "final": 14
+  },
+  "position:bottomLeft=in the bottom-left corner": {
+   "generated": 13,
+   "kept": 13,
+   "final": 11
+  },
+  "position:bottomLeft=in the lower left": {
+   "generated": 17,
+   "kept": 15,
+   "final": 12
+  },
+  "position:bottomLeft=in the lower-left corner": {
+   "generated": 20,
+   "kept": 20,
+   "final": 14
+  },
+  "position:bottomLeft=to the lower left corner": {
+   "generated": 16,
+   "kept": 15,
+   "final": 13
+  },
+  "position:bottomRight=in the bottom right": {
+   "generated": 15,
+   "kept": 12,
+   "final": 11
+  },
+  "position:bottomRight=in the bottom right corner": {
+   "generated": 18,
+   "kept": 15,
+   "final": 12
+  },
+  "position:bottomRight=in the bottom-right corner": {
+   "generated": 19,
+   "kept": 18,
+   "final": 12
+  },
+  "position:bottomRight=in the lower right": {
+   "generated": 18,
+   "kept": 17,
+   "final": 15
+  },
+  "position:bottomRight=to the lower-right": {
+   "generated": 17,
+   "kept": 17,
+   "final": 14
+  },
+  "position:center=at the center": {
+   "generated": 14,
+   "kept": 14,
+   "final": 9
+  },
+  "position:center=in the center": {
+   "generated": 15,
+   "kept": 15,
+   "final": 11
+  },
+  "position:center=in the center of the page": {
+   "generated": 13,
+   "kept": 11,
+   "final": 10
+  },
+  "position:center=in the centre": {
+   "generated": 10,
+   "kept": 9,
+   "final": 8
+  },
+  "position:center=in the middle": {
+   "generated": 11,
+   "kept": 11,
+   "final": 11
+  },
+  "position:center=in the middle of the canvas": {
+   "generated": 14,
+   "kept": 14,
+   "final": 10
+  },
+  "position:center=to the middle": {
+   "generated": 16,
+   "kept": 15,
+   "final": 9
+  },
+  "position:left=along the left edge": {
+   "generated": 22,
+   "kept": 18,
+   "final": 12
+  },
+  "position:left=at the left": {
+   "generated": 25,
+   "kept": 24,
+   "final": 19
+  },
+  "position:left=on the left": {
+   "generated": 24,
+   "kept": 21,
+   "final": 16
+  },
+  "position:left=on the left side": {
+   "generated": 24,
+   "kept": 22,
+   "final": 14
+  },
+  "position:leftOf=left of": {
+   "generated": 50,
+   "kept": 45,
+   "final": 40
+  },
+  "position:leftOf=left side of": {
+   "generated": 53,
+   "kept": 43,
+   "final": 34
+  },
+  "position:leftOf=on the left of": {
+   "generated": 57,
+   "kept": 50,
+   "final": 44
+  },
+  "position:leftOf=to the left of": {
+   "generated": 64,
+   "kept": 57,
+   "final": 46
+  },
+  "position:near=alongside": {
+   "generated": 29,
+   "kept": 27,
+   "final": 23
+  },
+  "position:near=around": {
+   "generated": 32,
+   "kept": 30,
+   "final": 25
+  },
+  "position:near=beside": {
+   "generated": 37,
+   "kept": 34,
+   "final": 23
+  },
+  "position:near=by": {
+   "generated": 32,
+   "kept": 32,
+   "final": 25
+  },
+  "position:near=close to": {
+   "generated": 32,
+   "kept": 27,
+   "final": 22
+  },
+  "position:near=near": {
+   "generated": 32,
+   "kept": 28,
+   "final": 21
+  },
+  "position:near=next to": {
+   "generated": 30,
+   "kept": 30,
+   "final": 25
+  },
+  "position:right=along the right edge": {
+   "generated": 25,
+   "kept": 20,
+   "final": 18
+  },
+  "position:right=at the right": {
+   "generated": 23,
+   "kept": 23,
+   "final": 17
+  },
+  "position:right=on the right": {
+   "generated": 23,
+   "kept": 20,
+   "final": 17
+  },
+  "position:right=on the right side": {
+   "generated": 29,
+   "kept": 28,
+   "final": 20
+  },
+  "position:rightOf=on the right of": {
+   "generated": 55,
+   "kept": 48,
+   "final": 41
+  },
+  "position:rightOf=right of": {
+   "generated": 57,
+   "kept": 56,
+   "final": 47
+  },
+  "position:rightOf=right side of": {
+   "generated": 60,
+   "kept": 53,
+   "final": 43
+  },
+  "position:rightOf=to the right of": {
+   "generated": 57,
+   "kept": 50,
+   "final": 43
+  },
+  "position:top=along the top": {
+   "generated": 23,
+   "kept": 22,
+   "final": 19
+  },
+  "position:top=at the top": {
+   "generated": 31,
+   "kept": 28,
+   "final": 24
+  },
+  "position:top=at the top edge": {
+   "generated": 22,
+   "kept": 17,
+   "final": 15
+  },
+  "position:top=on the top": {
+   "generated": 20,
+   "kept": 18,
+   "final": 16
+  },
+  "position:topLeft=at the top left": {
+   "generated": 12,
+   "kept": 12,
+   "final": 10
+  },
+  "position:topLeft=in the top left": {
+   "generated": 13,
+   "kept": 13,
+   "final": 9
+  },
+  "position:topLeft=in the top left corner": {
+   "generated": 10,
+   "kept": 10,
+   "final": 9
+  },
+  "position:topLeft=in the top-left corner": {
+   "generated": 12,
+   "kept": 12,
+   "final": 10
+  },
+  "position:topLeft=in the upper left": {
+   "generated": 13,
+   "kept": 13,
+   "final": 10
+  },
+  "position:topLeft=in the upper-left corner": {
+   "generated": 10,
+   "kept": 9,
+   "final": 9
+  },
+  "position:topLeft=to the top left": {
+   "generated": 8,
+   "kept": 8,
+   "final": 8
+  },
+  "position:topRight=at the top-right": {
+   "generated": 13,
+   "kept": 12,
+   "final": 11
+  },
+  "position:topRight=in the top right": {
+   "generated": 13,
+   "kept": 13,
+   "final": 13
+  },
+  "position:topRight=in the top right corner": {
+   "generated": 14,
+   "kept": 12,
+   "final": 10
+  },
+  "position:topRight=in the upper right": {
+   "generated": 11,
+   "kept": 11,
+   "final": 10
+  },
+  "position:topRight=in the upper-right corner": {
+   "generated": 12,
+   "kept": 11,
+   "final": 8
+  },
+  "position:topRight=to the top right": {
+   "generated": 14,
+   "kept": 13,
+   "final": 10
+  },
+  "property:color": {
+   "generated": 58,
+   "kept": 56,
+   "final": 47
+  },
+  "property:label": {
+   "generated": 85,
+   "kept": 63,
+   "final": 49
+  },
+  "property:position": {
+   "generated": 63,
+   "kept": 61,
+   "final": 49
+  },
+  "property:shape": {
+   "generated": 45,
+   "kept": 23,
+   "final": 16
+  },
+  "property:size": {
+   "generated": 99,
+   "kept": 98,
+   "final": 74
+  },
+  "propframe:how big is {T}": {
+   "generated": 20,
+   "kept": 20,
+   "final": 17
+  },
+  "propframe:how large is {T}": {
+   "generated": 20,
+   "kept": 20,
+   "final": 13
+  },
+  "propframe:how small is {T}": {
+   "generated": 19,
+   "kept": 18,
+   "final": 15
+  },
+  "propframe:what color is {T}": {
+   "generated": 20,
+   "kept": 19,
+   "final": 17
+  },
+  "propframe:what colour is {T}": {
+   "generated": 19,
+   "kept": 19,
+   "final": 18
+  },
+  "propframe:what does {T} say": {
+   "generated": 22,
+   "kept": 22,
+   "final": 17
+  },
+  "propframe:what is the color of {T}": {
+   "generated": 19,
+   "kept": 18,
+   "final": 12
+  },
+  "propframe:what is the label of {T}": {
+   "generated": 23,
+   "kept": 22,
+   "final": 16
+  },
+  "propframe:what is the position of {T}": {
+   "generated": 21,
+   "kept": 20,
+   "final": 17
+  },
+  "propframe:what is the shape of {T}": {
+   "generated": 21,
+   "kept": 0,
+   "final": 0
+  },
+  "propframe:what is the size of {T}": {
+   "generated": 20,
+   "kept": 20,
+   "final": 16
+  },
+  "propframe:what shape is {T}": {
+   "generated": 24,
+   "kept": 23,
+   "final": 16
+  },
+  "propframe:what size is {T}": {
+   "generated": 20,
+   "kept": 20,
+   "final": 13
+  },
+  "propframe:what text is on {T}": {
+   "generated": 20,
+   "kept": 19,
+   "final": 16
+  },
+  "propframe:what's the location of {T}": {
+   "generated": 21,
+   "kept": 20,
+   "final": 12
+  },
+  "propframe:what's written on {T}": {
+   "generated": 20,
+   "kept": 0,
+   "final": 0
+  },
+  "propframe:where is {T}": {
+   "generated": 21,
+   "kept": 21,
+   "final": 20
+  },
+  "quantifier:all=all": {
+   "generated": 358,
+   "kept": 287,
+   "final": 238
+  },
+  "quantifier:all=all of the": {
+   "generated": 120,
+   "kept": 112,
+   "final": 96
+  },
+  "quantifier:all=all of the shapes": {
+   "generated": 62,
+   "kept": 60,
+   "final": 42
+  },
+  "quantifier:all=all of them": {
+   "generated": 30,
+   "kept": 0,
+   "final": 0
+  },
+  "quantifier:all=all shapes": {
+   "generated": 61,
+   "kept": 57,
+   "final": 46
+  },
+  "quantifier:all=all the": {
+   "generated": 118,
+   "kept": 112,
+   "final": 98
+  },
+  "quantifier:all=all the elements": {
+   "generated": 63,
+   "kept": 57,
+   "final": 51
+  },
+  "quantifier:all=all the nodes": {
+   "generated": 66,
+   "kept": 65,
+   "final": 51
+  },
+  "quantifier:all=all the shapes": {
+   "generated": 65,
+   "kept": 57,
+   "final": 47
+  },
+  "quantifier:all=bare plural": {
+   "generated": 315,
+   "kept": 303,
+   "final": 243
+  },
+  "quantifier:all=each": {
+   "generated": 119,
+   "kept": 114,
+   "final": 95
+  },
+  "quantifier:all=every": {
+   "generated": 212,
+   "kept": 204,
+   "final": 167
+  },
+  "quantifier:all=every shape": {
+   "generated": 58,
+   "kept": 54,
+   "final": 43
+  },
+  "quantifier:all=everything": {
+   "generated": 65,
+   "kept": 60,
+   "final": 47
+  },
+  "quantifier:all=everything on the canvas": {
+   "generated": 61,
+   "kept": 52,
+   "final": 45
+  },
+  "quantifier:all=the": {
+   "generated": 78,
+   "kept": 74,
+   "final": 58
+  },
+  "quantifier:all=the diagram": {
+   "generated": 62,
+   "kept": 0,
+   "final": 0
+  },
+  "quantifier:all=the whole diagram": {
+   "generated": 58,
+   "kept": 0,
+   "final": 0
+  },
+  "quantifier:all=the+plural": {
+   "generated": 539,
+   "kept": 508,
+   "final": 415
+  },
+  "quantifier:all=them all": {
+   "generated": 61,
+   "kept": 4,
+   "final": 3
+  },
+  "reachframe:what can I get to from {A}": {
+   "generated": 15,
+   "kept": 15,
+   "final": 12
+  },
+  "reachframe:what can I reach from {A}": {
+   "generated": 15,
+   "kept": 15,
+   "final": 13
+  },
+  "reachframe:what can be reached from {A}": {
+   "generated": 14,
+   "kept": 12,
+   "final": 9
+  },
+  "reachframe:what is downstream from {A}": {
+   "generated": 20,
+   "kept": 20,
+   "final": 17
+  },
+  "reachframe:what is reachable from {A}": {
+   "generated": 19,
+   "kept": 16,
+   "final": 14
+  },
+  "reachframe:where can I go from {A}": {
+   "generated": 17,
+   "kept": 16,
+   "final": 13
+  },
+  "reachframe:which shapes can be reached from {A}": {
+   "generated": 16,
+   "kept": 15,
+   "final": 12
+  },
+  "recency:newest=last": {
+   "generated": 148,
+   "kept": 136,
+   "final": 104
+  },
+  "recency:newest=latest": {
+   "generated": 136,
+   "kept": 129,
+   "final": 105
+  },
+  "recency:newest=most recent": {
+   "generated": 141,
+   "kept": 135,
+   "final": 115
+  },
+  "recency:newest=new": {
+   "generated": 147,
+   "kept": 141,
+   "final": 111
+  },
+  "recency:newest=newest": {
+   "generated": 140,
+   "kept": 128,
+   "final": 104
+  },
+  "recency:oldest=earliest": {
+   "generated": 133,
+   "kept": 123,
+   "final": 97
+  },
+  "recency:oldest=first": {
+   "generated": 136,
+   "kept": 128,
+   "final": 106
+  },
+  "recency:oldest=oldest": {
+   "generated": 141,
+   "kept": 135,
+   "final": 113
+  },
+  "redoframe:do that again": {
+   "generated": 19,
+   "kept": 16,
+   "final": 7
+  },
+  "redoframe:re-apply": {
+   "generated": 16,
+   "kept": 15,
+   "final": 7
+  },
+  "redoframe:reapply": {
+   "generated": 17,
+   "kept": 17,
+   "final": 9
+  },
+  "redoframe:reapply that": {
+   "generated": 20,
+   "kept": 19,
+   "final": 7
+  },
+  "redoframe:redo": {
+   "generated": 20,
+   "kept": 19,
+   "final": 5
+  },
+  "redoframe:redo that": {
+   "generated": 16,
+   "kept": 16,
+   "final": 10
+  },
+  "redoframe:redo the last change": {
+   "generated": 16,
+   "kept": 15,
+   "final": 7
+  },
+  "ref:all of them": {
+   "generated": 82,
+   "kept": 69,
+   "final": 61
+  },
+  "ref:created name": {
+   "generated": 14,
+   "kept": 13,
+   "final": 13
+  },
+  "ref:it": {
+   "generated": 115,
+   "kept": 91,
+   "final": 77
+  },
+  "ref:that one": {
+   "generated": 67,
+   "kept": 61,
+   "final": 51
+  },
+  "ref:the same one": {
+   "generated": 72,
+   "kept": 69,
+   "final": 56
+  },
+  "ref:them": {
+   "generated": 122,
+   "kept": 107,
+   "final": 83
+  },
+  "ref:this one": {
+   "generated": 76,
+   "kept": 69,
+   "final": 61
+  },
+  "renameframe:call {T} {N}": {
+   "generated": 57,
+   "kept": 47,
+   "final": 31
+  },
+  "renameframe:rename {T} as {N}": {
+   "generated": 53,
+   "kept": 41,
+   "final": 32
+  },
+  "renameframe:rename {T} into {N}": {
+   "generated": 59,
+   "kept": 51,
+   "final": 41
+  },
+  "renameframe:rename {T} to {N}": {
+   "generated": 55,
+   "kept": 49,
+   "final": 40
+  },
+  "renameframe:rename {T} {N}": {
+   "generated": 55,
+   "kept": 45,
+   "final": 35
+  },
+  "requests:1": {
+   "generated": 9251,
+   "kept": 8661,
+   "final": 6760
+  },
+  "requests:2": {
+   "generated": 2531,
+   "kept": 2191,
+   "final": 1802
+  },
+  "requests:3": {
+   "generated": 918,
+   "kept": 748,
+   "final": 600
+  },
+  "resizeframe:{v} {T}": {
+   "generated": 152,
+   "kept": 142,
+   "final": 112
+  },
+  "resizeframe:{v} {T} 3 times bigger": {
+   "generated": 6,
+   "kept": 6,
+   "final": 5
+  },
+  "resizeframe:{v} {T} a bit": {
+   "generated": 28,
+   "kept": 28,
+   "final": 27
+  },
+  "resizeframe:{v} {T} a bit bigger": {
+   "generated": 7,
+   "kept": 6,
+   "final": 3
+  },
+  "resizeframe:{v} {T} a little smaller": {
+   "generated": 7,
+   "kept": 4,
+   "final": 3
+  },
+  "resizeframe:{v} {T} a lot smaller": {
+   "generated": 5,
+   "kept": 4,
+   "final": 3
+  },
+  "resizeframe:{v} {T} bigger": {
+   "generated": 6,
+   "kept": 6,
+   "final": 5
+  },
+  "resizeframe:{v} {T} double the size": {
+   "generated": 8,
+   "kept": 8,
+   "final": 7
+  },
+  "resizeframe:{v} {T} down": {
+   "generated": 15,
+   "kept": 15,
+   "final": 10
+  },
+  "resizeframe:{v} {T} half the size": {
+   "generated": 8,
+   "kept": 8,
+   "final": 6
+  },
+  "resizeframe:{v} {T} larger": {
+   "generated": 3,
+   "kept": 3,
+   "final": 2
+  },
+  "resizeframe:{v} {T} much bigger": {
+   "generated": 6,
+   "kept": 5,
+   "final": 5
+  },
+  "resizeframe:{v} {T} smaller": {
+   "generated": 4,
+   "kept": 4,
+   "final": 4
+  },
+  "resizeframe:{v} {T} three times larger": {
+   "generated": 4,
+   "kept": 3,
+   "final": 3
+  },
+  "resizeframe:{v} {T} twice as big": {
+   "generated": 9,
+   "kept": 7,
+   "final": 5
+  },
+  "resizeframe:{v} {T} twice as large": {
+   "generated": 6,
+   "kept": 6,
+   "final": 3
+  },
+  "resizeframe:{v} {T} up": {
+   "generated": 22,
+   "kept": 20,
+   "final": 17
+  },
+  "resizeframe:{v} {T} way bigger": {
+   "generated": 9,
+   "kept": 8,
+   "final": 8
+  },
+  "rule:opener=always": {
+   "generated": 12,
+   "kept": 11,
+   "final": 8
+  },
+  "rule:opener=by default": {
+   "generated": 32,
+   "kept": 30,
+   "final": 23
+  },
+  "rule:opener=from now on": {
+   "generated": 32,
+   "kept": 31,
+   "final": 27
+  },
+  "rule:opener=going forward": {
+   "generated": 28,
+   "kept": 26,
+   "final": 20
+  },
+  "rule:opener=henceforth": {
+   "generated": 34,
+   "kept": 31,
+   "final": 24
+  },
+  "rule:opener=in future": {
+   "generated": 31,
+   "kept": 29,
+   "final": 26
+  },
+  "rule:opener=in the future": {
+   "generated": 31,
+   "kept": 30,
+   "final": 26
+  },
+  "ruleframe:new {S} must be {v}": {
+   "generated": 22,
+   "kept": 22,
+   "final": 17
+  },
+  "ruleframe:new {S} should be {v}": {
+   "generated": 24,
+   "kept": 22,
+   "final": 16
+  },
+  "ruleframe:new {S} will be {v}": {
+   "generated": 24,
+   "kept": 23,
+   "final": 17
+  },
+  "ruleframe:{S} should be {v} from now on": {
+   "generated": 23,
+   "kept": 0,
+   "final": 0
+  },
+  "ruleframe:{o} all shapes are {v}": {
+   "generated": 28,
+   "kept": 27,
+   "final": 23
+  },
+  "ruleframe:{o} everything is {v}": {
+   "generated": 28,
+   "kept": 27,
+   "final": 19
+  },
+  "ruleframe:{o} make {S} {v}": {
+   "generated": 28,
+   "kept": 24,
+   "final": 18
+  },
+  "ruleframe:{o} new shapes should be {v}": {
+   "generated": 28,
+   "kept": 27,
+   "final": 24
+  },
+  "ruleframe:{o} {S} are {v2}": {
+   "generated": 21,
+   "kept": 19,
+   "final": 19
+  },
+  "ruleframe:{o} {S} are {v}": {
+   "generated": 20,
+   "kept": 19,
+   "final": 14
+  },
+  "ruleframe:{o} {S} should be {v}": {
+   "generated": 25,
+   "kept": 23,
+   "final": 19
+  },
+  "ruleframe:{o}, {S} are {v}": {
+   "generated": 22,
+   "kept": 22,
+   "final": 18
+  },
+  "rulesframe:list the defaults": {
+   "generated": 19,
+   "kept": 19,
+   "final": 9
+  },
+  "rulesframe:show me the rules": {
+   "generated": 18,
+   "kept": 17,
+   "final": 8
+  },
+  "rulesframe:what are the rules": {
+   "generated": 17,
+   "kept": 16,
+   "final": 7
+  },
+  "rulesframe:what default rules do we have": {
+   "generated": 22,
+   "kept": 22,
+   "final": 9
+  },
+  "rulesframe:what defaults are set": {
+   "generated": 23,
+   "kept": 23,
+   "final": 10
+  },
+  "rulesframe:what rules are there": {
+   "generated": 18,
+   "kept": 18,
+   "final": 9
+  },
+  "rulesframe:which defaults are active": {
+   "generated": 18,
+   "kept": 16,
+   "final": 8
+  },
+  "rulesframe:which rules are active": {
+   "generated": 22,
+   "kept": 20,
+   "final": 10
+  },
+  "setframe:{v} the color of {T} to {c}": {
+   "generated": 24,
+   "kept": 23,
+   "final": 17
+  },
+  "setframe:{v} the colour of {T} to {c}": {
+   "generated": 15,
+   "kept": 13,
+   "final": 10
+  },
+  "setframe:{v} the shape of {T} to {a} {s}": {
+   "generated": 29,
+   "kept": 28,
+   "final": 21
+  },
+  "setframe:{v} the shape of {T} to {s}": {
+   "generated": 38,
+   "kept": 34,
+   "final": 29
+  },
+  "setframe:{v} the size of {T} to {z}": {
+   "generated": 42,
+   "kept": 40,
+   "final": 34
+  },
+  "setframe:{v} {T} into {a} {c} {s}": {
+   "generated": 49,
+   "kept": 47,
+   "final": 37
+  },
+  "setframe:{v} {T} into {a} {s}": {
+   "generated": 155,
+   "kept": 150,
+   "final": 129
+  },
+  "setframe:{v} {T} into {a} {z} {c} {s}": {
+   "generated": 41,
+   "kept": 40,
+   "final": 36
+  },
+  "setframe:{v} {T} the colour {c}": {
+   "generated": 23,
+   "kept": 21,
+   "final": 17
+  },
+  "setframe:{v} {T} to {a} {s}": {
+   "generated": 43,
+   "kept": 41,
+   "final": 34
+  },
+  "setframe:{v} {T} to {a} {z} {s}": {
+   "generated": 75,
+   "kept": 71,
+   "final": 55
+  },
+  "setframe:{v} {T} to {c}": {
+   "generated": 44,
+   "kept": 39,
+   "final": 31
+  },
+  "setframe:{v} {T} to {z}": {
+   "generated": 102,
+   "kept": 92,
+   "final": 73
+  },
+  "setframe:{v} {T} with {c}": {
+   "generated": 35,
+   "kept": 34,
+   "final": 27
+  },
+  "setframe:{v} {T} {a} {c} color": {
+   "generated": 22,
+   "kept": 22,
+   "final": 17
+  },
+  "setframe:{v} {T} {a} {c} {s}": {
+   "generated": 47,
+   "kept": 45,
+   "final": 38
+  },
+  "setframe:{v} {T} {a} {s}": {
+   "generated": 29,
+   "kept": 29,
+   "final": 25
+  },
+  "setframe:{v} {T} {a} {z} {c} {s}": {
+   "generated": 49,
+   "kept": 48,
+   "final": 41
+  },
+  "setframe:{v} {T} {c}": {
+   "generated": 237,
+   "kept": 224,
+   "final": 181
+  },
+  "setframe:{v} {T} {z}": {
+   "generated": 131,
+   "kept": 128,
+   "final": 103
+  },
+  "setframe:{v} {T}'s color to {c}": {
+   "generated": 14,
+   "kept": 14,
+   "final": 12
+  },
+  "shape:any=element": {
+   "generated": 15,
+   "kept": 15,
+   "final": 14
+  },
+  "shape:any=elements": {
+   "generated": 35,
+   "kept": 34,
+   "final": 27
+  },
+  "shape:any=item": {
+   "generated": 13,
+   "kept": 11,
+   "final": 11
+  },
+  "shape:any=items": {
+   "generated": 35,
+   "kept": 34,
+   "final": 28
+  },
+  "shape:any=node": {
+   "generated": 14,
+   "kept": 14,
+   "final": 10
+  },
+  "shape:any=nodes": {
+   "generated": 33,
+   "kept": 31,
+   "final": 25
+  },
+  "shape:any=object": {
+   "generated": 16,
+   "kept": 16,
+   "final": 12
+  },
+  "shape:any=objects": {
+   "generated": 38,
+   "kept": 34,
+   "final": 28
+  },
+  "shape:any=ones": {
+   "generated": 281,
+   "kept": 269,
+   "final": 223
+  },
+  "shape:any=shape": {
+   "generated": 12,
+   "kept": 11,
+   "final": 10
+  },
+  "shape:any=shapes": {
+   "generated": 31,
+   "kept": 27,
+   "final": 18
+  },
+  "shape:any=thing": {
+   "generated": 13,
+   "kept": 13,
+   "final": 11
+  },
+  "shape:any=things": {
+   "generated": 38,
+   "kept": 37,
+   "final": 29
+  },
+  "shape:circle=ball": {
+   "generated": 225,
+   "kept": 213,
+   "final": 180
+  },
+  "shape:circle=balls": {
+   "generated": 108,
+   "kept": 104,
+   "final": 86
+  },
+  "shape:circle=circle": {
+   "generated": 228,
+   "kept": 211,
+   "final": 176
+  },
+  "shape:circle=circles": {
+   "generated": 113,
+   "kept": 106,
+   "final": 87
+  },
+  "shape:circle=dot": {
+   "generated": 222,
+   "kept": 204,
+   "final": 167
+  },
+  "shape:circle=dots": {
+   "generated": 109,
+   "kept": 101,
+   "final": 79
+  },
+  "shape:diamond=diamond": {
+   "generated": 337,
+   "kept": 324,
+   "final": 268
+  },
+  "shape:diamond=diamonds": {
+   "generated": 305,
+   "kept": 287,
+   "final": 232
+  },
+  "shape:diamond=rhombus": {
+   "generated": 336,
+   "kept": 308,
+   "final": 250
+  },
+  "shape:ellipse=ellipse": {
+   "generated": 345,
+   "kept": 323,
+   "final": 266
+  },
+  "shape:ellipse=ellipses": {
+   "generated": 158,
+   "kept": 144,
+   "final": 118
+  },
+  "shape:ellipse=oval": {
+   "generated": 336,
+   "kept": 326,
+   "final": 272
+  },
+  "shape:ellipse=ovals": {
+   "generated": 159,
+   "kept": 151,
+   "final": 124
+  },
+  "shape:hexagon=hexagon": {
+   "generated": 667,
+   "kept": 619,
+   "final": 500
+  },
+  "shape:hexagon=hexagons": {
+   "generated": 302,
+   "kept": 286,
+   "final": 229
+  },
+  "shape:rectangle=block": {
+   "generated": 175,
+   "kept": 162,
+   "final": 136
+  },
+  "shape:rectangle=blocks": {
+   "generated": 66,
+   "kept": 66,
+   "final": 59
+  },
+  "shape:rectangle=box": {
+   "generated": 169,
+   "kept": 156,
+   "final": 123
+  },
+  "shape:rectangle=boxes": {
+   "generated": 76,
+   "kept": 69,
+   "final": 59
+  },
+  "shape:rectangle=rect": {
+   "generated": 173,
+   "kept": 155,
+   "final": 131
+  },
+  "shape:rectangle=rectangle": {
+   "generated": 176,
+   "kept": 163,
+   "final": 137
+  },
+  "shape:rectangle=rectangles": {
+   "generated": 72,
+   "kept": 65,
+   "final": 59
+  },
+  "shape:rectangle=rects": {
+   "generated": 83,
+   "kept": 78,
+   "final": 65
+  },
+  "shape:square=square": {
+   "generated": 687,
+   "kept": 648,
+   "final": 540
+  },
+  "shape:square=squares": {
+   "generated": 280,
+   "kept": 263,
+   "final": 206
+  },
+  "shape:star=star": {
+   "generated": 676,
+   "kept": 624,
+   "final": 507
+  },
+  "shape:star=stars": {
+   "generated": 319,
+   "kept": 299,
+   "final": 243
+  },
+  "shape:triangle=triangle": {
+   "generated": 683,
+   "kept": 638,
+   "final": 533
+  },
+  "shape:triangle=triangles": {
+   "generated": 288,
+   "kept": 269,
+   "final": 215
+  },
+  "size:huge=enormous": {
+   "generated": 57,
+   "kept": 53,
+   "final": 46
+  },
+  "size:huge=giant": {
+   "generated": 57,
+   "kept": 56,
+   "final": 44
+  },
+  "size:huge=huge": {
+   "generated": 64,
+   "kept": 61,
+   "final": 51
+  },
+  "size:huge=massive": {
+   "generated": 64,
+   "kept": 62,
+   "final": 46
+  },
+  "size:large=big": {
+   "generated": 121,
+   "kept": 112,
+   "final": 92
+  },
+  "size:large=large": {
+   "generated": 118,
+   "kept": 109,
+   "final": 88
+  },
+  "size:medium=average": {
+   "generated": 59,
+   "kept": 54,
+   "final": 45
+  },
+  "size:medium=medium": {
+   "generated": 62,
+   "kept": 56,
+   "final": 44
+  },
+  "size:medium=normal": {
+   "generated": 68,
+   "kept": 66,
+   "final": 55
+  },
+  "size:medium=regular": {
+   "generated": 59,
+   "kept": 57,
+   "final": 49
+  },
+  "size:small=little": {
+   "generated": 120,
+   "kept": 111,
+   "final": 98
+  },
+  "size:small=small": {
+   "generated": 124,
+   "kept": 123,
+   "final": 103
+  },
+  "size:tiny=minuscule": {
+   "generated": 118,
+   "kept": 108,
+   "final": 91
+  },
+  "size:tiny=tiny": {
+   "generated": 126,
+   "kept": 119,
+   "final": 88
+  },
+  "style:dashed=dash": {
+   "generated": 32,
+   "kept": 29,
+   "final": 23
+  },
+  "style:dashed=dashed": {
+   "generated": 32,
+   "kept": 28,
+   "final": 22
+  },
+  "style:dotted=dotted": {
+   "generated": 54,
+   "kept": 41,
+   "final": 38
+  },
+  "superlative:biggest=biggest": {
+   "generated": 33,
+   "kept": 28,
+   "final": 21
+  },
+  "superlative:biggest=largest": {
+   "generated": 34,
+   "kept": 33,
+   "final": 16
+  },
+  "superlative:bottommost=bottommost": {
+   "generated": 30,
+   "kept": 30,
+   "final": 16
+  },
+  "superlative:bottommost=lowest": {
+   "generated": 31,
+   "kept": 29,
+   "final": 18
+  },
+  "superlative:closest=closest": {
+   "generated": 54,
+   "kept": 50,
+   "final": 41
+  },
+  "superlative:closest=nearest": {
+   "generated": 53,
+   "kept": 51,
+   "final": 38
+  },
+  "superlative:farthest=farthest": {
+   "generated": 54,
+   "kept": 52,
+   "final": 43
+  },
+  "superlative:farthest=furthest": {
+   "generated": 57,
+   "kept": 49,
+   "final": 40
+  },
+  "superlative:leastConnected=fewest arrows": {
+   "generated": 12,
+   "kept": 12,
+   "final": 9
+  },
+  "superlative:leastConnected=fewest connections": {
+   "generated": 14,
+   "kept": 14,
+   "final": 8
+  },
+  "superlative:leastConnected=fewest links": {
+   "generated": 11,
+   "kept": 11,
+   "final": 5
+  },
+  "superlative:leastConnected=least connected": {
+   "generated": 9,
+   "kept": 9,
+   "final": 7
+  },
+  "superlative:leastConnected=least connections": {
+   "generated": 13,
+   "kept": 13,
+   "final": 9
+  },
+  "superlative:leftmost=leftmost": {
+   "generated": 58,
+   "kept": 54,
+   "final": 30
+  },
+  "superlative:mostConnected=most arrows": {
+   "generated": 15,
+   "kept": 14,
+   "final": 10
+  },
+  "superlative:mostConnected=most connected": {
+   "generated": 13,
+   "kept": 13,
+   "final": 8
+  },
+  "superlative:mostConnected=most connections": {
+   "generated": 8,
+   "kept": 8,
+   "final": 5
+  },
+  "superlative:mostConnected=most edges": {
+   "generated": 10,
+   "kept": 10,
+   "final": 6
+  },
+  "superlative:mostConnected=most links": {
+   "generated": 12,
+   "kept": 12,
+   "final": 6
+  },
+  "superlative:rightmost=rightmost": {
+   "generated": 57,
+   "kept": 55,
+   "final": 29
+  },
+  "superlative:smallest=smallest": {
+   "generated": 29,
+   "kept": 25,
+   "final": 17
+  },
+  "superlative:smallest=tiniest": {
+   "generated": 32,
+   "kept": 30,
+   "final": 10
+  },
+  "superlative:topmost=highest": {
+   "generated": 31,
+   "kept": 31,
+   "final": 20
+  },
+  "superlative:topmost=topmost": {
+   "generated": 27,
+   "kept": 25,
+   "final": 14
+  },
+  "swapframe:exchange {A} and {B}": {
+   "generated": 24,
+   "kept": 24,
+   "final": 18
+  },
+  "swapframe:exchange {A} with {B}": {
+   "generated": 18,
+   "kept": 17,
+   "final": 14
+  },
+  "swapframe:swap the positions of {A} and {B}": {
+   "generated": 25,
+   "kept": 23,
+   "final": 19
+  },
+  "swapframe:swap {A} and {B}": {
+   "generated": 17,
+   "kept": 17,
+   "final": 16
+  },
+  "swapframe:swap {A} with {B}": {
+   "generated": 24,
+   "kept": 24,
+   "final": 19
+  },
+  "swapframe:switch places of {A} and {B}": {
+   "generated": 23,
+   "kept": 21,
+   "final": 19
+  },
+  "swapframe:trade {A} and {B}": {
+   "generated": 24,
+   "kept": 20,
+   "final": 16
+  },
+  "swapframe:{A} and {B} switch places": {
+   "generated": 26,
+   "kept": 24,
+   "final": 20
+  },
+  "swapframe:{A} and {B} trade places": {
+   "generated": 23,
+   "kept": 22,
+   "final": 19
+  },
+  "target:desc": {
+   "generated": 3966,
+   "kept": 3612,
+   "final": 2943
+  },
+  "target:list": {
+   "generated": 599,
+   "kept": 530,
+   "final": 441
+  },
+  "target:name": {
+   "generated": 1322,
+   "kept": 1226,
+   "final": 1009
+  },
+  "target:name_lc": {
+   "generated": 66,
+   "kept": 60,
+   "final": 50
+  },
+  "target:noun+name": {
+   "generated": 147,
+   "kept": 132,
+   "final": 114
+  },
+  "typo": {
+   "generated": 613,
+   "kept": 472,
+   "final": 383
+  },
+  "undoframe:revert": {
+   "generated": 15,
+   "kept": 11,
+   "final": 4
+  },
+  "undoframe:revert that": {
+   "generated": 14,
+   "kept": 11,
+   "final": 5
+  },
+  "undoframe:take it back": {
+   "generated": 13,
+   "kept": 8,
+   "final": 5
+  },
+  "undoframe:take that back": {
+   "generated": 16,
+   "kept": 15,
+   "final": 6
+  },
+  "undoframe:undo": {
+   "generated": 14,
+   "kept": 13,
+   "final": 4
+  },
+  "undoframe:undo 3 times": {
+   "generated": 13,
+   "kept": 0,
+   "final": 0
+  },
+  "undoframe:undo that": {
+   "generated": 15,
+   "kept": 15,
+   "final": 5
+  },
+  "undoframe:undo the last change": {
+   "generated": 12,
+   "kept": 12,
+   "final": 4
+  },
+  "undoframe:undo the last step": {
+   "generated": 14,
+   "kept": 13,
+   "final": 5
+  },
+  "undoframe:undo twice": {
+   "generated": 16,
+   "kept": 0,
+   "final": 0
+  },
+  "ungroupframe:break up the group {G}": {
+   "generated": 13,
+   "kept": 13,
+   "final": 12
+  },
+  "ungroupframe:break {G} up": {
+   "generated": 13,
+   "kept": 12,
+   "final": 9
+  },
+  "ungroupframe:dissolve {G}": {
+   "generated": 12,
+   "kept": 10,
+   "final": 9
+  },
+  "ungroupframe:remove {M} from {G}": {
+   "generated": 12,
+   "kept": 12,
+   "final": 12
+  },
+  "ungroupframe:split up {G}": {
+   "generated": 12,
+   "kept": 11,
+   "final": 9
+  },
+  "ungroupframe:split {G} up": {
+   "generated": 11,
+   "kept": 11,
+   "final": 10
+  },
+  "ungroupframe:take {M} out of {G}": {
+   "generated": 15,
+   "kept": 10,
+   "final": 10
+  },
+  "ungroupframe:ungroup {G}": {
+   "generated": 10,
+   "kept": 9,
+   "final": 7
+  },
+  "unlabel:clear the text of {T}": {
+   "generated": 11,
+   "kept": 11,
+   "final": 11
+  },
+  "unlabel:clear {N}'s label": {
+   "generated": 12,
+   "kept": 12,
+   "final": 12
+  },
+  "unlabel:delete the label of {T}": {
+   "generated": 11,
+   "kept": 11,
+   "final": 11
+  },
+  "unlabel:delete {N}'s label": {
+   "generated": 12,
+   "kept": 11,
+   "final": 10
+  },
+  "unlabel:get rid of the label on {T}": {
+   "generated": 15,
+   "kept": 15,
+   "final": 15
+  },
+  "unlabel:remove the label of {T}": {
+   "generated": 9,
+   "kept": 9,
+   "final": 9
+  },
+  "unlabel:remove the title of {T}": {
+   "generated": 15,
+   "kept": 14,
+   "final": 14
+  },
+  "unlabel:remove {N}'s caption": {
+   "generated": 13,
+   "kept": 13,
+   "final": 13
+  },
+  "unlabel:unlabel {T}": {
+   "generated": 11,
+   "kept": 11,
+   "final": 11
+  },
+  "verb:align=align": {
+   "generated": 174,
+   "kept": 114,
+   "final": 94
+  },
+  "verb:align=line up": {
+   "generated": 176,
+   "kept": 120,
+   "final": 96
+  },
+  "verb:arrange=arrange": {
+   "generated": 72,
+   "kept": 54,
+   "final": 45
+  },
+  "verb:arrange=lay out": {
+   "generated": 60,
+   "kept": 45,
+   "final": 38
+  },
+  "verb:arrange=layout": {
+   "generated": 54,
+   "kept": 39,
+   "final": 35
+  },
+  "verb:arrange=organise": {
+   "generated": 59,
+   "kept": 56,
+   "final": 46
+  },
+  "verb:arrange=organize": {
+   "generated": 70,
+   "kept": 57,
+   "final": 42
+  },
+  "verb:arrange=tidy": {
+   "generated": 90,
+   "kept": 75,
+   "final": 53
+  },
+  "verb:connect=add (+edge noun)": {
+   "generated": 27,
+   "kept": 23,
+   "final": 16
+  },
+  "verb:connect=attach": {
+   "generated": 133,
+   "kept": 93,
+   "final": 77
+  },
+  "verb:connect=connect": {
+   "generated": 121,
+   "kept": 95,
+   "final": 80
+  },
+  "verb:connect=connects to": {
+   "generated": 9,
+   "kept": 9,
+   "final": 8
+  },
+  "verb:connect=create (+edge noun)": {
+   "generated": 26,
+   "kept": 23,
+   "final": 18
+  },
+  "verb:connect=draw (+edge noun)": {
+   "generated": 19,
+   "kept": 18,
+   "final": 18
+  },
+  "verb:connect=feeds into": {
+   "generated": 11,
+   "kept": 10,
+   "final": 9
+  },
+  "verb:connect=flows into": {
+   "generated": 10,
+   "kept": 9,
+   "final": 8
+  },
+  "verb:connect=flows to": {
+   "generated": 12,
+   "kept": 11,
+   "final": 11
+  },
+  "verb:connect=goes to": {
+   "generated": 10,
+   "kept": 10,
+   "final": 9
+  },
+  "verb:connect=hook": {
+   "generated": 114,
+   "kept": 84,
+   "final": 63
+  },
+  "verb:connect=insert (+edge noun)": {
+   "generated": 22,
+   "kept": 20,
+   "final": 16
+  },
+  "verb:connect=join": {
+   "generated": 121,
+   "kept": 93,
+   "final": 76
+  },
+  "verb:connect=leads to": {
+   "generated": 7,
+   "kept": 7,
+   "final": 4
+  },
+  "verb:connect=link": {
+   "generated": 103,
+   "kept": 86,
+   "final": 72
+  },
+  "verb:connect=make (+edge noun)": {
+   "generated": 20,
+   "kept": 16,
+   "final": 14
+  },
+  "verb:connect=passes to": {
+   "generated": 13,
+   "kept": 12,
+   "final": 12
+  },
+  "verb:connect=place (+edge noun)": {
+   "generated": 26,
+   "kept": 20,
+   "final": 12
+  },
+  "verb:connect=points to": {
+   "generated": 5,
+   "kept": 5,
+   "final": 4
+  },
+  "verb:connect=put (+edge noun)": {
+   "generated": 19,
+   "kept": 18,
+   "final": 15
+  },
+  "verb:connect=runs to": {
+   "generated": 11,
+   "kept": 10,
+   "final": 8
+  },
+  "verb:connect=sends to": {
+   "generated": 8,
+   "kept": 8,
+   "final": 7
+  },
+  "verb:connect=tie": {
+   "generated": 137,
+   "kept": 84,
+   "final": 72
+  },
+  "verb:connect=to": {
+   "generated": 6,
+   "kept": 5,
+   "final": 5
+  },
+  "verb:connect=wire": {
+   "generated": 134,
+   "kept": 86,
+   "final": 72
+  },
+  "verb:create=(none)": {
+   "generated": 71,
+   "kept": 69,
+   "final": 62
+  },
+  "verb:create=add": {
+   "generated": 88,
+   "kept": 84,
+   "final": 67
+  },
+  "verb:create=build": {
+   "generated": 89,
+   "kept": 85,
+   "final": 72
+  },
+  "verb:create=create": {
+   "generated": 92,
+   "kept": 92,
+   "final": 78
+  },
+  "verb:create=draw": {
+   "generated": 89,
+   "kept": 87,
+   "final": 70
+  },
+  "verb:create=insert": {
+   "generated": 101,
+   "kept": 98,
+   "final": 80
+  },
+  "verb:create=make": {
+   "generated": 98,
+   "kept": 96,
+   "final": 75
+  },
+  "verb:create=place": {
+   "generated": 90,
+   "kept": 84,
+   "final": 71
+  },
+  "verb:create=plonk": {
+   "generated": 96,
+   "kept": 91,
+   "final": 73
+  },
+  "verb:create=pop": {
+   "generated": 97,
+   "kept": 94,
+   "final": 70
+  },
+  "verb:create=put": {
+   "generated": 88,
+   "kept": 86,
+   "final": 70
+  },
+  "verb:create=sketch": {
+   "generated": 93,
+   "kept": 89,
+   "final": 77
+  },
+  "verb:create=slap": {
+   "generated": 84,
+   "kept": 78,
+   "final": 64
+  },
+  "verb:create=spawn": {
+   "generated": 86,
+   "kept": 83,
+   "final": 69
+  },
+  "verb:create=stick": {
+   "generated": 97,
+   "kept": 94,
+   "final": 77
+  },
+  "verb:create=throw": {
+   "generated": 93,
+   "kept": 90,
+   "final": 75
+  },
+  "verb:delete=axe": {
+   "generated": 44,
+   "kept": 44,
+   "final": 36
+  },
+  "verb:delete=banish": {
+   "generated": 47,
+   "kept": 46,
+   "final": 40
+  },
+  "verb:delete=clear": {
+   "generated": 66,
+   "kept": 63,
+   "final": 45
+  },
+  "verb:delete=delete": {
+   "generated": 54,
+   "kept": 51,
+   "final": 42
+  },
+  "verb:delete=ditch": {
+   "generated": 42,
+   "kept": 40,
+   "final": 34
+  },
+  "verb:delete=drop": {
+   "generated": 46,
+   "kept": 46,
+   "final": 40
+  },
+  "verb:delete=erase": {
+   "generated": 52,
+   "kept": 46,
+   "final": 35
+  },
+  "verb:delete=get rid of": {
+   "generated": 43,
+   "kept": 42,
+   "final": 35
+  },
+  "verb:delete=kill": {
+   "generated": 42,
+   "kept": 40,
+   "final": 34
+  },
+  "verb:delete=nuke": {
+   "generated": 44,
+   "kept": 43,
+   "final": 35
+  },
+  "verb:delete=remove": {
+   "generated": 42,
+   "kept": 40,
+   "final": 32
+  },
+  "verb:delete=reset": {
+   "generated": 49,
+   "kept": 46,
+   "final": 35
+  },
+  "verb:delete=start over": {
+   "generated": 7,
+   "kept": 6,
+   "final": 4
+  },
+  "verb:delete=trash": {
+   "generated": 43,
+   "kept": 39,
+   "final": 33
+  },
+  "verb:delete=wipe": {
+   "generated": 34,
+   "kept": 32,
+   "final": 17
+  },
+  "verb:delete=wipe out": {
+   "generated": 19,
+   "kept": 18,
+   "final": 15
+  },
+  "verb:delete=zap": {
+   "generated": 43,
+   "kept": 39,
+   "final": 29
+  },
+  "verb:disconnect=cut": {
+   "generated": 25,
+   "kept": 24,
+   "final": 21
+  },
+  "verb:disconnect=cut (+edge noun)": {
+   "generated": 16,
+   "kept": 15,
+   "final": 13
+  },
+  "verb:disconnect=delete (+edge noun)": {
+   "generated": 16,
+   "kept": 15,
+   "final": 11
+  },
+  "verb:disconnect=detach": {
+   "generated": 23,
+   "kept": 22,
+   "final": 20
+  },
+  "verb:disconnect=disconnect": {
+   "generated": 21,
+   "kept": 21,
+   "final": 15
+  },
+  "verb:disconnect=drop (+edge noun)": {
+   "generated": 16,
+   "kept": 15,
+   "final": 12
+  },
+  "verb:disconnect=erase (+edge noun)": {
+   "generated": 14,
+   "kept": 13,
+   "final": 9
+  },
+  "verb:disconnect=get rid of (+edge noun)": {
+   "generated": 14,
+   "kept": 14,
+   "final": 10
+  },
+  "verb:disconnect=kill (+edge noun)": {
+   "generated": 14,
+   "kept": 14,
+   "final": 11
+  },
+  "verb:disconnect=remove (+edge noun)": {
+   "generated": 20,
+   "kept": 20,
+   "final": 17
+  },
+  "verb:disconnect=separate": {
+   "generated": 25,
+   "kept": 23,
+   "final": 20
+  },
+  "verb:disconnect=sever": {
+   "generated": 24,
+   "kept": 23,
+   "final": 18
+  },
+  "verb:disconnect=sever (+edge noun)": {
+   "generated": 15,
+   "kept": 14,
+   "final": 11
+  },
+  "verb:disconnect=snip": {
+   "generated": 28,
+   "kept": 25,
+   "final": 18
+  },
+  "verb:disconnect=snip (+edge noun)": {
+   "generated": 14,
+   "kept": 14,
+   "final": 10
+  },
+  "verb:disconnect=unhook": {
+   "generated": 21,
+   "kept": 19,
+   "final": 15
+  },
+  "verb:disconnect=unlink": {
+   "generated": 21,
+   "kept": 21,
+   "final": 18
+  },
+  "verb:distribute=distribute": {
+   "generated": 72,
+   "kept": 44,
+   "final": 33
+  },
+  "verb:distribute=space": {
+   "generated": 70,
+   "kept": 40,
+   "final": 31
+  },
+  "verb:distribute=space out": {
+   "generated": 71,
+   "kept": 48,
+   "final": 43
+  },
+  "verb:distribute=spread": {
+   "generated": 70,
+   "kept": 47,
+   "final": 36
+  },
+  "verb:distribute=spread out": {
+   "generated": 75,
+   "kept": 42,
+   "final": 35
+  },
+  "verb:duplicate=clone": {
+   "generated": 37,
+   "kept": 34,
+   "final": 29
+  },
+  "verb:duplicate=copy": {
+   "generated": 39,
+   "kept": 39,
+   "final": 33
+  },
+  "verb:duplicate=dupe": {
+   "generated": 41,
+   "kept": 40,
+   "final": 30
+  },
+  "verb:duplicate=duplicate": {
+   "generated": 39,
+   "kept": 36,
+   "final": 27
+  },
+  "verb:duplicate=make": {
+   "generated": 90,
+   "kept": 84,
+   "final": 68
+  },
+  "verb:duplicate=replicate": {
+   "generated": 37,
+   "kept": 33,
+   "final": 29
+  },
+  "verb:forget=cancel": {
+   "generated": 11,
+   "kept": 9,
+   "final": 5
+  },
+  "verb:forget=clear": {
+   "generated": 7,
+   "kept": 7,
+   "final": 6
+  },
+  "verb:forget=delete": {
+   "generated": 8,
+   "kept": 8,
+   "final": 4
+  },
+  "verb:forget=discard": {
+   "generated": 22,
+   "kept": 22,
+   "final": 9
+  },
+  "verb:forget=disregard": {
+   "generated": 8,
+   "kept": 8,
+   "final": 5
+  },
+  "verb:forget=drop": {
+   "generated": 13,
+   "kept": 13,
+   "final": 7
+  },
+  "verb:forget=forget": {
+   "generated": 36,
+   "kept": 35,
+   "final": 21
+  },
+  "verb:forget=remove": {
+   "generated": 21,
+   "kept": 18,
+   "final": 3
+  },
+  "verb:forget=reset": {
+   "generated": 10,
+   "kept": 9,
+   "final": 5
+  },
+  "verb:label=add": {
+   "generated": 55,
+   "kept": 55,
+   "final": 47
+  },
+  "verb:label=caption": {
+   "generated": 14,
+   "kept": 14,
+   "final": 11
+  },
+  "verb:label=inscribe": {
+   "generated": 19,
+   "kept": 18,
+   "final": 14
+  },
+  "verb:label=label": {
+   "generated": 126,
+   "kept": 120,
+   "final": 108
+  },
+  "verb:label=put": {
+   "generated": 35,
+   "kept": 17,
+   "final": 15
+  },
+  "verb:label=stamp": {
+   "generated": 13,
+   "kept": 13,
+   "final": 12
+  },
+  "verb:label=tag": {
+   "generated": 19,
+   "kept": 18,
+   "final": 13
+  },
+  "verb:label=title": {
+   "generated": 16,
+   "kept": 15,
+   "final": 10
+  },
+  "verb:label=write": {
+   "generated": 34,
+   "kept": 30,
+   "final": 24
+  },
+  "verb:move=(none)": {
+   "generated": 116,
+   "kept": 91,
+   "final": 68
+  },
+  "verb:move=drag": {
+   "generated": 77,
+   "kept": 72,
+   "final": 63
+  },
+  "verb:move=move": {
+   "generated": 82,
+   "kept": 74,
+   "final": 56
+  },
+  "verb:move=nudge": {
+   "generated": 72,
+   "kept": 70,
+   "final": 58
+  },
+  "verb:move=park": {
+   "generated": 75,
+   "kept": 73,
+   "final": 66
+  },
+  "verb:move=place": {
+   "generated": 79,
+   "kept": 71,
+   "final": 58
+  },
+  "verb:move=push": {
+   "generated": 89,
+   "kept": 86,
+   "final": 65
+  },
+  "verb:move=put": {
+   "generated": 77,
+   "kept": 64,
+   "final": 55
+  },
+  "verb:move=relocate": {
+   "generated": 74,
+   "kept": 71,
+   "final": 57
+  },
+  "verb:move=reposition": {
+   "generated": 74,
+   "kept": 66,
+   "final": 56
+  },
+  "verb:move=scoot": {
+   "generated": 78,
+   "kept": 78,
+   "final": 66
+  },
+  "verb:move=shift": {
+   "generated": 69,
+   "kept": 66,
+   "final": 56
+  },
+  "verb:move=shove": {
+   "generated": 83,
+   "kept": 80,
+   "final": 61
+  },
+  "verb:move=slide": {
+   "generated": 78,
+   "kept": 74,
+   "final": 61
+  },
+  "verb:move=tuck": {
+   "generated": 78,
+   "kept": 74,
+   "final": 58
+  },
+  "verb:redo=do that again": {
+   "generated": 19,
+   "kept": 16,
+   "final": 7
+  },
+  "verb:redo=re-apply": {
+   "generated": 16,
+   "kept": 15,
+   "final": 7
+  },
+  "verb:redo=reapply": {
+   "generated": 37,
+   "kept": 36,
+   "final": 16
+  },
+  "verb:redo=redo": {
+   "generated": 52,
+   "kept": 50,
+   "final": 22
+  },
+  "verb:rename=call": {
+   "generated": 57,
+   "kept": 47,
+   "final": 31
+  },
+  "verb:rename=rename": {
+   "generated": 219,
+   "kept": 184,
+   "final": 146
+  },
+  "verb:resize=enlarge": {
+   "generated": 36,
+   "kept": 35,
+   "final": 30
+  },
+  "verb:resize=grow": {
+   "generated": 52,
+   "kept": 50,
+   "final": 44
+  },
+  "verb:resize=make": {
+   "generated": 88,
+   "kept": 78,
+   "final": 62
+  },
+  "verb:resize=resize": {
+   "generated": 34,
+   "kept": 32,
+   "final": 21
+  },
+  "verb:resize=scale": {
+   "generated": 58,
+   "kept": 55,
+   "final": 45
+  },
+  "verb:resize=shrink": {
+   "generated": 38,
+   "kept": 34,
+   "final": 26
+  },
+  "verb:set=change": {
+   "generated": 222,
+   "kept": 206,
+   "final": 164
+  },
+  "verb:set=color": {
+   "generated": 30,
+   "kept": 30,
+   "final": 23
+  },
+  "verb:set=colour": {
+   "generated": 31,
+   "kept": 28,
+   "final": 23
+  },
+  "verb:set=convert": {
+   "generated": 42,
+   "kept": 41,
+   "final": 35
+  },
+  "verb:set=fill": {
+   "generated": 35,
+   "kept": 34,
+   "final": 27
+  },
+  "verb:set=give": {
+   "generated": 45,
+   "kept": 43,
+   "final": 34
+  },
+  "verb:set=make": {
+   "generated": 226,
+   "kept": 222,
+   "final": 184
+  },
+  "verb:set=morph": {
+   "generated": 34,
+   "kept": 32,
+   "final": 26
+  },
+  "verb:set=paint": {
+   "generated": 33,
+   "kept": 31,
+   "final": 26
+  },
+  "verb:set=recolor": {
+   "generated": 37,
+   "kept": 34,
+   "final": 28
+  },
+  "verb:set=recolour": {
+   "generated": 35,
+   "kept": 32,
+   "final": 26
+  },
+  "verb:set=reshape": {
+   "generated": 36,
+   "kept": 36,
+   "final": 32
+  },
+  "verb:set=set": {
+   "generated": 176,
+   "kept": 162,
+   "final": 130
+  },
+  "verb:set=transform": {
+   "generated": 37,
+   "kept": 35,
+   "final": 30
+  },
+  "verb:set=turn": {
+   "generated": 224,
+   "kept": 216,
+   "final": 179
+  },
+  "verb:swap=exchange": {
+   "generated": 42,
+   "kept": 41,
+   "final": 32
+  },
+  "verb:swap=swap": {
+   "generated": 66,
+   "kept": 64,
+   "final": 54
+  },
+  "verb:swap=switch places": {
+   "generated": 49,
+   "kept": 45,
+   "final": 39
+  },
+  "verb:swap=trade": {
+   "generated": 24,
+   "kept": 20,
+   "final": 16
+  },
+  "verb:swap=trade places": {
+   "generated": 23,
+   "kept": 22,
+   "final": 19
+  },
+  "verb:toBack=send": {
+   "generated": 154,
+   "kept": 151,
+   "final": 127
+  },
+  "verb:toFront=bring": {
+   "generated": 134,
+   "kept": 123,
+   "final": 97
+  },
+  "verb:toFront=raise": {
+   "generated": 33,
+   "kept": 33,
+   "final": 28
+  },
+  "verb:undo=revert": {
+   "generated": 29,
+   "kept": 22,
+   "final": 9
+  },
+  "verb:undo=take it back": {
+   "generated": 13,
+   "kept": 8,
+   "final": 5
+  },
+  "verb:undo=take that back": {
+   "generated": 16,
+   "kept": 15,
+   "final": 6
+  },
+  "verb:undo=undo": {
+   "generated": 83,
+   "kept": 53,
+   "final": 18
+  },
+  "whole:all": {
+   "generated": 34,
+   "kept": 6,
+   "final": 5
+  },
+  "whole:all of the shapes": {
+   "generated": 31,
+   "kept": 29,
+   "final": 22
+  },
+  "whole:all shapes": {
+   "generated": 27,
+   "kept": 24,
+   "final": 21
+  },
+  "whole:all the elements": {
+   "generated": 27,
+   "kept": 26,
+   "final": 23
+  },
+  "whole:all the nodes": {
+   "generated": 30,
+   "kept": 30,
+   "final": 24
+  },
+  "whole:all the shapes": {
+   "generated": 30,
+   "kept": 26,
+   "final": 21
+  },
+  "whole:every shape": {
+   "generated": 29,
+   "kept": 26,
+   "final": 21
+  },
+  "whole:everything": {
+   "generated": 32,
+   "kept": 31,
+   "final": 25
+  },
+  "whole:everything on the canvas": {
+   "generated": 26,
+   "kept": 23,
+   "final": 20
+  },
+  "whole:the diagram": {
+   "generated": 31,
+   "kept": 0,
+   "final": 0
+  },
+  "whole:the whole diagram": {
+   "generated": 30,
+   "kept": 0,
+   "final": 0
+  },
+  "whole:them all": {
+   "generated": 33,
+   "kept": 4,
+   "final": 3
+  }
+ }
+}
