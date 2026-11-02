@@ -1,0 +1,88 @@
+{
+ "about": "Arm VSS-T of FEEDBACK_PLAN.md: the shipped chain (7 worlds with their BUILD.json settings, cutter_worlds7s, cutter_events, context filler) retrained on base + T. Data: EXTRA_DIRS = llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_tgt_1 llm_train/opus_tgt_2 (all learned parts). Registry of docs/model/micro/registry.json otherwise unchanged.",
+ "router": "cutter",
+ "cutter": "arms/T/cutter_worlds7s.json",
+ "context": "arms/T/context/weights.json",
+ "worlds": [
+  {
+   "world": "shapes",
+   "events": [
+    "create",
+    "set",
+    "resize",
+    "fact",
+    "rule"
+   ],
+   "model": "arms/T/micro/shapes7c"
+  },
+  {
+   "world": "links",
+   "events": [
+    "connect",
+    "disconnect"
+   ],
+   "model": "arms/T/micro/links7"
+  },
+  {
+   "world": "position",
+   "events": [
+    "move",
+    "swap",
+    "arrange",
+    "align",
+    "distribute",
+    "toFront",
+    "toBack"
+   ],
+   "model": "arms/T/micro/position7"
+  },
+  {
+   "world": "graphq",
+   "events": [
+    "check",
+    "connected",
+    "path",
+    "reachable",
+    "cycle",
+    "exists"
+   ],
+   "model": "arms/T/micro/graphq7"
+  },
+  {
+   "world": "questions",
+   "events": [
+    "count",
+    "list",
+    "extreme",
+    "nearest",
+    "describe",
+    "neighbors",
+    "degree",
+    "property"
+   ],
+   "model": "arms/T/micro/questions7"
+  },
+  {
+   "world": "manage",
+   "events": [
+    "delete",
+    "duplicate",
+    "rename",
+    "label"
+   ],
+   "model": "arms/T/micro/manage7"
+  },
+  {
+   "world": "history",
+   "events": [
+    "undo",
+    "redo",
+    "forget"
+   ],
+   "model": "arms/T/micro/history7"
+  }
+ ],
+ "event_cutter": "arms/T/cutter_events.json",
+ "event_hint": "H1",
+ "EXTRA_DIRS": "llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_tgt_1 llm_train/opus_tgt_2"
+}

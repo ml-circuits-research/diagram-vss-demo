@@ -1,8 +1,8 @@
 [splits] written to /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_links7_t_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 212, heldout_formulations 204, train 4186
 [schema] roles ['text', 'source', 'target', 'style', 'arrow', 'edge', 'pairing', 'members', 'targets'] (core []), max depth 0, event negation False
-[guard] cuda allocator capped at 35% of 4 GB; watchdog: exit if MemAvailable < 1.5 GB or after 4.0 h
+[guard] cuda allocator capped at 85% of 4 GB; watchdog: exit if MemAvailable < 1.5 GB or after 4.0 h
 [train] seed 0: 4186 training rows x 10 epoch(s) -> 41860 steps' sentences; D=1024; kinds 59; vocab 4904; predicate lemma not found in 1640 targets
-[train] phase table: 3672 of 10720 rows reached by the training sentences, held and trained; the other 7048 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.87 GB (peak 0.98 GB) | torch alloc 0.10 GB reserved 0.12 GB | MemAvailable 7.4 GB
+[train] phase table: 3672 of 10720 rows reached by the training sentences, held and trained; the other 7048 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.89 GB (peak 0.99 GB) | torch alloc 0.10 GB reserved 0.12 GB | MemAvailable 7.6 GB
 /home/claude/vss-box/diagram-vss-demo/training/vss/tool/sop/train.py:651: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
 Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
   print(f"[trace] target |S_world| = {np.linalg.norm(target(0)):.2f} (sqrt(D) per unit term = {np.sqrt(a.D):.1f}); initial gates all {float(torch.sigmoid(m.logits[0])):.2f} (closed start)")
@@ -11,51 +11,24 @@ Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pyto
 [trace] gold frame: {"event": "connect", "lemma": "connect", "neg": false, "roles": {"source": ["entity", "n_dept1", null, null], "target": ["entity", "them", null, null]}, "scope": null, "shape": "ok", "speakers": []}
 [trace] target |S_world| = 53.77 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
 [fast] FAST=1: training loop with the rows encoded once (4186 rows, targets 65 MB on cuda), chain pieces packed (V8.states_packed), one model view for every batch, the loss read only at the log lines
-[train seed 0] start: RSS 1.04 GB (peak 1.04 GB) | torch alloc 0.17 GB reserved 0.18 GB | MemAvailable 7.4 GB
-Traceback (most recent call last):
-  File "<frozen runpy>", line 203, in _run_module_as_main
-  File "<frozen runpy>", line 88, in _run_code
-  File "/home/claude/vss-box/diagram-vss-demo/training/vss/tool/sop/__main__.py", line 3, in <module>
-    sys.exit(main())
-             ~~~~^^
-  File "/home/claude/vss-box/diagram-vss-demo/training/vss/tool/sop/cli.py", line 180, in main
-    from .train import main as tmain; return tmain(argv[1:])
-                                             ~~~~~^^^^^^^^^^
-  File "/home/claude/vss-box/diagram-vss-demo/training/vss/tool/sop/train.py", line 1304, in main
-    rd, ex = train_one(a, legend, rows, splits, schema, seed, build, a.run_dir)
-             ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/claude/vss-box/diagram-vss-demo/training/vss/tool/sop/train.py", line 684, in train_one
-    trainer.train_loop(tm, params, None, None, None, None, a.batch, a.lr, log_every=a.log_every, ckpt=None if a.no_ckpt else os.path.join(run_dir, f"ckpt_seed{seed}.pt"),
-    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                       resume=a.resume, tag=f" seed {seed}", batch_fn=batch_fn, n=len(sents), stop_after=getattr(a, 'stop_after', 0), loss_every_step=getattr(a, 'loss_every_step', False),
-                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                       **({"lazy_loss": True} if fast_loop else {}))
-                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/claude/vss-box/diagram-vss-demo/training/vss/experiment/trainer.py", line 56, in train_loop
-    loss = -cos.mean(); opt.zero_grad(set_to_none=True); loss.backward(); opt.step(); last_t = loss.detach()
-                                                         ~~~~~~~~~~~~~^^
-  File "/home/claude/vss-box/venv/lib/python3.13/site-packages/torch/_tensor.py", line 623, in backward
-    torch.autograd.backward(
-    ~~~~~~~~~~~~~~~~~~~~~~~^
-        self, gradient, retain_graph, create_graph, inputs=inputs
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-  File "/home/claude/vss-box/venv/lib/python3.13/site-packages/torch/autograd/__init__.py", line 395, in backward
-    _engine_run_backward(
-    ~~~~~~~~~~~~~~~~~~~~^
-        tensors,
-        ^^^^^^^^
-    ...<5 lines>...
-        accumulate_grad=True,
-        ^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-  File "/home/claude/vss-box/venv/lib/python3.13/site-packages/torch/autograd/graph.py", line 1113, in _engine_run_backward
-    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        t_outputs, *args, **kwargs
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )  # Calls into the C++ engine to run the backward pass
-    ^
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 130.00 MiB. GPU 0 has a total capacity of 3.73 GiB of which 1.82 GiB is free. Process 53728 has 496.00 MiB memory in use. Including non-PyTorch memory, this process has 1.36 GiB memory in use. 1.31 GiB allowed; Of the allocated memory 1.13 GiB is allocated by PyTorch, and 115.81 MiB is reserved by PyTorch but unallocated. expandable_segments is enabled. If instead the process is running out of virtual address space (VSZ), expandable segments may be over-reserving VA (each segment reserves ~9/8 of device memory, times the number of streams); reduce it via PYTORCH_CUDA_ALLOC_CONF expandable_segments_reserve / expandable_segments_reserve_by_class.
+[train seed 0] start: RSS 1.05 GB (peak 1.05 GB) | torch alloc 0.17 GB reserved 0.18 GB | MemAvailable 7.4 GB
+[train seed 0] step 500 sent 4000/41860 loss -0.706 (14s) | RSS 1.74 GB (peak 1.74 GB) | torch alloc 0.26 GB reserved 1.63 GB | MemAvailable 6.9 GB
+[train seed 0] step 1000 sent 8000/41860 loss -0.834 (27s) | RSS 1.74 GB (peak 1.74 GB) | torch alloc 0.26 GB reserved 1.63 GB | MemAvailable 6.9 GB
+[train seed 0] step 1500 sent 12000/41860 loss -0.733 (41s) | RSS 1.74 GB (peak 1.74 GB) | torch alloc 0.26 GB reserved 1.63 GB | MemAvailable 6.9 GB
+[train seed 0] step 2000 sent 16000/41860 loss -0.854 (54s) | RSS 1.74 GB (peak 1.74 GB) | torch alloc 0.26 GB reserved 1.63 GB | MemAvailable 6.9 GB
+[train seed 0] step 2500 sent 20000/41860 loss -0.859 (67s) | RSS 1.74 GB (peak 1.74 GB) | torch alloc 0.26 GB reserved 1.63 GB | MemAvailable 6.9 GB
+[train seed 0] step 3000 sent 24000/41860 loss -0.892 (80s) | RSS 1.74 GB (peak 1.74 GB) | torch alloc 0.26 GB reserved 1.63 GB | MemAvailable 6.9 GB
+[train seed 0] step 3500 sent 28000/41860 loss -0.792 (93s) | RSS 1.74 GB (peak 1.74 GB) | torch alloc 0.26 GB reserved 1.63 GB | MemAvailable 6.9 GB
+[train seed 0] step 4000 sent 32000/41860 loss -0.802 (105s) | RSS 1.74 GB (peak 1.74 GB) | torch alloc 0.26 GB reserved 1.63 GB | MemAvailable 6.9 GB
+[train seed 0] step 4500 sent 36000/41860 loss -0.767 (119s) | RSS 1.74 GB (peak 1.74 GB) | torch alloc 0.26 GB reserved 1.63 GB | MemAvailable 6.8 GB
+[train seed 0] step 5000 sent 40000/41860 loss -0.806 (132s) | RSS 1.74 GB (peak 1.74 GB) | torch alloc 0.26 GB reserved 1.63 GB | MemAvailable 6.8 GB
+[train seed 0] end: RSS 1.74 GB (peak 1.74 GB) | torch alloc 0.26 GB reserved 0.28 GB | MemAvailable 6.8 GB (138s)
+[export] route book written | RSS 1.74 GB (peak 1.84 GB) | torch alloc 0.17 GB reserved 0.28 GB | MemAvailable 6.7 GB
+[export] numpy reader vs torch states: max relative difference 6.97e-08 (float32 phases in the route book)
+[fast] FAST=1: calibration reads in 4 processes, each row read once, cleanups shared by its two reads
+[fast] calibration: 658 rows read, 400 background rows formalized in 36.7s
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.480 | residual 0.247
+[eval] seed 0 train (sample): FULL catalog candidates 0.533 | residual 0.183
+[mem] after seed 0: RSS 2.22 GB (peak 2.77 GB) | torch alloc 0.00 GB reserved 0.28 GB | MemAvailable 6.0 GB
+[done] model written to /home/claude/vss-box/diagram-vss-demo/training/sketch/worlds_micro/links7_t/model; REPORT.md and metrics.json there; run log /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_links7_t_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)

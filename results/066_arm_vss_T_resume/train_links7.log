@@ -1,0 +1,10 @@
+# World `real`: built from 6440 training messages (28625 requests with a span)
+
+WORLD_EVENTS=connect,disconnect: only the rows of these events; the legend lists only these events.
+
+FRONT_ROWS=world: the front end below is learned only from the 4603 requests of this world's events.
+
+Front end learned from the same messages: 49 value n-grams, 751 trigger rules, 0 segmenter weights; params {"seg_epochs": 8, "val_min_count": 5, "val_min_prec": 0.8, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}.
+2/2 files OK against legend(s) links7_t sha256:8bb358f5f130…
+world links7_t [connect,disconnect] -> docs/model/micro/links7_t (4602 rows); registry line:
+{"world": "links7_t", "events": ["connect", "disconnect"], "model": "micro/links7_t"}
