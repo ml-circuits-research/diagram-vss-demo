@@ -1,0 +1,10 @@
+# World `real`: built from 8584 training messages (28417 requests with a span)
+
+WORLD_EVENTS=count,degree,describe,extreme,groupOf,list,members,nearest,neighbors,property: only the rows of these events; the legend lists only these events.
+
+FRONT_ROWS=world: the front end below is learned only from the 5041 requests of this world's events.
+
+Front end learned from the same messages: 92 value n-grams, 1133 trigger rules, 0 segmenter weights; params {"seg_epochs": 8, "val_min_count": 5, "val_min_prec": 0.8, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}.
+2/2 files OK against legend(s) questions7r2 sha256:ea7abf14f3aa…
+world questions7r2 [count,list,extreme,nearest,describe,neighbors,degree,property,members,groupOf] -> docs/model/micro/questions7r2 (4975 rows); registry line:
+{"world": "questions7r2", "events": ["count", "list", "extreme", "nearest", "describe", "neighbors", "degree", "property", "members", "groupOf"], "model": "micro/questions7r2"}

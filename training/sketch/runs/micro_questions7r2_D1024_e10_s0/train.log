@@ -1,0 +1,29 @@
+[splits] written to /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_questions7r2_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 218, heldout_formulations 225, train 4532
+[schema] roles ['object', 'color', 'relation', 'landmark', 'landmark2', 'relation2', 'landmark3', 'region', 'notcolor', 'superlative', 'members'] (core []), max depth 0, event negation False
+[guard] cuda allocator capped at 85% of 4 GB; watchdog: exit if MemAvailable < 1.5 GB or after 16.0 h
+[train] seed 0: 4532 training rows x 10 epoch(s) -> 45320 steps' sentences; D=1024; kinds 57; vocab 2184; predicate lemma not found in 1780 targets
+[train] phase table: 2291 of 10016 rows reached by the training sentences, held and trained; the other 7725 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.84 GB (peak 0.89 GB) | torch alloc 0.05 GB reserved 0.06 GB | MemAvailable 8.5 GB
+[trace] text: how_many the connections
+[trace] tokens/kinds: how_many/VERB the/the connections/c3_rules
+[trace] gold frame: {"event": "count", "lemma": "how_many", "neg": false, "roles": {}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 32.00 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[train seed 0] start: RSS 0.95 GB (peak 0.95 GB) | torch alloc 0.05 GB reserved 0.06 GB | MemAvailable 8.5 GB
+[train seed 0] step 500 sent 4000/45320 loss -0.720 (9s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.10 GB reserved 0.44 GB | MemAvailable 7.9 GB
+[train seed 0] step 1000 sent 8000/45320 loss -0.821 (16s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.10 GB reserved 0.44 GB | MemAvailable 8.0 GB
+[train seed 0] step 1500 sent 12000/45320 loss -0.893 (24s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.10 GB reserved 0.44 GB | MemAvailable 8.0 GB
+[train seed 0] step 2000 sent 16000/45320 loss -0.835 (31s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.10 GB reserved 0.44 GB | MemAvailable 8.0 GB
+[train seed 0] step 2500 sent 20000/45320 loss -0.775 (39s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.10 GB reserved 0.44 GB | MemAvailable 7.9 GB
+[train seed 0] step 3000 sent 24000/45320 loss -0.945 (46s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.10 GB reserved 0.44 GB | MemAvailable 8.0 GB
+[train seed 0] step 3500 sent 28000/45320 loss -0.919 (54s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.10 GB reserved 0.44 GB | MemAvailable 8.0 GB
+[train seed 0] step 4000 sent 32000/45320 loss -0.900 (61s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.10 GB reserved 0.44 GB | MemAvailable 8.0 GB
+[train seed 0] step 4500 sent 36000/45320 loss -0.805 (69s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.10 GB reserved 0.44 GB | MemAvailable 8.0 GB
+[train seed 0] step 5000 sent 40000/45320 loss -0.914 (76s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.10 GB reserved 0.44 GB | MemAvailable 8.0 GB
+[train seed 0] step 5500 sent 44000/45320 loss -0.909 (84s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.10 GB reserved 0.44 GB | MemAvailable 8.0 GB
+[train seed 0] end: RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.10 GB reserved 0.12 GB | MemAvailable 8.0 GB (86s)
+[export] route book written | RSS 1.65 GB (peak 1.75 GB) | torch alloc 0.05 GB reserved 0.12 GB | MemAvailable 7.9 GB
+[export] numpy reader vs torch states: max relative difference 7.86e-08 (float32 phases in the route book)
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.893 | residual 0.155
+[eval] seed 0 train (sample): FULL catalog candidates 0.880 | residual 0.173
+[mem] after seed 0: RSS 1.98 GB (peak 2.01 GB) | torch alloc 0.00 GB reserved 0.12 GB | MemAvailable 7.6 GB
+[done] model written to /home/claude/vss-box/diagram-vss-demo/training/sketch/worlds_micro/questions7r2/model; REPORT.md and metrics.json there; run log /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_questions7r2_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)
