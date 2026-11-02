@@ -33,6 +33,11 @@ Read this first. These rules come from mistakes already made here; each says wha
 - Never drop realistic training examples because the current pipeline cannot read them. If the pipeline cannot read them, that is a
   finding to report, not a filter to apply.
 - Template-generated sentences (`training/sketch/generate.py`) are at most a secondary, clearly labelled variant, never the base.
+- **Owner, 2026-11-02 22:04 (replaces the line above where they conflict): the training data must cover everything the Rules reader can
+  detect.** People with a problem fall back to short, literal commands; if those fail, the system is useless. Synthetic short commands
+  generated from the Rules' grammar and cue words (every action and question, every value and its cue variants, every construction the
+  Rules parse) are training data for the learned readers, in their own clearly named folders, beside the realistic LLM-written data. The
+  validation that matters for production: the learned readers on short commands covering what the Rules detect, against the Rules.
 - A data writer saves its texts BEFORE annotating (one file per batch, ids and texts only); the coordinator checks that the annotated
   texts are identical to the saved ones. (2026-10-31: two writers edited about 50 texts to fit their annotation; one did not report it.)
 - Owner's decision, 2026-11-01 (replaces every earlier rule about hidden test sets): there is no hidden test set. Every annotated
