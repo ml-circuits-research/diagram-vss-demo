@@ -314,6 +314,7 @@ code { font-family: var(--mono); font-size: .92em; }
     <div class="rbar">
       <div class="rtabs" id="rtabs" role="tablist" aria-label="Readers"></div>
       <div class="tools">
+        <button class="ib" type="button" id="align-btn" hidden aria-label="Copy this drawing to the other tabs" title="Copy this drawing to the other tabs"><svg class="i" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>
         <button class="ib" type="button" id="view-btn" aria-label="Show the whole canvas" title="Show the whole canvas"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
         <button class="ib" type="button" data-say="Undo" data-sop="@t1 command action=undo" aria-label="Undo" title="Undo"><svg class="i" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
         <button class="ib" type="button" data-say="Redo" data-sop="@t1 command action=redo" aria-label="Redo" title="Redo"><svg class="i" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
@@ -330,7 +331,6 @@ code { font-family: var(--mono); font-size: .92em; }
       <div class="readout" id="readout">0 shapes</div>
       <div class="rcard" id="rcard" hidden></div>
     </div>
-    <div class="sopbar" id="sopbar" hidden></div>
   </section>
 
   <main class="msgs" id="msgs" aria-live="polite" aria-label="Conversation"></main>

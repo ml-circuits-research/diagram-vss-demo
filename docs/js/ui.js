@@ -545,8 +545,9 @@ function copyDrawing(src, dst) {
 function adoptRules(rd) { queue = queue.then(() => { if (!rd.reads) { copyDrawing(RD.rules, rd); if (rd === cur) renderCanvas(); } updateTabs(); renderSopBar(); }); return queue; }
 function alignDrawings() {
   queue = queue.then(() => {
-    for (const rd of READERS) if (rd !== RD.rules) copyDrawing(RD.rules, rd);
-    sysNote('Drawings aligned: VSS and Neural now have the Rules drawing and its undo history.');
+    const src = cur, to = READERS.filter(rd => rd !== src && isReady(rd));
+    for (const rd of to) copyDrawing(src, rd);
+    sysNote(`Drawings aligned: ${to.map(rd => rd.label).join(' and ') || 'no other reader'} now ${to.length > 1 ? 'have' : 'has'} the ${src.label} drawing and its undo history.`);
     renderCanvas(); updateTabs(); renderSopBar();
   });
 }
@@ -556,16 +557,16 @@ function sig(w) {
   return JSON.stringify([S.shapes.map(s => [s.name, s.shape, s.color, s.size, s.x, s.y, s.label || '', s.outline || ''].join('|')).sort(),
     S.edges.map(e => [e.from, e.to, e.style, e.arrow, e.label || '', e.color || ''].join('|')).sort(), S.rules.map(r => [r.shape, r.size, r.color, r.outline].join('|')).sort()]);
 }
-const differs = rd => rd !== RD.rules && isReady(rd) && sig(rd.world) !== sig(RD.rules.world);
+const differs = rd => rd !== cur && isReady(rd) && isReady(cur) && sig(rd.world) !== sig(cur.world);
 
 /* ---------------- reader tabs, SOP bar, loading card ---------------- */
 const rtabs = $('#rtabs');
 function tabTitle(rd) {
   if (!isReady(rd)) return `${rd.label}: ${offText(rd).replace(/, did not read this$/, '')}`;
-  return differs(rd) ? `${rd.label}: this drawing differs from the Rules drawing` : `${rd.label}: show this reader’s drawing`;
+  return differs(rd) ? `${rd.label}: this drawing differs from the ${cur.label} drawing` : `${rd.label}: show this reader’s drawing`;
 }
 function updateTabs() {
-  rtabs.innerHTML = READERS.map(rd => `<button type="button" role="tab" class="rtab${isReady(rd) ? '' : ' off'}" data-rtab="${rd.id}" aria-selected="${rd === cur}" title="${escH(tabTitle(rd))}">${escH(rd.label)}${differs(rd) ? '<i class="dot" aria-label="differs from Rules"></i>' : ''}${!isReady(rd) && (rd.id === 'vss' ? vssState === 'loading' : nState === 'loading' || nState === 'checking') ? '<i class="spin" aria-hidden="true"></i>' : ''}</button>`).join('');
+  rtabs.innerHTML = READERS.map(rd => `<button type="button" role="tab" class="rtab${isReady(rd) ? '' : ' off'}" data-rtab="${rd.id}" aria-selected="${rd === cur}" title="${escH(tabTitle(rd))}">${escH(rd.label)}${differs(rd) ? `<i class="dot" aria-label="differs from ${escH(cur.label)}"></i>` : ''}${!isReady(rd) && (rd.id === 'vss' ? vssState === 'loading' : nState === 'loading' || nState === 'checking') ? '<i class="spin" aria-hidden="true"></i>' : ''}</button>`).join('');
 }
 function setActive(id) {
   if (!RD[id] || drag) return;
@@ -579,14 +580,13 @@ rtabs.addEventListener('keydown', ev => {
   const i = READERS.indexOf(cur), n = READERS[(i + (ev.key === 'ArrowRight' ? 1 : READERS.length - 1)) % READERS.length];
   setActive(n.id); const b = rtabs.querySelector(`[data-rtab="${n.id}"]`); if (b) b.focus();
 });
+/* the align tool: shown when another loaded reader's drawing differs from the one on screen; copies this drawing to them */
 function renderSopBar() {
-  const bar = $('#sopbar'), lr = cur.lastRead, anyDiff = READERS.some(differs);
-  if (!turnSeq && !anyDiff) { bar.hidden = true; return; }
-  bar.hidden = false;
-  const body = !turnSeq ? '' : lr && lr.turn === turnSeq ? (lr.nodes.length ? lr.nodes.map(hlNode).join('\n') : '<span class="cm"># no wires</span>') : `<span class="cm"># ${escH(cur.label)} did not read the last message</span>`;
-  bar.innerHTML = `<div class="sophead"><span>${turnSeq ? `${escH(cur.label)} wrote, for the last message` : ''}</span>${anyDiff ? '<button type="button" class="btn" id="align-btn" title="Copy the Rules drawing and its undo history to VSS and Neural">Align drawings</button>' : ''}</div>${body ? `<pre class="sop mini">${body}</pre>` : ''}`;
+  const b = $('#align-btn'); if (!b) return;
+  b.hidden = !READERS.some(differs);
+  b.title = b.ariaLabel = `Copy this ${cur.label} drawing and its undo history to the other tabs`;
 }
-$('#sopbar').addEventListener('click', ev => { if (ev.target.id === 'align-btn') alignDrawings(); });
+$('#align-btn').addEventListener('click', alignDrawings);
 function renderCard() {
   const c = $('#rcard');
   if (cur.id === 'rules' || isReady(cur)) { c.hidden = true; return; }
@@ -699,7 +699,7 @@ function renderFormalizer() {
   const S = NeuralKit.SIZES, M = NeuralKit.MODELS, N = NeuralKit.NAMES, sz = id => mb(S[id]) + (id === M.embed ? ' (about)' : '');
   const vrows = vssState === 'ready' && vssInfo.composer ? `<table class="kv">${vssInfo.worlds.map(w => `<tr><td><code>${escH(w.model)}</code></td><td>${escH(w.events.join(', '))}</td><td>${mb(w.bytes)}</td></tr>`).join('')}<tr><td><code>${escH(vssInfo.fallback || '')}</code></td><td>fallback: every action</td><td>${mb(vssInfo.fallbackBytes)}</td></tr><tr><td>cutters, registry</td><td>which world reads which request</td><td>${mb(vssInfo.cutterBytes)}</td></tr></table>` : '';
   return `<h3 class="sub">Readers</h3>
-  <p class="intro">Every message goes to every reader that is loaded. <b>Rules</b> use the legend’s cue words. <b>VSS</b> is a set of small readers trained on this demo’s legend (VSA route books, no transformer). <b>Neural</b> asks pretrained transformers the legend questions. All three write the same SOP wires, and the same engine and Datalog reasoner run them. Each reader has its own drawing, changed only by its own readings; the tabs above the canvas switch between them, and a dot on a tab means that drawing differs from the Rules drawing. <b>Align drawings</b> (under the canvas) copies the Rules drawing and its undo history to the other readers. A reader that finishes loading before it has read anything starts from the Rules drawing.</p>
+  <p class="intro">Every message goes to every reader that is loaded. <b>Rules</b> use the legend’s cue words. <b>VSS</b> is a set of small readers trained on this demo’s legend (VSA route books, no transformer). <b>Neural</b> asks pretrained transformers the legend questions. All three write the same SOP wires, and the same engine and Datalog reasoner run them. Each reader has its own drawing, changed only by its own readings; the tabs above the canvas switch between them, and a dot on a tab means that drawing differs from the one on screen. The copy button next to the tabs copies the drawing on screen and its undo history to the other readers. A reader that finishes loading before it has read anything starts from the Rules drawing.</p>
   <table class="kv"><tr><td>Rules</td><td>code, ${mb(rulesBytes())}</td><td>ready</td></tr><tr><td>VSS</td><td>${vssState === 'ready' ? mb(vssInfo.bytes) : 'about ' + mb(VSS_HINT)}</td><td>${escH(isReady(RD.vss) ? 'ready' : offText(RD.vss).replace(/, did not read this$/, ''))}</td></tr><tr><td>Neural</td><td>${mb(NeuralKit.modelsFor(neuralOpts()).reduce((a, id) => a + S[id], 0))}</td><td>${escH(isReady(RD.neural) ? 'ready' : offText(RD.neural).replace(/, did not read this$/, ''))}</td></tr></table>
   <h3 class="sub">VSS</h3>
   ${VSS_OPTS.composer ? `<p class="intro">Seven small VSS readers (micro-worlds), each trained on a few actions of this legend. A cutter splits the message into requests and names the worlds that could read each one; each of those worlds reads it, and the reading that fits the drawing and the conversation best is kept. In a world with several actions, a request without a verb (“Hub teal”) gets its action from a second cutter (the event hint). A request no world can read goes to a general fallback reader. The files come from this site and load when the page opens. Add <code>?vss=single</code> to the address to use the earlier single model.</p>`
