@@ -12,13 +12,31 @@ import { loadComposer, nextContext } from "./vss-composer.js";
 
 const state = { vss: null, table: null, lexicon: null, verbs: null, verbEvent: null, bytes: 0, loadMs: 0, base: null };
 
-async function fetchSize(url, acc = state) { const r = await fetch(url); if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`); const b = await r.arrayBuffer(); acc.bytes += b.byteLength; return b; }
+// ---- model versions (owner's rule 2026-11-02: never use an older model after a new one is published). versions.json (written by
+// training/sketch/stamp_models.py) maps every model folder / file under docs/model/ to a content version; every model URL gets
+// ?v=<version>, so a new version is a new URL (HTTP cache and service workers cannot serve the old one) and an unchanged model stays cached.
+// versions.json and registry.json are small and fetched with cache: "no-cache" (always revalidated).
+const MODEL_ROOT = new URL("../model/", import.meta.url).href;
+let versionsP = null;
+function versions() { return versionsP || (versionsP = (async () => { try { const r = await fetch(new URL("versions.json", MODEL_ROOT), { cache: "no-cache" }); return r.ok ? (await r.json()).files || {} : {}; } catch (e) { return {}; } })()); }
+let vmap = {};   // path under docs/model/ -> version; filled by ensureVersions()
+async function ensureVersions() { vmap = await versions(); }
+/** the URL with ?v=<version> of the longest model folder / file of versions.json that contains it (urls outside docs/model/ are unchanged) */
+function versioned(url) {
+  const u = new URL(url), root = new URL(MODEL_ROOT);
+  if (u.origin !== root.origin || !u.pathname.startsWith(root.pathname)) return u.href;
+  const rel = u.pathname.slice(root.pathname.length).split("/");
+  for (let n = rel.length; n > 0; n--) { const v = vmap[rel.slice(0, n).join("/")]; if (v) { u.searchParams.set("v", v); break; } }
+  return u.href;
+}
+async function fetchSize(url, acc = state, init) { const r = await fetch(init && init.cache === "no-cache" ? url : versioned(url), init); if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`); const b = await r.arrayBuffer(); acc.bytes += b.byteLength; return b; }
 // hosts that serve no binary files get the .bin files as base64 text parts listed in bin-parts.json; the manifest's sha256 still checks them
+// (bin-parts.json and its parts are in the model folder, so they carry the folder's version too)
 async function fetchBin(base, name, acc = state) {
   try { return await fetchSize(new URL(name, base), acc); } catch (e) {
     const parts = JSON.parse(new TextDecoder().decode(await fetchSize(new URL("bin-parts.json", base), acc)))[name];
     if (!parts) throw e;
-    let b64 = ""; for (const p of parts) { const r = await fetch(new URL(p, base)); if (!r.ok) throw new Error(`${p}: HTTP ${r.status}`); b64 += await r.text(); }
+    let b64 = ""; for (const p of parts) { const r = await fetch(versioned(new URL(p, base).href)); if (!r.ok) throw new Error(`${p}: HTTP ${r.status}`); b64 += await r.text(); }
     const bin = atob(b64), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
     acc.bytes += u8.byteLength; return u8.buffer;
   }
@@ -26,6 +44,7 @@ async function fetchBin(base, name, acc = state) {
 
 export async function load(base = new URL("../model/real/", import.meta.url).href) {
   if (state.vss) return info();
+  await ensureVersions();
   const t0 = performance.now(); state.base = base; state.bytes = 0;
   const cache = new Map();
   const readFile = async (name) => { if (!cache.has(name)) cache.set(name, name.endsWith(".bin") ? await fetchBin(base, name) : await fetchSize(new URL(name, base))); const b = cache.get(name); return name.endsWith(".json") ? new TextDecoder().decode(b) : b; };
@@ -53,8 +72,8 @@ async function modelAt(base) {
 export async function loadComposerAt(root = new URL("../model/", import.meta.url).href) {
   if (comp.c) return comp.c;
   if (!comp.loading) comp.loading = (async () => {
-    comp.root = root; const t0 = performance.now(), json = async (u) => JSON.parse(new TextDecoder().decode(await fetchSize(new URL(u, root), comp)));
-    const registry = await json("micro/registry.json"), cutter = await json(registry.cutter); comp.registry = registry;
+    comp.root = root; await ensureVersions(); const t0 = performance.now(), json = async (u, init) => JSON.parse(new TextDecoder().decode(await fetchSize(new URL(u, root), comp, init)));
+    const registry = await json("micro/registry.json", { cache: "no-cache" }), cutter = await json(registry.cutter); comp.registry = registry;
     const context = registry.router === "cutter" ? await json(registry.context || "context/weights.json") : undefined;   // CandidateRouter needs the context filler
     const eventCutter = registry.event_cutter ? await json(registry.event_cutter) : undefined;   // the event hint (vss-composer.js, EVENT_HINT.md)
     comp.c = await loadComposer(registry, cutter, (name) => modelAt(new URL(name.replace(/\/?$/, "/"), root).href), { context, eventCutter });
