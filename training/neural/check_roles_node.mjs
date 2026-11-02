@@ -1,7 +1,8 @@
 // check_roles_node.mjs: does a joint model folder (training/neural/finetune_roles.py) load in transformers.js 3.8.1 (AutoTokenizer + AutoModel,
 // q8) and does docs/js/neural.js makeReader (the demo's decoding code) read the same as torch? Compares, per request: the word pieces,
-// the act, the class of every class key, and the tag of every word.
-// Usage: node training/neural/check_roles_node.mjs <parent dir of the model folder> <model folder name> <torch_ref.jsonl> [<torch_cut_ref.jsonl>]
+// the act, the class of every class key (the legend's value heads and SOP-BERT's fill:<key> / desc:<key> heads: who fills each name-role,
+// and the description's keys), and the tag of every word.
+// Usage: node training/neural/check_roles_node.mjs <parent dir of the model folder> <model folder name, e.g. sop-bert> <torch_ref.jsonl> [<torch_cut_ref.jsonl>]
 // (needs `cd training/laptop && npm install`). Last stdout line: {"ids": "k/n", "act": "k/n", "classes": "k/n", "tags": "k/n"} .
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";

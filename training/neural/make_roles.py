@@ -14,8 +14,25 @@ The legend (docs/js/logic.js, read with node) decides how each gold key is learn
       * a name, a label text, a number written in digits: the same word sequence in the request (case-insensitive), first free occurrence;
       * "$new" (a shape created earlier in the same message): the name that create gave it, when the request writes that name;
       * a number written as a word ("three"): learned by co-occurrence on the training rows (below);
-      * a mention (mention(...)) or a name the request does not write ("it", "them"): not tagged; the demo takes such references from
-        the rules' reading of the same request, as it did with extractive QA.
+      * a mention (mention(...)) or a name the request does not write ("it", "them"): not tagged; the filler-kind and description heads
+        below read them.
+Who fills each name-role (SOP-BERT reads it itself; owner, 2026-11-02: no reference may come from the rules' reading). For every key of
+legend kind "names" (target, from, to, anchor, linked ...: REF keys), a class head "fill:<key>" over
+  none        the request has no such role;
+  written     every value is a name written in the request (or "$new" whose created name is written): the B / I / O tags give it;
+  context     a value the request does not write: a pronoun or a vague reference ("it", "them", "the new one", "$new" with no name
+              written, "the cities" for names created earlier). The value is taken AFTER reading by the context rule all readers share
+              (docs/js/vss-composer.js nextContext: the last shape created or named), not by the model;
+  description a mention(...) value ("the red square", "all circles", "the newest one", "every square that is not blue").
+and, for the description, one class head "desc:<key>" per key the gold mentions use (quantifier, color, notColor, shape, recency, ... as
+found in the training gold, mapped to the legend's key case-insensitively): "none" or a value. The description heads read the request once,
+not per role: in the data no request has two described roles (counted below: "requests with 2+ described roles"), so one description per
+request loses nothing; if one appears, the first described role in REF key order is the one the heads learn and the count says so.
+The fill and desc heads are extra entries of reader.json "classes" (names "fill:<key>", "desc:<key>"), so the model, the export and
+docs/js/neural.js makeReader decode them as any class head; reader.json "ref_keys" and "desc_keys" list them.
+Counts (printed, saved in coverage.json "fillers"): per REF key and set, the fillers of each kind; requests with 2+ described / context roles;
+context fillers that are a list ("them" -> several names: the shared context rule gives one shape, so these cannot come out right); and
+the share of context fillers the shared rule gives right when every earlier request of the message is read right (an upper bound).
 Co-occurrence alignment (training rows only): for key k, value v and a word w of the request, J(k,v,w) = n(k=v, w) / (n(k=v) + n(w) -
 n(k=v, w)) over request spans (Jaccard). In a request with k=v, the word with the highest J is aligned when v is also that word's best
 value of k (both directions agree); otherwise the value counts as not aligned. It is used for number words (the learned word -> number map
@@ -44,6 +61,26 @@ REPO = MD.REPO
 WORD_RE = r"[^\W_]+|[^\w\s]|_"          # docs/js/neural.js WORD_RE: /[\p{L}\p{N}]+|[^\s\p{L}\p{N}]/gu
 WORD = re.compile(WORD_RE)
 ACT_KEYS = {"action", "ask"}
+FILL = ["none", "written", "context", "description"]
+
+
+def is_list(v):
+    return len(parts(v)) > 1
+
+
+def mention_args(p):
+    """"mention(color=red,shape=circle)" -> {"color": "red", "shape": "circle"}"""
+    return dict(kv.split("=", 1) for kv in parts(p[len("mention("):-1]) if "=" in kv)
+
+
+def filler_kind(ws, v, created):
+    """the kind of one role's gold value: written / context / description (FILL)"""
+    ps = parts(v); low = [w[0].lower() for w in ws]
+    if any(p.startswith("mention(") for p in ps): return "description"
+    def written(p):
+        if p == "$new": return any(find_seq(ws, [w[0].lower() for w in words(n)], set()) is not None for n in created)
+        return find_seq(ws, [w[0].lower() for w in words(p)], set()) is not None
+    return "written" if all(written(p) for p in ps) else "context"
 SPAN_KINDS = {"names", "name", "text", "number"}
 
 
@@ -219,6 +256,20 @@ def main():
     values = {k: sorted({str(x[3][k]) for x in train if k in x[3]}) for k in class_keys}
     act_keys = {ac: sorted({k for x in train if x[4] == ac for k in x[3] if k in class_keys or k in span_keys}) for ac in ACTS}
     tags = ["O"] + [f"{p}-{k}" for k in span_keys for p in ("B", "I")]
+    # who fills each name-role (FILL) and the description's own keys (see the head of the file)
+    ref_keys = [k for k in span_keys if LEG[k]["kind"] == "names"]
+    DKEY = {k.lower(): k for k in LEG}
+    dvals = collections.defaultdict(set); dunknown = collections.Counter()
+    for x in train:
+        for k in ref_keys:
+            for p in parts(x[3].get(k, "")) if k in x[3] else []:
+                if not p.startswith("mention("): continue
+                for dk, dv in mention_args(p).items():
+                    if dk.lower() in DKEY: dvals[DKEY[dk.lower()]].add(dv)
+                    else: dunknown[dk] += 1
+    if dunknown: print("description keys not in the legend (not learned):", dict(dunknown))
+    desc_keys = sorted(dvals)
+    fill_classes = [["fill:" + k, FILL] for k in ref_keys] + [["desc:" + k, ["none"] + sorted(dvals[k])] for k in desc_keys]
 
     # co-occurrence on the training rows: number words (count / distance written as a word) and, as evidence, every class key
     co = Cooc()
@@ -251,8 +302,34 @@ def main():
                     c["already tagged for another key" if seq and all(s in low for s in seq) else "not written in the request"] += 1; continue
                 c["aligned: " + how] += 1
                 for j in range(i, i + len(seq)): tag[j] = ("B-" if j == i else "I-") + k; taken[j] = k
-        return {"id": rid, "text": sp, "words": [w[0] for w in ws], "tags": tag, "act": act,
-                "classes": {k: str(args[k]) for k in class_keys if k in args}, "gold": args}
+        classes = {k: str(args[k]) for k in class_keys if k in args}
+        for k in ref_keys:
+            if k in args: classes["fill:" + k] = filler_kind(ws, str(args[k]), created)
+        d = next((p for k in ref_keys if k in args for p in parts(args[k]) if p.startswith("mention(")), None)
+        if d is not None:
+            for dk, dv in mention_args(d).items():
+                if DKEY.get(dk.lower()) in desc_keys: classes["desc:" + DKEY[dk.lower()]] = dv
+        return {"id": rid, "text": sp, "words": [w[0] for w in ws], "tags": tag, "act": act, "classes": classes, "gold": args}
+
+    def fillers(rows, out):
+        """per REF key: the gold fillers of each kind; requests with 2+ described / context roles; context fillers that are a list; and the
+        context fillers the shared context rule (nextContext, on the gold of the earlier requests of the message) gives right"""
+        per = {k: collections.Counter() for k in ref_keys}; multi_d = multi_c = 0; ctx_list = collections.Counter(); rule = collections.Counter()
+        last, prev = [], None
+        for r, o in zip(rows, out):
+            if r[0] != prev: last, prev = [], r[0]   # a new message: the context starts empty (as the scorer: ctx.last = [])
+            args, kinds = r[3], {k: o["classes"].get("fill:" + k) for k in ref_keys if k in r[3]}
+            for k, kd in kinds.items():
+                per[k][kd] += 1
+                if kd == "context":
+                    if is_list(str(args[k])): ctx_list[k] += 1
+                    rule[k + (" right" if len(last) == 1 and last[0].lower() == str(args[k]).lower() else " wrong")] += 1
+            multi_d += sum(v == "description" for v in kinds.values()) > 1; multi_c += sum(v == "context" for v in kinds.values()) > 1
+            if args.get("action") == "create": last = ["$new"]          # nextContext with the gold args of this request
+            elif args.get("target") is not None and not is_list(str(args["target"])): last = [str(args["target"])]
+            elif args.get("action") == "connect" and args.get("to") is not None and not is_list(str(args["to"])): last = [str(args["to"])]
+        return {"per key": {k: dict(v) for k, v in per.items()}, "requests with 2+ described roles": multi_d, "requests with 2+ context roles": multi_c,
+                "context fillers that are a list": dict(ctx_list), "context fillers the shared rule gives right (gold context)": dict(rule)}
 
     numword = collections.defaultdict(collections.Counter)
     coverage = {}
@@ -270,9 +347,10 @@ def main():
                 n += 1; v = str(r[3][k]); ws = words(r[1]); i = co.align(ws, k, v, values[k], set())
                 if i is not None: al += 1; pairs[(ws[i][0].lower(), v)] += 1
             ccov[k] = {"values": n, "one word expresses it (co-occurrence, both directions)": al, "top word->value": [f"{w}->{v} {c}" for (w, v), c in pairs.most_common(8)]}
-        coverage[name] = {"span keys": {k: dict(v) for k, v in cov.items()}, "class keys": ccov, "rows": len(out)}
+        coverage[name] = {"span keys": {k: dict(v) for k, v in cov.items()}, "class keys": ccov, "rows": len(out), "fillers": fillers(rows, out)}
     number_words = {w: c.most_common(1)[0][0] for w, c in numword.items()}
-    reader = {"cut": {"tags": ["O", "B", "I"], "max_length": 512}, "acts": ACTS, "tags": tags, "span_keys": span_keys, "classes": [[k, ["none"] + values[k]] for k in class_keys],
+    reader = {"cut": {"tags": ["O", "B", "I"], "max_length": 512}, "acts": ACTS, "tags": tags, "span_keys": span_keys, "ref_keys": ref_keys, "desc_keys": desc_keys,
+              "classes": [[k, ["none"] + values[k]] for k in class_keys] + fill_classes,
               "act_keys": act_keys, "number_words": number_words, "word_re": "[\\p{L}\\p{N}]+|[^\\s\\p{L}\\p{N}]", "max_length": 128}
     json.dump(reader, open(os.path.join(a.out, "reader.json"), "w"), indent=1)
     cutn = {}
@@ -302,6 +380,19 @@ def main():
     for k, c in coverage["train"]["class keys"].items():
         n = c["values"]; al = c["one word expresses it (co-occurrence, both directions)"]
         print(f"  {k:11} {al:5}/{n:5} = {al / max(n, 1) * 100:5.1f}%   e.g. {', '.join(c['top word->value'][:5])}")
+    print(f"\nwho fills the name-roles (REF keys {ref_keys}; desc keys {desc_keys}): written / context / description of the gold fillers")
+    for n in ("train", "heldout", "eval_sample1000"):
+        F = coverage[n]["fillers"]; print(f"  {n}:")
+        for k, c in F["per key"].items():
+            t = sum(c.values())
+            if t: print(f"    {k:7} {t:6} fillers: " + " · ".join(f"{kd} {c.get(kd, 0)} ({c.get(kd, 0) / t * 100:.1f}%)" for kd in FILL[1:]))
+        t = {kd: sum(c.get(kd, 0) for c in F["per key"].values()) for kd in FILL[1:]}; T = sum(t.values())
+        print(f"    all     {T:6} fillers: " + " · ".join(f"{kd} {v} ({v / max(T, 1) * 100:.1f}%)" for kd, v in t.items()))
+        print(f"    requests with 2+ described roles {F['requests with 2+ described roles']} · with 2+ context roles {F['requests with 2+ context roles']}"
+              f" · context fillers that are a list (several names) {sum(F['context fillers that are a list'].values())} {F['context fillers that are a list']}")
+        rr = F["context fillers the shared rule gives right (gold context)"]
+        ok = sum(v for k, v in rr.items() if k.endswith(" right")); tot = sum(rr.values())
+        print(f"    context fillers the shared rule (nextContext, gold earlier requests) gives right: {ok}/{tot} = {ok / max(tot, 1) * 100:.1f}%  {rr}")
     if skipped: print("skipped:", dict(skipped))
 
 

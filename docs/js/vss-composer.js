@@ -35,6 +35,14 @@
 //      mode "H2": also when the first reading is readable (ok, abstain) and its event differs from the hint.
 //   Each unit carries hint, hintApplies (the hint is an event of a candidate world), reread (readings replaced) and hintChanged (the unit's
 //   chosen reading, world and SOP text, or ignored, differs from the one the first readings give).
+// UNITS OF ANOTHER CUT (owner's decision 2026-11-02: the three readers read the same units; the cut is one setting of the demo, see
+// cutUnits below): formalize(text, ctx, {units: [{c0, c1}]}) reads those units instead of the cutter's. The world cutter is still decoded
+// once over the whole message, only for the candidate worlds: a unit's candidates are ranked by the SUM of each world's B-<world> score at
+// the cutter's own unit starts (segmentWorlds) that lie inside the unit, top ROUTER_K; a unit with no cutter start inside it ("no world
+// signal") is read by EVERY world of the cutter (ranked by their B-<world> score at the unit's first token, which only orders ties) and the
+// rule above (fewest words not understood) chooses. The event hint is read at the unit's first token. Everything else is unchanged. A unit
+// that coincides with a cutter unit holds exactly one cutter start, so with the cutter's own units the output is the cutter path's output
+// (checked by training/sketch/cut_bench.mjs, "identical").
 import * as FRONT from "./front.js";
 import { fillerWords } from "./vss/reader.js";
 import { readingFromWires, toNodes } from "./vss-adapter.js";
@@ -113,8 +121,8 @@ export class Composer {
 
   /** route one unit (router "cutter"); ranked: the cutter's worlds of the unit -> {zone "read" | "ignored", options (the tied best
    *  readings, cutter order), tried, candidates, reason} */
-  routeCutter(src, names, ranked, hint = null) {
-    const cands = ranked.slice(0, this.k), byId = new Map(this.worlds.map((w) => [w.id, w]));
+  routeCutter(src, names, ranked, hint = null, k = this.k) {
+    const cands = ranked.slice(0, k), byId = new Map(this.worlds.map((w) => [w.id, w]));
     const tried = cands.filter((c) => c.world !== "fallback" || this.fallback).map((c) => this.readWnu(c.world === "fallback" ? this.fallback : byId.get(c.world), src, names));
     let first = null, reread = 0, hintApplies = false;
     if (hint !== null) {      // the event hint (see the head of the file): a world whose events include the hint may read the unit again
@@ -185,14 +193,39 @@ export class Composer {
   eventHints(text, canvas) {
     const E = this.eventCutter, [toks] = FRONT.tokenize(text, canvas), { scores } = FRONT.segDecodeLabels(toks.map((x) => x[0]), E.segmenter, E.labels);
     const at = new Map(toks.map(([, s], k) => [s, k])), B = E.labels.filter((L) => L.startsWith("B-") && L !== "B-fallback");
-    return (c0) => {
-      const k = at.get(c0); if (k === undefined) return null;
+    // c1 given (units of another cut): the first token that starts inside [c0, c1) when no token starts exactly at c0
+    return (c0, c1) => {
+      let k = at.get(c0);
+      if (k === undefined && c1 !== undefined) k = toks.findIndex(([, s]) => s >= c0 && s < c1);
+      if (k === undefined || k < 0) return null;
       let best = null; for (const L of B) if (best === null || scores[k][L] > scores[k][best]) best = L;
       return best === null ? null : best.slice(2);
     };
   }
 
-  /** a whole message with router "cutter" -> the same shape as formalize; units carry candidates, tried, decidedBy, gaps */
+  /** units of another cut ([{c0, c1}]) -> the same shape as segmentWorlds ([{c0, c1, worlds, k}]): the candidate worlds of each unit from
+   *  the cutter's own unit starts inside it (see the head of the file; k = how many candidates the unit gets) */
+  worldsFor(text, canvas, units) {
+    const C = this.cutter, starts = FRONT.segmentWorlds(text, canvas, C), [toks] = FRONT.tokenize(text, canvas);
+    const idx = new Map(C.worlds.map((w, i) => [w, i]));
+    let first = null;      // the cutter's B-<world> scores at every token (only for units with no start inside)
+    return units.map((u) => {
+      const inside = starts.filter((s) => s.c0 >= u.c0 && s.c0 < u.c1);
+      if (inside.length) {
+        const sum = new Map(C.worlds.map((w) => [w, 0]));
+        for (const s of inside) for (const x of s.worlds) sum.set(x.world, sum.get(x.world) + x.score);
+        const worlds = C.worlds.map((w) => ({ world: w, score: sum.get(w) })).sort((a, b) => (b.score - a.score) || (idx.get(a.world) - idx.get(b.world)));
+        return { c0: u.c0, c1: u.c1, worlds, k: this.k, starts: inside.length };
+      }
+      if (!first) first = FRONT.segDecodeLabels(toks.map((x) => x[0]), C.segmenter, C.labels).scores;
+      const t = toks.findIndex(([, s]) => s >= u.c0 && s < u.c1);
+      const worlds = C.worlds.map((w) => ({ world: w, score: t < 0 ? 0 : first[t]["B-" + w] })).sort((a, b) => (b.score - a.score) || (idx.get(a.world) - idx.get(b.world)));
+      return { c0: u.c0, c1: u.c1, worlds, k: C.worlds.length, starts: 0 };
+    });
+  }
+
+  /** a whole message with router "cutter" -> the same shape as formalize; units carry candidates, tried, decidedBy, gaps.
+   *  opts.units: the units of another cut (see the head of the file) */
   formalizeCutter(text, ctx = {}, opts = {}) {
     const t0 = performance.now(), update = opts.update || nextContext, seq = { s: 0, m: 0 }, canvas = ctx.names || [];
     const c = { names: canvas, last: (ctx.last || []).slice(), refs: new Map() }, filler = new Context({ text, canvas, model: this.contextModel });
@@ -200,9 +233,11 @@ export class Composer {
     const rawOf = (x, sq = seq) => { const verb = x.tokens.find((t) => x.w.verbEvent.has(t)) || x.r.frame.lemma || null, reading = readingFromWires(x.r.wires, verb, x.tokens);
       return { reading, raw: rawNodes(reading, x.info, canvas, sq) }; };
     const hintAt = this.eventCutter ? this.eventHints(text, canvas) : null;
-    for (const cu of FRONT.segmentWorlds(text, canvas, this.cutter)) {
+    const given = Array.isArray(opts.units), cuts = given ? this.worldsFor(text, canvas, opts.units) : FRONT.segmentWorlds(text, canvas, this.cutter);
+    for (const cu of cuts) {
       const { c0, c1 } = cu, src = text.slice(c0, c1), names = c.names.concat([...c.refs.keys()]);
-      const u = Object.assign({ c0, c1 }, this.routeCutter(src, names, cu.worlds, hintAt ? hintAt(c0) : null));
+      const u = Object.assign({ c0, c1 }, this.routeCutter(src, names, cu.worlds, hintAt ? (given ? hintAt(c0, c1) : hintAt(c0)) : null, given ? cu.k : this.k));
+      if (given && !cu.starts) u.noWorldSignal = true;   // read by every world (see the head of the file)
       units.push(u);
       // the event hint: the reading the first readings would have given (same choice, dry; a scratch id counter), to count the changes
       let before;
@@ -250,8 +285,39 @@ export class Composer {
     return { nodes, notes, units, clauses: units, ignored, asks: units.filter((u) => u.zone === "ask"), ms: performance.now() - t0 };
   }
 
-  /** a whole message -> {nodes, notes, units, clauses, ignored, asks, ms}. opts.update: the context rule (default nextContext) */
+  /** a whole message -> {nodes, notes, units, clauses, ignored, asks, ms}. opts.update: the context rule (default nextContext);
+   *  opts.units: read the units of another cut ([{c0, c1}]) */
   formalize(text, ctx = {}, opts = {}) { return this.formalizeCutter(text, ctx, opts); }
+
+  /** this composer's cutter as a cut: -> [{c0, c1, src}] */
+  cutVss(text, ctx = {}) { return FRONT.segmentWorlds(text, ctx.names || [], this.cutter).map(({ c0, c1 }) => ({ c0, c1, src: text.slice(c0, c1) })); }
+}
+
+// ---------------------------------------------------------------- the cut shared by the three readers (owner's decision 2026-11-02)
+/** The cutting strategies of the demo's setting: every reader (Rules, VSS, Neural) reads the units of ONE cut.
+ *  rules: the rules' segmenter (logic.js rulesCut, the pieces located in the text); vss: the world cutter (cutter_worlds7s.json, the
+ *  composer's cutter); bert: the span head of the joint neural model (neural.js NeuralKit.cut), only when the loaded model has one. */
+export const CUT_STRATEGIES = [
+  { id: "rules", label: "Rules segmenter", about: "hand-written: sentences, then a comma or “and” before a verb, coordinated names, one clause per created object (docs/js/logic.js)" },
+  { id: "vss", label: "VSS cutter", about: "a learned token tagger B-<world> / I / O trained on the annotated request spans (docs/model/micro/cutter_worlds7s.json); it also names each request’s candidate worlds" },
+  { id: "bert", label: "BERT cutter", about: "the span head of the joint neural model: B / I / O per word over the whole message (training/neural/finetune_roles.py)" },
+];
+/** The default cut: the strategy with the best measured scores (training/sketch/cut_bench.mjs, 2026-11-02, right / wrong / not done % +extra).
+ *  1000-message sample (4858 requests): Rules reading the vss cut 73.6 / 11.9 / 14.5 +406 (rules cut 67.9 / 16.8 / 15.3 +821), VSS 77.2 /
+ *  11.4 / 11.4 +334 (rules cut 69.8 / 15.8 / 14.4 +833). Six short sets (1140): Rules 87.7 / 1.8 / 10.4 (rules cut 97.5 / 0.5 / 1.9), VSS
+ *  61.1 / 11.1 / 27.7 (rules cut 58.6 / 13.7 / 27.7): the vss cut makes no unit for 96 of 1118 one-request short commands. */
+export const DEFAULT_CUT = "vss";
+/** cutUnits(text, ctx, strategy, env) -> Promise<[{c0, c1, src}]> (character offsets into text, in order; src = text.slice(c0, c1)).
+ *  env: {rules: a logic.js system (its cut), composer: a Composer (its cutter), neural: NeuralKit (cut, canCut)}. */
+export async function cutUnits(text, ctx = {}, strategy = DEFAULT_CUT, env = {}) {
+  let units;
+  if (strategy === "rules") { if (!env.rules || !env.rules.cut) throw new Error("cut rules: no rules system"); units = env.rules.cut(text, ctx); }
+  else if (strategy === "vss") { if (!env.composer) throw new Error("cut vss: the VSS composer is not loaded"); units = env.composer.cutVss(text, ctx); }
+  else if (strategy === "bert") {
+    if (!env.neural || !env.neural.canCut || !env.neural.canCut()) throw new Error("cut bert: the loaded neural model has no span head");
+    units = (await env.neural.cut(text, ctx)).map(({ c0, c1 }) => ({ c0, c1 }));
+  } else throw new Error(`cut: unknown strategy ${strategy}`);
+  return units.filter((u) => u.c1 > u.c0).map(({ c0, c1 }) => ({ c0, c1, src: text.slice(c0, c1) }));
 }
 
 /** registry + cutter + a model loader -> a Composer. loadModel(folder relative to docs/model/) -> Promise<{vss, F}>.

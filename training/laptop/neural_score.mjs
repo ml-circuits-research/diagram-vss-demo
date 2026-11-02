@@ -1,11 +1,12 @@
 // neural_score.mjs: Rules, VSS (the composer of micro-worlds) and Neural (docs/js/neural.js: act classifier or zero-shot classifier +
 // extractive QA, run here by @huggingface/transformers in node) on the same gold messages, with the same per-request metric as
 // training/sketch/llm_score.mjs (whose scoring code is imported, not copied).
-//   ZS=reader-distilbert|act-distilbert|act-deberta-xsmall|deberta|distilbert [LIMIT=n] [IDS=file] [DEVICE=cpu|cuda] [MODEL_DIR=dir] node training/laptop/neural_score.mjs <dir> [<dir> ...]
+//   ZS=sop-bert|act-distilbert|act-deberta-xsmall|deberta|distilbert [LIMIT=n] [IDS=file] [DEVICE=cpu|cuda] [MODEL_DIR=dir] [CUT=rules] node training/laptop/neural_score.mjs <dir> [<dir> ...]
 // A <dir> holds one or more .jsonl files of gold messages (text, names, wires). Needs `npm install` in training/laptop first.
-//   ZS      a folder of MODEL_DIR whose config.json has "reader" (reader-distilbert, training/neural/finetune_roles.py): our joint model,
-//           act and roles in one call per request (the demo's model once published), loaded as AutoTokenizer + AutoModel and decoded by
-//           neural.js makeReader; no question-answering model is loaded then.
+//   ZS      a folder of MODEL_DIR whose config.json has "reader" (sop-bert, training/neural/finetune_roles.py): SOP-BERT, our joint model
+//           (the demo's model once published): it cuts the message and reads act, values, names and descriptions; loaded as AutoTokenizer +
+//           AutoModel and decoded by neural.js makeReader; no question-answering model is loaded then, and the Rules reader is not called
+//           by the neural reader. The context rule between requests is docs/js/vss-composer.js nextContext (passed as opts.update).
 //           act-distilbert / act-deberta-xsmall: our fine-tuned act classifier (training/neural/finetune.py), the demo's strategy
 //           "finetuned", loaded from the local folder MODEL_DIR/<name> (env.localModelPath; no network);
 //           deberta = Xenova/nli-deberta-v3-xsmall (default), distilbert = Xenova/distilbert-base-uncased-mnli: the zero-shot NLI
@@ -19,7 +20,8 @@
 //   IDS     a file of message ids (one per line): only those messages (before LIMIT), each scored once
 //   (rows without gold `wires`, e.g. the texts_*.jsonl files saved before annotation, are skipped)
 //   PAIR / SEG / REGISTRY ...: the variables of llm_score.mjs; here PAIR defaults to value and SEG to composer
-//   CUT=rules   the joint model reads the units the rules' segmenter cuts (its own span head is not used); default: the model's own cut when it has one
+//   CUT=rules   the joint model reads the units the rules' segmenter cuts (logic.js createSystem().cut, given as opts.units, timed with the
+//           neural reader; its own span head is not used); default: the model's own cut
 //   NEURAL_STUB=1: no models (classify returns the first hypothesis, qa an empty answer), to test the plumbing without the network
 // Milliseconds per message: the time of formalizing only (the models are loaded, and warmed up, before the timing starts).
 import { existsSync, readFileSync, readdirSync } from "node:fs";
@@ -33,6 +35,7 @@ const { vssFormalize, tally, msgLine, logic: K } = await import("../sketch/llm_s
 const require = createRequire(import.meta.url);
 globalThis.SOPKit = K;                                              // neural.js is a browser IIFE that reads the global SOPKit
 const NeuralKit = require("../../docs/js/neural.js");
+const { nextContext } = await import("../../docs/js/vss-composer.js");   // the context rule every reader shares
 
 const dirs = process.argv.slice(2).filter((a) => !a.startsWith("-"));
 if (!dirs.length) { console.error("usage: ZS=act-distilbert|act-deberta-xsmall|deberta|distilbert [LIMIT=n] [DEVICE=cpu|cuda] [MODEL_DIR=dir] node training/laptop/neural_score.mjs <dir> [<dir> ...]"); process.exit(2); }
@@ -94,9 +97,12 @@ async function buildModels() {
 }
 const t0load = performance.now(), models = await buildModels();
 console.error(`models loaded in ${((performance.now() - t0load) / 1000).toFixed(1)} s: ${JOINT ? models.enumModel + " (joint)" : models.enumModel + " + " + models.qaModel} · device ${models.device} · dtype ${models.dtype}`);
-const rsys = K.createSystem(), nsys = K.createSystem(), neural = NeuralKit.create(nsys.engine, nsys.formalize);
+const rsys = K.createSystem(), nsys = K.createSystem(), csys = K.createSystem();
+let rulesCalls = 0;   // calls the neural reader makes to the Rules reader (0 for SOP-BERT; printed at the end)
+const neural = NeuralKit.create(nsys.engine, (...x) => { rulesCalls++; return nsys.formalize(...x); });
+const CUT_RULES = JOINT && process.env.CUT === "rules";
 neural.setModels(models); neural.setStrategy(FINETUNED ? "finetuned" : "zeroshot");
-console.log(`neural: ${JOINT ? models.enumModel + " (joint: act and roles in one call)" : models.enumModel + " + " + models.qaModel} · device ${models.device} · dtype ${models.dtype}${STUB ? " (STUB models)" : ""}${LIMIT < Infinity ? ` · LIMIT ${LIMIT} per folder` : ""}`);
+console.log(`neural: ${JOINT ? models.enumModel + ` (joint; cut: ${CUT_RULES ? "the rules' segmenter (CUT=rules)" : "its own span head"}; no Rules reader)` : models.enumModel + " + " + models.qaModel} · device ${models.device} · dtype ${models.dtype}${STUB ? " (STUB models)" : ""}${LIMIT < Infinity ? ` · LIMIT ${LIMIT} per folder` : ""}`);
 
 const blank = () => ({ exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0, byAct: {} });
 const fresh = () => Object.fromEntries(READERS.map((f) => [f, blank()]));
@@ -127,7 +133,8 @@ for (const d of dirs) {
     await time("rules", () => rsys.formalize(r.text, ctxOf(r)).nodes);
     await time("vss", () => vssFormalize(r.text, ctxOf(r)));
     await time(NAME, async () => {
-      const res = await neural.formalize(r.text, ctxOf(r)), src = new Map(res.analyses.map((a) => [a.id, a.src]));   // the source text of each request, for PAIR=value pairing
+      const opts = JOINT ? { update: nextContext, ...(CUT_RULES ? { units: csys.cut(r.text, ctxOf(r)) } : {}) } : undefined;
+      const res = await neural.formalize(r.text, ctxOf(r), opts), src = new Map(res.analyses.map((a) => [a.id, a.src]));   // the source text of each request, for PAIR=value pairing
       for (const n of res.nodes) if (n.type !== "mention" && src.has(n.id)) Object.defineProperty(n, "src", { value: src.get(n.id), enumerable: false });
       return res.nodes;
     });
@@ -139,4 +146,5 @@ for (const d of dirs) {
   report(`\n${d}: ${n} messages, ${tot.rules.gold} gold wires`, tot, ms, n);
 }
 if (dirs.length > 1) report(`\nALL (${dirs.join(" + ")}): ${ALLN} messages, ${ALLT.rules.gold} gold wires`, ALLT, ALLMS, ALLN);
+console.log(`\n${NAME}: calls to the Rules reader made by the neural reader: ${rulesCalls}`);
 if (neuralErrors) console.log(`\n${NAME}: ${neuralErrors} messages raised an error (counted as no request read)`);

@@ -1,9 +1,12 @@
-"""finetune_roles.py: fine-tune the neural reader's joint model (one DistilBERT, one call per request) and export it for transformers.js 3.8.1.
+"""finetune_roles.py: fine-tune SOP-BERT, the neural reader's joint model (one DistilBERT: it cuts the message and reads, per request, the act,
+the values, the names and the descriptions), and export it for transformers.js 3.8.1.
 
 One encoder, three heads (data: make_roles.py output):
   - act head on the [CLS] vector (as DistilBertForSequenceClassification: pre_classifier + ReLU + dropout + classifier): the act;
   - one class head per legend key with values (color, shape, size, position, style, arrow, pairing, ...), on the same [CLS] vector:
-    "none" or one of the values the key takes in the training gold;
+    "none" or one of the values the key takes in the training gold; and, as more class heads of the same kind (make_roles.py), "fill:<key>"
+    per name-role (none / written / context / description: who fills it) and "desc:<key>" per key of the description (quantifier, color,
+    notColor, shape, recency): the model reads descriptions and references itself;
   - a token head: a B / I / O tag per word for the keys whose answer is written in the request (target, anchor, from, to, name, label,
     count, distance); the tag of a word is read on its first word piece.
 Loss = cross-entropy of the act + the mean cross-entropy of the class heads + the cross-entropy of the word tags. AdamW, linear warm-up and
@@ -17,7 +20,10 @@ AutoModel and returns both outputs) plus "reader": the head layout (reader.json 
 held-out requests through docs/js/neural.js makeReader (the demo's decoding code) and compares word pieces, act, classes and tags with torch.
 
 --base distilbert-base-uncased  (or another DistilBERT checkpoint)     --base tiny: a 2-layer DistilBERT from scratch (offline smoke test)
-Run: python3 training/neural/finetune_roles.py --base distilbert-base-uncased --name reader-distilbert [--data DIR] [--work DIR] [--out DIR]
+Reported besides the per-key counts: per filler kind (written / context / description), the share of gold name-roles whose kind the model
+reads right (and, for written, also on exactly its words), and the description accuracy: described roles read as a description with every
+key of the mention right (the mention the engine resolves).
+Run: python3 training/neural/finetune_roles.py --base distilbert-base-uncased --name sop-bert [--data DIR] [--work DIR] [--out DIR]
 """
 import argparse, collections, json, os, random, shutil, subprocess, sys, time
 import numpy as np, torch
@@ -167,6 +173,7 @@ def evaluate(model, tok, rows, L, maxlen, dev, fp16):
     if not rows: return {"n": 0, "right": 0.0, "act": 0.0, "keys": {}}
     preds = predict(model, tok, rows, L, maxlen, dev, fp16)
     keys = collections.defaultdict(lambda: [0, 0, 0]); right = act = 0; none = [0, 0, 0]   # none: rows, read as none, requests read as none
+    kinds = collections.defaultdict(lambda: [0, 0, 0])   # gold filler kind -> [kind read right, gold, kind right and the value read right]
     for r, p in zip(rows, preds):
         ok = p["act"] == r["act"]; act += ok
         if r["act"] == "none": none[0] += 1; none[1] += ok
@@ -181,13 +188,26 @@ def evaluate(model, tok, rows, L, maxlen, dev, fp16):
             if g: keys[k][1] += 1; keys[k][0] += g == q; ok &= g == q
             else: keys[k][2] += 1
         right += ok
-    return {"n": len(rows), "right": right / len(rows), "act": act / len(rows), "none": {"rows": none[0], "read as none": none[1], "requests read as none": none[2]}, "keys": {k: {"right": v[0], "gold": v[1], "extra": v[2]} for k, v in sorted(keys.items())}}
+        dk = [k for k, _ in L.classes if k.startswith("desc:")]
+        for k, _ in L.classes:   # per filler kind: the kind read right; written: also its words; description: also every desc key
+            if not k.startswith("fill:") or k not in r["classes"]: continue
+            g, q, rk = r["classes"][k], p["classes"].get(k), k[5:]
+            if g == "written": good = q == "written" and gs.get(rk) == p["spans"].get(rk)
+            elif g == "description": good = q == g and all(r["classes"].get(d) == p["classes"].get(d) for d in dk)
+            else: good = q == g
+            kinds[g][1] += 1; kinds[g][0] += q == g; kinds[g][2] += good
+    return {"n": len(rows), "right": right / len(rows), "act": act / len(rows), "none": {"rows": none[0], "read as none": none[1], "requests read as none": none[2]}, "keys": {k: {"right": v[0], "gold": v[1], "extra": v[2]} for k, v in sorted(keys.items())},
+            "fill kinds": {k: {"kind right": v[0], "gold": v[1], "value right": v[2]} for k, v in sorted(kinds.items())}}
 
 
 def report(name, ev):
     print(f"  {name:22} n={ev['n']:5}  requests read right {ev['right']:.4f}  act {ev['act']:.4f}")
     if ev.get("none", {}).get("rows"): print(f"      none rows read as none {ev['none']['read as none']}/{ev['none']['rows']} · requests read as none (lost) {ev['none']['requests read as none']}")
     print("      " + " · ".join(f"{k} {v['right']}/{v['gold']}" + (f" +{v['extra']}" if v['extra'] else "") for k, v in ev["keys"].items()))
+    fk = ev.get("fill kinds") or {}
+    if fk: print("      name-roles per filler kind (kind read right / value read right / gold): " + " · ".join(
+        f"{k} {v['kind right']}/{v['value right']}/{v['gold']} ({v['value right'] / max(v['gold'], 1) * 100:.1f}%)" for k, v in fk.items())
+        + (f"  ->  description accuracy {fk['description']['value right']}/{fk['description']['gold']}" if "description" in fk else ""))
 
 
 def export(model, tok, L, R, out, work, maxlen, enc_config):
@@ -312,11 +332,14 @@ def main():
         agree = json.loads(r.stdout.strip().splitlines()[-1]) if r.returncode == 0 and r.stdout.strip() else None
     ho = res["heldout"]; s1 = res.get("sample1000")
     with open(os.path.join(out, "README.md"), "w") as f:
-        f.write(f"""# {a.name}: the demo's neural reader (act and roles in one model), fine-tuned on our annotated requests
+        f.write(f"""# {"SOP-BERT" if a.name == "sop-bert" else a.name}: DistilBERT fine-tuned on our requests — cuts the message, reads the action, the values, the names and the descriptions
 
-One DistilBERT encoder with three heads, one call per request (the text of one request, as the rules cut it):
+One DistilBERT encoder with these heads (two calls per message: the cut, then all its requests in one batch):
 - the act ({len(L.acts)} classes: the action of a command, the ask of a question, else `fact` or `rule`, or `none`: the text is not a request);
-- {len(L.classes)} class heads, one per legend key with values ({", ".join(k for k, _ in L.classes)}): `none` or a value;
+- {sum(":" not in k for k, _ in L.classes)} class heads, one per legend key with values ({", ".join(k for k, _ in L.classes if ":" not in k)}): `none` or a value;
+- per name-role ({", ".join(R.get("ref_keys", []))}) a head `fill:<key>`: none / written (the word tags give the names) / context (a pronoun
+  or vague reference: the value comes from the context rule all readers share, the last shape created or named) / description (a `mention`
+  wire); and the description's own keys ({", ".join(R.get("desc_keys", []))}) as heads `desc:<key>`;
 - the CUT: a second token head (`cut_logits`, O / B / I per word) reads the WHOLE message (<= 512 word pieces) and marks the request spans; the
   act / class / role heads then read the spans of the message in one batched second call (two calls per message);
 - a B / I / O tag per word for the keys whose answer is written in the request ({", ".join(R["span_keys"])}).
@@ -326,7 +349,8 @@ AutoModel (dtype `q8`, file `onnx/model_quantized.onnx`); outputs `token_logits`
 - Base model: `{a.base}` (license: {LICENSE.get(a.base, "see the base model's card")}); fine-tuned here, weights are a derivative of it.
 - Data: {len(train)} request spans from the span-annotated messages of training/sketch (made by training/neural/make_roles.py; split by message id,
   10% of the messages held out; the fixed 1000-message sample and the docs/bench sets are never trained on).
-- Held-out act accuracy (fp32 torch): {ho['act']:.4f}. Held-out requests read right (act, every gold class key, every gold role on exactly its words): {ho['right']:.4f}.
+- Held-out act accuracy (fp32 torch): {ho['act']:.4f}. Held-out requests read right (act, every gold class key incl. fill / desc, every gold role on exactly its words): {ho['right']:.4f}.
+  Held-out name-roles per filler kind (value read right / gold): {", ".join(f"{k} {v['value right']}/{v['gold']}" for k, v in ho.get("fill kinds", {}).items())}.
   1000-message sample: {f"act {s1['act']:.4f}, requests read right {s1['right']:.4f}" if s1 else "not exported"}.
 - Size: onnx/model_quantized.onnx {q / 1e6:.1f} MB (q8). Node check (docs/js/neural.js makeReader, q8) vs torch on {len(chk)} held-out requests: {json.dumps(agree) if agree else "not run"}.
 - Trained with training/neural/finetune_roles.py (epochs <= {a.epochs}, lr {a.lr}, batch {a.bs}, fp16 on cuda, seed {a.seed}).
