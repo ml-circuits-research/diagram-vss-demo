@@ -26,6 +26,22 @@ UNKNOWN_KIND = "unknown"
 def sigmoid(x): return 1 / (1 + np.exp(-x))
 E = lambda ph: np.exp(1j * ph)
 
+# FAST=1 (training/vss/FAST_TRAIN.md; off by default): the cleanup M.conj() @ x of Reader.best uses a conjugate of M computed once per
+# candidate matrix instead of once per call (the copy was ~60 % of a calibration read), and, inside a FAST_MEMO block (sop train's
+# calibration), best() remembers its result for the same candidate matrix and the same probe vector (the two reads of a calibration row
+# compute the same probes). Both give the same floats bit for bit: the same arrays go to the same BLAS call.
+FAST = os.environ.get("FAST") == "1"
+_CONJ = {}          # id(M) -> (M, M.conj()); M is held so that its id is never reused
+_MEMO = None        # None = off; a dict {(id(M), probe bytes): result} while sop train's calibration reads one row
+
+
+def _conj(M):
+    e = _CONJ.get(id(M))
+    if e is None or e[0] is not M:
+        if len(_CONJ) > 50000: _CONJ.clear()
+        e = _CONJ[id(M)] = (M, M.conj())
+    return e[1]
+
 
 class ModelError(Exception): pass
 
@@ -303,6 +319,16 @@ class Reader:
     def best(x, cand):
         ws, M = cand
         if not ws: return None, 0.0, 0.0
+        if FAST:
+            key = None
+            if _MEMO is not None:
+                key = (id(M), x.tobytes()); hit = _MEMO.get(key)
+                if hit is not None and hit[0] is M: return hit[1]
+            sc = np.real(_conj(M) @ x)
+            out = (ws[0], float(sc[0]), float(sc[0])) if len(ws) == 1 else None
+            if out is None: j = np.argsort(-sc)[:2]; out = (ws[j[0]], float(sc[j[0]] - sc[j[1]]), float(sc[j[0]]))
+            if key is not None: _MEMO[key] = (M, out)
+            return out
         sc = np.real(M.conj() @ x)
         if len(ws) == 1: return ws[0], float(sc[0]), float(sc[0])
         j = np.argsort(-sc)[:2]; return ws[j[0]], float(sc[j[0]] - sc[j[1]]), float(sc[j[0]])
@@ -330,7 +356,7 @@ class Reader:
         # (2026-10-31, found by the centre parity test: the set role read the whole catalog here, the sentence's words in the browser)
         ws, M = self.role_cands(r, filt); out = {"margins": {}}
         if not ws: out.update(presence=0.0, present=False); return out
-        sc = np.real(M.conj() @ (Sn * key)); ratio = sc / core if core > 1e-9 else sc * 0
+        sc = np.real((_conj(M) if FAST else M.conj()) @ (Sn * key)); ratio = sc / core if core > 1e-9 else sc * 0
         thr = self.th.get("set_member", {}).get(r)
         # diagram-vss-demo patch: the role's own presence threshold (calibrated on this very ratio.max) decides first whether the set role
         # is in the sentence at all, as for every other role; before, a set role was "present" whenever one candidate passed the member

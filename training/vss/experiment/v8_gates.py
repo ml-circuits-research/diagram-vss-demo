@@ -112,6 +112,65 @@ class V8(v6.V6):
             terms = terms + sel.unsqueeze(-1).to(terms.dtype) * terms * E(relph)
         return (terms * self.F[ids] * mask.unsqueeze(-1)).sum(1)
 
+    def states_packed(self, cats, ids, mask, t_used=None):
+        """FAST=1 (tool/sop/train.py, training/vss/FAST_TRAIN.md): states() with the chain tables gathered only for the pairs the
+        recursions read (A[c_q, c_k] and L[c_q, c_k] for q < k), not as B x T x T x D tensors of which every step k slices one column:
+        the slices' backward filled a zero tensor of the whole B x T x T x D size per step k (O(B T^3 D) memory traffic per batch). The
+        same floats in the same order: the pairs are gathered in the order of the full tables' flattening (so the gradient reaches each
+        phase row in the same order), then cut into the per-k pieces. Only the codes path, chain / chainL and bigram; the rest of states()
+        (pos, vorder, rel) falls back to states()."""
+        if "pos" in self.codes or getattr(self, "vo", None) is not None or getattr(self, "rel", None) is not None:
+            return self.states(cats, ids, mask, t_used=t_used)
+        cats_w, mask_w = cats, mask; Tw = cats.shape[1]
+        if t_used is not None and t_used < Tw: cats, ids, mask = cats[:, :t_used], ids[:, :t_used], mask[:, :t_used]
+        th = self.theta * self.root_mask; B, T = cats.shape; one = torch.ones((), dtype=self.dtype, device=self.device)
+        E = lambda ph: torch.polar(torch.ones_like(ph), ph)
+        terms = 0
+        if "path" in self.codes:
+            terms = terms + E(torch.cumsum(th[self.ipath[cats]] * mask.unsqueeze(-1), 1))
+        if "bigram" in self.codes:
+            ph = th[self.ibg[cats[:, :-1], cats[:, 1:]]]; ph = torch.cat([th[self.ibg0[cats[:, :1]]], ph], 1); terms = terms + E(ph)
+        if "chainL" in self.codes or "chain" in self.codes:
+            g = torch.sigmoid(self.logits)[cats_w] * mask_w
+            u = torch.log1p(-g + 1e-9); Sx = torch.cat([torch.zeros(B, 1, dtype=self.dtype, device=self.device), torch.cumsum(u, 1)], 1)
+            lo, hi, perm, sz_a, sz_l = self._pairs(T)                                     # pairs (lo < hi), row-major in (lo, hi)
+            # A[c_q, c_k] for q = lo < k = hi, in the (q, k) order of the full B x T(q) x T(k) table, then reordered by k (perm)
+            EAk = torch.split(E(th[self.iA[cats[:, lo], cats[:, hi]]]).index_select(1, perm), sz_a, 1) if T > 1 else ()
+            addrs = []
+            for k in range(T):
+                p_root = torch.exp(Sx[:, k]).unsqueeze(-1) * one
+                if k == 0: addrs.append(p_root.to(torch.complex128 if self.dtype == torch.float64 else torch.complex64).expand(B, th.shape[1])); continue
+                ea = EAk[k - 1]                                                           # B x k x D : A[c_q, c_k], q < k
+                prev = torch.stack(addrs, 1)
+                p = g[:, :k] * torch.exp(Sx[:, k].unsqueeze(1) - Sx[:, 1:k + 1])
+                addrs.append(p_root.to(ea.dtype) + torch.einsum("bq,bqd->bd", p.to(ea.dtype), prev * ea))
+            addr = torch.stack(addrs, 1)
+            if "chainL" in self.codes:
+                # L[c_q, c_k] for k = lo < q = hi, in the (k, q) order of the full B x T(k) x T(q) table: the pieces of each k are contiguous
+                ELk = torch.split(E(th[self.iL[cats[:, hi], cats[:, lo]]]), sz_l, 1) if T > 1 else ()
+                cdt = addr.dtype; addrLs = []
+                for k in range(T):
+                    r = torch.exp(Sx[:, Tw] - Sx[:, k + 1])
+                    acc = r.unsqueeze(-1).to(cdt) * addr[:, k]
+                    if k < T - 1:
+                        pL = (g[:, k + 1:] if T == Tw else g[:, k + 1:T]) * torch.exp(Sx[:, k + 1:T] - Sx[:, k + 1].unsqueeze(1))
+                        acc = acc + torch.einsum("bq,bqd->bd", pL.to(cdt), addr[:, k + 1:] * ELk[k])
+                    addrLs.append(acc)
+                addrL = torch.stack(addrLs, 1)
+                gk = (g if T == Tw else g[:, :T]).unsqueeze(-1).to(cdt); addr = gk * addr + (1 - gk) * addrL
+            terms = terms + addr
+        return (terms * self.F[ids] * mask.unsqueeze(-1)).sum(1)
+
+    def _pairs(self, T):
+        """(lo, hi, perm, sizes by k for A, sizes by k for L) of the pairs lo < hi of T positions, cached per T and device"""
+        c = self.__dict__.setdefault("_pair_cache", {}); key = (T, str(self.device))
+        if key not in c:
+            lo, hi = torch.triu_indices(T, T, 1)                                          # row-major: lo ascending, then hi ascending
+            perm = sorted(range(len(lo)), key=lambda i: (int(hi[i]), int(lo[i])))        # by k = hi, then q = lo
+            c[key] = (lo.to(self.device), hi.to(self.device), torch.tensor(perm, dtype=torch.long, device=self.device),
+                      [k for k in range(1, T)], [T - 1 - k for k in range(T - 1)])
+        return c[key]
+
     def train(self, world, n_sent, lr=0.02, templates=None, persons=None, objects=None, batch=1, depth_train=2):
         w = self.w; sents, targets = [], []
         for n in range(n_sent):
