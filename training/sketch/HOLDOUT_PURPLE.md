@@ -42,3 +42,34 @@ HOLDOUT=purple DATA=spans FRONT_ROWS=world N_EVAL=150 EVAL_MODES=primary VSA_MAX
 reading that takes another colour is reported apart: it is worse than "not done".
 
 Run: on the laptop box (training/laptop/README.md) or here after Plan B. Result: this file, section "Result".
+
+## Result
+
+Run 2026-11-02 here (the command above, with `SOP_PYTHON=/home/claude/venv/bin/python3`). Model: docs/model/micro/set_nopurple
+(BUILD.json records HOLDOUT=purple). Scored with `MODEL=micro/<w> SEG=gold node training/sketch/llm_score.mjs <dir>` on the three
+splits; set_w re-scored in the same run and equal to the baseline above.
+
+| set | set_w | set_nopurple |
+|---|---|---|
+| P (128) | 80.5 / 10.2 / 9.4 | 78.1 / 12.5 / 9.4 |
+| M (233) | 78.5 / 12.9 / 8.6 | 76.8 / 14.6 / 8.6 |
+| R (3823) | 76.4 / 17.2 / 6.4 | 75.5 / 18.1 / 6.5 |
+
+(right / wrong / not done, % of requests.)
+
+Verdict: **it did not work**, by one request. P right 78.1 >= 75.5 and R right -0.9 (within 1 point) pass; P wrong 12.5% (16 of 128)
+is above 12.2% (at most 15). Stopped here, as pre-registered.
+
+Which value the wrong P readings took (set_w: 13 wrong, all of them a wrong target, the colour read right). set_nopurple: 16 wrong;
+the 13 target errors are the same messages, plus three where **purple was read as another colour, the dangerous case**. In all three
+the message also holds a colour word the world saw in training, and that word was taken instead of purple:
+- hm-0108 "Set every shape that is not white to purple": color=white;
+- sm2-0210 "Make Tante teal, no wait, make her purple": color=teal;
+- sl-0070 "Jazz is gold, no wait, Jazz should be purple": color=gold.
+
+Root cause: a value the world never saw is read from its kind most of the time (100 of 128 purple requests right without seeing the
+word, against 103 with it), but when a seen word of the same kind is in the message, the seen word wins. Two of the three are
+corrections ("X, no wait, purple"), where the right value is the later, unseen one.
+
+For skills/vss-world-design: an operator world can read values it never saw when they are alone in the request, but not against a seen
+value of the same kind; the values a world must choose between belong in its data.
