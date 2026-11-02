@@ -4,7 +4,8 @@
 //   ZS=deberta|distilbert [LIMIT=n] [DEVICE=cpu|cuda] node training/laptop/neural_score.mjs <dir> [<dir> ...]
 // A <dir> holds one or more .jsonl files of gold messages (text, names, wires). Needs `npm install` in training/laptop first.
 //   ZS      zero-shot classifier: deberta = Xenova/nli-deberta-v3-xsmall (default), distilbert = Xenova/distilbert-base-uncased-mnli
-//           (the question-answering model is always Xenova/distilbert-base-cased-distilled-squad); q8 files, as in the browser
+//           (the question-answering model is always Xenova/distilbert-base-cased-distilled-squad); the file type of each model
+//           is neural.js dtypeOf (q8 unless neural.js DTYPES says otherwise), as in the browser
 //   DEVICE  cpu (default) or cuda (onnxruntime-node CUDA; on an error the script says so and falls back to cpu)
 //   LIMIT   only the first n messages of each folder
 //   PAIR / SEG / REGISTRY ...: the variables of llm_score.mjs; here PAIR defaults to value and SEG to composer
@@ -37,9 +38,9 @@ async function buildModels() {
   };
   const T = await import("@huggingface/transformers");
   const build = async (device) => {
-    const make = (task, model) => T.pipeline(task, model, { device, dtype: NeuralKit.DTYPE });
+    const make = (task, model) => T.pipeline(task, model, { device, dtype: NeuralKit.dtypeOf(model) });
     const qa = await make("question-answering", qaId), zs = await make("zero-shot-classification", zsId);
-    const m = { device, dtype: NeuralKit.DTYPE, qaModel: qaId, enumModel: zsId };
+    const m = { device, dtype: [...new Set([zsId, qaId].map(NeuralKit.dtypeOf))].join("+"), qaModel: qaId, enumModel: zsId };
     m.qa = async (q, c) => { let r = await qa(q, c); if (Array.isArray(r)) r = r[0]; return r || { answer: "", score: 0 }; };
     m.classify = async (text, hyps) => { const r = await zs(text, hyps, { hypothesis_template: "{}" }); return Array.isArray(r) ? r[0] : r; };
     await m.qa("What is drawn?", "A red circle is drawn."); await m.classify("draw a circle", ["This asks the editor to change the diagram.", "This asks a question about the diagram."]);

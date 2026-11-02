@@ -10,12 +10,13 @@ const src = (await import("node:fs")).readFileSync(new URL("../../docs/js/neural
 const grab = (name) => eval("(" + src.slice(src.indexOf(`const ${name} = {`) + `const ${name} = `.length, src.indexOf("\n};", src.indexOf(`const ${name} = {`)) + 2) + ")");
 const KIND = grab("KIND"), ACTION = grab("ACTION");
 const MSG = ["create a black star", "draw a blue circle named Hub", "delete Start", "what is connected to Hub?", "move Box below Hub", "make Hub red", "how many circles are there?", "Hub is above Box"];
-for (const [zsName, id] of Object.entries(NeuralKit.MODELS.zeroshot)) for (const dtype of ["q8", "fp32"]) {
+for (const [zsName, id] of Object.entries(NeuralKit.MODELS.zeroshot)) for (const dtype of ["q8", "int8", "fp32"]) {
   let zs; try { zs = await T.pipeline("zero-shot-classification", id, { device: "cpu", dtype }); } catch (e) { console.log(`${zsName} ${dtype}: load failed: ${e.message}`); continue; }
   console.log(`\n=== ${zsName} (${id}) dtype ${dtype}`);
   for (const m of MSG) {
     const k = await zs(m, Object.values(KIND).map((x) => x[0]), { hypothesis_template: "{}" }), a = await zs(m, Object.values(ACTION).map((x) => x[0]), { hypothesis_template: "{}" });
     const kn = Object.keys(KIND)[Object.values(KIND).findIndex((x) => x[0] === k.labels[0])], an = Object.keys(ACTION)[Object.values(ACTION).findIndex((x) => x[0] === a.labels[0])];
-    console.log(`  ${m.padEnd(32)} kind ${kn} ${k.scores[0].toFixed(2)} · action ${an} ${a.scores[0].toFixed(2)} (2nd ${Object.keys(ACTION)[Object.values(ACTION).findIndex((x) => x[0] === a.labels[1])]} ${a.scores[1].toFixed(2)})`);
+    const kn2 = Object.keys(KIND)[Object.values(KIND).findIndex((x) => x[0] === k.labels[1])];
+    console.log(`  ${m.padEnd(32)} kind ${kn} ${k.scores[0].toFixed(2)} (2nd ${kn2} ${k.scores[1].toFixed(2)}) · action ${an} ${a.scores[0].toFixed(2)} (2nd ${Object.keys(ACTION)[Object.values(ACTION).findIndex((x) => x[0] === a.labels[1])]} ${a.scores[1].toFixed(2)})`);
   }
 }
