@@ -1,0 +1,33 @@
+fatal: could not read Username for 'https://github.com': No such device or address
+# World `real`: built from 4640 training messages (22702 requests with a span)
+
+WORLD_EVENTS=forget,redo,undo: only the rows of these events; the legend lists only these events.
+
+FRONT_ROWS=world: the front end below is learned only from the 547 requests of this world's events.
+
+Front end learned from the same messages: 0 value n-grams, 50 trigger rules, 0 segmenter weights; params {"seg_epochs": 8, "val_min_count": 5, "val_min_prec": 0.8, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}.
+
+Rows: 536. Dropped (cannot be trained): 11 {'no event token and no role (zero target)': 11}. Negative examples (text outside the spans with an action token): 0.
+Switches: VAL_PREC=all VAL_SUB=any CREATE_COLOR=attr DIAGRAM_OPS=0; data folders ['sonnet_msg', 'haiku_msg', 'sonnet_msg2', 'haiku_msg2', 'sonnet_long', '../llm_bench/fresh1/sonnet', '../llm_bench/fresh1/haiku', '../llm_bench/sonnet_spans', '../llm_bench/haiku_spans']
+Values left out per legend question kind: values 0 {}; event token not found 0; references 0
+2/2 files OK against legend(s) history7 sha256:bd6ff24f983f…
+DRY=1: data of history7 built in /home/claude/vss-box/diagram-vss-demo/training/sketch/worlds_micro/history7 (536 rows); not trained
+fatal: could not read Username for 'https://github.com': No such device or address
+# World `real`: built from 4640 training messages (22702 requests with a span)
+
+WORLD_EVENTS=check,connected,cycle,exists,path,reachable: only the rows of these events; the legend lists only these events.
+
+FRONT_ROWS=world: the front end below is learned only from the 2754 requests of this world's events.
+
+Front end learned from the same messages: 31 value n-grams, 429 trigger rules, 0 segmenter weights; params {"seg_epochs": 8, "val_min_count": 5, "val_min_prec": 0.8, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}.
+
+Rows: 2729. Dropped (cannot be trained): 25 {'no event token and no role (zero target)': 25}. Negative examples (text outside the spans with an action token): 0.
+Switches: VAL_PREC=all VAL_SUB=any CREATE_COLOR=attr DIAGRAM_OPS=0; data folders ['sonnet_msg', 'haiku_msg', 'sonnet_msg2', 'haiku_msg2', 'sonnet_long', '../llm_bench/fresh1/sonnet', '../llm_bench/fresh1/haiku', '../llm_bench/sonnet_spans', '../llm_bench/haiku_spans']
+Values left out per legend question kind: values 57 {"COLOR": 1, "NOTCOLOR": 37, "POS": 8, "SHAPE": 5, "SIZE": 6}; event token not found 155; references 33
+2/2 files OK against legend(s) graphq7 sha256:66d7f4184a90…
+DRY=1: data of graphq7 built in /home/claude/vss-box/diagram-vss-demo/training/sketch/worlds_micro/graphq7 (2729 rows); not trained
+==> ab/graphq7_up.log <==
+tools/upstream_ab_job.sh: line 26: /home/claude/vss-box/diagram-vss-demo/ab/vss-demo-9c85649/tool/bin/sop: No such file or directory
+
+==> ab/history7_up.log <==
+tools/upstream_ab_job.sh: line 26: /home/claude/vss-box/diagram-vss-demo/ab/vss-demo-9c85649/tool/bin/sop: No such file or directory
