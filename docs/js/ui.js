@@ -635,7 +635,7 @@ function neuralBoxHTML() {
     : `<p>${escH(neededText(o))}</p><div class="acts"><button type="button" class="btn solid" data-nact="download">Download</button><button type="button" class="btn" data-nact="notnow">Not now</button></div>`;
   if (nState === 'loading') return `<p class="nprog-t">${escH(progText())}</p><div class="prog"><div style="width:${nProg.T ? (nProg.L / nProg.T * 100).toFixed(1) : 0}%"></div></div>`;
   if (nState === 'failed') return `<p>The neural models could not be loaded:</p>${errHTML(nError)}<div class="acts"><button type="button" class="btn solid" data-nact="download">Try again</button></div>`;
-  return `<p>Ready: ${escH(NeuralKit.NAMES[models.enumModel] || models.enumModel)} + ${escH(NeuralKit.NAMES[models.qaModel] || models.qaModel)} on the CPU (WASM, 8-bit files), ${mb(neuralBytes)}, loaded in ${(neuralLoadMs / 1000).toFixed(1)} s${nFromCache ? ' from the browser cache' : ''}.</p>`;
+  return `<p>Ready: ${escH(NeuralKit.NAMES[models.enumModel] || models.enumModel)} + ${escH(NeuralKit.NAMES[models.qaModel] || models.qaModel)} on the CPU (WASM, ${escH(models.dtypeText || '8-bit files')}), ${mb(neuralBytes)}, loaded in ${(neuralLoadMs / 1000).toFixed(1)} s${nFromCache ? ' from the browser cache' : ''}.</p>`;
 }
 function inviteHTML() {
   if (nState === 'invite') return notNow() ? `${escH(neededText(neuralOpts()))} <span class="st">Not now. The Neural tab can download it later.</span>` : `${escH(neededText(neuralOpts()))}<span class="acts"><button type="button" class="btn solid" data-nact="download">Download</button><button type="button" class="btn" data-nact="notnow">Not now</button></span>`;
@@ -711,7 +711,7 @@ function renderFormalizer() {
     <label for="nm-strategy">Message type</label>
     <select id="nm-strategy"><option value="zeroshot:deberta">Zero-shot NLI · ${N[M.zeroshot.deberta]} · ${sz(M.zeroshot.deberta)}</option><option value="zeroshot:distilbert">Zero-shot NLI · ${N[M.zeroshot.distilbert]} · ${sz(M.zeroshot.distilbert)}</option><option value="embed">Similarity to legend examples · ${N[M.embed]} · ${sz(M.embed)}</option></select>
     <label>Answers</label><div>Extractive QA · ${N[M.qa]} · ${sz(M.qa)}</div>
-    <label>Device</label><div>CPU (WASM), 8-bit files</div>
+    <label>Device</label><div>CPU (WASM), ${escH(NeuralKit.dtypeText(neuralOpts()))}</div>
   </div>
   <div class="nbox" id="nm-box">${neuralBoxHTML()}</div>`;
 }

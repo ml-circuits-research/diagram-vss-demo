@@ -253,20 +253,35 @@ const MODELS = {
   qa: 'Xenova/distilbert-base-cased-distilled-squad'
 };
 const LIB = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1';
-/* The neural reader runs on the CPU (WASM) with the q8 files (onnx/model_quantized.onnx). WebGPU is not offered: on a browser that
+/* The neural reader runs on the CPU (WASM), by default with the q8 files (onnx/model_quantized.onnx; see DTYPES). WebGPU is not offered: on a browser that
    exposes navigator.gpu without an adapter (owner, Linux) it failed with "no available backend found ... Failed to get GPU adapter",
    and transformers.js 3.8.1 cannot retry on WASM in the same page: src/backends/onnx.js keeps the first session promise
    (wasmInitPromise) and awaits it before every later session, so one failed WebGPU session fails every WASM session after it.
    device 'wasm' maps to the execution providers ['wasm'] only, so this path never touches WebGPU. Sizes are those of the .onnx
    files (measured 2026-11-02; MiniLM approximate); the tokenizer and config files add a little. */
 const DTYPE = 'q8', HF = 'https://huggingface.co/', CACHE = 'transformers-cache';   // transformers.js 3.8.1: src/utils/hub.js getModelFile
-const FILES = ['config.json', 'tokenizer.json', 'tokenizer_config.json', 'onnx/model_quantized.onnx'];
-const SIZES = { 'Xenova/nli-deberta-v3-xsmall': 87.2e6, 'Xenova/distilbert-base-uncased-mnli': 67.6e6, 'Xenova/all-MiniLM-L6-v2': 23e6, 'Xenova/distilbert-base-cased-distilled-squad': 65.8e6 };
+/* The file type of each model: DTYPE unless listed here (e.g. 'Xenova/nli-deberta-v3-xsmall': 'fp32' or 'int8', if the q8 classifier
+   turns out to be too degraded; training/laptop/zs_check.mjs compares q8 and fp32). The file name, the cache check and the size shown
+   in Settings follow it. */
+const DTYPES = {};
+const dtypeOf = id => DTYPES[id] || DTYPE;
+const ONNX = { fp32: 'model.onnx', int8: 'model_int8.onnx', q8: 'model_quantized.onnx' };   // src/utils/dtypes.js DEFAULT_DTYPE_SUFFIX_MAPPING
+const filesOf = id => ['config.json', 'tokenizer.json', 'tokenizer_config.json', 'onnx/' + ONNX[dtypeOf(id)]];
+const BYTES = {   // the .onnx file of each model and file type (MiniLM approximate)
+  'Xenova/nli-deberta-v3-xsmall': { q8: 87.2e6, int8: 90e6, fp32: 284e6 },
+  'Xenova/distilbert-base-uncased-mnli': { q8: 67.6e6, int8: 67e6, fp32: 268e6 },
+  'Xenova/all-MiniLM-L6-v2': { q8: 23e6, int8: 23e6, fp32: 90e6 },
+  'Xenova/distilbert-base-cased-distilled-squad': { q8: 65.8e6, int8: 66e6, fp32: 261e6 }
+};
+const SIZES = Object.fromEntries(Object.entries(BYTES).map(([id, b]) => [id, b[dtypeOf(id)]]));
 const NAMES = { 'Xenova/nli-deberta-v3-xsmall': 'DeBERTa-v3 xsmall', 'Xenova/distilbert-base-uncased-mnli': 'DistilBERT MNLI', 'Xenova/all-MiniLM-L6-v2': 'MiniLM-L6', 'Xenova/distilbert-base-cased-distilled-squad': 'DistilBERT SQuAD' };
 /** the two models a choice needs: [message-type model, answer model] */
 const modelsFor = opts => [opts.strategy === 'embed' ? MODELS.embed : MODELS.zeroshot[opts.zeroshot || 'deberta'], MODELS.qa];
+/** the file types of a choice in words, e.g. "8-bit files" or "classifier 32-bit, answers 8-bit" */
+const BITS = { q8: '8-bit', int8: '8-bit', fp32: '32-bit' };
+const dtypeText = opts => { const [a, b] = modelsFor(opts).map(dtypeOf); return a === b ? `${BITS[a]} files` : `classifier ${BITS[a]}, answers ${BITS[b]} files`; };
 /** the exact URLs transformers.js requests (and uses as Cache API keys) for these models */
-const urlsFor = opts => modelsFor(opts).flatMap(id => FILES.map(f => `${HF}${id}/resolve/main/${f}`));
+const urlsFor = opts => modelsFor(opts).flatMap(id => filesOf(id).map(f => `${HF}${id}/resolve/main/${f}`));
 /** true when every file of the choice is already in this browser's transformers.js cache (nothing to download) */
 async function cached(opts) {
   try {
@@ -286,9 +301,9 @@ async function load(opts, onProgress) {
   const open = new Set();   // files asked for and not finished: transformers.js loads them in parallel, so a failure names no single file
   const track = e => { if (e && e.name && e.file) { const u = `${HF}${e.name}/resolve/main/${e.file}`; if (e.status === 'initiate') open.add(u); else if (e.status === 'done') open.delete(u); } if (onProgress) onProgress(e); };
   const build = async device => {
-    const make = (task, model) => T.pipeline(task, model, { device, dtype: DTYPE, progress_callback: track });
+    const make = (task, model) => T.pipeline(task, model, { device, dtype: dtypeOf(model), progress_callback: track });
     const qa = await make('question-answering', MODELS.qa);
-    const m = { device, dtype: DTYPE, qaModel: MODELS.qa };
+    const m = { device, dtype: [...new Set(modelsFor(opts).map(dtypeOf))].join('+'), dtypeText: dtypeText(opts), qaModel: MODELS.qa };
     m.qa = async (q, c) => { let r = await qa(q, c); if (Array.isArray(r)) r = r[0]; return r || { answer: '', score: 0 }; };
     if (opts.strategy === 'embed') {
       const fe = await make('feature-extraction', MODELS.embed); m.enumModel = MODELS.embed;
@@ -311,7 +326,7 @@ async function load(opts, onProgress) {
   }
 }
 
-return { create, load, cached, modelsFor, urlsFor, MODELS, SIZES, NAMES, DTYPE };
+return { create, load, cached, modelsFor, urlsFor, dtypeOf, dtypeText, MODELS, SIZES, NAMES, DTYPE };
 })();
 if (typeof module !== 'undefined') module.exports = NeuralKit;
 /*NEURAL-END*/
