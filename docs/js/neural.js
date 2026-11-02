@@ -253,31 +253,65 @@ const MODELS = {
   qa: 'Xenova/distilbert-base-cased-distilled-squad'
 };
 const LIB = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1';
+/* The neural reader runs on the CPU (WASM) with the q8 files (onnx/model_quantized.onnx). WebGPU is not offered: on a browser that
+   exposes navigator.gpu without an adapter (owner, Linux) it failed with "no available backend found ... Failed to get GPU adapter",
+   and transformers.js 3.8.1 cannot retry on WASM in the same page: src/backends/onnx.js keeps the first session promise
+   (wasmInitPromise) and awaits it before every later session, so one failed WebGPU session fails every WASM session after it.
+   device 'wasm' maps to the execution providers ['wasm'] only, so this path never touches WebGPU. Sizes are those of the .onnx
+   files (measured 2026-11-02; MiniLM approximate); the tokenizer and config files add a little. */
+const DTYPE = 'q8', HF = 'https://huggingface.co/', CACHE = 'transformers-cache';   // transformers.js 3.8.1: src/utils/hub.js getModelFile
+const FILES = ['config.json', 'tokenizer.json', 'tokenizer_config.json', 'onnx/model_quantized.onnx'];
+const SIZES = { 'Xenova/nli-deberta-v3-xsmall': 87.2e6, 'Xenova/distilbert-base-uncased-mnli': 67.6e6, 'Xenova/all-MiniLM-L6-v2': 23e6, 'Xenova/distilbert-base-cased-distilled-squad': 65.8e6 };
+const NAMES = { 'Xenova/nli-deberta-v3-xsmall': 'DeBERTa-v3 xsmall', 'Xenova/distilbert-base-uncased-mnli': 'DistilBERT MNLI', 'Xenova/all-MiniLM-L6-v2': 'MiniLM-L6', 'Xenova/distilbert-base-cased-distilled-squad': 'DistilBERT SQuAD' };
+/** the two models a choice needs: [message-type model, answer model] */
+const modelsFor = opts => [opts.strategy === 'embed' ? MODELS.embed : MODELS.zeroshot[opts.zeroshot || 'deberta'], MODELS.qa];
+/** the exact URLs transformers.js requests (and uses as Cache API keys) for these models */
+const urlsFor = opts => modelsFor(opts).flatMap(id => FILES.map(f => `${HF}${id}/resolve/main/${f}`));
+/** true when every file of the choice is already in this browser's transformers.js cache (nothing to download) */
+async function cached(opts) {
+  try {
+    if (typeof caches === 'undefined' || !(await caches.has(CACHE))) return false;
+    const c = await caches.open(CACHE);
+    for (const u of urlsFor(opts)) if (!(await c.match(u))) return false;
+    return true;
+  } catch (e) { return false; }
+}
+const looksNetwork = e => /failed to fetch|networkerror|load failed|network|dynamically imported module|importing a module script failed|err_|timeout|cors/i.test(String(e && e.message || e)) || (e && e.name === 'TypeError' && /fetch/i.test(String(e.message)));
 async function load(opts, onProgress) {
-  const T = await import(LIB);
+  let T;
+  try { T = await import(LIB); }
+  catch (e) { throw Object.assign(new Error(`The transformers.js library could not be loaded: ${e && e.message || e}`), { url: LIB, network: true, cause: e }); }
   T.env.allowLocalModels = false;
   try { T.env.useBrowserCache = typeof caches !== 'undefined'; } catch (e) { T.env.useBrowserCache = false; }
-  const wantGpu = opts.device === 'webgpu' || (opts.device === 'auto' && typeof navigator !== 'undefined' && 'gpu' in navigator);
-  let device = wantGpu ? 'webgpu' : 'wasm';
-  const make = async (task, model) => {
-    try { return await T.pipeline(task, model, { device, dtype: device === 'webgpu' ? 'fp32' : 'q8', progress_callback: onProgress }); }
-    catch (e) { if (device !== 'webgpu') throw e; device = 'wasm'; return T.pipeline(task, model, { device: 'wasm', dtype: 'q8', progress_callback: onProgress }); }
+  const open = new Set();   // files asked for and not finished: transformers.js loads them in parallel, so a failure names no single file
+  const track = e => { if (e && e.name && e.file) { const u = `${HF}${e.name}/resolve/main/${e.file}`; if (e.status === 'initiate') open.add(u); else if (e.status === 'done') open.delete(u); } if (onProgress) onProgress(e); };
+  const build = async device => {
+    const make = (task, model) => T.pipeline(task, model, { device, dtype: DTYPE, progress_callback: track });
+    const qa = await make('question-answering', MODELS.qa);
+    const m = { device, dtype: DTYPE, qaModel: MODELS.qa };
+    m.qa = async (q, c) => { let r = await qa(q, c); if (Array.isArray(r)) r = r[0]; return r || { answer: '', score: 0 }; };
+    if (opts.strategy === 'embed') {
+      const fe = await make('feature-extraction', MODELS.embed); m.enumModel = MODELS.embed;
+      m.embed = async texts => (await fe(texts, { pooling: 'mean', normalize: true })).tolist();
+    } else {
+      const id = MODELS.zeroshot[opts.zeroshot || 'deberta'], zs = await make('zero-shot-classification', id); m.enumModel = id;
+      m.classify = async (text, hyps) => { const r = await zs(text, hyps, { hypothesis_template: '{}' }); return Array.isArray(r) ? r[0] : r; };
+    }
+    open.clear();
+    await m.qa('What is drawn?', 'A red circle is drawn.');           // the first inference: a device that fails here fails now, not on a message
+    if (m.classify) await m.classify('draw a circle', ['This asks the editor to change the diagram.', 'This asks a question about the diagram.']); else await m.embed(['draw a circle']);
+    return m;
   };
-  const qa = await make('question-answering', MODELS.qa);
-  const m = { device, qaModel: MODELS.qa };
-  m.qa = async (q, c) => { let r = await qa(q, c); if (Array.isArray(r)) r = r[0]; return r || { answer: '', score: 0 }; };
-  if (opts.strategy === 'embed') {
-    const fe = await make('feature-extraction', MODELS.embed); m.enumModel = MODELS.embed;
-    m.embed = async texts => (await fe(texts, { pooling: 'mean', normalize: true })).tolist();
-  } else {
-    const id = MODELS.zeroshot[opts.zeroshot || 'deberta'], zs = await make('zero-shot-classification', id); m.enumModel = id;
-    m.classify = async (text, hyps) => { const r = await zs(text, hyps, { hypothesis_template: '{}' }); return Array.isArray(r) ? r[0] : r; };
+  try {
+    return await build('wasm');
+  } catch (e) {
+    const msg = String(e && e.message || e || 'unknown error');
+    const pending = /https?:\/\//.test(msg) ? [] : [...open];
+    throw Object.assign(new Error(msg), { url: pending.length ? pending.join(' ') : null, files: pending, network: looksNetwork(e), cause: e });
   }
-  m.device = device;
-  return m;
 }
 
-return { create, load, MODELS };
+return { create, load, cached, modelsFor, urlsFor, MODELS, SIZES, NAMES, DTYPE };
 })();
 if (typeof module !== 'undefined') module.exports = NeuralKit;
 /*NEURAL-END*/

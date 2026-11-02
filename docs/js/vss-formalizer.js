@@ -41,10 +41,10 @@ export async function load(base = new URL("../model/real/", import.meta.url).hre
 }
 
 // ---- the composer (option `composer` of formalize): every model folder of the registry, loaded with the same fetch code
-const comp = { c: null, loading: null, bytes: 0, loadMs: 0, registry: null };
+const comp = { c: null, loading: null, bytes: 0, loadMs: 0, registry: null, root: null, sizes: new Map() };   // bytes: registry and cutters; sizes: bytes per model folder
 async function modelAt(base) {
-  const cache = new Map();
-  const readFile = async (name) => { if (!cache.has(name)) cache.set(name, name.endsWith(".bin") ? await fetchBin(base, name, comp) : await fetchSize(new URL(name, base), comp)); const b = cache.get(name); return name.endsWith(".json") ? new TextDecoder().decode(b) : b; };
+  const cache = new Map(), acc = { bytes: 0 }; comp.sizes.set(base, acc);
+  const readFile = async (name) => { if (!cache.has(name)) cache.set(name, name.endsWith(".bin") ? await fetchBin(base, name, acc) : await fetchSize(new URL(name, base), acc)); const b = cache.get(name); return name.endsWith(".json") ? new TextDecoder().decode(b) : b; };
   const vss = await loadVSS(null, { readFile, sentenceCandidates: true });
   let F = null; try { F = JSON.parse(await readFile("front.json")); } catch (e) { F = null; }
   return { vss, F };
@@ -53,7 +53,7 @@ async function modelAt(base) {
 export async function loadComposerAt(root = new URL("../model/", import.meta.url).href) {
   if (comp.c) return comp.c;
   if (!comp.loading) comp.loading = (async () => {
-    const t0 = performance.now(), json = async (u) => JSON.parse(new TextDecoder().decode(await fetchSize(new URL(u, root), comp)));
+    comp.root = root; const t0 = performance.now(), json = async (u) => JSON.parse(new TextDecoder().decode(await fetchSize(new URL(u, root), comp)));
     const registry = await json("micro/registry.json"), cutter = await json(registry.cutter); comp.registry = registry;
     const context = registry.router === "cutter" ? await json(registry.context || "context/weights.json") : undefined;   // CandidateRouter needs the context filler
     const eventCutter = registry.event_cutter ? await json(registry.event_cutter) : undefined;   // the event hint (vss-composer.js, EVENT_HINT.md)
@@ -113,8 +113,11 @@ export async function formalize(text, ctx, rulesFormalize, opts = {}) {
 /** what the demo shows about the composer: its worlds (model folder, actions), router, event hint, fallback, bytes and load time */
 export function composerInfo() {
   const r = comp.registry; if (!comp.c || !r) return null;
-  return { composer: true, bytes: comp.bytes, loadMs: comp.loadMs, about: r.about || "", router: r.router || "", hint: r.event_cutter ? (r.event_hint || "H1") : null,
-    fallback: r.fallback || null, worlds: (r.worlds || []).map((w) => ({ world: w.world, model: w.model.replace(/^micro\//, ""), events: w.events || [] })) };
+  const size = (name) => { const a = comp.sizes.get(new URL(name.replace(/\/?$/, "/"), comp.root).href); return a ? a.bytes : 0; };
+  const models = [...comp.sizes.values()].reduce((a, x) => a + x.bytes, 0);
+  return { composer: true, bytes: comp.bytes + models, cutterBytes: comp.bytes, loadMs: comp.loadMs, about: r.about || "", router: r.router || "", hint: r.event_cutter ? (r.event_hint || "H1") : null,
+    fallback: r.fallback || null, fallbackBytes: r.fallback ? size(r.fallback) : 0,
+    worlds: (r.worlds || []).map((w) => ({ world: w.world, model: w.model.replace(/^micro\//, ""), events: w.events || [], bytes: size(w.model) })) };
 }
 
 export function goldNodes(row, ctx) {

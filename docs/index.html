@@ -75,12 +75,34 @@ svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-widt
 .ib { width: 40px; height: 40px; border-radius: 50%; border: 0; background: transparent; display: grid; place-items: center; cursor: pointer; color: var(--muted); flex: none; }
 .ib:hover { background: rgba(127, 127, 127, .14); color: var(--ink); }
 
-.stage { grid-area: stage; position: relative; background: var(--canvas); min-height: 0; min-width: 0; }
-#canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
-.tools { position: absolute; top: max(10px, env(safe-area-inset-top, 0px)); right: 10px; display: flex; gap: 6px; }
-.tools .ib { background: var(--head); box-shadow: 0 1px 2px rgba(0, 0, 0, .12); width: 38px; height: 38px; }
+.stage { grid-area: stage; position: relative; background: var(--canvas); min-height: 0; min-width: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+/* reader tabs: each reader (Rules, VSS, Neural) has its own drawing; the canvas shows the active one */
+.rbar { display: flex; align-items: center; gap: 8px; padding: max(8px, env(safe-area-inset-top, 0px)) 10px 0 16px; border-bottom: 1px solid var(--line); background: var(--head); min-width: 0; }
+.rtabs { display: flex; gap: 2px; flex: 1; min-width: 0; }
+.rtab { border: 0; background: none; padding: 8px 12px 9px; cursor: pointer; color: var(--muted); border-bottom: 3px solid transparent; font-weight: 600; white-space: nowrap; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+.rtab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+.rtab.off { font-weight: 500; opacity: .62; }
+.rtab .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--rf); display: inline-block; }
+.rtab .spin { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--accent); display: inline-block; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.tools { display: flex; gap: 4px; flex: none; padding-bottom: 4px; }
+.tools .ib { width: 36px; height: 36px; }
 .tools .ib svg.i { width: 19px; height: 19px; }
-.readout { position: absolute; left: 12px; bottom: 10px; font-size: 12px; color: var(--muted); background: var(--head); padding: 3px 9px; border-radius: 999px; font-variant-numeric: tabular-nums; box-shadow: 0 1px 2px rgba(0, 0, 0, .1); }
+.board { position: relative; min-height: 0; min-width: 0; }
+#canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.rcard { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); overflow-wrap: anywhere; width: min(380px, calc(100% - 32px)); max-height: calc(100% - 20px); overflow-y: auto; background: var(--sheet); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; box-shadow: 0 4px 18px rgba(0, 0, 0, .14); font-size: 13.5px; display: grid; gap: 6px; }
+.rcard.small { top: 12px; transform: translateX(-50%); }
+.rcard p { margin: 0; color: var(--muted); }
+.rcard .prog, .nbox .prog { margin: 4px 0 0; }
+.acts { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.nbox { display: grid; gap: 6px; font-size: 13.5px; }
+.nbox p { margin: 0; color: var(--muted); }
+.sopbar { border-top: 1px solid var(--line); background: var(--head); padding: 5px 16px 7px; display: grid; gap: 4px; min-width: 0; }
+.sophead { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--muted); min-height: 24px; }
+.sophead span { flex: 1; min-width: 0; }
+.sophead .btn { padding: 2px 12px; font-size: 12.5px; }
+.sop.mini { font-size: 11.5px; line-height: 1.5; padding: 4px 8px; max-height: 5.2em; overflow: auto; }
+.readout { position: absolute; left: 16px; bottom: 10px; font-size: 12px; color: var(--muted); background: var(--head); padding: 3px 9px; border-radius: 999px; font-variant-numeric: tabular-nums; box-shadow: 0 1px 2px rgba(0, 0, 0, .1); }
 
 .shp { cursor: grab; touch-action: none; }
 .shp .body { stroke: var(--shape-edge); stroke-width: 1.25; }
@@ -107,6 +129,12 @@ svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-widt
 .b.bot { align-self: flex-start; border-top-left-radius: 2px; }
 .b + .b.me, .b.me + .b.bot { margin-top: 6px; }
 .b .txt { white-space: pre-wrap; }
+.b .rl { white-space: pre-wrap; }
+.b .rl + .rl { margin-top: 3px; }
+.b .rl > b { font-weight: 600; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.b .rl.err .t { color: var(--err); }
+.b .rl.off { color: var(--muted); font-size: 13px; }
+.b .rl .sub { white-space: normal; }
 .b .sub { color: var(--muted); font-size: 13px; margin-top: 3px; }
 .b.err .txt { color: var(--err); }
 .meta { display: flex; justify-content: flex-end; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); margin-top: 2px; }
@@ -114,7 +142,10 @@ svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-widt
 .meta .tag2 { font-family: var(--mono); font-size: 10.5px; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
 .chips button { border: 1px solid var(--line); background: var(--pill); color: var(--link); border-radius: 999px; padding: 4px 12px; cursor: pointer; font-size: 14px; }
-.sys { align-self: center; background: var(--pill); color: var(--muted); font-size: 12.5px; padding: 4px 12px; border-radius: 8px; margin: 8px 0; text-align: center; max-width: 90%; box-shadow: 0 1px .5px rgba(11, 20, 26, .1); }
+.sys { overflow-wrap: anywhere; align-self: center; background: var(--pill); color: var(--muted); font-size: 12.5px; padding: 4px 12px; border-radius: 8px; margin: 8px 0; text-align: center; max-width: 90%; box-shadow: 0 1px .5px rgba(11, 20, 26, .1); }
+.sys.invite { max-width: min(460px, 94%); line-height: 1.45; }
+.sys.invite .acts { display: flex; justify-content: center; margin-top: 6px; }
+.sys.invite .st { display: block; margin-top: 4px; }
 .typing { display: inline-flex; gap: 4px; padding: 4px 2px; }
 .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); animation: blink 1.2s infinite; }
 .typing i:nth-child(2) { animation-delay: .2s; } .typing i:nth-child(3) { animation-delay: .4s; }
@@ -190,7 +221,7 @@ select { border: 1px solid var(--line); background: var(--sheet); border-radius:
 .fx .op.add { color: var(--str); } .fx .op.del { color: var(--err); } .fx .op.chg { color: var(--wid); }
 .answer { background: var(--code-bg); border-radius: 6px; padding: 6px 8px; }
 .note { color: var(--muted); font-size: 12.5px; }
-.errt { color: var(--err); }
+.errt { color: var(--err); overflow-wrap: anywhere; }
 details.lower summary, details.cmp summary { cursor: pointer; color: var(--muted); font-size: 12.5px; }
 details.lower pre { margin: 6px 0 0; font-family: var(--mono); font-size: 12px; background: var(--code-bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; overflow-x: auto; }
 details.cmp summary { font-family: var(--mono); color: var(--wid); }
@@ -232,6 +263,11 @@ details.cmp summary .src { font-family: var(--font); color: var(--muted); margin
 .actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
 .prog { height: 4px; background: var(--line); border-radius: 999px; overflow: hidden; margin-bottom: 10px; }
 .prog div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+table.kv { border-collapse: collapse; width: 100%; font-size: 13px; margin-bottom: 10px; }
+table.kv td { padding: 4px 8px 4px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.kv td:last-child { text-align: right; white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rdsec { display: grid; gap: 6px; }
+.rdsec + .rdsec { border-top: 1px dashed var(--line); padding-top: 8px; }
 .local { background: var(--warn-soft); border-radius: 8px; padding: 8px 10px; font-size: 13px; margin-bottom: 12px; }
 .scores { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 10px; }
 .score { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
@@ -246,14 +282,18 @@ code { font-family: var(--mono); font-size: .92em; }
 /* ---------- phone ---------- */
 /* phone keyboard open: shrink the drawing so the conversation stays usable */
 .app.kb { grid-template-rows: auto minmax(0, 24%) minmax(0, 1fr) auto auto; }
-.app.kb .readout { display: none; }
+.app.kb .readout, .app.kb .sopbar { display: none; }
 @media (max-width: 860px) {
-  .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(120px, 40%) minmax(0, 1fr) auto auto; grid-template-areas: "head" "stage" "msgs" "player" "comp"; }
+  .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(180px, 46%) minmax(0, 1fr) auto auto; grid-template-areas: "head" "stage" "msgs" "player" "comp"; }
   .head { border-left: 0; padding-top: max(10px, env(safe-area-inset-top, 0px)); padding-left: max(12px, env(safe-area-inset-left, 0px)); }
   .msgs, .player, .comp { border-left: 0; }
-  .msgs { padding-left: max(10px, env(safe-area-inset-left, 0px)); padding-right: max(10px, env(safe-area-inset-right, 0px)); }
+  .msgs { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   .stage { border-bottom: 1px solid var(--line); }
-  .tools { top: 8px; right: 8px; }
+  .rbar { padding: 6px 8px 0 16px; gap: 4px; }
+  .rtab { padding: 7px 8px 8px; font-size: 13.5px; }
+  .tools { gap: 0; }
+  .tools .ib { width: 34px; height: 34px; }
+  .sop.mini { max-height: 3.6em; }
   .b { max-width: 90%; }
   .sheet { width: 100%; }
 }
@@ -271,19 +311,26 @@ code { font-family: var(--mono); font-size: .92em; }
   </header>
 
   <section class="stage" aria-label="Drawing">
-    <svg id="canvas" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Diagram">
-      <defs><pattern id="dots" width="25" height="25" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1.1" style="fill: var(--grid)"/></pattern></defs>
-      <rect id="bg" x="-5000" y="-5000" width="20000" height="20000" fill="url(#dots)"/>
-      <g id="frames"></g>
-      <g id="layer"></g>
-    </svg>
-    <div class="tools">
-      <button class="ib" type="button" id="view-btn" aria-label="Show the whole canvas" title="Show the whole canvas"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
-      <button class="ib" type="button" data-say="undo" aria-label="Undo" title="Undo"><svg class="i" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
-      <button class="ib" type="button" data-say="redo" aria-label="Redo" title="Redo"><svg class="i" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
-      <button class="ib" type="button" data-say="clear the canvas" aria-label="Clear the canvas" title="Clear the canvas"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg></button>
+    <div class="rbar">
+      <div class="rtabs" id="rtabs" role="tablist" aria-label="Readers"></div>
+      <div class="tools">
+        <button class="ib" type="button" id="view-btn" aria-label="Show the whole canvas" title="Show the whole canvas"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+        <button class="ib" type="button" data-say="Undo" data-sop="@t1 command action=undo" aria-label="Undo" title="Undo"><svg class="i" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+        <button class="ib" type="button" data-say="Redo" data-sop="@t1 command action=redo" aria-label="Redo" title="Redo"><svg class="i" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
+        <button class="ib" type="button" data-say="Clear the canvas" data-sop="@m1 mention quantifier=all&#10;@t1 command action=delete target=$m1" aria-label="Clear the canvas" title="Clear the canvas"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg></button>
+      </div>
     </div>
-    <div class="readout" id="readout">0 shapes</div>
+    <div class="board">
+      <svg id="canvas" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Diagram">
+        <defs><pattern id="dots" width="25" height="25" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1.1" style="fill: var(--grid)"/></pattern></defs>
+        <rect id="bg" x="-5000" y="-5000" width="20000" height="20000" fill="url(#dots)"/>
+        <g id="frames"></g>
+        <g id="layer"></g>
+      </svg>
+      <div class="readout" id="readout">0 shapes</div>
+      <div class="rcard" id="rcard" hidden></div>
+    </div>
+    <div class="sopbar" id="sopbar" hidden></div>
   </section>
 
   <main class="msgs" id="msgs" aria-live="polite" aria-label="Conversation"></main>
