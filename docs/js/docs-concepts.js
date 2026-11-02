@@ -227,6 +227,60 @@ ${says('Connect Start to Done with a dashed arrow')}
 <code>unknown-event</code> instead of guessing (VSS_READER_SPEC.md). It can still read a value it never saw if the value is in the legend:
 a world trained without a single “purple” read 100 of 128 purple requests right (HOLDOUT_PURPLE.md).</p>
 
+<h2 id="learns">What a world learns, in plain words</h2>
+<p>A world is three learned parts in a row. Only the middle one is the vector-symbolic reader.</p>
+<ol>
+  <li><b>The front end: two phrase tables</b> (<code>front.json</code>, 4–85 KB per world). Learned by counting the annotated requests, before the
+  reader sees anything.
+    <ul>
+      <li><b>Value phrases</b>: a phrase that in the annotation almost always means one legend value is rewritten to that value. “bottom right” →
+      <code>bottom_right</code>, “around” → <code>next_to</code>, “add three” → <code>3</code>. Kept when seen at least 5 times and right at least 80%
+      of the time. 0–88 per world.</li>
+      <li><b>Trigger phrases</b>: the words the annotators marked as the action of a request, with the words around them, rewritten to one token
+      of that action. “change the color of” before a name → the token of <i>set</i>. Kept when seen at least twice and right at least 60%. 50–844
+      per world.</li>
+    </ul>
+  So the front end turns many ways of saying something into the few words the reader knows. It is a table of phrases learned from the data:
+  it can only rewrite phrases it saw, and it is the part of a world that can memorise wording.</li>
+  <li><b>The reader</b> (the route book). Every word has a fixed random vector that training never changes; what training learns is how a word’s
+  place in the sentence, relative to the kinds of words around it, maps to a role. Those rotations are stored per pair of word <i>kinds</i>
+  (59 kinds), not per word and not per sentence: one row serves every sentence with that pair. It learns constructions (“an action word, then a
+  name, then a colour”), not answers to sentences.</li>
+  <li><b>The thresholds</b>: how strong a role must read to count as present, fitted on the training rows.</li>
+</ol>
+<p>Around the worlds there are two more learned parts: the <b>cutter</b>, which marks where each request starts and which world reads it, and the
+<b>context filler</b>, below.</p>
+
+<h2 id="filler">The context filler, in plain words</h2>
+<p>A request often does not name the shape it acts on: “make <b>it</b> red”, “connect <b>them</b>”, “move <b>the blue one</b>”, or just “bigger”. The
+reader leaves such a role open (it writes “it”, “them”, or the description). The context filler is the step after the reader that decides
+who fills it.</p>
+<ol>
+  <li><b>Candidates</b>: the shapes this message has created or acted on so far, the shapes on the canvas, the names written in the text.</li>
+  <li><b>Filters</b>: “it” wants one shape, “them” several; “the blue one” must be a shape known to be blue; a shape already in another role of the
+  same request is out.</li>
+  <li><b>Ranking</b>: each remaining candidate gets a score from a few features (was it the last one mentioned, was it just created, how far back
+  in the text, …), plus a “nobody” candidate. The weights are learned from the annotated messages (<code>docs/model/context/weights.json</code>,
+  14 KB).</li>
+  <li><b>Decision</b>: fill with the best one, or ask “which one?”. Today it fills whenever one candidate ranks first; under the main metric
+  (<a href="#help/research-question">What this project measures</a>) whether that filling is executed is decided by the reader’s whole confidence.</li>
+</ol>
+${says('Draw a red circle named Hub in the center, then make it bigger')}
+<p>Example: in “draw a red circle named Hub, then make it bigger”, the second request reads <i>resize</i> with the target “it”; the filler’s
+candidates include Hub, just created, which ranks first: Hub gets bigger.</p>
+
+<h2 id="memorise">Where a VSS chain can memorise, and where it cannot</h2>
+<div class="tw"><table>
+<thead><tr><th>Part</th><th>Can it memorise wording?</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>Front end</td><td>yes, phrases</td><td>it is a table of phrases seen in the data</td></tr>
+<tr><td>Cutter</td><td>partly</td><td>it learns from the words around a cut</td></tr>
+<tr><td>Reader (route book)</td><td>hardly</td><td>rows per pair of word kinds, shared by all sentences; word vectors fixed</td></tr>
+<tr><td>Context filler</td><td>hardly</td><td>a few weights over features of candidates, no words</td></tr>
+</tbody></table></div>
+<p>How much each reader actually memorises (score on messages it was trained on against messages of the same kind it was not) is being
+measured for VSS and SOP-BERT alike (<code>training/sketch/MEMORIZATION.md</code>).</p>
+
 <h2 id="why-small">Why several small worlds and not one model</h2>
 <p>One model for every action has to keep apart roles that look alike but mean different things: the colour of a new shape, the colour that
 changes an old one, the colour asked about in a question. The measured path, all on the same 1000-message sample (right / wrong / not done):</p>
