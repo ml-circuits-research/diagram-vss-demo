@@ -59,6 +59,21 @@ def rows_of(m, ACTS, skipped):
     return rows
 
 
+def split_messages(sample_ids, seed):
+    """the message pools, shared with make_roles.py so both models see the same split:
+    (train_msgs sorted by id, held-out ids, sample messages, sample ids not found)"""
+    sample = set(l.strip() for l in open(sample_ids) if l.strip()) if sample_ids else set()
+    pool = messages(DIRS)
+    ids = [m["id"] for m in pool]; assert len(ids) == len(set(ids)), "message ids are not unique across folders"
+    in_sample = [m for m in pool if m["id"] in sample]
+    sample_msgs = in_sample + [m for m in messages(SAMPLE_DIRS) if m["id"] in sample and m["id"] not in {x["id"] for x in in_sample}]
+    missing = sample - {m["id"] for m in sample_msgs}
+    train_msgs = sorted((m for m in pool if m["id"] not in sample), key=lambda m: m["id"])
+    rng = random.Random(seed); held = set(rng.sample([m["id"] for m in train_msgs], round(0.1 * len(train_msgs))))
+    assert not (held | {m['id'] for m in train_msgs}) & sample, "sample leaked into train/held-out"
+    return train_msgs, held, sample_msgs, missing
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.path.expanduser("~/vss-box/ft/data"))
@@ -69,13 +84,7 @@ def main():
     ACTION, ASK = acts_from_neural_js(); ACTS = ACTION + ASK + ["fact", "rule"]
     sample = set(l.strip() for l in open(a.sample_ids) if l.strip()) if a.sample_ids else set()
     skipped = collections.Counter()
-    pool = messages(DIRS)
-    ids = [m["id"] for m in pool]; assert len(ids) == len(set(ids)), "message ids are not unique across folders"
-    in_sample = [m for m in pool if m["id"] in sample]
-    sample_msgs = in_sample + [m for m in messages(SAMPLE_DIRS) if m["id"] in sample and m["id"] not in {x["id"] for x in in_sample}]
-    missing = sample - {m["id"] for m in sample_msgs}
-    train_msgs = sorted((m for m in pool if m["id"] not in sample), key=lambda m: m["id"])
-    rng = random.Random(a.seed); held = set(rng.sample([m["id"] for m in train_msgs], round(0.1 * len(train_msgs))))
+    train_msgs, held, sample_msgs, missing = split_messages(a.sample_ids, a.seed)
     out = {"train": [], "heldout": [], "eval_sample1000": []}
     for m in train_msgs: out["heldout" if m["id"] in held else "train"] += rows_of(m, ACTS, skipped)
     for m in sample_msgs: out["eval_sample1000"] += rows_of(m, ACTS, skipped)

@@ -97,14 +97,21 @@ function cosine(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] 
 /* =====================================================================
    The neural formalizer. `models` is injected so the same code runs in
    the browser (Transformers.js) and in tests (mocks).
-   Strategy 'finetuned' (the demo's only one): our act classifier (training/neural/finetune.py) reads the act of a request in one call;
-   the kind follows from the act (an ACTION -> command, an ASK -> question, else fact or rule).
+   Strategy 'finetuned' (the demo's only one), with our joint model (training/neural/finetune_roles.py; makeReader below): ONE call per
+   request reads the act, the value of every legend key with values (a class head each) and a B / I / O role tag per word for the keys
+   whose answer is written in the request (names, a new name, a label, a number):
+     models.read(text)                 → {words, acts, classes, tags, spans}   (makeReader)
+     models.reader                     → the head layout (config.json "reader": acts, tags, classes, act_keys, number_words)
+   The kind follows from the act (an ACTION -> command, an ASK -> question, else fact or rule). The keys read for an act are the keys its
+   requests have in the training gold (reader.act_keys). A names key the request does not write ("it", "the red circle", a shape created
+   before) is taken from the rules' reading of the same request when the rules resolved it to a reference.
+   Earlier pair (until the joint model is published): our act classifier (training/neural/finetune.py) + extractive QA for the roles:
      models.act(text)                  → [{label, score}, ...]  (every class, best first; text-classification)
+     models.qa(question, context)      → {answer, score}
    Baselines, kept for the headless comparison (training/laptop/neural_score.mjs ZS=deberta|distilbert|embed), not offered in the demo:
      'zeroshot': models.classify(text, hypotheses) → {labels, scores}   (zero-shot NLI: the kind, then the action or ask)
      'embed':    models.embed(texts)               → number[][]          (similarity to the examples above)
-   Every strategy answers the roles with extractive QA:
-     models.qa(question, context)      → {answer, score}
+   and answer the roles with extractive QA (models.qa).
    ===================================================================== */
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 const KIND_OF = act => own(ACTION, act) ? 'command' : own(ASK, act) ? 'question' : act === 'fact' || act === 'rule' ? act : null;
@@ -113,9 +120,11 @@ function create(engine, rulesFormalize) {
   const st = { models: null, strategy: 'finetuned', protoCache: new Map(), calls: 0 };
 
   /** finetuned: the act of a request -> {kind: {value, top}, act: {value, top} | null} (the shapes of the zero-shot steps) */
-  async function classifyAct(text) {
+  async function classifyAct(text) { const r = await st.models.act(text); st.calls++; return actFrom(r); }
+  /** the act classes, best first ([{label, score}]) -> the same shapes */
+  function actFrom(ranked) {
     const known = act => { const k = KIND_OF(act), key = k === 'command' ? 'action' : k === 'question' ? 'ask' : null; return k && (!key || !L.get(key) || !L.get(key).values || act in L.get(key).values); };
-    const all = (await st.models.act(text)).filter(r => known(r.label)); st.calls++;
+    const all = ranked.filter(r => known(r.label));
     if (!all.length) throw new K.SOPError('The act classifier returned no act of this legend.');
     const z = all.reduce((a, r) => a + r.score, 0) || 1, kp = {};
     for (const r of all) { const k = KIND_OF(r.label); kp[k] = (kp[k] || 0) + r.score / z; }
@@ -173,6 +182,40 @@ function create(engine, rulesFormalize) {
     return out;
   }
 
+  /** joint model: a names key the request does not write is taken from the rules' reading of the same request when the rules resolved it
+      to a reference (a mention, a shape created in this message) or to a name the request does not write ("it" -> Cart) */
+  function ruleReference(ruleNode, key, src) {
+    const v = ruleNode && ruleNode.args[key];
+    if (v == null) return null;
+    const written = x => typeof x === 'string' && wordsOf(src).some(w => w.w.toLowerCase() === x.toLowerCase());
+    return [].concat(v).every(x => K.isRef(x) || !written(x)) ? v : null;
+  }
+  /** joint model: the answer to one legend key from one read() -> {q, span, score, value, source} (the shape answer() returns) */
+  function role(key, act, R, src, ruleNode, names) {
+    const q = (WORDING[act] && WORDING[act][key]) || WORDING._[key] || (L.get(key) && L.get(key).ask) || key + '?';
+    const lq = L.get(key), kind = lq ? lq.kind : null;
+    if (R.classes[key]) {   // a class head: none or a value of the key
+      const c = R.classes[key], out = { q, span: c.value || '', score: c.score, value: null, source: 'neural (class)' };
+      if (c.value && lq && (!lq.values || c.value in lq.values)) out.value = c.value;
+      return out;
+    }
+    const sp = R.spans[key] || [];
+    const out = { q, span: sp.map(s => s.text).join(' | '), score: sp.length ? Math.min(...sp.map(s => s.score)) : 0, value: null, source: 'neural' };
+    if (kind === 'names') {
+      const found = [];
+      for (const s of sp) { const hit = names.get(s.text.toLowerCase()); const v = hit != null ? hit : s.text; if (!found.some(f => f === v)) found.push(v); }
+      if (found.length) out.value = found.length === 1 ? found[0] : found;
+      else { const r = ruleReference(ruleNode, key, src); if (r != null) { out.value = r; out.source = 'rules (reference)'; } }
+    } else if (!sp.length) return out;
+    else if (kind === 'name' || kind === 'text') out.value = sp[0].text;
+    else if (kind === 'number') {
+      const t = sp[0].text, d = t.match(/\d+(?:\.\d+)?/), w = (st.models.reader.number_words || {})[t.toLowerCase()];
+      const n = d ? +d[0] : w != null ? +w : null;
+      if (n != null && (key !== 'count' || n > 1)) out.value = n;
+    }
+    return out;
+  }
+
   async function formalize(input, ctx) {
     if (!st.models) throw new K.SOPError('The neural models are not loaded yet. Open the Neural tab and load them.');
     const t0 = Date.now(); st.calls = 0;
@@ -185,8 +228,12 @@ function create(engine, rulesFormalize) {
       const rn = seg.id ? rules.nodes.find(n => n.id === seg.id) : { id: null, type: null, args: {}, src: seg.src };
       if (!rn.id) { do { rn.id = 'n' + (++k); } while (taken.has(rn.id)); taken.add(rn.id); }
       const a = { id: rn.id, src: seg.src, rules: seg.id ? rn : null, keys: {} };
-      let type, act = null, actKey = null;
-      if (st.strategy === 'finetuned') {
+      let type, act = null, actKey = null, R = null;
+      if (st.strategy === 'finetuned' && st.models.read) {   // the joint model: act and roles in one call
+        R = await st.models.read(seg.src); st.calls++;
+        const c = actFrom(R.acts); a.kind = c.kind; if (c.act) a.act = c.act;
+        type = a.kind.value; if (a.act) { act = a.act.value; actKey = type === 'command' ? 'action' : 'ask'; }
+      } else if (st.strategy === 'finetuned') {
         const c = await classifyAct(seg.src); a.kind = c.kind; if (c.act) a.act = c.act;
         type = a.kind.value; if (a.act) { act = a.act.value; actKey = type === 'command' ? 'action' : 'ask'; }
       } else {
@@ -194,10 +241,10 @@ function create(engine, rulesFormalize) {
         if (type === 'command') { actKey = 'action'; a.act = await classify('action', seg.src, ACTION); act = a.act.value; }
         else if (type === 'question') { actKey = 'ask'; a.act = await classify('ask', seg.src, ASK); act = a.act.value; }
       }
-      const frame = type === 'command' ? FRAMES.command[act] : type === 'question' ? FRAMES.question[act] : FRAMES[type];
+      const frame = R ? st.models.reader.act_keys[act || type] : type === 'command' ? FRAMES.command[act] : type === 'question' ? FRAMES.question[act] : FRAMES[type];
       const args = {}; if (actKey) args[actKey] = act;
       for (const k of frame || []) {
-        const r = await answer(k, act || type, seg.src, a.rules, names); a.keys[k] = r;
+        const r = R ? role(k, act || type, R, seg.src, a.rules, names) : await answer(k, act || type, seg.src, a.rules, names); a.keys[k] = r;
         if (r.value != null) args[k] = r.value;
       }
       if (args.notColor && args.color === args.notColor) delete args.color;
@@ -272,6 +319,55 @@ function create(engine, rulesFormalize) {
   return { formalize, bench, state: st, setModels(m) { st.models = m; st.protoCache.clear(); }, setStrategy(s) { st.strategy = s; }, BENCH, FRAMES, WORDING };
 }
 
+/* ---------------- the joint model's decoding (browser and node) ---------------- */
+/* Words: letter/digit runs and every other non-space character alone; training/neural/make_roles.py WORD_RE splits the same way, and the
+   model was trained on the word pieces of these words (the tag of a word is read on its first piece). */
+const WORD_RE = /[\p{L}\p{N}]+|[^\s\p{L}\p{N}]/gu;
+const wordsOf = text => [...String(text).matchAll(WORD_RE)].map(m => ({ w: m[0], start: m.index, end: m.index + m[0].length }));
+const softmax = a => { const m = Math.max(...a), e = a.map(x => Math.exp(x - m)), z = e.reduce((x, y) => x + y, 0); return e.map(x => x / z); };
+/** T: the transformers.js module; tokenizer, model: AutoTokenizer and AutoModel of a joint model (config.json "reader").
+    Returns the part of the `m` object create() takes: {read, act, reader}. read(text) runs the model once:
+      acts: [{label, score}] best first · classes: {key: {value (null = none), score}} · tags: [tag per word] ·
+      spans: {key: [{text, start, end, score}]} (text as written, start/end in characters; score = lowest tag probability) · words, ids */
+function makeReader(T, tokenizer, model) {
+  const R = model.config && model.config.reader;
+  if (!R) throw new Error('This model has no "reader" in its config.json: not a joint model (training/neural/finetune_roles.py).');
+  const nA = R.acts.length, nT = R.tags.length, maxlen = R.max_length || 128, offs = [];
+  let o = nA; for (const [, vals] of R.classes) { offs.push(o); o += vals.length; }
+  const sp = tokenizer.encode('');   // [CLS] [SEP]
+  if (sp.length !== 2) throw new Error(`The tokenizer adds ${sp.length} special tokens to a text; 2 ([CLS] [SEP]) are expected.`);
+  async function read(text) {
+    const ws = wordsOf(text), ids = [sp[0]], first = new Map();
+    for (let i = 0; i < ws.length && ids.length < maxlen - 1; i++) {   // truncation as in training: at most maxlen - 2 word pieces
+      const p = tokenizer.encode(ws[i].w, { add_special_tokens: false });
+      for (let j = 0; j < p.length && ids.length < maxlen - 1; j++) { if (j === 0) first.set(i, ids.length); ids.push(p[j]); }
+    }
+    ids.push(sp[1]);
+    const n = ids.length, big = BigInt64Array.from(ids.map(x => BigInt(x)));
+    const out = await model({ input_ids: new T.Tensor('int64', big, [1, n]), attention_mask: new T.Tensor('int64', new BigInt64Array(n).fill(1n), [1, n]) });
+    const tl = out.token_logits.data, sl = Array.from(out.seq_logits.data);
+    const pa = softmax(sl.slice(0, nA)), acts = R.acts.map((label, i) => ({ label, score: pa[i] })).sort((x, y) => y.score - x.score);
+    const classes = {};
+    R.classes.forEach(([k, vals], c) => { const p = softmax(sl.slice(offs[c], offs[c] + vals.length)); let b = 0; p.forEach((x, i) => { if (x > p[b]) b = i; }); classes[k] = { value: b ? vals[b] : null, score: p[b] }; });
+    const tags = [], probs = [];
+    for (let i = 0; i < ws.length; i++) {
+      const t = first.get(i); if (t == null) { tags.push('O'); probs.push(1); continue; }
+      const p = softmax(Array.from(tl.slice(t * nT, (t + 1) * nT))); let b = 0; p.forEach((x, k) => { if (x > p[b]) b = k; });
+      tags.push(R.tags[b]); probs.push(p[b]);
+    }
+    const spans = {}; let cur = null;   // B starts a role; I continues the role of the same key just before it, else starts one
+    tags.forEach((t, i) => {
+      if (t === 'O') { cur = null; return; }
+      const [pfx, k] = [t.slice(0, 1), t.slice(2)], list = spans[k] || (spans[k] = []), last = list[list.length - 1];
+      if (pfx === 'I' && cur === k && last && last.j === i) { last.j = i + 1; last.p = Math.min(last.p, probs[i]); }
+      else { list.push({ i, j: i + 1, p: probs[i] }); cur = k; }
+    });
+    for (const k of Object.keys(spans)) spans[k] = spans[k].map(s => ({ text: String(text).slice(ws[s.i].start, ws[s.j - 1].end), start: ws[s.i].start, end: ws[s.j - 1].end, score: s.p }));
+    return { words: ws.map(w => w.w), ids, acts, classes, tags, spans };
+  }
+  return { read, act: async text => (await read(text)).acts, reader: R };
+}
+
 /* ---------------- Transformers.js loader (browser only) ---------------- */
 /* The demo loads ONE neural model, ours (owner, 2026-11-02): the act classifier ACT_MODEL (fine-tuned by training/neural/finetune.py) and
    the extractive QA model QA_MODEL (the Xenova DistilBERT SQuAD files, hosted by us), both from docs/model/neural/<folder>/ (config.json,
@@ -279,21 +375,25 @@ function create(engine, rulesFormalize) {
    nothing to choose. If the folders are not published (not in versions.json, or config.json missing), the demo says so; it has no fallback. */
 const ACT_MODEL = 'act-distilbert';        // the act classifier the demo loads: 'act-distilbert' or 'act-deberta-xsmall' (set after the comparison)
 const QA_MODEL = 'qa-distilbert-squad';
+/* The joint model (act + roles, one call per request; training/neural/finetune_roles.py). When versions.json lists it, the demo loads it
+   alone; until then the pair above. */
+const READER_MODEL = 'reader-distilbert';
 /* model id (of the form <owner>/<name>, as transformers.js requires) -> folder under docs/model/neural/ */
-const OURS = { 'ours/act-distilbert': 'act-distilbert', 'ours/act-deberta-xsmall': 'act-deberta-xsmall', 'ours/qa-distilbert-squad': 'qa-distilbert-squad' };
+const OURS = { 'ours/reader-distilbert': 'reader-distilbert', 'ours/act-distilbert': 'act-distilbert', 'ours/act-deberta-xsmall': 'act-deberta-xsmall', 'ours/qa-distilbert-squad': 'qa-distilbert-squad' };
 const MODELS = {
-  act: 'ours/' + ACT_MODEL, qa: 'ours/' + QA_MODEL,
+  reader: 'ours/' + READER_MODEL, act: 'ours/' + ACT_MODEL, qa: 'ours/' + QA_MODEL,
   /* baselines of the headless comparison (training/laptop: neural_score.mjs, zs_check.mjs, zs_eval.mjs); the demo never loads them */
   zeroshot: { deberta: 'Xenova/nli-deberta-v3-xsmall', distilbert: 'Xenova/distilbert-base-uncased-mnli' },
   embed: 'Xenova/all-MiniLM-L6-v2',
   qaHF: 'Xenova/distilbert-base-cased-distilled-squad'
 };
 const NAMES = {
-  'ours/act-distilbert': 'DistilBERT act classifier', 'ours/act-deberta-xsmall': 'DeBERTa-v3 xsmall act classifier', 'ours/qa-distilbert-squad': 'DistilBERT SQuAD',
+  'ours/reader-distilbert': 'DistilBERT reader (act and roles)', 'ours/act-distilbert': 'DistilBERT act classifier', 'ours/act-deberta-xsmall': 'DeBERTa-v3 xsmall act classifier', 'ours/qa-distilbert-squad': 'DistilBERT SQuAD',
   'Xenova/nli-deberta-v3-xsmall': 'DeBERTa-v3 xsmall (zero-shot NLI)', 'Xenova/distilbert-base-uncased-mnli': 'DistilBERT MNLI (zero-shot NLI)', 'Xenova/all-MiniLM-L6-v2': 'MiniLM-L6', 'Xenova/distilbert-base-cased-distilled-squad': 'DistilBERT SQuAD'
 };
 /* what each model of ours is, in words (the act models' base model, data and held-out accuracy are read from their README.md: status()) */
 const ABOUT = {
+  'ours/reader-distilbert': 'reads one request in one call: its act, the value of every SOP question with values (colour, shape, size, position, ...) and which words name the shapes, the new name, the label and the numbers; fine-tuned on our annotated requests',
   'ours/act-distilbert': 'reads the act of one request (the action of a command, the ask of a question, or fact / rule); fine-tuned on our annotated requests',
   'ours/act-deberta-xsmall': 'reads the act of one request (the action of a command, the ask of a question, or fact / rule); fine-tuned on our annotated requests',
   'ours/qa-distilbert-squad': 'answers each question of the act’s frame with a span of the request; Xenova/distilbert-base-cased-distilled-squad (DistilBERT fine-tuned on SQuAD), hosted on this site'
@@ -347,10 +447,10 @@ function bytesOf(id) {
   let t = 0; for (const f of filesOf(id)) { if (sz[f] == null) return null; t += sz[f]; }
   return t;
 }
-/** the two models the demo loads: [act classifier, answer model] */
-const modelsFor = () => [MODELS.act, MODELS.qa];
+/** the models the demo loads: [the joint model] when versions.json lists it, else [act classifier, answer model] */
+const modelsFor = () => NVERS['neural/' + READER_MODEL] ? [MODELS.reader] : [MODELS.act, MODELS.qa];
 const BITS = { q8: '8-bit', int8: '8-bit', fp32: '32-bit' };
-const dtypeText = () => { const [a, b] = modelsFor().map(dtypeOf); return a === b ? `${BITS[a]} files` : `classifier ${BITS[a]}, answers ${BITS[b]} files`; };
+const dtypeText = () => { const [a, b] = modelsFor().map(dtypeOf); return b == null || a === b ? `${BITS[a]} files` : `classifier ${BITS[a]}, answers ${BITS[b]} files`; };
 /** the exact URLs the browser fetches for the demo's models */
 const urlsFor = () => modelsFor().flatMap(id => filesOf(id).map(f => urlOf(id, f)));
 /** first lines of an act model's README.md (finetune.py writes it): base model, data, held-out act accuracy */
@@ -375,7 +475,7 @@ function status() {
       } catch (e) { statusP = null; return { published: false, missing: [], error: `${urlOf(id, 'config.json')}: ${e && e.message || e}`, info: {} }; }
       const sz = NSIZES['neural/' + folder] || {};
       info[id] = { version: v, bytes: bytesOf(id), readme: sz['README.md'] != null ? urlOf(id, 'README.md') : null, facts: null };
-      if (id === MODELS.act && info[id].readme) try { const r = await fetch(info[id].readme); if (r.ok) info[id].facts = readmeFacts(await r.text()); } catch (e) { /* facts stay unknown */ }
+      if (id === modelsFor()[0] && info[id].readme) try { const r = await fetch(info[id].readme); if (r.ok) info[id].facts = readmeFacts(await r.text()); } catch (e) { /* facts stay unknown */ }
     }
     return { published: !missing.length, missing, error: null, info };
   })());
@@ -429,7 +529,7 @@ async function pruneStale() {
   } catch (e) { return 0; }
 }
 const looksNetwork = e => /failed to fetch|networkerror|load failed|network|dynamically imported module|importing a module script failed|err_|timeout|cors/i.test(String(e && e.message || e)) || (e && e.name === 'TypeError' && /fetch/i.test(String(e.message)));
-/** load the demo's two models (status() must say published); the `m` object create() takes */
+/** load the demo's model(s) (status() must say published); the `m` object create() takes */
 async function load(onProgress) {
   const s = await status();
   if (!s.published) throw Object.assign(new Error(s.error || 'The neural model is not published yet: ' + s.missing.join(', ')), { unpublished: !s.error, network: !!s.error });
@@ -445,6 +545,14 @@ async function load(onProgress) {
   const open = new Set();   // files asked for and not finished: transformers.js loads them in parallel, so a failure names no single file
   const track = e => { if (e && e.name && e.file) { const u = OURS[e.name] ? urlOf(e.name, e.file) : keyOf(e.name, e.file); if (e.status === 'initiate') open.add(u); else if (e.status === 'done') open.delete(u); } if (onProgress) onProgress(e); };
   const build = async device => {
+    if (modelsFor()[0] === MODELS.reader) {   // the joint model: tokenizer + model, decoded by makeReader
+      const id = MODELS.reader, tokenizer = await T.AutoTokenizer.from_pretrained(id, { revision: revOf(id), progress_callback: track });
+      const model = await T.AutoModel.from_pretrained(id, { device, dtype: dtypeOf(id), revision: revOf(id), progress_callback: track });
+      const m = Object.assign({ device, dtype: dtypeOf(id), dtypeText: dtypeText(), qaModel: id, enumModel: id, actModel: id }, makeReader(T, tokenizer, model));
+      open.clear();
+      await m.read('draw a circle');   // the first inference: a device that fails here fails now, not on a message
+      return m;
+    }
     const make = (task, model) => T.pipeline(task, model, { device, dtype: dtypeOf(model), revision: revOf(model), progress_callback: track });
     const qa = await make('question-answering', MODELS.qa), clf = await make('text-classification', MODELS.act);
     const m = { device, dtype: [...new Set(modelsFor().map(dtypeOf))].join('+'), dtypeText: dtypeText(), qaModel: MODELS.qa, enumModel: MODELS.act, actModel: MODELS.act };
@@ -466,7 +574,7 @@ async function load(onProgress) {
   }
 }
 
-return { create, load, status, cached, modelsFor, urlsFor, bytesOf, revOf, dtypeOf, dtypeText, KIND_OF, MODELS, OURS, NAMES, ABOUT, ACT_MODEL, QA_MODEL, DTYPE };
+return { create, load, status, cached, modelsFor, urlsFor, bytesOf, revOf, dtypeOf, dtypeText, makeReader, wordsOf, KIND_OF, MODELS, OURS, NAMES, ABOUT, ACT_MODEL, QA_MODEL, READER_MODEL, DTYPE };
 })();
 if (typeof module !== 'undefined') module.exports = NeuralKit;
 /*NEURAL-END*/
