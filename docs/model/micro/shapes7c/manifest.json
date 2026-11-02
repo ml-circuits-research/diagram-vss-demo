@@ -1,5 +1,5 @@
 {
- "format": "vss-web-2",
+ "format": "vss-web-3",
  "legend_sha256": "sha256:023a518c407b27a900a7aa0047799ad6de4de09cc9b34b273a7b628d4eb8d687",
  "training_code_commit": "4973882",
  "bits": 8,
@@ -19,6 +19,19 @@
    "L": 3481
   }
  },
+ "stars": {
+  "source": "generated",
+  "file": "stars.json",
+  "bits": 8,
+  "quantize": "keys",
+  "checked": "3605 stars equal stars.bin byte for byte",
+  "from": {
+   "stars.bin": {
+    "sha256": "9b83cc852ab9927f1baeeb105e0d1098f805122420990ec2d76000b622f358bf",
+    "bytes": 3738048
+   }
+  }
+ },
  "files": {
   "model.json": {
    "sha256": "0975d39c7737dc306dfb0e846278ed342ef9eee63fd41f9441067f9347d04008",
@@ -28,9 +41,9 @@
    "sha256": "3c97bdc97d283ab3b17c32108153ab9438d17c9efcdebf628fa56e4d9fb1b602",
    "bytes": 3388604
   },
-  "stars.bin": {
-   "sha256": "9b83cc852ab9927f1baeeb105e0d1098f805122420990ec2d76000b622f358bf",
-   "bytes": 3738048
+  "stars.json": {
+   "sha256": "feee7601924633fd185849bb1a2b68afa8433c6427c2ec6f7a44aecec053cbc1",
+   "bytes": 46482
   }
  }
 }

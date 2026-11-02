@@ -101,7 +101,7 @@ such a threshold yet: that is in progress. <a href="#help/measurement">Measureme
 <tr><td>Spell checker</td><td><code>docs/js/spell.js</code></td><td><code>docs/model/spell/vocab.json</code></td><td class="num">28.0 KB</td></tr>
 <tr><td>Rules reader, SOP Lang, engine, plugins, Datalog</td><td><code>docs/js/logic.js</code></td><td>none</td><td class="num">—</td></tr>
 <tr><td>The shared cut</td><td><code>docs/js/vss-composer.js</code> (<code>cutUnits</code>, <code>CUT_STRATEGIES</code>, <code>DEFAULT_CUT</code>), <code>docs/js/vss-formalizer.js</code> (<code>cut</code>)</td><td>the cutter of the strategy chosen</td><td class="num">—</td></tr>
-<tr><td>VSS reader (composer)</td><td><code>docs/js/vss-formalizer.js</code>, <code>docs/js/vss-composer.js</code>, <code>docs/js/front.js</code>, <code>docs/js/vss.js</code> + <code>docs/js/vss/</code>, <code>docs/js/vss-context.js</code>, <code>docs/js/vss-adapter.js</code></td><td><code>docs/model/micro/registry.json</code> and what it names: 2 cutters, 7 worlds, <code>docs/model/context/weights.json</code></td><td class="num">38.0 MB</td></tr>
+<tr><td>VSS reader (composer)</td><td><code>docs/js/vss-formalizer.js</code>, <code>docs/js/vss-composer.js</code>, <code>docs/js/front.js</code>, <code>docs/js/vss.js</code> + <code>docs/js/vss/</code>, <code>docs/js/vss-context.js</code>, <code>docs/js/vss-adapter.js</code></td><td><code>docs/model/micro/registry.json</code> and what it names: 2 cutters, 7 worlds, <code>docs/model/context/weights.json</code></td><td class="num">19.4 MB</td></tr>
 <tr><td>Neural reader</td><td><code>docs/js/neural.js</code> (transformers.js 3.8.1 from jsDelivr)</td><td><code>docs/model/neural/sop-bert/</code> (one DistilBERT, 8-bit)</td><td class="num">68.5 MB</td></tr>
 <tr><td>Benchmark (scoring)</td><td><code>docs/js/bench-canon.js</code></td><td><code>docs/bench/</code> (6 sets)</td><td class="num">—</td></tr>
 </tbody></table></div>
@@ -337,7 +337,7 @@ Names are never in the lexicon: an unknown word becomes a name token, quoted tex
 </tbody></table></div>
 <p class="note">Folders under <code>docs/model/</code>. Rows from each folder’s <code>BUILD.json</code>; values / triggers counted in its <code>front.json</code>.
 All seven: D 1024, 10 epochs, seed 0, <code>DATA=spans</code>, trained on CPU here; <code>shapes7c</code> is the build with
-<code>CREATE_COLOR=role</code> (CREATE_COLOR.md). Each folder holds <code>model.json</code>, <code>routebook.bin</code>, <code>stars.bin</code>,
+<code>CREATE_COLOR=role</code> (CREATE_COLOR.md). Each folder holds <code>model.json</code>, <code>routebook.bin</code>, <code>stars.json</code> (the word vectors are generated in the browser, SHRINK.md),
 <code>manifest.json</code> (sha256 of each file, format <code>vss-web-2</code>, 8-bit phases, sparse route book), <code>front.json</code> and
 <code>BUILD.json</code> (not loaded). The grouping of events into these 7 worlds is <code>training/sketch/worlds_micro/GROUPS_7.json</code>,
 chosen by measured cutter confusion (PLAN_B.md). The events group, ungroup, members and groupOf are in the engine, the Rules reader and the
@@ -608,7 +608,7 @@ page('models', 'Models and versions', `
 <rect class="chipv" x="58" y="238" width="9" height="9" rx="2"/><text class="m" x="72" y="246">shapes7c/ links7/ position7/</text><text class="m" x="392" y="246" text-anchor="end">35.6 MB</text>
 <text class="m" x="72" y="262">graphq7/ questions7/ manage7/ history7/</text>
 <rect class="chipx" x="58" y="280" width="9" height="9" rx="2"/><text class="m" x="72" y="288">the same seven, …7r2/</text><text class="m" x="392" y="288" text-anchor="end">40.5 MB</text>
-<text class="s" x="72" y="306">each world: model.json routebook.bin stars.bin manifest.json front.json</text>
+<text class="s" x="72" y="306">each world: model.json routebook.bin stars.json manifest.json front.json</text>
 <text class="s" x="72" y="320">(+ BUILD.json, not loaded)</text>
 <rect class="chipv" x="34" y="352" width="9" height="9" rx="2"/><text class="m" x="48" y="360">context/weights.json</text><text class="m" x="392" y="360" text-anchor="end">14.9 KB</text>
 <rect class="chipo" x="34" y="372" width="9" height="9" rx="2"/><text class="m" x="48" y="380">spell/vocab.json</text><text class="m" x="392" y="380" text-anchor="end">28.0 KB</text>

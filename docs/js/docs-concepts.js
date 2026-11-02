@@ -125,7 +125,7 @@ ${says('Hi, I am sketching a workflow. Draw a red circle named Hub in the center
 <thead><tr><th></th><th>Rules</th><th>VSS</th><th>Neural</th></tr></thead>
 <tbody>
 <tr><th>Learns from</th><td>nothing: written by hand</td><td>our annotated requests only</td><td>English text in general (pretraining), then our annotated requests</td></tr>
-<tr><th>Size</th><td>code</td><td>38.0 MB, seven worlds of 1.2–8.1 MB</td><td>68.5 MB, one DistilBERT in 8-bit form</td></tr>
+<tr><th>Size</th><td>code</td><td>19.4 MB, seven worlds of 0.7–3.8 MB (word vectors generated in the browser)</td><td>68.5 MB, one DistilBERT in 8-bit form</td></tr>
 <tr><th>Confidence</th><td>none: it executes what its rules match</td><td>a margin per reading (weak); a confidence from every step of its chain, measured, not in the demo</td><td>a probability per head (ranks well, runs high)</td></tr>
 <tr><th>When unsure, today</th><td>says it did not understand</td><td>says what it did not understand, or asks which shape; executes readings it is unsure of (status <code>abstain</code>)</td><td>rarely stops (2.8% not done): it reads something</td></tr>
 </tbody></table></div>
@@ -373,7 +373,7 @@ circle”), and one tags the words that are names, labels and numbers. The wires
 <div class="tw"><table>
 <thead><tr><th>Brings</th><th>Costs</th></tr></thead>
 <tbody>
-<tr><td>It knows English words that never occur in our data: a synonym it was not shown still has a meaning to it. A VSS world gives such a word the kind “unknown”.</td><td>Size: 68.5 MB for one DistilBERT in 8-bit form, against 1.2–8.1 MB for a VSS world.</td></tr>
+<tr><td>It knows English words that never occur in our data: a synonym it was not shown still has a meaning to it. A VSS world gives such a word the kind “unknown”.</td><td>Size: 68.5 MB for one DistilBERT in 8-bit form, against 0.7–3.8 MB for a VSS world.</td></tr>
 <tr><td>One model reads every action; no grouping into worlds. Two calls per message: 22.6 ms per message in its scoring run (commit 1f3c806).</td><td>It almost never says “I don’t know”: what it cannot read, it guesses (<a href="#help/knowing">Knowing what it does not know</a>).</td></tr>
 <tr><td>It learns the cut, the action and the details together.</td><td>One model: a fix for one action means retraining the whole model, and it can forget what it knew (see below).</td></tr>
 <tr><td>It reads “it” and “the red circle” with its own heads, so it needs no hand-written reader beside it (the pair borrowed both from the Rules reader).</td><td>Less inspectable: a VSS reading shows which word filled which role and with what margin; a transformer’s heads give a score, not a reason.</td></tr>

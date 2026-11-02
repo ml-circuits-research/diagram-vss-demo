@@ -14,7 +14,7 @@
     "rule"
    ],
    "model": "micro/shapes7c",
-   "version": "8b1d6877da"
+   "version": "0b0a3a2a46"
   },
   {
    "world": "links",
@@ -23,7 +23,7 @@
     "disconnect"
    ],
    "model": "micro/links7",
-   "version": "7bdd38271f"
+   "version": "8c6267e91a"
   },
   {
    "world": "position",
@@ -37,7 +37,7 @@
     "toBack"
    ],
    "model": "micro/position7",
-   "version": "524c92ad1b"
+   "version": "633ef86e4e"
   },
   {
    "world": "graphq",
@@ -50,7 +50,7 @@
     "exists"
    ],
    "model": "micro/graphq7",
-   "version": "3cdc3e20fa"
+   "version": "4b4e780f3b"
   },
   {
    "world": "questions",
@@ -65,7 +65,7 @@
     "property"
    ],
    "model": "micro/questions7",
-   "version": "b5eeb2d2e5"
+   "version": "2287579709"
   },
   {
    "world": "manage",
@@ -76,7 +76,7 @@
     "label"
    ],
    "model": "micro/manage7",
-   "version": "d19f5b0e3b"
+   "version": "0055db6906"
   },
   {
    "world": "history",
@@ -86,7 +86,7 @@
     "forget"
    ],
    "model": "micro/history7",
-   "version": "d2be6b87ae"
+   "version": "89724641ba"
   }
  ],
  "event_cutter": "micro/cutter_events.json",

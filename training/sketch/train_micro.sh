@@ -50,7 +50,7 @@ N_EVAL="${N_EVAL:-600}"; EVAL_MODES="${EVAL_MODES:-all}"; DEVICE="${DEVICE:-cpu}
 "$SOP" train "$W" --D "$D" --seed "$SEED" --seeds 1 --epochs "$EPOCHS" --shuffle --device "$DEVICE" --candidate_sets catalog --n_eval "$N_EVAL" --eval_modes "$EVAL_MODES" ${N_CAL:+--n_cal "$N_CAL"} --no_ckpt \
   --star_version 2 --threshold_rule fit --calibrate_on_heldout_formulations --run_dir "$HERE/runs/$RUN" > "runs/$RUN.log" 2>&1
 rm -rf "$OUT"
-"$SOP" export-web --model "$W/model" --out "$OUT" --bits 8 --sparse > /dev/null
+"$SOP" export-web --model "$W/model" --out "$OUT" --bits 8 --sparse --stars generated > /dev/null   # stars generated in the browser (SHRINK.md)
 cp "$W/front.json" "$OUT/front.json"
 cat > "$OUT/BUILD.json" <<JSON
 {"world": "$WORLD", "events": "$EVENTS", "command": "training/sketch/train_micro.sh $WORLD $EVENTS", "DATA": "$DATA", "FRAC": "$FRAC", "QCOLOR": "$QCOLOR",

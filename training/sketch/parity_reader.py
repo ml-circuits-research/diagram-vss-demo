@@ -1,6 +1,6 @@
 """parity_reader.py: the golden file of the one-request reader's parity test (parity_reader.mjs). Python reads every annotated span of
 the given messages with the numpy reader (tool/sop/infer.py Reader.formalize) on EXACTLY the numbers the browser reads: an export-web
-folder only (model.json, routebook.bin dense or sparse, stars.bin, front.json), no trained model folder needed. The span is normalized
+folder only (model.json, routebook.bin dense or sparse, stars.bin or stars.json (generated stars), front.json), no trained model folder needed. The span is normalized
 by front.normalize (the message's names); written per span: the tokens, the SOP text of the reading, its status and residual.
 The JS side (docs/js/vss.js read + docs/js/front.js normalize) must give the same tokens, SOP texts and statuses; residuals are compared
 with a stated tolerance.
@@ -26,8 +26,8 @@ def web_reader(web_dir):
     json.dump({"words": model["catalog"]["words"], "schema": model["schema"], "star_seed": model["catalog"]["star_seed"],
                "star_version": model["catalog"].get("star_version", 1)}, open(os.path.join(d, "catalog.json"), "w"))
     rd = Reader(d, force=True, sentence_candidates=True, routebook=export_web.routebook_from_bin(os.path.join(web_dir, "routebook.bin")))
-    sh, sa = export_web.read_bin(os.path.join(web_dir, "stars.bin")); M = sa["stars"]
-    table = {k: np.exp(1j * M[i]) for i, k in enumerate(sh["keys"])}
+    keys, M = export_web.stars_of_web(web_dir)   # stars.bin, or the generated stars of a vss-web-3 export (SHRINK.md)
+    table = {k: np.exp(1j * M[i]) for i, k in enumerate(keys)}
     st = rd.st; get0 = st.get
     def get(name, seed=None): return table[name] if name in table else get0(name, seed)
     st.get = get

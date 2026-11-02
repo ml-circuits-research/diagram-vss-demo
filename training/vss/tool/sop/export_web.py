@@ -9,6 +9,11 @@ export_web.py — `sop export-web`: a trained model/ folder -> the files app/src
   stars.bin      the stars the reader needs (catalog identities, legend verbs, role vectors, the decoder's operator vectors, the occupancy
                  marker, closed-value symbols), quantized to --bits
   manifest.json  sha256 of the three files, legend sha, training commit, bits, sizes
+  stars.json     (--stars generated, manifest format vss-web-3, instead of stars.bin) the keys stars.bin would hold and their bits: the browser
+                 regenerates each listed star from its name (star_version 2) and quantizes it exactly as quantize() does, byte for byte the
+                 stars.bin values (checked by --from-web against an existing stars.bin), so the reader's decisions do not change.
+                 {"format": "vss-stars-generated-1", "star_version": 2, "D", "bits", "quantize": "keys" | "all", "keys": [...]};
+                 quantize "all" also quantizes the stars of words outside the keys (experiments, training/sketch/shrink/SHRINK.md)
 
 Binary layout of routebook.bin / stars.bin: 8 bytes magic b"VSSBIN1\\n", uint32 LE header length, the header (UTF-8 JSON), zero padding to
 a multiple of 4, then the arrays at the offsets the header gives (relative to the start of the data block). A phase array with bits 8 stores
@@ -22,8 +27,13 @@ reader meets that kind pair). A row is "trained" when its stored value differs f
 flat row numbers i * K + j that are stored) and the table itself (header "rows": "<name>.rows", "absent": "zero", "shape" the FULL shape)
 holding only those rows in that order. Reading rule for an absent row: it contributes nothing (the bigram term of that token is left out;
 a chain term over that A or L pair is left out). path and bg0 stay dense.
-Usage: sop export-web --model <model dir> --out <dir> [--bits 8|4|32] [--sparse]
+Bits 1, 2, 4 and 6 pack the values as one little-endian bit stream (value i holds stream bits i*bits .. i*bits+bits-1; bits 4 is the
+low nibble first, as before).
+Usage: sop export-web --model <model dir> --out <dir> [--bits 8|6|4|2|1|32] [--sparse] [--stars bin|generated]
        sop export-web --from-web <export-web dir> --out <dir> --sparse     (an existing dense export made sparse, values byte for byte)
+       sop export-web --from-web <export-web dir> --out <dir> --stars generated [--star-bits B] [--star-quantize keys|all]
+                      (stars.bin -> stars.json; route book and model.json byte for byte; with the stored bits every stored star is checked
+                      against its regenerated quantized star and the export is refused on any difference)
 """
 import argparse, hashlib, json, os, sys
 import numpy as np
@@ -39,22 +49,26 @@ DECODER_OPS = ("pred", "says.scope", "says.speaker", "not", "attr", "det", "wide
 def wrap(ph): return (np.asarray(ph, dtype=np.float64) + np.pi) % (2 * np.pi) - np.pi
 
 
+PACKED_BITS = (1, 2, 4, 6)     # phases packed as one little-endian bit stream (value i: bits [i*bits, (i+1)*bits)); bits 4 = low nibble first
+
+
 def quantize(ph, bits):
     ph = wrap(ph).ravel()
     if bits == 32: return ph.astype("<f4").tobytes()
+    if bits != 8 and bits not in PACKED_BITS: raise ValueError(f"bits {bits}: expected 32, 8, 6, 4, 2 or 1")
     L = 1 << bits; q = (np.round((ph + np.pi) / (2 * np.pi) * L).astype(np.int64) % L).astype(np.uint8)
     if bits == 8: return q.tobytes()
-    if bits == 4:
-        if len(q) % 2: q = np.concatenate([q, [0]]).astype(np.uint8)
-        return (q[0::2] | (q[1::2] << 4)).astype(np.uint8).tobytes()
-    raise ValueError(f"bits {bits}: expected 8, 4 or 32")
+    # the bit stream: bit k of value i is stream bit i*bits + k; np.packbits(bitorder="little") fills byte j with stream bits 8j..8j+7
+    bitsarr = ((q[:, None] >> np.arange(bits, dtype=np.uint8)[None, :]) & 1).astype(np.uint8).ravel()
+    return np.packbits(bitsarr, bitorder="little").tobytes()
 
 
 def dequantize(buf, bits, count):
     if bits == 32: return np.frombuffer(buf, dtype="<f4", count=count).astype(np.float64)
     if bits == 8: q = np.frombuffer(buf, dtype=np.uint8, count=count).astype(np.float64)
-    elif bits == 4:
-        b = np.frombuffer(buf, dtype=np.uint8, count=(count + 1) // 2); q = np.empty(2 * len(b)); q[0::2] = b & 15; q[1::2] = b >> 4; q = q[:count]
+    elif bits in PACKED_BITS:
+        b = np.unpackbits(np.frombuffer(buf, dtype=np.uint8, count=(count * bits + 7) // 8), bitorder="little")[:count * bits].reshape(count, bits)
+        q = (b.astype(np.int64) << np.arange(bits)[None, :]).sum(1).astype(np.float64)
     else: raise ValueError(bits)
     return q * (2 * np.pi / (1 << bits)) - np.pi
 
@@ -89,6 +103,21 @@ def read_bin(path):
         if rows is not None:
             rm = np.full(int(np.prod(a["shape"][:-1])), -1, dtype=np.int64); rm[rows] = np.arange(len(rows)); out[a["name"] + "_rowmap"] = rm.reshape(a["shape"][:-1])
     return header, out
+
+
+def stars_of_web(web_dir):
+    """(keys, M) of an export folder, M the phases the browser reads (keys x D, float64): from stars.bin, or for a vss-web-3 export
+    (stars.json) the regenerated stars quantized and dequantized as loader.js GeneratedStars does. Words outside the keys are generated
+    unquantized by both readers (quantize "keys"); quantize "all" is not reproduced here"""
+    man = json.load(open(os.path.join(web_dir, "manifest.json")))
+    if not (man.get("stars") or {}).get("source") == "generated":
+        h, a = read_bin(os.path.join(web_dir, "stars.bin")); return h["keys"], a["stars"]
+    spec = json.load(open(os.path.join(web_dir, man["stars"].get("file", "stars.json")))); model = json.load(open(os.path.join(web_dir, "model.json")))
+    if spec.get("quantize", "keys") != "keys": raise ValueError("stars_of_web: quantize 'all' (an experiment) is not reproduced in Python")
+    seed, star_seed, D, b = model["config"]["seed"], model["catalog"]["star_seed"], spec["D"], spec["bits"]
+    ph = [np.angle(regenerate_star(k, seed, star_seed, D)) for k in spec["keys"]]
+    M = np.stack(ph) if b == 32 else np.stack([dequantize(quantize(p, b), b, D) for p in ph])
+    return spec["keys"], M
 
 
 def routebook_from_bin(path):
@@ -156,7 +185,25 @@ def star_keys(reader):
     return out
 
 
-def export(model_dir, out_dir, bits=8, sparse=False):
+def generated_stars_doc(keys, D, bits, quantize="keys"):
+    return {"format": "vss-stars-generated-1", "star_version": 2, "D": int(D), "bits": int(bits), "quantize": quantize, "keys": sorted(keys)}
+
+
+def regenerate_star(key, seed, star_seed, D):
+    """the star_version 2 vector of a stars.bin key (loader.js GeneratedStars: "marker" = op:marker under the world seed, id: / sym: under
+    the catalog's star seed, the rest under the world seed)"""
+    from .world import star_v2
+    if key == "marker": return star_v2(seed, "op:marker", D)
+    return star_v2(star_seed if key.startswith(("id:", "sym:")) else seed, key, D)
+
+
+def check_generatable(cfg, catalog_meta):
+    if int(cfg.get("star_version", 1) or 1) != 2: raise ValueError("--stars generated needs a star_version 2 model")
+    if catalog_meta.get("identity_table") or cfg.get("star_table") or catalog_meta.get("star_table"):
+        raise ValueError("--stars generated: identity_table / star_table models draw stars that are not the portable function; keep stars.bin")
+
+
+def export(model_dir, out_dir, bits=8, sparse=False, stars_mode="bin"):
     from .infer import Reader
     rd = Reader(model_dir); os.makedirs(out_dir, exist_ok=True); rb = rd.rb
     # ---- routebook.bin
@@ -182,9 +229,18 @@ def export(model_dir, out_dir, bits=8, sparse=False):
     if untrained is not None: hdr["sparse"] = {"rule": "zero", "tables": list(SPARSE_TABLES)}
     write_bin(os.path.join(out_dir, "routebook.bin"), hdr, blobs)
     # ---- stars.bin
-    stars = star_keys(rd); keys = sorted(stars); M = np.stack([np.angle(stars[k]) for k in keys])
-    write_bin(os.path.join(out_dir, "stars.bin"), {"keys": keys, "D": rd.D, "bits": bits},
-              [({"name": "stars", "kind": "phase", "bits": bits, "shape": list(M.shape)}, quantize(M, bits))])
+    stars = star_keys(rd); keys = sorted(stars)
+    if stars_mode == "generated":
+        check_generatable(rd.cfg, rd.cat)
+        sb = 8 if bits == 32 else bits       # float32 stars cannot be regenerated exactly: the generated stars are quantized to 8 bits then
+        for k in keys:                       # the regenerated star must be the reader's star (same seeds, same function)
+            if not np.allclose(regenerate_star(k, rd.cfg["seed"], rd.cat.get("star_seed"), rd.D), stars[k], atol=1e-9): raise ValueError(f"star {k}: not the portable star")
+        with open(os.path.join(out_dir, "stars.json"), "w") as f: json.dump(generated_stars_doc(keys, rd.D, sb), f, separators=(",", ":"))
+        if os.path.exists(os.path.join(out_dir, "stars.bin")): os.remove(os.path.join(out_dir, "stars.bin"))
+    else:
+        M = np.stack([np.angle(stars[k]) for k in keys])
+        write_bin(os.path.join(out_dir, "stars.bin"), {"keys": keys, "D": rd.D, "bits": bits},
+                  [({"name": "stars", "kind": "phase", "bits": bits, "shape": list(M.shape)}, quantize(M, bits))])
     # ---- model.json
     L = rd.legend; bg = {}
     if rd.background is not None:
@@ -199,6 +255,7 @@ def export(model_dir, out_dir, bits=8, sparse=False):
     man = {"format": "vss-web-2" if sparse else "vss-web-1", "legend_sha256": L.sha, "training_code_commit": rd.cfg.get("training_code_commit"),
            "bits": bits, "star_version": rd.cfg.get("star_version", 1), "D": rd.D, "n_stars": len(keys)}
     if untrained is not None: man["sparse"] = sparse_summary(untrained)
+    if stars_mode == "generated": man["format"] = "vss-web-3"; man["stars"] = {"source": "generated", "file": "stars.json", "bits": 8 if bits == 32 else bits}
     return write_manifest(out_dir, man)
 
 
@@ -207,7 +264,7 @@ def sparse_summary(untrained):
 
 
 def write_manifest(out_dir, man):
-    files = ["model.json", "routebook.bin", "stars.bin"]
+    files = ["model.json", "routebook.bin", man.get("stars", {}).get("file", "stars.json") if man.get("stars") else "stars.bin"]
     man = dict(man, files={fn: {"sha256": hashlib.sha256(open(os.path.join(out_dir, fn), "rb").read()).hexdigest(), "bytes": os.path.getsize(os.path.join(out_dir, fn))} for fn in files})
     with open(os.path.join(out_dir, "manifest.json"), "w") as f: json.dump(man, f, indent=1)
     return man
@@ -244,22 +301,58 @@ def sparsify_web(src, out_dir):
         else: blobs.append((m, blob(a)))
     h = {k: v for k, v in hdr.items() if k != "arrays"}; h["sparse"] = {"rule": "zero", "tables": list(SPARSE_TABLES)}
     os.makedirs(out_dir, exist_ok=True); write_bin(os.path.join(out_dir, "routebook.bin"), h, blobs)
-    for fn in ("model.json", "stars.bin", "front.json"):
+    for fn in ("model.json", "stars.bin", "stars.json", "front.json"):
         if os.path.exists(os.path.join(src, fn)): shutil.copyfile(os.path.join(src, fn), os.path.join(out_dir, fn))
     man = {k: v for k, v in man0.items() if k != "files"}; man["format"] = "vss-web-2"; man["sparse"] = sparse_summary(untrained)
     man["sparse"]["from"] = {"routebook.bin": man0["files"]["routebook.bin"]}
     return write_manifest(out_dir, man)
 
 
+def generate_stars_web(src, out_dir, star_bits=None, quantize_mode="keys"):
+    """an existing export with stars.bin -> the same export with generated stars (stars.json, format vss-web-3). model.json, routebook.bin
+    and front.json are copied byte for byte. With star_bits None (the stored bits) every stored star is compared byte for byte with its
+    regenerated star quantized the same way, and any difference refuses the conversion: the browser then reads exactly the stars.bin
+    values. Other star_bits (or quantize "all") are experiments: they change the stars and are marked so in the manifest."""
+    import shutil
+    model = json.load(open(os.path.join(src, "model.json"))); man0 = json.load(open(os.path.join(src, "manifest.json")))
+    check_generatable(model["config"], model["catalog"])
+    raw = open(os.path.join(src, "stars.bin"), "rb").read(); assert raw[:8] == MAGIC, "stars.bin: not a vss binary"
+    n = int.from_bytes(raw[8:12], "little"); hdr = json.loads(raw[12:12 + n]); start = 12 + n + ((-(12 + n)) % 4)
+    a = hdr["arrays"][0]; D = hdr["D"]; keys = hdr["keys"]; bits0 = a["bits"]
+    if bits0 == 32: raise ValueError("stars.bin holds float32 stars: generated stars are quantized; export again with --bits 8")
+    data = raw[start + a["offset"]: start + a["offset"] + a["nbytes"]]; per = D * bits0 // 8
+    seed, star_seed = model["config"]["seed"], model["catalog"]["star_seed"]
+    exact = star_bits is None and quantize_mode == "keys"
+    if star_bits is None:
+        for i, k in enumerate(keys):
+            q = quantize(np.angle(regenerate_star(k, seed, star_seed, D)), bits0)
+            if q != data[i * per:(i + 1) * per]: raise ValueError(f"{src}: star {k} differs from its regenerated quantized star; keep stars.bin")
+    os.makedirs(out_dir, exist_ok=True)
+    for fn in ("model.json", "routebook.bin", "front.json"):
+        if os.path.exists(os.path.join(src, fn)): shutil.copyfile(os.path.join(src, fn), os.path.join(out_dir, fn))
+    sb = bits0 if star_bits is None else star_bits
+    with open(os.path.join(out_dir, "stars.json"), "w") as f: json.dump(generated_stars_doc(keys, D, sb, quantize_mode), f, separators=(",", ":"))
+    man = {k: v for k, v in man0.items() if k != "files"}; man["format"] = "vss-web-3"
+    man["stars"] = {"source": "generated", "file": "stars.json", "bits": sb, "quantize": quantize_mode,
+                    "checked": f"{len(keys)} stars equal stars.bin byte for byte" if exact else "experiment: the stars differ from stars.bin",
+                    "from": {"stars.bin": man0["files"]["stars.bin"]}}
+    return write_manifest(out_dir, man)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="sop export-web"); ap.add_argument("--model"); ap.add_argument("--from-web", dest="from_web")
-    ap.add_argument("--out", required=True); ap.add_argument("--bits", type=int, default=8, choices=[4, 8, 32])
-    ap.add_argument("--sparse", action="store_true", help="store only the trained rows of bg, A, L (format vss-web-2)"); a = ap.parse_args(argv)
+    ap.add_argument("--out", required=True); ap.add_argument("--bits", type=int, default=8, choices=[1, 2, 4, 6, 8, 32])
+    ap.add_argument("--sparse", action="store_true", help="store only the trained rows of bg, A, L (format vss-web-2)")
+    ap.add_argument("--stars", choices=["bin", "generated"], default="bin", help="generated: stars.json (keys) instead of stars.bin (format vss-web-3)")
+    ap.add_argument("--star-bits", dest="star_bits", type=int, choices=[1, 2, 4, 6, 8, 32], help="--from-web --stars generated: experiments only")
+    ap.add_argument("--star-quantize", dest="star_quantize", choices=["keys", "all"], default="keys"); a = ap.parse_args(argv)
     if (a.model is None) == (a.from_web is None): ap.error("give exactly one of --model, --from-web")
-    if a.from_web and not a.sparse: ap.error("--from-web is for --sparse (it keeps the values byte for byte)")
-    man = sparsify_web(a.from_web, a.out) if a.from_web else export(a.model, a.out, a.bits, a.sparse)
+    if a.from_web and a.sparse == (a.stars == "generated"): ap.error("--from-web takes exactly one of --sparse, --stars generated (each keeps the other files byte for byte)")
+    if a.from_web and a.stars == "generated": man = generate_stars_web(a.from_web, a.out, a.star_bits, a.star_quantize)
+    else: man = sparsify_web(a.from_web, a.out) if a.from_web else export(a.model, a.out, a.bits, a.sparse, a.stars)
     if man.get("sparse"):
         sp = man["sparse"]; print("export-web: sparse route book, stored rows " + ", ".join(f"{k} {sp['stored_rows'][k]}/{sp['rows'][k]}" for k in sp["rows"]))
+    if man.get("stars"): print(f"export-web: generated stars ({man['stars']['bits']} bits): " + man["stars"].get("checked", "keys listed in stars.json"))
     tot = sum(f["bytes"] for f in man["files"].values())
     print(f"export-web: {a.model or a.from_web} -> {a.out} (bits {man['bits']}, D {man['D']}, star_version {man['star_version']}, {man['n_stars']} stars): "
           + ", ".join(f"{k} {v['bytes'] / 1e6:.3f} MB" for k, v in man["files"].items()) + f"; total {tot / 1e6:.3f} MB")

@@ -1,9 +1,17 @@
 // loader.js — the files written by `sop export-web` (tool/sop/export_web.py): model.json, routebook.bin, stars.bin, manifest.json.
 // Binary layout: 8 bytes "VSSBIN1\n", uint32 LE header length, UTF-8 JSON header, zero padding to 4, then the arrays at the header's
-// offsets. Phase arrays: bits 8 (q * 2pi/256 - pi), 4 (two 16-level values per byte, low nibble first) or 32 (float32); float arrays float32.
+// offsets. Phase arrays: bits 8 (q * 2pi/256 - pi), bits 1, 2, 4 or 6 (2**bits levels, q * 2pi/2**bits - pi, packed as one little-endian bit
+// stream: value i holds bits [i*bits, (i+1)*bits), so bits 4 is two values per byte, low nibble first) or 32 (float32); float arrays float32.
+// Generated stars (manifest format vss-web-3, manifest.stars.source "generated"; training/sketch/shrink/SHRINK.md): no stars.bin; stars.json
+// lists the keys stars.bin would hold and the bits. Each listed star is regenerated from its name (stars.js starV2Quantized: the portable
+// star_version 2 phases quantized exactly as export_web.py quantizes them), byte for byte the stars.bin values, so every reader decision is
+// the same; quantize "keys" (default) = only the listed keys are quantized (a word outside them gets float phases, as with stars.bin),
+// "all" = every generated star is quantized (experiments).
 // Sparse route book (export_web --sparse, manifest format vss-web-2): an array of kind "index" (uint32 LE) lists the flat row numbers a
 // table stores; the table's entry names it ("rows"), its "shape" is the FULL shape and its data holds only those rows, in that order. Such
 // a table comes back as {data (stored rows x D), shape (full), rowOf: Int32Array over the full rows, -1 = absent}; dense tables have no rowOf.
+
+import { starV2Quantized, starV2Phases } from "./stars.js";
 
 const MAGIC = "VSSBIN1\n";
 
@@ -22,7 +30,10 @@ export function readBin(buf) {
       const L = 1 << a.bits, step = (2 * Math.PI) / L;
       if (a.bits === 8) for (let i = 0; i < count; i++) data[i] = u8[o + i] * step - Math.PI;
       else if (a.bits === 4) for (let i = 0; i < count; i++) { const b = u8[o + (i >> 1)]; data[i] = ((i & 1) ? (b >> 4) : (b & 15)) * step - Math.PI; }
-      else throw new Error(`vss.js: bits ${a.bits}`);
+      else if (a.bits === 1 || a.bits === 2 || a.bits === 6) {
+        const B = a.bits, mask = L - 1;
+        for (let i = 0; i < count; i++) { const bit = i * B, k = o + (bit >> 3), sh = bit & 7, w = u8[k] | ((sh + B > 8 ? u8[k + 1] : 0) << 8); data[i] = ((w >> sh) & mask) * step - Math.PI; }
+      } else throw new Error(`vss.js: bits ${a.bits}`);
     } else {
       const f = new Float32Array(u8.slice(o, o + 4 * count).buffer); for (let i = 0; i < count; i++) data[i] = f[i];
     }
@@ -30,6 +41,24 @@ export function readBin(buf) {
     if (rows) { const rowOf = new Int32Array(a.shape.slice(0, -1).reduce((x, y) => x * y, 1)).fill(-1); rows.forEach((r, i) => { rowOf[r] = i; }); arrays[a.name].rowOf = rowOf; }
   }
   return { header, arrays };
+}
+
+/** generated stars (stars.json of a vss-web-3 export) as a Map-like table: has(key), get(key) -> Float64Array of phases, computed on first
+ *  use (nothing is generated at load). The key -> (seed, name) rule is export_web.star_keys': "marker" = op:marker under the world seed,
+ *  id: and sym: under the catalog's star seed, role: and op: under the world seed */
+export class GeneratedStars {
+  constructor(spec, seed, starSeed) {
+    if (spec.star_version !== 2) throw new Error(`vss.js: generated stars need star_version 2 (got ${spec.star_version})`);
+    this.D = spec.D; this.bits = spec.bits; this.seed = seed; this.starSeed = starSeed; this.keys = new Set(spec.keys);
+    this.quantizeAll = spec.quantize === "all" && spec.bits <= 8;     // bits 32: the float phases (experiments)
+  }
+  has(key) { return this.keys.has(key); }
+  get size() { return this.keys.size; }
+  get(key) {
+    if (!this.keys.has(key)) return undefined;
+    const [seed, name] = key === "marker" ? [this.seed, "op:marker"] : (key.startsWith("id:") || key.startsWith("sym:")) ? [this.starSeed, key] : [this.seed, key];
+    return this.bits === 32 ? starV2Phases(seed, name, this.D) : starV2Quantized(seed, name, this.D, this.bits);
+  }
 }
 
 /** the stars of stars.bin as a Map key -> Float64Array of phases */
@@ -47,12 +76,16 @@ async function sha256Hex(buf) {
 /** fetch the four files from a base URL (browser) or read them with `readFile(name) -> ArrayBuffer|string` (node); checks the manifest */
 export async function loadFiles(base, readFile) {
   const get = readFile || (async (name) => { const r = await fetch(new URL(name, base)); if (!r.ok) throw new Error(`vss.js: ${name}: HTTP ${r.status}`); return name.endsWith(".json") ? r.text() : r.arrayBuffer(); });
-  const manifest = JSON.parse(await get("manifest.json")), modelText = await get("model.json"), rbBuf = await get("routebook.bin"), stBuf = await get("stars.bin");
-  for (const [fn, buf] of [["model.json", new TextEncoder().encode(modelText)], ["routebook.bin", rbBuf], ["stars.bin", stBuf]]) {
+  const manifest = JSON.parse(await get("manifest.json")), modelText = await get("model.json"), rbBuf = await get("routebook.bin");
+  const gen = manifest.stars && manifest.stars.source === "generated";      // vss-web-3: stars.json (keys) instead of stars.bin
+  if (manifest.stars && !gen) throw new Error(`vss.js: stars source ${JSON.stringify(manifest.stars.source)}`);
+  const stName = gen ? manifest.stars.file || "stars.json" : "stars.bin", stRaw = await get(stName);
+  for (const [fn, buf] of [["model.json", new TextEncoder().encode(modelText)], ["routebook.bin", rbBuf], [stName, typeof stRaw === "string" ? new TextEncoder().encode(stRaw) : stRaw]]) {
     const h = await sha256Hex(buf);
     if (h !== null && h !== manifest.files[fn].sha256) throw new Error(`vss.js: ${fn} does not match manifest.json (sha256)`);
   }
   const model = JSON.parse(modelText);
   if (model.legend_sha256 !== manifest.legend_sha256) throw new Error("vss.js: legend hash of model.json differs from manifest.json");
-  return { manifest, model, routebook: readBin(rbBuf), stars: starsTable(stBuf) };
+  const stars = gen ? new GeneratedStars(JSON.parse(stRaw), model.config.seed, model.catalog.star_seed) : starsTable(stRaw);
+  return { manifest, model, routebook: readBin(rbBuf), stars };
 }
