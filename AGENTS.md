@@ -82,8 +82,15 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
 
 ## Fair comparison
 
-- Rules and VSS use the same legend and the same cue list (`export_cues.mjs` -> `make_normalizer.py`). A cue added for one reader is
-  added for both, and only from training data.
+- Rules and VSS read the same legend (questions and values). The learned readers (VSS worlds, Neural) use NO cue list: every word they know
+  comes from the annotated training data. The Rules' cue words are the Rules' own (the legend values' hand-written cues in `docs/js/logic.js`,
+  nothing learned is merged into them; the merged `learned-cues.js` was removed 2026-11-02: it made the Rules worse on both the short sets and the
+  sample). `export_cues.mjs` -> `make_normalizer.py` only builds the normalizer of the template sets (`docs/bench` gold, `generate.py`).
+  Consequence: the template sets (`docs/bench/{hand,blind,broad,seen,new_identities,heldout_formulations}`) are written or generated from the
+  Rules' own cues and templates and favour the Rules; the realistic short-command measure is `llm_short` (`training/sketch/short_bench`).
+- Before any commit that touches reader code (`docs/js` readers, models under `docs/model/`), run `bash training/sketch/regress.sh` and put its
+  table in the commit message (sample + short sets, Rules and VSS, the tests). The fixed sample and the per-event gold are rebuilt from the
+  committed data by `training/sketch/eval/make_sample.py`.
 - Scores are reported in three columns per reader: correct, abstained ("did not understand", honest) and wrong (did something else).
   A wrong executed command is worse than an abstention.
 - Also report separately the requests whose trigger word was seen in training and those whose trigger was not.

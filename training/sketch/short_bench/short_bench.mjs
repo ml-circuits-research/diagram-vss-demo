@@ -2,14 +2,20 @@
 // nextContext) on docs/bench/*.json. Scoring per gold request with llm_score.mjs's scoreMessage (LLM_SCORE_LIB=1, PAIR=value), each bench
 // row turned into one gold wire (or its `wires`); also the demo Benchmark's bench-canon score().ok.
 // Cause of every VSS gold request not right: first stage that explains it, from the composer's units.
-// node short_bench.mjs <out.json>
+// Two groups of sets (the output rows carry `group`):
+//   templates: hand, blind, broad, seen, new_identities, heldout_formulations (docs/bench/*.json). WRITTEN OR GENERATED FROM THE RULES' OWN
+//     TEMPLATES (generate.py + the rules' cue table; hand/blind/broad by the rules' author): they favour the Rules reader.
+//   llm_short: the 3000 one-line commands written by LLM agents, with annotated spans (llm_train/{sonnet,haiku}_short/msg_*.jsonl): the
+//     style people type in the demo. Caveat: the VSS cutter was trained on these messages (the worlds' rows too); the rules were not.
+//     Not scored with the demo's bench-canon (no canonical gold): demoOk is null for these rows.
+//   LLM_SHORT=0 skips llm_short. node short_bench.mjs <out.json>
 // Options (default: off; the default run is unchanged):
 //   BENCH_DIR=<dir>  read the sets from <dir>/<set>.json instead of docs/bench/ (e.g. the typo'd sets of training/sketch/spell/build_spell.mjs --typo-out)
 //   SPELL=1          run the VSA spell checker (docs/js/spell.js, docs/model/spell/vocab.json + the legend) on each text before both readers,
 //                    with the row's names as the canvas, as the demo does; the row gets `spell` (the fixes)
 process.env.LLM_SCORE_LIB = "1"; process.env.PAIR = "value"; process.env.SEG = "composer";
-const REPO = "/home/claude/diagram-vss-demo/";
-const { readFileSync, writeFileSync, existsSync } = await import("node:fs");
+const REPO = new URL("../../../", import.meta.url).pathname;   // the repository root
+const { readFileSync, writeFileSync, existsSync, readdirSync } = await import("node:fs");
 const L = await import(REPO + "training/sketch/llm_score.mjs");
 const { score } = await import(REPO + "docs/js/bench-canon.js");
 const { load } = await import(REPO + "docs/js/vss.js");
@@ -80,13 +86,15 @@ function formalizeCuts(self, text, ctx = {}) {
 }
 const evWorld = new Map(); for (const w of REG.worlds) for (const e of w.events) evWorld.set(e.toLowerCase(), w.world);
 const evOf = (type, a) => (type === "command" ? a.action : type === "question" ? (a.ask === "rules" ? "list" : a.ask) : type);
-const SETS = ["hand", "blind", "broad", "seen", "new_identities", "heldout_formulations"];
+const SETS = ["hand", "blind", "broad", "seen", "new_identities", "heldout_formulations"].concat(process.env.LLM_SHORT === "0" ? [] : ["llm_short"]);
+const llmShort = () => ["sonnet_short", "haiku_short"].flatMap((d) => readdirSync(REPO + `training/sketch/llm_train/${d}`).filter((f) => /^msg_.*\.jsonl$/.test(f)).sort().flatMap((f) => readFileSync(REPO + `training/sketch/llm_train/${d}/${f}`, "utf8").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l))));
 const out = [];
 for (const id of SETS) {
-  const rows = JSON.parse(readFileSync(process.env.BENCH_DIR ? `${process.env.BENCH_DIR}/${id}.json` : REPO + `docs/bench/${id}.json`, "utf8"));
+  const isLLM = id === "llm_short", group = isLLM ? "llm_short" : "templates";
+  const rows = isLLM ? llmShort() : JSON.parse(readFileSync(process.env.BENCH_DIR ? `${process.env.BENCH_DIR}/${id}.json` : REPO + `docs/bench/${id}.json`, "utf8"));
   for (let [k, r] of rows.entries()) {
     const CASE = { tofront: "toFront", toback: "toBack" }, fix = (a) => (a && CASE[a.action] ? { ...a, action: CASE[a.action] } : a);
-    const wires = (r.wires ? r.wires.map((w) => ({ type: w.type, args: w.gold ?? w.args })) : [{ type: r.type, args: r.gold ?? r.args }]).map((w) => ({ type: w.type, args: fix(w.args) }));   // gold action case as logic.js writes it (llm_score's act label is case-sensitive)
+    const wires = (r.wires ? r.wires.map((w) => ({ type: w.type, args: w.gold ?? w.args })) : [{ type: r.type, args: r.gold ?? r.args }]).map((w, j) => ({ type: w.type, args: fix(w.args), ...(isLLM && r.wires[j].span ? { span: r.wires[j].span } : {}) }));   // gold action case as logic.js writes it (llm_score's act label is case-sensitive)
     const sp = speller ? speller.check(r.text, { names: r.names || [] }) : null;
     if (sp) r = { ...r, text: sp.text };
     const row = { text: r.text, names: r.names || [], wires };
@@ -99,8 +107,8 @@ for (const id of SETS) {
     // per-world normalization of the whole text (front end of each world), for the front-normalization check
     const norm = {}; for (const w of comp.worlds) norm[w.id] = FRONT.normalize(r.text, r.names || [], w.F).tokens.join(" ");
     const segw = FRONT.segmentWorlds(r.text, r.names || [], comp.cutter).map((c) => ({ c0: c.c0, c1: c.c1, worlds: c.worlds.slice(0, 4) }));
-    out.push({ set: id, i: k, text: r.text, names: r.names, wires: wires.map((w) => ({ ...w, event: evOf(w.type, w.args), world: evWorld.get(String(evOf(w.type, w.args)).toLowerCase()) || "fallback" })),
-      demoOk: { rules: score(rn, r).ok, vss: score(res.nodes, r).ok },
+    out.push({ set: id, group, i: k, text: r.text, names: r.names, wires: wires.map((w) => ({ ...w, event: evOf(w.type, w.args), world: evWorld.get(String(evOf(w.type, w.args)).toLowerCase()) || "fallback" })),
+      demoOk: isLLM ? null : { rules: score(rn, r).ok, vss: score(res.nodes, r).ok },
       rules: { right: sR.right, wrong: sR.wrongAligned, missed: sR.missed, extra: sR.extra, bad: sR.bad, acts: rn.filter((n) => n.type !== "mention").map((n) => `${n.type}:${n.args.action || n.args.ask || ""}`) },
       vss: { right: sV.right, wrong: sV.wrongAligned, missed: sV.missed, extra: sV.extra, bad: sV.bad, acts: res.nodes.filter((n) => n.type !== "mention").map((n) => `${n.type}:${n.args.action || n.args.ask || ""}`) },
       units, notes: res.notes, norm, segw, ...(sp ? { spell: sp.fixes } : {}), ...(r.typo !== undefined ? { typo: r.typo } : {}) });
