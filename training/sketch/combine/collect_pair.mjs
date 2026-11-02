@@ -14,6 +14,7 @@
 //     worlds, CUT_SHARED.md), then cut_start / cut_end are REPLACED by the SOP-BERT cut head's probabilities at the unit's edges, with the
 //     definitions of collect_sop.mjs (cut_start = P(B) of the unit's first word; cut_end = 1 - P(I) of the word after its last, 1 at the end of
 //     the text); the VSS cutter's values are kept as cut_start_vss / cut_end_vss (not used by the fit). COMBINE.md states this choice.
+//   5. (added for confidence3/PLAN.md) units.jsonl: {id, bert: [{c0, c1}], vss: [{c0, c1}]}, the units of the two cuts (no reading).
 //   [MODEL=<folder>] [THREADS=n] [LIMIT=n] [IDS=<file>] node training/sketch/combine/collect_pair.mjs <out dir> <set> <dir> [<dir> ...]
 // Needs `npm install` in training/laptop (@huggingface/transformers).
 import { readFileSync, readdirSync, writeFileSync, appendFileSync, existsSync, mkdirSync } from "node:fs";
@@ -234,7 +235,8 @@ for (const d of dirs) {
     .filter((r) => Array.isArray(r.wires) && (!IDS || IDS.has(r.id)) && !seenIds.has(r.id)).slice(0, LIMIT);
   for (const r of rows) { seenIds.add(r.id); allRows.push(r); }
 }
-const OUT = { sop_own: `${outDir}/sop_own.jsonl`, vss_own: `${outDir}/vss_own.jsonl`, vss_bert: `${outDir}/vss_bert.jsonl`, sop_vss: `${outDir}/sop_vss.jsonl` };
+const OUT = { sop_own: `${outDir}/sop_own.jsonl`, vss_own: `${outDir}/vss_own.jsonl`, vss_bert: `${outDir}/vss_bert.jsonl`, sop_vss: `${outDir}/sop_vss.jsonl`,
+  units: `${outDir}/units.jsonl` };   // units.jsonl (added for confidence3/PLAN.md): the units of both cuts per message, for the Rules collector
 for (const f of Object.values(OUT)) writeFileSync(f, "");
 const blank = () => ({ exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0, byAct: {} });
 const TOT = { vss_own: blank(), vss_bert: blank(), sop_own: blank(), sop_vss: blank() }, MINE = { vss_own: { right: 0, wrong: 0, extra: 0 }, vss_bert: { right: 0, wrong: 0, extra: 0 }, sop_own: { right: 0, wrong: 0, extra: 0 }, sop_vss: { right: 0, wrong: 0, extra: 0 } };
@@ -296,7 +298,8 @@ for (const r of allRows) {
       MINE.sop_vss[res[i]]++;
     });
     tally(TOT.sop_vss, sr4.nodes, r);
-    appendFileSync(OUT.sop_vss, JSON.stringify(rec) + "\n"); }
+    appendFileSync(OUT.sop_vss, JSON.stringify(rec) + "\n");
+    appendFileSync(OUT.units, JSON.stringify({ id: r.id, bert: bertUnits, vss: vssUnits }) + "\n"); }
   if (++done % 25 === 0) console.error(`${done} / ${allRows.length} messages, ${((Date.now() - t0) / 1000).toFixed(0)} s`);
 }
 for (const k of Object.keys(TOT)) {

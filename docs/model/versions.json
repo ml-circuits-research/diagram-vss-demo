@@ -3,6 +3,7 @@
  "files": {
   "confidence/combined.json": "f1458ccce2",
   "confidence/sop-bert.json": "93bd402b17",
+  "confidence/vote3.json": "89a02d93bf",
   "confidence/vss.json": "3606432fe7",
   "context/weights.json": "ee4fcc6ab9",
   "micro/cutter_events.json": "af1589b3fe",
