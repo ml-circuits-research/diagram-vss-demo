@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""test_vss_gate_ui.py: the VSS gate of the demo in a real browser (Playwright, Chromium): VSS executes a request only when its combined
-confidence clears the threshold of the chosen level (docs/js/vss-confidence.js, docs/model/confidence/vss.json; default "cost", the
-safety threshold that maximises the cost score, owner 2026-11-02 21:24).
+"""test_vss_gate_ui.py: the VSS gate of the demo in a real browser (Playwright, Chromium): VSS executes a request only when its
+confidence clears the threshold of the chosen level (default "cost", the safety threshold that maximises the cost score, owner 2026-11-02
+21:24). With SOP-BERT loaded the confidence includes the votes of SOP-BERT and the Rules (docs/js/vote-confidence.js columnVss,
+docs/model/confidence/vote3.json; checked by test_vote_ui.py); here SOP-BERT is blocked, so VSS falls back to its own confidence alone
+(docs/js/vss-confidence.js, docs/model/confidence/vss.json) and the details say so.
 
 Run:  python3 training/sketch/test_vss_gate_ui.py [screenshot dir]      (PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers in this sandbox)
 It serves docs/ on a free local port and loads the VSS models (docs/model/micro, about 23 MB); the neural model files and the transformers.js
@@ -10,8 +12,8 @@ library are blocked (memory). On the VSS tab, after the page's own start message
   2. "Make Process green and connect Start to Done."  the first request executed, the second not (VSS not sure: read in the links
                                                      world, which is often wrong), one button;
   3. click "Do it anyway": the link Start -> Done appears in the VSS drawing, the button is disabled; "undo" takes exactly that back;
-  4. VSS › Settings shows the levels (bolder / safety threshold / more careful / 95 / 97 / 99 / execute all, the safety threshold checked; the precision levels
-     vss.json does not reach are disabled); choosing another level is kept in localStorage, the default is not stored.
+  4. VSS › Settings shows the levels (bolder / safety threshold / more careful / execute all, the safety threshold checked, each with the
+     thresholds of vote3.json for commands and questions); choosing another level is kept in localStorage, the default is not stored.
 Screenshots of each step go to the directory (default: a temporary folder). Exit code 0 when everything passes.
 """
 import functools, http.server, json, os, socketserver, sys, tempfile, threading
@@ -24,8 +26,8 @@ OUT = sys.argv[1] if len(sys.argv) > 1 else tempfile.mkdtemp(prefix="vss-gate-ui
 os.makedirs(OUT, exist_ok=True)
 SPEC = json.load(open(os.path.join(DOCS, "model", "confidence", "vss.json")))["readers"]["vss_combined"]
 T_COST = SPEC["levels"]["cost"]["threshold"]                                       # the default level's threshold
-NOT_REACHED = [l for l in ("95", "97", "99") if not (SPEC["levels"].get(l) or {}).get("threshold")]
-OTHER = next((l for l in ("95", "97", "99") if l not in NOT_REACHED), "all")        # a level to choose in Settings
+VOTE = json.load(open(os.path.join(DOCS, "model", "confidence", "vote3.json")))["columns"]["vss"]["levels"]   # the levels of the VSS tab
+OTHER = "all"                                                                       # a level to choose in Settings
 fails = []
 def check(name, ok, detail=""):
     print(("ok   " if ok else "FAIL ") + name + ("" if ok or not detail else f"\n     {detail}"))
@@ -108,22 +110,22 @@ with sync_playwright() as p:
     det = pg.evaluate("() => (document.querySelector('#sbody') || {}).textContent || ''")
     pg.screenshot(path=f"{OUT}/5_details.png")
     check("details show the gate: executed and not executed requests with confidences", f"VSS gate: safety threshold (it acts from confidence {T_COST:.4f})" in det and "not executed" in det and "confidence" in det, det[:300])
+    check("details say VSS used its own confidence alone (SOP-BERT did not read the message)", "SOP-BERT did not read this message, so VSS used its own confidence alone (confidence/vss.json)" in det, det[det.find("VSS gate"):][:400])
     pg.keyboard.press("Escape"); pg.wait_for_timeout(300)
 
     # settings: the precision level control
     pg.click("[data-sub=settings]"); pg.wait_for_timeout(300)
+    pg.wait_for_function("() => /for commands/.test((document.querySelector('#rpanel') || {}).textContent || '')", timeout=30000)
     levels = pg.evaluate("() => [...document.querySelectorAll('#rpanel input[name=vss-gate]')].map(x => [x.value, x.checked])")
     pg.screenshot(path=f"{OUT}/6_settings.png")
-    check("settings: bolder / safety threshold / more careful / 95 / 97 / 99 / all, the safety threshold checked", levels == [["cost5", False], ["cost", True], ["cost20", False], ["95", False], ["97", False], ["99", False], ["all", False]], str(levels))
+    check("settings: bolder / safety threshold / more careful / all, the safety threshold checked", levels == [["cost5", False], ["cost", True], ["cost20", False], ["all", False]], str(levels))
     lab = pg.evaluate("() => [...document.querySelectorAll('#rpanel input[name=vss-gate]')].map(x => x.parentElement.textContent)")
-    t5, t20 = SPEC["levels"]["cost5"]["threshold"], SPEC["levels"]["cost20"]["threshold"]
-    check("settings: bolder and more careful in plain words, with the thresholds of vss.json", "bolder" in lab[0] and "one confident mistake counts as 5 right answers" in lab[0] and f"{t5:.4f}" in lab[0]
-          and "more careful" in lab[2] and "counts as 20 right answers" in lab[2] and f"{t20:.4f}" in lab[2], str(lab[:3]))
+    t5, t20 = VOTE["cost5"], VOTE["cost20"]
+    check("settings: bolder and more careful in plain words, with the thresholds of vote3.json (commands, questions)", "bolder" in lab[0] and "one confident mistake counts as 5 right answers" in lab[0] and f"{t5['command']:.4f}" in lab[0] and f"{t5['question']:.4f}" in lab[0]
+          and "more careful" in lab[2] and "counts as 20 right answers" in lab[2] and f"{t20['command']:.4f}" in lab[2], str(lab[:3]))
     pg.check("#rpanel input[name=vss-gate][value='cost20']"); pg.wait_for_timeout(200)
     kept20 = pg.evaluate("() => { try { return localStorage.getItem('sop.vss.gate'); } catch (e) { return 'no storage'; } }")
     check("settings: more careful is kept in localStorage", kept20 == "cost20", str(kept20))
-    off = pg.evaluate("() => [...document.querySelectorAll('#rpanel input[name=vss-gate]')].filter(x => x.disabled).map(x => x.value)")
-    check(f"settings: the levels vss.json does not reach are disabled ({', '.join(NOT_REACHED) or 'none'})", off == NOT_REACHED, str(off))
     pg.check(f"#rpanel input[name=vss-gate][value='{OTHER}']"); pg.wait_for_timeout(200)
     kept = pg.evaluate("() => { try { return localStorage.getItem('sop.vss.gate'); } catch (e) { return 'no storage'; } }")
     check(f"settings: the chosen level ({OTHER}) is kept in localStorage", kept == OTHER, str(kept))

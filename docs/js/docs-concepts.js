@@ -773,6 +773,89 @@ them. Requests only VSS finds are almost never right (1 in 55), so they are alwa
 <p class="note">Sources: <code>training/sketch/combine/COMBINED_READER.md</code>, <code>COMBINE.md</code>; model <code>docs/model/confidence/combined.json</code>.</p>
 `);
 
+/* ============================================================ three readers voting (training/sketch/confidence3/RESULT.md) */
+page('three-readers', 'Three readers voting',
+'The Rules, VSS and SOP-BERT read the same requests. When all three read a request the same way it was right 98.4% of the time on the calibration messages and 97.2% on the test part, so the tab 3 readers acts on that and asks about the rest. “Two of three agree” is not safe and is not used. The VSS and SOP-BERT tabs now also use the votes in their confidence.', `
+<h2 id="tv-what">What it does</h2>
+<p>The owner asked (2026-11-02): could the Rules give a vote too, so that three readers decide together? For every message the three readers
+read the same requests; each request of one reader is paired with the same request of the others, and two readings <i>agree</i> when they would
+make the editor do the same thing: every value equal, an arrange or distribute list in any order (the editor sorts it anyway), and “all”, no
+target and the list of every shape counted as the same. The tab <b>3 readers</b> reuses the readings of the three tabs; nothing is read twice.</p>
+<ul>
+  <li><b>All three agree</b> (the default): the request is done.</li>
+  <li><b>Not all three</b>: it is not done; the reply says who agrees and what the other one reads, e.g. “the Rules and VSS agree, SOP-BERT reads
+  layout ‘circle’ instead of no layout”, and offers <b>Do it anyway</b>.</li>
+  <li><b>Bolder</b> (3 readers › Settings): a fitted vote, a confidence from the reader’s own numbers and who agrees with whom, at its safety threshold.</li>
+</ul>
+${says('arrange all in a circle', 'distribute all vertically')}
+
+<h2 id="tv-agree">What an agreement is worth</h2>
+<p>Share of the requests right, by who agrees (in brackets: how many requests). Calibration and test: the new writer’s messages (fresh2, 195 and
+405 messages). Short commands: generated from the Rules’ own grammar (the Rules are right on all of them by construction), and short3, short
+commands written blind (its gold has conventions not yet aligned, so its numbers are lower bounds).</p>
+<div class="tw"><table>
+<thead><tr><th>Situation</th><th>Rules + VSS + SOP-BERT</th><th>VSS + SOP-BERT</th><th>Rules + SOP-BERT</th><th>Rules + VSS</th><th>None agree</th></tr></thead>
+<tbody>
+<tr><td>Calibration</td><td class="num"><b>98.4%</b> (316)</td><td class="num">83.7% (92)</td><td class="num">66.7% (69)</td><td class="num">52.6% (19)</td><td class="num">42.6% (94)</td></tr>
+<tr><td>Test part</td><td class="num"><b>97.2%</b> (654)</td><td class="num">89.8% (167)</td><td class="num">69.9% (133)</td><td class="num">51.0% (49)</td><td class="num">39.7% (247)</td></tr>
+<tr><td>Short, from the Rules’ grammar</td><td class="num">100.0% (128)</td><td class="num">0.0% (23)</td><td class="num">98.8% (84)</td><td class="num">100.0% (31)</td><td class="num">1.6% (188)</td></tr>
+<tr><td>Short, written blind (short3)</td><td class="num">88.7% (150)</td><td class="num">64.9% (74)</td><td class="num">82.7% (52)</td><td class="num">45.0% (20)</td><td class="num">16.7% (72)</td></tr>
+</tbody></table></div>
+
+<h2 id="tv-two">Why “2 of 3” is not used</h2>
+<p>With a confident mistake counted as 10 right answers, a request is worth doing only when it is right at least about 91% of the time. When
+only two readers agree, it is right 51.0% to 89.8% of the time on the new writer’s messages, depending on which two: below that bar. Measured
+with the cost score (per 100 requested actions; asking scores 0):</p>
+<div class="tw"><table>
+<thead><tr><th>Situation</th><th>All three agree: score · done right · confidently wrong</th><th>2 of 3 agree: score · done right · confidently wrong</th></tr></thead>
+<tbody>
+<tr><td>Calibration</td><td class="num"><b>43.8</b> · 52.2% · 1.6%</td><td class="num">−11.1 · 74.5% · 10.3%</td></tr>
+<tr><td>Test part</td><td class="num"><b>36.1</b> · 48.3% · 2.5%</td><td class="num">−5.9 · 68.7% · 9.8%</td></tr>
+<tr><td>Short, from the Rules’ grammar</td><td class="num">25.7 · 25.7% · 0.0%</td><td class="num">2.0 · 49.0% · 8.7%</td></tr>
+<tr><td>Short, written blind (short3)</td><td class="num">−7.8 · 26.3% · 11.5%</td><td class="num">−65.5 · 46.7% · 19.4%</td></tr>
+</tbody></table></div>
+<p>“2 of 3” does more, but one executed request in ten is wrong: worse than asking. So 3 readers acts on all three agreeing, or on the fitted vote.</p>
+
+<h2 id="tv-columns">The votes inside each reader’s confidence</h2>
+<p>The same votes, as inputs of each reader’s fitted confidence (method (c): its own numbers, plus whether the other two read the request the
+same way and whether the Rules had a note about it; VSS without its world prior; commands and questions with their own threshold). Each
+reader at its safety threshold: cost score · done right · confidently wrong (of what it executed).</p>
+<div class="tw"><table>
+<thead><tr><th>Situation</th><th>VSS tab</th><th>SOP-BERT tab</th><th>3 readers, all agree</th><th>3 readers, bolder</th></tr></thead>
+<tbody>
+<tr><td>Calibration (out of fold)</td><td class="num">30.5 · 42.3% · 2.7%</td><td class="num">51.2 · 56.2% · 0.9%</td><td class="num">43.8 · 52.2% · 1.6%</td><td class="num">51.3 · 66.4% · 2.2%</td></tr>
+<tr><td>Test part</td><td class="num">25.1 · 41.1% · 3.7%</td><td class="num">41.1 · 54.1% · 2.3%</td><td class="num">36.1 · 48.3% · 2.5%</td><td class="num">46.0 · 61.2% · 2.4%</td></tr>
+<tr><td>Short, from the Rules’ grammar</td><td class="num">16.7 · 22.9% · 2.6%</td><td class="num">10.4 · 30.8% · 6.2%</td><td class="num">25.7 · 25.7% · 0.0%</td><td class="num">−46.9 · 36.7% · 18.6%</td></tr>
+<tr><td>Short, written blind (short3)</td><td class="num">−4.4 · 25.7% · 10.5%</td><td class="num">−29.5 · 30.7% · 16.4%</td><td class="num">−7.8 · 26.3% · 11.5%</td><td class="num">−46.9 · 35.3% · 18.9%</td></tr>
+</tbody></table></div>
+
+<h2 id="tv-verdicts">The verdicts</h2>
+<p>Written before the test part was scored: each new confidence against the one it replaces, on the 405 test messages (paired bootstrap, 95%
+interval). “Better” only when the whole interval is above 0.</p>
+<div class="tw"><table>
+<thead><tr><th>Reader</th><th>Test part: new vs before</th><th>Difference [95% interval]</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr><td>VSS, with the votes</td><td class="num">25.1 vs 12.9</td><td class="num">+12.3 [4.0, 19.8]</td><td><b>better</b></td></tr>
+<tr><td>SOP-BERT, with the votes</td><td class="num">41.1 vs 14.4</td><td class="num">+26.7 [15.9, 38.2]</td><td><b>better</b></td></tr>
+<tr><td>VSS-BERT, with the Rules’ vote</td><td class="num">40.0 vs 40.6</td><td class="num">−0.6 [−7.1, 4.8]</td><td>not shown (VSS-BERT is unchanged)</td></tr>
+<tr><td>3 readers (fitted) vs VSS-BERT</td><td class="num">46.0 vs 40.6</td><td class="num">+5.4 [−1.0, 11.0]</td><td>not shown</td></tr>
+</tbody></table></div>
+<p>So the VSS and SOP-BERT tabs use the confidence with the votes; VSS-BERT keeps its own.</p>
+
+<h2 id="tv-limits">Limits</h2>
+<ul>
+  <li><b>Short commands are not solved.</b> On short3 every learned reader, with any confidence, is confidently wrong on 10–30% of what it
+  executes; the fitted votes were calibrated on long messages only. On the short commands from the Rules’ grammar, VSS and SOP-BERT agree with
+  each other against the Rules 23 times and are wrong every time; the fitted weights trust that agreement. All three agreeing is the most
+  robust rule (0% wrong there), which is why it is the default.</li>
+  <li><b>Mistakes all three share stay invisible</b>: about 2–3% of the requests all three agree on are still wrong on the new writer’s messages.</li>
+  <li>The confidences belong to the models they were fitted on; after a retraining they are refitted (<code>training/sketch/confidence3/refit.sh</code>).</li>
+</ul>
+<p class="note">Sources: <code>training/sketch/confidence3/RESULT.md</code> (sections 2–4), <code>PLAN.md</code>, <code>REPORT_fit3.md</code>; model
+<code>docs/model/confidence/vote3.json</code>; code <code>docs/js/vote-confidence.js</code>. The “all agree” numbers are without the engine-true
+equivalence of lists; with it they change by less than 1.5 points.</p>
+`);
+
 /* ============================================================ limits today */
 page('limits-today', 'Where it is weak today',
 'The known weak spots of the readers, with the numbers. The editor’s own limits (what it cannot draw) are in What it cannot do.', `

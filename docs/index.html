@@ -77,9 +77,11 @@ svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-widt
 .ib:hover { background: rgba(127, 127, 127, .14); color: var(--ink); }
 
 .stage { grid-area: stage; position: relative; background: var(--canvas); min-height: 0; min-width: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr); }
-/* reader tabs: each reader (Rules, VSS, SOP-BERT, VSS-BERT) has its own drawing; the canvas shows the active one */
+/* reader tabs: each reader (Rules, VSS, SOP-BERT, VSS-BERT, 3 readers) has its own drawing; the canvas shows the active one. On a narrow
+   screen the tabs scroll sideways inside their strip instead of running under the tools. */
 .rbar { display: flex; align-items: center; gap: 8px; padding: max(8px, env(safe-area-inset-top, 0px)) 10px 0 16px; border-bottom: 1px solid var(--line); background: var(--head); min-width: 0; }
-.rtabs { display: flex; gap: 2px; flex: 1; min-width: 0; }
+.rtabs { display: flex; gap: 2px; flex: 1; min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+.rtabs::-webkit-scrollbar { display: none; }
 .rtab { border: 0; background: none; padding: 8px 12px 9px; cursor: pointer; color: var(--muted); border-bottom: 3px solid transparent; font-weight: 600; white-space: nowrap; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
 .rtab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
 .rtab.off { font-weight: 500; opacity: .62; }
@@ -423,7 +425,7 @@ html.docs-open, html.docs-open body { overflow: hidden; }
   .msgs { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   .stage { border-bottom: 1px solid var(--line); }
   .rbar { padding: 6px 8px 0 16px; gap: 4px; }
-  .rtab { padding: 7px 8px 8px; font-size: 13.5px; }
+  .rtab { padding: 7px 7px 8px; font-size: 13.5px; }
   .tools { gap: 0; }
   .tools .ib { width: 34px; height: 34px; }
   .sop.mini { max-height: 3.6em; }

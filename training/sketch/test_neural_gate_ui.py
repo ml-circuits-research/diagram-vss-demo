@@ -2,6 +2,8 @@
 """test_neural_gate_ui.py: the SOP-BERT gate of the demo (the tab labelled SOP-BERT, id neural) in a real browser (Playwright, Chromium): SOP-BERT executes a request only when its
 fitted confidence (docs/js/neural-confidence.js, docs/model/confidence/sop-bert.json, PRECISION_BERT.md), computed in the page from the
 head logits of its own model calls, clears the threshold of the chosen level (default: the file's "cost" level, the safety threshold).
+With VSS loaded the confidence includes the votes of VSS and the Rules (docs/js/vote-confidence.js columnSop, docs/model/confidence/vote3.json;
+checked by test_vote_ui.py); here VSS is blocked, so SOP-BERT falls back to its own confidence alone (sop-bert.json) and the details say so.
 
 Run:  python3 training/sketch/test_neural_gate_ui.py [screenshot dir]      (PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers in this sandbox)
 It serves docs/ on a free local port and loads the neural model (docs/model/neural/sop-bert, about 68 MB, run in WASM). The VSS model files
@@ -13,8 +15,8 @@ It serves docs/ on a free local port and loads the neural model (docs/model/neur
                                                    with its confidence, the threshold and one button;
   3. click "Do it anyway": the link Process -> Done appears in the SOP-BERT drawing, the button is disabled; "undo" takes exactly that back;
   4. the details of message 2: "SOP-BERT gate: safety threshold (it acts from confidence <the file's cost threshold>)", the confidences;
-  5. SOP-BERT > Settings: the levels of the file (bolder = cost5, cost, more careful = cost20, 95, 97, 99, execute all; cost checked; a level the file does not reach disabled);
-     choosing 95 is kept in localStorage, choosing the default removes it;
+  5. SOP-BERT > Settings: bolder = cost5, cost (checked), more careful = cost20, execute all, with the thresholds of vote3.json (commands,
+     questions); choosing one is kept in localStorage, choosing the default removes it;
   6. with the Rules segmenter as the cut (other cut than the BERT cutter): the gate still works; the details say the cut head ran once more.
 Screenshots of each step go to the directory (default: a temporary folder). Exit code 0 when everything passes.
 """
@@ -32,6 +34,7 @@ os.makedirs(OUT, exist_ok=True)
 SPEC = json.load(open(os.path.join(DOCS, "model", "confidence", "sop-bert.json")))
 LV = SPEC["levels_out_of_fold"]
 T_COST = LV["cost"]["threshold"]
+VOTE = json.load(open(os.path.join(DOCS, "model", "confidence", "vote3.json")))["columns"]["sop"]["levels"]
 fails = []
 def check(name, ok, detail=""):
     print(("ok   " if ok else "FAIL ") + name + ("" if ok or not detail else f"\n     {detail}"))
@@ -125,24 +128,25 @@ with sync_playwright() as p:
     pg.screenshot(path=f"{OUT}/5_details.png")
     check("4. details show the SOP-BERT gate, its level and threshold", f"SOP-BERT gate: safety threshold (it acts from confidence {T_COST:.4f})" in det and "executed 1 of 2 requests" in det and "not executed" in det, det[:600])
     check("4. the cut head was not run again with the BERT cutter", "run once more" not in det, "")
+    check("4. the details say SOP-BERT used its own confidence alone (VSS did not read the message)", "VSS did not read this message, so SOP-BERT used its own confidence alone (confidence/sop-bert.json)" in det, det[det.find("SOP-BERT gate"):][:400])
     pg.keyboard.press("Escape"); pg.wait_for_timeout(300)
 
     pg.click("[data-sub=settings]"); pg.wait_for_timeout(300)
-    pg.wait_for_function("() => document.querySelectorAll('#rpanel input[name=neural-gate]').length > 0", timeout=30000)
+    pg.wait_for_function("() => document.querySelectorAll('#rpanel input[name=neural-gate]').length > 0 && /for commands/.test(document.querySelector('#rpanel').textContent)", timeout=30000)
     levels = pg.evaluate("() => [...document.querySelectorAll('#rpanel input[name=neural-gate]')].map(x => [x.value, x.checked, x.disabled])")
     pg.locator("#rpanel input[name=neural-gate]").first.scroll_into_view_if_needed()
     pg.screenshot(path=f"{OUT}/6_settings.png")
-    COSTS = ["cost5", "cost", "cost20"]   # bolder (one confident mistake = 5 right answers), the default (10), more careful (20)
-    want = [[l, l == "cost", l != "all" and not (LV.get(l) and LV[l].get("threshold") is not None)] for l in [k for k in COSTS if k in LV] + sorted([k for k in LV if k not in COSTS], key=float) + ["all"]]
-    check("5. settings: the file's levels (bolder, safety threshold, more careful, precision levels) and execute all, cost checked, an unreached level disabled", levels == want and all(k in LV for k in COSTS), f"{levels} vs {want}")
+    want = [[l, l == "cost", False] for l in ["cost5", "cost", "cost20", "all"]]   # bolder (one confident mistake = 5 right answers), the default (10), more careful (20), execute all
+    check("5. settings: bolder, safety threshold, more careful and execute all, cost checked", levels == want, f"{levels} vs {want}")
     lab = pg.evaluate("() => [...document.querySelectorAll('#rpanel input[name=neural-gate]')].map(x => x.parentElement.textContent)")
     check("5. bolder and more careful say what they mean in plain words", any("bolder" in t and "one confident mistake counts as 5 right answers" in t for t in lab) and any("more careful" in t and "counts as 20 right answers" in t for t in lab), str(lab[:3]))
+    check("5. each cost level shows the thresholds of vote3.json for commands and questions", all(f"{VOTE[l]['command']:.4f}" in t and f"{VOTE[l]['question']:.4f}" in t for l, t in zip(["cost5", "cost", "cost20"], lab)), str(lab[:3]))
     pg.check("#rpanel input[name=neural-gate][value='cost20']"); pg.wait_for_timeout(200)
     kept20 = pg.evaluate("() => { try { return localStorage.getItem('sop.neural.gate'); } catch (e) { return 'no storage'; } }")
     check("5. more careful is kept in localStorage", kept20 == "cost20", str(kept20))
-    pg.check("#rpanel input[name=neural-gate][value='95']"); pg.wait_for_timeout(200)
+    pg.check("#rpanel input[name=neural-gate][value='all']"); pg.wait_for_timeout(200)
     kept = pg.evaluate("() => { try { return localStorage.getItem('sop.neural.gate'); } catch (e) { return 'no storage'; } }")
-    check("5. the chosen level is kept in localStorage", kept == "95", str(kept))
+    check("5. the chosen level is kept in localStorage", kept == "all", str(kept))
     pg.check("#rpanel input[name=neural-gate][value='cost']"); pg.wait_for_timeout(200)
     kept = pg.evaluate("() => { try { return localStorage.getItem('sop.neural.gate'); } catch (e) { return 'no storage'; } }")
     check("5. choosing the default removes it", kept is None, str(kept))

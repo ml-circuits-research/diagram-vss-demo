@@ -318,8 +318,9 @@ an address from its path, bigram and position, and the reader (<code>docs/js/vss
 event, from the world’s verb lemmas) and the role fillers (target, colour, landmark, …). The reader returns a status:
 <code>ok</code>, <code>abstain</code> (margin under 0.05: uncertain, still executed today), <code>unknown-event</code> (no action word found) or
 <code>no-sense</code> (more than half of the tokens could not be placed). Executing <code>abstain</code> readings goes against the main metric
-of 2026-11-02 (execute only what it is sure of); the confidence gate that replaces it is in progress (<a href="#help/planned">In progress</a>).
-The margin behind <code>abstain</code> is also a poor confidence (AUROC 0.59 on the sample, RISK_COVERAGE.md).</p>
+of 2026-11-02 (execute only what it is sure of); in the demo the VSS tab now executes a request only when its confidence clears a threshold:
+a confidence from every step of the chain plus whether SOP-BERT and the Rules read the request the same way (<a href="#help/three-readers">Three
+readers voting</a>). The margin behind <code>abstain</code> alone is a poor confidence (AUROC 0.59 on the sample, RISK_COVERAGE.md).</p>
 <p>Before the model, the world’s own <b>front end</b> <code>front.json</code> normalizes the tokens: learned value n-grams (“bottom right” →
 <code>bottom_right</code>) and trigger rules, learned from the annotated rows of that world’s events only (<code>FRONT_ROWS=world</code>;
 thresholds <code>val_min_count</code> 5, <code>val_min_prec</code> 0.8, <code>trig_min_count</code> 2, <code>trig_share</code> 0.75, <code>trig_min_prec</code> 0.6).
@@ -371,8 +372,8 @@ becomes a question to the user, not an execution.</p>
 <p class="callout warn">The margin 0 comes from the owner’s rule of 2026-11-01, “ask as little as possible” (in drawing a mistake costs one undo,
 a question costs more). It was replaced on 2026-11-02 by the main metric: do only what you are sure of, ask about the rest (AGENTS.md). The
 filler keeps ranking the candidates, but whether its filling is executed is to be decided by the reader’s confidence against a threshold
-chosen on held-out data (the VSS confidence measured in VSS_CONFIDENCE.md includes the filler’s own margin, <code>ctx_margin</code>). In progress; the demo still
-fills at margin 0.</p>
+chosen on held-out data (the VSS confidence includes the filler’s own margin, <code>ctx_margin</code>, and whether the other two readers read the
+request the same way). The filler still fills at margin 0; the VSS tab’s confidence then decides whether that request is executed.</p>
 
 <h2 id="adapter">(e) The adapter to SOP Lang wires</h2>
 <p><code>docs/js/vss-adapter.js</code>: <code>readingFromWires</code> turns the reader’s wires into an event with roles; <code>toNodes</code> maps the
@@ -490,8 +491,9 @@ requests through the demo’s decoding code and compares them with torch.</p>
 <p>SOP-BERT gets more requests right than VSS on whole messages (80.8 vs 77.2) and also more wrong (16.5 vs 11.4): it almost never leaves a
 request undone (2.8%), so what it does not know it guesses. Descriptions in roles (“next to the orange hexagon”) are its weakest part: 4 of 34
 held-out. These are the earlier measure, every request executed. Under the main metric (precision of execution, owner 2026-11-02) SOP-BERT
-is to execute only when its confidence (the smallest probability among its heads for the request) clears a threshold chosen on held-out data:
-measured offline in RISK_COVERAGE.md, in the demo in progress. Why the difference between guessing and stopping matters:
+executes a request in the demo only when its confidence clears a threshold chosen on held-out data: a confidence fitted on 24 numbers of its
+own heads plus whether VSS and the Rules read the request the same way (<a href="#help/three-readers">Three readers voting</a>). Why the
+difference between guessing and stopping matters:
 <a href="#help/knowing">Knowing what it does not know</a>.</p>
 <p class="note">Trained by <code>training/neural/finetune_roles.py</code> on the GPU machine: epochs ≤ 8, lr 6e-5, batch 32, fp16 on cuda, seed 0; 15,683
 request spans. The milliseconds are from the scoring run in node; the time of each message in the demo is in its reply.</p>
@@ -873,7 +875,7 @@ page('repository', 'Repository map', `
 <thead><tr><th>Folder</th><th>What it holds</th></tr></thead>
 <tbody>
 <tr><td><code>docs/</code></td><td>The site published by GitHub Pages: <code>docs/index.html</code> (the demo), <code>docs/architecture.html</code> (these pages as one page).</td></tr>
-<tr><td><code>docs/js/</code></td><td>All the page’s code: engine and Rules (<code>logic.js</code>), VSS composer and its parts, SOP-BERT (<code>neural.js</code>), the combined reader VSS-BERT (<code>combined-confidence.js</code>), spell checker, UI, help (<code>help.js</code>, <code>docs.js</code>, <code>docs-concepts.js</code>, <code>docs-arch.js</code>).</td></tr>
+<tr><td><code>docs/js/</code></td><td>All the page’s code: engine and Rules (<code>logic.js</code>), VSS composer and its parts, SOP-BERT (<code>neural.js</code>), the combined reader VSS-BERT (<code>combined-confidence.js</code>), the three readers’ votes used by the VSS, SOP-BERT and 3 readers tabs (<code>vote-confidence.js</code>), spell checker, UI, help (<code>help.js</code>, <code>docs.js</code>, <code>docs-concepts.js</code>, <code>docs-arch.js</code>).</td></tr>
 <tr><td><code>docs/js/vss/</code></td><td>The VSS reader in the browser: <code>loader.js</code>, <code>stars.js</code>, <code>routebook.js</code>, <code>reader.js</code>, <code>soplang.js</code>.</td></tr>
 <tr><td><code>docs/model/</code></td><td>Every model the page loads, with <code>versions.json</code> (<a href="#help/models">Models and versions</a>).</td></tr>
 <tr><td><code>docs/bench/</code></td><td>The six short benchmark sets.</td></tr>

@@ -6,7 +6,7 @@ Run:  python3 training/sketch/test_combined_ui.py [screenshot dir]      (PLAYWRI
 It serves docs/ on a free local port and loads both readers it combines: VSS (docs/model/micro, about 23 MB) and SOP-BERT
 (docs/model/neural/sop-bert, about 68 MB, WASM; transformers.js 3.8.1 from training/laptop/node_modules in place of cdn.jsdelivr.net). Nothing
 is blocked except huggingface.co (never used). Checks:
-  1. the tabs read Rules, VSS, SOP-BERT, VSS-BERT (the neural tab is labelled SOP-BERT); VSS-BERT has its own drawing and the subtabs
+  1. the tabs read Rules, VSS, SOP-BERT, VSS-BERT, 3 readers (the neural tab is labelled SOP-BERT; 3 readers: test_vote_ui.py); VSS-BERT has its own drawing and the subtabs
      Drawing / SOP Lang / Settings; every reply has a "VSS-BERT · <ms>" line;
   2. with the default cut (VSS cutter) VSS-BERT reads the BERT cutter's requests itself (details: "read here", 2 SOP-BERT model calls);
      with the BERT cutter as the shared cut it reuses the two tabs' readings (details: "reused");
@@ -95,7 +95,7 @@ with sync_playwright() as p:
     pg.wait_for_function("() => { const t = document.querySelector('[data-rtab=combined]'); return t && !t.classList.contains('off'); }", timeout=900000)
     pg.wait_for_function("() => document.querySelectorAll('#msgs .b.bot').length >= 1 + (window.StartDiagram ? StartDiagram.MESSAGES.length : 3) && !document.querySelector('#msgs .typing')", timeout=180000)
     tabs = pg.evaluate("() => [...document.querySelectorAll('#rtabs [data-rtab]')].map(x => x.textContent.trim())")
-    check("1. the tabs are Rules, VSS, SOP-BERT, VSS-BERT", tabs == ["Rules", "VSS", "SOP-BERT", "VSS-BERT"], str(tabs))
+    check("1. the tabs are Rules, VSS, SOP-BERT, VSS-BERT, 3 readers", tabs == ["Rules", "VSS", "SOP-BERT", "VSS-BERT", "3 readers"], str(tabs))
     pg.click("[data-rtab=combined]"); pg.wait_for_timeout(300)
     subs = pg.evaluate("() => [...document.querySelectorAll('#subtabs [data-sub]')].map(x => x.dataset.sub)")
     of = pg.evaluate("() => (document.querySelector('#subtabs .of') || {}).textContent")
