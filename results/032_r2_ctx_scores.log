@@ -1,0 +1,138 @@
+v22.23.1
+errors default exit 0
+short r2 exit 0
+errors r2 exit 0
+set n | demo-ok rules vss | per request rules R/W/ND(+wrongact) extra | vss R/W/ND extra
+== templates: written or generated from the rules' own templates: they favour the Rules reader
+hand                     40 gold   40 | demo  95.0  80.0 | rules  95.0/ 0.0/  5.0 (wrong act  0.0) x0 | vss  80.0/12.5/  7.5 (wrong act  5.0) x2 |
+blind                    60 gold   60 | demo  83.3  71.7 | rules  83.3/ 3.3/ 13.3 (wrong act  8.3) x5 | vss  71.7/10.0/ 18.3 (wrong act 13.3) x8 |
+broad                   128 gold  140 | demo  96.1  78.1 | rules  95.7/ 1.4/  2.9 (wrong act  2.1) x2 | vss  80.0/11.4/  8.6 (wrong act  4.3) x6 |
+seen                    300 gold  300 | demo 100.0  59.3 | rules 100.0/ 0.0/  0.0 (wrong act  0.0) x0 | vss  59.3/ 7.3/ 33.3 (wrong act  8.3) x25 |
+new_identities          300 gold  300 | demo 100.0  59.3 | rules 100.0/ 0.0/  0.0 (wrong act  0.0) x0 | vss  59.3/10.7/ 30.0 (wrong act  6.3) x21 |
+heldout_formulations    300 gold  300 | demo  99.7  56.3 | rules  99.7/ 0.3/  0.0 (wrong act  0.0) x0 | vss  56.3/14.7/ 29.0 (wrong act  6.3) x19 |
+ALL templates rules 98.3/0.4/1.2 (wrong act 0.7) extra 7
+ALL templates vss 62.5/11.0/26.6 (wrong act 6.9) extra 81
+== llm_short: 3000 LLM-written one-line commands with spans; the VSS cutter was trained on them
+llm_short              3000 gold 3000 | demo   -     -   | rules  70.8/ 5.8/ 23.4 (wrong act 11.9) x397 | vss  75.9/ 7.5/ 16.6 (wrong act  9.1) x282 |
+ALL llm_short rules 70.8/5.8/23.4 (wrong act 11.9) extra 397
+ALL llm_short vss 75.9/7.5/16.6 (wrong act 9.1) extra 282
+composer: docs/model/micro/registry_r2.json · worlds shapes micro/shapes7r2, links micro/links7r2, position micro/position7r2, graphq micro/graphq7r2, questions micro/questions7r2, manage micro/manage7r2, history micro/history7r2 · filler docs/model/context/weights_r2.json · event hint H1
+
+totals (per gold request): 4858 requests · right 75.1% · done wrong 10.8% · not done 14.1% · extra 373
+  sample1000/bench_fresh1_haiku: 542 · right 79.5 · wrong 13.3 · not done 7.2 · extra 29
+  sample1000/bench_fresh1_sonnet: 700 · right 77.7 · wrong 8.4 · not done 13.9 · extra 50
+  sample1000/bench_haiku_spans: 442 · right 80.1 · wrong 11.3 · not done 8.6 · extra 26
+  sample1000/bench_sonnet_spans: 483 · right 55.5 · wrong 12.2 · not done 32.3 · extra 51
+  sample1000/train_haiku_msg: 483 · right 90.5 · wrong 7.0 · not done 2.5 · extra 11
+  sample1000/train_haiku_msg2: 427 · right 82.7 · wrong 8.2 · not done 9.1 · extra 39
+  sample1000/train_sonnet_long: 535 · right 69.3 · wrong 12.5 · not done 18.1 · extra 51
+  sample1000/train_sonnet_msg: 667 · right 73.6 · wrong 9.6 · not done 16.8 · extra 60
+  sample1000/train_sonnet_msg2: 579 · right 69.3 · wrong 14.5 · not done 16.2 · extra 56
+
+first cause of the 1208 requests not right (524 done wrong + 684 not done)
+| cause | requests | share of misses | done wrong | not done |
+|---|---|---|---|---|
+| 1 cut: cut short (a value of the request is outside the unit) | 99 | 8.2% | 70 | 29 |
+| 1 cut: lost (no unit holds a letter of the request) | 144 | 11.9% | 8 | 136 |
+| 1 cut: merged with another request (the unit gave the other one) | 39 | 3.2% | 1 | 38 |
+| 1 cut: the trigger word is outside every unit | 20 | 1.7% | 9 | 11 |
+| 2 event: the gold world read another event | 103 | 8.5% | 2 | 101 |
+| 2 ignored: no candidate understood a word | 2 | 0.2% | 0 | 2 |
+| 2 unknown-event: the gold world found no action word (no-sense) | 24 | 2.0% | 1 | 23 |
+| 2 unknown-event: the gold world found no action word (unknown-event) | 5 | 0.4% | 0 | 5 |
+| 2 world: another world won (fewer words not understood) | 148 | 12.3% | 0 | 148 |
+| 2 world: another world won (tie decided by context) | 5 | 0.4% | 0 | 5 |
+| 2 world: another world won (tie decided by order) | 7 | 0.6% | 0 | 7 |
+| 2 world: the gold world is not a candidate (cutter's top k) | 13 | 1.1% | 0 | 13 |
+| 3 filler asked (empty) | 72 | 6.0% | 5 | 67 |
+| 3 filler asked (empty+pron) | 3 | 0.2% | 0 | 3 |
+| 3 filler asked (empty+vague) | 1 | 0.1% | 0 | 1 |
+| 3 filler asked (pron) | 71 | 5.9% | 4 | 67 |
+| 3 filler asked (vague) | 7 | 0.6% | 0 | 7 |
+| 4 pairing: done by another unit | 2 | 0.2% | 2 | 0 |
+| 4 pairing: the unit's request was paired to another gold request (or none) | 21 | 1.7% | 0 | 21 |
+| 5 adapter: the reading holds the value, the args do not | 35 | 2.9% | 35 | 0 |
+| 5 description read as another description or a name | 5 | 0.4% | 5 | 0 |
+| 5 filler dropped a reference (pron) | 4 | 0.3% | 4 | 0 |
+| 5 filler filled wrong (empty entity key) | 44 | 3.6% | 44 | 0 |
+| 5 filler filled wrong (pron entity key) | 21 | 1.7% | 21 | 0 |
+| 5 filler filled wrong (vague entity key) | 1 | 0.1% | 1 | 0 |
+| 5 front end: the value is not a token of the unit | 146 | 12.1% | 146 | 0 |
+| 5 other (the raw args hold the value; a later step changed it) | 6 | 0.5% | 6 | 0 |
+| 5 roles: the key holds the gold values and more (reader) | 100 | 8.3% | 100 | 0 |
+| 5 roles: the value is a token of the unit, placed in no role | 40 | 3.3% | 40 | 0 |
+| 5 roles: the value is in another key (wrong role) | 20 | 1.7% | 20 | 0 |
+
+per stage: 1 cut 302 (25.0%: wrong 88, not done 214) · 2 world / event 307 (25.4%: wrong 3, not done 304) · 3 filler asked 154 (12.7%: wrong 9, not done 145) · 4 pairing 23 (1.9%: wrong 2, not done 21) · 5 keys 422 (34.9%: wrong 422, not done 0)
+
+extras (373)
+| cause | extras |
+|---|---|
+| extra: the gold request of this unit is done with another action (it counts as not done too) | 218 |
+| extra: the unit is outside every gold request (text that is not a request) | 105 |
+| extra: a second request from one gold request (split, or one request read twice) | 50 |
+
+examples
+
+1 cut: cut short (a value of the request is outside the unit)
+  {"id":"fh-0026","gold":"command:connect {\"action\":\"connect\",\"from\":\"lobby,stairs,kitchen,room1\",\"pairing\":\"chain\"}","span":"Connect Lobby to Stairs, then Stairs to Kitchen, and Kitchen to Room1","unit":"Connect Lobby to Stairs","outside":["kitchen","room1"]}
+composer: docs/model/micro/registry.json · worlds shapes micro/shapes7c, links micro/links7, position micro/position7, graphq micro/graphq7, questions micro/questions7, manage micro/manage7, history micro/history7 · filler docs/model/context/weights.json · event hint H1
+
+totals (per gold request): 4858 requests · right 77.1% · done wrong 11.0% · not done 11.9% · extra 315
+  sample1000/bench_fresh1_haiku: 542 · right 81.9 · wrong 11.3 · not done 6.8 · extra 29
+  sample1000/bench_fresh1_sonnet: 700 · right 80.9 · wrong 9.6 · not done 9.6 · extra 33
+  sample1000/bench_haiku_spans: 442 · right 79.4 · wrong 12.9 · not done 7.7 · extra 28
+  sample1000/bench_sonnet_spans: 483 · right 56.9 · wrong 13.5 · not done 29.6 · extra 42
+  sample1000/train_haiku_msg: 483 · right 90.9 · wrong 7.2 · not done 1.9 · extra 9
+  sample1000/train_haiku_msg2: 427 · right 82.7 · wrong 9.4 · not done 8.0 · extra 36
+  sample1000/train_sonnet_long: 535 · right 73.6 · wrong 13.1 · not done 13.3 · extra 44
+  sample1000/train_sonnet_msg: 667 · right 76.3 · wrong 8.7 · not done 15.0 · extra 46
+  sample1000/train_sonnet_msg2: 579 · right 71.8 · wrong 14.0 · not done 14.2 · extra 48
+
+first cause of the 1111 requests not right (534 done wrong + 577 not done)
+| cause | requests | share of misses | done wrong | not done |
+|---|---|---|---|---|
+| 1 cut: cut short (a value of the request is outside the unit) | 100 | 9.0% | 69 | 31 |
+| 1 cut: lost (no unit holds a letter of the request) | 146 | 13.1% | 6 | 140 |
+| 1 cut: merged with another request (the unit gave the other one) | 40 | 3.6% | 0 | 40 |
+| 1 cut: the trigger word is outside every unit | 24 | 2.2% | 12 | 12 |
+| 2 event: the gold world read another event | 84 | 7.6% | 1 | 83 |
+| 2 ignored: no candidate understood a word | 4 | 0.4% | 0 | 4 |
+| 2 unknown-event: the gold world found no action word (no-sense) | 24 | 2.2% | 0 | 24 |
+| 2 unknown-event: the gold world found no action word (unknown-event) | 6 | 0.5% | 0 | 6 |
+| 2 world: another world won (fewer words not understood) | 50 | 4.5% | 1 | 49 |
+| 2 world: another world won (tie decided by context) | 6 | 0.5% | 0 | 6 |
+| 2 world: another world won (tie decided by order) | 9 | 0.8% | 1 | 8 |
+| 2 world: the gold world is not a candidate (cutter's top k) | 13 | 1.2% | 0 | 13 |
+| 3 filler asked (empty) | 76 | 6.8% | 8 | 68 |
+| 3 filler asked (empty+pron) | 4 | 0.4% | 0 | 4 |
+| 3 filler asked (pron) | 64 | 5.8% | 4 | 60 |
+| 3 filler asked (vague) | 7 | 0.6% | 0 | 7 |
+| 4 pairing: the unit's request was paired to another gold request (or none) | 22 | 2.0% | 0 | 22 |
+| 5 adapter: the reading holds the value, the args do not | 35 | 3.2% | 35 | 0 |
+| 5 description read as another description or a name | 9 | 0.8% | 9 | 0 |
+| 5 filler dropped a reference (pron) | 3 | 0.3% | 3 | 0 |
+| 5 filler filled wrong (empty entity key) | 52 | 4.7% | 52 | 0 |
+| 5 filler filled wrong (pron entity key) | 16 | 1.4% | 16 | 0 |
+| 5 filler filled wrong (vague entity key) | 2 | 0.2% | 2 | 0 |
+| 5 front end: the value is not a token of the unit | 153 | 13.8% | 153 | 0 |
+| 5 other (the raw args hold the value; a later step changed it) | 8 | 0.7% | 8 | 0 |
+| 5 roles: the key holds the gold values and more (reader) | 91 | 8.2% | 91 | 0 |
+| 5 roles: the value is a token of the unit, placed in no role | 40 | 3.6% | 40 | 0 |
+| 5 roles: the value is in another key (wrong role) | 23 | 2.1% | 23 | 0 |
+
+per stage: 1 cut 310 (27.9%: wrong 87, not done 223) · 2 world / event 196 (17.6%: wrong 3, not done 193) · 3 filler asked 151 (13.6%: wrong 12, not done 139) · 4 pairing 22 (2.0%: wrong 0, not done 22) · 5 keys 432 (38.9%: wrong 432, not done 0)
+
+extras (315)
+| cause | extras |
+|---|---|
+| extra: the gold request of this unit is done with another action (it counts as not done too) | 165 |
+| extra: the unit is outside every gold request (text that is not a request) | 100 |
+| extra: a second request from one gold request (split, or one request read twice) | 50 |
+
+examples
+
+1 cut: cut short (a value of the request is outside the unit)
+  {"id":"fh-0026","gold":"command:connect {\"action\":\"connect\",\"from\":\"lobby,stairs,kitchen,room1\",\"pairing\":\"chain\"}","span":"Connect Lobby to Stairs, then Stairs to Kitchen, and Kitchen to Room1","unit":"Connect Lobby to Stairs","outside":["kitchen","room1"]}
+  {"id":"fh-0028","gold":"command:connect {\"action\":\"connect\",\"from\":\"ingest,clean,model,report\",\"pairing\":\"chain\"}","span":"Connect Ingest to Clean, Clean to Model, and then Model to Report","unit":"Connect Ingest to Clean, Clean to Model","outside":["report"]}
+  {"id":"fh-0227","gold":"command:connect {\"action\":\"connect\",\"from\":\"mix,rest,bake\",\"pairing\":\"chain\"}","span":"Mix goes to Rest, then Rest goes to Bake","unit":"Mix goes to Rest","outside":["bake"]}

@@ -1,0 +1,271 @@
+composer: docs/model/micro/registry_r2.json · worlds shapes micro/shapes7r2, links micro/links7r2, position micro/position7r2, graphq micro/graphq7r2, questions micro/questions7r2, manage micro/manage7r2, history micro/history7r2 · filler docs/model/context/weights_r2.json · event hint H1
+
+totals (per gold request): 4858 requests · right 75.1% · done wrong 10.8% · not done 14.1% · extra 373
+  sample1000/bench_fresh1_haiku: 542 · right 79.5 · wrong 13.3 · not done 7.2 · extra 29
+  sample1000/bench_fresh1_sonnet: 700 · right 77.7 · wrong 8.4 · not done 13.9 · extra 50
+  sample1000/bench_haiku_spans: 442 · right 80.1 · wrong 11.3 · not done 8.6 · extra 26
+  sample1000/bench_sonnet_spans: 483 · right 55.5 · wrong 12.2 · not done 32.3 · extra 51
+  sample1000/train_haiku_msg: 483 · right 90.5 · wrong 7.0 · not done 2.5 · extra 11
+  sample1000/train_haiku_msg2: 427 · right 82.7 · wrong 8.2 · not done 9.1 · extra 39
+  sample1000/train_sonnet_long: 535 · right 69.3 · wrong 12.5 · not done 18.1 · extra 51
+  sample1000/train_sonnet_msg: 667 · right 73.6 · wrong 9.6 · not done 16.8 · extra 60
+  sample1000/train_sonnet_msg2: 579 · right 69.3 · wrong 14.5 · not done 16.2 · extra 56
+
+first cause of the 1208 requests not right (524 done wrong + 684 not done)
+| cause | requests | share of misses | done wrong | not done |
+|---|---|---|---|---|
+| 1 cut: cut short (a value of the request is outside the unit) | 99 | 8.2% | 70 | 29 |
+| 1 cut: lost (no unit holds a letter of the request) | 144 | 11.9% | 8 | 136 |
+| 1 cut: merged with another request (the unit gave the other one) | 39 | 3.2% | 1 | 38 |
+| 1 cut: the trigger word is outside every unit | 20 | 1.7% | 9 | 11 |
+| 2 event: the gold world read another event | 103 | 8.5% | 2 | 101 |
+| 2 ignored: no candidate understood a word | 2 | 0.2% | 0 | 2 |
+| 2 unknown-event: the gold world found no action word (no-sense) | 24 | 2.0% | 1 | 23 |
+| 2 unknown-event: the gold world found no action word (unknown-event) | 5 | 0.4% | 0 | 5 |
+| 2 world: another world won (fewer words not understood) | 148 | 12.3% | 0 | 148 |
+| 2 world: another world won (tie decided by context) | 5 | 0.4% | 0 | 5 |
+| 2 world: another world won (tie decided by order) | 7 | 0.6% | 0 | 7 |
+| 2 world: the gold world is not a candidate (cutter's top k) | 13 | 1.1% | 0 | 13 |
+| 3 filler asked (empty) | 72 | 6.0% | 5 | 67 |
+| 3 filler asked (empty+pron) | 3 | 0.2% | 0 | 3 |
+| 3 filler asked (empty+vague) | 1 | 0.1% | 0 | 1 |
+| 3 filler asked (pron) | 71 | 5.9% | 4 | 67 |
+| 3 filler asked (vague) | 7 | 0.6% | 0 | 7 |
+| 4 pairing: done by another unit | 2 | 0.2% | 2 | 0 |
+| 4 pairing: the unit's request was paired to another gold request (or none) | 21 | 1.7% | 0 | 21 |
+| 5 adapter: the reading holds the value, the args do not | 35 | 2.9% | 35 | 0 |
+| 5 description read as another description or a name | 5 | 0.4% | 5 | 0 |
+| 5 filler dropped a reference (pron) | 4 | 0.3% | 4 | 0 |
+| 5 filler filled wrong (empty entity key) | 44 | 3.6% | 44 | 0 |
+| 5 filler filled wrong (pron entity key) | 21 | 1.7% | 21 | 0 |
+| 5 filler filled wrong (vague entity key) | 1 | 0.1% | 1 | 0 |
+| 5 front end: the value is not a token of the unit | 146 | 12.1% | 146 | 0 |
+| 5 other (the raw args hold the value; a later step changed it) | 6 | 0.5% | 6 | 0 |
+| 5 roles: the key holds the gold values and more (reader) | 100 | 8.3% | 100 | 0 |
+| 5 roles: the value is a token of the unit, placed in no role | 40 | 3.3% | 40 | 0 |
+| 5 roles: the value is in another key (wrong role) | 20 | 1.7% | 20 | 0 |
+
+per stage: 1 cut 302 (25.0%: wrong 88, not done 214) · 2 world / event 307 (25.4%: wrong 3, not done 304) · 3 filler asked 154 (12.7%: wrong 9, not done 145) · 4 pairing 23 (1.9%: wrong 2, not done 21) · 5 keys 422 (34.9%: wrong 422, not done 0)
+
+extras (373)
+| cause | extras |
+|---|---|
+| extra: the gold request of this unit is done with another action (it counts as not done too) | 218 |
+| extra: the unit is outside every gold request (text that is not a request) | 105 |
+| extra: a second request from one gold request (split, or one request read twice) | 50 |
+
+examples
+
+1 cut: cut short (a value of the request is outside the unit)
+  {"id":"fh-0026","gold":"command:connect {\"action\":\"connect\",\"from\":\"lobby,stairs,kitchen,room1\",\"pairing\":\"chain\"}","span":"Connect Lobby to Stairs, then Stairs to Kitchen, and Kitchen to Room1","unit":"Connect Lobby to Stairs","outside":["kitchen","room1"]}
+  {"id":"fh-0028","gold":"command:connect {\"action\":\"connect\",\"from\":\"ingest,clean,model,report\",\"pairing\":\"chain\"}","span":"Connect Ingest to Clean, Clean to Model, and then Model to Report","unit":"Connect Ingest to Clean, Clean to Model","outside":["report"]}
+  {"id":"fh-0227","gold":"command:connect {\"action\":\"connect\",\"from\":\"mix,rest,bake\",\"pairing\":\"chain\"}","span":"Mix goes to Rest, then Rest goes to Bake","unit":"Mix goes to Rest","outside":["bake"]}
+  {"id":"fs-0031","gold":"command:arrange {\"action\":\"arrange\",\"target\":\"anna,bo,cy\",\"layout\":\"row\"}","span":"Anna, Bo and Cy should be in a row right under her","unit":"Cy should be in a row right under her","outside":["anna","bo"]}
+  {"id":"fs-0093","gold":"command:align {\"action\":\"align\",\"target\":\"ape,bird\",\"axis\":\"horizontal\"}","span":"ape and bird should be the same height, so line them up","unit":"bird should be the same height, so line them up","outside":["ape"]}
+
+1 cut: lost (no unit holds a letter of the request)
+  {"id":"fh-0026","gold":"command:move {\"action\":\"move\",\"target\":\"lobby\",\"position\":\"bottomleft\"}","span":"The Lobby is at the bottom left corner","unit":null}
+  {"id":"fh-0310","gold":"fact: {\"target\":\"anna\",\"position\":\"near\",\"anchor\":\"ben\"}","span":"Anna is next to Ben","unit":null}
+  {"id":"fh-0313","gold":"command:move {\"action\":\"move\",\"target\":\"gate2\",\"position\":\"bottom\"}","span":"Gate2 sits at the bottom","unit":null}
+  {"id":"fh-0317","gold":"command:connect {\"action\":\"connect\",\"from\":\"magma\",\"to\":\"vent\"}","span":"Magma rises through the Vent","unit":null}
+  {"id":"fh-0332","gold":"fact: {\"target\":\"guard\",\"position\":\"near\",\"anchor\":\"painting\"}","span":"Guard stands near Painting","unit":null}
+
+1 cut: merged with another request (the unit gave the other one)
+  {"id":"fh-0104","gold":"command:connect {\"action\":\"connect\",\"from\":\"modem\",\"to\":\"switch\"}","span":"Modem feeds Switch","unit":"Modem feeds Switch, and Switch connects to both Ap1 and Ap2"}
+  {"id":"fh-0237","gold":"command:connect {\"action\":\"connect\",\"from\":\"server\",\"to\":\"phone\"}","span":"Server connects back to Phone","unit":"Phone connects to Cloud, Cloud connects to Server, Server connects back to Phone"}
+  {"id":"fh-0287","gold":"command:connect {\"action\":\"connect\",\"from\":\"teamc\",\"to\":\"teama\"}","span":"TeamC to TeamA","unit":"Connect TeamA to TeamB, TeamB to TeamC, and TeamC to TeamA"}
+  {"id":"fh-0314","gold":"command:connect {\"action\":\"connect\",\"from\":\"full\",\"to\":\"new\"}","span":"Full back to New","unit":"Connect New to Crescent, Crescent to Half, Half to Full, and Full back to New"}
+  {"id":"fs-0024","gold":"command:set {\"action\":\"set\",\"target\":\"mars\",\"size\":\"tiny\"}","span":"tiny please","unit":"Mars belongs far to the right and tiny"}
+
+1 cut: the trigger word is outside every unit
+  {"id":"fs-0251","gold":"command:set {\"action\":\"set\",\"target\":\"pass\",\"size\":\"small\",\"color\":\"gray\",\"shape\":\"rectangle\"}","span":"I'd like the Pass to be a small gray rectangle","unit":"a small gray rectangle"}
+  {"id":"s-0062","gold":"command:set {\"action\":\"set\",\"target\":\"bed1,bed2\",\"shape\":\"rectangle\",\"color\":\"green\"}","span":"want Bed1 and Bed2 as green rectangles","unit":"Bed2 as green rectangles"}
+  {"id":"s-0085","gold":"command:connect {\"action\":\"connect\",\"from\":\"apply,interview,offer\",\"pairing\":\"chain\"}","span":"Apply -> Interview -> Offer. i want those chained","unit":"Apply -> Interview -> Offer"}
+  {"id":"s-0126","gold":"command:connect {\"action\":\"connect\",\"from\":\"salary\",\"to\":\"rent,savings\"}","span":"My money flows from Salary to Rent and from Salary to Savings. Draw it with arrows","unit":"from Salary to Savings"}
+  {"id":"s-0212","gold":"command:connect {\"action\":\"connect\",\"from\":\"well,pump,field\",\"pairing\":\"chain\",\"color\":\"blue\"}","span":"Water comes from the Well through the Pump to the Field. Make the lines blue","unit":"Make the lines blue"}
+
+2 event: the gold world read another event
+  {"id":"fh-0136","gold":"rule: {\"shape\":\"circle\",\"color\":\"red\"}","span":"From now on circles are red","unit":"From now on circles are red","read":"fact"}
+  {"id":"fh-0477","gold":"question:cycle {\"ask\":\"cycle\"}","span":"Is there any cycle","unit":"Is there any cycle","read":"exists"}
+  {"id":"fs-0031","gold":"question:count {\"ask\":\"count\",\"kind\":\"edge\"}","span":"how many connections do we have in total","unit":"how many connections do we have in total","read":"degree"}
+  {"id":"fs-0045","gold":"question:cycle {\"ask\":\"cycle\"}","span":"Is there any cycle in here","unit":"Is there any cycle in here","read":"exists"}
+  {"id":"fs-0045","gold":"question:count {\"ask\":\"count\",\"kind\":\"edge\"}","span":"How many connections do we have now","unit":"How many connections do we have now","read":"degree"}
+
+2 ignored: no candidate understood a word
+  {"id":"s-0425","gold":"command:distribute {\"action\":\"distribute\",\"target\":\"aisle1,aisle2,aisle3\",\"axis\":\"horizontal\"}","span":"evenly","unit":"evenly"}
+  {"id":"hm2-0061","gold":"command:forget {\"action\":\"forget\"}","span":"Reset the defaults","unit":"Reset the defaults"}
+
+2 unknown-event: the gold world found no action word (no-sense)
+  {"id":"fh-0332","gold":"question:exists {\"ask\":\"exists\",\"color\":\"gray\"}","span":"Is there any gray shape","unit":"Is there any gray shape"}
+  {"id":"fh-0366","gold":"question:exists {\"ask\":\"exists\",\"shape\":\"triangle\"}","span":"Is there any triangle","unit":"Is there any triangle"}
+  {"id":"fs-0078","gold":"command:delete {\"action\":\"delete\",\"target\":\"mention(notcolor=green,quantifier=all)\"}","span":"Remove every shape that isn't green","unit":"Remove every shape that isn't green"}
+  {"id":"fs-0100","gold":"question:check {\"ask\":\"check\",\"target\":\"$new\",\"shape\":\"hexagon\"}","span":"Is it a hexagon","unit":"Is it a hexagon"}
+  {"id":"fs-0313","gold":"command:set {\"action\":\"set\",\"target\":\"mention(quantifier=all)\",\"shape\":\"hexagon\"}","span":"make em all hexagons","unit":"make em all hexagons"}
+
+2 unknown-event: the gold world found no action word (unknown-event)
+  {"id":"fh-0168","gold":"fact: {\"target\":\"dev1,dev2\",\"position\":\"below\",\"anchor\":\"lead\"}","span":"Dev1 and Dev2 sit below Lead","unit":"Dev1 and Dev2 sit below Lead"}
+  {"id":"fs-0160","gold":"question:path {\"ask\":\"path\",\"from\":\"bergen\",\"to\":\"tromso\"}","span":"show me the shortest connection from Bergen to Tromso","unit":"show me the shortest connection from Bergen to Tromso"}
+  {"id":"s-0126","gold":"command:set {\"action\":\"set\",\"target\":\"savings\",\"color\":\"green\"}","span":"Savings in green","unit":"Savings in green"}
+  {"id":"s-0279","gold":"command:connect {\"action\":\"connect\",\"from\":\"idea,prototype,demo\",\"pairing\":\"chain\"}","span":"Idea becomes Prototype becomes Demo","unit":"Idea becomes Prototype becomes Demo, with the last arrow dashed"}
+  {"id":"sm2-0413","gold":"command:label {\"action\":\"label\",\"target\":\"three\",\"label\":\"iii\"}","span":"Three with III","unit":"Three with III"}
+
+2 world: another world won (fewer words not understood)
+  {"id":"fh-0002","gold":"question:list {\"ask\":\"list\",\"position\":\"rightof\",\"anchor\":\"art\"}","span":"Which shapes are to the right of Art","unit":"Which shapes are to the right of Art","chosen":"graphq:check"}
+  {"id":"fh-0083","gold":"question:count {\"ask\":\"count\"}","span":"How many players do we have on the board","unit":"How many players do we have on the board","chosen":"graphq:exists"}
+  {"id":"fh-0127","gold":"question:count {\"ask\":\"count\"}","span":"How many shapes do we have","unit":"How many shapes do we have","chosen":"graphq:exists"}
+  {"id":"fh-0273","gold":"question:neighbors {\"ask\":\"neighbors\",\"target\":\"board\"}","span":"What is linked to Board","unit":"What is linked to Board","chosen":"graphq:connected"}
+  {"id":"fh-0329","gold":"command:undo {\"action\":\"undo\"}","span":"Undo the last connect","unit":"Undo the last connect","chosen":"graphq:connected"}
+
+2 world: another world won (tie decided by context)
+  {"id":"s-0325","gold":"command:set {\"action\":\"set\",\"target\":\"$new\",\"color\":\"gray\"}","span":"Colour that copy gray","unit":"Colour that copy gray","chosen":"manage:duplicate"}
+  {"id":"s-0498","gold":"command:disconnect {\"action\":\"disconnect\",\"from\":\"alpha\",\"to\":\"beta\"}","span":"Remove the direct link","unit":"Remove the direct link","chosen":"manage:delete"}
+  {"id":"sm-0333","gold":"command:connect {\"action\":\"connect\",\"from\":\"call\",\"to\":\"police,fire,ambulance\"}","span":"Link the Call to all three","unit":"Link the Call to all three","chosen":"questions:nearest"}
+  {"id":"sm2-0248","gold":"command:connect {\"action\":\"connect\",\"from\":\"hub\",\"to\":\"spoke1,spoke2,spoke3\"}","span":"Wire Hub to every Spoke","unit":"Wire Hub to every Spoke, three of them","chosen":"questions:nearest"}
+  {"id":"sm2-0560","gold":"command:redo {\"action\":\"redo\"}","span":"redo the label on Nav","unit":"redo the label on Nav","chosen":"manage:label"}
+
+2 world: another world won (tie decided by order)
+  {"id":"s-0063","gold":"question:neighbors {\"ask\":\"neighbors\",\"target\":\"buy\"}","span":"Does anything point out of Buy","unit":"Does anything point out of Buy","chosen":"graphq:exists"}
+  {"id":"s-0453","gold":"command:move {\"action\":\"move\",\"target\":\"nave\",\"position\":\"center\"}","span":"The Nave is in the middle","unit":"The Nave is in the middle and huge","chosen":"shapes:fact"}
+  {"id":"hm2-0527","gold":"question:reachable {\"ask\":\"reachable\",\"from\":\"mayor\"}","span":"What shapes are reachable from Mayor","unit":"What shapes are reachable from Mayor","chosen":"questions:nearest"}
+  {"id":"hm2-0582","gold":"question:reachable {\"ask\":\"reachable\",\"from\":\"aisle2\"}","span":"Which shapes are reachable from Aisle2","unit":"Which shapes are reachable from Aisle2","chosen":"questions:list"}
+  {"id":"sl-0032","gold":"command:move {\"action\":\"move\",\"target\":\"search\",\"position\":\"top\"}","span":"The Search I want on the top","unit":"The Search I want on the top","chosen":"shapes:set"}
+
+2 world: the gold world is not a candidate (cutter's top k)
+  {"id":"fh-0276","gold":"command:move {\"action\":\"move\",\"target\":\"desk\",\"position\":\"between\",\"anchor\":\"shelf1,shelf2\"}","span":"put it there","unit":"Desk is between Shelf1 and Shelf2, put it there"}
+  {"id":"h-0020","gold":"question:path {\"ask\":\"path\",\"from\":\"ingest\",\"to\":\"report\"}","span":"the path from Ingest to Report","unit":"how many steps the path from Ingest to Report passes through"}
+  {"id":"h-0044","gold":"question:path {\"ask\":\"path\",\"from\":\"central\",\"to\":\"stadium\"}","span":"the path from Central to Stadium","unit":"tell me the path from Central to Stadium"}
+  {"id":"h-0067","gold":"question:path {\"ask\":\"path\",\"from\":\"trailhead\",\"to\":\"summit\"}","span":"What is the shortest path from Trailhead to Summit","unit":"What is the shortest path from Trailhead to Summit"}
+  {"id":"h-0133","gold":"question:path {\"ask\":\"path\",\"from\":\"client\",\"to\":\"authority\"}","span":"What is the path from Client to Authority","unit":"What is the path from Client to Authority"}
+
+3 filler asked (empty)
+  {"id":"fh-0010","gold":"command:move {\"action\":\"move\",\"target\":\"search\",\"position\":\"rightof\",\"anchor\":\"logo\"}","span":"put the Search to its right","unit":"put the Search to its right","gaps":"empty anchor"}
+  {"id":"fh-0126","gold":"command:delete {\"action\":\"delete\",\"target\":\"mention(quantifier=all,shape=star)\"}","span":"Delete all the stars","unit":"Delete all the stars","gaps":"empty target"}
+  {"id":"fh-0344","gold":"command:move {\"action\":\"move\",\"target\":\"bye\",\"position\":\"between\",\"anchor\":\"week2,week3\"}","span":"put Bye between them","unit":"put Bye between them","gaps":"empty anchor"}
+  {"id":"fs-0044","gold":"question:property {\"ask\":\"property\",\"target\":\"b1\",\"property\":\"color\"}","span":"what colour","unit":"what colour","gaps":"empty target"}
+  {"id":"fs-0058","gold":"command:set {\"action\":\"set\",\"target\":\"mention(quantifier=all,shape=square)\",\"color\":\"blue\"}","span":"the squares blue","unit":"the squares blue","gaps":"empty target"}
+
+3 filler asked (empty+pron)
+  {"id":"fs-0146","gold":"command:connect {\"action\":\"connect\",\"from\":\"ios\",\"to\":\"android\",\"style\":\"dotted\",\"arrow\":\"none\"}","span":"Link them with a dotted line","unit":"Link them with a dotted line","gaps":"pron to, empty from"}
+  {"id":"h-0336","gold":"command:connect {\"action\":\"connect\",\"from\":\"node8\",\"to\":\"node9b\"}","span":"connect them with a plain arrow","unit":"connect them with a plain arrow","gaps":"pron to, empty from"}
+  {"id":"sm2-0011","gold":"command:disconnect {\"action\":\"disconnect\",\"from\":\"build\",\"to\":\"test\"}","span":"disconnect them","unit":"disconnect them","gaps":"pron to, empty from"}
+
+3 filler asked (empty+vague)
+  {"id":"sm2-0530","gold":"question:connected {\"ask\":\"connected\",\"target\":\"fn1\",\"anchor\":\"fn2\"}","span":"Is any function linked to the other","unit":"Is any function linked to the other","gaps":"vague target, empty anchor"}
+
+3 filler asked (pron)
+  {"id":"fh-0083","gold":"command:set {\"action\":\"set\",\"target\":\"winger1,winger2\",\"size\":\"medium\"}","span":"Make them both medium","unit":"Make them both medium","gaps":"pron target"}
+  {"id":"fh-0202","gold":"command:move {\"action\":\"move\",\"target\":\"tent1,tent2\",\"position\":\"above\",\"anchor\":\"fire\"}","span":"put them above it","unit":"put them above it","gaps":"pron target, pron anchor"}
+  {"id":"fh-0224","gold":"command:align {\"action\":\"align\",\"target\":\"ant,bee,cow,dog,eel\",\"axis\":\"horizontal\"}","span":"align them horizontally","unit":"align them horizontally","gaps":"pron target"}
+  {"id":"fh-0344","gold":"command:connect {\"action\":\"connect\",\"from\":\"week1,week2,week3,week4\",\"pairing\":\"chain\"}","span":"Connect them in order, so the season flows from one week to the next","unit":"Connect them in order","gaps":"pron from"}
+  {"id":"fh-0365","gold":"command:distribute {\"action\":\"distribute\",\"target\":\"chair1,chair2,chair3\",\"axis\":\"vertical\"}","span":"distribute them vertically","unit":"distribute them vertically","gaps":"pron target"}
+
+3 filler asked (vague)
+  {"id":"fh-0031","gold":"command:arrange {\"action\":\"arrange\",\"target\":\"shelf1,shelf2,shelf3\",\"layout\":\"column\"}","span":"arrange those three in a column","unit":"arrange those three in a column","gaps":"vague target"}
+  {"id":"fh-0082","gold":"command:move {\"action\":\"move\",\"target\":\"dock\",\"position\":\"center\"}","span":"put it in the middle of the screen","unit":"put it in the middle of the screen","gaps":"vague target"}
+  {"id":"h-0343","gold":"command:toFront {\"action\":\"tofront\",\"target\":\"mention(recency=newest)\"}","span":"Bring the last shape I made to the front","unit":"Bring the last shape","gaps":"vague target"}
+  {"id":"s-0123","gold":"command:set {\"action\":\"set\",\"target\":\"mention(quantifier=all)\",\"color\":\"orange\"}","span":"Colour the whole thing orange","unit":"Colour the whole thing orange after that","gaps":"vague target"}
+  {"id":"sl-0201","gold":"command:arrange {\"action\":\"arrange\",\"target\":\"mage,rogue,healer\",\"layout\":\"row\"}","span":"the three lieutenants in a row below him","unit":"the three lieutenants in a row below him","gaps":"vague target"}
+
+4 pairing: done by another unit
+  {"id":"fh-0345","gold":"command:connect {\"action\":\"connect\",\"from\":\"clock1,clock2\",\"to\":\"board2\"}","span":"Connect Clock1 to Board2 and Clock2 to Board2","unit":"Connect Clock1 to Board2 and Clock2 to Board2","by":"Clock1 and Clock2 sit on each side of the Board2"}
+  {"id":"fh-0420","gold":"command:connect {\"action\":\"connect\",\"from\":\"laptop2,phone2\",\"to\":\"drive\"}","span":"Connect Laptop2 to Drive and Phone2 to Drive","unit":"Connect Laptop2 to Drive and Phone2 to Drive","by":"Laptop2 and Phone2 both sync to Drive"}
+
+4 pairing: the unit's request was paired to another gold request (or none)
+  {"id":"s-0405","gold":"question:rules {\"ask\":\"rules\"}","span":"Which rules are active","unit":"Which rules are active","act":"question:rules"}
+  {"id":"s-0492","gold":"question:rules {\"ask\":\"rules\"}","span":"the active rules","unit":"tell me the active rules","act":"question:rules"}
+  {"id":"hm2-0272","gold":"question:rules {\"ask\":\"rules\"}","span":"Which rules are active right now","unit":"Which rules are active right now","act":"question:rules"}
+  {"id":"hm2-0315","gold":"question:rules {\"ask\":\"rules\"}","span":"Which rules are active","unit":"Which rules are active","act":"question:rules"}
+  {"id":"hm2-0338","gold":"question:rules {\"ask\":\"rules\"}","span":"Which rules are active now","unit":"Which rules are active now","act":"question:rules"}
+
+5 adapter: the reading holds the value, the args do not
+  {"id":"fh-0133","gold":"question:check {\"ask\":\"check\",\"target\":\"bob\",\"position\":\"near\",\"anchor\":\"ann\"}","span":"Is Bob next to Ann","unit":"Is Bob next to Ann","key":"anchor","got":"∅","want":"ann"}
+  {"id":"fh-0317","gold":"question:list {\"ask\":\"list\",\"position\":\"leftof\",\"anchor\":\"crater\"}","span":"Show me the list of shapes left of Crater","unit":"Show me the list of shapes left of Crater","key":"anchor","got":"∅","want":"crater"}
+  {"id":"fh-0366","gold":"command:toFront {\"action\":\"tofront\",\"target\":\"pawn\"}","span":"Pawn goes in front of King2","unit":"Pawn goes in front of King2","key":"target","got":"king2","want":"pawn"}
+  {"id":"fh-0408","gold":"fact: {\"target\":\"a1,b1\",\"color\":\"red\",\"shape\":\"square\"}","span":"A1 and B1 are both red squares","unit":"A1 and B1 are both red squares","key":"shape","got":"squares","want":"square"}
+  {"id":"fs-0184","gold":"command:move {\"action\":\"move\",\"target\":\"left\",\"position\":\"leftof\",\"anchor\":\"root\"}","span":"Just put Left to the left of Root","unit":"Just put Left to the left of Root","key":"anchor","got":"∅","want":"root"}
+
+5 description read as another description or a name
+  {"id":"fh-0178","gold":"command:set {\"action\":\"set\",\"target\":\"mention(notcolor=green,quantifier=all)\",\"size\":\"huge\"}","span":"Make all the shapes that are not green huge","unit":"Make all the shapes that are not green huge","key":"target","got":"mention(quantifier=all)","want":"mention(notcolor=green,quantifier=all)"}
+  {"id":"hm-0108","gold":"command:set {\"action\":\"set\",\"target\":\"mention(notcolor=white,quantifier=all)\",\"color\":\"purple\"}","span":"Set every shape that is not white to purple","unit":"Set every shape that is not white to purple","key":"target","got":"mention(quantifier=all)","want":"mention(notcolor=white,quantifier=all)"}
+  {"id":"sl-0239","gold":"command:resize {\"action\":\"resize\",\"target\":\"mention(recency=newest,shape=hexagon)\"}","span":"Resize the new hexagon bigger, no wait, smaller","unit":"Resize the new hexagon bigger, no wait, smaller","key":"target","got":"mention(shape=hexagon)","want":"mention(recency=newest,shape=hexagon)"}
+  {"id":"sm2-0304","gold":"command:delete {\"action\":\"delete\",\"target\":\"mention(color=gray,recency=oldest,shape=hexagon)\"}","span":"Axe the old gray hexagon","unit":"Axe the old gray hexagon","key":"target","got":"mention(shape=hexagon)","want":"mention(color=gray,recency=oldest,shape=hexagon)"}
+  {"id":"sm2-0580","gold":"command:arrange {\"action\":\"arrange\",\"target\":\"mention(color=blue,quantifier=all)\",\"layout\":\"row\"}","span":"Arrange all the blue shapes in a row","unit":"Arrange all the blue shapes in a row","key":"target","got":"mention(quantifier=all)","want":"mention(color=blue,quantifier=all)"}
+
+5 filler dropped a reference (pron)
+  {"id":"fh-0338","gold":"command:connect {\"action\":\"connect\",\"from\":\"stage1,stage2,stage3,nose\",\"pairing\":\"chain\"}","span":"Connect them in order from Stage1 up to Nose","unit":"Connect them in order from Stage1 up to Nose","key":"from","got":"stage1,nose","want":"stage1,stage2,stage3,nose"}
+  {"id":"sm2-0149","gold":"command:connect {\"action\":\"connect\",\"from\":\"point\",\"to\":\"serve\"}","span":"point it back at Serve","unit":"point it back at Serve","key":"from","got":"point,serve","want":"point"}
+  {"id":"sm2-0393","gold":"command:connect {\"action\":\"connect\",\"from\":\"basil,cheese\",\"to\":\"dough\"}","span":"Basil and Cheese feed Dough, wire them","unit":"Basil and Cheese feed Dough, wire them","key":"from","got":"basil,cheese,dough","want":"basil,cheese"}
+  {"id":"sm2-0409","gold":"command:connect {\"action\":\"connect\",\"from\":\"runner1,runner2,runner3\",\"to\":\"finish\"}","span":"Runner1, Runner2 and Runner3 all go to Finish, connect them","unit":"Runner1, Runner2 and Runner3 all go to Finish, connect them","key":"from","got":"runner1,runner2,runner3,finish","want":"runner1,runner2,runner3"}
+
+5 filler filled wrong (empty entity key)
+  {"id":"fh-0227","gold":"command:connect {\"action\":\"connect\",\"from\":\"dough,yeast,water\",\"to\":\"mix\"}","span":"Connect Dough to Mix, and Yeast to Mix, and Water to Mix","unit":"Connect Dough to Mix, and Yeast to Mix, and Water to Mix","key":"from","got":"dough","want":"dough,yeast,water"}
+  {"id":"fh-0229","gold":"command:connect {\"action\":\"connect\",\"from\":\"input,filter,model,output\",\"pairing\":\"chain\"}","span":"Connect them as a chain","unit":"Connect them as a chain","key":"from","got":"filter,input,logs,model,output","want":"input,filter,model,output"}
+  {"id":"fh-0266","gold":"command:arrange {\"action\":\"arrange\",\"target\":\"tenor,bass,alto,soprano\",\"layout\":\"circle\"}","span":"Arrange the singers in a circle","unit":"Arrange the singers in a circle","key":"target","got":"alto,bass,soprano,tenor","want":"tenor,bass,alto,soprano"}
+  {"id":"fs-0012","gold":"command:arrange {\"action\":\"arrange\",\"target\":\"api,db,cache\",\"layout\":\"row\"}","span":"Put the three in a row","unit":"Put the three in a row","key":"target","got":"api,cache,db","want":"api,db,cache"}
+  {"id":"fs-0194","gold":"command:connect {\"action\":\"connect\",\"from\":\"$new\",\"to\":\"login\",\"style\":\"dashed\"}","span":"connected to Login with a dashed arrow","unit":"connected to Login with a dashed arrow","key":"from","got":"login","want":"$new"}
+
+5 filler filled wrong (pron entity key)
+  {"id":"fh-0116","gold":"command:set {\"action\":\"set\",\"target\":\"docs\",\"color\":\"gray\",\"shape\":\"rectangle\"}","span":"make it a gray box","unit":"make it a gray box","key":"target","got":"tests","want":"docs"}
+  {"id":"fs-0022","gold":"command:rename {\"action\":\"rename\",\"target\":\"$new\",\"name\":\"gift\"}","span":"Name it Gift","unit":"Name it Gift","key":"target","got":"gift","want":"$new"}
+  {"id":"h-0166","gold":"question:nearest {\"ask\":\"nearest\",\"anchor\":\"lobby3\",\"superlative\":\"closest\"}","span":"Which shape is closest to it","unit":"Which shape is closest to it","key":"anchor","got":"cam1","want":"lobby3"}
+  {"id":"s-0026","gold":"command:set {\"action\":\"set\",\"target\":\"button\",\"color\":\"magenta\"}","span":"paint it magenta","unit":"paint it magenta","key":"target","got":"card","want":"button"}
+  {"id":"s-0215","gold":"command:set {\"action\":\"set\",\"target\":\"plant\",\"size\":\"large\"}","span":"make it large","unit":"make it large","key":"target","got":"hq","want":"plant"}
+
+5 filler filled wrong (vague entity key)
+  {"id":"sm-0150","gold":"command:move {\"action\":\"move\",\"target\":\"sink\",\"position\":\"below\",\"anchor\":\"hood\"}","span":"put it below the Hood","unit":"The Sink should be near the door... I mean put it below the Hood","key":"target","got":"hood","want":"sink"}
+
+5 front end: the value is not a token of the unit
+  {"id":"fh-0028","gold":"question:count {\"ask\":\"count\",\"kind\":\"edge\"}","span":"count how many arrows there are in total","unit":"count how many arrows there are in total","key":"kind","got":"∅","want":"edge","tokens":"how_many there are in total"}
+  {"id":"fh-0031","gold":"question:extreme {\"ask\":\"extreme\",\"superlative\":\"smallest\"}","span":"Which shape is the tiniest one","unit":"Which shape is the tiniest one","key":"superlative","got":"∅","want":"smallest","tokens":"which shape is the extreme_q one"}
+  {"id":"fh-0102","gold":"command:connect {\"action\":\"connect\",\"from\":\"trailhead,camp,summit\",\"pairing\":\"chain\"}","span":"Connect Trailhead to Camp and Camp to Summit","unit":"Connect Trailhead to Camp and Camp to Summit","key":"pairing","got":"∅","want":"chain","tokens":"connect n_trailhead to n_camp and n_camp to n_summit"}
+  {"id":"fh-0104","gold":"question:count {\"ask\":\"count\",\"kind\":\"edge\"}","span":"count how many arrows we have now","unit":"count how many arrows we have now","key":"kind","got":"∅","want":"edge","tokens":"how_many we have now"}
+  {"id":"fh-0127","gold":"command:connect {\"action\":\"connect\",\"from\":\"q1,q2,q3\",\"pairing\":\"chain\"}","span":"Connect Q1 to Q2 and Q2 to Q3","unit":"Connect Q1 to Q2 and Q2 to Q3","key":"pairing","got":"∅","want":"chain","tokens":"connect n_q1 to n_q2 and n_q2 to n_q3"}
+
+5 other (the raw args hold the value; a later step changed it)
+  {"id":"s-0052","gold":"question:path {\"ask\":\"path\",\"from\":\"triage\",\"to\":\"exit\"}","span":"there is a path from Triage to Exit","unit":"check if there is a path from Triage to Exit","key":"to","got":"$new","want":"exit"}
+  {"id":"hm2-0183","gold":"command:connect {\"action\":\"connect\",\"from\":\"count,ignite,lift2\",\"pairing\":\"chain\"}","span":"Count leads to Ignite, and Ignite leads to Lift2","unit":"Count leads to Ignite, and Ignite leads to Lift2, in that order","key":"from","got":"count,ignite,lift2,mention()","want":"count,ignite,lift2"}
+  {"id":"sm-0385","gold":"command:label {\"action\":\"label\",\"target\":\"fiction\",\"label\":\"novels\"}","span":"put the label \"Novels\" on Fiction","unit":"put the label \"Novels\" on Fiction","key":"target","got":"$new","want":"fiction"}
+  {"id":"sm-0500","gold":"command:duplicate {\"action\":\"duplicate\",\"target\":\"japan\"}","span":"Duplicate the Japan hexagon once","unit":"Duplicate the Japan hexagon once","key":"target","got":"$new","want":"japan"}
+  {"id":"sm-0500","gold":"command:swap {\"action\":\"swap\",\"target\":\"japan,peru\"}","span":"Swap Japan and Peru","unit":"Swap Japan and Peru","key":"target","got":"$new,$new","want":"japan,peru"}
+
+5 roles: the key holds the gold values and more (reader)
+  {"id":"fh-0083","gold":"command:connect {\"action\":\"connect\",\"from\":\"winger1,winger2\",\"to\":\"captain\"}","span":"Connect Winger1 and Winger2 to Captain","unit":"Connect Winger1 and Winger2 to Captain","key":"from","got":"winger1,winger2,captain","want":"winger1,winger2"}
+  {"id":"fh-0104","gold":"command:connect {\"action\":\"connect\",\"from\":\"switch\",\"to\":\"ap1,ap2\"}","span":"Switch connects to both Ap1 and Ap2","unit":"Modem feeds Switch, and Switch connects to both Ap1 and Ap2","key":"from","got":"modem,switch,ap1,ap2","want":"switch"}
+  {"id":"fh-0127","gold":"command:connect {\"action\":\"connect\",\"from\":\"q3\",\"to\":\"result\"}","span":"Q3 goes to Result","unit":"Q3 goes to Result","key":"from","got":"q3,result","want":"q3"}
+  {"id":"fh-0166","gold":"command:connect {\"action\":\"connect\",\"from\":\"andgate,orgate\",\"to\":\"out\"}","span":"AndGate and OrGate both go to Out","unit":"AndGate and OrGate both go to Out","key":"from","got":"andgate,orgate,out","want":"andgate,orgate"}
+  {"id":"fh-0247","gold":"command:connect {\"action\":\"connect\",\"from\":\"node1\",\"to\":\"node2,node3\"}","span":"Connect Node1 to Node2 and Node1 to Node3","unit":"Connect Node1 to Node2 and Node1 to Node3","key":"from","got":"node1,node2,node3","want":"node1"}
+
+5 roles: the value is a token of the unit, placed in no role
+  {"id":"fh-0031","gold":"command:move {\"action\":\"move\",\"target\":\"entrance\",\"position\":\"bottom\"}","span":"Move the Entrance to the bottom center","unit":"Move the Entrance to the bottom center","key":"position","got":"∅","want":"bottom"}
+  {"id":"fh-0109","gold":"command:set {\"action\":\"set\",\"target\":\"done\",\"color\":\"blue\"}","span":"make Done blue instead","unit":"Make Done green. Actually, make Done blue instead","key":"color","got":"green","want":"blue"}
+  {"id":"fs-0153","gold":"command:connect {\"action\":\"connect\",\"from\":\"milk,eggs,butter\",\"pairing\":\"chain\"}","span":"Link the Milk to the Eggs and the Eggs to the Butter","unit":"Link the Milk to the Eggs and the Eggs to the Butter","key":"from","got":"eggs,butter","want":"milk,eggs,butter"}
+  {"id":"fs-0194","gold":"command:create {\"action\":\"create\",\"size\":\"small\",\"color\":\"red\",\"shape\":\"circle\",\"name\":\"error\",\"position\":\"right\"}","span":"I want a small red circle named Error on the right side of the canvas","unit":"I want a small red circle named Error on the right side of the canvas","key":"position","got":"∅","want":"right"}
+  {"id":"fs-0251","gold":"command:set {\"action\":\"set\",\"target\":\"table1,table2\",\"size\":\"large\",\"shape\":\"circle\"}","span":"the tables to be big circles","unit":"the tables to be big circles","key":"shape","got":"∅","want":"circle"}
+
+5 roles: the value is in another key (wrong role)
+  {"id":"fh-0442","gold":"command:move {\"action\":\"move\",\"target\":\"fan3\",\"position\":\"left\"}","span":"move Fan3 left","unit":"move Fan3 left","key":"position","got":"∅","want":"left"}
+  {"id":"fs-0024","gold":"command:move {\"action\":\"move\",\"target\":\"mars\",\"position\":\"right\"}","span":"Mars belongs far to the right","unit":"Mars belongs far to the right and tiny","key":"position","got":"∅","want":"right"}
+  {"id":"fs-0410","gold":"question:list {\"ask\":\"list\",\"notColor\":\"lime\"}","span":"Which flasks are not lime","unit":"Which flasks are not lime","key":"notColor","got":"∅","want":"lime"}
+  {"id":"h-0194","gold":"question:exists {\"ask\":\"exists\",\"notColor\":\"navy\"}","span":"Are any sections not navy","unit":"Are any sections not navy","key":"notColor","got":"∅","want":"navy"}
+  {"id":"h-0491","gold":"question:exists {\"ask\":\"exists\",\"notColor\":\"green\"}","span":"Is there any shape left that is not green","unit":"Is there any shape left that is not green","key":"notColor","got":"∅","want":"green"}
+
+extra: the unit is outside every gold request (text that is not a request)
+  {"id":"fh-0016","got":"command:set {\"action\":\"set\",\"target\":\"deploy\"}","unit":"it should be a dotted line"}
+  {"id":"fh-0028","got":"command:set {\"action\":\"set\",\"target\":\"alert\",\"shape\":\"diamond\"}","unit":"Make the Alert a dotted diamond"}
+  {"id":"fh-0064","got":"question:property {\"ask\":\"property\",\"target\":\"box1\",\"property\":\"color\"}","unit":"Is Box2 the same color as Box1"}
+  {"id":"fh-0104","got":"command:set {\"action\":\"set\",\"target\":\"router\",\"color\":\"blue\"}","unit":"Make the Router blue"}
+  {"id":"fh-0116","got":"command:set {\"action\":\"set\",\"target\":\"tests\"}","unit":"Docs should be a dashed box below Tests"}
+
+extra: a second request from one gold request (split, or one request read twice)
+  {"id":"fh-0026","got":"command:connect {\"action\":\"connect\",\"from\":\"lobby,stairs\",\"to\":\"stairs\"}","unit":"Connect Lobby to Stairs"}
+  {"id":"fh-0028","got":"command:connect {\"action\":\"connect\",\"from\":\"model,report\",\"to\":\"report\"}","unit":"Model to Report"}
+  {"id":"fh-0227","got":"command:connect {\"action\":\"connect\",\"from\":\"mix,rest\",\"to\":\"rest\"}","unit":"Mix goes to Rest"}
+  {"id":"fh-0345","got":"command:connect {\"action\":\"connect\",\"from\":\"clock1,board2,clock2\",\"to\":\"board2,clock2\"}","unit":"Connect Clock1 to Board2 and Clock2 to Board2"}
+  {"id":"fh-0420","got":"command:connect {\"action\":\"connect\",\"to\":\"drive,phone2\",\"from\":\"laptop2,drive,phone2\"}","unit":"Connect Laptop2 to Drive and Phone2 to Drive"}
+
+extra: the gold request of this unit is done with another action (it counts as not done too)
+  {"id":"fh-0083","got":"question:exists {\"ask\":\"exists\"}","unit":"How many players do we have on the board"}
+  {"id":"fh-0127","got":"question:exists {\"ask\":\"exists\"}","unit":"How many shapes do we have"}
+  {"id":"fh-0136","got":"fact: {\"target\":\"mention(shape=circle)\",\"color\":\"red\"}","unit":"From now on circles are red"}
+  {"id":"fh-0168","got":"command:move {\"action\":\"move\",\"target\":\"dev1,dev2\",\"position\":\"below\",\"anchor\":\"lead\"}","unit":"Dev1 and Dev2 sit below Lead"}
+  {"id":"fh-0276","got":"fact: {\"position\":\"between\",\"anchor\":\"shelf1,shelf2\"}","unit":"Desk is between Shelf1 and Shelf2, put it there"}

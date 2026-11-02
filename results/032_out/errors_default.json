@@ -1,0 +1,8086 @@
+{
+ "meta": {
+  "registry": "docs/model/micro/registry.json",
+  "cutter": "micro/cutter_worlds7s.json",
+  "event_cutter": "micro/cutter_events.json",
+  "event_hint": "H1",
+  "ties_context": "docs/model/context/weights.json",
+  "worlds": [
+   "shapes micro/shapes7c",
+   "links micro/links7",
+   "position micro/position7",
+   "graphq micro/graphq7",
+   "questions micro/questions7",
+   "manage micro/manage7",
+   "history micro/history7"
+  ],
+  "entity": {
+   "roles": [
+    "object",
+    "landmark",
+    "landmark2",
+    "source",
+    "target",
+    "edge",
+    "members",
+    "targets"
+   ],
+   "keys": [
+    "target",
+    "anchor",
+    "from",
+    "to"
+   ]
+  }
+ },
+ "totals": {
+  "gold": 4858,
+  "right": 3747,
+  "wrong": 534,
+  "notDone": 577,
+  "extra": 315
+ },
+ "perDir": {
+  "sample1000/bench_fresh1_haiku": {
+   "gold": 542,
+   "right": 444,
+   "wrong": 61,
+   "notDone": 37,
+   "extra": 29
+  },
+  "sample1000/bench_fresh1_sonnet": {
+   "gold": 700,
+   "right": 566,
+   "wrong": 67,
+   "notDone": 67,
+   "extra": 33
+  },
+  "sample1000/bench_haiku_spans": {
+   "gold": 442,
+   "right": 351,
+   "wrong": 57,
+   "notDone": 34,
+   "extra": 28
+  },
+  "sample1000/bench_sonnet_spans": {
+   "gold": 483,
+   "right": 275,
+   "wrong": 65,
+   "notDone": 143,
+   "extra": 42
+  },
+  "sample1000/train_haiku_msg": {
+   "gold": 483,
+   "right": 439,
+   "wrong": 35,
+   "notDone": 9,
+   "extra": 9
+  },
+  "sample1000/train_haiku_msg2": {
+   "gold": 427,
+   "right": 353,
+   "wrong": 40,
+   "notDone": 34,
+   "extra": 36
+  },
+  "sample1000/train_sonnet_long": {
+   "gold": 535,
+   "right": 394,
+   "wrong": 70,
+   "notDone": 71,
+   "extra": 44
+  },
+  "sample1000/train_sonnet_msg": {
+   "gold": 667,
+   "right": 509,
+   "wrong": 58,
+   "notDone": 100,
+   "extra": 46
+  },
+  "sample1000/train_sonnet_msg2": {
+   "gold": 579,
+   "right": 416,
+   "wrong": 81,
+   "notDone": 82,
+   "extra": 48
+  }
+ },
+ "causes": {
+  "2 world: another world won (fewer words not understood)": {
+   "n": 50,
+   "wrong": 1,
+   "notDone": 49,
+   "ex": [
+    {
+     "id": "fh-0002",
+     "gold": "question:list {\"ask\":\"list\",\"position\":\"rightof\",\"anchor\":\"art\"}",
+     "span": "Which shapes are to the right of Art",
+     "unit": "Which shapes are to the right of Art",
+     "chosen": "graphq:check"
+    },
+    {
+     "id": "fh-0329",
+     "gold": "command:undo {\"action\":\"undo\"}",
+     "span": "Undo the last connect",
+     "unit": "Undo the last connect",
+     "chosen": "links:connect"
+    },
+    {
+     "id": "fh-0344",
+     "gold": "command:undo {\"action\":\"undo\"}",
+     "span": "Undo the last connect",
+     "unit": "Undo the last connect",
+     "chosen": "links:connect"
+    },
+    {
+     "id": "fh-0347",
+     "gold": "command:forget {\"action\":\"forget\"}",
+     "span": "Forget the rules you saved earlier",
+     "unit": "Forget the rules you saved earlier",
+     "chosen": "questions:list"
+    },
+    {
+     "id": "fh-0369",
+     "gold": "command:undo {\"action\":\"undo\"}",
+     "span": "Undo the last connect",
+     "unit": "Undo the last connect",
+     "chosen": "links:connect"
+    }
+   ]
+  },
+  "3 filler asked (empty)": {
+   "n": 76,
+   "wrong": 8,
+   "notDone": 68,
+   "ex": [
+    {
+     "id": "fh-0010",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"search\",\"position\":\"rightof\",\"anchor\":\"logo\"}",
+     "span": "put the Search to its right",
+     "unit": "put the Search to its right",
+     "gaps": "empty anchor"
+    },
+    {
+     "id": "fh-0344",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"bye\",\"position\":\"between\",\"anchor\":\"week2,week3\"}",
+     "span": "put Bye between them",
+     "unit": "put Bye between them",
+     "gaps": "empty anchor"
+    },
+    {
+     "id": "fs-0024",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"mars\",\"size\":\"tiny\"}",
+     "span": "tiny please",
+     "unit": "tiny please",
+     "gaps": "empty target"
+    },
+    {
+     "id": "fs-0044",
+     "gold": "question:property {\"ask\":\"property\",\"target\":\"b1\",\"property\":\"color\"}",
+     "span": "what colour",
+     "unit": "what colour",
+     "gaps": "empty target"
+    },
+    {
+     "id": "fs-0077",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"root\",\"to\":\"yes,no\"}",
+     "span": "link it to both",
+     "unit": "link it to both",
+     "gaps": "empty to"
+    }
+   ]
+  },
+  "1 cut: lost (no unit holds a letter of the request)": {
+   "n": 146,
+   "wrong": 6,
+   "notDone": 140,
+   "ex": [
+    {
+     "id": "fh-0026",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"lobby\",\"position\":\"bottomleft\"}",
+     "span": "The Lobby is at the bottom left corner",
+     "unit": null
+    },
+    {
+     "id": "fh-0166",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"andgate,orgate\",\"to\":\"out\"}",
+     "span": "AndGate and OrGate both go to Out",
+     "unit": null
+    },
+    {
+     "id": "fh-0168",
+     "gold": "fact: {\"target\":\"dev1,dev2\",\"position\":\"below\",\"anchor\":\"lead\"}",
+     "span": "Dev1 and Dev2 sit below Lead",
+     "unit": null
+    },
+    {
+     "id": "fh-0295",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"sword,shield\",\"to\":\"bag\"}",
+     "span": "Sword and Shield go into the Bag",
+     "unit": null
+    },
+    {
+     "id": "fh-0310",
+     "gold": "fact: {\"target\":\"anna\",\"position\":\"near\",\"anchor\":\"ben\"}",
+     "span": "Anna is next to Ben",
+     "unit": null
+    }
+   ]
+  },
+  "1 cut: cut short (a value of the request is outside the unit)": {
+   "n": 100,
+   "wrong": 69,
+   "notDone": 31,
+   "ex": [
+    {
+     "id": "fh-0026",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"lobby,stairs,kitchen,room1\",\"pairing\":\"chain\"}",
+     "span": "Connect Lobby to Stairs, then Stairs to Kitchen, and Kitchen to Room1",
+     "unit": "Connect Lobby to Stairs",
+     "outside": [
+      "kitchen",
+      "room1"
+     ]
+    },
+    {
+     "id": "fh-0028",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"ingest,clean,model,report\",\"pairing\":\"chain\"}",
+     "span": "Connect Ingest to Clean, Clean to Model, and then Model to Report",
+     "unit": "Connect Ingest to Clean, Clean to Model",
+     "outside": [
+      "report"
+     ]
+    },
+    {
+     "id": "fh-0227",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"mix,rest,bake\",\"pairing\":\"chain\"}",
+     "span": "Mix goes to Rest, then Rest goes to Bake",
+     "unit": "Mix goes to Rest",
+     "outside": [
+      "bake"
+     ]
+    },
+    {
+     "id": "fs-0031",
+     "gold": "command:arrange {\"action\":\"arrange\",\"target\":\"anna,bo,cy\",\"layout\":\"row\"}",
+     "span": "Anna, Bo and Cy should be in a row right under her",
+     "unit": "Cy should be in a row right under her",
+     "outside": [
+      "anna",
+      "bo"
+     ]
+    },
+    {
+     "id": "fs-0093",
+     "gold": "command:align {\"action\":\"align\",\"target\":\"ape,bird\",\"axis\":\"horizontal\"}",
+     "span": "ape and bird should be the same height, so line them up",
+     "unit": "bird should be the same height, so line them up",
+     "outside": [
+      "ape"
+     ]
+    }
+   ]
+  },
+  "5 front end: the value is not a token of the unit": {
+   "n": 153,
+   "wrong": 153,
+   "notDone": 0,
+   "ex": [
+    {
+     "id": "fh-0028",
+     "gold": "question:count {\"ask\":\"count\",\"kind\":\"edge\"}",
+     "span": "count how many arrows there are in total",
+     "unit": "count how many arrows there are in total",
+     "key": "kind",
+     "got": "∅",
+     "want": "edge",
+     "tokens": "how_many there are in total"
+    },
+    {
+     "id": "fh-0031",
+     "gold": "question:extreme {\"ask\":\"extreme\",\"superlative\":\"smallest\"}",
+     "span": "Which shape is the tiniest one",
+     "unit": "Which shape is the tiniest one",
+     "key": "superlative",
+     "got": "∅",
+     "want": "smallest",
+     "tokens": "which shape is the extreme_q one"
+    },
+    {
+     "id": "fh-0102",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"trailhead,camp,summit\",\"pairing\":\"chain\"}",
+     "span": "Connect Trailhead to Camp and Camp to Summit",
+     "unit": "Connect Trailhead to Camp and Camp to Summit",
+     "key": "pairing",
+     "got": "∅",
+     "want": "chain",
+     "tokens": "connect n_trailhead to n_camp and n_camp to n_summit"
+    },
+    {
+     "id": "fh-0104",
+     "gold": "question:count {\"ask\":\"count\",\"kind\":\"edge\"}",
+     "span": "count how many arrows we have now",
+     "unit": "count how many arrows we have now",
+     "key": "kind",
+     "got": "∅",
+     "want": "edge",
+     "tokens": "how_many we have now"
+    },
+    {
+     "id": "fh-0127",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"q1,q2,q3\",\"pairing\":\"chain\"}",
+     "span": "Connect Q1 to Q2 and Q2 to Q3",
+     "unit": "Connect Q1 to Q2 and Q2 to Q3",
+     "key": "pairing",
+     "got": "∅",
+     "want": "chain",
+     "tokens": "connect n_q1 to n_q2 and n_q2 to n_q3"
+    }
+   ]
+  },
+  "3 filler asked (vague)": {
+   "n": 7,
+   "wrong": 0,
+   "notDone": 7,
+   "ex": [
+    {
+     "id": "fh-0031",
+     "gold": "command:arrange {\"action\":\"arrange\",\"target\":\"shelf1,shelf2,shelf3\",\"layout\":\"column\"}",
+     "span": "arrange those three in a column",
+     "unit": "arrange those three in a column",
+     "gaps": "vague target"
+    },
+    {
+     "id": "fh-0082",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"dock\",\"position\":\"center\"}",
+     "span": "put it in the middle of the screen",
+     "unit": "put it in the middle of the screen",
+     "gaps": "vague target"
+    },
+    {
+     "id": "h-0343",
+     "gold": "command:toFront {\"action\":\"tofront\",\"target\":\"mention(recency=newest)\"}",
+     "span": "Bring the last shape I made to the front",
+     "unit": "Bring the last shape",
+     "gaps": "vague target"
+    },
+    {
+     "id": "s-0123",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"mention(quantifier=all)\",\"color\":\"orange\"}",
+     "span": "Colour the whole thing orange",
+     "unit": "Colour the whole thing orange after that",
+     "gaps": "vague target"
+    },
+    {
+     "id": "sl-0201",
+     "gold": "command:arrange {\"action\":\"arrange\",\"target\":\"mage,rogue,healer\",\"layout\":\"row\"}",
+     "span": "the three lieutenants in a row below him",
+     "unit": "the three lieutenants in a row below him",
+     "gaps": "vague target"
+    }
+   ]
+  },
+  "5 roles: the key holds the gold values and more (reader)": {
+   "n": 91,
+   "wrong": 91,
+   "notDone": 0,
+   "ex": [
+    {
+     "id": "fh-0083",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"winger1,winger2\",\"to\":\"captain\"}",
+     "span": "Connect Winger1 and Winger2 to Captain",
+     "unit": "Connect Winger1 and Winger2 to Captain",
+     "key": "from",
+     "got": "winger1,winger2,captain",
+     "want": "winger1,winger2"
+    },
+    {
+     "id": "fh-0104",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"switch\",\"to\":\"ap1,ap2\"}",
+     "span": "Switch connects to both Ap1 and Ap2",
+     "unit": "Modem feeds Switch, and Switch connects to both Ap1 and Ap2",
+     "key": "from",
+     "got": "modem,switch,ap1,ap2",
+     "want": "switch"
+    },
+    {
+     "id": "fh-0127",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"q3\",\"to\":\"result\"}",
+     "span": "Q3 goes to Result",
+     "unit": "Q3 goes to Result",
+     "key": "from",
+     "got": "q3,result",
+     "want": "q3"
+    },
+    {
+     "id": "fh-0208",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"root\",\"to\":\"docs,images,code\"}",
+     "span": "Connect Root to Docs, Images and Code",
+     "unit": "Connect Root to Docs, Images and Code",
+     "key": "to",
+     "got": "root,docs,images,code",
+     "want": "docs,images,code"
+    },
+    {
+     "id": "fh-0247",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"node1\",\"to\":\"node2,node3\"}",
+     "span": "Connect Node1 to Node2 and Node1 to Node3",
+     "unit": "Connect Node1 to Node2 and Node1 to Node3",
+     "key": "from",
+     "got": "node1,node2,node3",
+     "want": "node1"
+    }
+   ]
+  },
+  "3 filler asked (pron)": {
+   "n": 64,
+   "wrong": 4,
+   "notDone": 60,
+   "ex": [
+    {
+     "id": "fh-0083",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"winger1,winger2\",\"size\":\"medium\"}",
+     "span": "Make them both medium",
+     "unit": "Make them both medium",
+     "gaps": "pron target"
+    },
+    {
+     "id": "fh-0202",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"tent1,tent2\",\"position\":\"above\",\"anchor\":\"fire\"}",
+     "span": "put them above it",
+     "unit": "put them above it",
+     "gaps": "pron target, pron anchor"
+    },
+    {
+     "id": "fh-0224",
+     "gold": "command:align {\"action\":\"align\",\"target\":\"ant,bee,cow,dog,eel\",\"axis\":\"horizontal\"}",
+     "span": "align them horizontally",
+     "unit": "align them horizontally",
+     "gaps": "pron target"
+    },
+    {
+     "id": "fh-0344",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"week1,week2,week3,week4\",\"pairing\":\"chain\"}",
+     "span": "Connect them in order, so the season flows from one week to the next",
+     "unit": "Connect them in order",
+     "gaps": "pron from"
+    },
+    {
+     "id": "fh-0365",
+     "gold": "command:distribute {\"action\":\"distribute\",\"target\":\"chair1,chair2,chair3\",\"axis\":\"vertical\"}",
+     "span": "distribute them vertically",
+     "unit": "distribute them vertically",
+     "gaps": "pron target"
+    }
+   ]
+  },
+  "1 cut: merged with another request (the unit gave the other one)": {
+   "n": 40,
+   "wrong": 0,
+   "notDone": 40,
+   "ex": [
+    {
+     "id": "fh-0104",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"modem\",\"to\":\"switch\"}",
+     "span": "Modem feeds Switch",
+     "unit": "Modem feeds Switch, and Switch connects to both Ap1 and Ap2"
+    },
+    {
+     "id": "fh-0237",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"server\",\"to\":\"phone\"}",
+     "span": "Server connects back to Phone",
+     "unit": "Phone connects to Cloud, Cloud connects to Server, Server connects back to Phone"
+    },
+    {
+     "id": "fh-0287",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"teamc\",\"to\":\"teama\"}",
+     "span": "TeamC to TeamA",
+     "unit": "Connect TeamA to TeamB, TeamB to TeamC, and TeamC to TeamA"
+    },
+    {
+     "id": "fh-0314",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"full\",\"to\":\"new\"}",
+     "span": "Full back to New",
+     "unit": "Connect New to Crescent, Crescent to Half, Half to Full, and Full back to New"
+    },
+    {
+     "id": "fs-0046",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"$new\",\"color\":\"white\"}",
+     "span": "make it white",
+     "unit": "place a hexagon above the Goal, call it Post, and make it white"
+    }
+   ]
+  },
+  "5 filler filled wrong (pron entity key)": {
+   "n": 16,
+   "wrong": 16,
+   "notDone": 0,
+   "ex": [
+    {
+     "id": "fh-0116",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"docs\",\"color\":\"gray\",\"shape\":\"rectangle\"}",
+     "span": "make it a gray box",
+     "unit": "make it a gray box",
+     "key": "target",
+     "got": "tests",
+     "want": "docs"
+    },
+    {
+     "id": "fs-0022",
+     "gold": "command:rename {\"action\":\"rename\",\"target\":\"$new\",\"name\":\"gift\"}",
+     "span": "Name it Gift",
+     "unit": "Name it Gift",
+     "key": "target",
+     "got": "gift",
+     "want": "$new"
+    },
+    {
+     "id": "h-0166",
+     "gold": "question:nearest {\"ask\":\"nearest\",\"anchor\":\"lobby3\",\"superlative\":\"closest\"}",
+     "span": "Which shape is closest to it",
+     "unit": "Which shape is closest to it",
+     "key": "anchor",
+     "got": "cam1",
+     "want": "lobby3"
+    },
+    {
+     "id": "s-0215",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"plant\",\"size\":\"large\"}",
+     "span": "make it large",
+     "unit": "make it large",
+     "key": "target",
+     "got": "hq",
+     "want": "plant"
+    },
+    {
+     "id": "s-0498",
+     "gold": "command:create {\"action\":\"create\",\"shape\":\"diamond\",\"color\":\"red\",\"name\":\"gate\",\"position\":\"between\",\"anchor\":\"alpha,beta\"}",
+     "span": "create a diamond named Gate between them, make it red",
+     "unit": "create a diamond named Gate between them, make it red",
+     "key": "anchor",
+     "got": "beta",
+     "want": "alpha,beta"
+    }
+   ]
+  },
+  "2 event: the gold world read another event": {
+   "n": 84,
+   "wrong": 1,
+   "notDone": 83,
+   "ex": [
+    {
+     "id": "fh-0136",
+     "gold": "rule: {\"shape\":\"circle\",\"color\":\"red\"}",
+     "span": "From now on circles are red",
+     "unit": "From now on circles are red",
+     "read": "fact"
+    },
+    {
+     "id": "fh-0477",
+     "gold": "question:cycle {\"ask\":\"cycle\"}",
+     "span": "Is there any cycle",
+     "unit": "Is there any cycle",
+     "read": "exists"
+    },
+    {
+     "id": "fs-0045",
+     "gold": "question:cycle {\"ask\":\"cycle\"}",
+     "span": "Is there any cycle in here",
+     "unit": "Is there any cycle in here",
+     "read": "exists"
+    },
+    {
+     "id": "fs-0157",
+     "gold": "question:property {\"ask\":\"property\",\"target\":\"audi,bmw\",\"property\":\"shape\"}",
+     "span": "what shapes are the cars",
+     "unit": "what shapes are the cars",
+     "read": "list"
+    },
+    {
+     "id": "fs-0160",
+     "gold": "question:count {\"ask\":\"count\",\"kind\":\"edge\"}",
+     "span": "How many links do we have",
+     "unit": "How many links do we have",
+     "read": "degree"
+    }
+   ]
+  },
+  "5 description read as another description or a name": {
+   "n": 9,
+   "wrong": 9,
+   "notDone": 0,
+   "ex": [
+    {
+     "id": "fh-0178",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"mention(notcolor=green,quantifier=all)\",\"size\":\"huge\"}",
+     "span": "Make all the shapes that are not green huge",
+     "unit": "Make all the shapes that are not green huge",
+     "key": "target",
+     "got": "mention(quantifier=all)",
+     "want": "mention(notcolor=green,quantifier=all)"
+    },
+    {
+     "id": "fs-0078",
+     "gold": "command:delete {\"action\":\"delete\",\"target\":\"mention(notcolor=green,quantifier=all)\"}",
+     "span": "Remove every shape that isn't green",
+     "unit": "Remove every shape that isn't green",
+     "key": "target",
+     "got": "mention(quantifier=all)",
+     "want": "mention(notcolor=green,quantifier=all)"
+    },
+    {
+     "id": "h-0214",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"mention(color=orange,shape=circle)\",\"shape\":\"diamond\"}",
+     "span": "make the orange circle a diamond instead",
+     "unit": "make the orange circle a diamond instead",
+     "key": "target",
+     "got": "mention(shape=circle)",
+     "want": "mention(color=orange,shape=circle)"
+    },
+    {
+     "id": "h-0379",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"mention(color=green,shape=rectangle)\",\"size\":\"huge\",\"shape\":\"circle\"}",
+     "span": "Make the green rectangle a huge circle",
+     "unit": "Make the green rectangle a huge circle",
+     "key": "target",
+     "got": "mention(shape=rectangle)",
+     "want": "mention(color=green,shape=rectangle)"
+    },
+    {
+     "id": "s-0166",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"mention(recency=newest,shape=square)\",\"position\":\"rightof\",\"anchor\":\"done\"}",
+     "span": "move the newest square to the right of Done",
+     "unit": "move the newest square to the right of Done",
+     "key": "target",
+     "got": "mention(shape=square)",
+     "want": "mention(recency=newest,shape=square)"
+    }
+   ]
+  },
+  "5 adapter: the reading holds the value, the args do not": {
+   "n": 35,
+   "wrong": 35,
+   "notDone": 0,
+   "ex": [
+    {
+     "id": "fh-0214",
+     "gold": "question:check {\"ask\":\"check\",\"target\":\"stage\",\"comparison\":\"bigger\",\"anchor\":\"crowd\"}",
+     "span": "Is Stage larger than Crowd",
+     "unit": "Is Stage larger than Crowd",
+     "key": "anchor",
+     "got": "∅",
+     "want": "crowd"
+    },
+    {
+     "id": "fh-0366",
+     "gold": "command:toFront {\"action\":\"tofront\",\"target\":\"pawn\"}",
+     "span": "Pawn goes in front of King2",
+     "unit": "Pawn goes in front of King2",
+     "key": "target",
+     "got": "king2",
+     "want": "pawn"
+    },
+    {
+     "id": "fs-0160",
+     "gold": "question:check {\"ask\":\"check\",\"target\":\"oslo\",\"comparison\":\"bigger\",\"anchor\":\"bergen\"}",
+     "span": "is Oslo larger than Bergen",
+     "unit": "is Oslo larger than Bergen",
+     "key": "anchor",
+     "got": "∅",
+     "want": "bergen"
+    },
+    {
+     "id": "fs-0184",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"left\",\"position\":\"leftof\",\"anchor\":\"root\"}",
+     "span": "Just put Left to the left of Root",
+     "unit": "Just put Left to the left of Root",
+     "key": "anchor",
+     "got": "∅",
+     "want": "root"
+    },
+    {
+     "id": "fs-0193",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"floor2\",\"position\":\"above\",\"anchor\":\"floor1\"}",
+     "span": "Floor2 on top of Floor1",
+     "unit": "Floor2 on top of Floor1",
+     "key": "anchor",
+     "got": "∅",
+     "want": "floor1"
+    }
+   ]
+  },
+  "5 filler filled wrong (empty entity key)": {
+   "n": 52,
+   "wrong": 52,
+   "notDone": 0,
+   "ex": [
+    {
+     "id": "fh-0227",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"dough,yeast,water\",\"to\":\"mix\"}",
+     "span": "Connect Dough to Mix, and Yeast to Mix, and Water to Mix",
+     "unit": "Connect Dough to Mix, and Yeast to Mix, and Water to Mix",
+     "key": "from",
+     "got": "dough",
+     "want": "dough,yeast,water"
+    },
+    {
+     "id": "fh-0266",
+     "gold": "command:arrange {\"action\":\"arrange\",\"target\":\"tenor,bass,alto,soprano\",\"layout\":\"circle\"}",
+     "span": "Arrange the singers in a circle",
+     "unit": "Arrange the singers in a circle",
+     "key": "target",
+     "got": "alto,bass,soprano,tenor",
+     "want": "tenor,bass,alto,soprano"
+    },
+    {
+     "id": "fs-0012",
+     "gold": "command:arrange {\"action\":\"arrange\",\"target\":\"api,db,cache\",\"layout\":\"row\"}",
+     "span": "Put the three in a row",
+     "unit": "Put the three in a row",
+     "key": "target",
+     "got": "api,cache,db",
+     "want": "api,db,cache"
+    },
+    {
+     "id": "fs-0153",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"milk,eggs,butter\",\"pairing\":\"chain\"}",
+     "span": "Link the Milk to the Eggs and the Eggs to the Butter",
+     "unit": "Link the Milk to the Eggs and the Eggs to the Butter",
+     "key": "from",
+     "got": "butter",
+     "want": "milk,eggs,butter"
+    },
+    {
+     "id": "fs-0194",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"$new\",\"to\":\"login\",\"style\":\"dashed\"}",
+     "span": "connected to Login with a dashed arrow",
+     "unit": "connected to Login with a dashed arrow",
+     "key": "from",
+     "got": "login",
+     "want": "$new"
+    }
+   ]
+  },
+  "2 world: the gold world is not a candidate (cutter's top k)": {
+   "n": 13,
+   "wrong": 0,
+   "notDone": 13,
+   "ex": [
+    {
+     "id": "fh-0276",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"desk\",\"position\":\"between\",\"anchor\":\"shelf1,shelf2\"}",
+     "span": "put it there",
+     "unit": "Desk is between Shelf1 and Shelf2, put it there"
+    },
+    {
+     "id": "fs-0016",
+     "gold": "command:rename {\"action\":\"rename\",\"target\":\"sidekick\",\"name\":\"buddy\"}",
+     "span": "call it Buddy instead",
+     "unit": "The Sidekick needs a little name change, call it Buddy instead"
+    },
+    {
+     "id": "h-0020",
+     "gold": "question:path {\"ask\":\"path\",\"from\":\"ingest\",\"to\":\"report\"}",
+     "span": "the path from Ingest to Report",
+     "unit": "how many steps the path from Ingest to Report passes through"
+    },
+    {
+     "id": "h-0044",
+     "gold": "question:path {\"ask\":\"path\",\"from\":\"central\",\"to\":\"stadium\"}",
+     "span": "the path from Central to Stadium",
+     "unit": "tell me the path from Central to Stadium"
+    },
+    {
+     "id": "h-0133",
+     "gold": "question:path {\"ask\":\"path\",\"from\":\"client\",\"to\":\"authority\"}",
+     "span": "What is the path from Client to Authority",
+     "unit": "What is the path from Client to Authority"
+    }
+   ]
+  },
+  "5 filler dropped a reference (pron)": {
+   "n": 3,
+   "wrong": 3,
+   "notDone": 0,
+   "ex": [
+    {
+     "id": "fh-0338",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"stage1,stage2,stage3,nose\",\"pairing\":\"chain\"}",
+     "span": "Connect them in order from Stage1 up to Nose",
+     "unit": "Connect them in order from Stage1 up to Nose",
+     "key": "from",
+     "got": "stage1,nose",
+     "want": "stage1,stage2,stage3,nose"
+    },
+    {
+     "id": "sm2-0149",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"point\",\"to\":\"serve\"}",
+     "span": "point it back at Serve",
+     "unit": "point it back at Serve",
+     "key": "from",
+     "got": "point,serve",
+     "want": "point"
+    },
+    {
+     "id": "sm2-0393",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"basil,cheese\",\"to\":\"dough\"}",
+     "span": "Basil and Cheese feed Dough, wire them",
+     "unit": "Basil and Cheese feed Dough, wire them",
+     "key": "from",
+     "got": "basil,cheese,dough",
+     "want": "basil,cheese"
+    }
+   ]
+  },
+  "5 roles: the value is in another key (wrong role)": {
+   "n": 23,
+   "wrong": 23,
+   "notDone": 0,
+   "ex": [
+    {
+     "id": "fh-0442",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"fan3\",\"position\":\"left\"}",
+     "span": "move Fan3 left",
+     "unit": "move Fan3 left",
+     "key": "position",
+     "got": "∅",
+     "want": "left"
+    },
+    {
+     "id": "fs-0024",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"mars\",\"position\":\"right\"}",
+     "span": "Mars belongs far to the right",
+     "unit": "Mars belongs far to the right",
+     "key": "position",
+     "got": "∅",
+     "want": "right"
+    },
+    {
+     "id": "fs-0410",
+     "gold": "question:list {\"ask\":\"list\",\"notColor\":\"lime\"}",
+     "span": "Which flasks are not lime",
+     "unit": "Which flasks are not lime",
+     "key": "notColor",
+     "got": "∅",
+     "want": "lime"
+    },
+    {
+     "id": "h-0005",
+     "gold": "question:exists {\"ask\":\"exists\",\"notColor\":\"blue\"}",
+     "span": "Do we have any shape on the board that is not blue",
+     "unit": "Do we have any shape on the board that is not blue",
+     "key": "notColor",
+     "got": "∅",
+     "want": "blue"
+    },
+    {
+     "id": "h-0194",
+     "gold": "question:exists {\"ask\":\"exists\",\"notColor\":\"navy\"}",
+     "span": "Are any sections not navy",
+     "unit": "Are any sections not navy",
+     "key": "notColor",
+     "got": "∅",
+     "want": "navy"
+    }
+   ]
+  },
+  "3 filler asked (empty+pron)": {
+   "n": 4,
+   "wrong": 0,
+   "notDone": 4,
+   "ex": [
+    {
+     "id": "fs-0146",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"ios\",\"to\":\"android\",\"style\":\"dotted\",\"arrow\":\"none\"}",
+     "span": "Link them with a dotted line",
+     "unit": "Link them with a dotted line",
+     "gaps": "pron to, empty from"
+    },
+    {
+     "id": "fs-0488",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"plant1\",\"to\":\"plant2\"}",
+     "span": "Connect them, one way",
+     "unit": "Connect them, one way",
+     "gaps": "pron to, empty from"
+    },
+    {
+     "id": "h-0336",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"node8\",\"to\":\"node9b\"}",
+     "span": "connect them with a plain arrow",
+     "unit": "connect them with a plain arrow",
+     "gaps": "pron to, empty from"
+    },
+    {
+     "id": "sm2-0011",
+     "gold": "command:disconnect {\"action\":\"disconnect\",\"from\":\"build\",\"to\":\"test\"}",
+     "span": "disconnect them",
+     "unit": "disconnect them",
+     "gaps": "pron to, empty from"
+    }
+   ]
+  },
+  "2 world: another world won (tie decided by order)": {
+   "n": 9,
+   "wrong": 1,
+   "notDone": 8,
+   "ex": [
+    {
+     "id": "fs-0160",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"trondheim\",\"position\":\"between\",\"anchor\":\"oslo,tromso\"}",
+     "span": "Trondheim ought to go between Oslo and Tromso",
+     "unit": "Trondheim ought to go between Oslo and Tromso",
+     "chosen": "shapes:create"
+    },
+    {
+     "id": "s-0026",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"button\",\"position\":\"below\",\"anchor\":\"card\"}",
+     "span": "The Button belongs under the Card",
+     "unit": "The Button belongs under the Card, centered if possible",
+     "chosen": "shapes:fact"
+    },
+    {
+     "id": "s-0220",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"group1\",\"color\":\"red\"}",
+     "span": "Group1 red",
+     "unit": "give each one a different colour: Group1 red",
+     "chosen": "manage:label"
+    },
+    {
+     "id": "hm2-0527",
+     "gold": "question:reachable {\"ask\":\"reachable\",\"from\":\"mayor\"}",
+     "span": "What shapes are reachable from Mayor",
+     "unit": "What shapes are reachable from Mayor",
+     "chosen": "questions:nearest"
+    },
+    {
+     "id": "hm2-0582",
+     "gold": "question:reachable {\"ask\":\"reachable\",\"from\":\"aisle2\"}",
+     "span": "Which shapes are reachable from Aisle2",
+     "unit": "Which shapes are reachable from Aisle2",
+     "chosen": "questions:list"
+    }
+   ]
+  },
+  "1 cut: the trigger word is outside every unit": {
+   "n": 24,
+   "wrong": 12,
+   "notDone": 12,
+   "ex": [
+    {
+     "id": "fs-0251",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"pass\",\"size\":\"small\",\"color\":\"gray\",\"shape\":\"rectangle\"}",
+     "span": "I'd like the Pass to be a small gray rectangle",
+     "unit": "a small gray rectangle"
+    },
+    {
+     "id": "fs-0341",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"joe\",\"to\":\"jim\",\"arrow\":\"both\"}",
+     "span": "Joe knows Jim. Link, two way",
+     "unit": "Joe knows Jim"
+    },
+    {
+     "id": "h-0113",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"solar\",\"size\":\"large\",\"color\":\"yellow\",\"shape\":\"square\"}",
+     "span": "make the Solar panel a large yellow square",
+     "unit": "a large yellow square"
+    },
+    {
+     "id": "h-0241",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"bank\",\"color\":\"green\"}",
+     "span": "change Bank color to green",
+     "unit": "color to green"
+    },
+    {
+     "id": "s-0030",
+     "gold": "command:create {\"action\":\"create\",\"shape\":\"circle\",\"color\":\"white\",\"size\":\"tiny\",\"label\":\"ta\",\"position\":\"near\",\"anchor\":\"prof2\"}",
+     "span": "I'd also love a tiny white circle labeled \"TA\" placed near Prof2",
+     "unit": "love a tiny white circle labeled \"TA\" placed near Prof2"
+    }
+   ]
+  },
+  "2 unknown-event: the gold world found no action word (no-sense)": {
+   "n": 24,
+   "wrong": 0,
+   "notDone": 24,
+   "ex": [
+    {
+     "id": "fs-0313",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"mention(quantifier=all)\",\"shape\":\"hexagon\"}",
+     "span": "make em all hexagons",
+     "unit": "make em all hexagons"
+    },
+    {
+     "id": "fs-0379",
+     "gold": "command:create {\"action\":\"create\",\"count\":\"2\",\"size\":\"tiny\",\"shape\":\"circle\",\"position\":\"below\",\"anchor\":\"cup\"}",
+     "span": "Same again below it",
+     "unit": "Same again below it"
+    },
+    {
+     "id": "fs-0495",
+     "gold": "question:check {\"ask\":\"check\",\"target\":\"box\",\"color\":\"blue\"}",
+     "span": "Is it blue",
+     "unit": "Is it blue"
+    },
+    {
+     "id": "s-0196",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"camp,lake,peak\",\"pairing\":\"chain\"}",
+     "span": "The trail goes from Camp to Lake to Peak, so connect them that way",
+     "unit": "The trail goes from Camp to Lake to Peak, so connect them that way"
+    },
+    {
+     "id": "s-0279",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"mention(notcolor=blue,quantifier=all)\",\"color\":\"blue\"}",
+     "span": "make everything that is not blue turn blue",
+     "unit": "make everything that is not blue turn blue"
+    }
+   ]
+  },
+  "5 roles: the value is a token of the unit, placed in no role": {
+   "n": 40,
+   "wrong": 40,
+   "notDone": 0,
+   "ex": [
+    {
+     "id": "fs-0315",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"book1\",\"direction\":\"right\",\"distance\":\"30\"}",
+     "span": "Nudge Book1 to the left, no wait, to the right by 30",
+     "unit": "Nudge Book1 to the left, no wait, to the right by 30",
+     "key": "direction",
+     "got": "left",
+     "want": "right"
+    },
+    {
+     "id": "h-0019",
+     "gold": "command:create {\"action\":\"create\",\"shape\":\"square\",\"name\":\"storage\",\"position\":\"between\",\"anchor\":\"lobby,lift\"}",
+     "span": "Add a square called Storage between Lobby and Lift",
+     "unit": "Add a square called Storage between Lobby and Lift and make it small",
+     "key": "anchor",
+     "got": "lobby",
+     "want": "lobby,lift"
+    },
+    {
+     "id": "h-0070",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"new\",\"to\":\"assigned\",\"label\":\"assign\"}",
+     "span": "draw an arrow from New to Assigned labeled assign",
+     "unit": "draw an arrow from New to Assigned labeled assign",
+     "key": "label",
+     "got": "∅",
+     "want": "assign"
+    },
+    {
+     "id": "h-0083",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"plan\",\"to\":\"draft\",\"label\":\"write\"}",
+     "span": "Connect Plan to Draft with an arrow labeled write",
+     "unit": "Connect Plan to Draft with an arrow labeled write",
+     "key": "label",
+     "got": "∅",
+     "want": "write"
+    },
+    {
+     "id": "h-0105",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"pay\",\"to\":\"confirm\",\"style\":\"dotted\",\"label\":\"card\"}",
+     "span": "Pay to Confirm with a dotted arrow labeled card",
+     "unit": "then Pay to Confirm with a dotted arrow labeled card",
+     "key": "label",
+     "got": "∅",
+     "want": "card"
+    }
+   ]
+  },
+  "2 world: another world won (tie decided by context)": {
+   "n": 6,
+   "wrong": 0,
+   "notDone": 6,
+   "ex": [
+    {
+     "id": "h-0254",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"mention(recency=newest,shape=circle)\",\"position\":\"above\",\"anchor\":\"peak\"}",
+     "span": "move the latest circle above Peak",
+     "unit": "move the latest circle above Peak",
+     "chosen": "questions:list"
+    },
+    {
+     "id": "sl-0177",
+     "gold": "fact: {\"target\":\"mum,dad,kid1,kid2\",\"color\":\"blue\",\"shape\":\"circle\"}",
+     "span": "The people are all blue circles",
+     "unit": "The people are all blue circles",
+     "chosen": "manage:label"
+    },
+    {
+     "id": "sm-0294",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"mention(quantifier=all,shape=rectangle)\",\"color\":\"gray\"}",
+     "span": "Everything that is a rectangle should be gray",
+     "unit": "Everything that is a rectangle should be gray",
+     "chosen": "graphq:check"
+    },
+    {
+     "id": "sm-0486",
+     "gold": "question:nearest {\"ask\":\"nearest\",\"anchor\":\"agent\",\"superlative\":\"farthest\"}",
+     "span": "The farthest",
+     "unit": "The farthest",
+     "chosen": "links:connect"
+    },
+    {
+     "id": "sm-0541",
+     "gold": "question:path {\"ask\":\"path\",\"from\":\"blue\",\"to\":\"server\"}",
+     "span": "from Blue",
+     "unit": "from Blue",
+     "chosen": "questions:nearest"
+    }
+   ]
+  },
+  "5 other (the raw args hold the value; a later step changed it)": {
+   "n": 8,
+   "wrong": 8,
+   "notDone": 0,
+   "ex": [
+    {
+     "id": "s-0052",
+     "gold": "question:path {\"ask\":\"path\",\"from\":\"triage\",\"to\":\"exit\"}",
+     "span": "there is a path from Triage to Exit",
+     "unit": "check if there is a path from Triage to Exit",
+     "key": "to",
+     "got": "$new",
+     "want": "exit"
+    },
+    {
+     "id": "hm2-0183",
+     "gold": "command:connect {\"action\":\"connect\",\"from\":\"count,ignite,lift2\",\"pairing\":\"chain\"}",
+     "span": "Count leads to Ignite, and Ignite leads to Lift2",
+     "unit": "Count leads to Ignite, and Ignite leads to Lift2, in that order",
+     "key": "from",
+     "got": "count,ignite,lift2,mention()",
+     "want": "count,ignite,lift2"
+    },
+    {
+     "id": "sm-0230",
+     "gold": "command:label {\"action\":\"label\",\"target\":\"plot\",\"label\":\"act one\"}",
+     "span": "Label Plot \"Act one\"",
+     "unit": "Label Plot \"Act one\"",
+     "key": "target",
+     "got": "$new",
+     "want": "plot"
+    },
+    {
+     "id": "sm-0385",
+     "gold": "command:label {\"action\":\"label\",\"target\":\"fiction\",\"label\":\"novels\"}",
+     "span": "put the label \"Novels\" on Fiction",
+     "unit": "put the label \"Novels\" on Fiction",
+     "key": "target",
+     "got": "$new",
+     "want": "fiction"
+    },
+    {
+     "id": "sm-0500",
+     "gold": "command:duplicate {\"action\":\"duplicate\",\"target\":\"japan\"}",
+     "span": "Duplicate the Japan hexagon once",
+     "unit": "Duplicate the Japan hexagon once",
+     "key": "target",
+     "got": "$new",
+     "want": "japan"
+    }
+   ]
+  },
+  "2 unknown-event: the gold world found no action word (unknown-event)": {
+   "n": 6,
+   "wrong": 0,
+   "notDone": 6,
+   "ex": [
+    {
+     "id": "s-0063",
+     "gold": "question:neighbors {\"ask\":\"neighbors\",\"target\":\"buy\"}",
+     "span": "Does anything point out of Buy",
+     "unit": "Does anything point out of Buy"
+    },
+    {
+     "id": "s-0126",
+     "gold": "command:set {\"action\":\"set\",\"target\":\"savings\",\"color\":\"green\"}",
+     "span": "Savings in green",
+     "unit": "Savings in green please"
+    },
+    {
+     "id": "s-0161",
+     "gold": "question:count {\"ask\":\"count\",\"shape\":\"rectangle\"}",
+     "span": "are there still two cages left",
+     "unit": "hook the Gate to the first one. Wait, are there still two cages left"
+    },
+    {
+     "id": "s-0186",
+     "gold": "question:check {\"ask\":\"check\",\"target\":\"$new\",\"color\":\"yellow\"}",
+     "span": "Warn is yellow",
+     "unit": "Warn is yellow"
+    },
+    {
+     "id": "s-0492",
+     "gold": "command:forget {\"action\":\"forget\"}",
+     "span": "clear all rules",
+     "unit": "clear all rules"
+    }
+   ]
+  },
+  "4 pairing: the unit's request was paired to another gold request (or none)": {
+   "n": 22,
+   "wrong": 0,
+   "notDone": 22,
+   "ex": [
+    {
+     "id": "s-0405",
+     "gold": "question:rules {\"ask\":\"rules\"}",
+     "span": "Which rules are active",
+     "unit": "Which rules are active",
+     "act": "question:rules"
+    },
+    {
+     "id": "s-0492",
+     "gold": "question:rules {\"ask\":\"rules\"}",
+     "span": "the active rules",
+     "unit": "tell me the active rules",
+     "act": "question:rules"
+    },
+    {
+     "id": "hm2-0272",
+     "gold": "question:rules {\"ask\":\"rules\"}",
+     "span": "Which rules are active right now",
+     "unit": "Which rules are active right now",
+     "act": "question:rules"
+    },
+    {
+     "id": "hm2-0315",
+     "gold": "question:rules {\"ask\":\"rules\"}",
+     "span": "Which rules are active",
+     "unit": "Which rules are active",
+     "act": "question:rules"
+    },
+    {
+     "id": "hm2-0338",
+     "gold": "question:rules {\"ask\":\"rules\"}",
+     "span": "Which rules are active now",
+     "unit": "Which rules are active now",
+     "act": "question:rules"
+    }
+   ]
+  },
+  "2 ignored: no candidate understood a word": {
+   "n": 4,
+   "wrong": 0,
+   "notDone": 4,
+   "ex": [
+    {
+     "id": "s-0425",
+     "gold": "command:distribute {\"action\":\"distribute\",\"target\":\"aisle1,aisle2,aisle3\",\"axis\":\"horizontal\"}",
+     "span": "evenly",
+     "unit": "evenly"
+    },
+    {
+     "id": "hm2-0061",
+     "gold": "command:forget {\"action\":\"forget\"}",
+     "span": "Reset the defaults",
+     "unit": "Reset the defaults"
+    },
+    {
+     "id": "hm2-0151",
+     "gold": "command:undo {\"action\":\"undo\"}",
+     "span": "Take that back",
+     "unit": "Take that back"
+    },
+    {
+     "id": "sm-0349",
+     "gold": "command:swap {\"action\":\"swap\",\"target\":\"puppet1,puppet2\"}",
+     "span": "Switch places of the two puppets",
+     "unit": "Switch places of the two puppets"
+    }
+   ]
+  },
+  "5 filler filled wrong (vague entity key)": {
+   "n": 2,
+   "wrong": 2,
+   "notDone": 0,
+   "ex": [
+    {
+     "id": "sm-0150",
+     "gold": "command:move {\"action\":\"move\",\"target\":\"sink\",\"position\":\"below\",\"anchor\":\"hood\"}",
+     "span": "put it below the Hood",
+     "unit": "The Sink should be near the door... I mean put it below the Hood",
+     "key": "target",
+     "got": "hood",
+     "want": "sink"
+    },
+    {
+     "id": "sm2-0248",
+     "gold": "command:arrange {\"action\":\"arrange\",\"target\":\"spoke1,spoke2,spoke3\",\"layout\":\"circle\"}",
+     "span": "arrange Spoke1, Spoke2 and Spoke3 in a circle",
+     "unit": "drag the Spokes to a circle layout, I mean arrange Spoke1, Spoke2 and Spoke3 in a circle",
+     "key": "target",
+     "got": "spoke1",
+     "want": "spoke1,spoke2,spoke3"
+    }
+   ]
+  }
+ },
+ "extras": {
+  "extra: the gold request of this unit is done with another action (it counts as not done too)": {
+   "n": 165,
+   "wrong": 0,
+   "notDone": 0,
+   "ex": [
+    {
+     "id": "fh-0002",
+     "got": "question:check {\"ask\":\"check\",\"target\":\"mention(quantifier=all)\",\"position\":\"rightof\",\"anchor\":\"art\"}",
+     "unit": "Which shapes are to the right of Art"
+    },
+    {
+     "id": "fh-0136",
+     "got": "fact: {\"target\":\"mention(shape=circle)\",\"color\":\"red\"}",
+     "unit": "From now on circles are red"
+    },
+    {
+     "id": "fh-0276",
+     "got": "fact: {\"target\":\"shelf2\",\"position\":\"between\",\"anchor\":\"shelf1,desk\"}",
+     "unit": "Desk is between Shelf1 and Shelf2, put it there"
+    },
+    {
+     "id": "fh-0329",
+     "got": "command:connect {\"action\":\"connect\",\"from\":\"mention()\"}",
+     "unit": "Undo the last connect"
+    },
+    {
+     "id": "fh-0347",
+     "got": "question:list {\"ask\":\"list\"}",
+     "unit": "Forget the rules you saved earlier"
+    }
+   ]
+  },
+  "extra: the unit is outside every gold request (text that is not a request)": {
+   "n": 100,
+   "wrong": 0,
+   "notDone": 0,
+   "ex": [
+    {
+     "id": "fh-0016",
+     "got": "command:connect {\"action\":\"connect\",\"from\":\"notify,deploy\",\"style\":\"dotted\",\"arrow\":\"none\",\"pairing\":\"chain\"}",
+     "unit": "Notify should happen after Deploy and it should be a dotted line"
+    },
+    {
+     "id": "fh-0028",
+     "got": "command:set {\"action\":\"set\",\"target\":\"alert\",\"shape\":\"diamond\"}",
+     "unit": "Make the Alert a dotted diamond"
+    },
+    {
+     "id": "fh-0064",
+     "got": "question:property {\"ask\":\"property\",\"target\":\"box1\",\"property\":\"color\"}",
+     "unit": "Is Box2 the same color as Box1"
+    },
+    {
+     "id": "fh-0104",
+     "got": "command:set {\"action\":\"set\",\"target\":\"router\",\"color\":\"blue\"}",
+     "unit": "Make the Router blue"
+    },
+    {
+     "id": "fh-0109",
+     "got": "command:set {\"action\":\"set\",\"target\":\"done\",\"color\":\"green\"}",
+     "unit": "Make Done green"
+    }
+   ]
+  },
+  "extra: a second request from one gold request (split, or one request read twice)": {
+   "n": 50,
+   "wrong": 0,
+   "notDone": 0,
+   "ex": [
+    {
+     "id": "fh-0026",
+     "got": "command:connect {\"action\":\"connect\",\"from\":\"lobby,stairs\",\"to\":\"stairs\"}",
+     "unit": "Connect Lobby to Stairs"
+    },
+    {
+     "id": "fh-0028",
+     "got": "command:connect {\"action\":\"connect\",\"from\":\"model,report\",\"to\":\"report\"}",
+     "unit": "Model to Report"
+    },
+    {
+     "id": "fh-0227",
+     "got": "command:connect {\"action\":\"connect\",\"from\":\"mix,rest\",\"to\":\"rest\"}",
+     "unit": "Mix goes to Rest"
+    },
+    {
+     "id": "fs-0139",
+     "got": "command:connect {\"action\":\"connect\",\"from\":\"alert,pager,oncall\"}",
+     "unit": "The Alert triggers the Pager, which wakes Oncall"
+    },
+    {
+     "id": "fs-0144",
+     "got": "command:move {\"action\":\"move\",\"target\":\"home\"}",
+     "unit": "Home to the Grid with a green arrow as well"
+    }
+   ]
+  }
+ },
+ "records": [
+  {
+   "id": "fh-0002",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fh-0010",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "fh-0026",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fh-0026",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "fh-0028",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "fh-0028",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0031",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (vague)"
+  },
+  {
+   "id": "fh-0031",
+   "j": 9,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0082",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (vague)"
+  },
+  {
+   "id": "fh-0083",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0083",
+   "j": 8,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "fh-0102",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0104",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "fh-0104",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0104",
+   "j": 8,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0116",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "fh-0127",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0127",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0136",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "fh-0166",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fh-0168",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fh-0178",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 description read as another description or a name"
+  },
+  {
+   "id": "fh-0179",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0187",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0202",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "fh-0208",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0214",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "fh-0224",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "fh-0227",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "fh-0227",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "fh-0229",
+   "j": 8,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0237",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0237",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "fh-0247",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0252",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0259",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0266",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "fh-0273",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0276",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 world: the gold world is not a candidate (cutter's top k)"
+  },
+  {
+   "id": "fh-0287",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0287",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "fh-0289",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0291",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0293",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0295",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fh-0310",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fh-0313",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fh-0314",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0314",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "fh-0314",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0317",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fh-0328",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0329",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fh-0332",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fh-0333",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0333",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0334",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0338",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 filler dropped a reference (pron)"
+  },
+  {
+   "id": "fh-0344",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "fh-0344",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "fh-0344",
+   "j": 10,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0344",
+   "j": 12,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fh-0345",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0347",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0347",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fh-0359",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0364",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0365",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "fh-0365",
+   "j": 11,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0366",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "fh-0369",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0369",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fh-0371",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0379",
+   "j": 14,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fh-0386",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "fh-0386",
+   "j": 10,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0386",
+   "j": 12,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fh-0389",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fh-0396",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0408",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fh-0420",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0430",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0430",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0430",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0431",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0442",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "fh-0442",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0442",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0442",
+   "j": 14,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0442",
+   "j": 16,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fh-0455",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0467",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fh-0474",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fh-0477",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "fh-0485",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "fh-0485",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "fh-0485",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fh-0494",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0003",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0010",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0011",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "fs-0012",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "fs-0012",
+   "j": 6,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fs-0016",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: the gold world is not a candidate (cutter's top k)"
+  },
+  {
+   "id": "fs-0022",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fs-0022",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "fs-0024",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "fs-0024",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "fs-0031",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "fs-0031",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0031",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0031",
+   "j": 6,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0031",
+   "j": 7,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0044",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "fs-0044",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fs-0045",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0045",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "fs-0045",
+   "j": 11,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0046",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "fs-0058",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fs-0074",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fs-0074",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0077",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "fs-0078",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 description read as another description or a name"
+  },
+  {
+   "id": "fs-0081",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0090",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0090",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0093",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "fs-0093",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0100",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fs-0105",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0127",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "fs-0132",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fs-0132",
+   "j": 6,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fs-0143",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0143",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0143",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0144",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "fs-0146",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty+pron)"
+  },
+  {
+   "id": "fs-0153",
+   "j": 7,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "fs-0157",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "fs-0158",
+   "j": 6,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fs-0158",
+   "j": 11,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0160",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: another world won (tie decided by order)"
+  },
+  {
+   "id": "fs-0160",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fs-0160",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "fs-0160",
+   "j": 6,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "fs-0162",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "fs-0167",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0168",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0175",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "fs-0175",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "fs-0184",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "fs-0184",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0189",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0193",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "fs-0193",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "fs-0193",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "fs-0193",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "fs-0194",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0194",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "fs-0209",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "fs-0209",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "fs-0210",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "fs-0210",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "fs-0213",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0213",
+   "j": 12,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0235",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0235",
+   "j": 12,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0246",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0246",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "fs-0246",
+   "j": 12,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0248",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "fs-0248",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fs-0250",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "fs-0251",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fs-0251",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fs-0251",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "fs-0251",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0251",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "fs-0259",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0259",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0259",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "fs-0259",
+   "j": 6,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "fs-0259",
+   "j": 13,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0266",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "fs-0266",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fs-0266",
+   "j": 13,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0266",
+   "j": 15,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "fs-0310",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "fs-0310",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0310",
+   "j": 6,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fs-0313",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "fs-0315",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "fs-0321",
+   "j": 8,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0332",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "fs-0332",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0336",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "fs-0339",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fs-0339",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "fs-0339",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "fs-0341",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "fs-0358",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "fs-0363",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "fs-0363",
+   "j": 10,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0364",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "fs-0379",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "fs-0390",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0394",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0394",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "fs-0410",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0410",
+   "j": 7,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "fs-0410",
+   "j": 8,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "fs-0421",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "fs-0430",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "fs-0430",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0438",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "fs-0449",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "fs-0451",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0451",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0460",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "fs-0460",
+   "j": 6,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "fs-0461",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "fs-0473",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0473",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0473",
+   "j": 8,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "fs-0488",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty+pron)"
+  },
+  {
+   "id": "fs-0490",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "fs-0495",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "fs-0496",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0496",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "fs-0496",
+   "j": 8,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "h-0005",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "h-0005",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "h-0010",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "h-0011",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "h-0011",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "h-0019",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "h-0019",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0019",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "h-0019",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "h-0020",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "h-0020",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "h-0020",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: the gold world is not a candidate (cutter's top k)"
+  },
+  {
+   "id": "h-0042",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "h-0044",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "h-0044",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: the gold world is not a candidate (cutter's top k)"
+  },
+  {
+   "id": "h-0050",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "h-0059",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "h-0070",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "h-0070",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0082",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "h-0083",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0083",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "h-0084",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "h-0093",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "h-0105",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0113",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "h-0113",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "h-0113",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "h-0129",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0133",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0133",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "h-0133",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: the gold world is not a candidate (cutter's top k)"
+  },
+  {
+   "id": "h-0135",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "h-0144",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0144",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0153",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "h-0155",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "h-0163",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: the gold world is not a candidate (cutter's top k)"
+  },
+  {
+   "id": "h-0164",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "h-0166",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0166",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0166",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "h-0168",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "h-0170",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "h-0194",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "h-0214",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "h-0214",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 description read as another description or a name"
+  },
+  {
+   "id": "h-0220",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "h-0225",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "h-0230",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "h-0238",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "h-0238",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0240",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "h-0241",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "h-0241",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "h-0254",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 world: another world won (tie decided by context)"
+  },
+  {
+   "id": "h-0257",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "h-0261",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0282",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "h-0287",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "h-0292",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "h-0292",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "h-0312",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "h-0312",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "h-0327",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "h-0335",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "h-0336",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "h-0336",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty+pron)"
+  },
+  {
+   "id": "h-0343",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (vague)"
+  },
+  {
+   "id": "h-0343",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0365",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0365",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "h-0379",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "h-0379",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 description read as another description or a name"
+  },
+  {
+   "id": "h-0384",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "h-0384",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0388",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "h-0388",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "h-0388",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "h-0404",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "h-0421",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "h-0433",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "h-0433",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "h-0433",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "h-0449",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "h-0450",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0461",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "h-0478",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "h-0491",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "h-0493",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "h-0493",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "s-0004",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0004",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0005",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0005",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0009",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0010",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0025",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0026",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "2 world: another world won (tie decided by order)"
+  },
+  {
+   "id": "s-0026",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0030",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "s-0030",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "s-0030",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "s-0032",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "s-0032",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "s-0037",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "s-0040",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "s-0040",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0047",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0052",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "s-0052",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 other (the raw args hold the value; a later step changed it)"
+  },
+  {
+   "id": "s-0062",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0062",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "s-0062",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "s-0063",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0063",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0063",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (unknown-event)"
+  },
+  {
+   "id": "s-0065",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0066",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0066",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0068",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "s-0068",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "s-0082",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 world: the gold world is not a candidate (cutter's top k)"
+  },
+  {
+   "id": "s-0082",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: the gold world is not a candidate (cutter's top k)"
+  },
+  {
+   "id": "s-0082",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0085",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "s-0085",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0088",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0088",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "s-0089",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0089",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "s-0105",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "s-0105",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0112",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0112",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0116",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0116",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: the gold world is not a candidate (cutter's top k)"
+  },
+  {
+   "id": "s-0116",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0118",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0120",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0122",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0123",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "s-0123",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0123",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "s-0123",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (vague)"
+  },
+  {
+   "id": "s-0123",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0126",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "s-0126",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (unknown-event)"
+  },
+  {
+   "id": "s-0130",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "s-0133",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0133",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0140",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "s-0140",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "s-0144",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0144",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0150",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0161",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "s-0161",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "s-0161",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "s-0161",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (unknown-event)"
+  },
+  {
+   "id": "s-0166",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "s-0166",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 description read as another description or a name"
+  },
+  {
+   "id": "s-0170",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0170",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "s-0185",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0186",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0186",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (unknown-event)"
+  },
+  {
+   "id": "s-0188",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "s-0190",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0190",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0193",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "s-0193",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "s-0193",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "s-0196",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "s-0196",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0199",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "s-0205",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0205",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0212",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "s-0215",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "s-0215",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0215",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0220",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (tie decided by order)"
+  },
+  {
+   "id": "s-0221",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0221",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0226",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0226",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0226",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0228",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0228",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0234",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0234",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0236",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "s-0238",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 world: the gold world is not a candidate (cutter's top k)"
+  },
+  {
+   "id": "s-0238",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "s-0241",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0243",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "s-0243",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "s-0244",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0244",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0257",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0257",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "s-0260",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0260",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0263",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0268",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0279",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0279",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "s-0279",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "s-0297",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "s-0306",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0306",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "s-0309",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0309",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "s-0318",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0321",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0321",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "s-0321",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "s-0324",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 world: the gold world is not a candidate (cutter's top k)"
+  },
+  {
+   "id": "s-0324",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "s-0324",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "s-0324",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "s-0324",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "s-0325",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "s-0325",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0325",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0325",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "s-0333",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0342",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0342",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "s-0342",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "s-0342",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "s-0342",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "s-0344",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0344",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "s-0344",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "s-0345",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "s-0345",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "s-0345",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "s-0345",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "s-0345",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "s-0346",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "s-0346",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "s-0352",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "s-0352",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: the gold world is not a candidate (cutter's top k)"
+  },
+  {
+   "id": "s-0352",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0352",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0358",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "s-0377",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0377",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0385",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0385",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0386",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0397",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0397",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0397",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0402",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0402",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0402",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0405",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "s-0425",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 ignored: no candidate understood a word"
+  },
+  {
+   "id": "s-0425",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0425",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0432",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "s-0432",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0432",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "s-0435",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0441",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0441",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0444",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "s-0444",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "s-0447",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0448",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0451",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0451",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0452",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0452",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "s-0453",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "s-0453",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "s-0454",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0463",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0463",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0476",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0479",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "s-0482",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "s-0484",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "s-0486",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "s-0486",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "s-0486",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "s-0486",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0492",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "s-0492",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "s-0492",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (unknown-event)"
+  },
+  {
+   "id": "s-0492",
+   "j": 6,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "s-0498",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "s-0498",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "s-0498",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "s-0498",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "s-0498",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm-0008",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "hm-0020",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "hm-0041",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "hm-0060",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "hm-0080",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "hm-0106",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm-0108",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 description read as another description or a name"
+  },
+  {
+   "id": "hm-0122",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "hm-0134",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "hm-0169",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "hm-0189",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "hm-0192",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "hm-0192",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "hm-0197",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "hm-0223",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "hm-0263",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm-0268",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "hm-0280",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "hm-0293",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "hm-0303",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "hm-0304",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "hm-0307",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 description read as another description or a name"
+  },
+  {
+   "id": "hm-0310",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "hm-0326",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "hm-0344",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "hm-0344",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "hm-0350",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "hm-0358",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "hm-0358",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "hm-0358",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "hm-0389",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "hm-0408",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: the gold world is not a candidate (cutter's top k)"
+  },
+  {
+   "id": "hm-0410",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "hm-0435",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm-0439",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "hm-0455",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "hm-0458",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "hm-0462",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm-0522",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm-0554",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm-0556",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm-0559",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "hm-0569",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "hm-0594",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm2-0005",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "hm2-0022",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "hm2-0028",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "hm2-0031",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "hm2-0032",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "hm2-0038",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "hm2-0050",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm2-0051",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "hm2-0061",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 ignored: no candidate understood a word"
+  },
+  {
+   "id": "hm2-0111",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm2-0113",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "hm2-0115",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "hm2-0124",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm2-0133",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "hm2-0151",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 ignored: no candidate understood a word"
+  },
+  {
+   "id": "hm2-0155",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "hm2-0155",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "hm2-0158",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "hm2-0169",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "hm2-0181",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "hm2-0183",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 other (the raw args hold the value; a later step changed it)"
+  },
+  {
+   "id": "hm2-0194",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "hm2-0195",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm2-0201",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "hm2-0209",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "hm2-0209",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm2-0222",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "hm2-0239",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "hm2-0252",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "hm2-0252",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "hm2-0257",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "hm2-0259",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "hm2-0262",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm2-0262",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "hm2-0272",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "hm2-0272",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "hm2-0272",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "hm2-0290",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "hm2-0297",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm2-0297",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm2-0299",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "hm2-0304",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "hm2-0304",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "hm2-0312",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm2-0315",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm2-0315",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "hm2-0338",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "hm2-0338",
+   "j": 8,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "hm2-0352",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "hm2-0353",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "hm2-0353",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "hm2-0362",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "hm2-0368",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "hm2-0380",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "hm2-0404",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "hm2-0404",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "hm2-0406",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "hm2-0429",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "hm2-0441",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "hm2-0442",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "hm2-0456",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "hm2-0479",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "hm2-0490",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "hm2-0490",
+   "j": 8,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "hm2-0490",
+   "j": 10,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "hm2-0527",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (tie decided by order)"
+  },
+  {
+   "id": "hm2-0537",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "hm2-0542",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "hm2-0582",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (tie decided by order)"
+  },
+  {
+   "id": "hm2-0592",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "hm2-0594",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "hm2-0594",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "hm2-0599",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "hm2-0599",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sl-0003",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sl-0005",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "sl-0005",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sl-0005",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sl-0005",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sl-0005",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sl-0006",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0012",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sl-0012",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "sl-0012",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sl-0012",
+   "j": 6,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0017",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0017",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "sl-0017",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sl-0027",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0027",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0027",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "sl-0027",
+   "j": 7,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sl-0032",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: another world won (tie decided by order)"
+  },
+  {
+   "id": "sl-0032",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "sl-0032",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "sl-0035",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sl-0035",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "sl-0037",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0037",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0037",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0037",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sl-0041",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0041",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sl-0041",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sl-0046",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sl-0046",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sl-0046",
+   "j": 6,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sl-0049",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0049",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sl-0049",
+   "j": 8,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0050",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "sl-0050",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sl-0050",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sl-0050",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "sl-0050",
+   "j": 6,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0050",
+   "j": 7,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sl-0061",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sl-0064",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sl-0064",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "sl-0064",
+   "j": 6,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sl-0067",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sl-0067",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sl-0067",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "sl-0068",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0068",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0068",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0068",
+   "j": 8,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "sl-0087",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0087",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sl-0092",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sl-0096",
+   "j": 7,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0096",
+   "j": 8,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0103",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0105",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sl-0105",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0105",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0105",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0108",
+   "j": 6,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sl-0108",
+   "j": 9,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sl-0116",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0116",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0116",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0116",
+   "j": 6,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sl-0116",
+   "j": 7,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0118",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0118",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sl-0118",
+   "j": 7,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sl-0121",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0121",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "sl-0121",
+   "j": 7,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sl-0126",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sl-0143",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sl-0148",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0148",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sl-0148",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sl-0148",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0148",
+   "j": 6,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0150",
+   "j": 6,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "sl-0153",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sl-0158",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0158",
+   "j": 7,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sl-0166",
+   "j": 9,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sl-0169",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0169",
+   "j": 6,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "sl-0169",
+   "j": 8,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sl-0171",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0171",
+   "j": 11,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "sl-0177",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: another world won (tie decided by context)"
+  },
+  {
+   "id": "sl-0177",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0177",
+   "j": 7,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sl-0192",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sl-0195",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sl-0195",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sl-0195",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0195",
+   "j": 6,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sl-0197",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0197",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0197",
+   "j": 7,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0197",
+   "j": 10,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sl-0198",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sl-0198",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0199",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0199",
+   "j": 8,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "sl-0199",
+   "j": 11,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sl-0201",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (vague)"
+  },
+  {
+   "id": "sl-0201",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0205",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sl-0217",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "sl-0217",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "sl-0217",
+   "j": 10,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "sl-0218",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sl-0218",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sl-0218",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sl-0218",
+   "j": 6,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0221",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "sl-0221",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sl-0221",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0221",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sl-0221",
+   "j": 9,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0223",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0223",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "sl-0223",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sl-0224",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sl-0224",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "sl-0227",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sl-0227",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sl-0227",
+   "j": 7,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sl-0227",
+   "j": 10,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0236",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sl-0239",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "sl-0239",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sl-0239",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0239",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0239",
+   "j": 6,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sl-0239",
+   "j": 7,
+   "kind": "wrong",
+   "cause": "5 description read as another description or a name"
+  },
+  {
+   "id": "sm-0002",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0003",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sm-0006",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0018",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm-0018",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sm-0019",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm-0019",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0019",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm-0023",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm-0023",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm-0026",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm-0047",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "sm-0051",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm-0051",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm-0055",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "sm-0060",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (vague)"
+  },
+  {
+   "id": "sm-0061",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "sm-0061",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm-0065",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm-0065",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "sm-0069",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm-0092",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm-0092",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0097",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm-0097",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0117",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0123",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm-0126",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm-0126",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "sm-0126",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "sm-0128",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm-0128",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0128",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sm-0150",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (vague entity key)"
+  },
+  {
+   "id": "sm-0159",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm-0166",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sm-0170",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm-0170",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "sm-0175",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm-0176",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm-0176",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "sm-0184",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0199",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "sm-0204",
+   "j": 6,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "sm-0206",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm-0206",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "sm-0220",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0220",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sm-0230",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm-0230",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 other (the raw args hold the value; a later step changed it)"
+  },
+  {
+   "id": "sm-0235",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm-0238",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm-0238",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm-0252",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "sm-0252",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "sm-0271",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "sm-0275",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm-0275",
+   "j": 7,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0277",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0277",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0280",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm-0292",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm-0292",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "sm-0293",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm-0293",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0294",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm-0294",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0294",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: another world won (tie decided by context)"
+  },
+  {
+   "id": "sm-0308",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm-0313",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm-0315",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0315",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "sm-0315",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0316",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm-0316",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0320",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0333",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0333",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm-0335",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm-0336",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sm-0346",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0346",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm-0346",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm-0346",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sm-0346",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "sm-0349",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm-0349",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 ignored: no candidate understood a word"
+  },
+  {
+   "id": "sm-0351",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0351",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm-0380",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm-0380",
+   "j": 7,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0385",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm-0385",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 other (the raw args hold the value; a later step changed it)"
+  },
+  {
+   "id": "sm-0388",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0388",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0394",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm-0394",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0394",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0394",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0402",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "sm-0402",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm-0413",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm-0413",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm-0414",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "sm-0423",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm-0424",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm-0428",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm-0428",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0428",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0428",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0433",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0438",
+   "j": 6,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0444",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (tie decided by order)"
+  },
+  {
+   "id": "sm-0444",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm-0457",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0464",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm-0464",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm-0464",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm-0465",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0468",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm-0468",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm-0468",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm-0477",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "sm-0485",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm-0485",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm-0486",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0486",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: another world won (tie decided by context)"
+  },
+  {
+   "id": "sm-0500",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "sm-0500",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 other (the raw args hold the value; a later step changed it)"
+  },
+  {
+   "id": "sm-0500",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0500",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 other (the raw args hold the value; a later step changed it)"
+  },
+  {
+   "id": "sm-0500",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 other (the raw args hold the value; a later step changed it)"
+  },
+  {
+   "id": "sm-0502",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm-0502",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "sm-0504",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm-0504",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm-0508",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0510",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "sm-0510",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "sm-0510",
+   "j": 8,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0511",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm-0520",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "sm-0541",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm-0541",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: another world won (tie decided by context)"
+  },
+  {
+   "id": "sm-0543",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0543",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm-0543",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm-0545",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm-0563",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0563",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0565",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "sm-0576",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm-0584",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm-0590",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm-0591",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm-0591",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "2 world: another world won (tie decided by order)"
+  },
+  {
+   "id": "sm-0596",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm-0596",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm2-0003",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm2-0003",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0011",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty+pron)"
+  },
+  {
+   "id": "sm2-0011",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0019",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0019",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sm2-0024",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0029",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sm2-0033",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm2-0037",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm2-0044",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "sm2-0045",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0061",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm2-0061",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0069",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm2-0086",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm2-0096",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm2-0096",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0096",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0097",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm2-0115",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0115",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "sm2-0122",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0127",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 other (the raw args hold the value; a later step changed it)"
+  },
+  {
+   "id": "sm2-0142",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sm2-0149",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0149",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 filler dropped a reference (pron)"
+  },
+  {
+   "id": "sm2-0156",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "sm2-0189",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0190",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0195",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "sm2-0195",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0204",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0204",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0205",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm2-0212",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (unknown-event)"
+  },
+  {
+   "id": "sm2-0219",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "sm2-0219",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "sm2-0219",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm2-0221",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "sm2-0227",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "sm2-0230",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm2-0230",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm2-0235",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm2-0237",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm2-0237",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the value is in another key (wrong role)"
+  },
+  {
+   "id": "sm2-0245",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm2-0248",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm2-0248",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (vague entity key)"
+  },
+  {
+   "id": "sm2-0248",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0254",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm2-0257",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "sm2-0258",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm2-0258",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm2-0262",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0262",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm2-0262",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "sm2-0268",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0268",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm2-0270",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm2-0270",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0273",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "sm2-0273",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 adapter: the reading holds the value, the args do not"
+  },
+  {
+   "id": "sm2-0276",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0282",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0289",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0289",
+   "j": 4,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0301",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0304",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm2-0304",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 description read as another description or a name"
+  },
+  {
+   "id": "sm2-0305",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm2-0305",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0313",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0314",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0314",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0314",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0317",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0317",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0323",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm2-0323",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0325",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0329",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (pron entity key)"
+  },
+  {
+   "id": "sm2-0329",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0329",
+   "j": 5,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0332",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm2-0333",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0337",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0348",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm2-0348",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm2-0351",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0351",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "sm2-0367",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "sm2-0380",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0387",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0389",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "sm2-0393",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler dropped a reference (pron)"
+  },
+  {
+   "id": "sm2-0393",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm2-0407",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0409",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm2-0409",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm2-0413",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "sm2-0413",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "1 cut: lost (no unit holds a letter of the request)"
+  },
+  {
+   "id": "sm2-0415",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0415",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm2-0415",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0419",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0434",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0437",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0439",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm2-0445",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0445",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm2-0445",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "sm2-0445",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 unknown-event: the gold world found no action word (no-sense)"
+  },
+  {
+   "id": "sm2-0454",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm2-0454",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0454",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (vague)"
+  },
+  {
+   "id": "sm2-0454",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0455",
+   "j": 6,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm2-0459",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0459",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0470",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm2-0472",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm2-0472",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm2-0476",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm2-0482",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "1 cut: the trigger word is outside every unit"
+  },
+  {
+   "id": "sm2-0483",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm2-0483",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm2-0487",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm2-0487",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: another world won (tie decided by context)"
+  },
+  {
+   "id": "sm2-0492",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0511",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "5 roles: the value is a token of the unit, placed in no role"
+  },
+  {
+   "id": "sm2-0511",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm2-0519",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm2-0530",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "1 cut: cut short (a value of the request is outside the unit)"
+  },
+  {
+   "id": "sm2-0530",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm2-0533",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0533",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm2-0533",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0533",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "sm2-0535",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "1 cut: merged with another request (the unit gave the other one)"
+  },
+  {
+   "id": "sm2-0535",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0540",
+   "j": 7,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "sm2-0545",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm2-0546",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0546",
+   "j": 6,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "sm2-0553",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0560",
+   "j": 0,
+   "kind": "notDone",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sm2-0560",
+   "j": 1,
+   "kind": "wrong",
+   "cause": "2 world: another world won (fewer words not understood)"
+  },
+  {
+   "id": "sm2-0560",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 world: another world won (tie decided by order)"
+  },
+  {
+   "id": "sm2-0580",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm2-0585",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 roles: the key holds the gold values and more (reader)"
+  },
+  {
+   "id": "sm2-0585",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm2-0585",
+   "j": 3,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0585",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0586",
+   "j": 2,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm2-0586",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "3 filler asked (empty)"
+  },
+  {
+   "id": "sm2-0587",
+   "j": 0,
+   "kind": "wrong",
+   "cause": "5 filler filled wrong (empty entity key)"
+  },
+  {
+   "id": "sm2-0587",
+   "j": 4,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  },
+  {
+   "id": "sm2-0588",
+   "j": 1,
+   "kind": "notDone",
+   "cause": "3 filler asked (pron)"
+  },
+  {
+   "id": "sm2-0588",
+   "j": 2,
+   "kind": "wrong",
+   "cause": "5 front end: the value is not a token of the unit"
+  },
+  {
+   "id": "sm2-0588",
+   "j": 3,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0588",
+   "j": 5,
+   "kind": "notDone",
+   "cause": "2 event: the gold world read another event"
+  },
+  {
+   "id": "sm2-0597",
+   "j": 7,
+   "kind": "notDone",
+   "cause": "4 pairing: the unit's request was paired to another gold request (or none)"
+  }
+ ]
+}

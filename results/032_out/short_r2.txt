@@ -1,0 +1,14 @@
+set n | demo-ok rules vss | per request rules R/W/ND(+wrongact) extra | vss R/W/ND extra
+== templates: written or generated from the rules' own templates: they favour the Rules reader
+hand                     40 gold   40 | demo  95.0  80.0 | rules  95.0/ 0.0/  5.0 (wrong act  0.0) x0 | vss  80.0/12.5/  7.5 (wrong act  5.0) x2 |
+blind                    60 gold   60 | demo  83.3  71.7 | rules  83.3/ 3.3/ 13.3 (wrong act  8.3) x5 | vss  71.7/10.0/ 18.3 (wrong act 13.3) x8 |
+broad                   128 gold  140 | demo  96.1  78.1 | rules  95.7/ 1.4/  2.9 (wrong act  2.1) x2 | vss  80.0/11.4/  8.6 (wrong act  4.3) x6 |
+seen                    300 gold  300 | demo 100.0  59.3 | rules 100.0/ 0.0/  0.0 (wrong act  0.0) x0 | vss  59.3/ 7.3/ 33.3 (wrong act  8.3) x25 |
+new_identities          300 gold  300 | demo 100.0  59.3 | rules 100.0/ 0.0/  0.0 (wrong act  0.0) x0 | vss  59.3/10.7/ 30.0 (wrong act  6.3) x21 |
+heldout_formulations    300 gold  300 | demo  99.7  56.3 | rules  99.7/ 0.3/  0.0 (wrong act  0.0) x0 | vss  56.3/14.7/ 29.0 (wrong act  6.3) x19 |
+ALL templates rules 98.3/0.4/1.2 (wrong act 0.7) extra 7
+ALL templates vss 62.5/11.0/26.6 (wrong act 6.9) extra 81
+== llm_short: 3000 LLM-written one-line commands with spans; the VSS cutter was trained on them
+llm_short              3000 gold 3000 | demo   -     -   | rules  70.8/ 5.8/ 23.4 (wrong act 11.9) x397 | vss  75.9/ 7.5/ 16.6 (wrong act  9.1) x282 |
+ALL llm_short rules 70.8/5.8/23.4 (wrong act 11.9) extra 397
+ALL llm_short vss 75.9/7.5/16.6 (wrong act 9.1) extra 282
