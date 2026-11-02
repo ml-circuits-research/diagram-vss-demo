@@ -798,9 +798,11 @@ filler may still rank candidates, but the reader’s confidence decides whether 
 action, shape or value), and <b>not done</b> (not understood, or asked); plus <b>extra</b>: the count of requests nobody asked for.
 Decisions weigh “done wrong” first. A reference the reader leaves for the context (“it”, a name from an earlier sentence) is not an error.
 Every number measured before 2026-11-02, including the table below, is in this form, with every request executed.</p>
-<div class="callout warn" id="precision-measure"><p><b>Being measured.</b> The precision of execution of VSS and SOP-BERT at thresholds chosen on
-held-out data, and of the Rules, with the share of requests done right and the comparison at equal precision:
-<code>training/sketch/PRECISION.md</code>, being written.</p></div>
+<div class="callout" id="precision-measure"><p><b>Precision of execution</b> (<code>training/sketch/PRECISION.md</code>, thresholds fixed on the
+held-out split): at 97%, VSS with its combined confidence (threshold 0.893) does 35.5% of the sample’s requests right at 95.8% precision and asks
+about 52.2%; the VSS margin (at most 87.3%) and SOP-BERT’s smallest probability (at most 94.9%) reach 95% at no threshold; the Rules execute
+everything at 67.1%. Tools: <code>precision.mjs</code>, <code>precision_confidence.mjs</code>, <code>precision_thresholds.json</code>. A fitted
+confidence for SOP-BERT, for a fair comparison, is being measured (<code>PRECISION_BERT.md</code>). Summary: <a href="#help/research-question/precision-result">What this project measures</a>.</p></div>
 <dl class="kv">
   <dt><code>training/sketch/llm_score.mjs</code></dt><dd>Scores a reader on folders of annotated messages. <code>SEG=composer</code>: the whole
   composer on whole messages; <code>SEG=gold</code> with <code>MODEL=micro/&lt;world&gt;</code>: one world on gold spans (no cut). <code>PAIR=value</code>
@@ -902,7 +904,7 @@ page('repository', 'Repository map', `
 <tr><td><code>CUT_SHARED.md</code></td><td>One cut for all three readers: the VSS cut is better on whole messages for both readers, the Rules segmenter on one-line commands; default VSS.</td></tr>
 <tr><td><code>RISK_COVERAGE.md</code></td><td>Does each reader know when it does not know? AUROC VSS margin 0.59, SOP-BERT 0.72 on the sample; risk-coverage curves; thresholds for SOP-BERT chosen on held-out.</td></tr>
 <tr><td><code>VSS_CONFIDENCE.md</code></td><td>A VSS confidence from every step of the chain: AUROC 0.81 on the sample, 0.84 on short held-out commands; each weight named.</td></tr>
-<tr><td><code>PRECISION.md</code></td><td>Being written: precision of execution of each reader at its threshold, compared at equal precision.</td></tr>
+<tr><td><code>PRECISION.md</code></td><td>Precision of execution of each reader at a threshold fixed on held-out; at 97% only VSS with its combined confidence qualifies (35.5% done right on the sample, 52.2% asked).</td></tr>
 </tbody></table></div>
 <p class="note">Older documents in the same folder: <code>VSS_READER_SPEC.md</code> (what is given and learned), <code>ROUTER_V2.md</code> (the router),
 <code>CUTTER.md</code>, <code>PLAN_A.md</code> (16 worlds), <code>LABEL_CONVENTIONS.md</code>, <code>ERROR_ANALYSIS.md</code>, <code>COMPOSER_ERRORS.md</code>,
@@ -918,9 +920,8 @@ page('planned', 'In progress', `
   its confidence clears a threshold chosen on held-out data by a protocol written before the run, and below it asks, saying why (which words,
   which step). It replaces, for VSS, executing <code>abstain</code> readings and filling a gap whenever a candidate ranks first. The confidences
   measured so far: for VSS the one from every step of the chain (VSS_CONFIDENCE.md), for SOP-BERT the smallest probability of its heads
-  (RISK_COVERAGE.md). Then the
-  precision of execution of every reader, the Rules included, and the comparison at equal precision (<code>training/sketch/PRECISION.md</code>,
-  being written).</li>
+  (RISK_COVERAGE.md); the precision of every reader is measured (PRECISION.md): VSS’s threshold is fixed, a fitted confidence for
+  SOP-BERT is being measured (PRECISION_BERT.md).</li>
   <li><b>A fresh test set neither reader has seen</b> (planned): realistic messages written and annotated after the models, read by no training.
   Today the sample is VSS training data and SOP-BERT never saw it, so neither the old measure nor precision compares them on equal footing
   (<a href="#help/chain-vs-one/fairness">Is the comparison fair?</a>).</li>

@@ -76,10 +76,25 @@ can say “not sure”.</p>
   <li><b>Planned</b>: a fresh test set that neither reader has seen. The sample is VSS training data and SOP-BERT never saw it
   (<a href="#help/chain-vs-one/fairness">Is the comparison fair?</a>).</li>
 </ul>
-<div class="callout warn" id="precision-result">
-<p><b>Being measured.</b> The precision of execution of each reader at its threshold chosen on held-out data, the share of requests it does
-right at that precision, and the comparison at equal precision: <code>training/sketch/PRECISION.md</code>, being written. Until it is
-committed, the numbers on these pages are the earlier measure: right / wrong / not done in % of the requested actions, plus extras.</p>
+<div class="callout" id="precision-result">
+<p><b>First result (2026-11-02, <code>training/sketch/PRECISION.md</code>).</b> Each learned reader executes a request only when its confidence
+clears a threshold; the threshold is the lowest at which its precision of execution reaches the level on the held-out split, fixed there and
+then applied unchanged. Precision of execution counts every executed action, extras included.</p>
+<table>
+<tr><th>Reader</th><th>Can it reach 97% precision?</th><th>Sample: precision · requests done right · asked</th></tr>
+<tr><td>VSS, confidence from every step</td><td>yes (threshold 0.893)</td><td>95.8% · 35.5% · 52.2%</td></tr>
+<tr><td>VSS, the old margin</td><td>no: at most 87.3%</td><td>—</td></tr>
+<tr><td>SOP-BERT, smallest probability</td><td>no: at most 94.9%</td><td>—</td></tr>
+<tr><td>Rules (no confidence: executes all)</td><td>no</td><td>67.1% · 68.0% · 0%</td></tr>
+</table>
+<p>In plain words: today only VSS, with the confidence built from every step of its chain, can be set to make at most about 1 silent mistake
+in 30 executed actions. The price is high: it then does about a third of the requests and asks about half (on the held-out split 97.1% ·
+38.7% · 48.4%; at 95% it does about half). SOP-BERT executing everything does the most right (80.8%) at a precision of 77.4%; even its most
+confident requests are wrong about 1 in 20. The Rules are precise only on the short template sets written from their own cues (98.9%).</p>
+<p class="note">Cautions. The sample is VSS training data and SOP-BERT never saw it. VSS’s confidence was fitted on the same held-out split its
+threshold was chosen on, so 97% there is slightly optimistic; on other sets it lands at 95.5–95.8%. SOP-BERT was given only the simplest
+confidence (the smallest probability), VSS a fitted one: the same treatment for SOP-BERT is being measured (<code>PRECISION_BERT.md</code>).
+The gate is not in the demo yet; it is being built.</p>
 </div>
 `);
 

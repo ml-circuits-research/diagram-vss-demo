@@ -18,7 +18,7 @@ action has serious consequences it is what matters most. The diagram editor is t
 - Under it, per requested action: right / wrong / not done, plus extras (every number before 2026-11-02 is in this form, with every request
   executed). Rules: `AGENTS.md` ("What counts as an error"); decision record: `DECISIONS.md`.
 - State on 2026-11-02: the confidences are measured (`training/sketch/RISK_COVERAGE.md`, `training/sketch/VSS_CONFIDENCE.md`); the
-  confidence gate in the demo and the precision of each reader (`training/sketch/PRECISION.md`) are in progress; a fresh test set neither
+  confidence gate in the demo is in progress; the precision of each reader is measured (`training/sketch/PRECISION.md`: at 97% only VSS with its combined confidence qualifies, doing about a third of the requests and asking about half); a fresh test set neither
   learned reader has seen is planned.
 
 ## The readers
