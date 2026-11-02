@@ -498,6 +498,21 @@ TRAIN_DIRS = {"old": ["sonnet_msg", "haiku_msg"],
                         "../llm_bench/sonnet_spans", "../llm_bench/haiku_spans"]}   # every annotated folder with spans (micro_tools.py DIRS)
 
 
+def extra_dirs():
+    """EXTRA_DIRS (FEEDBACK_PLAN.md arms): extra annotated folders added to EVERY learned part, the same list everywhere (front.py train_dirs,
+    train_cutter.py DIRS, micro_tools.py DIRS = the context filler's folders, training/neural/make_data.py DIRS). A space- or comma-separated
+    list of folders relative to training/sketch (e.g. "llm_train/opus_train_a llm_train/opus_gen_1") or absolute. Unset or empty: [], so
+    every default behaviour is unchanged. A listed folder without msg_*.jsonl / batch_*.jsonl is an error (never a silent empty arm)."""
+    import glob
+    out = []
+    for d in os.environ.get("EXTRA_DIRS", "").replace(",", " ").split():
+        d = os.path.relpath(os.path.join(HERE, d), HERE) if not os.path.isabs(d) else d
+        if not (glob.glob(os.path.join(HERE, d, "msg_*.jsonl")) or glob.glob(os.path.join(HERE, d, "batch_*.jsonl"))):
+            raise SystemExit(f"EXTRA_DIRS: {d!r} has no msg_*.jsonl / batch_*.jsonl (not written or not annotated yet)")
+        if d not in out: out.append(d)
+    return out
+
+
 def train_dirs():
     """DATA picks the base folders; two switches add folders (default off: exactly the base folders; ROUND2.md):
     SHORT=1 adds the one-request short messages llm_train/{sonnet,haiku}_short (the same folders train_cutter.py SHORT=1 adds);
@@ -508,6 +523,7 @@ def train_dirs():
     out = list(TRAIN_DIRS[d])
     if os.environ.get("SHORT") == "1": out += ["sonnet_short", "haiku_short"]
     if os.environ.get("OPS") == "1": out += ["ops_groups", "ops_positions"]
+    out += [os.path.relpath(os.path.join(HERE, d), os.path.join(HERE, "llm_train")) for d in extra_dirs()]   # EXTRA_DIRS (default: none)
     return out
 
 

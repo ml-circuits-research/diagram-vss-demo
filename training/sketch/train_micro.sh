@@ -34,6 +34,7 @@ HERE="$(cd "$(dirname "$0")" && pwd)"; REPO="$(cd "$HERE/../.." && pwd)"; SOP="$
 W="$HERE/worlds_micro/$WORLD"; OUT="$REPO/docs/model/micro/$WORLD"
 cd "$HERE"; export VSA_MIN_AVAILABLE_GB="${VSA_MIN_AVAILABLE_GB:-1.5}"
 export DATA="${DATA:-all}" QCOLOR="${QCOLOR:-1}" MARKER="${MARKER:-0}" CAL_FALLBACK="${CAL_FALLBACK:-train}" WORLD_EVENTS="$EVENTS" FRONT_ROWS="${FRONT_ROWS:-}"
+export EXTRA_DIRS="${EXTRA_DIRS:-}"   # extra annotated folders for every learned part (front.py extra_dirs; FEEDBACK_PLAN.md arms); recorded in BUILD.json
 export VAL_PREC="${VAL_PREC:-}" VAL_SUB="${VAL_SUB:-}" SHORT="${SHORT:-}" OPS="${OPS:-}" DIAGRAM_OPS="${DIAGRAM_OPS:-}"
 KINDMAP="${KINDMAP-diagnosis_kinds/kinds_comb1.json}"; if [ -n "$KINDMAP" ]; then export KINDMAP; else unset KINDMAP; fi
 FRAC="${FRAC:-1.0}"; D="${D:-1024}"; EPOCHS="${EPOCHS:-10}"; SEED="${SEED:-0}"
@@ -53,7 +54,7 @@ rm -rf "$OUT"
 cp "$W/front.json" "$OUT/front.json"
 cat > "$OUT/BUILD.json" <<JSON
 {"world": "$WORLD", "events": "$EVENTS", "command": "training/sketch/train_micro.sh $WORLD $EVENTS", "DATA": "$DATA", "FRAC": "$FRAC", "QCOLOR": "$QCOLOR",
- "MARKER": "$MARKER", "ROW_SHAPE": "${ROW_SHAPE:-}", "FRONT_ROWS": "$FRONT_ROWS", "KINDMAP": "${KINDMAP:-}", "CAL_FALLBACK": "$CAL_FALLBACK", "D": $D, "EPOCHS": $EPOCHS, "SEED": $SEED, "N_EVAL": $N_EVAL, "EVAL_MODES": "$EVAL_MODES", "DEVICE": "$DEVICE", "HOLDOUT": "${HOLDOUT:-}", "CREATE_COLOR": "${CREATE_COLOR:-}", "N_CAL": "${N_CAL:-}", "VAL_PREC": "$VAL_PREC", "VAL_SUB": "$VAL_SUB", "SHORT": "$SHORT", "OPS": "$OPS", "DIAGRAM_OPS": "$DIAGRAM_OPS", "rows": $(grep -c . "$W/raw/sentences.txt"),
+ "MARKER": "$MARKER", "ROW_SHAPE": "${ROW_SHAPE:-}", "FRONT_ROWS": "$FRONT_ROWS", "KINDMAP": "${KINDMAP:-}", "CAL_FALLBACK": "$CAL_FALLBACK", "D": $D, "EPOCHS": $EPOCHS, "SEED": $SEED, "N_EVAL": $N_EVAL, "EVAL_MODES": "$EVAL_MODES", "DEVICE": "$DEVICE", "HOLDOUT": "${HOLDOUT:-}", "CREATE_COLOR": "${CREATE_COLOR:-}", "N_CAL": "${N_CAL:-}", "VAL_PREC": "$VAL_PREC", "VAL_SUB": "$VAL_SUB", "SHORT": "$SHORT", "OPS": "$OPS", "DIAGRAM_OPS": "$DIAGRAM_OPS", "EXTRA_DIRS": "$EXTRA_DIRS", "rows": $(grep -c . "$W/raw/sentences.txt"),
  "run_log": "training/sketch/runs/$RUN.log"}
 JSON
 echo "world $WORLD [$EVENTS] -> docs/model/micro/$WORLD ($(grep -c . "$W/raw/sentences.txt") rows); registry line:"

@@ -43,3 +43,8 @@ The owner made the cost score the measure (AGENTS.md): score = (requests done ri
 requested actions; asked / not done = 0. Each arm's threshold maximises the score on the calibration data (out-of-fold). The three
 verdicts above are judged on this score on the test part (same 95% bootstrap rule) instead of "requests done right at <= 3% confidently
 wrong", which is still reported beside it.
+
+## Amendment 2026-11-02 19:40 (before any arm is trained)
+Calibration is the fresh2 calibration part only (195 messages), for every arm and both readers. The old held-out split is dropped from it:
+every arm is trained on all data, so that split is training data for the arms and their confidences on it would be in-sample (thresholds
+too lax). The cost-score threshold (a maximum, not a 97% target) can be fitted on 195 messages.

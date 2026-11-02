@@ -4,6 +4,8 @@
 //   writer slice; ids, texts and gold wires come from the files the collectors read.
 // Records (written by collect_*.mjs in <records dir>): rules_own, rules_vss, vss_r1, vss_r2, sop_shipped_own, sop_shipped_vss,
 //   sop_all_own, sop_all_vss (.jsonl; a missing file leaves that reader out).
+// Env (FEEDBACK_PLAN.md arms): ARM=<name> adds the readers of records vss_arm.jsonl / sop_arm_own.jsonl; CAL_FOLDERS="dir_name .." makes every message of
+// those data folders calibration (a union with the fresh2 calibration part), default none.
 // Split: int(sha256(id), 16) % 3 == 0 -> calibration, else test. Fitting uses ONLY the calibration part; the test part is only scored.
 // Recipe for both learned readers (FRESH2_PLAN.md): percentile maps, world / act prior and L2 fitted inside 5 folds of the calibration
 // part (folds by message), L2 grid {0.01, 0.1, 1, 10} chosen by out-of-fold AUROC; threshold = the lowest confidence whose OUT-OF-FOLD
@@ -35,7 +37,10 @@ for (const d of DATADIRS) {
     META.set(r.id, { writer: basename(d), sent, lenClass: sent <= 1 ? "1 sentence" : sent <= 6 ? "2-6 sentences" : "7+ sentences" });
   }
 }
-const isCal = (id) => BigInt("0x" + createHash("sha256").update(id).digest("hex")) % 3n === 0n;
+// CAL_FOLDERS="name name": data folders (writer slices, folder basenames) whose messages are ALL calibration (FEEDBACK_PLAN.md: the calibration
+// is the old held-out split's text + the fresh2 calibration part); every other folder is split by the hash as before. Unset: unchanged.
+const CALF = new Set((process.env.CAL_FOLDERS || "").split(/[\s,]+/).filter(Boolean));
+const isCal = (id) => (CALF.size > 0 && CALF.has(META.get(id)?.writer)) || BigInt("0x" + createHash("sha256").update(id).digest("hex")) % 3n === 0n;
 const meta = (id) => { const m = META.get(id); if (!m) throw new Error(`record id ${id} is not in the data dirs`); return m; };
 const kindOf = (act) => { const t = String(act).split(":")[0]; return t === "command" ? "command" : t === "question" ? "question" : "fact/rule"; };
 
@@ -148,7 +153,7 @@ function fitReader(items, kind) {   // items: calibration produced requests [{mi
 // ------------------------------------------------------------------ records -> readers
 function load(name) { const f = `${RECDIR}/${name}.jsonl`; return existsSync(f) ? readJ(f) : null; }
 const rawFiles = {};
-for (const n of ["rules_own", "rules_vss", "vss_r1", "vss_r2", "sop_shipped_own", "sop_shipped_vss", "sop_all_own", "sop_all_vss"]) rawFiles[n] = load(n);
+for (const n of ["rules_own", "rules_vss", "vss_r1", "vss_r2", "sop_shipped_own", "sop_shipped_vss", "sop_all_own", "sop_all_vss", "vss_arm", "sop_arm_own"]) rawFiles[n] = load(n);
 // a reader: {id, label, file, kind: rules|vss|sop, cut, old: json spec or null}. Items are built once per file: one per produced request.
 function itemsOf(recs, kind) {
   const calIdx = new Map(); let nc = 0;
@@ -170,6 +175,10 @@ add("vss_r1", "VSS default", "vss_r1", "vss", { group: "main" });
 add("vss_r2", "VSS round 2", "vss_r2", "vss", { group: "main" });
 add("sop_shipped_own", "SOP-BERT shipped", "sop_shipped_own", "sop", { group: "main" });
 add("sop_all_own", "SOP-BERT all-data", "sop_all_own", "sop", { group: "main" });
+// ARM=<name> (FEEDBACK_PLAN.md): the records of one retrained arm: vss_arm.jsonl (collect_vss.mjs) and/or sop_arm_own.jsonl (collect_sop.mjs)
+const ARM = process.env.ARM || "arm";
+add("vss_arm", `VSS ${ARM}`, "vss_arm", "vss", { group: "main" });
+add("sop_arm_own", `SOP-BERT ${ARM}`, "sop_arm_own", "sop", { group: "main" });
 add("rules_vss", "Rules on the VSS cut", "rules_vss", "rules", { group: "same" });
 add("vss_r1_same", "VSS default (its cut)", "vss_r1", "vss", { group: "same" });
 add("sop_shipped_vss", "SOP-BERT shipped on the VSS cut", "sop_shipped_vss", "sop", { group: "same" });
@@ -242,7 +251,7 @@ const ci = (a) => (Number.isFinite(a[0]) ? `[${pc(a[0])}, ${pc(a[1])}]` : "[-]")
 const R0 = READERS[0];
 log("# FRESH2 report (test part), written by training/sketch/fresh2/fit_report.mjs\n");
 log(`Records: ${RECDIR}. Messages: ${META.size} in the data dirs (${[...new Set([...META.values()].map((m) => m.writer))].sort().join(", ")}); calibration ${R0.nMsg.cal} messages / ${R0.G.cal} requested actions; test ${R0.nMsg.test} messages / ${R0.G.test} requested actions.`);
-log(`Split: int(sha256(id), 16) % 3 == 0 is calibration. Thresholds and confidences are fitted on the calibration part only. MINEXEC ${MINEXEC}; bootstrap ${BOOT} resamples of the test messages, seed ${SEED}.`);
+log(`Split: int(sha256(id), 16) % 3 == 0 is calibration${CALF.size ? ` (and every message of ${[...CALF].join(", ")}, CAL_FOLDERS)` : ""}. Thresholds and confidences are fitted on the calibration part only. MINEXEC ${MINEXEC}; bootstrap ${BOOT} resamples of the test messages, seed ${SEED}.`);
 log("Definitions (per requested action, PAIR=value as llm_score.mjs): confidently wrong % = (executed wrong + executed extras) / everything executed; done right % = executed right / requested actions; asked % = right or wrong requests below the threshold / requested; not read % = requested actions with no produced request / requested; extras = produced requests nobody asked for. Execute when confidence >= threshold.\n");
 
 
