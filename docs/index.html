@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="help/docs.css">
 <style>
 /* Layout: a messaging app with a drawing board pinned beside it (desktop) or above it (phone).
    Chat bubbles carry plain-language replies; a bubble's "details" shows the wires, patches and model evidence of that message. */
@@ -284,18 +285,24 @@ table.kv td:last-child { text-align: right; white-space: nowrap; color: var(--mu
 .bench td { font-family: var(--font); }
 .bench .ok { color: var(--str); font-weight: 600; } .bench .no { color: var(--err); font-weight: 600; }
 code { font-family: var(--mono); font-size: .92em; }
-/* help, SOP language, capabilities (docs/js/help.js) */
-.hdoc { max-width: 68ch; }
-.hdoc q { quotes: "“" "”"; }
-.hdoc h3.hh { margin: 26px 0 8px; font-size: 17px; font-weight: 600; color: var(--ink); scroll-margin-top: 8px; }
-.hdoc h3.hh:first-of-type { margin-top: 12px; }
-.hdoc h4 { margin: 16px 0 6px; font-size: 14px; font-weight: 600; }
-.hdoc h4.grp { margin: 20px 0 2px; font-size: 11.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
-.hdoc .note { margin: 4px 0 10px; }
-.hdoc pre.sop { white-space: pre-wrap; overflow-wrap: anywhere; }
-.htoc { display: flex; flex-wrap: wrap; gap: 4px 6px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
-.htoc a { font-size: 13px; color: var(--link); text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }
-.htoc a:hover { border-color: var(--link); }
+/* the pieces of the help pages (docs/js/help.js, docs-concepts.js) inside the Help overlay; the page typography is help/docs.css */
+.doc pre.sop { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; }
+.doc .steps li { margin: 8px 0; }
+.doc .screen li { margin: 8px 0; }
+.doc .jump { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; }
+.doc .jump a { font-size: 13.5px; text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; }
+.doc .jump a:hover { border-color: var(--link); }
+.doc .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; margin: 8px 0 16px; }
+.doc .card { display: grid; gap: 2px; text-decoration: none; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; color: var(--ink); background: var(--sheet); line-height: 1.35; }
+.doc .card:hover { border-color: var(--accent); }
+.doc .card b { font-weight: 600; color: var(--link); }
+.doc .card span { font-size: 14px; color: var(--muted); }
+.doc .hitem p { font-size: 15px; }
+.doc .readers { gap: 8px 16px; }
+.doc .plug h3 { margin: 0; font-size: 16px; flex: 1; }
+.doc .plug p { font-size: 14.5px; }
+.doc .limits li { margin: 12px 0; }
+.capsw .plug { margin-bottom: 6px; padding: 8px 12px; }
 .readers { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 12px; margin: 0 0 12px; }
 .readers dt { font-weight: 600; }
 .readers dd { margin: 0; color: var(--muted); }
@@ -360,6 +367,41 @@ svg.i.inl { width: 16px; height: 16px; vertical-align: -3px; color: var(--muted)
 .msghead .q { white-space: pre-wrap; overflow-wrap: anywhere; }
 .msghead .note { font-size: 12px; }
 
+/* ---------- the Help overlay (docs/js/docs.js) ---------- */
+html.docs-open, html.docs-open body { overflow: hidden; }
+.docs { position: fixed; inset: 0; z-index: 30; background: var(--sheet); display: grid; grid-template-rows: auto minmax(0, 1fr); padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px); }
+.docs-bar { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--head); min-width: 0; }
+.docs-brand { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; padding-left: 6px; }
+.docs-brand svg.i { color: var(--accent); }
+.docs-brand b { font-size: 16px; font-weight: 600; }
+.docs-brand span { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.docs-menu-btn { display: none; }
+.docs-body { display: grid; grid-template-columns: 272px minmax(0, 1fr); min-height: 0; position: relative; }
+.docs-nav { overflow-y: auto; border-right: 1px solid var(--line); padding: 14px 10px 32px; background: var(--head); overscroll-behavior: contain; }
+.dn-group + .dn-group { margin-top: 16px; }
+.dn-title { margin: 0 0 4px; padding: 0 10px; font-size: 11.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.docs-nav ul { list-style: none; margin: 0; padding: 0; }
+.docs-nav a { display: block; padding: 6px 10px; border-radius: 8px; color: var(--ink); text-decoration: none; font-size: 14.5px; line-height: 1.3; }
+.docs-nav a:hover { background: rgba(127, 127, 127, .12); }
+.docs-nav a[aria-current="page"] { background: var(--sheet); color: var(--accent); font-weight: 600; box-shadow: inset 3px 0 0 var(--accent); }
+.docs-scrim { display: none; }
+.docs-main { overflow-y: auto; overscroll-behavior: contain; padding: 36px 40px 72px; scroll-padding-top: 12px; }
+.docs-main .doc { margin: 0 auto; max-width: 78ch; }
+@media (max-width: 860px) {
+  .docs-brand span { display: none; }
+  .docs-brand { flex: none; }
+  .docs-menu-btn { display: inline-flex; align-items: center; gap: 6px; flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--sheet); border-radius: 999px; padding: 6px 8px 6px 12px; cursor: pointer; font-size: 14px; }
+  .docs-menu-btn .dm-l { color: var(--muted); flex: none; }
+  .docs-menu-btn b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; text-align: left; }
+  .docs-menu-btn svg.i { width: 18px; height: 18px; color: var(--muted); }
+  .docs-body { grid-template-columns: minmax(0, 1fr); }
+  .docs-nav { position: absolute; left: 0; right: 0; top: 0; max-height: min(78vh, 640px); z-index: 2; border-right: 0; border-bottom: 1px solid var(--line); box-shadow: 0 10px 24px rgba(0, 0, 0, .18); display: none; padding: 10px 8px 18px; }
+  .docs.menu-open .docs-nav { display: block; }
+  .docs.menu-open .docs-scrim { display: block; position: absolute; inset: 0; z-index: 1; background: rgba(11, 20, 26, .35); }
+  .docs.menu-open .docs-menu-btn svg.i { transform: rotate(180deg); }
+  .docs-main { padding: 22px 16px 56px; padding-bottom: max(56px, env(safe-area-inset-bottom, 0px)); }
+}
+
 /* ---------- phone ---------- */
 /* phone keyboard open: shrink the drawing so the conversation stays usable */
 .app.kb { grid-template-rows: auto minmax(0, 24%) minmax(0, 1fr) auto auto; }
@@ -386,7 +428,7 @@ svg.i.inl { width: 16px; height: 16px; vertical-align: -3px; color: var(--muted)
   <header class="head">
     <div class="avatar" aria-hidden="true">@</div>
     <div class="who"><b>Sketchpad</b><span id="status">draws what you write</span></div>
-    <button class="ib" type="button" id="open-settings" aria-label="Help, SOP language, capabilities and benchmark" title="Help, SOP language, capabilities and benchmark">
+    <button class="ib" type="button" id="open-settings" aria-label="Settings: cutting, spelling, capabilities, benchmark" title="Settings: cutting, spelling, capabilities, benchmark">
       <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg>
     </button>
   </header>
@@ -400,6 +442,7 @@ svg.i.inl { width: 16px; height: 16px; vertical-align: -3px; color: var(--muted)
         <button class="ib" type="button" data-say="Undo" data-sop="@t1 command action=undo" aria-label="Undo" title="Undo"><svg class="i" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
         <button class="ib" type="button" data-say="Redo" data-sop="@t1 command action=redo" aria-label="Redo" title="Redo"><svg class="i" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
         <button class="ib" type="button" data-say="Clear the canvas" data-sop="@m1 mention quantifier=all&#10;@t1 command action=delete target=$m1" aria-label="Clear the canvas" title="Clear the canvas"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg></button>
+        <button class="ib" type="button" id="help-btn" aria-label="Help" title="Help: how to use it and how it works"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.5"/><path d="M12 16.8v.2"/></svg></button>
       </div>
     </div>
     <div class="subbar" id="subtabs" role="tablist" aria-label="What to show for this reader"></div>
@@ -428,17 +471,32 @@ svg.i.inl { width: 16px; height: 16px; vertical-align: -3px; color: var(--muted)
 </div>
 
 <div class="scrim" id="scrim" hidden></div>
+<div class="docs" id="docs" hidden role="dialog" aria-modal="true" aria-labelledby="docs-title">
+  <header class="docs-bar">
+    <button class="ib" type="button" id="docs-back" hidden aria-label="Back to the previous help page" title="Back"><svg class="i" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></button>
+    <div class="docs-brand"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.5"/><path d="M12 16.8v.2"/></svg><b>Help</b><span>SOP Sketchpad</span></div>
+    <button class="docs-menu-btn" type="button" id="docs-menu-btn" aria-expanded="false" aria-controls="docs-nav"><span class="dm-l">Pages</span><b id="docs-crumb"></b><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    <button class="ib" type="button" id="docs-close" aria-label="Close help (Esc)" title="Close (Esc)"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </header>
+  <div class="docs-body">
+    <nav class="docs-nav" id="docs-nav" aria-label="Help pages"></nav>
+    <div class="docs-scrim" aria-hidden="true"></div>
+    <main class="docs-main" id="docs-main"><article class="doc" id="docs-page"></article></main>
+  </div>
+</div>
 <aside class="sheet" id="sheet" hidden aria-modal="true" role="dialog" aria-labelledby="sheet-title">
   <div class="sheet-head"><h2 id="sheet-title">Examples</h2><button class="ib" type="button" id="close-sheet" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <nav class="stabs" id="stabs" role="tablist"></nav>
   <div class="sbody" id="sbody"></div>
 </aside>
 
-<script src="js/learned-cues.js"></script>
 <script src="js/logic.js"></script>
 <script src="js/spell.js"></script>
 <script src="js/scenarios.js"></script>
 <script src="js/help.js"></script>
+<script src="js/docs-concepts.js"></script>
+<script src="js/docs-arch.js"></script>
+<script src="js/docs.js"></script>
 <script src="js/neural.js"></script>
 <script type="module" src="js/bench-canon.js"></script>
 <script src="js/ui.js"></script>

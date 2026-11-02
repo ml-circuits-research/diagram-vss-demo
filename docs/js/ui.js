@@ -25,13 +25,13 @@ const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { ret
 const clock = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 // spelling (docs/js/spell.js): a VSA spell checker corrects typed messages before the readers read them; every reader reads the same
 // corrected text. Its vocabulary: docs/model/spell/vocab.json (the VSS worlds' words), the legend's values and cue words, and the names
-// on the active reader's canvas. The switch is in ⋮ › Help (Spelling); it is kept in this browser when storage works.
+// on the active reader's canvas. The switch is in ⋮ › Settings (Spelling); it is kept in this browser when storage works.
 const SPELL_OFF = 'sop.spell.off';
 let spellEnabled = store.get(SPELL_OFF) !== '1', speller = null;
 const spellP = (window.SpellKit ? SpellKit.load(new URL('model/', document.baseURI).href, engine.legend) : Promise.resolve(null)).then(s => { speller = s; return s; });
 const canvasNames = rd => rd.world.state.shapes.map(s => s.name).concat((rd.world.state.groups || []).map(g => g.name));
 // cutting (owner's decision 2026-11-02): the three readers read the SAME requests. Each message is cut once, by the strategy chosen in
-// ⋮ › Help › Cutting (Rules segmenter, VSS cutter, BERT cutter; vss-composer.js CUT_STRATEGIES, cutUnits), and every reader reads those
+// ⋮ › Settings › Cutting (Rules segmenter, VSS cutter, BERT cutter; vss-composer.js CUT_STRATEGIES, cutUnits), and every reader reads those
 // units; the tabs differ only in how each reads a request. The default is vss-composer.js DEFAULT_CUT (the best measured, training/sketch/
 // cut_bench.mjs); the choice is kept in this browser when storage works. A strategy that is not available yet (VSS not loaded, no neural
 // span head) is replaced by the Rules segmenter for that message, and the details say so. The cut reads the canvas of the reader it
@@ -291,7 +291,7 @@ async function run(text, sop) {
   if (!raw && spellEnabled) { const sc = await spellP; if (sc) { sp = sc.check(text, { names: canvasNames(cur) }); text = sp.text; } }
   meBubble(typed, sp);
   const id = ++turnSeq, rec = { id, time: clock(), text, typed, spell: sp, spellOff: !raw && !spellEnabled, raw, sop: sop || text, button: !!sop, readers: {}, off: {}, ran: [] }; history.push(rec);
-  if (rec.raw) { try { K.parse(rec.sop); } catch (e) { rec.error = e; botBubble({ text: e.message, err: true, turn: id, tag: 'SOP' }); return; } }
+  if (rec.raw) { try { K.parse(rec.sop); } catch (e) { rec.error = e; botBubble({ text: e.message, err: true, turn: id, tag: 'SOP Lang' }); return; } }
   // the readers that read this message are fixed now: one that finishes loading meanwhile starts from the Rules drawing instead
   const live = READERS.filter(isReady);
   // a reply to a question ("which Hub?") goes to the readers that asked it; the others have nothing to choose
@@ -308,7 +308,7 @@ async function run(text, sop) {
     rec.ran.push(rd.id); parts.push(Object.assign(p, { rd }));
   }
   setStatus(idleStatus());
-  botBubble({ lines: parts, chips: [...new Set(parts.flatMap(p => p.chips || []))], turn: id, tag: rec.button ? 'button' : rec.raw ? 'SOP' : null, replace: wait });
+  botBubble({ lines: parts, chips: [...new Set(parts.flatMap(p => p.chips || []))], turn: id, tag: rec.button ? 'button' : rec.raw ? 'SOP Lang' : null, replace: wait });
   const mine = parts.find(p => p.rd === cur);
   if (mine && mine.highlight) flash(mine.highlight); else renderCanvas();
   updateTabs(); renderSopBar();
@@ -330,7 +330,9 @@ async function readWith(rd, text, rec, pk) {
   } catch (e) { r.error = e; r.ms = performance.now() - t0; return { text: `The ${rd.label} reader failed: ${e.message}`, err: true, ms: r.ms }; }
   const ms = r.ms, nodes = r.nodes, notes = r.notes, world = rd.world, engine = rd.engine;
   rd.reads++; rd.lastRead = { turn: rec.id, nodes };
-  const unread = notes.filter(n => /couldn't find an action/.test(n)).map(n => (n.match(/in "(.*)"\.?$/) || [])[1]).filter(Boolean);
+  // the parts no reading took: the Rules reader's "couldn't find an action in …" and the VSS reader's "Ignored (not understood): “…”, “…”"
+  const unread = notes.filter(n => /couldn't find an action/.test(n)).map(n => (n.match(/in "(.*)"\.?$/) || [])[1]).filter(Boolean)
+    .concat(notes.filter(n => /^Ignored \(not understood\):/.test(n)).flatMap(n => [...n.matchAll(/“([^”]*)”/g)].map(m => m[1])).filter(u => u.trim().split(/\s+/).length > 1));   // a one-word unit ("and") stays in the details only
   if (!nodes.length) {
     r.error = new K.SOPError('No wires.');
     return { text: unread.length ? 'I didn’t get what to do there. Try something like “draw a red circle next to Start” or “what is connected to Start?”.' : 'I couldn’t turn that into anything I can do.', err: true, ms };
@@ -372,12 +374,12 @@ async function readWith(rd, text, rec, pk) {
 
 /* ---------------- technical history ---------------- */
 function turnHTML(r) {
-  if (r.error) return `<pre class="sop"><span class="cm"># typed as SOP</span>\n${escH(r.sop)}</pre><div class="errt">${escH(r.error.message)}</div>`;
+  if (r.error) return `<pre class="sop"><span class="cm"># typed as SOP Lang</span>\n${escH(r.sop)}</pre><div class="errt">${escH(r.error.message)}</div>`;
   return READERS.map(rd => {
     const x = r.readers[rd.id];
     if (!x) return `<section class="rdsec"><div class="minihead">${escH(rd.label)} <span>${escH(r.off[rd.id] || 'did not read this')}</span></div></section>`;
-    let h = `<div class="minihead">${escH(rd.label)} <span>${x.ms != null ? 'formalized in ' + fmtMs(x.ms) : r.raw ? 'SOP, nothing to formalize' : 'your choice from the question'}${x.neural ? ` · ${x.neural.calls} model calls` : ''}${x.cutBy ? ` · cut by: ${escH(cutLabel(x.cutBy))}` : ''}</span></div>`;
-    if (x.nodes && x.nodes.length) h += `<pre class="sop">${r.raw ? `<span class="cm"># ${r.button ? 'toolbar button, sent as SOP' : 'typed as SOP'}</span>\n` : ''}${x.nodes.map(hlNode).join('\n')}</pre>`;
+    let h = `<div class="minihead">${escH(rd.label)} <span>${x.ms != null ? 'formalized in ' + fmtMs(x.ms) : r.raw ? 'SOP Lang, nothing to formalize' : 'your choice from the question'}${x.neural ? ` · ${x.neural.calls} model calls` : ''}${x.cutBy ? ` · cut by: ${escH(cutLabel(x.cutBy))}` : ''}</span></div>`;
+    if (x.nodes && x.nodes.length) h += `<pre class="sop">${r.raw ? `<span class="cm"># ${r.button ? 'toolbar button, sent as SOP Lang' : 'typed as SOP Lang'}</span>\n` : ''}${x.nodes.map(hlNode).join('\n')}</pre>`;
     (x.notes || []).forEach(n => { h += `<div class="note">${escH(n)}</div>`; });
     if (x.vss) h += vssHTML(x.vss);
     if (x.neural) h += neuralHTML(x.neural);
@@ -388,17 +390,17 @@ function turnHTML(r) {
     return `<section class="rdsec">${h}</section>`;
   }).join('');
 }
-const ranLabel = r => (r.button ? 'button · ' : r.raw ? 'SOP · ' : '') + (r.ran.length ? r.ran.map(id => RD[id].label).join(' · ') : 'none');
+const ranLabel = r => (r.button ? 'button · ' : r.raw ? 'SOP Lang · ' : '') + (r.ran.length ? r.ran.map(id => RD[id].label).join(' · ') : 'none');
 /** the details of one message: what each reader wrote (SOP wires), how long that took, and what it did to that reader's drawing */
 function renderTurn(id) {
   const r = history.find(x => x.id === id);
   if (!r) return '<p class="intro">This message is no longer here.</p>';
   const sp = r.spell, fixes = sp && sp.fixes.length ? sp.fixes.map(f => `${f.from} → ${f.to} (similarity ${f.sim.toFixed(2)}, next ${f.second.toFixed(2)})`).join(', ') : '';
   const spell = fixes ? `<div class="note">Spelling, in ${fmtMs(sp.ms)}: ${escH(fixes)}. Every reader read the corrected text:</div><div class="q">${escH(r.text)}</div>`
-    : sp ? `<div class="note">Spelling: nothing corrected (${fmtMs(sp.ms)}).</div>` : r.spellOff ? '<div class="note">Spelling check was off (⋮ › Help).</div>' : '';
+    : sp ? `<div class="note">Spelling: nothing corrected (${fmtMs(sp.ms)}).</div>` : r.spellOff ? '<div class="note">Spelling check was off (⋮ › Settings).</div>' : '';
   const c = r.cut, cut = c ? `<div class="note">Cut into ${c.units.length} request${c.units.length === 1 ? '' : 's'} by the ${escH(cutLabel(c.strategy))} in ${fmtMs(c.ms)}${c.why ? ` (the ${escH(cutLabel(c.wanted))} was chosen, but ${escH(c.why)})` : ''}; every reader read these:</div><ul class="units">${c.units.map(u => `<li><span class="src">“${escH(u.src)}”</span></li>`).join('')}</ul>` : '';
   return `<div class="msghead"><div class="q">${escH(r.typed || r.text)}</div>${spell}${cut}<div class="note">${escH(r.time)} · read by ${escH(ranLabel(r))}</div></div>
-  <p class="intro">What each reader wrote for this message: the SOP wires and how long writing them took, the plugin that ran each wire and the changes it made to that reader’s drawing, the VSS cutter’s requests and the neural model’s evidence.</p>${turnHTML(r)}`;
+  <p class="intro">What each reader wrote for this message in SOP Lang and how long writing it took, the plugin that ran each wire and the changes it made to that reader’s drawing, the requests each VSS world read and the neural model’s evidence.</p>${turnHTML(r)}`;
 }
 
 /* ---------------- SOP highlighting ---------------- */
@@ -470,8 +472,8 @@ function neuralHTML(n) {
       const why = q ? (q.span ? `“${q.span}” ${pct(q.score)}${q.source !== 'neural' ? ' · from ' + q.source : ''}` : 'no span') : 'not in frame';
       rows.push([k, r ? fmtV(r.args[k]) : '', q ? fmtV(q.value) : '', why, false]);
     }
-    const body = rows.filter(x => x[1] !== '' || x[2] !== '' || x[4]).map(([k, rv, nv, why]) => `<tr class="${rv === nv ? 'same' : 'diff'}"><th>${escH(k)}</th><td>${escH(rv || '–')}</td><td>${escH(nv || '–')}</td><td class="why">${escH(why)}</td></tr>`).join('');
-    h += `<details class="cmp"><summary>@${escH(a.id)} <span class="src">${escH(a.src)}</span></summary><div class="tbl"><table><thead><tr><th>question</th><th>rules</th><th>neural</th><th>model evidence</th></tr></thead><tbody>${body}</tbody></table></div></details>`;
+    const body = rows.filter(x => x[1] !== '' || x[2] !== '' || x[4]).map(([k, rv, nv, why]) => r ? `<tr class="${rv === nv ? 'same' : 'diff'}"><th>${escH(k)}</th><td>${escH(rv || '–')}</td><td>${escH(nv || '–')}</td><td class="why">${escH(why)}</td></tr>` : `<tr><th>${escH(k)}</th><td>${escH(nv || '–')}</td><td class="why">${escH(why)}</td></tr>`).join('');
+    h += `<details class="cmp"><summary>@${escH(a.id)} <span class="src">${escH(a.src)}</span></summary><div class="tbl"><table><thead><tr><th>question</th>${r ? '<th>rules</th>' : ''}<th>neural</th><th>model evidence</th></tr></thead><tbody>${body}</tbody></table></div></details>`;
   }
   return h;
 }
@@ -480,10 +482,11 @@ function neuralHTML(n) {
 const sheet = $('#sheet'), scrim = $('#scrim'), sbody = $('#sbody'), stabs = $('#stabs');
 let sheetKind = null, sheetTab = null, sheetTurn = null;
 // the readers' own settings and their drawing as SOP are subtabs of each reader tab; the sheet keeps what is shared by every reader
-const TABS = { settings: [['help', 'Help'], ['sop', 'SOP language'], ['plugins', 'Capabilities'], ['benchmark', 'Benchmark']], examples: [], turn: [] };
+// Help is not here: it is the full-screen overlay (docs/js/docs.js), opened by the ? button above the drawing
+const TABS = { settings: [['settings', 'Settings'], ['plugins', 'Capabilities'], ['benchmark', 'Benchmark']], examples: [], turn: [] };
 function openSheet(kind, tab, focus) {
   sheetKind = kind; sheetTab = tab || (TABS[kind][0] || [])[0] || null;
-  $('#sheet-title').textContent = kind === 'examples' ? 'Examples' : kind === 'turn' ? 'Message details' : 'Help and settings';
+  $('#sheet-title').textContent = kind === 'examples' ? 'Examples' : kind === 'turn' ? 'Message details' : 'Settings';
   stabs.hidden = !TABS[kind].length;
   stabs.innerHTML = TABS[kind].map(([k, l]) => `<button class="stab" role="tab" type="button" data-stab="${k}" aria-selected="${k === sheetTab}">${l}</button>`).join('');
   sheet.hidden = false; scrim.hidden = false; renderSheet(focus); sbody.scrollTop = 0;
@@ -492,14 +495,16 @@ function closeSheet() { sheet.hidden = true; scrim.hidden = true; sheetKind = nu
 $('#close-sheet').addEventListener('click', closeSheet); scrim.addEventListener('click', closeSheet);
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !sheet.hidden) closeSheet(); });
 stabs.addEventListener('click', ev => { const b = ev.target.closest('[data-stab]'); if (!b) return; sheetTab = b.dataset.stab; stabs.querySelectorAll('.stab').forEach(x => x.setAttribute('aria-selected', String(x === b))); renderSheet(); sbody.scrollTop = 0; });
-$('#open-settings').addEventListener('click', () => openSheet('settings', 'help'));
+$('#open-settings').addEventListener('click', () => openSheet('settings', 'settings'));
+$('#help-btn').addEventListener('click', () => { closeSheet(); DocsKit.open('start'); });
+/** open a help page from anywhere in the app (a button with data-help="<page>") */
+function openHelp(id) { if (!sheet.hidden) closeSheet(); DocsKit.open(id); }
 $('#open-examples').addEventListener('click', () => openSheet('examples'));
 function renderSheet(focus) {
   if (sheetKind === 'examples') sbody.innerHTML = renderExamples();
   else if (sheetKind === 'turn') { if (focus) sheetTurn = focus; sbody.innerHTML = renderTurn(sheetTurn); }
-  else if (sheetTab === 'help') sbody.innerHTML = renderHelp();
+  else if (sheetTab === 'settings') sbody.innerHTML = renderSettings();
   else if (sheetTab === 'benchmark') { sbody.innerHTML = renderBench(); if (!benchSets) benchIndex().then(() => { if (sheetTab === 'benchmark' && !sheet.hidden) sbody.innerHTML = renderBench(); }).catch(e => { sbody.innerHTML = `<p class="intro">The test sets could not be loaded: ${escH(e.message)}</p>`; }); }
-  else if (sheetTab === 'sop') sbody.innerHTML = renderLegend();
   else if (sheetTab === 'plugins') sbody.innerHTML = renderPlugins();
 }
 
@@ -521,13 +526,13 @@ const QUICK = [
 ];
 function renderExamples() {
   return `<h3 class="sub">Send one sentence</h3>
-  <div class="quick">${QUICK.map(q => `<button type="button" data-quick="${escH(q)}">${escH(q.startsWith('@') ? 'Raw SOP: ' + q : q)}</button>`).join('')}</div>
+  <div class="quick">${QUICK.map(q => `<button type="button" data-quick="${escH(q)}">${escH(q.startsWith('@') ? 'SOP Lang: ' + q : q)}</button>`).join('')}</div>
   <h3 class="sub">Play a scenario</h3>
   <p class="intro">A scenario is a script of messages. It is drawn in a new area next to what is already on the canvas; nothing is erased.</p>
   <div class="opts"><label for="sc-delay">Pause between messages</label><select id="sc-delay"><option value="0">none</option><option value="400" selected>0.4 s</option><option value="1000">1 s</option><option value="2000">2 s</option></select></div>
   <div class="sc-list">${SCENARIOS.map(sc => `<article class="sc"><header><h4>${escH(sc.title)}</h4><span class="len">${sc.size} · ${sc.turns.length} message${sc.turns.length === 1 ? '' : 's'}</span></header><p>${escH(sc.blurb)}</p><div class="row2"><button type="button" class="btn solid" data-sc="${sc.id}" data-how="play">Play</button><button type="button" class="btn" data-sc="${sc.id}" data-how="step">Step through</button><button type="button" class="btn" data-sc="${sc.id}" data-how="edit">Edit a copy</button></div></article>`).join('')}</div>
   <h3 class="sub">Your own script</h3>
-  <p class="intro">One message per line. Lines starting with <code>#</code> are comments; lines starting with <code>@</code> are raw SOP.</p>
+  <p class="intro">One message per line. Lines starting with <code>#</code> are comments; lines starting with <code>@</code> are SOP Lang, sent to the engine as they are.</p>
   <textarea id="sc-text" rows="7" spellcheck="false" placeholder="# My diagram&#10;Draw a blue circle named Hub in the center.&#10;Add a red square named Node1 left of Hub and connect Hub to it.&#10;What is connected to Hub?"></textarea>
   <div class="row2" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px"><button type="button" class="btn solid" data-own="play">Play</button><button type="button" class="btn" data-own="step">Step through</button><label class="btn file">Load .txt<input type="file" id="sc-file" accept=".txt,.md,.sop,text/plain"></label><span class="status" id="sc-status"></span></div>`;
 }
@@ -672,8 +677,10 @@ async function ensureVSS(announce) {
   refreshReaders(); return vssState === 'ready';
 }
 
-/* ---------------- Neural: our model (act classifier + QA) loads by itself when the page opens, like VSS ---------------- */
+/* ---------------- Neural: our model (SOP-BERT, NeuralKit.modelsFor) loads by itself when the page opens, like VSS ---------------- */
 let nStatus = null;   // NeuralKit.status(): is our model published on this site
+/** the neural model(s) this page loads, by name: "SOP-BERT" (one model; the earlier pair joined with +) */
+const neuralNames = () => { try { return NeuralKit.modelsFor().map(id => NeuralKit.NAMES[id] || id); } catch (e) { return []; } };
 const nBytesHint = () => NeuralKit.modelsFor().reduce((a, id) => a + (NeuralKit.bytesOf(id) || 0), 0);
 function errHTML(e) {
   if (!e) return '';
@@ -687,7 +694,7 @@ function neuralBoxHTML() {
   if (nState === 'unpublished') return unpublishedHTML();
   if (nState === 'loading') return `<p class="nprog-t">${escH(progText())}</p><div class="prog"><div style="width:${nProg.T ? (nProg.L / nProg.T * 100).toFixed(1) : 0}%"></div></div>`;
   if (nState === 'failed') return `<p>The neural model could not be loaded:</p>${errHTML(nError)}<div class="acts"><button type="button" class="btn solid" data-nact="retry">Try again</button></div>`;
-  return `<p>Ready: ${escH(NeuralKit.NAMES[models.actModel] || models.actModel)} + ${escH(NeuralKit.NAMES[models.qaModel] || models.qaModel)} on the CPU (WASM, ${escH(models.dtypeText || '8-bit files')}), ${mb(neuralBytes)}, loaded in ${(neuralLoadMs / 1000).toFixed(1)} s${nFromCache ? ' from the browser cache' : ''}.</p>`;
+  return `<p>Ready: ${escH(neuralNames().join(' + '))} on the CPU (WASM, ${escH(models.dtypeText || '8-bit files')}), ${mb(neuralBytes)}, loaded in ${(neuralLoadMs / 1000).toFixed(1)} s${nFromCache ? ' from the browser cache' : ''}.</p>`;
 }
 let nRaf = 0;
 function refreshReaders() {   // every place that shows a reader's state
@@ -718,7 +725,7 @@ async function loadModels(fromCache) {
     neural.setStrategy('finetuned'); neural.setModels(m); models = m; nState = 'ready'; neuralLoadMs = performance.now() - t0;
     if (!neuralBytes) neuralBytes = nBytesHint();
     const fresh = !RD.neural.reads;
-    sysNote(`Neural reader ready: ${NeuralKit.NAMES[m.actModel]} + ${NeuralKit.NAMES[m.qaModel]} on the CPU, ${mb(neuralBytes)}${fromCache ? ' from the browser cache' : ''}, ${(neuralLoadMs / 1000).toFixed(1)} s.` + (fresh ? ' It starts from the Rules drawing.' : ''));
+    sysNote(`Neural reader ready: ${neuralNames().join(' + ')} on the CPU, ${mb(neuralBytes)}${fromCache ? ' from the browser cache' : ''}, ${(neuralLoadMs / 1000).toFixed(1)} s.` + (fresh ? ' It starts from the Rules drawing.' : ''));
     adoptRules(RD.neural);
   } catch (e) {
     if (tok !== nToken) return;
@@ -733,7 +740,7 @@ document.addEventListener('click', ev => {
 });
 
 /* ---------------- reader subtabs: Drawing | SOP | Settings ---------------- */
-const SUBS = [['drawing', 'Drawing'], ['sop', 'SOP'], ['settings', 'Settings']];
+const SUBS = [['drawing', 'Drawing'], ['sop', 'SOP Lang'], ['settings', 'Settings']];
 const subbar = $('#subtabs'), rpanel = $('#rpanel');
 function renderSub() {
   subbar.innerHTML = SUBS.map(([k, l]) => `<button type="button" role="tab" class="subtab" data-sub="${k}" aria-selected="${k === sub}">${l}</button>`).join('') + `<span class="of">${escH(cur.label)} reader</span>`;
@@ -747,7 +754,7 @@ function renderSub() {
 }
 function setSub(k) { if (k === sub || !SUBS.some(x => x[0] === k)) return; sub = k; renderSub(); renderCard(); if (k === 'drawing') renderCanvas(); }
 subbar.addEventListener('click', ev => { const b = ev.target.closest('[data-sub]'); if (b) setSub(b.dataset.sub); });
-rpanel.addEventListener('click', ev => { const b = ev.target.closest('[data-open]'); if (b) openSheet('settings', b.dataset.open); });
+rpanel.addEventListener('click', ev => { const h = ev.target.closest('[data-help]'); if (h) { openHelp(h.dataset.help); return; } const b = ev.target.closest('[data-open]'); if (b) openSheet('settings', b.dataset.open); });
 function vssStatusHTML() {
   return escH(vssState === 'ready' ? (vssInfo.composer ? `Ready: ${vssInfo.worlds.length} micro-worlds, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
     : `Ready: D ${vssInfo.D}, ${vssInfo.bits || 8}-bit route book, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`) : vssState === 'failed' ? 'Failed: ' + (vssError && vssError.message || vssError) : `Loading (about ${mb0(VSS_HINT)} from this site)…`);
@@ -755,27 +762,28 @@ function vssStatusHTML() {
 /** what every reader's Settings subtab starts with: its drawing and what it has read */
 function readerFacts(rd) {
   const S = rd.world.state, n = S.shapes.length, m = S.edges.length, u = rd.world.undoStack.length;
-  return `<table class="kv"><tr><td>State</td><td>${escH(isReady(rd) ? 'ready' : offText(rd).replace(/, did not read this$/, '').replace(/ \(see Neural › Settings\)$/, '').replace(/; see Neural › Settings\)$/, ')'))}</td></tr><tr><td>Messages read</td><td>${rd.reads}</td></tr><tr><td>Its drawing</td><td>${n} shape${n === 1 ? '' : 's'} · ${m} link${m === 1 ? '' : 's'} · ${u} step${u === 1 ? '' : 's'} to undo</td></tr><tr><td>Requests cut by</td><td>${escH(cutLabel(cutWanted()))} (the same for every reader; ⋮ › Help › Cutting)</td></tr></table>`;
+  return `<table class="kv"><tr><td>State</td><td>${escH(isReady(rd) ? 'ready' : offText(rd).replace(/, did not read this$/, '').replace(/ \(see Neural › Settings\)$/, '').replace(/; see Neural › Settings\)$/, ')'))}</td></tr><tr><td>Messages read</td><td>${rd.reads}</td></tr><tr><td>Its drawing</td><td>${n} shape${n === 1 ? '' : 's'} · ${m} link${m === 1 ? '' : 's'} · ${u} step${u === 1 ? '' : 's'} to undo</td></tr><tr><td>Requests cut by</td><td>${escH(cutLabel(cutWanted()))} (the same for every reader; ⋮ › Settings)</td></tr></table>`;
 }
-const sharedNote = `<p class="intro">The SOP language (the commands every reader writes) and the engine’s capabilities are the same for all three readers. They are in the ⋮ menu: <button type="button" class="btn" data-open="sop">SOP language</button> <button type="button" class="btn" data-open="plugins">Capabilities</button></p>`;
+const sharedNote = `<p class="intro">SOP Lang (the commands every reader writes) and the engine’s capabilities are the same for all three readers. Help explains both: <button type="button" class="btn" data-help="sop-lang">SOP Lang</button> <button type="button" class="btn" data-help="capabilities">Capabilities</button> <button type="button" class="btn" data-help="architecture">How it works inside</button></p>`;
 function renderReaderSettings(rd) {
   if (rd.id === 'rules') return `<h3 class="sub">Rules reader</h3>${readerFacts(rd)}
-  <p class="intro">Hand-written code (<code>docs/js/logic.js</code>, ${mb(rulesBytes())}): it cuts the message into requests, finds the action by its cue words and answers the SOP questions from the words around it. Nothing to download and nothing to choose; it reads every message at once.</p>${sharedNote}`;
+  <p class="intro">Hand-written code (<code>docs/js/logic.js</code>, ${mb(rulesBytes())}): it cuts the message into requests, finds the action by its cue words and answers the SOP Lang questions from the words around it. Nothing to download and nothing to choose; it reads every message at once.</p>${sharedNote}`;
   if (rd.id === 'vss') {
     const vrows = vssState === 'ready' && vssInfo.composer ? `<table class="kv">${vssInfo.worlds.map(w => `<tr><td><code>${escH(w.model)}</code></td><td>${escH(w.events.join(', '))}</td><td>${mb(w.bytes)}</td></tr>`).join('')}<tr><td>cutters, registry</td><td>which world reads which request</td><td>${mb(vssInfo.cutterBytes)}</td></tr></table>` : '';
     return `<h3 class="sub">VSS reader</h3>${readerFacts(rd)}<div class="actions"><span class="status" id="vss-st">${vssStatusHTML()}</span></div>
-    <p class="intro">Seven small VSS readers (micro-worlds), each trained on a few actions of this demo’s SOP language (VSA route books, no transformer). A cutter splits the message into requests and names the worlds that could read each one; each of those worlds reads it, and the reading that fits the drawing and the conversation best is kept. In a world with several actions, a request without a verb (“Hub teal”) gets its action from a second cutter (the event hint). The files come from this site and load when the page opens.</p>
+    <p class="intro">Seven small VSS readers (micro-worlds), each trained on a few actions of SOP Lang (VSA route books, no transformer). The world cutter names the worlds that could read each request (and cuts the message when the VSS cutter is the chosen cut); each of those worlds reads it, and the reading that leaves the fewest words not understood is kept (no drawing is passed to a world). A tie, and a reference such as “it” or a role left empty, go to the context filler, which fills it from the conversation and the names on the canvas, or asks when nothing fits. In a world with several actions, a request without a verb (“Hub teal”) gets its action from a second cutter (the event hint). The files come from this site and load when the page opens.</p>
+    <p class="intro"><button type="button" class="btn" data-help="vss-reader">How the VSS reader works</button> <button type="button" class="btn" data-help="vss-worlds">What a VSS world is</button></p>
     ${vssState === 'ready' ? '<h3 class="sub">Worlds: actions and sizes</h3>' + vrows : ''}`;
   }
-  const N = NeuralKit.NAMES, A = NeuralKit.ABOUT, info = nStatus ? nStatus.info : {};
+  const N = NeuralKit.NAMES, A = NeuralKit.ABOUT, info = nStatus ? nStatus.info : {}, ids = NeuralKit.modelsFor();
   const size = id => { const b = NeuralKit.bytesOf(id); return b ? mb(b) : 'size not known yet'; };
   const facts = id => { const f = info[id] && info[id].facts; if (!f) return ''; const p = [f.base && `base model <code>${escH(f.base)}</code>`, f.spans && `${escH(f.spans)} annotated requests`, f.heldout && `held-out act accuracy ${(+f.heldout * 100).toFixed(1)}%`].filter(Boolean); return p.length ? ` (${p.join(', ')})` : ''; };
-  const row = (label, id) => `<label>${label}</label><div>${escH(N[id])} · ${size(id)}<div class="note">${escH(A[id])}${facts(id)}.${info[id] ? `${info[id].readme ? ` <a href="${escH(info[id].readme)}" target="_blank" rel="noopener">README</a> ·` : ''} version <code>${escH(info[id].version)}</code>` : ''}</div></div>`;
+  const row = (label, id) => `<label>${label}</label><div>${escH(N[id] || id)} · ${size(id)}<div class="note">${escH(A[id] || '')}${facts(id)}.${info[id] ? `${info[id].readme ? ` <a href="${escH(info[id].readme)}" target="_blank" rel="noopener">README</a> ·` : ''} version <code>${escH(info[id].version)}</code>` : ''}</div></div>`;
   return `<h3 class="sub">Neural reader</h3>${readerFacts(rd)}
-  <p class="intro">Two small transformers of ours, run in this browser. A classifier trained on our annotated requests reads the act of each request (the action of a command, the ask of a question, or a fact or rule); then each SOP question in that act’s frame is answered with extractive question answering (“Where does the connection start?”). The files come from this site, load by themselves when the page opens, and stay in this browser’s cache.</p>
+  <p class="intro">SOP-BERT: one DistilBERT model of ours, fine-tuned on the same annotated requests as the VSS worlds, run in this browser. In two calls per message (the cut, then all its requests at once) it reads, for every request, the action, the value of each SOP Lang key, who fills each role (a name written in the request, “it”, or a description such as “the red circle”) and the words that are names, labels and numbers; the SOP Lang wires are then assembled by the legend. It does not use the Rules reader. Its cut head is the BERT cutter (⋮ › Settings). The files come from this site, load by themselves when the page opens, and stay in this browser’s cache.</p>
+  <p class="intro"><button type="button" class="btn" data-help="neural-reader">How SOP-BERT works</button> <button type="button" class="btn" data-help="bert">What we do with BERT</button></p>
   <div class="form">
-    ${row('Act', NeuralKit.MODELS.act)}
-    ${row('Answers', NeuralKit.MODELS.qa)}
+    ${ids.map((id, i) => row(ids.length > 1 ? ['Act', 'Answers'][i] || 'Model' : 'Model', id)).join('')}
     <label>Device</label><div>CPU (WASM), ${escH(NeuralKit.dtypeText())}</div>
   </div>
   <div class="nbox" id="nm-box">${neuralBoxHTML()}</div>`;
@@ -783,6 +791,7 @@ function renderReaderSettings(rd) {
 sbody.addEventListener('click', async ev => {
   const q = ev.target.closest('[data-quick]'); if (q) { closeSheet(); submit(q.dataset.quick); return; }
   const op = ev.target.closest('[data-open]'); if (op) { openSheet('settings', op.dataset.open); return; }
+  const hp = ev.target.closest('[data-help]'); if (hp) { openHelp(hp.dataset.help); return; }
   const b = ev.target.closest('[data-sc]');
   if (b) {
     const sc = SCENARIOS.find(x => x.id === b.dataset.sc);
@@ -805,7 +814,7 @@ sbody.addEventListener('change', ev => {
     rd.readAsText(f); ev.target.value = '';
   }
   const pl = ev.target.closest('[data-plug]');
-  if (pl) { for (const rd of READERS) rd.engine.plugin(pl.dataset.plug).enabled = pl.checked; const p = engine.plugin(pl.dataset.plug); sysNote(`${(HelpKit.CAPS[p.name] || p).t || p.title} switched ${p.enabled ? 'on' : 'off'} for every reader`); sbody.innerHTML = renderPlugins(); }
+  if (pl) { setPlug(pl.dataset.plug, pl.checked); sbody.innerHTML = renderPlugins(); }
 });
 
 /* ---------------- benchmark: every reader on the same labelled sentences ---------------- */
@@ -814,12 +823,12 @@ async function benchIndex() { if (!benchSets) { const r = await fetch(new URL('b
 function renderBench() {
   const sets = benchSets || [];
   const fz = [['rules', 'Rules', true], ['vss', 'VSS', vssState !== 'failed'], ['neural', 'Neural', !!models]];
-  return `<p class="intro">Every reader reads the same labelled sentences against the same gold wires, cut into requests by the ${escH(cutLabel(cutWanted()))} (⋮ › Help › Cutting). A message counts when its wire type and every labelled answer match (descriptions are compared by what they describe). Speed is measured here, in this browser, per message, after the model has loaded.</p>
+  return `<p class="intro">Every reader reads the same labelled sentences against the same gold wires, cut into requests by the ${escH(cutLabel(cutWanted()))} (⋮ › Settings). A message counts when its wire type and every labelled answer match (descriptions are compared by what they describe). Speed is measured here, in this browser, per message, after the model has loaded.</p>
   <h3 class="sub">Test sets</h3>
   ${sets.length ? sets.map(s => `<label class="ck" style="display:flex;margin:4px 0"><input type="checkbox" data-bset="${s.id}" ${['blind', 'broad', 'new_identities'].includes(s.id) ? 'checked' : ''}> ${escH(s.title)} <span class="status">&nbsp;· ${s.n}</span></label>`).join('') : '<p class="intro">Loading the test sets…</p>'}
   <div class="opts" style="margin-top:8px"><label for="bm-limit">Sentences per generated set</label><select id="bm-limit"><option value="50">50</option><option value="100" selected>100</option><option value="300">300</option></select></div>
   <h3 class="sub">Readers</h3>
-  ${fz.map(([k, l, ok]) => `<label class="ck" style="display:flex;margin:4px 0"><input type="checkbox" data-bfz="${k}" ${ok ? 'checked' : ''}> ${l}${k === 'neural' && !models ? ' <span class="status">&nbsp;(not loaded: download it in Neural › Settings first; about 40 model calls per message)</span>' : ''}</label>`).join('')}
+  ${fz.map(([k, l, ok]) => `<label class="ck" style="display:flex;margin:4px 0"><input type="checkbox" data-bfz="${k}" ${ok ? 'checked' : ''}> ${l}${k === 'neural' && !models ? ' <span class="status">&nbsp;(not loaded yet: see Neural › Settings)</span>' : ''}</label>`).join('')}
   <div class="actions" style="margin-top:10px"><button type="button" class="btn solid" id="bm-run">Run benchmark</button><button type="button" class="btn" id="bm-stop">Stop</button><span class="status" id="bm-status"></span></div>
   <div id="bm-out">${benchLast || ''}</div>`;
 }
@@ -861,26 +870,35 @@ async function runBench(btn) {
   }
   const size = { rules: rulesBytes(), vss: vssInfo ? vssInfo.bytes : 0, neural: neuralBytes };
   const load = { rules: 0, vss: vssInfo ? vssInfo.loadMs : 0, neural: neuralLoadMs };
-  const label = { rules: 'Rules', vss: vssInfo && vssInfo.composer ? `VSS (${vssInfo.worlds.length} micro-worlds)` : `VSS (D ${vssInfo ? vssInfo.D : '?'})`, neural: models ? `Neural (${models.enumModel.split('/')[1]} + ${models.qaModel.split('/')[1]})` : 'Neural' };
+  const label = { rules: 'Rules', vss: vssInfo && vssInfo.composer ? `VSS (${vssInfo.worlds.length} micro-worlds)` : `VSS (D ${vssInfo ? vssInfo.D : '?'})`, neural: models ? `Neural (${neuralNames().join(' + ')})` : 'Neural' };
   const sets = setIds.filter(id => fzs.some(f => res[f].sets[id] && res[f].sets[id].n));
   const cell = S => S && S.n ? `<b>${(S.ok / S.n * 100).toFixed(0)}%</b> <span class="why">${S.ok}/${S.n} · answers ${(S.kok / Math.max(1, S.keys) * 100).toFixed(0)}%</span>` : '–';
-  const html = `<h3 class="sub">Results</h3><p class="intro">Every reader read the requests cut by the ${escH(cutLabel(benchCut))} (⋮ › Help › Cutting); the times are the reading only.</p><div class="tbl"><table class="bench"><thead><tr><th>reader</th>${sets.map(id => `<th>${escH(benchSets.find(s => s.id === id).title.split(' (')[0])}</th>`).join('')}<th>model size</th><th>load</th><th>ms / message (median · p95)</th></tr></thead><tbody>
+  const html = `<h3 class="sub">Results</h3><p class="intro">Every reader read the requests cut by the ${escH(cutLabel(benchCut))} (⋮ › Settings); the times are the reading only.</p><div class="tbl"><table class="bench"><thead><tr><th>reader</th>${sets.map(id => `<th>${escH(benchSets.find(s => s.id === id).title.split(' (')[0])}</th>`).join('')}<th>model size</th><th>load</th><th>ms / message (median · p95)</th></tr></thead><tbody>
     ${fzs.map(f => `<tr><td><b>${escH(label[f])}</b></td>${sets.map(id => `<td>${cell(res[f].sets[id])}</td>`).join('')}<td>${f === 'rules' ? mb(size[f]) + ' <span class="why">code</span>' : mb(size[f])}</td><td>${f === 'rules' ? '–' : (load[f] / 1000).toFixed(1) + ' s'}</td><td>${pctl(res[f].times, 0.5).toFixed(1)} · ${pctl(res[f].times, 0.95).toFixed(1)}</td></tr>`).join('')}
   </tbody></table></div>
-  <p class="intro" style="margin-top:8px">The generated sets come from the same templates the VSS model was trained on (new names, held-out template × prefix pairs), and the rules were written by the same author as the templates, so they favour both. The blind paraphrases and the broad set were written before any reader was run on them and no reader was tuned on them afterwards; their author also wrote the rules, which favours the rules.</p>
+  <p class="intro" style="margin-top:8px">The generated sets (seen, new identities, held-out formulations) come from templates written by the author of the rules, with the rules’ own words, so they favour the rules; the VSS worlds and the neural model are trained on messages written by LLM agents, not on these templates. The blind paraphrases and the broad set were written before any reader was run on them and no reader was tuned on them afterwards; their author also wrote the rules, which favours the rules.</p>
   ${fzs.map(f => `<div class="actions"><button type="button" class="btn" data-fails="${f}">${escH(label[f])}: ${res[f].fails.length} misread message${res[f].fails.length === 1 ? '' : 's'}</button></div><div id="fails-${f}" hidden><div class="tbl"><table class="bench"><tbody>${res[f].fails.map(x => `<tr><td>${escH(x.text)}<div class="why">${escH(x.set)} · ${escH(x.miss)}</div></td></tr>`).join('')}</tbody></table></div></div>`).join('')}`;
   benchLast = html; btn.disabled = false;
   const out = $('#bm-out'); if (out) out.innerHTML = html;
   say(benchStop ? 'Stopped.' : `Done: ${fzs.length} reader${fzs.length > 1 ? 's' : ''} on ${sets.length} set${sets.length > 1 ? 's' : ''}.`);
 }
-/* ---------------- help, SOP language, capabilities (docs/js/help.js; their lists are read from the legend) ---------------- */
-/** what help.js needs: the engine (legend, plugins), the canvas drawing code for its small drawings, and sizes to quote */
+/* ---------------- Help overlay and settings (docs/js/help.js, docs.js; their lists are read from the legend) ---------------- */
+/** what the help pages need: the engine (legend, plugins), the canvas drawing code for their small drawings, and facts to quote */
 function helpEnv() {
   let nb = neuralBytes; try { if (!nb) nb = nBytesHint(); } catch (e) { }
-  return { K, engine, drawShape, drawEdge, drawGroups, startMessages: START, vssBytes: vssInfo && vssInfo.bytes ? vssInfo.bytes : VSS_HINT, neuralBytes: nb };
+  const def = VF ? VF.DEFAULT_CUT : 'vss';
+  return { K, engine, drawShape, drawEdge, drawGroups, startMessages: START, vssBytes: vssInfo && vssInfo.bytes ? vssInfo.bytes : VSS_HINT, neuralBytes: nb,
+    neuralModels: neuralNames(), cut: { current: cutLabel(cutWanted()), def: cutLabel(def) } };
 }
-const renderHelp = () => spellHelpHTML() + cutHelpHTML() + HelpKit.help(helpEnv());
-/** the cut setting, at the top of ⋮ › Help (it acts before every reader, so it is not one reader's setting) */
+/** a capability switch (Settings › Capabilities or Help › Capabilities): the same for every reader */
+function setPlug(name, on) {
+  for (const rd of READERS) rd.engine.plugin(name).enabled = on;
+  const p = engine.plugin(name); sysNote(`${(HelpKit.CAPS[p.name] || p).t || p.title} switched ${p.enabled ? 'on' : 'off'} for every reader`);
+}
+/** ⋮ › Settings: the two steps that act before every reader */
+const renderSettings = () => `<p class="intro">These act before every reader: the spell checker, then the cut into requests. What each one is: <button type="button" class="btn" data-help="spelling">Spell checker</button> <button type="button" class="btn" data-help="cutting">One cut for all readers</button></p>` + cutHelpHTML() + spellHelpHTML()
+  + `<div class="help"><h3 class="sub">Help</h3><p class="note">How to use the editor, SOP Lang, the concepts and the architecture are in Help: the <b>?</b> button above the drawing. <button type="button" class="btn" data-help="start">Open Help</button></p></div>`;
+/** the cut setting, in ⋮ › Settings (it acts before every reader, so it is not one reader's setting) */
 function cutHelpHTML() {
   const want = cutWanted(), def = VF ? VF.DEFAULT_CUT : null;
   const opt = s => { const why = cutWhyNot(s.id), off = s.id === 'bert' && why;   // VSS can be chosen while it loads (the Rules segmenter cuts until then)
@@ -889,7 +907,7 @@ function cutHelpHTML() {
   <p class="note">A message is cut into requests once, and Rules, VSS and Neural all read the same requests; the tabs differ only in how each reader reads a request. <b>details</b> under a reply lists the requests and the time the cut took.</p>
   ${cutStrategies().map(opt).join('')}</div>`;
 }
-/** the spell checker's switch, at the top of ⋮ › Help (it acts before every reader, so it is not one reader's setting) */
+/** the spell checker's switch, in ⋮ › Settings (it acts before every reader, so it is not one reader's setting) */
 function spellHelpHTML() {
   const P = speller && speller.params;
   const about = P ? `A word that no reader knows is replaced by the most similar known word when the similarity of their letter groups (VSA character n-grams, D ${P.D}) is at least ${P.threshold} and ${P.margin} above the next word. Known words: ${speller.size()} (the VSS worlds’ words, the legend’s values and cue words) and the names on the canvas; ${speller.keepSize()} more words of the training messages are left alone. Never changed: quoted text, numbers, words of one or two letters, the word after “named” or “called”, and capitalised names that are not on the canvas.`
@@ -898,8 +916,7 @@ function spellHelpHTML() {
   <label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:pointer"><input type="checkbox" id="spell-on" ${spellEnabled ? 'checked' : ''}> <span>Correct typos before the readers read a message (“gree circle” → “green circle”). Every reader reads the corrected text; your message shows what was changed, and <b>details</b> shows the typed and the corrected text.</span></label>
   <p class="note">${escH(about)}</p></div>`;
 }
-const renderLegend = () => HelpKit.sop(helpEnv());
-const renderPlugins = () => HelpKit.capabilities(helpEnv());
+const renderPlugins = () => HelpKit.capSwitches(helpEnv());
 function renderWorld(rd) {
   const w = rd.world, S = w.state, lines = [];
   for (const s of S.shapes) lines.push(hlNode({ id: s.name, type: 'shape', args: Object.assign({ shape: s.shape, size: K.sizeName(s.size), color: s.color }, s.outline ? { outline: s.outline } : {}, s.label ? { label: s.label } : {}, { at: [s.x, s.y] }) }));
@@ -907,7 +924,7 @@ function renderWorld(rd) {
   for (const r of S.rules) { const a = {}; ['shape', 'size', 'color', 'outline'].forEach(k => { if (r[k]) a[k] = r[k]; }); lines.push(hlNode({ id: r.id, type: 'rule', args: a })); }
   for (const g of S.groups || []) lines.push(hlNode({ id: g.name, type: 'group', args: { members: g.members.map(m => ({ ref: m })) } }));
   if (!lines.length) lines.push('<span class="cm"># empty</span>');
-  return `${isReady(rd) ? '' : `<p class="intro">This reader is ${escH(offText(rd).replace(/, did not read this$/, '').replace(/ \(see Neural › Settings\)$/, ''))}; its Settings subtab shows how to load it.</p>`}<p class="intro">The ${escH(rd.label)} reader’s drawing, written back as SOP wires. This is what a backend such as Datalog, Prolog or Z3 would receive after lowering. ${w.undoStack.length} step${w.undoStack.length === 1 ? '' : 's'} can be undone.</p><pre class="sop">${lines.join('\n')}</pre>`;
+  return `${isReady(rd) ? '' : `<p class="intro">This reader is ${escH(offText(rd).replace(/, did not read this$/, '').replace(/ \(see Neural › Settings\)$/, ''))}; its Settings subtab shows how to load it.</p>`}<p class="intro">The ${escH(rd.label)} reader’s drawing, written back as SOP Lang wires. This is what a backend such as Datalog, Prolog or Z3 would receive after lowering. ${w.undoStack.length} step${w.undoStack.length === 1 ? '' : 's'} can be undone.</p><pre class="sop">${lines.join('\n')}</pre>`;
 }
 
 /* ---------------- composer ---------------- */
@@ -968,7 +985,7 @@ window.addEventListener('resize', () => { if (!drag) renderCanvas(); });
 
 /* ---------------- start ---------------- */
 updateTabs(); renderCanvas(); setStatus(idleStatus());
-botBubble({ text: 'Hi! Tell me what to draw, change or connect, or ask me about the drawing. Three readers (Rules, VSS, Neural) read every message, each into its own drawing; the tabs above the canvas switch between them. Tap + for examples and whole scenarios, ⋮ for help.' });
+botBubble({ text: 'Hi! Tell me what to draw, change or connect, or ask me about the drawing. Three readers (Rules, VSS, Neural) read every message, each into its own drawing; the tabs above the canvas switch between them. Tap + for examples and whole scenarios, ? for help, ⋮ for settings.' });
 const START = [
   'Draw a large blue circle named Start in the top left, then add a rectangle named Process to the right of it labeled "Validate". Connect Start to Process.',
   'Add a yellow diamond named Check right of Process labeled "ok?" and connect Process to it. Put a green circle named Done below Check and link Check to Done with a dashed arrow labeled "yes".',
@@ -976,6 +993,8 @@ const START = [
 ];
 START.forEach(t => submit(t));
 queue.then(() => { READERS.forEach(rd => { rd.world.undoStack = []; }); renderSopBar(); });
+// the Help overlay: opened by the ? button, by a data-help button, or by a link #help/<page> (also on reload)
+DocsKit.init({ env: helpEnv, say: t => submit(t), onPlug: (name, on) => { setPlug(name, on); if (!sheet.hidden && sheetTab === 'plugins') sbody.innerHTML = renderPlugins(); } });
 ensureVSS();              // same site: no button, no question
 checkNeural();            // our neural model loads by itself (from the browser cache when it is there)
 })();

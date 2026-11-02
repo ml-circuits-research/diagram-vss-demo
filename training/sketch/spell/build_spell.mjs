@@ -10,8 +10,8 @@
 //     whose kind is not unknown / NAME / NUM / TEXT, and the words of front.json's value phrases and trigger phrases;
 //   - added in the page and here: the legend's values and cue words (docs/js/logic.js; SpellKit.legendWords) and the canvas names.
 // Kept words (`keep`: never corrected, never a correction target): the words of the training messages the worlds are trained from
-// (committed training/sketch/llm_train/**/*.jsonl, outside quotes, written in lower case) that occur in 2 or more messages (a word
-// written in two different messages is a word, not a typo), less the vocabulary.
+// (committed training/sketch/llm_train/**/*.jsonl, outside quotes, written in lower case) that occur in 2 or more DISTINCT messages (a word
+// written in two different messages is a word, not a typo; a text saved twice is one message), less the vocabulary.
 //
 // Protocol (owner's request 2026-11-02; fixed before the run):
 //   Typo test: every message of the demo's benchmark sets (docs/bench/*.json) gets ONE typo in one known word: a word of the text
@@ -94,7 +94,12 @@ function typoOf(text, names, known, untouched, r) {
 
 // ---- data
 const trainFiles = execSync("git ls-files 'training/sketch/llm_train/*.jsonl' 'training/sketch/llm_train/**/*.jsonl'", { cwd: REPO, encoding: "utf8" }).split("\n").filter(Boolean).sort();
-let train = []; for (const f of trainFiles) for (const l of readFileSync(REPO + f, "utf8").split("\n")) if (l.trim()) { const j = JSON.parse(l); if (j.text) train.push({ text: j.text, names: j.names || [] }); }
+// each message TEXT counts once: the texts_*.jsonl saved before annotation and the msg_*.jsonl / batch_*.jsonl with the same texts, the
+// llm_train/{sonnet,haiku} copies of the *_short folders and repeated folders are the same message (2026-11-02 review: 13528 rows, 6538 distinct
+// texts in llm_train alone; the typos abov, benath, betwen, blu, botom, diamand, lft, moev were "words of 2+ messages" because one text was counted 2-3 times)
+let train = []; const seenText = new Set(); let nRows = 0;
+for (const f of trainFiles) for (const l of readFileSync(REPO + f, "utf8").split("\n")) if (l.trim()) { const j = JSON.parse(l); if (j.text) { nRows++; if (seenText.has(j.text)) continue; seenText.add(j.text); train.push({ text: j.text, names: j.names || [] }); } }
+console.log(`training texts: ${nRows} rows, ${train.length} distinct texts`);
 { const r = rng(7); for (let i = train.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [train[i], train[j]] = [train[j], train[i]]; } }
 const nTrainAll = train.length, rest = train, keepAll = new Set(); train = train.slice(0, 2000);
 { const df = new Map();
@@ -102,7 +107,7 @@ const nTrainAll = train.length, rest = train, keepAll = new Set(); train = train
     for (const m of x.text.matchAll(TOK)) { const t = m[0]; if (/^[.!?"“']/.test(t)) { prev = null; continue; } if (/^[a-z]+$/.test(t)) seen.add(t); prev = t; }
     for (const w of seen) df.set(w, (df.get(w) || 0) + 1); }
   for (const [w, n] of df) if (n >= 2 && WORD.test(w)) keepAll.add(w);
-  console.log(`training words in 2+ of ${rest.length} messages: ${keepAll.size}`); }
+  console.log(`training words in 2+ of ${rest.length} distinct messages: ${keepAll.size}`); }
 const vssWords = [...vocab.keys()].sort();
 const legendWords = SpellKit.legendWords(K.createSystem().engine.legend);
 const keepWords = [...keepAll].filter((w) => !vocab.has(w) && !legendWords.includes(w)).sort();

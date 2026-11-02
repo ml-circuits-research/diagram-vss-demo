@@ -7,16 +7,16 @@ wires by one of three readers, and the same engine and the same Datalog reasoner
 |---|---|---|
 | **Rules** | hand-written extractors keyed on the legend's cue words, with spelling correction and mention resolution | none (code) |
 | **VSS** | a composer of 7 small VSS worlds (VSA route book, no transformer) trained on this demo's legend with the `sop` tool of [vss-demo](https://github.com/ml-circuits-research/vss-demo): a cutter cuts the message into units, the worlds read them, a context filler fills references | `docs/model/micro/` (the worlds, the cutter, `registry.json`), `docs/model/context/` |
-| **Neural** | pretrained transformers through Transformers.js: zero-shot NLI for the act, extractive QA (DistilBERT SQuAD) for each legend question | downloaded from the Hugging Face hub on first use |
+| **Neural** | SOP-BERT: one DistilBERT fine-tuned on the annotated requests, run in the browser by Transformers.js; it cuts the message (the BERT cutter) and reads, per request, the act, the value of each legend key, who fills each role and the written names, labels and numbers, without the Rules reader. (Until 2026-11-02: an act classifier plus a ready-made QA model, removed.) | `docs/model/neural/sop-bert/` (hosted on this site, versioned) |
 
-The **Benchmark** tab (menu ⋮) runs the readers on the same labelled sentences in the browser and shows accuracy per test set, the model
+The **Benchmark** (menu ⋮ › Benchmark) runs the readers on the same labelled sentences in the browser and shows accuracy per test set, the model
 size, the load time and the time per message.
 
 Open it: `docs/` is the whole application (GitHub Pages from `/docs`, or `npx serve docs` locally; ES modules do not load from `file://`).
 
 Working rules for this repository (scope, data, fairness): `AGENTS.md`. The VSS reader's design: `training/sketch/VSS_READER_SPEC.md`.
 
-How it works inside (every component, model, data set, training run and measurement, with file paths and sizes): `docs/architecture.html` ([on the site](https://ml-circuits-research.github.io/diagram-vss-demo/architecture.html)).
+Help: the ? button above the drawing opens it full screen (deep links such as `index.html#help/sop-lang`). How it works inside (every component, model, data set, training run and measurement, with file paths and sizes): the Help pages under "How it works inside", also as one page, `docs/architecture.html` ([on the site](https://ml-circuits-research.github.io/diagram-vss-demo/architecture.html)).
 
 ## Layout
 

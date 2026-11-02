@@ -1733,11 +1733,6 @@ function rulesCut(formalize, input, ctx) {
 /* =====================================================================
    7. Assembly
    ===================================================================== */
-function learnedCues() {   /* docs/js/learned-cues.js, generated from the training messages (training/sketch/mine_triggers.py) */
-  if (typeof SOP_LEARNED_CUES !== 'undefined') return SOP_LEARNED_CUES;
-  if (typeof module !== 'undefined' && typeof require === 'function') { try { return require('./learned-cues.js'); } catch (e) { return null; } }
-  return null;
-}
 /** the world written back as SOP wires (shapes, edges, rules, groups): what a backend receives after lowering; the World view shows it */
 function worldNodes(state) {
   const S = state, out = [];
@@ -1754,11 +1749,6 @@ function createSystem(opts = {}) {
   const engine = new Engine(world);
   [corePlugin, historyPlugin, shapesPlugin, groupsPlugin, connectionsPlugin, layoutPlugin, queriesPlugin, reasoningPlugin, logicPlugin, rulesPlugin, factsPlugin].forEach(p => engine.use(Object.assign({}, p)));
   engine.legend.define('core', 'action', { ask: 'What should happen?', kind: 'enum' });
-  const LC = opts.learned === false ? null : learnedCues();
-  if (LC) for (const [key, vals] of Object.entries(LC)) {   /* merged, never replacing the hand-written cues */
-    const q = engine.legend.get(key); if (!q || !q.values) continue;
-    for (const [v, cues] of Object.entries(vals)) if (q.values[v]) q.values[v] = q.values[v].concat(cues.filter(c => !q.values[v].includes(c)));
-  }
   const formalize = makeFormalizer(engine);
   /** cut(input, ctx): the rules' cut as character offsets [{c0, c1, src}] (rulesCut) */
   return { world, engine, formalize, cut: (input, ctx) => rulesCut(formalize, input, ctx) };
