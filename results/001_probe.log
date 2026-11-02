@@ -1,0 +1,12 @@
+cuda: FAILED
+# World `real`: built from 4640 training messages (22702 requests with a span)
+
+WORLD_EVENTS=delete,duplicate,label,rename: only the rows of these events; the legend lists only these events.
+
+FRONT_ROWS=world: the front end below is learned only from the 1091 requests of this world's events.
+
+Front end learned from the same messages: 17 value n-grams, 138 trigger rules, 0 segmenter weights; params {"seg_epochs": 8, "val_min_count": 5, "val_min_prec": 0.8, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}.
+2/2 files OK against legend(s) probe_cuda sha256:fdf259818928…
+cpu: total 164 s; last progress lines:
+[train] phase table: 1170 of 10720 rows reached by the training sentences, held and trained; the other 9550 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.60 GB (peak 0.63 GB) | cpu | MemAvailable 7.7 GB
+[train seed 0] step 500 sent 4000/4975 loss -0.985 (24s) | RSS 0.86 GB (peak 1.17 GB) | cpu | MemAvailable 7.4 GB
