@@ -1,0 +1,89 @@
+[20:05:47 +0s] arm BERT-T, EXTRA_DIRS=llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_tgt_1 llm_train/opus_tgt_2
+               total        used        free      shared  buff/cache   available
+Mem:              15           5           3           0           7           9
+Swap:             15           0          15
+6 extra folders: ['llm_train/opus_train_a', 'llm_train/opus_train_b', 'llm_train/opus_train_c', 'llm_train/opus_train_d', 'llm_train/opus_tgt_1', 'llm_train/opus_tgt_2']
+Using Python 3.13.18 environment at: /home/claude/vss-box/venv
+Checked 13 packages in 3ms
+torch 2.15.0+cu132 cuda True
+acts: 36; messages train 9440 heldout 0; sample found 1000 missing 0
+act                train     heldout  sample1000        hand       blind       broad        seennew_identitiesheldout_formulations
+create              1665           0         190           4           5          21          26          33          65
+delete               364           0          47           3           4           9          13          10           5
+move                3974           0         638           2           4           7          27          22          22
+acts: 36; messages train 9440 heldout 0; sample found 1000 missing 0
+act                train     heldout  sample1000        hand       blind       broad        seennew_identitiesheldout_formulations
+create              1665           0         190           4           5          21          26          33          65
+delete               364           0          47           3           4           9          13          10           5
+[20:05:51 +4s] rows done
+[20:12:29 +402s] GPU is ours
+NO HELD-OUT: fixed 8 epochs, last epoch kept; numbers below on evaluation sets that are part of the training data are the FIT on the training data, not a test
+base distilbert-base-uncased: 67.1M parameters, device cuda, fp16 True; train 31625 held-out 0; acts 36, class keys 24 (177 classes), tags 17
+cut: 9440 train messages; word pieces per message: median 36, max 287; 0 of 9440 exceed 512 (the words beyond are read as outside every request)
+act none: 0/31625 train rows = 0.0%; weight 1 (not above 40%)
+  scaler.step(opt); scaler.update(); sch.step(); loss_sum += loss.item(); n += 1; step += 1
+epoch 1: loss 1.8979  (no held-out)  (96s)
+epoch 2: loss 0.2821  (no held-out)  (191s)
+epoch 3: loss 0.1700  (no held-out)  (288s)
+epoch 4: loss 0.0991  (no held-out)  (384s)
+epoch 5: loss 0.0618  (no held-out)  (479s)
+epoch 6: loss 0.0390  (no held-out)  (575s)
+epoch 7: loss 0.0250  (no held-out)  (671s)
+epoch 8: loss 0.0176  (no held-out)  (767s)
+  torch.onnx.export(model, (x["input_ids"], x["attention_mask"]), os.path.join(ox, "model.onnx"), dynamo=False, opset_version=14,
+  mask, torch.tensor(torch.finfo(scores.dtype).min)
+WARNING:root:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+
+last epoch (8) kept; there is no held-out score. Per key: right/gold (+ produced where the gold has none), on the sets below (eval_sample1000 is TRAINING data here)
+  blind                  n=   60  requests read right 0.8000  act 0.9833
+      anchor 8/8 · arrow 0/2 · axis 1/1 +1 · color 10/10 · comparison 1/1 · count 1/1 · desc:color 0/1 · desc:notColor 0/1 · desc:quantifier 5/7 +1 · desc:shape 1/5 · direction 2/2 · distance 1/1 · fill:anchor 8/8 · fill:from 7/9 +1 · fill:target 29/30 +1 · fill:to 6/6 · from 7/7 · label 2/2 · layout 1/1 · name 2/2 · pairing 2/2 · position 5/8 · property 3/3 · shape 12/12 · size 4/4 · style 1/1 · superlative 1/1 +1 · target 24/25 · to 6/6 +1
+      name-roles per filler kind (kind read right / value read right / gold): description 5/1/7 (14.3%) · written 45/45/46 (97.8%)  ->  description accuracy 1/7
+  broad                  n=  118  requests read right 0.7627  act 0.9576
+      anchor 15/15 · arrow 1/2 · axis 2/2 · color 29/29 · comparison 1/1 · count 3/3 · desc:color 0/3 · desc:notColor 0/1 · desc:quantifier 8/9 +1 · desc:recency 1/2 · desc:shape 6/13 · direction 2/3 · distance 2/2 · fill:anchor 15/15 · fill:from 14/17 · fill:target 53/54 +3 · fill:to 14/14 · from 14/14 · kind 1/1 · label 4/4 · layout 2/2 · name 5/5 · notColor 0/1 · pairing 2/2 · position 11/17 · property 5/6 · shape 31/33 · size 7/8 · style 2/2 · superlative 2/3 · target 43/43 +3 · to 14/14
+      name-roles per filler kind (kind read right / value read right / gold): context 0/0/1 (0.0%) · description 10/4/13 (30.8%) · written 86/86/86 (100.0%)  ->  description accuracy 4/13
+  hand                   n=   40  requests read right 0.9000  act 1.0000
+      anchor 5/5 · axis 2/2 · color 10/10 · count 1/1 · desc:notColor 0/1 · desc:quantifier 2/4 · desc:shape 1/4 · direction 1/1 · distance 1/1 · fill:anchor 5/5 · fill:from 5/7 · fill:target 19/19 +1 · fill:to 4/4 · from 5/5 · label 1/1 · layout 1/1 · name 2/2 · notColor 1/1 · pairing 2/2 · position 3/4 +1 · property 2/2 · shape 7/7 · size 3/3 · style 1/1 · superlative 2/2 · target 17/17 · to 4/4
+      name-roles per filler kind (kind read right / value read right / gold): description 2/1/4 (25.0%) · written 31/31/31 (100.0%)  ->  description accuracy 1/4
+  heldout_formulations   n=  300  requests read right 0.5400  act 0.9733
+      anchor 34/37 +5 · arrow 3/10 · axis 9/9 +2 · color 96/98 +11 · count 14/14 · desc:color 0/46 · desc:notColor 0/19 · desc:quantifier 34/42 · desc:recency 2/3 +4 · desc:shape 11/97 · fill:anchor 34/53 +1 · fill:from 50/85 +3 · fill:target 100/104 +8 · fill:to 63/77 · from 50/50 +5 · label 26/26 · name 26/28 · notColor 1/1 · pairing 7/11 · position 44/81 +3 · shape 93/94 +1 · size 21/24 · style 24/24 · target 60/63 +1 · to 54/54 +2
+      name-roles per filler kind (kind read right / value read right / gold): description 47/5/115 (4.3%) · written 200/196/204 (96.1%)  ->  description accuracy 5/115
+  new_identities         n=  300  requests read right 0.6033  act 0.9667
+      anchor 22/24 +4 · arrow 3/8 · axis 5/5 +1 · color 73/75 +1 · count 3/3 +1 · desc:color 0/37 · desc:notColor 0/5 · desc:quantifier 30/47 +2 · desc:recency 1/3 +1 · desc:shape 6/82 · direction 6/6 · distance 4/4 · fill:anchor 22/39 · fill:from 37/65 +1 · fill:target 129/143 +12 · fill:to 33/40 · from 35/40 +2 · label 16/16 · layout 11/11 · name 24/25 · notColor 0/1 · pairing 11/16 · position 33/58 · property 8/9 · shape 66/70 · size 23/23 +1 · style 13/13 +1 · target 99/99 +8 · to 31/31 +1
+      name-roles per filler kind (kind read right / value read right / gold): description 35/3/93 (3.2%) · written 186/183/194 (94.3%)  ->  description accuracy 3/93
+  sample1000             n= 4858  requests read right 0.9432  act 0.9998
+      anchor 850/850 · arrow 15/158 · axis 68/72 · color 1197/1199 · comparison 79/79 · count 55/55 · desc:color 0/18 · desc:notColor 1/13 · desc:quantifier 45/52 +1 · desc:recency 29/36 +4 · desc:shape 23/62 +3 · direction 34/34 +1 · distance 34/34 · fill:anchor 907/915 +2 · fill:from 936/944 · fill:target 2790/2805 +1 · fill:to 657/660 · from 878/878 · kind 36/36 · label 108/110 · layout 102/102 · name 198/198 · notColor 37/54 · pairing 252/252 · position 903/914 · property 49/49 · shape 719/723 · size 503/506 · style 136/139 · superlative 359/359 +1 · target 2483/2484 · to 605/605
+      name-roles per filler kind (kind read right / value read right / gold): context 392/392/414 (94.7%) · description 91/31/101 (30.7%) · written 4807/4806/4809 (99.9%)  ->  description accuracy 31/101
+  seen                   n=  300  requests read right 0.6733  act 0.9733
+      anchor 31/33 +2 · arrow 1/5 · axis 5/5 · color 70/74 +1 · count 9/9 +1 · desc:color 0/34 · desc:notColor 0/2 · desc:quantifier 18/28 +3 · desc:recency 0/3 +4 · desc:shape 2/63 · direction 9/10 · distance 9/9 · fill:anchor 31/41 · fill:from 32/47 +3 · fill:target 161/170 +13 · fill:to 27/35 · from 32/33 +1 · label 15/15 · layout 7/7 · name 22/22 · notColor 0/1 · pairing 6/8 · position 32/55 +1 · property 6/8 · shape 60/61 +1 · size 16/16 +2 · style 7/7 +2 · target 127/129 +2 · to 26/26 +2
+      name-roles per filler kind (kind read right / value read right / gold): description 34/1/72 (1.4%) · written 217/215/221 (97.3%)  ->  description accuracy 1/72
+  cut train: n 9440, spans gold 31620, spans predicted 31648, exact 31541, precision 0.9966, recall 0.9975, f1 0.9971, word accuracy 0.9996
+  cut eval_sample1000: n 1000, spans gold 4856, spans predicted 4860, exact 4846, precision 0.9971, recall 0.9979, f1 0.9975, word accuracy 0.9997
+onnx fp32 vs torch: max |diff| token 7.63e-06, seq 1.14e-05, cut 5.96e-06
+node makeReader q8 vs torch on 50 requests: word pieces 50/50, act 50/50, classes 50/50, tags 50/50 (17 tags, 24 class keys)
+node cut() vs torch on 20 whole messages: spans identical 20/20
+{"ids":"50/50","act":"50/50","classes":"50/50","tags":"50/50","cut":"20/20"} 
+
+wrote results/064_arm_bert_T/sop-bert-T (67.8 MB q8); README.md inside
+[20:25:43 +1196s] fine-tuning exit 0
+node makeReader q8 vs torch on 50 requests: word pieces 50/50, act 50/50, classes 50/50, tags 50/50 (17 tags, 24 class keys)
+node cut() vs torch on 20 whole messages: spans identical 20/20
+{"ids":"50/50","act":"50/50","classes":"50/50","tags":"50/50","cut":"20/20"}
+-rw-r--r--. 1 claude claude     8726 Nov  2 20:25 results/064_arm_bert_T/sop-bert-T/config.json
+-rw-r--r--. 1 claude claude      283 Nov  2 20:25 results/064_arm_bert_T/sop-bert-T/DATA.txt
+-rw-r--r--. 1 claude claude 67771471 Nov  2 20:25 results/064_arm_bert_T/sop-bert-T/onnx/model_quantized.onnx
+-rw-r--r--. 1 claude claude      886 Nov  2 20:25 results/064_arm_bert_T/sop-bert-T/README.md
+-rw-r--r--. 1 claude claude     1227 Nov  2 20:25 results/064_arm_bert_T/sop-bert-T/tokenizer_config.json
+-rw-r--r--. 1 claude claude   711551 Nov  2 20:25 results/064_arm_bert_T/sop-bert-T/tokenizer.json
+600 messages (fresh2, sop-bert-T, cut own)
+fresh2 sop-bert-T cut own: 600 messages, 2029 produced requests; max |min over recorded heads - confSop| = 1.93e-4
+[20:25:54 +1207s] collectors done
+[20:25:54 +1207s] report written: results/064_arm_bert_T/report.md
+# FRESH2 report (test part), written by training/sketch/fresh2/fit_report.mjs
+
+Records: results/064_arm_bert_T/records. Messages: 600 in the data dirs (opus_a, opus_b, opus_c, opus_d); calibration 195 messages / 596 requested actions; test 405 messages / 1313 requested actions.
+Split: int(sha256(id), 16) % 3 == 0 is calibration. Thresholds and confidences are fitted on the calibration part only. MINEXEC 50; bootstrap 1000 resamples of the test messages, seed 1.
+Definitions (per requested action, PAIR=value as llm_score.mjs): confidently wrong % = (executed wrong + executed extras) / everything executed; done right % = executed right / requested actions; asked % = right or wrong requests below the threshold / requested; not read % = requested actions with n
+
+## Cost score: one confident mistake costs 10 right answers (the main measure, AGENTS.md 2026-11-02 19:09)
+
+68M	results/064_arm_bert_T
