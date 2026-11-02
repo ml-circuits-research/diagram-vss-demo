@@ -1,44 +1,37 @@
-// layer_common.mjs: shared by layer_score.mjs and train_context.mjs.
-//  - build(): ONE composer pass (docs/js/vss-composer.js via loadComposer, registry docs/model/micro/registry.json, the learned cutter) over
-//    the 9 data folders (micro_tools.py dirs). Per read unit it keeps: the VSS layer (vss-context.js rawNodes: the adapter's mapping with
-//    nothing resolved) and today's post-VSS output (vss-adapter.js toNodes with the context rule of llm_score.mjs, scorerUpdate), both in
-//    the canonical form of bench-canon.js. The loop over units is copied from composer_errors.mjs (itself a copy of Composer.formalize).
-//    The result is cached as JSON (CACHE=<file>, default in the scratchpad dir given by LAYER_CACHE_DIR or /tmp); REBUILD=1 rebuilds.
-//  - classify(): the VSS layer's output per gold key (classes 1-5 of LAYERS.md).
+// layer_common.mjs: shared by train_context.mjs (the context filler's training), composer_errors.mjs (root causes) and llm_score.mjs (PAIR=value).
+//  - build(): ONE pass of the composer as the demo runs it (docs/js/vss-composer.js loadComposer + comp.formalize: the world cutter, the
+//    event cutter, the registry's worlds, no fallback, the context filler of the registry for ties) over the 9 data folders (micro_tools.py
+//    dirs), with the context rule of llm_score.mjs between requests (scorerUpdate). Per unit that gave a request (zone "read" or "ask") it
+//    keeps the VSS layer: the unit's raw nodes (vss-context.js rawNodes of the chosen reading: the adapter's mapping with nothing
+//    resolved, exposed by the composer as unit.raw). REGISTRY=<file> (default docs/model/micro/registry.json); CONTEXT=<file> the filler
+//    used for ties while building (default the registry's "context"). Cached as JSON (CACHE=<file>, default in LAYER_CACHE_DIR or /tmp,
+//    one file per registry); REBUILD=1 rebuilds.
 //  - pairOrder() (llm_score.mjs: LCS on the action label) and pairValue() (per action label, a maximum-weight matching: as many pairs as
 //    possible, then the most gold keys the VSS layer read right, then the most letters shared by the unit and the gold span).
 import { readFileSync, readdirSync, existsSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { basename } from "node:path";
 import { load } from "../../docs/js/vss.js";
-import * as FRONT from "../../docs/js/front.js";
-import { readingFromWires, toNodes } from "../../docs/js/vss-adapter.js";
 import { canon, canonWant } from "../../docs/js/bench-canon.js";
 import { loadComposer } from "../../docs/js/vss-composer.js";
-import { rawNodes, ENTITY_KEYS } from "../../docs/js/vss-context.js";
 
 export const MODELS = new URL("../../docs/model/", import.meta.url);
 export const actOf = (type, args) => `${type}:${args.action || args.ask || ""}`;
-export const words = (s) => String(s).toLowerCase().replace(/[^a-z0-9$]+/g, " ").trim();
 export const isTest = (id) => { let h = 2166136261; for (const ch of String(id)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h % 5 === 0; };   // 20% of messages by id hash (FNV-1a)
 export const dirsAll = () => execFileSync("python3", [new URL("micro_tools.py", import.meta.url).pathname, "dirs"], { encoding: "utf8" }).split("\n").filter(Boolean);
-export const defaultCache = () => process.env.CACHE || `${process.env.LAYER_CACHE_DIR || "/tmp"}/layer_cache.json`;
+export const registryFile = () => process.env.REGISTRY || new URL("micro/registry.json", MODELS).pathname;
+export const defaultCache = () => process.env.CACHE || `${process.env.LAYER_CACHE_DIR || "/tmp"}/layer_cache_${basename(registryFile(), ".json")}.json`;
+export const readRows = (d) => readdirSync(d).filter((f) => f.endsWith(".jsonl")).sort().flatMap((f) => readFileSync(`${d}/${f}`, "utf8").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l)));
 
-function scorerUpdate(c, main) {   // llm_score.mjs, copied
+/** llm_score.mjs's context rule between requests (copied: llm_score.mjs does not export it) */
+export function scorerUpdate(c, main) {
   if (main && main.args) {
     if (main.args.action === "create") { if (main.args.name && !main.args.count) c.refs.set(String(main.args.name).toLowerCase(), { ref: main.id }); c.last = [{ ref: main.id }]; }
     else if (main.args.target != null && !Array.isArray(main.args.target)) c.last = [main.args.target];
   }
 }
-/** canon with the name of a created shape kept: "$new" -> "$new=<name>" (for the per-key comparisons only) */
-export function canonN(main, nodes) {
-  const byId = new Map(nodes.map((n) => [n.id, n])), sub = (v) => {
-    if (Array.isArray(v)) return v.map(sub);
-    if (v && typeof v === "object" && typeof v.ref === "string") { const m = byId.get(v.ref); if (m && m.type !== "mention" && m.args && m.args.name != null && !m.args.count) return "$new=" + String(m.args.name); }
-    return v;
-  };
-  return canon({ type: main.type, args: Object.fromEntries(Object.entries(main.args).map(([k, v]) => [k, sub(v)])) }, nodes);
-}
-function goldSpans(r) {   // composer_errors.mjs, copied
+/** the gold requests of a row with their character spans (the k-th occurrence for repeated spans) */
+export function goldSpans(r) {
   const used = new Set();
   return r.wires.map((w, idx) => {
     let s = -1, from = 0;
@@ -49,11 +42,10 @@ function goldSpans(r) {   // composer_errors.mjs, copied
   });
 }
 
-export async function build(dirs) {
-  const cacheFile = defaultCache();
-  if (existsSync(cacheFile) && process.env.REBUILD !== "1") return JSON.parse(readFileSync(cacheFile, "utf8"));
-  const REG = JSON.parse(readFileSync(process.env.REGISTRY || new URL("micro/registry.json", MODELS), "utf8"));
-  const MODEL = process.env.MODEL || REG.fallback, CUTF = JSON.parse(readFileSync(new URL(REG.cutter, MODELS), "utf8"));
+/** the composer of a registry as the demo loads it: -> {comp, REG, meta}. ctxFile: the filler's weights (default the registry's) */
+export async function loadRegistry(regFile = registryFile(), ctxFile = process.env.CONTEXT || null) {
+  const REG = JSON.parse(readFileSync(regFile, "utf8")), J = (p) => JSON.parse(readFileSync(new URL(p, MODELS), "utf8"));
+  const ctxPath = ctxFile || new URL(REG.context || "context/weights.json", MODELS).pathname;
   const cache = new Map();
   const loadModel = async (name) => {
     if (cache.has(name)) return cache.get(name);
@@ -61,74 +53,45 @@ export async function build(dirs) {
     const m = { vss: await load(null, { readFile: rf, sentenceCandidates: true }), F: existsSync(new URL("front.json", d)) ? JSON.parse(await rf("front.json")) : null };
     cache.set(name, m); return m;
   };
-  const comp = await loadComposer(REG, CUTF, loadModel, { fallback: MODEL });
-  const out = { meta: { registry: process.env.REGISTRY || "docs/model/micro/registry.json", fallback: MODEL, cutter: REG.cutter, worlds: comp.worlds.map((w) => w.id), built: new Date().toISOString() }, msgs: [] };
+  const comp = await loadComposer(REG, J(REG.cutter), loadModel, Object.assign({ context: JSON.parse(readFileSync(ctxPath, "utf8")) }, REG.event_cutter ? { eventCutter: J(REG.event_cutter) } : {}));
+  const meta = { registry: regFile.replace(/^.*\/docs\//, "docs/"), cutter: REG.cutter, event_cutter: REG.event_cutter || null, event_hint: comp.eventHint, ties_context: ctxPath.replace(/^.*\/docs\//, "docs/"),
+    worlds: comp.worlds.map((w) => `${w.id} ${(REG.worlds.find((e) => e.world === w.id) || {}).model}`), entity: comp.entity };
+  return { comp, REG, meta };
+}
+
+/** one message through the composer -> {units, prods, out} (prods: the units that gave a request, with their VSS layer) */
+export function runMessage(comp, r, opts = {}) {
+  const out = comp.formalize(r.text, { names: r.names || [], last: [] }, Object.assign({ update: scorerUpdate }, opts));
+  const units = [], prods = [];
+  out.units.forEach((u, i) => {
+    units.push({ c0: u.c0, c1: u.c1, zone: u.zone, world: u.world, event: u.event, status: u.status });
+    const raw = u.raw;
+    if (!raw || !raw.main) return;
+    prods.push({ u: i, world: u.world, act: actOf(raw.main.type, raw.main.args), tokens: (u.normalized || "").split(" ").filter(Boolean),
+      raw: { nodes: raw.nodes, mainId: raw.main.id, defaulted: raw.defaulted }, rawC: canon(raw.main, raw.nodes) });
+  });
+  return { units, prods, out };
+}
+
+export async function build(dirs) {
+  const cacheFile = defaultCache();
+  if (existsSync(cacheFile) && process.env.REBUILD !== "1") return JSON.parse(readFileSync(cacheFile, "utf8"));
+  const { comp, meta } = await loadRegistry();
+  const out = { meta: Object.assign(meta, { built: new Date().toISOString() }), msgs: [] };
   for (const d of dirs) {
-    const name = d.split("/").slice(-2).join("/");
-    const rows = readdirSync(d).filter((f) => f.endsWith(".jsonl")).sort().flatMap((f) => readFileSync(`${d}/${f}`, "utf8").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l)));
-    for (const r of rows) {
-      const names = r.names || [], c = { names: names.slice(), last: [], refs: new Map() }, seq = { s: 0, m: 0 }, rseq = { s: 100, m: 100 };
-      const bnodes = [], units = [], prods = [];
-      for (const [c0, c1] of FRONT.segmentSpans(r.text, names, CUTF)) {
-        const src = r.text.slice(c0, c1), nm = c.names.concat([...c.refs.keys()]);
-        const u = comp.route(src, nm), ui = units.length;
-        units.push({ c0, c1, zone: u.zone, world: u.world, status: u.status });
-        if (u.zone !== "read") continue;
-        const x = u.chosen, verb = x.tokens.find((t) => x.w.verbEvent.has(t)) || x.r.frame.lemma || null;
-        const reading = readingFromWires(x.r.wires, verb, x.tokens);
-        const raw = rawNodes(reading, x.info, names, rseq);
-        const base = toNodes(reading, x.info, c, seq);
-        bnodes.push(...base.nodes); scorerUpdate(c, base.nodes[base.nodes.length - 1]);
-        const bm = base.nodes.filter((n) => n.type !== "mention")[0];
-        if (!bm || !raw.main) continue;
-        prods.push({ u: ui, world: u.world, act: actOf(bm.type, bm.args), tokens: x.tokens, raw: { nodes: raw.nodes, mainId: raw.main.id, defaulted: raw.defaulted },
-          rawC: canon(raw.main, raw.nodes), baseC: canon(bm, bnodes), baseN: canonN(bm, bnodes) });
-      }
-      out.msgs.push({ id: r.id, dir: name, text: r.text, names, gold: goldSpans(r), units, prods });
-    }
+    const name = d.split("/").slice(-2).join("/"), rows = readRows(d);
+    for (const r of rows) { const { units, prods } = runMessage(comp, r); out.msgs.push({ id: r.id, dir: name, text: r.text, names: r.names || [], gold: goldSpans(r), units, prods }); }
     console.error(`built ${name}: ${rows.length} messages`);
   }
   writeFileSync(cacheFile, JSON.stringify(out));
   return out;
 }
 
-// ---------------------------------------------------------------- the VSS layer per gold key
-const REL = { leftof: "left_of", rightof: "right_of", above: "above", below: "below", near: "next_to", between: "between" };   // keys lower-case: canonWant lower-cases
-const REGION = { center: "center", top: "top", bottom: "bottom", left: "left_side", right: "right_side", topleft: "top_left", topright: "top_right", bottomleft: "bottom_left", bottomright: "bottom_right" };
-const VALTOK = { horizontal: "horizontally", vertical: "vertically", circle: "ring", both: "two_way", none: "plain", all: "each_other", mostconnected: "mostconnected" };
+// ---------------------------------------------------------------- values (canonical strings of bench-canon.js)
 export const parts = (s) => { const o = []; let d = 0, cur = ""; for (const ch of String(s)) { if (ch === "(") d++; if (ch === ")") d--; if (ch === "," && d === 0) { o.push(cur); cur = ""; } else cur += ch; } o.push(cur); return o; };
-const isRefStr = (x) => x.startsWith("@") || x.startsWith("mention(");
 /** element equality, VSS value x against gold g; created: names of shapes the gold creates earlier in the message */
 export const elEq = (x, g, created) => x === g || (g === "$new" && (created.has(x) || x.startsWith("$new"))) || (x.startsWith("$new=") && x.slice(5) === g) || (x === "$new" && g === "$new");
 export const valEq = (v, g, created) => { if (v == null) return false; const a = parts(v), b = parts(g); return a.length === b.length && a.every((x, i) => elEq(x, b[i], created)); };
-/** can the gold element be read from the unit? (its words, or its token, are in the unit) */
-function readableEl(k, g, src, tokens, created) {
-  const W = " " + words(src) + " ", T = new Set(tokens), has = (p) => { const q = words(p.replace(/_/g, " ")); return q && (W.includes(" " + q + " ") || W.includes(" " + q + "s ")); };
-  if (g === "$new") return [...created].some((n) => has(n));
-  if (g.startsWith("mention(")) return g.slice(8, -1).split(",").map((p) => p.split("=")[1]).filter((x) => x && x !== "all").some((x) => has(x) || T.has(x));
-  if (ENTITY_KEYS.includes(k) || k === "name") return has(g) || T.has("n_" + g.replace(/[^a-z0-9]+/g, "_"));
-  const tok = (REL[g] || REGION[g] || VALTOK[g] || g).toLowerCase();
-  return T.has(tok) || T.has(g) || T.has("not_" + g) || T.has("t_" + g.replace(/[^a-z0-9]+/g, "_")) || has(g) || (REL[g] && has(REL[g])) || (REGION[g] && has(REGION[g]));
-}
-/** the VSS layer's class of one gold key: {cls: "1".."4", sub} (class 5 = rawC keys absent from the gold, counted apart) */
-export function classifyKey(k, g, v, src, tokens, created) {
-  const gEls = parts(g), readAll = gEls.every((x) => readableEl(k, x, src, tokens, created));
-  if (v != null && valEq(v, g, created)) return { cls: "1", sub: "right" };
-  if (v == null) return readAll ? { cls: "4", sub: "4a empty" } : { cls: "2", sub: "2 empty" };
-  const vEls = parts(v), refs = vEls.filter(isRefStr), vals = vEls.filter((x) => !isRefStr(x));
-  if (!vals.length) {   // only references
-    const kind = refs.some((x) => x.startsWith("@")) ? "pronoun" : "mention";
-    if (g.startsWith("mention(") && kind === "mention" && !readAll) return { cls: "2", sub: "2 mention" };
-    if (g.startsWith("mention(") && kind === "mention") return { cls: "3", sub: "3 other description" };
-    return readAll ? { cls: "4", sub: "4b " + kind } : { cls: "2", sub: "2 " + kind };
-  }
-  if (gEls.length > 1 && vals.every((x) => gEls.some((y) => elEq(x, y, created))) && vals.length < gEls.length) {   // a partial list, every value right
-    const missing = gEls.filter((y) => !vals.some((x) => elEq(x, y, created)));
-    return missing.every((y) => readableEl(k, y, src, tokens, created)) ? { cls: "4", sub: "4c partial list" } : { cls: "2", sub: "2 partial list" };
-  }
-  if (ENTITY_KEYS.includes(k)) return { cls: "3", sub: vals.some((x) => gEls.some((y) => elEq(x, y, created))) ? "3 entity: some right, some wrong" : "3 entity: wrong shape" };
-  return { cls: "3", sub: "3 value: " + k };
-}
 /** the gold names created before gold request j */
 export const createdBefore = (m, j) => new Set(m.gold.filter((o) => o.s < m.gold[j].s && o.args.action === "create" && o.args.name != null && !o.args.count).map((o) => String(o.args.name).toLowerCase()));
 
@@ -155,7 +118,7 @@ function hungarianMax(W) {   // square matrix, maximum total weight; returns col
   const col = new Int32Array(n); for (let j = 1; j <= n; j++) col[p[j] - 1] = j - 1; return col;
 }
 const alnum = /[A-Za-z0-9]/;
-const overlap = (text, a0, a1, b0, b1) => { let k = 0; for (let i = Math.max(a0, b0); i < Math.min(a1, b1); i++) if (alnum.test(text[i])) k++; return k; };
+export const overlap = (text, a0, a1, b0, b1) => { let k = 0; for (let i = Math.max(a0, b0); i < Math.min(a1, b1); i++) if (alnum.test(text[i])) k++; return k; };
 /** VSS-layer right keys of produced i for gold j */
 export function rightKeys(m, p, j) {
   const g = m.gold[j], cr = createdBefore(m, j); let k = 0;

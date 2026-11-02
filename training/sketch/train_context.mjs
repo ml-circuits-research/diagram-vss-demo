@@ -6,17 +6,26 @@
 // Split: 80% / 20% of the messages by a hash of the id (layer_common.mjs isTest). Model: a conditional logit (softmax over the candidates of
 // one gap), loss -log P(positive), L2 1e-3, full-batch Adam, 600 steps; nothing tuned on the test split.
 // Margin (pre-registered): the smallest margin in the grid whose fills on the TRAINING split are at least 95% right.
-// Writes docs/model/context/weights.json (WEIGHTS=<file> to write elsewhere). Uses the composer cache of layer_common.mjs build().
-// node train_context.mjs
+// The margin WRITTEN is 0, the owner's per-domain choice for drawing (AGENTS.md: mistakes are cheap, questions annoying); the
+// pre-registered rule's margin is recorded as margin_rule_95.
+// The units and their VSS layer come from layer_common.mjs build(): ONE pass of the composer of the registry, as the demo runs it
+// (comp.formalize: world cutter, event cutter, worlds, no fallback; ties decided by the registry's current filler, CONTEXT=<file> for
+// another). The entity keys (target, from, to, anchor, anchor2 ...) and so the features role_<key> come from the registry
+// (vss-context.js entitySpec, via the composer), not from a list.
+// REGISTRY=<file> (default docs/model/micro/registry.json); WEIGHTS=<file> where to write (default docs/model/context/weights.json);
+// CACHE / REBUILD: layer_common.mjs build().
+// node train_context.mjs                                   (default registry -> docs/model/context/weights.json)
+// REGISTRY=../../docs/model/micro/registry_r2.json WEIGHTS=../../docs/model/context/weights_r2.json node train_context.mjs
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
-import { Context, FEATURES, deriveNeeds, ENTITY_KEYS } from "../../docs/js/vss-context.js";
-import { build, dirsAll, pairValue, createdBefore, candMatches, isTest, parts, valEq } from "./layer_common.mjs";
+import { Context, featureNames, deriveNeeds } from "../../docs/js/vss-context.js";
+import { build, dirsAll, pairValue, createdBefore, candMatches, isTest, parts } from "./layer_common.mjs";
 
 const OUT = process.env.WEIGHTS || new URL("../../docs/model/context/weights.json", import.meta.url).pathname;
-const C = await build(dirsAll());
+const C = await build(dirsAll()), ENTITY = C.meta.entity, FEATURES = featureNames(ENTITY.keys);
+console.log(`composer: ${C.meta.registry} · worlds ${C.meta.worlds.join(", ")} · entity keys ${ENTITY.keys.join(", ")} (roles ${ENTITY.roles.join(", ")})`);
 const train = C.msgs.filter((m) => !isTest(m.id)), test = C.msgs.filter((m) => isTest(m.id));
-const needs = deriveNeeds(train.flatMap((m) => m.gold.map((g) => ({ type: g.type, args: g.args }))));
+const needs = deriveNeeds(train.flatMap((m) => m.gold.map((g) => ({ type: g.type, args: g.args }))), ENTITY.keys);
 console.log(`messages: train ${train.length}, test ${test.length}`);
 
 function collect(msgs, model) {
@@ -44,7 +53,7 @@ function collect(msgs, model) {
   }
   return inst;
 }
-const model0 = { weights: {}, margin: 0, needs };
+const model0 = { weights: {}, margin: 0, needs, entity: ENTITY };
 const TR = collect(train, model0), TE = collect(test, model0);
 console.log(`gap instances: train ${TR.length}, test ${TE.length}`);
 
@@ -76,12 +85,13 @@ const decideAll = (data, I) => data.map(({ X, pos }, n) => { const s = scoresOf(
 const DTR = decideAll(dTR, TR), DTE = decideAll(dTE, TE);
 const GRID = Array.from({ length: 21 }, (_, k) => k * 0.25);   // 0 .. 5
 const at = (Ds, mg) => { let fills = 0, right = 0, ask = 0; for (const d of Ds) { if (d.isNull || d.margin < mg) ask++; else { fills++; if (d.right) right++; } } return { fills, right, wrong: fills - right, ask }; };
-let margin = GRID[GRID.length - 1];
-for (const mg of GRID) { const r = at(DTR, mg); if (r.fills && r.right / r.fills >= 0.95) { margin = mg; break; } }
+let margin95 = GRID[GRID.length - 1];
+for (const mg of GRID) { const r = at(DTR, mg); if (r.fills && r.right / r.fills >= 0.95) { margin95 = mg; break; } }
+const margin = 0;   // the owner's choice for drawing (see the head of the file)
 const pc = (x, n) => (n ? (100 * x / n).toFixed(1) + "%" : "-");
 console.log("\nmargin trade-off (teacher-forced context): fills right / wrong / asked");
 console.log("| margin | train fills | train right | train wrong | train asked | test fills | test right | test wrong | test asked |\n|---|---|---|---|---|---|---|---|---|");
-for (const mg of GRID) { const a = at(DTR, mg), b = at(DTE, mg); console.log(`| ${mg}${mg === margin ? " (chosen)" : ""} | ${a.fills} | ${a.right} (${pc(a.right, a.fills)}) | ${a.wrong} | ${a.ask} | ${b.fills} | ${b.right} (${pc(b.right, b.fills)}) | ${b.wrong} | ${b.ask} |`); }
+for (const mg of GRID) { const a = at(DTR, mg), b = at(DTE, mg); console.log(`| ${mg}${mg === margin ? " (written)" : ""}${mg === margin95 ? " (95% rule)" : ""} | ${a.fills} | ${a.right} (${pc(a.right, a.fills)}) | ${a.wrong} | ${a.ask} | ${b.fills} | ${b.right} (${pc(b.right, b.fills)}) | ${b.wrong} | ${b.ask} |`); }
 const perKey = (Ds, title) => {
   console.log(`\n${title}\n| key / gap kind | gaps | gold has the key | gold among candidates (recall) | fills | right fills | wrong fills | asked |\n|---|---|---|---|---|---|---|---|`);
   const rows = {};
@@ -94,11 +104,11 @@ const perKey = (Ds, title) => {
 perKey(DTR, "train split (teacher-forced context), at the chosen margin"); perKey(DTE, "TEST split (teacher-forced context), at the chosen margin");
 console.log("\nlearned weights (higher = preferred; NULL = 'nobody in the context', i.e. ask):");
 for (const [f, v] of Object.entries(weights).sort((a, b) => b[1] - a[1])) console.log(`  ${f.padEnd(14)} ${v >= 0 ? " " : ""}${v.toFixed(3)}`);
-console.log(`chosen margin ${margin}`);
+console.log(`margin written ${margin} (owner's choice) · margin of the 95% rule ${margin95}`);
 { const r = {}; for (const d of DTR) { if (!d.inst.goldIn) continue; const k = d.inst.kind + " " + (d.inst.gv && parts(d.inst.gv).length > 1 ? "several" : "one"); const o = (r[k] = r[k] || { n: 0, top1: 0, nullTop: 0 }); o.n++; if (d.right) o.top1++; if (d.isNull) o.nullTop++; }
   console.log("train, gaps with the gold among the candidates: best = gold (top-1) / best = NULL, by gap kind and gold arity"); for (const [k, o] of Object.entries(r)) console.log(`  ${k}: ${o.n} · top-1 ${o.top1} (${pc(o.top1, o.n)}) · NULL on top ${o.nullTop}`); }
 if (process.env.DEBUG) { const L = DTR.filter((d) => process.env.DEBUG === "recall" ? d.inst.hasGold && !d.inst.goldIn : d.inst.goldIn && !d.right);
   for (const d of L.filter((_, k) => k % Math.max(1, Math.floor(L.length / 40)) === 0)) console.log(`DBG ${d.inst.id} ${d.inst.kind} ${d.inst.key} ${d.inst.word || ""} gold=${d.inst.gv} best=${d.inst.ckeys[d.best]} m=${d.margin.toFixed(2)} | "${d.inst.src}" | cands ${d.inst.ckeys.slice(0, 8).join(" ")}`); }
 mkdirSync(dirname(OUT), { recursive: true });
-writeFileSync(OUT, JSON.stringify({ about: "weights of the post-VSS context filler (docs/js/vss-context.js), learned by training/sketch/train_context.mjs from the gold args of the 80% training split (id hash); needs = the entity roles each action has in the gold data (deriveNeeds)", trained: { at: new Date().toISOString(), composer: C.meta, train_messages: train.length, test_messages: test.length, train_gaps: TR.length, test_gaps: TE.length, margin_rule: "smallest margin of the grid with >= 95% right fills on the training split" }, features: FEATURES, weights, margin, needs }, null, 1));
+writeFileSync(OUT, JSON.stringify({ about: "weights of the post-VSS context filler (docs/js/vss-context.js), learned by training/sketch/train_context.mjs from the gold args of the 80% training split (id hash); needs = the entity roles each action has in the gold data (deriveNeeds)", trained: { at: new Date().toISOString(), composer: C.meta, train_messages: train.length, test_messages: test.length, train_gaps: TR.length, test_gaps: TE.length, margin_rule: "smallest margin of the grid with >= 95% right fills on the training split" }, features: FEATURES, weights, margin, needs, margin_rule_95: margin95, margin_about: "margin = how much the best candidate must beat the runner-up to be filled without asking. A per-domain cost choice (owner, 2026-11-01): in drawing, mistakes are cheap and questions annoying, so 0 (ask only when 'nobody' ranks first). margin_rule_95 = the pre-registered rule (95% right fills on the training split)." }));
 console.log(`wrote ${OUT}`);

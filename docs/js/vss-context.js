@@ -5,7 +5,7 @@
 // with NOTHING resolved: "it" / "them" stay the strings "@it" / "@them", a name stays the name the reader read (never a reference to a shape
 // created earlier), a description stays a mention node, and the two adapter defaults (create shape "circle", property "color") are flagged.
 //
-// A GAP is one of (the same test for every entity role target / from / to / anchor):
+// A GAP is one of (the same test for every entity key of the registry, see entitySpec):
 //   pron   the role holds "@it" (one shape) or "@them" (several);
 //   vague  the role holds a mention with no shape, colour or quantifier ("this one", "that", "the new one": recency only);
 //   desc   the role holds a mention with a shape and/or colour ("the blue one"): filled only by a context shape whose KNOWN attributes
@@ -22,15 +22,55 @@
 //     context": its score is learned too). Weights are learned (training/sketch/train_context.mjs) from the gold args.
 //   4 decision: fill with the best candidate only when it beats the runner-up (NULL included) by at least `margin` (chosen once on the
 //     training split); otherwise the gap stays and the request becomes a question to the user ("ask"). Output: a context entity or ask.
-import { toNodes } from "./vss-adapter.js";
+// ENTITY ROLES AND KEYS ARE NOT WRITTEN HERE (review 2026-11-02, item 1): a reading's entity roles are the roles whose filler is an entity
+// (an entity wire of the reader: readingFromWires gives it as {head, attr, det} or a list of them); the entity KEYS (the SOP args that
+// hold shapes: target, from, to, anchor, anchor2 ...) are the args the adapter writes from the entity roles of the registry's worlds
+// (entitySpec, run once by the composer when it loads; the Context reads them from model.entity).
+import { toNodes, SHAPES, PROPERTY } from "./vss-adapter.js";
 import { tokenize } from "./front.js";
 
-export const ENTITY_KEYS = ["target", "from", "to", "anchor"];
-const ENTITY_ROLES = new Set(["object", "landmark", "landmark2", "source", "target", "edge", "members", "targets"]);
-const SHAPE_WORDS = new Set(["circle", "circles", "square", "squares", "rectangle", "rectangles", "triangle", "triangles", "diamond", "diamonds", "ellipse", "ellipses", "hexagon", "hexagons", "star", "stars"]);
-const PROPERTY_VERBS = new Set(["what_color", "where_is", "how_big", "what_shape", "what_says"]);   // vss-adapter.js PROPERTY (copied: its keys)
 const PRON = new Set(["it", "them"]);
 const low = (s) => String(s).toLowerCase();
+
+// ---------------------------------------------------------------- the entity roles and keys of a registry (from its worlds)
+/** worlds (vss-composer.js makeWorld: {id, events, vss}, registry order) -> {roles, keys}.
+ *  roles: the roles whose learned schema filler is an entity (vss model schema roles[r].main, learned from the annotated data), in the
+ *  order the worlds' legends list them. keys: the SOP args the adapter (toNodes) writes from those roles. Found by running the adapter on
+ *  probe readings of every event of every world: each entity role of the event holds a distinct probe name (two for a set role), and the
+ *  word roles of the event are filled (a) one at a time with each of their values, (b) all at once with their k-th values, (c) not at all.
+ *  The values of a word role are the lexicon words whose kind is one of the role's kinds (and one sample for a pattern kind: NUM, NAME,
+ *  TEXT). An arg that holds a probe name is an entity key. Order: the legend order of the first role that writes it. No list is written
+ *  by hand; a new world, a new role or a new adapter case changes the result by itself. */
+export function entitySpec(worlds) {
+  const roleOrder = [], roles = new Set(), keyRole = new Map();
+  for (const w of worlds) {
+    const model = w.vss.model, sch = (model.schema && model.schema.roles) || {}, legendRoles = (model.legend.roles || []).map((r) => r.id);
+    const sets = new Set((model.legend.reader && model.legend.reader.set_roles) || []);
+    for (const r of legendRoles.concat(Object.keys(sch))) if (!roleOrder.includes(r)) roleOrder.push(r);
+    const isEnt = (r) => sch[r] && (sch[r].main === "entity" || sets.has(r));
+    for (const r of Object.keys(sch)) if (isEnt(r)) roles.add(r);
+    const lex = Object.entries(model.lexicon || {}), sample = { NUM: "2", NAME: "n_v", TEXT: "t_v" };
+    const valuesOf = (r) => { const ks = new Set(sch[r].kinds || []); const v = lex.filter(([, x]) => ks.has(x.kind)).map(([t]) => t); for (const k of ks) if (sample[k]) v.push(sample[k]); return v; };
+    for (const ev of model.legend.events || []) {
+      const evRoles = (ev.roles || []).filter((r) => sch[r]), ent = evRoles.filter(isEnt), words = evRoles.filter((r) => !isEnt(r));
+      const base = {}; for (const r of ent) base[r] = sets.has(r) ? [{ head: "n_p_" + r + "_1" }, { head: "n_p_" + r + "_2" }] : { head: "n_p_" + r };
+      const vals = Object.fromEntries(words.map((r) => [r, valuesOf(r)])), probes = [{}];
+      for (const r of words) for (const v of vals[r]) probes.push({ [r]: v });
+      const kmax = Math.max(0, ...words.map((r) => vals[r].length));
+      for (let k = 0; k < kmax; k++) probes.push(Object.fromEntries(words.filter((r) => vals[r].length).map((r) => [r, vals[r][k % vals[r].length]])));
+      for (const p of probes) {
+        const out = toNodes({ event: ev.id, roles: Object.assign({}, base, p), verb: null, tokens: [] }, { names: {} }, { names: [], refs: new Map(), last: [] }, { s: 0, m: 0 });
+        const main = out.nodes.find((n) => n.type !== "mention"); if (!main) continue;
+        for (const [k, v] of Object.entries(main.args)) for (const x of [].concat(v)) {
+          const m = typeof x === "string" && /^p_([a-z0-9]+?)(_\d)?$/.exec(x); if (!m) continue;
+          if (!keyRole.has(k) || roleOrder.indexOf(m[1]) < roleOrder.indexOf(keyRole.get(k))) keyRole.set(k, m[1]);
+        }
+      }
+    }
+  }
+  const keys = [...keyRole.keys()].sort((a, b) => roleOrder.indexOf(keyRole.get(a)) - roleOrder.indexOf(keyRole.get(b)) || (a < b ? -1 : 1));
+  return { roles: roleOrder.filter((r) => roles.has(r)), keys };
+}
 
 // ---------------------------------------------------------------- the VSS layer (nothing resolved)
 function patchEnt(e) {
@@ -39,32 +79,33 @@ function patchEnt(e) {
   if (typeof e === "string") return PRON.has(e) ? "n_@" + e : e;
   return PRON.has(e.head) ? Object.assign({}, e, { head: "n_@" + e.head }) : e;
 }
-/** reading (readingFromWires) -> {nodes, main, defaulted}: the adapter's mapping with no reference resolved (see the head of the file) */
+/** reading (readingFromWires) -> {nodes, main, defaulted}: the adapter's mapping with no reference resolved (see the head of the file).
+ *  An entity role is a role whose filler is an entity (an object or a list: an entity wire of the reader); its pronoun stays a pronoun. */
 export function rawNodes(reading, info, names, seq) {
   if (!reading || !reading.event) return { nodes: [], main: null, defaulted: [] };
   const roles = {};
-  for (const [k, v] of Object.entries(reading.roles || {})) roles[k] = ENTITY_ROLES.has(k) ? patchEnt(v) : v;
+  for (const [k, v] of Object.entries(reading.roles || {})) roles[k] = v && typeof v === "object" ? patchEnt(v) : v;
   const tokens = (reading.tokens || []).map((t) => (PRON.has(t) ? "n_@" + t : t));
   const out = toNodes(Object.assign({}, reading, { roles, tokens }), info, { names: names || [], refs: new Map(), last: [] }, seq);
   const main = out.nodes.find((n) => n.type !== "mention") || null, defaulted = [];
   const obj = reading.roles && reading.roles.object;
-  if (main && reading.event === "create" && !(obj && typeof obj === "object" && SHAPE_WORDS.has(obj.head))) defaulted.push("shape");
-  if (main && reading.event === "property" && !PROPERTY_VERBS.has(reading.verb)) defaulted.push("property");
+  if (main && reading.event === "create" && !(obj && typeof obj === "object" && Object.hasOwn(SHAPES, obj.head))) defaulted.push("shape");
+  if (main && reading.event === "property" && !Object.hasOwn(PROPERTY, reading.verb)) defaulted.push("property");
   return { nodes: out.nodes, main, defaulted };
 }
 
 // ---------------------------------------------------------------- what the actions need (learned from the gold args)
 const arity = (v) => (v == null ? null : Array.isArray(v) ? "n" : typeof v === "object" && v.quantifier === "all" ? "n" : /,(?![^(]*\))/.test(String(v)) || String(v).includes("quantifier=all") ? "n" : "1");
 const actKey = (type, args) => `${type}:${args.action || args.ask || ""}`;
-/** gold wires -> {required: {act: [[signature, count]]}, plist: {act: {key: share of gold values that are lists}}} */
-export function deriveNeeds(wires) {
+/** gold wires, the entity keys (entitySpec) -> {required: {act: [[signature, count]]}, plist: {act: {key: share of gold values that are lists}}} */
+export function deriveNeeds(wires, keys) {
   const sig = {}, pl = {};
   for (const w of wires) {
     const a = w.args || {}, act = actKey(w.type, a), s = {};
-    for (const k of ENTITY_KEYS) if (a[k] != null) s[k] = arity(a[k]);
+    for (const k of keys) if (a[k] != null) s[k] = arity(a[k]);
     if (a.position != null) s.position = String(a.position);
     const key = JSON.stringify(s); (sig[act] = sig[act] || {})[key] = ((sig[act] || {})[key] || 0) + 1;
-    for (const k of ENTITY_KEYS) if (a[k] != null) { const p = ((pl[act] = pl[act] || {})[k] = pl[act][k] || [0, 0]); p[1]++; if (arity(a[k]) === "n") p[0]++; }
+    for (const k of keys) if (a[k] != null) { const p = ((pl[act] = pl[act] || {})[k] = pl[act][k] || [0, 0]); p[1]++; if (arity(a[k]) === "n") p[0]++; }
   }
   const required = Object.fromEntries(Object.entries(sig).map(([a, m]) => [a, Object.entries(m)]));
   const plist = Object.fromEntries(Object.entries(pl).map(([a, m]) => [a, Object.fromEntries(Object.entries(m).map(([k, [n, d]]) => [k, +(n / d).toFixed(3)]))]));
@@ -73,22 +114,24 @@ export function deriveNeeds(wires) {
 /** the entity roles an action still needs, given the roles it has: a role is needed when at least THRESH of the gold wires of that action
  *  that agree with the present roles (same roles with the same one/several arity, same position value when one is present) have it */
 export const NEED_THRESH = 0.9, NEED_SUPPORT = 10;
-export function missingRoles(needs, act, args, mentionArgs) {
+export function missingRoles(needs, act, args, mentionArgs, keys) {
   const sigs = (needs.required || {})[act]; if (!sigs) return [];
   const q = {};
-  for (const k of ENTITY_KEYS) if (args[k] != null) q[k] = Array.isArray(args[k]) ? "n" : args[k] && typeof args[k] === "object" && args[k].ref && mentionArgs && mentionArgs(args[k].ref) && mentionArgs(args[k].ref).quantifier === "all" ? "n" : "1";
+  for (const k of keys) if (args[k] != null) q[k] = Array.isArray(args[k]) ? "n" : args[k] && typeof args[k] === "object" && args[k].ref && mentionArgs && mentionArgs(args[k].ref) && mentionArgs(args[k].ref).quantifier === "all" ? "n" : "1";
   const pos = args.position != null ? String(args.position) : null;
   let match = sigs.map(([s, c]) => [JSON.parse(s), c]).filter(([s]) => Object.entries(q).every(([k, a]) => s[k] === a));
   if (pos != null) { const m2 = match.filter(([s]) => s.position === pos); if (m2.reduce((x, [, c]) => x + c, 0) >= NEED_SUPPORT) match = m2; }
   const n = match.reduce((x, [, c]) => x + c, 0); if (n < NEED_SUPPORT) return [];
-  return ENTITY_KEYS.filter((k) => q[k] == null && match.reduce((x, [s, c]) => x + (s[k] != null ? c : 0), 0) / n >= NEED_THRESH);
+  return keys.filter((k) => q[k] == null && match.reduce((x, [s, c]) => x + (s[k] != null ? c : 0), 0) / n >= NEED_THRESH);
 }
 
 // ---------------------------------------------------------------- features (shared by every role)
-export const FEATURES = [
+/** the feature names for the entity keys of a registry (entitySpec keys): role_<key> for every key, the rest fixed */
+export function featureNames(keys) {
+  const F = [
   "null", "null_pron", "null_vague", "null_desc", "null_empty",          // the NULL candidate ("nobody in the context"), by gap kind
   "d1", "d2", "d3p", "dnone",                                              // requests since it was last in a role (1 = the previous request); never
-  "role_target", "role_from", "role_to", "role_anchor", "role_created", "role_member", // the role it had where it was last in a role
+  ...keys.map((k) => "role_" + k), "role_created", "role_member",        // the role it had where it was last in a role
   "same_role", "same_action", "prev_main", "log_count",                   // same role as the gap; same action; the previous request's main shape; ln(1+times in a role)
   "text_last", "text_named", "in_unit", "canvas", "created",              // last name written before the unit; written before; written inside the unit; on the canvas; created
   "group", "group_plist", "confirmed",                                    // several shapes; x share of lists for this role (data); constraints confirmed
@@ -96,18 +139,21 @@ export const FEATURES = [
   // shapes created; the shapes of the trailing run of requests with one action; all shapes in a role so far; all shapes on the canvas;
   // the names that share the stem of a plural word of the unit ("the tiles" -> Tile1..Tile4); the last two names written before the unit
   "g_list", "g_last2", "g_created", "g_run", "g_all", "g_canvas", "g_stem", "g_text2",
-];
-// every candidate feature also has a copy per gap kind ("pron:d1", "empty:in_unit", ...): one shared weight plus a correction per gap kind
+  ];
+  // every candidate feature also has a copy per gap kind ("pron:d1", "empty:in_unit", ...): one shared weight plus a correction per gap kind
+  for (const k of F.filter((f) => !f.startsWith("null"))) for (const g of GAP_KINDS) F.push(g + ":" + k);
+  return F;
+}
 export const GAP_KINDS = ["pron", "empty", "vague", "desc"];
-for (const k of BASE_FEATURES()) for (const g of GAP_KINDS) FEATURES.push(g + ":" + k);
-function BASE_FEATURES() { return FEATURES.filter((f) => !f.startsWith("null")); }
 export function score(w, f) { let s = 0; for (const [k, v] of Object.entries(f)) s += (w[k] || 0) * v; return s; }
 
 // ---------------------------------------------------------------- the context of one message
 export class Context {
-  /** text: the whole message; canvas: names already on the canvas (row.names); model: {weights, margin, needs} (weights.json) */
+  /** text: the whole message; canvas: names already on the canvas (row.names); model: {weights, margin, needs} (weights.json) plus
+   *  entity: entitySpec(worlds) of the registry (the composer adds it to the weights it loads) */
   constructor({ text = "", canvas = [], model = {} }) {
-    this.text = text; this.model = model; this.needs = model.needs || { required: {}, plist: {} };
+    if (!model.entity || !Array.isArray(model.entity.keys)) throw new Error("vss-context: the model has no entity keys (model.entity = entitySpec(worlds); the composer adds it)");
+    this.text = text; this.model = model; this.needs = model.needs || { required: {}, plist: {} }; this.keys = model.entity.keys;
     this.ents = new Map();      // key -> {key, name, id, created, canvas, attrs, last, role, action, count}
     this.groups = new Map();    // key -> {key, members: [keys], last, role, action, count}
     this.t = 0; this.prevMain = null; this.createdOrder = [];
@@ -216,13 +262,13 @@ export class Context {
     for (const k of raw.defaulted || []) if (k === "property") { /* the adapter's default stays: not an entity role */ }
     // names read by VSS that are shapes created earlier in the message -> those shapes (what the adapter does today with ctx.refs)
     const toCreated = (v) => { if (typeof v === "string" && !v.startsWith("@")) { const e = this.ents.get(low(v)); return e && e.id ? { ref: e.id } : v; } return Array.isArray(v) ? v.map(toCreated) : v; };
-    for (const k of ENTITY_KEYS) if (a[k] != null) a[k] = toCreated(a[k]);
+    for (const k of this.keys) if (a[k] != null) a[k] = toCreated(a[k]);
     const gaps = [], frameKeys = new Set();
-    for (const k of ENTITY_KEYS) for (const x of [].concat(a[k] == null ? [] : a[k])) { const ks = this.keysOf(x); if (ks) ks.forEach((y) => frameKeys.add(y)); }
+    for (const k of this.keys) for (const x of [].concat(a[k] == null ? [] : a[k])) { const ks = this.keysOf(x); if (ks) ks.forEach((y) => frameKeys.add(y)); }
     if (a.action === "create" && a.name != null) frameKeys.add(low(a.name));      // the shape this request creates is not its own anchor
     const findGaps = () => {
       const gs = [];
-      for (const k of ENTITY_KEYS) {
+      for (const k of this.keys) {
         const v = a[k]; if (v == null) continue;
         if (typeof v === "string" && v.startsWith("@")) gs.push({ key: k, act, kind: "pron", plural: v === "@them", word: v });
         else if (Array.isArray(v)) {
@@ -238,7 +284,7 @@ export class Context {
           else gs.push({ key: k, act, kind: "vague", plural: false, recency: m.recency || null, mention: v.ref });
         }
       }
-      for (const k of missingRoles(this.needs, act, a, (id) => mentions.get(id))) gs.push({ key: k, act, kind: "empty", plural: null });
+      for (const k of missingRoles(this.needs, act, a, (id) => mentions.get(id), this.keys)) gs.push({ key: k, act, kind: "empty", plural: null });
       return gs;
     };
     for (let pass = 0; pass < 2; pass++) {
@@ -269,7 +315,7 @@ export class Context {
   }
 
   /** does the action need role `key`, given its other roles? (missingRoles on the args without that role) */
-  needed(act, key, args, mentions) { const b = Object.assign({}, args); delete b[key]; return missingRoles(this.needs, act, b, (id) => mentions.get(id)).includes(key); }
+  needed(act, key, args, mentions) { const b = Object.assign({}, args); delete b[key]; return missingRoles(this.needs, act, b, (id) => mentions.get(id), this.keys).includes(key); }
 
   /** the request's resolved args enter the context */
   update(main, act) {
@@ -283,7 +329,7 @@ export class Context {
       for (const k of ["shape", "color", "size"]) if (a[k] != null) e.attrs[k] = a[k];
       this.byId.set(main.id, key); this.createdOrder.push(key); touch(key, "created"); mainKey = key;
     }
-    for (const k of ENTITY_KEYS) {
+    for (const k of this.keys) {
       const ks = this.keysOf(a[k]); if (!ks) continue;
       for (const x of ks) { const e = touch(x, ks.length > 1 ? "member" : k); if (!e.name && !e.id) e.name = x; }
       if (ks.length > 1) { const id = ks.join("|"), g = this.groups.get(id) || { key: id, members: ks, count: 0 }; g.last = t; g.role = k; g.action = act; g.count++; this.groups.set(id, g); }
