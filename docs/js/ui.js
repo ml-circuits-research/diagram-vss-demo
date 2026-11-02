@@ -252,21 +252,30 @@ function rayDist(s, ux, uy) {
     default: return hw * 0.62;
   }
 }
+/* fill=light / faint / none (zones, backgrounds, venn circles): the opacity of the body's fill */
+const FILL_OPACITY = { light: 0.3, faint: 0.13, none: 0 };
 function drawShape(g, s) {
-  const grp = el('g', { class: 'shp' + (hl.shapes.has(s.name) ? ' hl' : ''), 'data-name': s.name, transform: `translate(${s.x} ${s.y})` }, g);
+  const grp = el('g', { class: 'shp' + (hl.shapes.has(s.name) ? ' hl' : '') + (s.layer ? ' ' + s.layer : '') + (s.shape === 'text' ? ' txt' : ''), 'data-name': s.name, transform: `translate(${s.x} ${s.y})` }, g);
   const { w, h } = K.dims(s), fill = K.COLOR_HEX[s.color] || '#ffffff';
+  if (s.shape === 'text') {   /* a free text: no body, no name tag; its colour is the text's */
+    if (hl.shapes.has(s.name)) el('rect', { class: 'halo', x: -w / 2 - 5, y: -h / 2 - 4, width: w + 10, height: h + 8, rx: 8 }, grp);
+    const t = el('text', { class: 'ftext', x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': K.fontOf(s), fill: K.COLOR_HEX[s.color] || '#24282E' }, grp); t.textContent = s.label || '';
+    return;
+  }
   const attrs = { class: 'body' + (s.outline ? ' outlined' : ''), fill };
   if (s.outline) attrs.style = `stroke: ${K.COLOR_HEX[s.outline]}`;
+  if (FILL_OPACITY[s.fill] != null) attrs['fill-opacity'] = FILL_OPACITY[s.fill];
   const pts = outlinePts(s);
   if (s.shape === 'circle') el('circle', Object.assign({ r: w / 2 }, attrs), grp);
   else if (s.shape === 'ellipse') el('ellipse', Object.assign({ rx: w / 2, ry: h / 2 }, attrs), grp);
   else if (pts) el('polygon', Object.assign({ points: pts.map(p => p.map(v => v.toFixed(1)).join(',')).join(' '), 'stroke-linejoin': 'round' }, attrs), grp);
   else el('rect', Object.assign({ x: -w / 2, y: -h / 2, width: w, height: h, rx: 6 }, attrs), grp);
   if (hl.shapes.has(s.name)) el('rect', { class: 'halo', x: -w / 2 - 7, y: -h / 2 - 7, width: w + 14, height: h + 14, rx: 10 }, grp);
-  const tag = el('text', { class: 'tag', x: 0, y: -h / 2 - (hl.shapes.has(s.name) ? 12 : 7), 'text-anchor': 'middle' }, grp); tag.textContent = s.name;
+  /* the name above the shape; a template's own shapes do not show it (their texts say what they are; the details list the names) */
+  if (!s.quiet) { const tag = el('text', { class: 'tag', x: 0, y: -h / 2 - (hl.shapes.has(s.name) ? 12 : 7), 'text-anchor': 'middle' }, grp); tag.textContent = s.name; }
   if (s.label) {
     const room = s.shape === 'rectangle' || s.shape === 'square' || s.shape === 'ellipse' || s.shape === 'circle' ? w * 0.84 : w * 0.56;
-    let fs = Math.max(9, Math.min(14, s.size / 4.4)), txt = s.label;
+    let fs = s.w ? Math.max(10, Math.min(15, s.h / 2.8)) : Math.max(9, Math.min(14, s.size / 4.4)), txt = s.label;   // a box of its own size: the font follows its height
     while (txt.length * fs * 0.56 > room && fs > 9) fs -= 0.5;
     const maxc = Math.max(3, Math.floor(room / (fs * 0.56))); if (txt.length > maxc) txt = txt.slice(0, maxc - 1) + '…';
     const t = el('text', { class: 'lbl', x: 0, y: s.shape === 'triangle' ? h * 0.18 : 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': fs.toFixed(1), fill: lum(fill) > 0.62 ? '#17202B' : '#FFFFFF' }, grp);
@@ -358,7 +367,7 @@ function flash(h) {
 function svgPt(ev) { const p = svg.createSVGPoint(); p.x = ev.clientX; p.y = ev.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); }
 svg.addEventListener('pointerdown', ev => {
   const g = ev.target.closest && ev.target.closest('.shp'); if (!g) return;
-  const s = world.find(g.dataset.name); if (!s) return;
+  const s = world.find(g.dataset.name); if (!s || s.layer === 'background') return;   // the background stays put
   const p = svgPt(ev); drag = { name: s.name, before: world.snapshot(), dx: s.x - p.x, dy: s.y - p.y, cell: K.cellOf(s.x, s.y), moved: false };
   svg.setPointerCapture(ev.pointerId); ev.preventDefault();
 });
@@ -419,6 +428,7 @@ function summarize(result) {
   const adds = [], links = [], unlinks = [], dels = [], moved = [], changed = [], renames = [], rules = [], said = [], answers = [];
   for (const st of result.steps) {
     if (st.node.type === 'mention' || st.error || st.skipped) continue;
+    if (st.node.args && st.node.args.template && st.answer) { answers.push(st.answer); continue; }   // a template: its answer says what it drew
     for (const p of st.patches) {
       if (p.op === 'add') adds.push(`${p.shape.name}`);
       else if (p.op === 'link') links.push(K.edgeText(p.edge).replace(/ \(.*$|\s+".*"$/, ''));
@@ -589,9 +599,10 @@ async function readWith(rd, text, rec, pk) {
   const odd = notes.filter(n => /is not a shape I know|couldn't tell|^I read /.test(n));
   const did = anyDone ? summarize(result) : '';
   const tail = problems.concat(asks).join(' ');
+  const examples = [...new Set(result.steps.flatMap(st => st.examples || []))];   // a help answer's example sentences: buttons that send them
   if (clar) return withHeld({ text: (did && did !== 'Done.' ? did + ' ' : '') + clar.message.replace(/ Reply with a name\.$/, ''), sub: [tail, odd.join(' ')].filter(Boolean).join(' ') || null, chips: clar.candidates, ms, highlight });
   if (problems.length && !anyDone) return withHeld({ text: problems.join(' '), sub: [asks.join(' '), odd.join(' ')].filter(Boolean).join(' ') || null, err: true, ms, highlight });
-  return withHeld({ text: did || 'Done.', sub: [tail, odd.join(' ')].filter(Boolean).join(' ') || null, ms, highlight });
+  return withHeld({ text: did || 'Done.', sub: [tail, odd.join(' ')].filter(Boolean).join(' ') || null, ms, highlight, chips: examples.length ? examples : undefined });
 }
 
 /* ---------------- technical history ---------------- */
@@ -1288,12 +1299,12 @@ window.addEventListener('resize', () => { if (!drag) renderCanvas(); });
 /* ---------------- start ---------------- */
 updateTabs(); renderCanvas(); setStatus(idleStatus());
 botBubble({ text: 'Hi! Tell me what to draw, change or connect, or ask me about the drawing. Three readers (Rules, VSS, SOP-BERT) read every message, each into its own drawing, and VSS-BERT does what VSS and SOP-BERT are sure of together; the tabs above the canvas switch between them. Tap + for examples and whole scenarios, ? for help, ⋮ for settings.' });
-const START = [
-  'Draw a large blue circle named Start in the top left, then add a rectangle named Process to the right of it labeled "Validate". Connect Start to Process.',
-  'Add a yellow diamond named Check right of Process labeled "ok?" and connect Process to it. Put a green circle named Done below Check and link Check to Done with a dashed arrow labeled "yes".',
-  'Is there a path from Start to Done?'
-];
-START.forEach(t => submit(t));
+/* the opening drawing (docs/js/start-diagram.js): a background, two zones, the items and their texts, as SOP Lang wires run by every
+   reader's engine (not a message: no reader reads it); then its first question is sent as a message */
+const START = [StartDiagram.SOP];
+for (const rd of READERS) rd.engine.run(K.parse(StartDiagram.SOP));
+renderCanvas(); updateTabs();
+StartDiagram.MESSAGES.forEach(t => submit(t));
 queue.then(() => { READERS.forEach(rd => { rd.world.undoStack = []; }); renderSopBar(); });
 // the Help overlay: opened by the ? button, by a data-help button, or by a link #help/<page> (also on reload)
 DocsKit.init({ env: helpEnv, say: t => submit(t), onPlug: (name, on) => { setPlug(name, on); if (!sheet.hidden && sheetTab === 'plugins') sbody.innerHTML = renderPlugins(); } });

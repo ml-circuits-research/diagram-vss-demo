@@ -15,7 +15,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 /* ---------------- the page list ---------------- */
 const HELP = (root.HelpKit && root.HelpKit.pages) || {};
 const GROUPS = [
-  { title: 'Using the editor', pages: [['start', 'Start here'], ['draw', 'What you can draw'], ['arrows', 'Arrows and lines'], ['where', 'Where things go'], ['do', 'Everything you can do'], ['ask', 'Everything you can ask'], ['limits', 'What it cannot do']].map(([id, title]) => ({ id, title, render: env => HELP[id](env) })) },
+  { title: 'Using the editor', pages: [['start', 'Start here'], ['draw', 'What you can draw'], ['arrows', 'Arrows and lines'], ['where', 'Where things go'], ['do', 'Everything you can do'], ['templates', 'Templates'], ['ask', 'Everything you can ask'], ['limits', 'What it cannot do']].map(([id, title]) => ({ id, title, render: env => HELP[id](env) })) },
   { title: 'The language', pages: [['sop-lang', 'SOP Lang'], ['capabilities', 'Capabilities']].map(([id, title]) => ({ id, title, render: env => HELP[id](env) })) },
   { title: 'Concepts', pages: ((root.DocsConcepts && root.DocsConcepts.pages) || []).map(p => ({ id: p.id, title: p.title, lead: p.lead, render: () => p.html })) },
   { title: 'How it works inside', pages: ((root.DocsArch && root.DocsArch.pages) || []).map(p => ({ id: p.id, title: p.title, lead: p.lead, render: () => p.html })) }

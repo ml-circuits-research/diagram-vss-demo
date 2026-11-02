@@ -120,6 +120,9 @@ svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-widt
 .shp .body.outlined { stroke-width: 3; }
 .shp .tag { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
 .shp .lbl { font-family: var(--font); font-weight: 500; pointer-events: none; }
+.shp .ftext { font-family: var(--font); font-weight: 650; }
+.shp.background { cursor: default; }
+.shp.background .body, .shp.zone .body { stroke-dasharray: 0; stroke-opacity: .5; }
 .shp.hl .halo { stroke: var(--hl); stroke-width: 2.5; fill: none; stroke-dasharray: 5 4; animation: march 1.2s linear infinite; }
 .shp.hl .tag { fill: var(--hl); font-weight: 600; }
 .edge .ln { stroke: var(--edge); stroke-width: 1.75; fill: none; }
@@ -497,6 +500,9 @@ html.docs-open, html.docs-open body { overflow: hidden; }
   <div class="sbody" id="sbody"></div>
 </aside>
 
+<script src="js/templates.js"></script>
+<script src="js/help-answers.js"></script>
+<script src="js/start-diagram.js"></script>
 <script src="js/logic.js"></script>
 <script src="js/spell.js"></script>
 <script src="js/scenarios.js"></script>

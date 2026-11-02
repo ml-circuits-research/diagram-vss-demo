@@ -93,7 +93,7 @@ with sync_playwright() as p:
     pg.route("https://huggingface.co/**", lambda r: r.abort())
     pg.goto(base, wait_until="domcontentloaded")
     pg.wait_for_function("() => { const t = document.querySelector('[data-rtab=combined]'); return t && !t.classList.contains('off'); }", timeout=900000)
-    pg.wait_for_function("() => document.querySelectorAll('#msgs .b.bot').length >= 4 && !document.querySelector('#msgs .typing')", timeout=180000)
+    pg.wait_for_function("() => document.querySelectorAll('#msgs .b.bot').length >= 1 + (window.StartDiagram ? StartDiagram.MESSAGES.length : 3) && !document.querySelector('#msgs .typing')", timeout=180000)
     tabs = pg.evaluate("() => [...document.querySelectorAll('#rtabs [data-rtab]')].map(x => x.textContent.trim())")
     check("1. the tabs are Rules, VSS, SOP-BERT, VSS-BERT", tabs == ["Rules", "VSS", "SOP-BERT", "VSS-BERT"], str(tabs))
     pg.click("[data-rtab=combined]"); pg.wait_for_timeout(300)

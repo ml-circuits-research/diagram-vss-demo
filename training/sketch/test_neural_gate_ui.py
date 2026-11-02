@@ -89,7 +89,7 @@ with sync_playwright() as p:
     pg.goto(base, wait_until="domcontentloaded")
     # Neural ready (its tab is enabled) and the start messages read
     pg.wait_for_function("() => { const t = document.querySelector('[data-rtab=neural]'); return t && !t.classList.contains('off'); }", timeout=600000)
-    pg.wait_for_function("() => document.querySelectorAll('#msgs .b.bot').length >= 4 && !document.querySelector('#msgs .typing')", timeout=120000)
+    pg.wait_for_function("() => document.querySelectorAll('#msgs .b.bot').length >= 1 + (window.StartDiagram ? StartDiagram.MESSAGES.length : 3) && !document.querySelector('#msgs .typing')", timeout=120000)
     pg.wait_for_function("() => [...document.querySelectorAll('#msgs .sys')].some(x => /SOP-BERT reader ready/.test(x.textContent))", timeout=600000)
     pg.click("[data-rtab=neural]"); pg.wait_for_timeout(300)
 

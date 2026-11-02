@@ -63,7 +63,7 @@ function fmtScalar(v) {
   return /^[A-Za-z_][\w.+-]*$/.test(v) ? v : JSON.stringify(v);
 }
 const fmtValue = v => Array.isArray(v) ? v.map(fmtScalar).join(',') : fmtScalar(v);
-const KEY_ORDER = ['action', 'ask', 'quantifier', 'count', 'shape', 'kind', 'property', 'superlative', 'comparison', 'size', 'scale', 'color', 'outline', 'name', 'label', 'target', 'from', 'to', 'style', 'arrow', 'position', 'anchor', 'position2', 'anchor2', 'region', 'members', 'at', 'direction', 'distance', 'axis', 'layout', 'linked'];
+const KEY_ORDER = ['action', 'ask', 'topic', 'aspect', 'about', 'template', 'quantifier', 'count', 'shape', 'kind', 'property', 'superlative', 'comparison', 'size', 'scale', 'color', 'outline', 'fill', 'layer', 'name', 'label', 'title', 'items', 'items2', 'parents', 'scheme', 'target', 'from', 'to', 'style', 'arrow', 'position', 'anchor', 'position2', 'anchor2', 'region', 'members', 'at', 'width', 'height', 'direction', 'distance', 'axis', 'layout', 'linked'];
 function serialize(n) {
   const keys = Object.keys(n.args).filter(k => { const v = n.args[k]; return v != null && !(Array.isArray(v) && !v.length); });
   keys.sort((a, b) => (KEY_ORDER.indexOf(a) + 1 || 99) - (KEY_ORDER.indexOf(b) + 1 || 99));
@@ -179,7 +179,7 @@ class Engine {
         const h = this.match(node.type, args); step.plugin = h.plugin.name;
         const ctx = { world: this.world, engine: this, node, env, undo: hist.undo, redo: hist.redo, emit: p => { this.world.apply(p); step.patches.push(p); changed = true; } };
         const out = h.run(args, ctx) || {};
-        Object.assign(step, { value: out.value, answer: out.answer, notes: out.notes, lowering: out.lowering, highlight: out.highlight });
+        Object.assign(step, { value: out.value, answer: out.answer, notes: out.notes, lowering: out.lowering, highlight: out.highlight, examples: out.examples });
         env[node.id] = out.value;
         if (step.patches.length) { L.push({ step, mark, patches: step.patches }); R.length = 0; }
       } catch (e) {
@@ -202,8 +202,17 @@ const CANVAS = { W: 800, H: 500 };
 const SIZE_PX = { tiny: 30, small: 44, medium: 62, large: 88, huge: 118 };
 const COLOR_HEX = { red: '#E5484D', orange: '#F0803C', yellow: '#F2C94C', gold: '#D4A017', lime: '#9CCB3B', green: '#3E9B57', teal: '#159E93', cyan: '#3BB4D0', blue: '#3A6BDC', navy: '#22346B', indigo: '#4F46C8', purple: '#8B4FC4', magenta: '#C23FA6', pink: '#EC7FAE', brown: '#8B5A3C', gray: '#8C929B', black: '#24282E', white: '#F7F8F9' };
 const sizeName = px => Object.entries(SIZE_PX).reduce((b, [k, v]) => Math.abs(v - px) < Math.abs(SIZE_PX[b] - px) ? k : b, 'medium');
+/* free text (shape=text): the font size of each size value (the same table as docs/js/templates.js FONT_PX); its box is estimated from
+   the text as the renderer draws it (0.56 em per character) */
+const FONT_PX = { tiny: 12, small: 14, medium: 18, large: 26, huge: 36 };
+const fontOf = s => s.font || FONT_PX[sizeName(s.size)];
+/* the z-band of an item (LEGEND_EXT.md section 2): a new item goes on top of its own band; background < zone < item < text */
+const BAND = s => s.layer === 'background' ? 0 : s.layer === 'zone' ? 1 : s.shape === 'text' ? 3 : 2;
+const isPanel = s => s.layer === 'background' || s.layer === 'zone';
 function dims(s) {
   if (s.box) return { w: s.box.w, h: s.box.h };   /* a group used as an anchor: the box around its members */
+  if (s.shape === 'text') { const fs = fontOf(s); return { w: Math.ceil(String(s.label || '').length * fs * 0.56) + 10, h: Math.round(fs * 1.4) }; }
+  if (s.w && s.h) return { w: s.w, h: s.h };      /* an explicit box (width=, height=; panels, templates) */
   const k = s.size;
   if (s.shape === 'rectangle') return { w: Math.round(k * 1.6), h: k };
   if (s.shape === 'ellipse') return { w: Math.round(k * 1.45), h: k };
@@ -233,7 +242,7 @@ class DiagramWorld {
   apply(p) {
     const S = this.state;
     switch (p.op) {
-      case 'add': S.shapes.push(Object.assign({}, p.shape, { order: ++S.order })); break;
+      case 'add': { const sh = Object.assign({}, p.shape, { order: ++S.order }), b = BAND(sh); let i = S.shapes.length; while (i > 0 && BAND(S.shapes[i - 1]) > b) i--; S.shapes.splice(i, 0, sh); break; }   // on top of its own z-band
       case 'remove': S.shapes = S.shapes.filter(s => s.name !== p.name); if (S.groups) S.groups = S.groups.map(g => Object.assign({}, g, { members: g.members.filter(m => m !== p.name) })).filter(g => g.members.length); break;
       case 'set': { const s = this.find(p.name); p.before = {}; for (const k of Object.keys(p.props)) p.before[k] = s[k]; Object.assign(s, p.props); break; }
       case 'rename': { const s = this.find(p.from); s.name = p.to; for (const e of S.edges) { if (e.from === p.from) e.from = p.to; if (e.to === p.from) e.to = p.to; } for (const g of S.groups || []) g.members = g.members.map(m => m === p.from ? p.to : m); break; }
@@ -263,7 +272,7 @@ const boxAt = (x, y, w, h) => ({ x1: x - w / 2, y1: y - h / 2, x2: x + w / 2, y2
 function hits(W, b, ignore, pad) {
   pad = pad == null ? 14 : pad;
   return W.state.shapes.some(s => {
-    if (ignore.includes(s.name)) return false;
+    if (ignore.includes(s.name) || isPanel(s)) return false;   /* a background or a zone is never an obstacle: items go on it */
     const d = dims(s), o = boxAt(s.x, s.y, d.w, d.h);
     return b.x1 < o.x2 + pad && b.x2 > o.x1 - pad && b.y1 < o.y2 + pad && b.y2 > o.y1 - pad;
   });
@@ -408,7 +417,7 @@ function relHolds(s, pos, anc) {
 const region = s => { const o = cellOf(s.x, s.y), X = s.x - o.x, Y = s.y - o.y; const c = X < 267 ? 'left' : X < 533 ? 'center' : 'right'; const r = Y < 167 ? 'top' : Y < 333 ? 'middle' : 'bottom'; return r === 'middle' ? (c === 'center' ? 'center' : 'middle ' + c) : r + (c === 'center' ? ' center' : ' ' + c); };
 const plural = (w, n) => n === 1 ? w : (w.endsWith('x') || w.endsWith('s') ? w + 'es' : w + 's');
 const listing = arr => arr.length <= 1 ? arr.join('') : arr.slice(0, -1).join(', ') + ' and ' + arr[arr.length - 1];
-const describeShape = s => `${s.name} is a ${sizeName(s.size)} ${s.color} ${s.shape}${s.outline ? ' with a ' + s.outline + ' outline' : ''}${s.label ? ` labeled "${s.label}"` : ''} in the ${region(s)}`;
+const describeShape = s => s.shape === 'text' ? `${s.name} is a ${sizeName(s.size)} ${s.color} text “${s.label || ''}” in the ${region(s)}` : `${s.name} is a ${s.w ? `${s.w}×${s.h} px` : sizeName(s.size)} ${s.color} ${s.layer ? s.layer + ' ' : ''}${s.shape}${s.outline ? ' with a ' + s.outline + ' outline' : ''}${s.label ? ` labeled "${s.label}"` : ''} in the ${region(s)}`;
 const edgeText = e => `${e.from} ${e.arrow === 'forward' ? '→' : e.arrow === 'both' ? '↔' : '—'} ${e.to}${e.style !== 'solid' ? ' (' + e.style + ')' : ''}${e.label ? ` "${e.label}"` : ''}`;
 const edgeEnds = e => `${e.from} ${e.arrow === 'forward' ? '→' : e.arrow === 'both' ? '↔' : '—'} ${e.to}`;
 /* the existing connections a wire names by its ends: from= and/or to= (shape names). With both ends: the connection from -> to; when there
@@ -516,7 +525,7 @@ function bfs(W, from, to, mode) {
 /* =====================================================================
    5. Plugins
    ===================================================================== */
-const SHAPE_VALUES = { any: ['shape', 'shapes', 'node', 'nodes', 'object', 'objects', 'thing', 'things', 'element', 'elements', 'item', 'items', 'one', 'ones'], circle: ['circles', 'dot', 'dots', 'ball', 'balls'], square: ['squares'], rectangle: ['rectangles', 'rect', 'rects', 'box', 'boxes', 'block', 'blocks'], triangle: ['triangles'], diamond: ['diamonds', 'rhombus'], ellipse: ['ellipses', 'oval', 'ovals'], hexagon: ['hexagons'], star: ['stars'] };
+const SHAPE_VALUES = { any: ['shape', 'shapes', 'node', 'nodes', 'object', 'objects', 'thing', 'things', 'element', 'elements', 'item', 'items', 'one', 'ones'], circle: ['circles', 'dot', 'dots', 'ball', 'balls'], square: ['squares'], rectangle: ['rectangles', 'rect', 'rects', 'box', 'boxes', 'block', 'blocks'], triangle: ['triangles'], diamond: ['diamonds', 'rhombus'], ellipse: ['ellipses', 'oval', 'ovals'], hexagon: ['hexagons'], star: ['stars'], text: ['texts', 'title', 'heading', 'headline', 'caption', 'subtitle'] };   /* text: a free text item (LEGEND_EXT.md 2) */
 const COLOR_VALUES = { red: ['crimson', 'scarlet'], orange: [], yellow: ['amber'], gold: ['golden'], lime: [], green: [], teal: ['turquoise'], cyan: ['aqua'], blue: [], navy: [], indigo: [], purple: ['violet', 'lilac'], magenta: ['fuchsia'], pink: ['rose'], brown: [], gray: ['grey', 'silver'], black: [], white: [] };
 const OUTLINE_VALUES = Object.assign({ none: ['no'] }, COLOR_VALUES);
 
@@ -597,6 +606,32 @@ function layoutOffsets(lay, n, w, h) {
   return { pts, w: Math.max(...xs) - Math.min(...xs) + w, h: Math.max(...ys) - Math.min(...ys) + h };
 }
 
+/* the explicit box, fill and layer of a new shape (width=, height=, fill=, layer=): panels, zones, backgrounds */
+function boxArgs(a, shape) {
+  const o = {};
+  if (a.width != null || a.height != null) { const d = dims({ shape, size: SIZE_PX[a.size || 'medium'] }); o.w = Math.max(10, Math.round(+(a.width != null ? a.width : a.height * d.w / d.h))); o.h = Math.max(10, Math.round(+(a.height != null ? a.height : a.width * d.h / d.w))); }
+  if (a.fill && a.fill !== 'solid') o.fill = a.fill;
+  if (a.layer && a.layer !== 'item') o.layer = a.layer;
+  return o;
+}
+/* a free text: an item of its own (shape=text) with a text (label), a font size (size), a colour (default black), a place (a free spot
+   near the top centre when none is given); no body, no outline, not connectable; moved, recoloured, resized, relabelled, deleted and
+   restacked like a shape (LEGEND_EXT.md section 2) */
+function createText(a, ctx) {
+  const W = ctx.world;
+  if (a.label == null || String(a.label) === '') throw new SOPError('What should the text say? Put it in quotes, e.g. add a title "Q3 roadmap" at the top.');
+  const name = a.name != null ? String(a.name) : W.nextName('text');
+  if (!/^[A-Za-z_][\w-]*$/.test(name)) throw new SOPError(`"${name}" can't be a name: use letters, digits, - or _ and start with a letter.`);
+  if (W.find(name)) throw new SOPError(`There is already a shape named "${W.find(name).name}".`);
+  if (W.findGroup(name)) throw new SOPError(`"${W.findGroup(name).name}" is already the name of a group.`);
+  const t = { name, shape: 'text', size: SIZE_PX[a.size || 'medium'], color: a.color || 'black', outline: null, label: String(a.label) }, d = dims(t);
+  let p, answer;
+  if (a.at || a.position || a.region) { p = placeFor(W, a, d.w, d.h, []); answer = unmetText(name, p); }
+  else p = nearFree(W, FR.x + 400, FR.y + 24 + d.h / 2 + 8, d.w, d.h, []);
+  ctx.emit({ op: 'add', shape: Object.assign(t, { x: p.x, y: p.y }) });
+  return { value: [name], answer };
+}
+
 const shapesPlugin = {
   name: 'shapes', title: 'Shapes',
   description: 'Create, delete, move, restyle, rename, label, duplicate and swap shapes.',
@@ -613,9 +648,14 @@ const shapesPlugin = {
     at: { ask: 'At which x,y coordinates?', kind: 'point' },
     direction: { ask: 'In which direction does it move?', kind: 'enum', values: { left: [], right: [], up: ['upwards'], down: ['downwards'] } },
     distance: { ask: 'How far, in pixels?', kind: 'number' },
-    linked: { ask: 'Which shapes is it connected to?', kind: 'names' }
+    linked: { ask: 'Which shapes is it connected to?', kind: 'names' },
+    width: { ask: 'How wide is it, in pixels?', kind: 'number' },
+    height: { ask: 'How tall is it, in pixels?', kind: 'number' },
+    fill: { ask: 'How solid is its fill?', kind: 'enum', values: { solid: ['opaque', 'filled'], light: ['pale', 'light', 'pastel', 'see-through', 'translucent'], faint: ['very light', 'faint', 'washed out'], none: ['hollow', 'empty', 'unfilled', 'transparent', 'outline only'] } },
+    layer: { ask: 'Is it a background, a zone that holds items, or an item?', kind: 'enum', values: { background: ['background', 'backdrop'], zone: ['zone', 'panel', 'container', 'area', 'lane', 'swimlane'], item: [] } }
   },
   handlers: [
+    { type: 'command', when: { action: 'create', shape: 'text' }, run: createText },
     { type: 'command', when: { action: 'create' }, run(a, ctx) {
       const W = ctx.world, notes = [];
       const shape = a.shape && a.shape !== 'any' ? a.shape : 'circle';
@@ -634,12 +674,12 @@ const shapesPlugin = {
         if (!/^[A-Za-z_][\w-]*$/.test(name)) throw new SOPError(`"${name}" can't be a name: use letters, digits, - or _ and start with a letter.`);
         if (W.find(name)) throw new SOPError(`There is already a shape named "${W.find(name).name}".`);
         if (W.findGroup(name)) throw new SOPError(`"${W.findGroup(name).name}" is already the name of a group.`);
-        const size = SIZE_PX[props.size || 'medium'], d = dims({ shape, size });
+        const size = SIZE_PX[props.size || 'medium'], box = boxArgs(a, shape), d = dims(Object.assign({ shape, size }, box));
         let p;
         if (block) p = block[i];
         else if (i > 0) { const chain = a.position === 'leftOf' ? 'leftOf' : a.position === 'above' ? 'above' : a.position === 'below' && !a.anchor ? 'rightOf' : 'rightOf'; p = relSpot(W, d.w, d.h, a.position === 'below' || a.position === 'above' ? 'rightOf' : chain, [prev], null, []); }
         else { p = placeFor(W, a, d.w, d.h, []); const u = unmetText(name, p); if (u) answer = u; }
-        ctx.emit({ op: 'add', shape: { name, shape, size, color: props.color || 'white', outline: props.outline && props.outline !== 'none' ? props.outline : null, label: a.label != null ? String(a.label) : null, x: p.x, y: p.y } });
+        ctx.emit({ op: 'add', shape: Object.assign({ name, shape, size, color: props.color || 'white', outline: props.outline && props.outline !== 'none' ? props.outline : null, label: a.label != null ? String(a.label) : null, x: p.x, y: p.y }, box) });
         made.push(name); prev = W.find(name);
         for (const l of names(a.linked)) { const t = need(W, l); ctx.emit({ op: 'link', edge: W.newEdge(t.name, name) }); }
       }
@@ -674,11 +714,17 @@ const shapesPlugin = {
       for (const k of ['color', 'shape', 'label']) if (a[k] != null && !(k === 'shape' && a[k] === 'any')) base[k] = String(a[k]);
       if (a.outline != null) base.outline = a.outline === 'none' ? null : a.outline;
       if (a.size) base.size = SIZE_PX[a.size];
+      if (a.fill) base.fill = a.fill === 'solid' ? null : a.fill;
+      if (a.layer) base.layer = a.layer === 'item' ? null : a.layer;
       let scale = a.scale != null ? +a.scale : null;
-      if (a.action === 'resize' && scale == null && !a.size) scale = 1.5;
-      if (!Object.keys(base).length && scale == null) throw new SOPError(`What should change about ${listing(t)}? Try a color, size, shape, outline or label.`);
+      if (a.action === 'resize' && scale == null && !a.size && a.width == null && a.height == null) scale = 1.5;
+      if (!Object.keys(base).length && scale == null && a.width == null && a.height == null) throw new SOPError(`What should change about ${listing(t)}? Try a color, size, shape, outline or label.`);
       for (const n of t) {
-        const s = need(W, n), p = Object.assign({}, base); if (scale != null) p.size = Math.round(Math.min(160, Math.max(22, s.size * scale)));
+        const s = need(W, n), p = Object.assign({}, base);
+        if (base.shape && (base.shape === 'text') !== (s.shape === 'text')) throw new SOPError(s.shape === 'text' ? `${s.name} is a text; a text can't become a ${base.shape}. Draw a ${base.shape} and delete the text.` : `${s.name} is a shape; it can't become a text. To write on it, label it: label ${s.name} "…".`);
+        if (scale != null) { p.size = Math.round(Math.min(160, Math.max(22, s.size * scale))); if (s.w) { p.w = Math.round(Math.min(1600, Math.max(10, s.w * scale))); p.h = Math.round(Math.min(1000, Math.max(10, s.h * scale))); } }
+        else if (a.size && s.w && s.shape !== 'text') { p.w = null; p.h = null; }   /* a size name replaces an explicit box */
+        if (a.width != null || a.height != null) { const d0 = dims(s); p.w = Math.max(10, Math.round(+(a.width != null ? a.width : d0.w))); p.h = Math.max(10, Math.round(+(a.height != null ? a.height : d0.h))); }
         ctx.emit({ op: 'set', name: s.name, props: p });
         inCell(s.x, s.y, () => { const d = dims(s), c = clampPt(s.x, s.y, d.w, d.h);
           if (c.x !== s.x || c.y !== s.y || hits(W, boxAt(c.x, c.y, d.w, d.h), [s.name], 6)) { const q = nearFree(W, c.x, c.y, d.w, d.h, [s.name]); if (q.x !== s.x || q.y !== s.y) ctx.emit({ op: 'set', name: s.name, props: { x: q.x, y: q.y } }); } });
@@ -826,6 +872,7 @@ const connectionsPlugin = {
       for (const f of from) for (const t of to) {
         const x = need(W, f), y = need(W, t);
         if (x === y) throw new SOPError(`${x.name} can't connect to itself.`);
+        for (const z of [x, y]) if (z.shape === 'text') throw new SOPError(`${z.name} is a text; arrows join shapes. Connect the shape next to it instead.`);
         if (W.state.edges.some(e => e.from === x.name && e.to === y.name)) { notes.push(`${x.name} → ${y.name} already exists`); continue; }
         ctx.emit({ op: 'link', edge: W.newEdge(x.name, y.name, { style: a.style || 'solid', arrow: a.arrow || 'forward', label: a.label != null ? String(a.label) : null, color: a.color || null }) });
       }
@@ -871,6 +918,9 @@ function edgeProperty(a, ctx) {
   return { value: es.map(e => prop === 'color' ? e.color || null : prop === 'label' ? e.label || null : edgeText(e)), answer: es.map(say).join('; ') + '.', highlight: { shapes: [...new Set(es.flatMap(e => [e.from, e.to]))], edges: es.map(e => e.id) } };
 }
 
+/* a background or a zone never takes part in a row, grid, alignment or spacing with ordinary items (it holds them); alone it does */
+const itemsOnly = list => list.some(s => !isPanel(s)) ? list.filter(s => !isPanel(s)) : list;
+
 const layoutPlugin = {
   name: 'layout', title: 'Layout',
   description: 'Align shapes along an axis, or arrange many shapes as a row, column, grid or circle.',
@@ -881,7 +931,7 @@ const layoutPlugin = {
   },
   handlers: [
     { type: 'command', when: { action: 'distribute' }, run(a, ctx) {
-      const W = ctx.world, t = expandGroups(W, names(a.target)), list = (t.length ? t.map(n => need(W, n)) : W.state.shapes.slice());
+      const W = ctx.world, t = expandGroups(W, names(a.target)), list = itemsOnly(t.length ? t.map(n => need(W, n)) : W.state.shapes.slice());
       if (list.length < 3) throw new SOPError('Spacing evenly needs at least three shapes.');
       const horiz = a.axis !== 'vertical', key = horiz ? 'x' : 'y', sorted = list.slice().sort((p, q) => p[key] - q[key]);
       const lo = sorted[0][key], hi = sorted[sorted.length - 1][key], step = (hi - lo) / (sorted.length - 1);
@@ -890,11 +940,11 @@ const layoutPlugin = {
     } },
     { type: 'command', when: { action: ['toFront', 'toBack'] }, run(a, ctx) {
       const W = ctx.world, t = targetsOf(W, a, a.action === 'toFront' ? 'bring to the front' : 'send to the back');
-      for (const n of t) ctx.emit({ op: 'reorder', name: need(W, n).name, to: a.action === 'toFront' ? 'front' : 'back' });
+      for (const n of a.action === 'toBack' ? t.slice().reverse() : t) ctx.emit({ op: 'reorder', name: need(W, n).name, to: a.action === 'toFront' ? 'front' : 'back' });   // several shapes (a group) keep their own order
       return { value: t };
     } },
     { type: 'command', when: { action: 'align' }, run(a, ctx) {
-      const W = ctx.world, list = targetsOf(W, a, 'align').map(n => need(W, n));
+      const W = ctx.world, list = itemsOnly(targetsOf(W, a, 'align').map(n => need(W, n)));
       if (list.length < 2) throw new SOPError('Align needs at least two shapes.');
       const horiz = a.axis !== 'vertical', base = list[0];
       const sorted = list.slice().sort((p, q) => horiz ? p.x - q.x : p.y - q.y); let edge = null;
@@ -908,7 +958,7 @@ const layoutPlugin = {
     } },
     { type: 'command', when: { action: 'arrange' }, run(a, ctx) {
       const W = ctx.world; const t = expandGroups(W, names(a.target));
-      const list = (t.length ? t.map(n => need(W, n)) : W.state.shapes.slice()).sort((p, q) => p.order - q.order);
+      const list = itemsOnly(t.length ? t.map(n => need(W, n)) : W.state.shapes.slice()).sort((p, q) => p.order - q.order);
       if (!list.length) throw new SOPError('There is nothing to arrange.');
       const n = list.length, lay = a.layout || (a.axis === 'vertical' ? 'column' : a.axis === 'horizontal' ? 'row' : 'grid');
       const cw = Math.max(...list.map(s => dims(s).w)) + 46, ch = Math.max(...list.map(s => dims(s).h)) + 46;
@@ -1258,6 +1308,90 @@ const factsPlugin = {
   }]
 };
 
+/* ---------- templates (docs/js/templates.js: the geometry; LEGEND_EXT.md section 3) ----------
+   create template=… items=… : the template's shapes, free texts and links, placed in a free part of the drawing's cell (or the place asked
+   for), emitted in z-band order as ONE wire (one undo step) and grouped under one name (its title, or Timeline1, ...); when no part of the
+   cell is free, the template goes into a new frame. arrange template=… target=… : the existing shapes move to the template's item places,
+   in the order given; nothing is created. The template keys and values come from TemplateKit.legend(). */
+const optRequire = f => { try { return typeof require === 'function' ? require(f) : null; } catch (e) { return null; } };
+const templateKit = () => (typeof TemplateKit !== 'undefined' ? TemplateKit : null) || optRequire('./templates.js');
+const helpAnswers = () => (typeof HelpAnswers !== 'undefined' ? HelpAnswers : null) || optRequire('./help-answers.js');
+const helpDocs = () => (typeof HelpKit !== 'undefined' ? HelpKit : null) || optRequire('./help.js');
+const LAYER_OF = ['background', 'zone', null, null];
+function templateBox(W, a, TK) {
+  const canvas = { x: FR.x, y: FR.y, w: CANVAS.W, h: CANVAS.H }, prefer = { size: a.size };
+  if (a.at) { const [x, y] = [].concat(a.at).map(Number); prefer.at = [x + FR.x, y + FR.y]; }
+  else if (a.position && SPOTS[a.position]) prefer.region = a.position;
+  else if (a.region && SPOTS[a.region]) prefer.region = a.region;
+  if (a.position && !SPOTS[a.position] && a.anchor) { const an = needAnchor(W, names(a.anchor)[0]), d = dims(an); prefer.rel = a.position; prefer.anchor = { x1: an.x - d.w / 2, y1: an.y - d.h / 2, x2: an.x + d.w / 2, y2: an.y + d.h / 2 }; }
+  return { canvas, prefer };
+}
+function makeTemplatesPlugin(TK) {
+  const paramsOf = a => ({ items: names(a.items), items2: names(a.items2), title: a.title, parents: names(a.parents), scheme: a.scheme, color: a.color, axis: a.axis, count: a.count });
+  const tname = n => TK.TEMPLATES[n] ? TK.TEMPLATES[n].t.toLowerCase() : n;
+  return {
+    name: 'templates', title: 'Templates',
+    description: 'Ready-made diagram forms (process, cycle, timeline, pyramid, heart, mountain, ...): a list of texts laid out as shapes, texts and arrows in one step, or existing shapes laid out in the form.',
+    legend: TK.legend(),
+    handlers: [
+      { type: 'command', when: { action: 'create', template: true }, run(a, ctx) {
+        const W = ctx.world, T = TK.TEMPLATES[a.template]; if (!T) throw new SOPError(`There is no template "${a.template}".`);
+        const P = paramsOf(a);
+        /* what a new template must not cover: every shape of the cell except a background of its own (the opening drawing's Backdrop);
+           zones and other templates' backgrounds count, so two forms never sit on each other */
+        const shapesHere = W.state.shapes.filter(s => !(s.layer === 'background' && !s.template) && K_SAME_CELL(s, { x: FR.x + 1, y: FR.y + 1 }));
+        const obstacles = shapesHere.map(s => { const d = dims(s); return { x1: s.x - d.w / 2, y1: s.y - d.h / 2, x2: s.x + d.w / 2, y2: s.y + d.h / 2 }; });
+        const { canvas, prefer } = templateBox(W, a, TK);
+        let r = TK.place(a.template, P, canvas, obstacles, prefer); const notes = [];
+        if (!r.fits) { const c = W.newFrame(a.title || T.t); r = TK.place(a.template, P, { x: c.x, y: c.y, w: CANVAS.W, h: CANVAS.H }, [], { size: a.size }); notes.push(`no free room on this drawing, so it is in a new frame`); }
+        else if (r.moved) notes.push(`the place asked for was taken, so it went to the ${camelWords(r.region)}`);
+        const L = r.layout;
+        if (L.crowded) throw new SOPError(`${listing(P.items.length ? P.items : ['these items'])} don't fit in a ${tname(a.template)} here; try fewer items, shorter texts, or a bigger place.`);
+        const taken = W.state.shapes.map(s => s.name).concat((W.state.groups || []).map(g => g.name));
+        const gname = a.name != null ? String(a.name) : TK.groupName(a.template, a.title, taken);
+        if (W.find(gname) || W.findGroup(gname)) throw new SOPError(`"${gname}" is already taken.`);
+        const nm = TK.nameElements(L, gname, taken.concat(gname)), made = [];
+        const els = L.elements.map((e, i) => ({ e, i })).sort((p, q) => (p.e.layer - q.e.layer) || (p.i - q.i)).map(x => x.e);
+        for (const e of els) {
+          const sh = { name: nm.get(e.id), shape: e.kind === 'text' ? 'text' : e.shape, size: SIZE_PX[e.kind === 'text' ? (Object.entries(FONT_PX).reduce((b, [k, v]) => Math.abs(v - e.fontSize) < Math.abs(FONT_PX[b] - e.fontSize) ? k : b, 'medium')) : 'medium'], color: e.color, outline: null, label: e.label || null, x: e.x, y: e.y, quiet: true, template: gname };
+          if (e.kind === 'text') sh.font = e.fontSize; else { sh.w = e.w; sh.h = e.h; }
+          if (e.fill && e.fill !== 'solid') sh.fill = e.fill;
+          if (LAYER_OF[e.layer]) sh.layer = LAYER_OF[e.layer];
+          ctx.emit({ op: 'add', shape: sh }); made.push(sh.name);
+        }
+        for (const l of L.links) ctx.emit({ op: 'link', edge: W.newEdge(nm.get(l.from), nm.get(l.to), { style: l.style, arrow: l.arrow, color: l.color }) });
+        ctx.emit({ op: 'group', group: { name: gname, members: made } });
+        const items = L.elements.filter(e => e.role === 'item').map(e => e.text);
+        return { value: made, notes: notes.concat(L.notes), answer: `Drew a ${tname(a.template)} of ${listing(items)} as the group ${gname}${notes.length ? ` (${notes.join('; ')})` : ''}${L.notes.length ? '; ' + L.notes.join('; ') : ''}.`, highlight: { shapes: made } };
+      } },
+      { type: 'command', when: { action: 'arrange', template: true }, run(a, ctx) {
+        const W = ctx.world, T = TK.TEMPLATES[a.template]; if (!T) throw new SOPError(`There is no template "${a.template}".`);
+        const list = itemsOnly(expandGroups(W, names(a.target)).map(n => need(W, n)));
+        if (list.length < T.min) throw new SOPError(`A ${tname(a.template)} needs at least ${T.min} shapes; name them, e.g. "arrange A, B and C as a ${a.template}".`);
+        const use = list.slice(0, T.max), { canvas, prefer } = inCell(use[0].x, use[0].y, () => templateBox(W, a, TK));
+        const box = prefer.region ? TK.boxFor(canvas, prefer.region, a.size) : TK.boxFor(canvas, 'whole', a.size);
+        const L = TK.layout(a.template, Object.assign(paramsOf(a), { items: use.map(s => s.label || s.name), items2: [] }), box);
+        const slots = L.elements.filter(e => e.role === 'item').sort((p, q) => p.index - q.index);
+        use.forEach((s, i) => { const d = dims(s), q = inCell(use[0].x, use[0].y, () => clampPt(slots[i].x, slots[i].y, d.w, d.h)); ctx.emit({ op: 'set', name: s.name, props: { x: q.x, y: q.y } }); });
+        const left = list.length - use.length;
+        return { value: use.map(s => s.name), answer: `Laid out ${listing(use.map(s => s.name))} as a ${tname(a.template)}${left ? `; a ${tname(a.template)} takes at most ${T.max}, so ${left} stayed where ${left === 1 ? 'it was' : 'they were'}` : ''}.`, highlight: { shapes: use.map(s => s.name) } };
+      } }
+    ]
+  };
+}
+/* ---------- help: the help world (LEGEND_EXT.md section 4): question ask=help topic=… aspect=… about=… -> an answer from the legend ---------- */
+function makeHelpPlugin(HA) {
+  return {
+    name: 'help', title: 'Help',
+    description: 'Answers questions about the editor itself (what it can do, how, which values, an example) from the legend, the capabilities and the help pages; it never changes the drawing.',
+    legend: HA.legend(),
+    handlers: [{ type: 'question', when: { ask: 'help' }, run(a, ctx) {
+      const TK = templateKit(), r = HA.answer(a, HA.contextFromEngine(ctx.engine, { docs: helpDocs(), templates: TK ? TK.catalogue() : [] }));
+      return { value: { topic: r.topic, aspect: r.aspect, examples: r.examples, known: r.known }, answer: r.text, examples: r.examples };
+    } }]
+  };
+}
+
 /* =====================================================================
    6. Formalizer: English → SOP, driven by the legend's cues
    ===================================================================== */
@@ -1290,6 +1424,29 @@ const COMMON = new Set(('the and for all too also not but with without from into
   + 'leftmost rightmost highest lowest corner side edge row column grid ring stack dashed dotted solid plain border outline stroke yourself up down unlabel').split(' '));
 const STOP = new Set(['a', 'an', 'the', 'and', 'or', 'to', 'of', 'in', 'on', 'at', 'it', 'is', 'are', 'be', 'with', 'by', 'from', 'into', 'as', 'that', 'this', 'please', 'new', 'another']);
 
+/* the Rules' cues of the new readers (their own, like every Rules cue; LEGEND_EXT.md section 6) */
+const HELP_LEAD = /^\s*(?:(?:hi|hey|hello|ok(?:ay)?|so|um+|hmm+|please|quick\s+question)[\s,!.:]+)*(help\b(?:\s+me\b)?(?:\s+(?:with|on))?|i\s+need\s+help\b(?:\s+(?:with|on))?|what\s+(?:else\s+)?can\s+(?:you|i|we)\s+do\b(?:\s+with)?|what\s+(?:can|could)\s+(?:you|i|we)\s+(?:draw|make|use|ask|say)\b|how\s+(?:do|can|could|should|would)\s+(?:i|we|you)\b|how\s+to\b|what(?:'s|\s+is)\s+the\s+way\s+to\b|is\s+(?:it|there\s+a\s+way)\s+(?:possible\s+)?to\b|is\s+it\s+possible\b|(?:are|r)\s+you\s+able\s+to\b|(?:do|does)\s+(?:you|it|this|the\s+editor)\s+support\b|(?:can|could)\s+(?:i|we|you|u)\b|(?:show|give)\s+me\s+(?:an?\s+|some\s+)?examples?\b(?:\s+of)?|examples?\s+of\b|what\s+(?:kinds?|types?|sorts?)\s+of\b|(?:what|which)\s+(?:colou?rs|sizes|shapes|styles|line\s+styles|templates|layouts|positions|forms|fills)\s+(?:can|could|do|are\s+(?:available|supported|possible)|exist|are\s+there\s+to\s+choose)\b|tell\s+me\s+about\b|explain\b|what\s+(?:is|are)\s+(?:a|an)\s+(?=\w+\s*$)|what\s+are\s+templates\b)/i;
+const HELP_GENERIC = new Set(['add', 'make', 'put', 'draw', 'create', 'set', 'change', 'give', 'place', 'insert', 'build', 'turn', 'stick', 'pop', 'throw', 'spawn', 'sketch', 'write', 'call', 'tie', 'hook', 'attach', 'cut', 'separate', 'fill', 'push', 'drop', 'clear', 'scale', 'title', 'tag', 'send', 'bring', 'space', 'line up', 'transform', 'convert', 'reset', 'trade', 'exchange', 'pop', 'park', 'tuck', 'dissolve', 'split up', 'break up', 'stamp', 'color', 'colour']);
+const HELP_FAMILY = [
+  [/\b(?:arrows?|lines?|links?|connections?|edges?|connectors?)\b/, 'connections'], [/\b(?:groups|grouping)\b/, 'groups'],
+  [/\b(?:texts?|titles?|headings?|headlines?|captions?|free\s+text|words|writing)\b/, 'text'], [/\b(?:bigger|smaller|larger)\b/, 'resize'],
+  [/\bcolou?rs?\b|\bpalettes?\b/, 'color'], [/\bsizes?\b/, 'size'], [/\b(?:kinds?|types?|sorts?)\s+of\s+shapes?\b|\bshape\s+(?:kinds|types)\b|\bwhich\s+shapes\b|\bwhat\s+shapes\b/, 'shape'],
+  [/\b(?:positions?|places?|where)\b/, 'position'], [/\b(?:line\s+)?styles?\b/, 'style'], [/\b(?:outlines?|borders?)\b/, 'outline'], [/\b(?:fills?|transparen\w*|see-through)\b/, 'fill'],
+  [/\b(?:templates?|smart\s*art|diagram\s+(?:types|forms|kinds)|ready-made)\b/, 'template'], [/\b(?:layouts?|tidy|tidying)\b/, 'layout'], [/\b(?:rules?|defaults?)\b/, 'rules'],
+  [/\b(?:questions?|ask)\b/, 'queries'], [/\b(?:backgrounds?|zones?|panels?|containers?|layers?)\b/, 'layer'], [/\b(?:front|back|behind|on\s+top|z-?order|overlap\w*)\b/, 'toFront']
+];
+const HELP_STOP = new Set(('a an the i you we u me my your our us it its is are be been do does did can could would should will how to what whats which who where when why with of in on for from at by into onto about as and or but not if then so ok okay hi hey hello please thanks just really also too very '
+  + 'use using used make making made add adding draw drawing put get have has there here any some kind kinds type types sort sorts option options available possible way ways help need want like able support supported '
+  + 'thing things stuff shape shapes item items element elements object objects node nodes diagram diagrams canvas drawing page editor app tool example examples show give tell explain else other another new one ones '
+  + 'two both each all many much more most this that these those them they their mean means work works let lets say know quick question something anything everything nothing different same simple basic exist exists choose').split(' '));
+const TPL_MOD = /^(?:simple|quick|nice|new|basic|clean|little|pretty|small|big|large|huge|tiny|vertical|horizontal|colou?rful|cute|lovely|beautiful|neat|fancy|step|stage|level|\d+-\w+)$/i;
+const TPL_PLACES = [['topLeft', /\b(?:in|at|on|into)\s+the\s+(?:top|upper)[\s-]+left(?:\s+(?:corner|quarter|part))?\b/i], ['topRight', /\b(?:in|at|on|into)\s+the\s+(?:top|upper)[\s-]+right(?:\s+(?:corner|quarter|part))?\b/i], ['bottomLeft', /\b(?:in|at|on|into)\s+the\s+(?:bottom|lower)[\s-]+left(?:\s+(?:corner|quarter|part))?\b/i], ['bottomRight', /\b(?:in|at|on|into)\s+the\s+(?:bottom|lower)[\s-]+right(?:\s+(?:corner|quarter|part))?\b/i],
+  ['top', /\b(?:in|at|on|along|across|into)\s+the\s+(?:top|upper)(?:\s+(?:half|part|side))?\b/i], ['bottom', /\b(?:in|at|on|along|across|into)\s+the\s+(?:bottom|lower)(?:\s+(?:half|part|side))?\b/i], ['left', /\b(?:in|at|on|into)\s+the\s+left(?:\s+(?:half|part|side))?\b/i], ['right', /\b(?:in|at|on|into)\s+the\s+right(?:\s+(?:half|part|side))?\b/i], ['center', /\b(?:in|at|into)\s+the\s+(?:center|centre|middle)\b/i]];
+const ALL_SHAPES = {};   /* a template's "lay out everything as a pyramid": a mention of every shape, made when the wire is kept */
+const TPL_MAKE = /\b(?:draw|make|create|build|add|sketch|lay\s*out|put\s+together|do)\s+(?:(?:me|us|quickly|please|out|up)\s+)*((?:a|an|another)\s+)?$/i;   /* no article: plural forms only ("draw rising steps of …") */
+const TPL_ARR = /\b(arrange|rearrange|lay\s*out|layout|organi[sz]e|reorgani[sz]e|turn|put|place|make|order|set\s+out)\s+((?:[\w-]+[\s,&]+){1,12}?)(?:as|into|in(?:to)?|like)\s+(?:a|an)\s+$/i;
+const TEXT_NOUN = /\b(?:text|texts|title|heading|headline|caption|subtitle|banner|note|words?)\b/i;
+
 function makeFormalizer(engine) {
   const L = engine.legend;
   /** formalize(input, ctx[, opts]). opts.units ([{c0, c1}], character offsets into input, in order): read these units instead of cutting the
@@ -1303,7 +1460,10 @@ function makeFormalizer(engine) {
     const lx = k => L.lexicon(k);
     const SHAPE = lx('shape'), COLOR = lx('color'), SIZE = lx('size'), ACTION = lx('action');
     const generic = new Set(SHAPE_VALUES.any.concat('any'));
-    const nounWords = [...SHAPE.keys()];
+    /* the cue words of shape=text (text, title, heading, ...) are not shape nouns of descriptions ("the title" is not a mention): a free
+       text is read by its own rule below (a quoted text with no shape to put it on) */
+    const TEXTW = new Set([...SHAPE.entries()].filter(([, v]) => v === 'text').map(([k]) => k));
+    const nounWords = [...SHAPE.keys()].filter(k => !TEXTW.has(k));
     const pluralNoun = w => /s$/.test(w) && !['rhombus'].includes(w) && w !== 'ones' ? true : w === 'ones';
     const colorRe = alt([...COLOR.keys()]), sizeRe = alt([...SIZE.keys()]), nounRe = alt(nounWords);
     const MOD = `(?:(?:${colorRe}|${sizeRe})\\s+){0,3}`;
@@ -1373,6 +1533,7 @@ function makeFormalizer(engine) {
     const unq = tok => { const m = /^⟪(\d+)⟫$/.exec(tok); return m ? quotes[+m[1]] : tok; };
 
     const sentences = text.split(/(?<=[.!?;])\s+/).map(s => s.trim()).filter(Boolean);
+    const TPL_PART = '\u0001';
     const SPLIT_VERB = new RegExp(`\\s*(?:,\\s*(?:and\\s+)?|\\s+and\\s+)(?=(?:${alt(verbCues.concat(['undo', 'redo']))})\\b)`, 'i');
     const CREATE_START = /^\s*(?:please\s+)?(draw|add|create|insert|sketch|place|put|make)\s+(?:a|an|another|\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s/i;
     const OBJ_SPLIT = new RegExp(`\\s*(?:,\\s*(?:and\\s+|plus\\s+)?|\\s+and\\s+|\\s+plus\\s+)(?=(?:a|an|another|${NUMRE})\\s+(?:(?:[a-z-]+)\\s+){0,3}?(?:${nounRe})\\b)`, 'i');
@@ -1437,10 +1598,11 @@ function makeFormalizer(engine) {
     for (const sen of sentences) {
       const isQ = /\?\s*$/.test(sen);
       const body = sen.replace(/[.!?;]+\s*$/, '');
-      const parts = body.split(/\s*,?\s*\b(?:and then|then|after that|afterwards|finally)\b[\s,]*/i).flatMap(p => p.split(SPLIT_VERB)).flatMap(coordSplit).flatMap(p => FACT_LIST && !VERB_RE.test(p) ? p.split(FACT_LIST) : [p]).flatMap(p => CONNECT_ONLY && CONNECT_ONLY.test(p) && nameAltRe ? p.split(new RegExp(`\\s+and\\s+(?=(?:the\\s+)?(?:${nameAltRe})\\s+(?:goes|go|leads?|flows?|feeds?|sends?|files|points?|runs?|passes)\\b)`, 'i')) : [p]);
+      const parts = body.split(/\s*,?\s*\b(?:and then|then|after that|afterwards|finally)\b[\s,]*/i).flatMap(p => templateOf(' ' + p + ' ') ? [TPL_PART + p] : p.split(SPLIT_VERB)).flatMap(p => p.startsWith(TPL_PART) ? [p] : coordSplit(p)).flatMap(p => FACT_LIST && !p.startsWith(TPL_PART) && !VERB_RE.test(p) ? p.split(FACT_LIST) : [p]).flatMap(p => CONNECT_ONLY && CONNECT_ONLY.test(p) && nameAltRe ? p.split(new RegExp(`\\s+and\\s+(?=(?:the\\s+)?(?:${nameAltRe})\\s+(?:goes|go|leads?|flows?|feeds?|sends?|files|points?|runs?|passes)\\b)`, 'i')) : [p]);
       for (let pi = 0; pi < parts.length; pi++) {
         let p = parts[pi];
         if (!p || !p.trim()) continue;
+        if (p.startsWith(TPL_PART)) { clause(p.slice(TPL_PART.length), isQ); continue; }   // a template's list of items is one request
         const pv = p.match(VERB_RE);
         if (pv) prevVerb = pv[1];
         else if (prevVerb && !isQ && ELLIPSIS && ELLIPSIS.test(p) && !/^\s*(?:the\s+)?\S+\s+(?:is|are|was|were|should|would|will|has|have)\b/i.test(p)) { p = prevVerb + ' ' + p.replace(/^\s*(?:(?:and|then|also|plus|now)\s+)*/i, ''); parts[pi] = p; }
@@ -1468,10 +1630,120 @@ function makeFormalizer(engine) {
     }
     return { nodes: F.nodes, notes: corrections.concat(F.notes), segments: F.segments, corrections, pieces };
 
+    /* ---- the help world, the templates: their own small readers (LEGEND_EXT.md sections 3, 4, 6). Their cue words are the Rules' own. ---- */
+    function pushWire(kind, args, raw) {
+      const id = 's' + (++F.s), node = { id, type: kind, args };
+      Object.defineProperty(node, 'src', { value: raw.trim().replace(/⟪(\d+)⟫/g, (m, n) => '"' + quotes[+n] + '"').replace(/\s+/g, ' '), enumerable: false });
+      F.nodes.push(node); F.segments.push({ src: node.src, id });
+      if (kind === 'command' && args.action === 'create') { lastRef = ref(id); lastGroup = ref(id); }
+      return node;
+    }
+    function helpOf(raw) {
+      if (!L.get('topic')) return null;
+      const t = ' ' + raw.replace(/[?!.\s]+$/, '').trim() + ' ', lead = HELP_LEAD.exec(t);
+      if (!lead) return null;
+      const rest = t.slice(lead.index + lead[0].length), lw = lead[0].toLowerCase(), plain = rest.replace(/⟪\d+⟫/g, ' ');
+      const nameHere = (rest.match(/[A-Za-z_][\w-]*/g) || []).some(w => /^[A-Z]/.test(w) && nameIndex.has(w.toLowerCase()) && w !== 'I' && w !== 'A');
+      const concrete = /⟪\d+⟫/.test(rest) || nameHere || /\b\d+\b/.test(rest);
+      const first = (raw.trim().match(/^[A-Za-z_][\w-]*/) || [''])[0];
+      /* with shapes named in it, a help lead asks about the drawing ("how do I get from Auth to Logs", "which shapes can Spawn reach") unless it
+         names an action of the legend ("how do I connect Start to Done?") */
+      if (nameHere && !new RegExp(`\\b(?:${alt([...ACTION.keys()].filter(k => !HELP_GENERIC.has(k)))})\\b`, 'i').test(plain)) return null;
+      if (/\b(?:explain|tell\s+me\s+about)\b/i.test(lw) && /\b(?:diagram|drawing|canvas|picture|what|which|where)\b/i.test(plain)) return null;   // "explain what the diagram contains": a question about the drawing
+      if (/^[A-Z]/.test(first) && nameIndex.has(first.toLowerCase()) && !/^(?:help|can|how|what|which|show|explain|tell)$/i.test(first) || /^help$/i.test(first) && nameIndex.has('help')) return null;   // "Help is below Settings": a shape named Help
+      /* "help" / "I need help" / "tell me about" / "explain" followed by a request or a story is not a help question: only a short topic is */
+      if (/^\W*(?:(?:hi|hey|hello|ok(?:ay)?|so|um+|hmm+|please|quick\s+question)[\s,!.:]+)*(?:help|i\s+need\s+help|tell\s+me\s+about|explain)\b/i.test(lw) && (nameHere || VERB_RE.test(plain) && !/^\s*(?:with|on)\b/i.test(plain) || plain.trim().split(/\s+/).filter(Boolean).length > 4)) return null;
+      if (/\b(?:how\s+many|which|where|is\s+there|are\s+there|what\s+colou?r\s+is)\b/i.test(plain) && !/^\s*(?:what|which)\s/i.test(lw.replace(/^\W+/, ''))) return null;   // "can you tell me how many circles ..." is a question about the drawing
+      /* "can you …" is a polite request ("can you undo", "could you draw a star", "can you get rid of the navy star"), except a bare
+         capability question: "can you draw stars?", "can you do timelines?", "can you help?", "could you handle groups?" */
+      if (/^[\s\W]*(?:(?:hi|hey|hello|ok(?:ay)?|so|um+|hmm+|please|quick\s+question)[\s,!.:]+)*(?:can|could|would)\s+(?:you|u)\b/i.test(lw) && (concrete || !/^\s*(?:help\b.*|(?:do|make|draw|create|handle|support|show|work\s+with)\s+(?:\w+\s+)?\w+s\s*)$/i.test(plain) || /\b(?:all|every|each|everything|the|this|that|it|them)\b/i.test(plain))) return null;
+      if (/\b(?:can|could)\s+(?:i|we)\b/.test(lw) && concrete) return null;
+      const a = { ask: 'help' };
+      const lw0 = lw.replace(/^[\s\W]*(?:(?:hi|hey|hello|ok(?:ay)?|so|um+|hmm+|please|quick\s+question)[\s,!.:]+)*/, '');
+      a.aspect = /\bhow\b|\bthe\s+way\s+to\b/.test(lw0) ? 'how' : /examples?\b/.test(lw0) || /\bexamples?\b/i.test(plain) ? 'example'
+        : /^(?:what|which)\s+(?:kinds?|types?|sorts?|colou?rs|sizes|shapes|styles|line\s+styles|templates|layouts|positions|forms|fills)\b/.test(lw0) ? 'values'
+        : /^what\s+(?:else\s+)?can\s+(?:you|i|we)\s+do\b/.test(lw0) ? 'overview' : /\b(?:can|could|possible|able|support)\b/.test(lw0) ? 'can' : 'overview';
+      const tp = helpTopic(lw.replace(/^.*\b(?:what|which)\s+(?=(?:colou?rs|sizes|shapes|styles|line\s+styles|templates|layouts|positions|forms|fills)\b)/, '') + ' ' + plain);
+      if (tp.topic) a.topic = tp.topic; else if (tp.about) a.about = tp.about;
+      if (/^\s*help\b/i.test(plain) && !a.topic && !a.about) a.aspect = 'overview';
+      if (a.aspect === 'overview' && !a.topic && !a.about) delete a.aspect;
+      return a;
+    }
+    function helpTopic(text) {
+      const T = ' ' + text.toLowerCase().replace(/[^a-z0-9' -]+/g, ' ') + ' ', TPL = lx('template'), found = (re, pl) => { const m = re && new RegExp(`\\b(${re})${pl ? '(?:s|es)?' : ''}\\b`).exec(T); return m ? m[1] : null; };
+      const tw = TPL.size ? found(alt([...TPL.keys()]), true) : null; if (tw) return { topic: TPL.get(tw) };
+      const acts = [...ACTION.entries()].filter(([k]) => !HELP_GENERIC.has(k)), aw = found(alt(acts.map(([k]) => k))); if (aw && !/^(?:help)$/.test(aw)) return { topic: ACTION.get(aw) };
+      for (const [re, topic] of HELP_FAMILY) if (re.test(T) && topicKnown(topic)) return { topic };
+      for (const k of ['shape', 'color', 'style', 'arrow', 'size', 'fill', 'scheme', 'layout']) { const lex = lx(k), w = lex.size ? found(alt([...lex.keys()].filter(c => !['shape', 'shapes', 'thing', 'things', 'item', 'items', 'one', 'ones', 'any', 'object', 'objects', 'element', 'elements', 'node', 'nodes', 'line', 'arrow', 'normal', 'regular', 'average', 'no'].includes(c)))) : null; if (w) return { topic: lex.get(w) }; }
+      const left = T.trim().split(/\s+/).filter(w => w && !HELP_STOP.has(w) && !ACTION.has(w) && !/^\d/.test(w));
+      if (left.length) return { about: left.slice(0, 3).join(' ') };
+      const gw = found(alt([...HELP_GENERIC].filter(k => ACTION.has(k)))); if (gw) return { topic: ACTION.get(gw) };
+      return {};
+    }
+    function topicKnown(t) { const q = L.get('topic'); return !!(q && q.values && t in q.values); }
+    function templateOf(t) {
+      const TPL = lx('template'); if (!TPL.size) return null;
+      const lc = t.toLowerCase(), cue = new RegExp(`\\b(${alt([...TPL.keys()])})\\b`, 'gi');
+      let m, hit = null;
+      while ((m = cue.exec(t))) {
+        const before = t.slice(0, m.index), word = t.slice(m.index, m.index + m[1].length);
+        if (/^[A-Z]/.test(word) && nameIndex.has(word.toLowerCase())) continue;   // a shape named Timeline
+        const pre = /^[\s\S]*(?:^|\s)((?:a|an|the|my|our|this|one|some)\s+|(?:draw|make|create|build|add|show|sketch|give\s+me|lay\s*out|arrange|rearrange|organi[sz]e|turn\s+.*?\s+into|put\s+.*?\s+(?:in|into|as)|as|into|in)\s+(?:(?:a|an|the)\s+)?)((?:[\w-]+\s+){0,3}?)$/i.exec(before);
+        if (!pre) continue;
+        const mods = pre[2].trim().split(/\s+/).filter(Boolean);
+        if (!mods.every(w => TPL_MOD.test(w) || COLOR.has(w.toLowerCase()) || SIZE.has(w.toLowerCase()) || lx('scheme').has(w.toLowerCase()) || /^(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)(?:-\w+)?$/i.test(w))) continue;
+        hit = { m, pre, mods, start: m.index - pre[2].length, end: m.index + m[1].length }; break;
+      }
+      if (!hit) return null;
+      /* the form must be the object of a verb of making ("make a timeline", "draw me a heart", "a timeline of A, B" alone) or the target
+         form of an arrangement whose objects are only shapes ("arrange A, B and C as a cycle", "lay out everything as a pyramid"); a
+         template word in other text ("the heart rate", "our sales funnel is drawn as boxes", "the chairs sit in a loop") is not one */
+      const before = t.slice(0, hit.start), mk = TPL_MAKE.exec(before), ar = TPL_ARR.exec(before);
+      const arrObjOk = ar && ar[2].replace(/[,&]/g, ' ').split(/\s+/).filter(Boolean).every(w => /^(?:and|the|all|of|everything|shapes|things|items|them|these|those|boxes|nodes)$/i.test(w) || (nameIndex.has(w.toLowerCase()) && /^[A-Z]|\d/.test(w)));
+      if (mk && !(ar && arrObjOk)) { const v0 = before.match(VERB_RE); if (v0 && v0.index < mk.index) return null; }   // "add a link … to make a loop": the template is not the request
+      const alone = /^\s*(?:a|an)\s+$/i.test(before) && /^\s*(?:\S+\s+)?(?:of|:)\s/i.test(t.slice(hit.end));
+      if (mk && !mk[1] && !/s$/i.test(hit.m[1])) return null;
+      if (!mk && !(ar && arrObjOk) && !alone) return null;
+      const vm = (ar && arrObjOk ? ar[0] : mk ? mk[0] : '').match(VERB_RE), verb = vm ? vm[1].toLowerCase() : null;
+      const a = { action: 'create', template: TPL.get(hit.m[1].toLowerCase()) };
+      let tail = ' ' + t.slice(hit.end) + ' ';
+      const unq = x => x.replace(/⟪(\d+)⟫/g, (q, n) => quotes[+n]).trim();
+      const list = x => x.split(/\s*(?:,|;|&|\band\b|\bthen\b|->|→)\s*/i).map(y => unq(y.replace(/^\s*(?:the|a|an)\s+/i, '')).replace(/[.!?]+$/, '').trim()).filter(Boolean);
+      const cut = (re, fn) => { const mm = re.exec(tail); if (!mm) return null; tail = tail.slice(0, mm.index) + ' ' + tail.slice(mm.index + mm[0].length) + ' '; fn(mm); return mm; };
+      for (const w of hit.mods) { const x = w.toLowerCase(); if (COLOR.has(x)) a.color = COLOR.get(x); else if (SIZE.has(x)) a.size = SIZE.get(x); else if (lx('scheme').has(x)) a.scheme = lx('scheme').get(x); const n = /^(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)/i.exec(x); if (n) a.count = toNum(n[1]); if (/^vertical/.test(x)) a.axis = 'vertical'; if (/^horizontal/.test(x)) a.axis = 'horizontal'; }
+      cut(/\b(?:titled|entitled|called|named|headed|with\s+(?:the\s+|a\s+)?(?:title|heading|header|caption))\s+(⟪\d+⟫|[A-Za-z0-9][\w'-]*(?:\s+[A-Z][\w'-]*)*)/i, mm => { a.title = unq(mm[1]); });
+      cut(/\bwith\s+(⟪\d+⟫)\s+in\s+the\s+(?:middle|centre|center)\b/i, mm => { if (a.template === 'venn') a.items2 = [unq(mm[1])]; else a.title = unq(mm[1]); });
+      cut(/\b(?:around|centred\s+on|centered\s+on|towards?|to\s+the\s+goal|leading\s+to)\s+(⟪\d+⟫)/i, mm => { if (a.title == null) a.title = unq(mm[1]); });
+      if (a.template === 'road') cut(/\bto\s+(⟪\d+⟫)/i, mm => { if (a.title == null) a.title = unq(mm[1]); });
+      if (a.template === 'pillars') cut(/\bon\s+(?:a\s+|the\s+)?(?:base|foundation)?\s*(?:of\s+)?(⟪\d+⟫)/i, mm => { a.items2 = [unq(mm[1])]; });
+      cut(new RegExp(`(?:\\b(?:in|with|using)\\s+(?:a\\s+|an\\s+|the\\s+)?)?\\b(${alt([...lx('scheme').keys()])})(?:\\s+(?:colou?rs?|palette|scheme|tones|style))?\\b`, 'i'), mm => { a.scheme = lx('scheme').get(mm[1].toLowerCase()); });
+      cut(new RegExp(`\\b(?:in|using)\\s+(?:the\\s+)?(${colorRe})(?:\\s+colou?rs?)?\\b`, 'i'), mm => { a.color = COLOR.get(mm[1].toLowerCase()); });
+      cut(/\b(vertical(?:ly)?|top\s+to\s+bottom|horizontal(?:ly)?|left\s+to\s+right)\b/i, mm => { a.axis = /vert|top/i.test(mm[1]) ? 'vertical' : 'horizontal'; });
+      cut(/\b(?:with\s+)?(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)[\s-]+(?:steps?|stages?|levels?|items?|parts?|phases?|rings?|points?|milestones?|layers?|boxes|columns?|pillars?|rows?|sets?|circles?|spokes?|rays?|branches?|camps?)\b/i, mm => { a.count = toNum(mm[1]); });
+      for (const [p, re] of TPL_PLACES) if (cut(re, () => {})) { a.position = p; break; }
+      cut(/\b(below|under|beneath|above|over|left\s+of|right\s+of)\s+(?:the\s+)?([A-Za-z_][\w-]*)/i, mm => { if (nameIndex.has(mm[2].toLowerCase())) { a.position = { below: 'below', under: 'below', beneath: 'below', above: 'above', over: 'above' }[mm[1].toLowerCase()] || (/left/i.test(mm[1]) ? 'leftOf' : 'rightOf'); a.anchor = nameIndex.get(mm[2].toLowerCase()); } else tail = tail + ' ' + mm[0]; });
+      cut(/\b(?:against|versus|vs\.?|with\s+(?:the\s+)?roots|and\s+roots|roots:?|on\s+the\s+other\s+side:?|on\s+the\s+right:?)\s+(.+)$/i, mm => { a.items2 = list(mm[1]); });
+      if (['bridge', 'balance'].includes(a.template)) cut(/\b(?:from|between)\s+(.+?)\s+(?:to|and\s+on\s+the\s+other\s+side|with)\s+(.+)$/i, mm => { a.items = list(mm[1]); a.items2 = list(mm[2]); });
+      if (!a.items) cut(new RegExp(`^\\s*(?:(?:diagram|chart|graph|form|layout|shape|${alt([...TPL.keys()])})\\s+)?(?:of|for|with|showing|listing|containing|from|:|-)\\s+(.+)$`, 'i'), mm => { a.items = list(mm[1]); });
+      /* arrange: the shapes named before the template ("arrange A, B and C as a cycle", "lay out everything as a pyramid") */
+      const verbAct = ar && arrObjOk ? 'arrange' : vm ? ACTION.get(verb) : null, named = (before.match(/[A-Za-z_][\w-]*/g) || []).filter(w => nameIndex.has(w.toLowerCase()) && w !== 'a' && w !== 'I' && !(w === 'A' && !/^[A-Z]$/.test(w))).map(w => nameIndex.get(w.toLowerCase()));
+      const allOf = /\b(?:everything|all(?:\s+the)?\s+(?:shapes|things|items)|all\s+of\s+them)\b/i.test(before);
+      if (verbAct === 'arrange' && (named.length || allOf) && !a.items) {
+        a.action = 'arrange'; a.target = named.length ? (named.length === 1 ? named[0] : named) : ALL_SHAPES;
+      } else if (a.items && a.items.length >= 2 && a.items.every(x => nameIndex.has(String(x).toLowerCase()) && /^[A-Z]/.test(x)) && verbAct !== 'create') { a.action = 'arrange'; a.target = a.items.map(x => nameIndex.get(x.toLowerCase())); delete a.items; }
+      for (const k of ['items', 'items2']) if (a[k] && !a[k].length) delete a[k];
+      if (a.items && a.items.every(x => SHAPE.has(String(x).toLowerCase().replace(/^(?:the|all)\s+/, '')))) return null;   // "make a list of the circles" is not a list template
+      if (a.items && a.items.some(x => /\b(?:everything|all|every|shapes?|things|items|ones)\b/i.test(x) || String(x).split(/\s+/).some(w => SHAPE.has(w.toLowerCase()) && !TEXTW.has(w.toLowerCase())))) return null;   // "a list of the red shapes": a question about the drawing
+      if (a.items && a.items.length === 1 && /\b(?:of|for)\s+the\s+/i.test(t.slice(hit.end))) return null;   // "a timeline of the project", "a flow for the soup recipe": a description, not the items
+      return a;
+    }
+    function templateClause(p, isQ) { const tp = templateOf(' ' + p + ' '); if (!tp) return false; if (tp.target === ALL_SHAPES) { const id = 'm' + (++F.m); F.nodes.push({ id, type: 'mention', args: { quantifier: 'all' } }); tp.target = ref(id); } pushWire('command', tp, p); return true; }
     function clause(raw, isQ) {
+      { const h = helpOf(raw); if (h) { pushWire('question', h, raw); return; } }   // a question about the editor itself (the help world)
       let t = ' ' + raw.trim().replace(/[,\s]+$/, '') + ' ';
       t = t.replace(/^\s*(?:(?:please|kindly|now|ok(?:ay)?|so|and|also|hey|next|can you|could you|would you|will you|i want you to|i'd like you to|i would like you to|let's|lets|go ahead and)\b[\s,]*)+/i, ' ');
       if (!t.trim()) return;
+      if (templateClause(t.trim(), isQ)) return;   // a diagram template (timeline, pyramid, heart, ...)
       const forced = new Set();   // words read as shape names because a shape noun + named/called stands before them
       t = nounBeforeName(t, forced);
       const firstWord = (t.trim().match(/^[A-Za-z']+/) || [''])[0].toLowerCase();
@@ -1570,6 +1842,18 @@ function makeFormalizer(engine) {
         else { F.notes.push(`I couldn't find an action in "${raw.trim()}".`); F.segments.push({ src: raw.trim().replace(/⟪(\d+)⟫/g, (m, n) => '"' + quotes[+n] + '"').replace(/\s+/g, ' '), id: null }); return; }
       }
       const isCmd = kind === 'command';
+      /* a free text: a quoted text with nothing to put it on ("add a title "Q3" at the top", "write "Draft" in the corner", "title the
+         diagram "Order flow"") -> create shape=text; a create needs a text noun (title, heading, text, caption, ...) and no shape noun;
+         a name, a pronoun or a shape noun in the request means the text goes ON a shape (a label) */
+      let textItem = false;
+      if (isCmd && ['create', 'label', 'move'].includes(action) && /⟪\d+⟫/.test(t) && !edgeLabel && !unlabel) {
+        const plain = t.replace(/⟪\d+⟫/g, ' ');
+        const nameIn = (plain.match(/[A-Za-z_][\w-]*/g) || []).some(w => nameIndex.has(w.toLowerCase()) && !(TEXTW.has(w.toLowerCase()) && /^[a-z]/.test(w)) && !['a', 'I', 'A'].includes(w))
+          || (nameIndex.has('a') && /\b(?:on|to|onto|of|for|at|near|beside|above|below|under|label|write|put)\s+A\b/.test(plain));
+        const shapeNoun = new RegExp(`\\b(?:${nounRe})\\b`, 'i').test(plain), pron = /\b(?:it|them|this|that|these|those)\b/i.test(plain);
+        const onSomething = /\bon\s+(?:the\s+|a\s+)?(?!(?:top|bottom|left|right|middle|center|centre|side|corner|canvas|page|diagram|screen|upper|lower)\b)[a-z]/i.test(plain);   // "write "Stop" on the red octagon": a label
+        if (!nameIn && !pron && !shapeNoun && !onSomething && (action !== 'create' || TEXT_NOUN.test(plain))) { action = 'create'; textItem = true; }
+      }
 
       // ---- rename's new name, declared names, labels ----
       if (unlabel) { C.args.label = ''; C.t = C.t.replace(REMOVE_LABEL, m => ' ' + ((/([A-Za-z_][\w-]*)['\u2019]s\s/.exec(m) || [])[1] || '') + ' ').replace(/\bunlabel\b/i, ' '); }   /* "delete Done's label" keeps Done */
@@ -1757,7 +2041,7 @@ function makeFormalizer(engine) {
       const rest = C.t.toLowerCase().replace(/⟦\d+⟧|⟪\d+⟫/g, ' ');
       const words = rest.split(/[^a-z0-9'-]+/).filter(w => w && !STOP.has(w));
       const firstOf = (lex, skip) => { for (const w of words) if (lex.has(w) && !(skip && skip(lex.get(w)))) return lex.get(w); return null; };
-      const sh = firstOf(SHAPE, v => v === 'any');
+      const sh = firstOf(SHAPE, v => v === 'any' || v === 'text');
       if (sh) {
         const cues = [...SHAPE.entries()].filter(([, v]) => v === sh).map(([k]) => k);
         const asNewKind = new RegExp(`\\b(?:a|an|into|to\\s+an?)\\s+(?:(?:${colorRe}|${sizeRe})\\s+){0,2}(?:${alt(cues)})\\b`, 'i').test(C.t);
@@ -1791,6 +2075,7 @@ function makeFormalizer(engine) {
         if (left.length) C.args.target = markVals(left);
       }
       if (action === 'delete' && C.args.target == null && /\b(clear|wipe|reset|everything|start over|canvas|diagram)\b/i.test(raw)) C.args.target = mention(true, '', null);
+      if (textItem) { C.args.shape = 'text'; for (const k of ['target', 'count', 'outline', 'linked', 'anchor2', 'position2']) delete C.args[k]; }
       if (action === 'arrange' && C.args.target != null && C.args.layout == null && /\bgrid|tidy\b/i.test(raw)) C.args.layout = 'grid';
 
       // ---- build the wire ----
@@ -1877,7 +2162,7 @@ function rulesCut(formalize, input, ctx) {
 /** the world written back as SOP wires (shapes, edges, rules, groups): what a backend receives after lowering; the World view shows it */
 function worldNodes(state) {
   const S = state, out = [];
-  for (const s of S.shapes) out.push({ id: s.name, type: 'shape', args: Object.assign({ shape: s.shape, size: sizeName(s.size), color: s.color }, s.outline ? { outline: s.outline } : {}, s.label ? { label: s.label } : {}, { at: [s.x, s.y] }) });
+  for (const s of S.shapes) out.push({ id: s.name, type: 'shape', args: Object.assign({ shape: s.shape, size: sizeName(s.size), color: s.color }, s.outline ? { outline: s.outline } : {}, s.fill ? { fill: s.fill } : {}, s.layer ? { layer: s.layer } : {}, s.label ? { label: s.label } : {}, { at: [s.x, s.y] }, s.w && s.shape !== 'text' ? { width: s.w, height: s.h } : {}) });
   for (const e of S.edges) out.push({ id: e.id, type: 'edge', args: Object.assign({ from: ref(e.from), to: ref(e.to), style: e.style, arrow: e.arrow }, e.color ? { color: e.color } : {}, e.label ? { label: e.label } : {}) });
   for (const r of S.rules) { const a = {}; ['shape', 'size', 'color', 'outline'].forEach(k => { if (r[k]) a[k] = r[k]; }); out.push({ id: r.id, type: 'rule', args: a }); }
   for (const g of S.groups || []) out.push({ id: g.name, type: 'group', args: { members: g.members.map(ref) } });
@@ -1888,14 +2173,16 @@ const worldSOP = state => worldNodes(state).map(serialize).join('\n');
 function createSystem(opts = {}) {
   const world = new DiagramWorld();
   const engine = new Engine(world);
-  [corePlugin, historyPlugin, shapesPlugin, groupsPlugin, connectionsPlugin, layoutPlugin, queriesPlugin, reasoningPlugin, logicPlugin, rulesPlugin, factsPlugin].forEach(p => engine.use(Object.assign({}, p)));
+  const TK = templateKit(), HA = helpAnswers();
+  [corePlugin, historyPlugin, shapesPlugin, groupsPlugin, connectionsPlugin, layoutPlugin, queriesPlugin, reasoningPlugin, logicPlugin, rulesPlugin, factsPlugin].concat(TK ? [makeTemplatesPlugin(TK)] : [], HA ? [makeHelpPlugin(HA)] : []).forEach(p => engine.use(Object.assign({}, p)));
   engine.legend.define('core', 'action', { ask: 'What should happen?', kind: 'enum' });
+  if (HA) engine.legend.define('help', 'topic', HA.topicLegend(HA.contextFromEngine(engine, {})).topic);   // every topic of the legend, after the other plugins
   const formalize = makeFormalizer(engine);
   /** cut(input, ctx): the rules' cut as character offsets [{c0, c1, src}] (rulesCut) */
   return { world, engine, formalize, cut: (input, ctx) => rulesCut(formalize, input, ctx) };
 }
 
-return { createSystem, CELL, cellOf, parse, serialize, fmtValue, isRef, names, SOPError, Clarify, CANVAS, COLOR_HEX, SIZE_PX, dims, sizeName, region, edgeText, groupBox, worldNodes, worldSOP };
+return { createSystem, CELL, cellOf, parse, serialize, fmtValue, isRef, names, SOPError, Clarify, CANVAS, COLOR_HEX, SIZE_PX, FONT_PX, fontOf, dims, sizeName, region, edgeText, groupBox, worldNodes, worldSOP };
 })();
 if (typeof module !== 'undefined') module.exports = SOPKit;
 /*LOGIC-END*/

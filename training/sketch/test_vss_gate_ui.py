@@ -66,7 +66,7 @@ with sync_playwright() as p:
     pg.goto(base, wait_until="domcontentloaded")
     # VSS ready (its tab is enabled) and the start messages read
     pg.wait_for_function("() => { const t = document.querySelector('[data-rtab=vss]'); return t && !t.classList.contains('off'); }", timeout=180000)
-    pg.wait_for_function("() => document.querySelectorAll('#msgs .b.bot').length >= 4 && !document.querySelector('#msgs .typing')", timeout=60000)
+    pg.wait_for_function("() => document.querySelectorAll('#msgs .b.bot').length >= 1 + (window.StartDiagram ? StartDiagram.MESSAGES.length : 3) && !document.querySelector('#msgs .typing')", timeout=60000)
     pg.click("[data-rtab=vss]"); pg.wait_for_timeout(300)
     undo0 = pg.evaluate("() => (document.querySelector('#readout') || {}).textContent")
 
