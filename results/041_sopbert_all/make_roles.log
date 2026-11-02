@@ -1,0 +1,96 @@
+acts: 36; messages train 7640 heldout 0; sample found 1000 missing 0
+act                train     heldout  sample1000        hand       blind       broad        seennew_identitiesheldout_formulations
+create              1231           0         190           4           5          21          26          33          65
+delete               291           0          47           3           4           9          13          10           5
+move                3230           0         638           2           4           7          27          22          22
+set                 4261           0         888           3           4           8          39          36          17
+resize               337           0          50           1           1           3          14          10           1
+rename               429           0          79           1           1           2          12           9          12
+label                261           0          46           1           1           1           8           7           0
+duplicate            389           0          60           0           1           2           9           2           7
+swap                 240           0          34           0           1           1           8           2           0
+connect             3599           0         747           4           5          12          31          42          75
+disconnect           231           0          39           1           1           2           5           3           6
+align                255           0          37           1           1           1           4           4           0
+distribute           242           0          35           1           1           1           1           2          12
+toFront              236           0          48           1           0           1           5           3           1
+toBack               227           0          35           1           1           1           2           4           9
+arrange              508           0         102           1           1           2           7          11           0
+undo                 325           0          44           1           1           1           2           1           4
+redo                 189           0          26           0           1           1           3           4           0
+forget               216           0          25           0           1           1           1           4           3
+count                768           0         167           2           2           8          15          17           9
+list                 485           0          99           0           2           3           9           6          19
+exists               337           0          66           1           2           2           5           9           0
+property             342           0          49           2           3           6           8           9           0
+check               1144           0         193           1           3           3          11           7           0
+describe             346           0          51           0           1           2           3           3           0
+neighbors            277           0          46           1           2           2           7           7           0
+connected            618           0         127           0           0           1           0           0           0
+degree               379           0          71           0           0           1           0           0           0
+nearest              487           0          87           1           1           1           0           0           0
+extreme             1293           0         272           1           1           2           0           0           0
+path                 639           0         126           1           2           2           7          11           7
+reachable            207           0          32           1           1           1           7          10           0
+cycle                257           0          47           1           1           2           4           5           0
+rules                201           0          22           0           0           1           0           0           0
+fact                 983           0         206           1           2           2           4           3          19
+rule                 242           0          27           1           2           2           3           4           7
+TOTAL              25702           0        4858          40          60         118         300         300         300
+eval texts that also occur (case-insensitively) in train: {'eval_sample1000': 4858, 'eval_hand': 1, 'eval_blind': 4, 'eval_broad': 9, 'eval_seen': 3, 'eval_new_identities': 2, 'eval_heldout_formulations': 0}
+skipped: {'bench broad: multi-request message without spans': 10}
+cut rows (whole messages, B/I/O per word): train 7640 messages 25697 spans, heldout 0 messages 0 spans, eval_sample1000 1000 messages 4856 spans
+rows: train 25702, heldout 0, eval_sample1000 4858, eval_hand 40, eval_blind 60, eval_broad 118, eval_seen 300, eval_new_identities 300, eval_heldout_formulations 300
+none rows (segments of the rules' segmenter that overlap no gold span): train 0/25702 = 0.0%, heldout 0/0 = 0.0%, eval_sample1000 0/4858 = 0.0%
+class keys (15): arrow(2), axis(2), color(18), comparison(2), direction(4), kind(1), layout(4), notColor(18), pairing(3), position(15), property(5), shape(8), size(5), style(2), superlative(10)
+span keys (8): anchor, count, distance, from, label, name, target, to; tags 17; number words learned: {'three': '3', 'duplicate': '2', 'twice': '2', 'four': '4', 'two': '2', 'five': '5', 'below': '2', 'ten': '10', 'six': '6', 'day': '100', '90px': '90'}
+
+span keys, training rows: gold values aligned to words
+  anchor     4783/ 5188 =  92.2%  aligned: $new: name written 25 · aligned: written 4758 · not written in the request 393 · reference $new (no name written) 8 · reference mention(...) 4
+  count       352/  352 = 100.0%  aligned: number word (co-occurrence) 272 · aligned: written 80
+  distance    274/  275 =  99.6%  aligned: number word (co-occurrence) 2 · aligned: written 272 · not written in the request 1
+  from       6845/ 7655 =  89.4%  aligned: $new: name written 91 · aligned: written 6754 · not written in the request 751 · reference $new (no name written) 53 · reference mention(...) 6
+  label       652/  653 =  99.8%  aligned: written 652 · not written in the request 1
+  name       1140/ 1140 = 100.0%  aligned: written 1140
+  target    14324/16942 =  84.5%  aligned: $new: name written 155 · aligned: written 14169 · already tagged for another key 1 · not written in the request 1963 · reference $new (no name written) 97 · reference mention(...) 557
+  to         3611/ 4024 =  89.7%  aligned: $new: name written 84 · aligned: written 3527 · not written in the request 320 · reference $new (no name written) 69 · reference mention(...) 24
+
+class keys, training rows (evidence only; the class head needs no alignment): one word expresses the value
+  arrow         760/  764 =  99.5%   e.g. line->none 448, with->none 136, way->both 64, lines->none 40, ways->both 20
+  axis          452/  491 =  92.1%   e.g. horizontally->horizontal 189, vertically->vertical 142, align->horizontal 27, distribute->horizontal 27, horizontal->horizontal 22
+  color        6140/ 6165 =  99.6%   e.g. red->red 891, green->green 659, blue->blue 638, gray->gray 547, yellow->yellow 426
+  comparison    470/  470 = 100.0%   e.g. bigger->bigger 344, smaller->smaller 112, than->bigger 12, check->bigger 2
+  direction     231/  295 =  78.3%   e.g. up->up 75, pixels->right 63, down->down 61, left->left 10, px->left 8
+  kind          184/  184 = 100.0%   e.g. count->edge 105, connections->edge 67, arrows->edge 8, many->edge 3, total->edge 1
+  layout        444/  508 =  87.4%   e.g. row->row 237, column->column 103, grid->grid 74, circle->circle 24, and->row 2
+  notColor      117/  242 =  48.3%   e.g. not->red 32, black->black 15, purple->purple 8, navy->navy 7, t->blue 6
+  pairing      1187/ 1194 =  99.4%   e.g. chain->chain 321, connect->chain 316, and->chain 268, each->next 102, to->chain 77
+  position     4035/ 4763 =  84.7%   e.g. near->near 582, above->above 534, below->below 519, right->rightOf 481, left->leftOf 421
+  property      280/  342 =  81.9%   e.g. color->color 119, where->position 40, size->size 30, what->color 29, label->label 19
+  shape        3988/ 4016 =  99.3%   e.g. circle->circle 829, star->star 499, square->square 457, rectangle->rectangle 402, hexagon->hexagon 303
+  size         2665/ 2682 =  99.4%   e.g. small->small 648, huge->huge 646, large->large 465, tiny->tiny 381, big->large 341
+  style         590/  595 =  99.2%   e.g. dashed->dashed 300, dotted->dotted 280, to->dashed 3, line->dotted 1, and->dashed 1
+  superlative  1760/ 1780 =  98.9%   e.g. most->mostConnected 251, closest->closest 234, leftmost->leftmost 201, biggest->biggest 170, rightmost->rightmost 170
+
+who fills the name-roles (REF keys ['anchor', 'from', 'target', 'to']; desc keys ['color', 'notColor', 'quantifier', 'recency', 'shape']): written / context / description of the gold fillers
+  train:
+    anchor    4820 fillers: written 4497 (93.3%) · context 319 (6.6%) · description 4 (0.1%)
+    from      4676 fillers: written 4317 (92.3%) · context 353 (7.5%) · description 6 (0.1%)
+    target   14730 fillers: written 13024 (88.4%) · context 1149 (7.8%) · description 557 (3.8%)
+    to        3280 fillers: written 3007 (91.7%) · context 249 (7.6%) · description 24 (0.7%)
+    all      27506 fillers: written 24845 (90.3%) · context 2070 (7.5%) · description 591 (2.1%)
+    requests with 2+ described roles 0 · with 2+ context roles 136 · context fillers that are a list (several names) 855 {'target': 470, 'from': 216, 'anchor': 79, 'to': 90}
+    context fillers the shared rule (nextContext, gold earlier requests) gives right: 639/2070 = 30.9%  {'target wrong': 764, 'anchor right': 103, 'target right': 385, 'from wrong': 288, 'anchor wrong': 216, 'to right': 86, 'from right': 65, 'to wrong': 163}
+  heldout:
+    all          0 fillers: written 0 (0.0%) · context 0 (0.0%) · description 0 (0.0%)
+    requests with 2+ described roles 0 · with 2+ context roles 0 · context fillers that are a list (several names) 0 {}
+    context fillers the shared rule (nextContext, gold earlier requests) gives right: 0/0 = 0.0%  {}
+  eval_sample1000:
+    anchor     915 fillers: written 850 (92.9%) · context 65 (7.1%) · description 0 (0.0%)
+    from       944 fillers: written 873 (92.5%) · context 70 (7.4%) · description 1 (0.1%)
+    target    2805 fillers: written 2481 (88.4%) · context 226 (8.1%) · description 98 (3.5%)
+    to         660 fillers: written 605 (91.7%) · context 53 (8.0%) · description 2 (0.3%)
+    all       5324 fillers: written 4809 (90.3%) · context 414 (7.8%) · description 101 (1.9%)
+    requests with 2+ described roles 0 · with 2+ context roles 25 · context fillers that are a list (several names) 174 {'target': 94, 'to': 23, 'from': 41, 'anchor': 16}
+    context fillers the shared rule (nextContext, gold earlier requests) gives right: 120/414 = 29.0%  {'from right': 12, 'anchor wrong': 44, 'from wrong': 58, 'to wrong': 34, 'target wrong': 158, 'target right': 68, 'anchor right': 21, 'to right': 19}
+skipped: {'bench broad: multi-request message without spans': 10}

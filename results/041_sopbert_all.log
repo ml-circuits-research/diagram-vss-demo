@@ -1,0 +1,77 @@
+Using Python 3.13.18 environment at: /home/claude/vss-box/venv
+Checked 13 packages in 3ms
+torch 2.15.0+cu132 cuda True
+acts: 36; messages train 7640 heldout 0; sample found 1000 missing 0
+act                train     heldout  sample1000        hand       blind       broad        seennew_identitiesheldout_formulations
+create              1231           0         190           4           5          21          26          33          65
+delete               291           0          47           3           4           9          13          10           5
+move                3230           0         638           2           4           7          27          22          22
+acts: 36; messages train 7640 heldout 0; sample found 1000 missing 0
+act                train     heldout  sample1000        hand       blind       broad        seennew_identitiesheldout_formulations
+create              1231           0         190           4           5          21          26          33          65
+delete               291           0          47           3           4           9          13          10           5
+NO HELD-OUT: fixed 8 epochs, last epoch kept; numbers below on evaluation sets that are part of the training data are the FIT on the training data, not a test
+base distilbert-base-uncased: 67.1M parameters, device cuda, fp16 True; train 25702 held-out 0; acts 36, class keys 24 (176 classes), tags 17
+cut: 7640 train messages; word pieces per message: median 42, max 287; 0 of 7640 exceed 512 (the words beyond are read as outside every request)
+act none: 0/25702 train rows = 0.0%; weight 1 (not above 40%)
+  scaler.step(opt); scaler.update(); sch.step(); loss_sum += loss.item(); n += 1; step += 1
+epoch 1: loss 2.0129  (no held-out)  (79s)
+epoch 2: loss 0.2861  (no held-out)  (158s)
+epoch 3: loss 0.1707  (no held-out)  (240s)
+epoch 4: loss 0.1053  (no held-out)  (323s)
+epoch 5: loss 0.0627  (no held-out)  (408s)
+epoch 6: loss 0.0397  (no held-out)  (488s)
+epoch 7: loss 0.0263  (no held-out)  (569s)
+epoch 8: loss 0.0182  (no held-out)  (651s)
+  torch.onnx.export(model, (x["input_ids"], x["attention_mask"]), os.path.join(ox, "model.onnx"), dynamo=False, opset_version=14,
+  mask, torch.tensor(torch.finfo(scores.dtype).min)
+WARNING:root:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+
+last epoch (8) kept; there is no held-out score. Per key: right/gold (+ produced where the gold has none), on the sets below (eval_sample1000 is TRAINING data here)
+  blind                  n=   60  requests read right 0.8000  act 1.0000
+      anchor 8/8 · arrow 0/2 · axis 1/1 +1 · color 10/10 · comparison 1/1 · count 1/1 · desc:color 0/1 · desc:notColor 0/1 · desc:quantifier 5/7 +1 · desc:shape 1/5 · direction 2/2 · distance 0/1 · fill:anchor 8/8 · fill:from 7/9 · fill:target 30/30 +1 · fill:to 6/6 · from 7/7 · label 2/2 · layout 1/1 · name 2/2 · pairing 2/2 · position 5/8 · property 3/3 · shape 12/12 · size 4/4 +1 · style 1/1 · superlative 1/1 +1 · target 25/25 · to 6/6
+      name-roles per filler kind (kind read right / value read right / gold): description 5/1/7 (14.3%) · written 46/46/46 (100.0%)  ->  description accuracy 1/7
+  broad                  n=  118  requests read right 0.7712  act 0.9661
+      anchor 15/15 · arrow 1/2 · axis 2/2 · color 27/29 · comparison 1/1 · count 3/3 · desc:color 0/3 · desc:notColor 0/1 · desc:quantifier 7/9 +1 · desc:recency 2/2 · desc:shape 3/13 · direction 3/3 · distance 1/1 +1 · fill:anchor 15/15 · fill:from 14/17 · fill:target 53/54 +2 · fill:to 14/14 · from 14/14 · kind 1/1 · label 4/4 · layout 2/2 · name 5/5 · notColor 0/1 · pairing 2/2 · position 11/17 +1 · property 5/6 · shape 31/33 · size 7/8 · style 2/2 · superlative 2/3 · target 43/43 +3 · to 14/14
+      name-roles per filler kind (kind read right / value read right / gold): context 0/0/1 (0.0%) · description 10/3/13 (23.1%) · written 86/86/86 (100.0%)  ->  description accuracy 3/13
+  hand                   n=   40  requests read right 0.8750  act 1.0000
+      anchor 5/5 · axis 2/2 · color 10/10 · count 1/1 · desc:notColor 0/1 · desc:quantifier 2/4 · desc:shape 0/4 · direction 1/1 · distance 1/1 · fill:anchor 5/5 · fill:from 5/7 · fill:target 19/19 +1 · fill:to 4/4 · from 5/5 · label 1/1 · layout 1/1 · name 2/2 · notColor 1/1 · pairing 2/2 · position 3/4 +1 · property 2/2 · shape 7/7 · size 3/3 · style 1/1 · superlative 2/2 · target 17/17 · to 4/4
+      name-roles per filler kind (kind read right / value read right / gold): description 2/0/4 (0.0%) · written 31/31/31 (100.0%)  ->  description accuracy 0/4
+  heldout_formulations   n=  300  requests read right 0.4867  act 0.9700
+      anchor 37/37 +6 · arrow 3/10 · axis 9/9 +2 · color 87/98 +13 · count 14/14 · desc:color 0/46 · desc:notColor 0/19 · desc:quantifier 33/42 +4 · desc:recency 2/3 +6 · desc:shape 9/97 · fill:anchor 34/53 +1 · fill:from 49/85 +3 · fill:target 98/104 +5 · fill:to 58/77 · from 50/50 +5 · label 26/26 · name 23/28 · notColor 0/1 · pairing 5/11 · position 43/81 +3 · shape 91/94 +4 · size 24/24 · style 24/24 · target 58/63 +3 · to 54/54 +4
+      name-roles per filler kind (kind read right / value read right / gold): description 43/1/115 (0.9%) · written 196/192/204 (94.1%)  ->  description accuracy 1/115
+  new_identities         n=  300  requests read right 0.6000  act 0.9733
+      anchor 23/24 +5 · arrow 3/8 · axis 5/5 +1 · color 69/75 +3 · comparison 0/0 +1 · count 3/3 +1 · desc:color 0/37 · desc:notColor 0/5 · desc:quantifier 30/47 +1 · desc:recency 1/3 +1 · desc:shape 6/82 · direction 6/6 · distance 4/4 · fill:anchor 24/39 · fill:from 37/65 +1 · fill:target 128/143 +14 · fill:to 33/40 · from 36/40 +2 · label 16/16 · layout 10/11 · name 24/25 · notColor 0/1 · pairing 10/16 · position 33/58 +1 · property 8/9 · shape 67/70 +1 · size 23/23 +1 · style 12/13 · target 99/99 +8 · to 31/31 +1
+      name-roles per filler kind (kind read right / value read right / gold): description 33/2/93 (2.2%) · written 189/187/194 (96.4%)  ->  description accuracy 2/93
+  sample1000             n= 4858  requests read right 0.9417  act 0.9996
+      anchor 850/850 · arrow 15/158 · axis 65/72 · color 1196/1199 · comparison 79/79 · count 54/55 · desc:color 0/18 · desc:notColor 0/13 · desc:quantifier 45/52 +3 · desc:recency 30/36 +5 · desc:shape 24/62 +2 · direction 34/34 · distance 34/34 · fill:anchor 903/915 +2 · fill:from 938/944 · fill:target 2789/2805 +1 · fill:to 654/660 · from 878/878 · kind 36/36 · label 109/110 · layout 102/102 · name 198/198 · notColor 35/54 · pairing 251/252 · position 904/914 · property 49/49 · shape 718/723 · size 503/506 · style 136/139 · superlative 359/359 · target 2484/2484 · to 605/605
+      name-roles per filler kind (kind read right / value read right / gold): context 388/388/414 (93.7%) · description 89/32/101 (31.7%) · written 4807/4807/4809 (100.0%)  ->  description accuracy 32/101
+  seen                   n=  300  requests read right 0.6667  act 0.9667
+      anchor 31/33 +2 · arrow 1/5 · axis 5/5 · color 70/74 +2 · count 9/9 +1 · desc:color 0/34 · desc:notColor 0/2 · desc:quantifier 15/28 +1 · desc:recency 1/3 +4 · desc:shape 3/63 · direction 10/10 · distance 9/9 · fill:anchor 30/41 · fill:from 32/47 +3 · fill:target 157/170 +15 · fill:to 24/35 +1 · from 32/33 +1 · label 15/15 · layout 7/7 · name 22/22 · notColor 0/1 · pairing 6/8 · position 28/55 +1 · property 6/8 · shape 59/61 +2 · size 16/16 +1 · style 7/7 · target 126/129 +6 · to 26/26 +3
+      name-roles per filler kind (kind read right / value read right / gold): description 29/0/72 (0.0%) · written 214/211/221 (95.5%)  ->  description accuracy 0/72
+  cut train: n 7640, spans gold 25697, spans predicted 25714, exact 25643, precision 0.9972, recall 0.9979, f1 0.9976, word accuracy 0.9997
+  cut eval_sample1000: n 1000, spans gold 4856, spans predicted 4861, exact 4846, precision 0.9969, recall 0.9979, f1 0.9974, word accuracy 0.9997
+onnx fp32 vs torch: max |diff| token 8.58e-06, seq 5.72e-06, cut 5.25e-06
+differs: "all the rooms arranged in a grid" {"act":["arrange","arrange"],"classes":[{"layout":"grid","fill:target":"context"},{"layout":"grid","fill:target":"context","desc:quantifier":"all"}],"tags":["O O O O O O O","O O O O O O O"],"ids":true}
+node makeReader q8 vs torch on 50 requests: word pieces 50/50, act 50/50, classes 49/50, tags 50/50 (17 tags, 24 class keys)
+node cut() vs torch on 20 whole messages: spans identical 20/20
+{"ids":"50/50","act":"50/50","classes":"49/50","tags":"50/50","cut":"20/20"} 
+
+wrote results/041_sopbert_all/sop-bert-all (67.8 MB q8); README.md inside
+-rw-r--r--. 1 claude claude     8627 Nov  2 18:36 results/041_sopbert_all/sop-bert-all/config.json
+-rw-r--r--. 1 claude claude 67770694 Nov  2 18:36 results/041_sopbert_all/sop-bert-all/onnx/model_quantized.onnx
+-rw-r--r--. 1 claude claude      888 Nov  2 18:36 results/041_sopbert_all/sop-bert-all/README.md
+-rw-r--r--. 1 claude claude     1227 Nov  2 18:36 results/041_sopbert_all/sop-bert-all/tokenizer_config.json
+-rw-r--r--. 1 claude claude   711551 Nov  2 18:36 results/041_sopbert_all/sop-bert-all/tokenizer.json
+  differs: "all the rooms arranged in a grid" {"act":["arrange","arrange"],"classes":[{"layout":"grid","fill:target":"context"},{"layout":"grid","fill:target":"context","desc:quantifier":"all"}],"tags":["O O O O O O O","O O O O O O O"],"ids":true}
+node makeReader q8 vs torch on 50 requests: word pieces 50/50, act 50/50, classes 49/50, tags 50/50 (17 tags, 24 class keys)
+node cut() vs torch on 20 whole messages: spans identical 20/20
+{"ids":"50/50","act":"50/50","classes":"49/50","tags":"50/50","cut":"20/20"}
+# sop-bert-all: SOP-BERT fine-tuned on ALL the data (no held-out)
+
+Same architecture, heads and export as docs/model/neural/sop-bert (see its README). Differences: trained with make_roles.py --all
+(training/neural/ALL_DATA.md): the 25702 request spans of every message the shipped VSS chain trains on (7640 messages), nothing removed, no
+held-out, so no early stop: 8 epochs (the best epoch of the shipped run), lr 6e-05, batch 32, fp16 on cuda, seed 0; the last epoch is kept.
+Fit on the TRAINING data only (not a test): sample1000 (inside the training set) act 0.9996, requests read right 0.9417.
+Size: onnx/model_quantized.onnx 67.8 MB (q8). Node check vs torch on 50 training requests: {"ids": "50/50", "act": "50/50", "classes": "49/50", "tags": "50/50", "cut": "20/20"}.
+Evaluation: on a fresh test set only (calibration part for confidences/thresholds, test part for the numbers).
