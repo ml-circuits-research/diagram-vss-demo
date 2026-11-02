@@ -1,4 +1,4 @@
-.logic_*.js
+.logic_*
 __pycache__/
 .cands.jsonl
 .verdicts.jsonl
