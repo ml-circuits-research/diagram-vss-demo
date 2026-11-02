@@ -1,37 +1,28 @@
 {
  "about": "Content versions of the model folders and files the demo loads (training/sketch/stamp_models.py). The loader appends ?v=<version>.",
  "files": {
-  "confidence/vss.json": "eb5baef660",
-  "context/weights.json": "17808ca5c0",
-  "context/weights_r2.json": "3907acc62f",
-  "micro/cutter_events.json": "08e2afb5e4",
-  "micro/cutter_events_r2.json": "9e1b73d71c",
-  "micro/cutter_worlds7r2.json": "2845fe1f39",
-  "micro/cutter_worlds7s.json": "a1203fdc7e",
-  "micro/graphq7": "4b4e780f3b",
-  "micro/graphq7r2": "e3c7d632ae",
-  "micro/history7": "89724641ba",
-  "micro/history7r2": "7af938e2df",
-  "micro/links7": "8c6267e91a",
-  "micro/links7r2": "8fb3069fad",
-  "micro/manage7": "0055db6906",
-  "micro/manage7r2": "0badcd4822",
-  "micro/position7": "633ef86e4e",
-  "micro/position7r2": "6dba42fe4b",
-  "micro/questions7": "2287579709",
-  "micro/questions7r2": "32b4610081",
-  "micro/shapes7c": "0b0a3a2a46",
-  "micro/shapes7r2": "ae0f861435",
-  "neural/sop-bert": "bad2c5dd68",
+  "confidence/sop-bert.json": "ed05f8f6bf",
+  "confidence/vss.json": "89368ad1ed",
+  "context/weights.json": "ee4fcc6ab9",
+  "micro/cutter_events.json": "af1589b3fe",
+  "micro/cutter_worlds7s.json": "14f47a02a1",
+  "micro/graphq7": "d771449db6",
+  "micro/history7": "9e05acedac",
+  "micro/links7": "1977b44ce1",
+  "micro/manage7": "b1423ee7f7",
+  "micro/position7": "aba60e3d75",
+  "micro/questions7": "d77e6c05b2",
+  "micro/shapes7c": "8ed97b25b1",
+  "neural/sop-bert": "868837b882",
   "spell/vocab.json": "34accc6565"
  },
  "sizes": {
   "neural/sop-bert": {
-   "README.md": 2612,
-   "config.json": 8576,
+   "README.md": 3447,
+   "config.json": 8727,
    "tokenizer.json": 711551,
    "tokenizer_config.json": 1227,
-   "onnx/model_quantized.onnx": 67769917
+   "onnx/model_quantized.onnx": 67771471
   }
  }
 }

@@ -1,3 +1,0 @@
-{"world": "history7r2", "events": "undo,redo,forget", "command": "training/sketch/train_micro.sh history7r2 undo,redo,forget", "DATA": "spans", "FRAC": "1.0", "QCOLOR": "1",
- "MARKER": "0", "ROW_SHAPE": "", "FRONT_ROWS": "world", "KINDMAP": "diagnosis_kinds/kinds_comb1.json", "CAL_FALLBACK": "train", "D": 1024, "EPOCHS": 10, "SEED": 0, "N_EVAL": 150, "EVAL_MODES": "primary", "DEVICE": "cuda", "HOLDOUT": "", "CREATE_COLOR": "role", "N_CAL": "100000", "VAL_PREC": "", "VAL_SUB": "value", "SHORT": "1", "OPS": "1", "DIAGRAM_OPS": "1", "rows": 710,
- "run_log": "training/sketch/runs/micro_history7r2_D1024_e10_s0.log"}

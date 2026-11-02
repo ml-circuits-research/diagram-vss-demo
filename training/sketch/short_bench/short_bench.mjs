@@ -11,7 +11,7 @@
 //   LLM_SHORT=0 skips llm_short. node short_bench.mjs <out.json>
 // Options (default: off; the default run is unchanged):
 //   BENCH_DIR=<dir>  read the sets from <dir>/<set>.json instead of docs/bench/ (e.g. the typo'd sets of training/sketch/spell/build_spell.mjs --typo-out)
-//   GATE=95|97|99    also score VSS gated (llm_score.mjs GATE, PRECISION.md): each row gets vss.gated {r, w, e executed; ar, aw, ae asked;
+//   GATE=cost|95|97|99 also score VSS gated (llm_score.mjs GATE, PRECISION.md): each row gets vss.gated {r, w, e executed; ar, aw, ae asked;
 //                    n produced; gold} and `gate` (the level); agg.py prints the gated line per group. Not with BEST=1 (its copy of the
 //                    composer gives no signals, so everything would be asked).
 //   SPELL=1          run the VSA spell checker (docs/js/spell.js, docs/model/spell/vocab.json + the legend) on each text before both readers,

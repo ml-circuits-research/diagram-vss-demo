@@ -1,17 +1,17 @@
 {
  "format": "vss-web-3",
- "legend_sha256": "sha256:757204772f3855f62d89934d0b8d2f39a7789f4a4971d0eeaeefce8a4fc856a7",
- "training_code_commit": "9b2fa1c",
+ "legend_sha256": "sha256:26ae6492c20140278033d66acebc4e645ebfa0fb401f5c13991a51f958c813b9",
+ "training_code_commit": "dfd5262",
  "bits": 8,
  "star_version": 2,
  "D": 1024,
- "n_stars": 1826,
+ "n_stars": 2137,
  "sparse": {
   "rule": "zero",
   "stored_rows": {
-   "bg": 427,
-   "A": 776,
-   "L": 776
+   "bg": 508,
+   "A": 1006,
+   "L": 1006
   },
   "rows": {
    "bg": 3249,
@@ -24,26 +24,26 @@
   "file": "stars.json",
   "bits": 8,
   "quantize": "keys",
-  "checked": "1826 stars equal stars.bin byte for byte",
+  "checked": "2137 stars equal stars.bin byte for byte",
   "from": {
    "stars.bin": {
-    "sha256": "08c662412ae31984820fbc19d3949365478a0fb3d381b9db2047813520b7e762",
-    "bytes": 1892756
+    "sha256": "d8fb9155ad5808785f59bef935c837860644ad9cbf249be15590a2d5505df1c9",
+    "bytes": 2215252
    }
   }
  },
  "files": {
   "model.json": {
-   "sha256": "b54e13daf3746e0605d6d88fdb5a9031af3fe0a30820739825d11c18a4041116",
-   "bytes": 64988
+   "sha256": "a2a1c8ab40f4531fb08e815413fb6150f6667a2d54543db10cfe4602dee5dbc7",
+   "bytes": 73539
   },
   "routebook.bin": {
-   "sha256": "786a9159d56cd5828873266cafd0ee583151081ac38b4a441ade6d4088afc774",
-   "bytes": 2152940
+   "sha256": "8bebbcd113b657c990538dd61ce377cf398cb6701262a6bfc4630f3c368ca88b",
+   "bytes": 2709092
   },
   "stars.json": {
-   "sha256": "5f27462ddbabf64b0e8127b68ac7c8c0943520a0bf4afc3ea3245ea94195cd79",
-   "bytes": 22886
+   "sha256": "009a276a800732d26a63b90cc5bc19d13665da9b0519ea8a5074fe59f09cd1b8",
+   "bytes": 26919
   }
  }
 }

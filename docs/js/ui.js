@@ -28,14 +28,41 @@ const clock = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute:
 // the reply says why the reader is not sure (vss-confidence.js reasons) and offers "Do it anyway" (that one reading, as one undoable turn).
 // GATES[reader id](its formalize result) -> Promise<gate> | null; a gate is {level, threshold, units: [{index, src, conf, execute, nodes,
 // reasons: [{text}]}], executed (the nodes to run, message order), held (the units not executed)} (vss-confidence.js gate).
-// VSS: the combined confidence (docs/model/confidence/vss.json) at the level of VSS › Settings (95 / 97 / 99 / execute all; default 97,
-// kept in this browser when storage works). Neural: no gate yet: its confidence and threshold come from another measurement
-// (training/sketch/PRECISION_BERT.md, in progress). HOOK: set GATES.neural to a function of the same shape and readWith, the reply,
-// "Do it anyway" and the details work for it unchanged. The Rules have no confidence and execute everything.
-const GATE_KEY = 'sop.vss.gate', GATE_LEVELS = ['95', '97', '99', 'all'];
-let vssGate = GATE_LEVELS.includes(store.get(GATE_KEY)) ? store.get(GATE_KEY) : '97';
+// VSS: the combined confidence (docs/model/confidence/vss.json) at the level of VSS › Settings (default "cost": the safety threshold that
+// maximises the cost score, one confident mistake = 10 right answers, owner 2026-11-02 21:24; 95 / 97 / 99 % precision when the model
+// reaches them; execute all, never the default; a choice other than the default is kept in this browser when storage works). Neural: SOP-BERT's fitted confidence
+// (docs/model/confidence/sop-bert.json; the "Neural gate" block below sets GATES.neural); readWith, the reply, "Do it anyway" and the
+// details are the same code for both readers. The Rules have no confidence and execute everything.
+const GATE_KEY = 'sop.vss.gate', GATE_LEVELS = ['cost', '95', '97', '99', 'all'], GATE_DEFAULT = 'cost';
+let vssGate = GATE_LEVELS.includes(store.get(GATE_KEY)) ? store.get(GATE_KEY) : GATE_DEFAULT;
 const GATES = { vss: v => window.VSSFormalizer && window.VSSFormalizer.gate ? window.VSSFormalizer.gate(v, vssGate) : null, neural: null };
-const gateLabel = l => l === 'all' ? 'execute all' : `${l}% precision`;
+const gateLabel = l => l === 'all' ? 'execute all' : l === 'cost' ? 'safety threshold' : `${l}% precision`;
+// Neural gate (GATES.neural): SOP-BERT's fitted confidence (docs/js/neural-confidence.js; model docs/model/confidence/sop-bert.json, versioned;
+// training/sketch/PRECISION_BERT.md), 24 numbers read from the head logits of the reader's own model calls (the act, the value heads, who
+// fills each role, the word tags, the cut head, the word pieces), the same value as the scripts (training/sketch/test_neural_confidence.mjs).
+// Level: Neural › Settings, default the file's "cost" level (its safety threshold), the other levels of the file, execute all; a level other
+// than the default is kept in this browser. The confidence was fitted on requests cut by the BERT cutter: with that cut the cut head's
+// output of the cutter's call is reused; with another cut (Rules, VSS) neural.js runs the cut head once more to read it at that cut's units.
+// Without the file every request is asked (the reason says so).
+const NGATE_KEY = 'sop.neural.gate';
+let neuralGate = store.get(NGATE_KEY);   // null: the file's default level
+let ncNow = null;   // the module once loaded (the settings render synchronously)
+const ncP = import(new URL('js/neural-confidence.js', document.baseURI).href).then(m => { ncNow = m; return m; }).catch(e => { console.error(e); return null; });
+const nconf = { spec: null, error: null, url: null };
+/** the confidence file (loaded once; a failure is kept in nconf.error and tried again on the next message) */
+async function neuralSpec() {
+  const NC = await ncP; if (!NC) throw new Error('docs/js/neural-confidence.js could not be loaded');
+  const url = await NeuralKit.confidenceUrl(); nconf.url = url;
+  try { nconf.spec = await NC.load(url); nconf.error = null; } catch (e) { nconf.spec = null; nconf.error = e; throw e; }
+  return nconf.spec;
+}
+/** the level the neural gate uses: the chosen one when the file reaches it (or "all"), else the file's default */
+const neuralLevel = (NC, spec) => neuralGate && (!spec || neuralGate === 'all' || NC.reached(spec, neuralGate)) ? neuralGate : spec ? NC.defaultLevel(spec) : 'cost';
+GATES.neural = async n => {
+  const NC = await ncP; if (!NC || !n || !n.joint) return null;
+  let spec = null; try { spec = await neuralSpec(); } catch (e) { console.error(e); }
+  return NC.gate(spec, n, neuralLevel(NC, spec));
+};
 // spelling (docs/js/spell.js): a VSA spell checker corrects typed messages before the readers read them; every reader reads the same
 // corrected text. Its vocabulary: docs/model/spell/vocab.json (the VSS worlds' words), the legend's values and cue words, and the names
 // on the active reader's canvas. The switch is in ⋮ › Settings (Spelling); it is kept in this browser when storage works.
@@ -386,7 +413,7 @@ async function readWith(rd, text, rec, pk) {
     else if (rec.raw) r.nodes = K.parse(rec.sop);   // SOP: nothing to formalize, no time
     else if (rd.id === 'rules') { const f = rec.cut && rec.cut.strategy !== 'rules' ? rd.formalize(text, ctx, { units: rec.cut.units }) : rd.formalize(text, ctx); r.ms = performance.now() - t0; r.nodes = f.nodes; r.notes = f.notes; }
     else if (rd.id === 'vss') { const v = await window.VSSFormalizer.formalize(text, ctx, rd.formalize, Object.assign({}, VSS_OPTS, rec.cut ? { units: rec.cut.units } : {})); r.ms = performance.now() - t0; r.vss = v; r.nodes = v.nodes; r.notes = v.notes; }
-    else { const n = await neural.formalize(text, ctx, rec.cut ? { units: rec.cut.units } : undefined); r.ms = performance.now() - t0; r.neural = n; r.nodes = n.nodes; r.notes = n.notes.filter(x => !/couldn't find an action/.test(x)); }
+    else { const n = await neural.formalize(text, ctx, rec.cut ? { units: rec.cut.units, signals: true } : { signals: true }); r.ms = performance.now() - t0; r.neural = n; r.nodes = n.nodes; r.notes = n.notes.filter(x => !/couldn't find an action/.test(x)); }
     if (rec.cut && !pk && !rec.raw) r.cutBy = rec.cut.strategy;
     // the gate (see GATES): the requests this reader is not sure of are not executed; the reply lists them with "Do it anyway"
     const gf = !pk && !rec.raw ? GATES[rd.id] : null, gsrc = rd.id === 'vss' ? r.vss : r.neural;
@@ -538,6 +565,8 @@ function vssHTML(v) {
 function neuralHTML(n) {
   const pct = x => (x * 100).toFixed(0) + '%';
   let h = '';
+  // where the cut numbers of the neural gate's confidence came from (GATES.neural)
+  if (n.joint && n.joint.cutFrom === 'cut head (extra call)') h += '<div class="note">The cut numbers of SOP-BERT’s confidence were read from its cut head, run once more over the message, at the requests of the shared cut; the confidence was fitted on the requests of the BERT cutter.</div>';
   for (const a of n.analyses) {
     const r = a.rules, rows = [];
     const actKey = a.kind.value === 'command' ? 'action' : a.kind.value === 'question' ? 'ask' : null;
@@ -671,7 +700,7 @@ $('#player').addEventListener('click', async ev => {
 let vssState = 'idle', vssInfo = null, vssError = null, neuralBytes = 0, neuralLoadMs = 0;
 // neural: 'checking' (is it published? in the cache?), 'loading', 'ready', 'unpublished' (our model is not on this site), 'failed'
 let nState = 'checking', nError = null, nProg = { L: 0, T: 0 }, nFromCache = false, nToken = 0;
-const VSS_HINT = 19.4e6;   // the composer's files (7 worlds with generated stars, cutters), measured 2026-11-02 (SHRINK.md); the loaded size is measured again in the page
+const VSS_HINT = 23.0e6;   // the composer's files (7 worlds of arm VSS-G with generated stars, cutters, context weights), measured 2026-11-02; the loaded size is measured again in the page
 const RULES_BYTES_INLINE = (() => { try { return [...document.scripts].filter(s => !s.src && /SOPKit/.test(s.textContent.slice(0, 400))).reduce((a, s) => a + s.textContent.length, 0); } catch (e) { return 0; } })();
 const rulesBytes = () => { try { const e = performance.getEntriesByType('resource').find(r => /\/js\/logic\.js$/.test(r.name)); return e && e.decodedBodySize ? e.decodedBodySize : RULES_BYTES_INLINE; } catch (e) { return RULES_BYTES_INLINE; } };
 const mb = b => b >= 1e6 ? (b / 1e6).toFixed(1) + ' MB' : (b / 1e3).toFixed(0) + ' KB';
@@ -747,9 +776,9 @@ async function ensureVSS(announce) {
     await window.VSSFormalizer.loadComposerAt(); vssInfo = window.VSSFormalizer.composerInfo();
     try {
       await window.VSSFormalizer.loadConfidence();
-      // a level kept from before that the model does not reach (e.g. 99): the highest reached level below it
+      // a level kept from before that the model does not reach (e.g. 99): the highest reached level below it, else the safety threshold
       const ci = window.VSSFormalizer.confidenceInfo(), eff = ci && ci.effective(vssGate);
-      if (eff && eff !== vssGate) { sysNote(`VSS does not reach ${vssGate}% precision on held-out messages; it uses ${gateLabel(eff)} instead.`); vssGate = eff; store.set(GATE_KEY, vssGate === '97' ? null : vssGate); }
+      if (eff && eff !== vssGate) { sysNote(`VSS does not reach ${vssGate}% precision on its calibration messages; it uses its ${gateLabel(eff)} instead.`); vssGate = eff; store.set(GATE_KEY, vssGate === GATE_DEFAULT ? null : vssGate); }
     } catch (e) { sysNote('The VSS confidence model could not be loaded (' + (e && e.message || e) + '): VSS will ask about every request.'); }
     vssState = 'ready'; vssError = null;
     const fresh = !RD.vss.reads;
@@ -837,25 +866,34 @@ function renderSub() {
 }
 function setSub(k) { if (k === sub || !SUBS.some(x => x[0] === k)) return; sub = k; renderSub(); renderCard(); if (k === 'drawing') renderCanvas(); }
 subbar.addEventListener('click', ev => { const b = ev.target.closest('[data-sub]'); if (b) setSub(b.dataset.sub); });
+rpanel.addEventListener('change', ev => {   // Neural › Settings: the level of the neural gate (GATES.neural)
+  if (ev.target.name !== 'neural-gate' || !nconf.spec || !ncNow) return;
+  const l = ev.target.value, def = ncNow.defaultLevel(nconf.spec); neuralGate = l === def ? null : l; store.set(NGATE_KEY, neuralGate);
+  sysNote(`Neural now ${l === 'all' ? 'executes every request it reads (no gate)' : l === 'cost' ? 'executes a request only when its confidence clears its safety threshold; below it, it asks' : `executes a request only at ${l}% precision; below it, it asks`}.`);
+  if (sub === 'settings') renderSub();
+});
 rpanel.addEventListener('change', ev => {
-  if (ev.target.name === 'vss-gate' && GATE_LEVELS.includes(ev.target.value)) { vssGate = ev.target.value; store.set(GATE_KEY, vssGate === '97' ? null : vssGate); sysNote(`VSS now ${vssGate === 'all' ? 'executes every request it reads (no gate)' : `executes a request only at ${vssGate}% precision; below it, it asks`}.`); if (sub === 'settings') renderSub(); }
+  if (ev.target.name === 'vss-gate' && GATE_LEVELS.includes(ev.target.value)) { vssGate = ev.target.value; store.set(GATE_KEY, vssGate === GATE_DEFAULT ? null : vssGate); sysNote(`VSS now ${vssGate === 'all' ? 'executes every request it reads (no gate)' : vssGate === 'cost' ? 'executes a request only when its confidence clears its safety threshold; below it, it asks' : `executes a request only at ${vssGate}% precision; below it, it asks`}.`); if (sub === 'settings') renderSub(); }
 });
 rpanel.addEventListener('click', ev => { const h = ev.target.closest('[data-help]'); if (h) { openHelp(h.dataset.help); return; } const b = ev.target.closest('[data-open]'); if (b) openSheet('settings', b.dataset.open); });
 function vssStatusHTML() {
   return escH(vssState === 'ready' ? (vssInfo.composer ? `Ready: ${vssInfo.worlds.length} micro-worlds, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
     : `Ready: D ${vssInfo.D}, ${vssInfo.bits || 8}-bit route book, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`) : vssState === 'failed' ? 'Failed: ' + (vssError && vssError.message || vssError) : `Loading (about ${mb0(VSS_HINT)} from this site)…`);
 }
-/** VSS › Settings: the precision level of the gate (see GATES), with what each level gave on the held-out messages (PRECISION.md) */
+/** VSS › Settings: the level of the gate (see GATES), with what each level gave on the calibration messages (out-of-fold confidences) */
 function gateSettingsHTML() {
   const info = window.VSSFormalizer && window.VSSFormalizer.confidenceInfo ? window.VSSFormalizer.confidenceInfo() : null, L = info ? info.levels : {};
   const pc = v => (v * 100).toFixed(1) + '%';
-  // a level the model does not reach (no threshold gives it on held-out) is shown, disabled, with the highest precision VSS reaches
+  // a level the model does not reach (no threshold gives it on the calibration messages) is shown, disabled, with the highest precision VSS reaches
+  const acts = x => Number.isFinite(x.threshold) ? `acts when its confidence is at least ${x.threshold.toFixed(4)}` : x.kind === 'executes everything' ? 'acts on every request' : 'asks about every request';
+  const costAbout = x => `${acts(x)}: the threshold that scores best when one confident mistake costs as much as ${x.cost || 10} right answers; on the calibration messages (out-of-fold scores) ${x.precision != null ? `${pc(x.precision)} of what it executed was right, ` : ''}it did ${pc(x.coverage)} of the requests right and asked about ${pc(x.asked)}`;
   const opt = l => { const x = L[l], off = !!info && l !== 'all' && !x, about = l === 'all' ? 'no gate: VSS executes every request it reads (as before 2026-11-02)'
-      : x ? `acts when its confidence is at least ${x.threshold.toFixed(4)}; on the held-out messages (out-of-fold scores): ${pc(x.precision)} of what it executed was right, it did ${pc(x.coverage)} of the requests right and asked about ${pc(x.asked)}`
-      : off ? `not offered: no threshold reaches it on the held-out messages (the highest is ${info.best != null ? pc(info.best) : 'lower'} with at least 50 requests executed)` : 'thresholds not loaded yet';
-    return `<label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:${off ? 'default' : 'pointer'}${off ? ';opacity:.6' : ''}"><input type="radio" name="vss-gate" value="${l}" ${l === vssGate ? 'checked' : ''} ${off ? 'disabled' : ''}> <span><b>${escH(gateLabel(l))}</b>${l === '97' ? ' (default)' : ''}: ${escH(about)}</span></label>`; };
+      : x && l === 'cost' ? costAbout(x)
+      : x ? `${acts(x)}; on the calibration messages (out-of-fold scores): ${pc(x.precision)} of what it executed was right, it did ${pc(x.coverage)} of the requests right and asked about ${pc(x.asked)}`
+      : off ? (l === 'cost' ? 'not offered: the confidence model has no safety threshold' : `not offered: no threshold reaches it on the calibration messages (the highest is ${info.best != null ? pc(info.best) : 'lower'} with at least 50 requests executed)`) : 'thresholds not loaded yet';
+    return `<label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:${off ? 'default' : 'pointer'}${off ? ';opacity:.6' : ''}"><input type="radio" name="vss-gate" value="${l}" ${l === vssGate ? 'checked' : ''} ${off ? 'disabled' : ''}> <span><b>${escH(gateLabel(l))}</b>${l === GATE_DEFAULT ? ' (default)' : ''}: ${escH(about)}</span></label>`; };
   return `<h3 class="sub">When VSS acts</h3>
-  <p class="intro">VSS executes a request only when its confidence clears the threshold of the precision level chosen here; below it, it does not execute the request, says why it is not sure (words it did not understand, an uncertain cut, a world that is often wrong, a reference filled from context with a weak margin) and offers <b>Do it anyway</b>. The confidence combines 14 numbers from the whole chain (the cut, the world, the reading, the words, the context filler, the world's own accuracy); the thresholds were fixed on held-out messages from out-of-fold scores (training/sketch/PRECISION.md, PRECISION_BERT.md; on other messages the precision came out about a point lower). The level is kept in this browser.</p>
+  <p class="intro">VSS executes a request only when its confidence clears the threshold of the level chosen here (by default its safety threshold: the one that scores best when a confident mistake costs as much as 10 right answers); below it, it does not execute the request, says why it is not sure (words it did not understand, an uncertain cut, a world that is often wrong, a reference filled from context with a weak margin) and offers <b>Do it anyway</b>. The confidence combines 14 numbers from the whole chain (the cut, the world, the reading, the words, the context filler, the world's own accuracy); the confidence and the thresholds were fitted on the calibration part of the fresh2 messages, from out-of-fold scores (training/sketch/fresh2/fit_report.mjs, FEEDBACK_RESULT.md); on the test part the safety threshold gave a cost score of 12.9, 1.9% of what it executed wrong. A level other than the default is kept in this browser.</p>
   ${GATE_LEVELS.map(opt).join('')}${info && info.version ? `<p class="note">Model <code>confidence/vss.json</code>, version <code>${escH(info.version)}</code>.</p>` : ''}`;
 }
 /** what every reader's Settings subtab starts with: its drawing and what it has read */
@@ -880,13 +918,37 @@ function renderReaderSettings(rd) {
   const facts = id => { const f = info[id] && info[id].facts; if (!f) return ''; const p = [f.base && `base model <code>${escH(f.base)}</code>`, f.spans && `${escH(f.spans)} annotated requests`, f.heldout && `held-out act accuracy ${(+f.heldout * 100).toFixed(1)}%`].filter(Boolean); return p.length ? ` (${p.join(', ')})` : ''; };
   const row = (label, id) => `<label>${label}</label><div>${escH(N[id] || id)} · ${size(id)}<div class="note">${escH(A[id] || '')}${facts(id)}.${info[id] ? `${info[id].readme ? ` <a href="${escH(info[id].readme)}" target="_blank" rel="noopener">README</a> ·` : ''} version <code>${escH(info[id].version)}</code>` : ''}</div></div>`;
   return `<h3 class="sub">Neural reader</h3>${readerFacts(rd)}
-  <p class="intro">SOP-BERT: one DistilBERT model of ours, fine-tuned on the same annotated requests as the VSS worlds, run in this browser. In two calls per message (the cut, then all its requests at once) it reads, for every request, the action, the value of each SOP Lang key, who fills each role (a name written in the request, “it”, or a description such as “the red circle”) and the words that are names, labels and numbers; the SOP Lang wires are then assembled by the legend. It does not use the Rules reader. It carries out everything it reads; a threshold on its probabilities, below which it asks instead of acting, is in progress. Its cut head is the BERT cutter (⋮ › Settings). The files come from this site, load by themselves when the page opens, and stay in this browser’s cache.</p>
+  <p class="intro">SOP-BERT: one DistilBERT model of ours, fine-tuned on the same annotated requests as the VSS worlds, run in this browser. In two calls per message (the cut, then all its requests at once) it reads, for every request, the action, the value of each SOP Lang key, who fills each role (a name written in the request, “it”, or a description such as “the red circle”) and the words that are names, labels and numbers; the SOP Lang wires are then assembled by the legend. It does not use the Rules reader. It carries out a request only when its confidence clears the threshold chosen below, and asks about the rest. Its cut head is the BERT cutter (⋮ › Settings). The files come from this site, load by themselves when the page opens, and stay in this browser’s cache.</p>
   <p class="intro"><button type="button" class="btn" data-help="neural-reader">How SOP-BERT works</button> <button type="button" class="btn" data-help="bert">What we do with BERT</button></p>
   <div class="form">
     ${ids.map((id, i) => row(ids.length > 1 ? ['Act', 'Answers'][i] || 'Model' : 'Model', id)).join('')}
     <label>Device</label><div>CPU (WASM), ${escH(NeuralKit.dtypeText())}</div>
   </div>
-  <div class="nbox" id="nm-box">${neuralBoxHTML()}</div>`;
+  <div class="nbox" id="nm-box">${neuralBoxHTML()}</div>
+  ${neuralGateSettingsHTML()}`;
+}
+/** Neural › Settings: the level of the neural gate (GATES.neural), with what each level gave on the calibration messages (sop-bert.json) */
+function neuralGateSettingsHTML() {
+  const spec = nconf.spec, NC = spec ? ncNow : null;
+  if (!spec) {   // load it, then show this part again
+    const again = () => { if (sub === 'settings' && cur.id === 'neural') renderSub(); };
+    if (!nconf.error) neuralSpec().then(again, again);
+    return `<h3 class="sub">When Neural acts</h3><p class="intro">${nconf.error ? `The confidence model could not be loaded (${escH(nconf.error.message || nconf.error)}): Neural asks about every request.` : 'Loading the confidence model…'}</p>`;
+  }
+  const pc = v => (v * 100).toFixed(1) + '%', L = spec.levels_out_of_fold || {}, def = NC.defaultLevel(spec), chosen = neuralLevel(NC, spec);
+  const stats = x => { const p = x.heldout_oof_precision ?? x.heldout_precision, c = x.heldout_oof_coverage ?? x.heldout_coverage, a = x.heldout_oof_asked ?? x.heldout_asked;
+    return [p != null ? `${pc(p)} of what it executed was right` : '', c != null ? `it did ${pc(c)} of the requests right` : '', a != null ? `asked about ${pc(a)}` : ''].filter(Boolean).join(', '); };
+  const opt = l => {
+    const x = L[l], off = l !== 'all' && !NC.reached(spec, l), st = x ? stats(x) : '';
+    const about = l === 'all' ? 'no gate: Neural executes every request it reads (as before 2026-11-02)'
+      : off ? 'not offered: no threshold reaches it on the calibration messages with at least 50 requests executed'
+      : `acts when its confidence is at least ${x.threshold.toFixed(4)}${l === 'cost' ? `: the threshold that scores best when one confident mistake costs as much as ${x.cost || 10} right answers` : ''}${st ? `; on the calibration messages (out-of-fold scores): ${st}` : ''}`;
+    return `<label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:${off ? 'default' : 'pointer'}${off ? ';opacity:.6' : ''}"><input type="radio" name="neural-gate" value="${escH(l)}" ${l === chosen ? 'checked' : ''} ${off ? 'disabled' : ''}> <span><b>${escH(gateLabel(l))}</b>${l === def ? ' (default)' : ''}: ${escH(about)}</span></label>`;
+  };
+  const cost = L.cost && L.cost.test_score != null ? ` On the test part the safety threshold gave a cost score of ${L.cost.test_score.toFixed(1)}${L.cost.test_confidently_wrong != null ? `, ${pc(L.cost.test_confidently_wrong)} of what it executed wrong` : ''}.` : '';
+  return `<h3 class="sub">When Neural acts</h3>
+  <p class="intro">SOP-BERT executes a request only when its confidence clears the threshold of the level chosen here; below it, it does not execute the request, says why it is not sure (which action it is, which shape “it” means, where the request ends, words it reads badly) and offers <b>Do it anyway</b>. The confidence combines 24 numbers read from the model’s own outputs for that request (the action, the values, who fills each role, the word tags, the cut, the word pieces), fitted on calibration messages, the thresholds from out-of-fold scores (the method of training/sketch/PRECISION_BERT.md; this file: the calibration part of the fresh2 messages, training/sketch/fresh2/fit_report.mjs, FEEDBACK_RESULT.md).${cost} It was fitted on requests cut by the BERT cutter; with another cut the model’s cut head runs once more and is read at that cut’s requests. A level other than the default is kept in this browser.</p>
+  ${NC.levels(spec).map(opt).join('')}<p class="note">Model <code>confidence/sop-bert.json</code>${nconf.url && /[?&]v=/.test(nconf.url) ? `, version <code>${escH(decodeURIComponent(nconf.url.split('v=').pop()))}</code>` : ''}.</p>`;
 }
 sbody.addEventListener('click', async ev => {
   const q = ev.target.closest('[data-quick]'); if (q) { closeSheet(); submit(q.dataset.quick); return; }

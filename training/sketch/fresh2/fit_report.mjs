@@ -361,3 +361,24 @@ log("A 'not done' request of a kind has no produced request, so the commands / q
 
 writeFileSync(REPORT, out.join("\n") + "\n");
 console.log(out.join("\n"));
+
+// EXPORT=<dir>: for every fitted reader of its own cut (group main), the final fit as data (export_confidence.mjs turns it into the demo's
+// confidence files): L2, signal names and orientation, prior, percentile tables, weights (w[0] intercept), the 95/97/99 thresholds, the
+// cost-score threshold read on the out-of-fold calibration scores, and every produced request's confidence (to check the export against).
+if (process.env.EXPORT) {
+  for (const c of CR) {
+    const R = c.R; if (!R.fit || R.group !== "main") continue;
+    const K = KINDS[R.kind], m = R.fit.model, fin = (t) => (Number.isFinite(t) ? t : t > 0 ? "Infinity" : "-Infinity");
+    const thrOf = (p) => { const o = R.fit.thr[p]; if (!o) return null; const st = stats(R.fit.oofItems, R.G.cal, o.t); return { t: o.t, n: o.n, prec: o.right / o.n, cov: st.cov, asked: st.asked }; };
+    const cst = stats(R.fit.oofItems, R.G.cal, c.t);
+    writeFileSync(`${process.env.EXPORT}/${R.id}.json`, JSON.stringify({
+      reader: R.id, label: R.label, kind: R.kind, records: `${RECDIR}/${R.file}.jsonl`, cost: COST, minexec: MINEXEC,
+      calibration: { messages: R.nMsg.cal, requested: R.G.cal, produced: R.fit.nCal }, test: { messages: R.nMsg.test, requested: R.G.test },
+      lam: R.fit.lam, oofAuc: R.fit.oofAuc, names: K.names, prior_name: K.prior, prior: m.prior, overall: m.overall, tables: m.tables, w: m.w,
+      thr: { 95: thrOf(0.95), 97: thrOf(0.97), 99: thrOf(0.99) },
+      costThreshold: { t: fin(c.ct.t), kind: c.ct.kind, calScore: c.ct.score, calExecuted: c.ct.n, calPrec: cst.n ? (cst.r / cst.n) : null, calCov: cst.cov, calAsked: cst.asked },
+      testAtCost: { score: c.sc, ci: c.b, r: c.st.r, w: c.st.w, e: c.st.e, executed: c.st.n, conf_wrong: c.st.conf_wrong, cov: c.st.cov, asked: c.st.asked },
+      items: R.items.map((x) => ({ id: x.id, k: x.k, cal: x.cal, o: x.o, c: x.c })), oof: R.fit.oofItems.map((x) => x.c),   // oof: the calibration items in order
+    }) + "\n");
+  }
+}

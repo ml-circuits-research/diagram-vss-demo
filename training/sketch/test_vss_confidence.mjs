@@ -1,12 +1,13 @@
 // test_vss_confidence.mjs: the browser's VSS confidence equals the scripts' (PRECISION.md, VSS_CONFIDENCE.md).
 //   browser: the composer's own unit.signals (docs/js/vss-composer.js) + docs/js/vss-confidence.js with docs/model/confidence/vss.json
-//            (the same weights, intercept, tables and world prior as precision_thresholds.json, checked; its own thresholds per level, from
-//            the out-of-fold scores of PRECISION_BERT.md);
+//            (since 2026-11-02 21:24 the fit of arm VSS-G on the fresh2 calibration part, fresh2/export_confidence.mjs; its default level
+//            "cost" and its reached precision levels);
 //   scripts: the records of training/sketch/vss_confidence.mjs collect (the composer observed from outside, run as a separate process) +
-//            training/sketch/precision_confidence.mjs with training/sketch/precision_thresholds.json.
+//            training/sketch/precision_confidence.mjs with the same spec (SPEC=<file> compares with another file's spec instead, e.g.
+//            training/sketch/precision_thresholds.json: its weights must then be identical to vss.json's).
 // Both read the same messages of the fixed sample (training/sketch/eval/sample1000) with the same scorer context rule (llm_score.mjs
 // vssFormalize). Per produced request: every raw signal, the world, the confidence (max abs difference reported) and the execute / ask
-// decision at every threshold of both files (vss.json: 95, 97; precision_thresholds.json: 95, 97, 99 in-sample), each confidence against the
+// decision at every threshold (vss.json: cost and the reached levels; with SPEC, that file's levels too), each confidence against the
 // same threshold. Also the gated numbers of the requests compared (precision of execution, right % of requests, asked
 // %, from the records' outcomes), from both confidences.
 //   node training/sketch/test_vss_confidence.mjs            300 produced requests (whole messages, spread over the sample)
@@ -22,11 +23,13 @@ const SAMPLE = REPO + "training/sketch/eval/sample1000";
 const { vssFormalize } = await import(REPO + "training/sketch/llm_score.mjs");
 const B = await import(REPO + "docs/js/vss-confidence.js");
 const S = await import(REPO + "training/sketch/precision_confidence.mjs");
-const MB = JSON.parse(readFileSync(REPO + "docs/model/confidence/vss.json", "utf8")), MS = JSON.parse(readFileSync(REPO + "training/sketch/precision_thresholds.json", "utf8"));
-const specS = MS.readers.vss_combined, specB = B.specOf(MB);
+const VSSJSON = REPO + "docs/model/confidence/vss.json", SPECF = process.env.SPEC || VSSJSON;
+const MB = JSON.parse(readFileSync(VSSJSON, "utf8")), MS = JSON.parse(readFileSync(SPECF, "utf8"));
+const specS = MS.readers ? MS.readers.vss_combined : MS, specB = B.specOf(MB);
 const sameFile = ["intercept", "features", "tables", "world_prior", "world_prior_default"].every((k) => JSON.stringify(specB[k]) === JSON.stringify(specS[k]));
-// the thresholds compared: vss.json's reached levels and precision_thresholds.json's (in-sample) levels
-const THR = B.reachedLevels(MB).map((l) => [`${l}% (vss.json)`, B.threshold(MB, String(l))]).concat(Object.entries(specS.levels).filter(([, L]) => L).map(([l, L]) => [`${l}% (in-sample)`, L.threshold]));
+// the thresholds compared: vss.json's default level (cost) and reached precision levels; with SPEC, that file's levels (in-sample) too
+const THR = [[`${B.DEFAULT_LEVEL} (vss.json default)`, B.threshold(MB, B.DEFAULT_LEVEL)]].concat(B.reachedLevels(MB).map((l) => [`${l}% (vss.json)`, B.threshold(MB, String(l))]))
+  .concat(SPECF === VSSJSON ? [] : Object.entries(specS.levels_in_sample || specS.levels || {}).filter(([, L]) => L && Number.isFinite(L.threshold)).map(([l, L]) => [`${l} (${SPECF.split("/").pop()})`, L.threshold]));
 const LEVELS = THR.map(([k]) => k), TH = Object.fromEntries(THR);
 
 // the sample's messages, in the order collect reads them (dirs sorted, files msg_/batch_/s_ sorted)
@@ -81,7 +84,7 @@ function gated(it, t) {
   return `precision ${p(r / (r + w + e))} · right ${p(r / gold)} · asked ${p((ar + aw) / gold)} · executed wrong ${p(w / gold)} · extras executed ${e}`;
 }
 console.log(`collect: ${log.trim().split("\n").pop()}`);
-console.log(`model files: the confidence of docs/model/confidence/vss.json (weights, intercept, tables, world prior) ${sameFile ? "is identical to" : "DIFFERS FROM"} training/sketch/precision_thresholds.json's; thresholds: ${THR.map(([k, t]) => `${k} ${t.toFixed(4)}`).join(", ")}`);
+console.log(`model files: the confidence of docs/model/confidence/vss.json (weights, intercept, tables, world prior) ${SPECF === VSSJSON ? "used by both sides" : sameFile ? `is identical to ${SPECF}'s` : `DIFFERS FROM ${SPECF}'s`}; thresholds: ${THR.map(([k, t]) => `${k} ${t.toFixed(4)}`).join(", ")}`);
 console.log(`messages ${recs.length} (browser path ${mine.size}) · produced requests compared ${n} · messages with a different request count ${countDiff}`);
 console.log(`requests with a raw signal that differs ${sigDiff} · world differs ${worldDiff} · records without a found unit ${notFound}`);
 console.log(`confidence: max abs difference ${maxd.toExponential(2)}`);
