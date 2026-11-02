@@ -26,3 +26,8 @@ How it was made (the fresh1 recipe, `../fresh1/README.md`)
 Use: the test set of `../../FRESH2_PLAN.md` (calibration part: int(sha256(id),16) % 3 == 0, 195 messages, 596 requests; the rest is the
 test part). No reader is trained on it. Rule (AGENTS.md): nobody who works on the readers opens these messages before they are scored;
 after the first score the set counts as read.
+
+Exposure log
+- 2026-11-02 19:05, the root-cause agent of FRESH2_CAUSES.md (calibration part only): before its filter existed it printed opus_a/LABEL_FIXES.md
+  and the first lines of opus_a/batch_01.jsonl, and a grep over the other LABEL_FIXES.md files printed lines naming some test-part ids. It
+  says none of it was analysed; nothing was trained or tuned on it. Recorded so that any later reader of these numbers knows.
