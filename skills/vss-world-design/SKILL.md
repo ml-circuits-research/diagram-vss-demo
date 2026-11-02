@@ -9,6 +9,9 @@ The owner's goal: a recipe that says how big a world should be and how to prepar
 draft separates what is measured from what is still a hypothesis. Plan A (training/sketch/PLAN_A.md) and Plan B (PLAN_B.md, 6 worlds)
 are the measurements that will turn the hypotheses into rules or drop them. Use with skills/vss-microworlds (the build loop).
 
+Current state (2026-11-02): the demo's VSS reader is the composer over 7 worlds (shapes, links, position, graphq, questions, manage, history;
+grouping GROUPS_7, docs/model/micro/registry.json). There is no fallback model and no single model: a unit no world understands is ignored.
+
 ## Measured (diagram-vss-demo)
 
 1. **A world learns its words only from its own rows.** If verbs and values are learned from all the data and shared by every world,
@@ -20,7 +23,7 @@ are the measurements that will turn the hypotheses into rules or drop them. Use 
    best, and nothing else.
 3. **Split by meaning, not by construction.** connect_single / lists / chain each fit better alone. In the composer they misrouted
    more units, and the composer got worse (MICRO_ROUND1.md).
-4. **A world must pay for itself in the composer.** superlatives fits 96.6% vs 93.5% for the fallback, but in the composer it
+4. **A world must pay for itself in the composer.** superlatives fit 96.6% vs 93.5% for the single model that served as fallback at that time, but in the composer it
    changed one message. check cut 31 extras and lost 35 right messages. A world that is neutral in the composer is not kept.
 5. **More data does not fix a wrong front end.** Round 2 (DATA=spans) made connect_s worse (+55 wrong messages) with the shared
    front (MICRO_ROUND2.md).
@@ -57,6 +60,6 @@ are the measurements that will turn the hypotheses into rules or drop them. Use 
 2. Per world: gold rows (`micro_tools.py gold`). Check the border labels with the neighbouring worlds by script. Fix the labels
    (skills/llm-annotated-data); never edit the texts. Add data where an action has under ~150 rows.
 3. Train with its own front (DATA=spans FRONT_ROWS=world). Big worlds: VSA_MAX_HOURS=16, N_EVAL=150 EVAL_MODES=primary.
-4. Measure per action inside the world, against its small world and against the fallback. Then the composer on a fixed sample of
+4. Measure per action inside the world, against its small world and against the current composer. Then the composer on a fixed sample of
    1000 messages (seed 0) before the full data. Count per request: right / wrong / not done, plus extra.
 5. Keep the grouping with the fewest worlds that loses no action (done wrong first).

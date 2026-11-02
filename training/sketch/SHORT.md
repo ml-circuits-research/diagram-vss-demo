@@ -154,13 +154,14 @@ Data (no new texts; the existing pipeline's annotation step, as for llm_bench/{s
 Build (CPU, minutes; no GPU):
 - train_cutter.py: add "llm_train/sonnet_short", "llm_train/haiku_short" to DIRS behind a switch (e.g. SHORT=1), default unchanged.
 - `SHORT=1 python3 training/sketch/train_cutter.py --worlds training/sketch/worlds_micro/GROUPS_7.json --out docs/model/micro/cutter_worlds7s.json`
-- docs/model/micro/registry_short.json = registry.json with "cutter": "micro/cutter_worlds7s.json" (worlds, fallback, context, event
-  cutter unchanged: one change).
+- Registry: registry_short.json (a copy of registry.json with only "cutter" set to "micro/cutter_worlds7s.json") has been deleted. Since
+  2026-11-02 cutter_worlds7s is the default cutter, so docs/model/micro/registry.json is the registry to use (worlds, context, event
+  cutter unchanged).
 
 Measure:
-- short sets: `cd training/sketch/short_bench && REGISTRY=../../../docs/model/micro/registry_short.json node short_bench.mjs out_short.json;
+- short sets: `cd training/sketch/short_bench && node short_bench.mjs out_short.json;
   python3 agg.py out_short.json; python3 classify.py out_short.json` (the script of section 1), against the baseline above;
-- long messages: `REGISTRY=docs/model/micro/registry_short.json PAIR=value SEG=composer node training/sketch/llm_score.mjs <the 9 sampleF folders>`
+- long messages: `PAIR=value SEG=composer node training/sketch/llm_score.mjs <the 9 sampleF folders>`
   against 74.9 / 13.1 / 12.0, extra 302.
 
 Threshold ("it worked" = all of these):
@@ -187,7 +188,7 @@ The direction is right and large on the short sets; the long messages do not get
 | data | 3000 one-request LLM-written messages (llm_train/sonnet_short, haiku_short), texts byte-identical to llm_train/{sonnet,haiku}/train_*.jsonl (3000 of 3000, checked by script) |
 | annotation | span, trigger, type, args per row (args and type = the row's gold); 3000 of 3000 spanned, 0 not spanned, 0 dropped |
 | cutter | train_cutter.py with SHORT=1 adds the two folders to DIRS (default unchanged: the list is the same 7 folders when SHORT is not 1); 6640 messages, 224724 tokens; cutter_worlds7s.json |
-| registry | docs/model/micro/registry_short.json = registry.json with only "cutter" (and its "about") changed |
+| registry | registry_short.json (registry.json with only "cutter" and its "about" changed) was used for the run; it was deleted when cutter_worlds7s became the default in registry.json |
 
 Span convention, found in the long data (4640 messages, 22702 wires) and applied the same way. The span is the request itself: it starts at the
 verb (or at the noun phrase of a verbless request) and ends before closing chatter; it never includes the text before it. Counts in the long data,
@@ -273,3 +274,5 @@ start with "could you / can you / I want you to", which the short data strips by
 - Texts were not touched; 25 rows name a second shape that is missing from `names` (copied unchanged); not a fix, listed in LABEL_FIXES_SHORT.md.
 - The sample's baseline extra was 302; the new run gives 336 (+11.3%, the limit was +10%).
 - Training the cutter took 82 seconds on CPU; no GPU.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/kinds_p80_s0` (a76b4e3), `docs/model/micro/cutter_worlds7.json` (d972545). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

@@ -74,3 +74,5 @@ because head closing the pipe made msg_to_world.py die with BrokenPipe under pip
 models docs/model/{d512,d2048,famA,famB}_p80_s0; runs training/sketch/runs/{d512_p80_D512,d2048_p80_D2048,famA_p80_D1024,famB_p80_D1024}_e2_s0{,.log};
 llm_train/REAL_WORLD.md restored after each build (unchanged). Raw scorer outputs and filtered files: scratchpad res/ and fam/.
 Note: `sop train` needs torch; it runs with SOP_PYTHON=/home/claude/venv/bin/python3 (no .venv in the repository).
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/comb1_p80_s0` (a76b4e3), `docs/model/d2048_p80_s0` (aee681e), `docs/model/d512_p80_s0` (aee681e). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

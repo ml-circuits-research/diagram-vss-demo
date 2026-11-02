@@ -4,8 +4,9 @@ never use an older version of a model after a new one is published).
 
 Version = first 10 hex digits of the sha256 over the model's files (relative path + content, sorted; BUILD.json is not loaded and
 is left out). Folder models: a folder with manifest.json (VSS) or, under neural/, with config.json (a transformers.js model).
-File models: docs/model/micro/*.json (cutters; not registry*.json) and docs/model/context/*.json.
-Writes docs/model/versions.json {"files": {path relative to docs/model: version}} for everything, and the same versions as
+File models: docs/model/micro/*.json (cutters; not registry*.json), docs/model/context/*.json and docs/model/spell/*.json (the spell checker's vocabulary, docs/js/spell.js).
+Writes docs/model/versions.json {"files": {path relative to docs/model: version}} for everything (plus "sizes": {"neural/<folder>":
+{file path in the folder: bytes}} for the transformers.js models, which the browser shows before downloading), and the same versions as
 fields in docs/model/micro/registry.json ("version" per world, "cutter_version", "event_cutter_version", "context_version",
 "fallback_version"). The loader appends ?v=<version> to every model URL. Idempotent: run it before every commit that changes a model.
 
@@ -30,6 +31,16 @@ def folder_version(path):
     return h.hexdigest()[:10]
 
 
+def folder_sizes(path):
+    """bytes of every file of a folder (relative path -> size), BUILD.json left out as in folder_version"""
+    out = {}
+    for dp, dn, fn in os.walk(path):
+        dn.sort()
+        for f in sorted(fn):
+            if f not in SKIP: out[os.path.relpath(os.path.join(dp, f), path).replace(os.sep, "/")] = os.path.getsize(os.path.join(dp, f))
+    return out
+
+
 def file_version(path):
     with open(path, "rb") as fh: return hashlib.sha256(fh.read()).hexdigest()[:10]
 
@@ -49,14 +60,16 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model-root", default=os.path.join(here, "..", "..", "docs", "model"))
     root = os.path.normpath(ap.parse_args().model_root)
-    vers = {}
+    vers, sizes = {}, {}
     for dp, dn, fn in os.walk(root):
         dn.sort()
         rel = os.path.relpath(dp, root).replace(os.sep, "/")
         if rel == ".": continue
         if "manifest.json" in fn or (rel.startswith("neural/") and rel.count("/") == 1 and "config.json" in fn):
-            vers[rel] = folder_version(dp); dn[:] = []
-    for sub in ("micro", "context"):
+            vers[rel] = folder_version(dp)
+            if rel.startswith("neural/"): sizes[rel] = folder_sizes(dp)
+            dn[:] = []
+    for sub in ("micro", "context", "spell"):
         d = os.path.join(root, sub)
         for f in sorted(os.listdir(d)) if os.path.isdir(d) else []:
             if f.endswith(".json") and not f.startswith("registry") and os.path.isfile(os.path.join(d, f)): vers[f"{sub}/{f}"] = file_version(os.path.join(d, f))
@@ -64,19 +77,31 @@ def main():
     vpath = os.path.join(root, "versions.json")
     old = json.load(open(vpath))["files"] if os.path.exists(vpath) else {}
     changes = [(k, old.get(k), v) for k, v in vers.items() if old.get(k) != v] + [(k, old[k], None) for k in old if k not in vers]
-    write_if_changed(vpath, dump({"about": "Content versions of the model folders and files the demo loads (training/sketch/stamp_models.py). The loader appends ?v=<version>.", "files": vers}))
-    rpath = os.path.join(root, "micro", "registry.json")
-    if os.path.exists(rpath):
+    doc = {"about": "Content versions of the model folders and files the demo loads (training/sketch/stamp_models.py). The loader appends ?v=<version>.", "files": vers}
+    if sizes: doc["sizes"] = dict(sorted(sizes.items()))
+    write_if_changed(vpath, dump(doc))
+    # registry.json (the default composer) must stamp; registry_r2.json (ROUND2.md) is stamped when all
+    # its models exist (a registry of models not trained yet is skipped with a message, not an error)
+    mdir = os.path.join(root, "micro")
+    for rname in ("registry.json", "registry_r2.json"):
+        rpath = os.path.join(mdir, rname)
+        if not os.path.exists(rpath): continue
         reg = json.load(open(rpath)); before = dump(reg)
         def v(p):
             p = (p or "").rstrip("/")
-            if p not in vers: sys.exit(f"stamp_models: registry names {p!r}, which has no version (missing folder/file?)")
+            if p not in vers:
+                if rname == "registry.json": sys.exit(f"stamp_models: registry names {p!r}, which has no version (missing folder/file?)")
+                raise KeyError(p)
             return vers[p]
-        for w in reg["worlds"]: w["version"] = v(w["model"])
-        for key, field in (("cutter", "cutter_version"), ("event_cutter", "event_cutter_version"), ("context", "context_version"), ("fallback", "fallback_version")):
-            if reg.get(key): reg[field] = v(reg[key])
-        if reg.get("router") == "cutter" and not reg.get("context"): reg["context_version"] = v("context/weights.json")   # the loader's default context file
-        if write_if_changed(rpath, dump(reg)): changes.append(("micro/registry.json", None, "fields updated"))
+        try:
+            for w in reg["worlds"]: w["version"] = v(w["model"])
+            for key, field in (("cutter", "cutter_version"), ("event_cutter", "event_cutter_version"), ("context", "context_version"), ("fallback", "fallback_version")):
+                if reg.get(key): reg[field] = v(reg[key])
+                elif field in reg: del reg[field]        # a model the registry no longer names (e.g. the fallback, removed 2026-11-02): no stale version
+            if reg.get("router") == "cutter" and not reg.get("context"): reg["context_version"] = v("context/weights.json")   # the loader's default context file
+        except KeyError as e:
+            print(f"  {rname}: skipped, {e} has no version yet (model not built)"); continue
+        if write_if_changed(rpath, dump(reg)): changes.append((f"micro/{rname}", None, "fields updated"))
     for k, a, b in changes: print(f"  {k}: {a or '(new)'} -> {b or '(removed)'}")
     print(f"{len(vers)} versions, {len(changes)} changed")
 

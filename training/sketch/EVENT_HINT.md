@@ -80,3 +80,5 @@ Verdict against the threshold (right >= 70.6, wrong <= 14.8, extra <= 353):
   gain is set requests with no set verb now done (+133). The wrong margin is thin and all of it is connect roles read without a verb.
 - H2 did not work: right 70.0 (+0.5, under the +1.0 needed) and extra 431 (above 353); wrong 14.7 is within the limit. Overriding a
   readable reading with the event cutter's label loses more than it gains.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/micro/set_w` (0776f18), `docs/model/micro/shapes7` (9aaacfc). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

@@ -183,3 +183,5 @@ wrong, +3.9 points not done, and 901 fewer extra wires. Against q1 with the lege
 - `docs/js/vss/reader.js`: `opts.excl`, `Reader.exclude`, the same call. `docs/js/vss-centers.js`: `opts.roleless` in the q1 cut.
 - `training/sketch/llm_score.mjs`: `EXCL=1`, `Q1B=1` (with SEG=q1). `training/sketch/parity_reader.py` / `.mjs`: `--excl`.
 - Raw outputs, rebuilt worlds, goldens and scripts (jobs.sh, table.py): `scratchpad/decode/`.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/comb1_p80_s0` (a76b4e3), `docs/model/fix_p80_s0` (cf0545a), `docs/model/kinds_p80_s0` (a76b4e3). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

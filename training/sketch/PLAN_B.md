@@ -106,3 +106,5 @@ Reading:
 New or changed (not committed by me): docs/model/micro/cutter_worlds7.json, docs/model/micro/{shapes,links,position,graphq,questions,manage,history}7/ (the coordinator committed shapes7 and links7),
 training/sketch/worlds_micro/<world>7/ (build folders, gitignored), training/sketch/runs/micro_<world>7*, training/sketch/PLAN_B.md.
 Scratch (not in the repository): /tmp/claude-0/-home-claude/8941735c-db18-5907-b7c8-a224e2065054/scratchpad/planB7 (STATUS.txt, ev/ per-event scores, registry_g7.json, sampleF_*.txt).
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/micro/connect` (cd4be6a), `docs/model/micro/cutter_worlds7.json` (d972545), `docs/model/micro/move_s` (68b0656), `docs/model/micro/shapes7` (9aaacfc). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

@@ -13,9 +13,6 @@
 - Negative examples (off by default; NEGATIVES=1 on; plan step 1 failed its criterion, ERROR_ANALYSIS.md): every sentence outside the annotated spans whose normalized form carries an
   action token becomes a wire of that event with no roles and `_negative=true` (target = minus its compiled state, vss-demo R81).
 Writes worlds/real/{legend.json, kinds.tsv, world.json, split_hints.json, front.json, examples/train.sop} and llm_train/REAL_WORLD.md.
-CENTRES=1 (the centre reader, research/attention/port/NOTES.md): the legend's reader block gets "centres": true, the requests' tokens are
-taken from the WHOLE message as front.normalize_message reads it (centres_rows.py), and examples/messages.jsonl holds one line per message
-(its tokens, and per request its span as a token range, its centre and its row); REAL_WORLD.md is written into the world folder.
 KINDMAP=<file.json> (off by default; diagnosis_kinds/KINDS.md): the kinds of the words that are neither legend value tokens nor event
 tokens come from that kind map ({"map": {word: kind}}) instead of "seen >= --freq times -> own kind"; the training rows do not change.
 WORLD_EVENTS=<comma list of events> (off by default; a micro-world of the composer, docs/js/vss-composer.js, research/hier/HIER.md):
@@ -23,7 +20,7 @@ only the rows of those events AND a legend that lists only those events (HIER.md
 another event's token can become this world's predicate). The kinds (lexicon) and the front end stay those learned from all messages
 (an event token of another event keeps the kind VERB but is no predicate of this world). Needs --out (never worlds/real); REAL_WORLD.md
 is written into the output folder, llm_train/REAL_WORLD.md is not touched; the world's name is the output folder's name (sop train
-reads it from the folder). Not combined with CENTRES or FAMILY.
+reads it from the folder). Not combined with FAMILY.
 FRONT_ROWS=world (off by default; needs WORLD_EVENTS; owner's decision 2026-11-01, ROUTER_V2.md): the world's front end (value n-grams
 AND trigger rules) is learned ONLY from the world's own rows: the spans of the requests of its events (and of its ROW_SHAPE), with no text
 outside the spans and no request of another event (front.learn keep=...), so a trigger rule's precision is counted inside the world.
@@ -85,16 +82,8 @@ def main():
     vk = FR.value_kinds(); evtok = {v for vs in G.EVENTS.values() for v in vs}
     base = dict(vk); base.update({v: "VERB" for v in evtok})
     items = []
-    CENTRES = os.environ.get("CENTRES") == "1"; msg_items = []
-    if CENTRES:      # the centre reader: one message normalization, every request's tokens taken from it (centres_rows.py)
-        import centres_rows as CR
-        for m in msgs:
-            toks_m, src_m, info_m, its = CR.message_items(m, F); msg_items.append((m, toks_m, its))
-            for wi, w, rng, centre, created in its:
-                if rng: items.append((m, w, {"text": w["span"], "names": m.get("names") or [], "created": created, "wire": {"type": w["type"], "args": w["args"]},
-                                         "_toks": toks_m[rng[0]:rng[1]], "_info": info_m, "_key": (m["id"], wi)}))
     nf = lambda row: (lambda text, names: (list(row["_toks"]), row["_info"])) if "_toks" in row else norm
-    for m in ([] if CENTRES else msgs):
+    for m in msgs:
         created = []
         for w in m["wires"]:
             if w.get("span") and w["span"] in m["text"]:
@@ -125,7 +114,7 @@ def main():
     if FAMILY - set(G.EVENTS): raise SystemExit(f"FAMILY: unknown events {sorted(FAMILY - set(G.EVENTS))}")
     WEV = {e for e in os.environ.get("WORLD_EVENTS", "").split(",") if e}     # WORLD_EVENTS (see the docstring); empty: every event
     if WEV - set(G.EVENTS): raise SystemExit(f"WORLD_EVENTS: unknown events {sorted(WEV - set(G.EVENTS))}")
-    if WEV and (CENTRES or FAMILY): raise SystemExit("WORLD_EVENTS is not combined with CENTRES or FAMILY")
+    if WEV and FAMILY: raise SystemExit("WORLD_EVENTS is not combined with FAMILY")
     if WEV and os.path.abspath(a.out) == os.path.abspath(os.path.join(HERE, "worlds", "real")): raise SystemExit("WORLD_EVENTS needs --out <folder> (not worlds/real)")
     WNAME = os.path.basename(os.path.normpath(a.out)) if WEV else "real"   # sop train takes the world's name from its folder
     SHAPE = os.environ.get("ROW_SHAPE", "")     # ROW_SHAPE (see shape_is): needs WORLD_EVENTS=connect; off by default
@@ -162,7 +151,7 @@ def main():
               # MARKER=0 (off by default; owner's decision 2026-10-31, CAPACITY.md S5): no occupancy marker, so a single role's presence is read
               # from the deposit that carries its word (role * F(filler), the rule of the set roles) and the training target has no marker term;
               # with the marker only a word of a one-word kind can write the presence ("delete X": the object is never read)
-              "reader": {"predicate_role": True, "occupancy_marker": os.environ.get("MARKER", "1") != "0", "definite_dets": [], "set_roles": ["members", "targets"], **({"centres": True} if CENTRES else {})}}
+              "reader": {"predicate_role": True, "occupancy_marker": os.environ.get("MARKER", "1") != "0", "definite_dets": [], "set_roles": ["members", "targets"]}}
     lp = os.path.join(out, "legend.json"); json.dump(legend, open(lp, "w"), indent=1); sha = G.sha256_file(lp)
     with open(os.path.join(out, "kinds.tsv"), "w") as fh:
         rule = (f"the other words -> the kind map KINDMAP={KINDMAP} ({kindmap_sha})" if KINDMAP else
@@ -189,14 +178,6 @@ def main():
         ids = iter(f"w{k + i}" for i in range(1, 100)); ws = G.wires_for(ev, roles, text, f"msg.{mid[:2]}", ids, world=WNAME, source="llm")
         k += len(ws); docs["calib.sop" if cal(mid) else "train.sop"].wires += ws
         if row_key[ri] is not None: wire_of[row_key[ri]] = f"examples/{'calib.sop' if cal(mid) else 'train.sop'}#{ws[0].id}"
-    n_cent = collections.Counter()
-    if CENTRES:      # examples/messages.jsonl: the training rows of the centre reader (sop train, legend reader.centres)
-        with open(os.path.join(out, "examples", "messages.jsonl"), "w") as fh:
-            for m, toks_m, its in msg_items:
-                reqs = [{"row": wire_of.get((m["id"], wi)), "tokens": list(rng), "centre": centre} for wi, w, rng, centre, _ in its if rng]
-                n_cent["requests with a span"] += len(reqs); n_cent["with a centre"] += sum(1 for q in reqs if q["centre"] is not None)
-                n_cent["with a row"] += sum(1 for q in reqs if q["row"]); n_cent["event tokens in the messages"] += sum(1 for t in toks_m if t in evtok)
-                fh.write(json.dumps({"id": m["id"], "split": "calib" if cal(m["id"]) else "train", "tokens": toks_m, "requests": reqs}) + "\n")
     # NEGATIVE examples (NEGATIVES=1 turns them on; off by default since plan step 1 failed its criterion, ERROR_ANALYSIS.md): the sentences of the training messages that lie outside
     # every annotated span (front.requests). When the normalized sentence carries an action token E (the first one), it becomes a wire of
     # event E with no roles and `_negative=true`: sop train uses MINUS its compiled state as the target (vss-demo R81), so the reader
@@ -223,7 +204,6 @@ def main():
            *([f"FRONT_ROWS=world: the front end below is learned only from the {F['front_rows']['requests']} requests of this world's events.", ""] if "front_rows" in F else []),
            f"Front end learned from the same messages: {len(F['values'])} value n-grams, {len(F['triggers'])} trigger rules, {len(F['segmenter'])} segmenter weights; params {json.dumps(P)}.", "",
            f"Rows: {len(rows)}. Dropped (cannot be trained): {sum(dropped.values())} {dict(dropped)}. Negative examples (text outside the spans with an action token): {n_neg}.", "",
-           *([f"Centre reader (CENTRES=1): {len(msg_items)} messages in examples/messages.jsonl; {dict(n_cent)}.", ""] if CENTRES else []),
            (f"Kinds: {len(kc)}; lexicon {len(lexicon)} words (legend value tokens {len(vk)}, event tokens {len(evtok)}, other words from the kind map "
             f"KINDMAP={KINDMAP} ({kindmap_sha}): {len(kinds) - len(base)} words).") if KINDMAP else
            f"Kinds: {len(kc)}; lexicon {len(lexicon)} words (legend value tokens {len(vk)}, event tokens {len(evtok)}, own-kind tokens seen >= {a.freq} times).", "",
@@ -233,7 +213,7 @@ def main():
            "Values left out per legend question kind (value tokens not in the normalized span; rows kept): " + lost_kind_line(lost_kind), "",
            "Roles left out because their words are not in the normalized span (rows kept):", "", "| what | n |", "|---|---|"] + \
           [f"| {x} | {n} |" for x, n in lost_why.most_common(40)] + ["", "| event | rows |", "|---|---|"] + [f"| {e} | {n} |" for e, n in by_ev.most_common()]
-    open(os.path.join(out, "REAL_WORLD.md") if CENTRES or WEV else os.path.join(HERE, "llm_train", "REAL_WORLD.md"), "w").write("\n".join(rep) + "\n")
+    open(os.path.join(out, "REAL_WORLD.md") if WEV else os.path.join(HERE, "llm_train", "REAL_WORLD.md"), "w").write("\n".join(rep) + "\n")
     print("\n".join(rep[:9]))
     print(f"Switches: VAL_PREC={FR.val_prec()} VAL_SUB={FR.val_sub()} CREATE_COLOR={os.environ.get('CREATE_COLOR', '') or 'attr'} "
           f"DIAGRAM_OPS={os.environ.get('DIAGRAM_OPS', '') or '0'}; data folders {FR.train_dirs()}")

@@ -1,5 +1,0 @@
-# World `real`: built from 285 training messages (1341 gold wires)
-
-Rows: 1318. Dropped (cannot be trained): 23 {'no verb and no role (zero target)': 23}.
-1/1 files OK against legend(s) real sha256:bd4b45541bf5…
-share 0.25 -> docs/model/learned_p25 (1318 rows)

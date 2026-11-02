@@ -1,17 +1,29 @@
-// neural_score.mjs: Rules, VSS (the composer of micro-worlds) and Neural (docs/js/neural.js: zero-shot classifier + extractive QA, run
-// here by @huggingface/transformers in node) on the same gold messages, with the same per-request metric as training/sketch/llm_score.mjs
-// (whose scoring code is imported, not copied).
-//   ZS=deberta|distilbert [LIMIT=n] [DEVICE=cpu|cuda] node training/laptop/neural_score.mjs <dir> [<dir> ...]
+// neural_score.mjs: Rules, VSS (the composer of micro-worlds) and Neural (docs/js/neural.js: act classifier or zero-shot classifier +
+// extractive QA, run here by @huggingface/transformers in node) on the same gold messages, with the same per-request metric as
+// training/sketch/llm_score.mjs (whose scoring code is imported, not copied).
+//   ZS=reader-distilbert|act-distilbert|act-deberta-xsmall|deberta|distilbert [LIMIT=n] [IDS=file] [DEVICE=cpu|cuda] [MODEL_DIR=dir] node training/laptop/neural_score.mjs <dir> [<dir> ...]
 // A <dir> holds one or more .jsonl files of gold messages (text, names, wires). Needs `npm install` in training/laptop first.
-//   ZS      zero-shot classifier: deberta = Xenova/nli-deberta-v3-xsmall (default), distilbert = Xenova/distilbert-base-uncased-mnli
-//           (the question-answering model is always Xenova/distilbert-base-cased-distilled-squad); the file type of each model
-//           is neural.js dtypeOf (q8 unless neural.js DTYPES says otherwise), as in the browser
+//   ZS      a folder of MODEL_DIR whose config.json has "reader" (reader-distilbert, training/neural/finetune_roles.py): our joint model,
+//           act and roles in one call per request (the demo's model once published), loaded as AutoTokenizer + AutoModel and decoded by
+//           neural.js makeReader; no question-answering model is loaded then.
+//           act-distilbert / act-deberta-xsmall: our fine-tuned act classifier (training/neural/finetune.py), the demo's strategy
+//           "finetuned", loaded from the local folder MODEL_DIR/<name> (env.localModelPath; no network);
+//           deberta = Xenova/nli-deberta-v3-xsmall (default), distilbert = Xenova/distilbert-base-uncased-mnli: the zero-shot NLI
+//           baselines (strategy "zeroshot", from Hugging Face, pinned to neural.js REVISIONS)
+//           The question-answering model: MODEL_DIR/qa-distilbert-squad when that folder exists (our hosted copy, as in the demo), else
+//           Xenova/distilbert-base-cased-distilled-squad from Hugging Face. The file type of each model is neural.js dtypeOf (q8 unless
+//           neural.js DTYPES says otherwise), as in the browser
+//   MODEL_DIR  the folder of our models (default docs/model/neural)
 //   DEVICE  cpu (default) or cuda (onnxruntime-node CUDA; on an error the script says so and falls back to cpu)
 //   LIMIT   only the first n messages of each folder
+//   IDS     a file of message ids (one per line): only those messages (before LIMIT), each scored once
+//   (rows without gold `wires`, e.g. the texts_*.jsonl files saved before annotation, are skipped)
 //   PAIR / SEG / REGISTRY ...: the variables of llm_score.mjs; here PAIR defaults to value and SEG to composer
 //   NEURAL_STUB=1: no models (classify returns the first hypothesis, qa an empty answer), to test the plumbing without the network
 // Milliseconds per message: the time of formalizing only (the models are loaded, and warmed up, before the timing starts).
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { createRequire } from "node:module";
 import { performance } from "node:perf_hooks";
 
@@ -22,28 +34,54 @@ globalThis.SOPKit = K;                                              // neural.js
 const NeuralKit = require("../../docs/js/neural.js");
 
 const dirs = process.argv.slice(2).filter((a) => !a.startsWith("-"));
-if (!dirs.length) { console.error("usage: ZS=deberta|distilbert [LIMIT=n] [DEVICE=cpu|cuda] node training/laptop/neural_score.mjs <dir> [<dir> ...]"); process.exit(2); }
-const ZS = process.env.ZS || "deberta", DEVICE = process.env.DEVICE || "cpu", STUB = process.env.NEURAL_STUB === "1", LIMIT = process.env.LIMIT ? +process.env.LIMIT : Infinity;
-if (!NeuralKit.MODELS.zeroshot[ZS]) throw new Error(`ZS=${ZS}: expected ${Object.keys(NeuralKit.MODELS.zeroshot).join(" or ")}`);
+if (!dirs.length) { console.error("usage: ZS=act-distilbert|act-deberta-xsmall|deberta|distilbert [LIMIT=n] [DEVICE=cpu|cuda] [MODEL_DIR=dir] node training/laptop/neural_score.mjs <dir> [<dir> ...]"); process.exit(2); }
+const ZS = process.env.ZS || "deberta", IDS = process.env.IDS ? new Set(readFileSync(process.env.IDS, "utf8").split(/\s+/).filter(Boolean)) : null, DEVICE = process.env.DEVICE || "cpu", STUB = process.env.NEURAL_STUB === "1", LIMIT = process.env.LIMIT ? +process.env.LIMIT : Infinity;
+const MODEL_DIR = resolve(process.env.MODEL_DIR || fileURLToPath(new URL("../../docs/model/neural", import.meta.url)));
+const OURS = Object.fromEntries(Object.entries(NeuralKit.OURS).map(([id, folder]) => [folder, id]));   // folder -> id
+const cfgOf = (f) => { try { return JSON.parse(readFileSync(`${MODEL_DIR}/${f}/config.json`, "utf8")); } catch (e) { return null; } };
+const JOINT = !!(cfgOf(ZS) || {}).reader;
+const FINETUNED = JOINT || (OURS[ZS] && ZS.startsWith("act-"));
+if (!FINETUNED && !NeuralKit.MODELS.zeroshot[ZS]) throw new Error(`ZS=${ZS}: expected a joint model folder of ${MODEL_DIR} (config.json with "reader") or ${Object.values(NeuralKit.OURS).filter((f) => f.startsWith("act-")).concat(Object.keys(NeuralKit.MODELS.zeroshot)).join(" or ")}`);
+if (FINETUNED && !STUB && !existsSync(`${MODEL_DIR}/${ZS}/config.json`)) throw new Error(`ZS=${ZS}: no model folder ${MODEL_DIR}/${ZS} (config.json); set MODEL_DIR`);
+const QA_LOCAL = existsSync(`${MODEL_DIR}/${NeuralKit.QA_MODEL}/config.json`);
 if (!["cpu", "cuda"].includes(DEVICE)) throw new Error(`DEVICE=${DEVICE}: expected cpu or cuda`);
 const NAME = `neural-${ZS}`, READERS = ["rules", "vss", NAME];
 
-// the same `m` object NeuralKit.load builds in the browser (neural.js, function load/build), with the node package
+// the same `m` object NeuralKit.load builds in the browser (neural.js, function load/build), with the node package.
+// Our models are loaded by folder name from MODEL_DIR (env.localModelPath); the Hugging Face ones by id, pinned to neural.js REVISIONS.
 async function buildModels() {
-  const zsId = NeuralKit.MODELS.zeroshot[ZS], qaId = NeuralKit.MODELS.qa;
+  const zsId = FINETUNED ? ZS : NeuralKit.MODELS.zeroshot[ZS], qaId = JOINT ? ZS : QA_LOCAL ? NeuralKit.QA_MODEL : NeuralKit.MODELS.qaHF;
   if (STUB) return {
     device: "stub", dtype: "none", qaModel: qaId, enumModel: zsId,
     classify: async (text, hyps) => ({ labels: hyps.slice(), scores: hyps.map(() => 1 / hyps.length) }),
+    act: async () => [{ label: "create", score: 1 }],
     qa: async () => ({ answer: "", score: 0 }),
   };
   const T = await import("@huggingface/transformers");
+  T.env.allowLocalModels = true; T.env.localModelPath = MODEL_DIR + "/";
+  const isOurs = (model) => !model.includes("/");   // a folder name in MODEL_DIR
   const build = async (device) => {
-    const make = (task, model) => T.pipeline(task, model, { device, dtype: NeuralKit.dtypeOf(model) });
-    const qa = await make("question-answering", qaId), zs = await make("zero-shot-classification", zsId);
-    const m = { device, dtype: [...new Set([zsId, qaId].map(NeuralKit.dtypeOf))].join("+"), qaModel: qaId, enumModel: zsId };
+    if (JOINT) {   // the demo's joint model: the same makeReader the browser uses
+      const tokenizer = await T.AutoTokenizer.from_pretrained(ZS, { local_files_only: true });
+      const model = await T.AutoModel.from_pretrained(ZS, { device, dtype: NeuralKit.dtypeOf(OURS[ZS] || ZS), local_files_only: true });
+      const m = Object.assign({ device, dtype: NeuralKit.dtypeOf(OURS[ZS] || ZS), qaModel: ZS, enumModel: ZS }, NeuralKit.makeReader(T, tokenizer, model));
+      await m.read("draw a circle");
+      return m;
+    }
+    const make = (task, model) => T.pipeline(task, model, { device, dtype: NeuralKit.dtypeOf(OURS[model] || model), ...(isOurs(model) ? { local_files_only: true } : { revision: NeuralKit.revOf(model) }) });
+    const qa = await make("question-answering", qaId);
+    const m = { device, dtype: [...new Set([zsId, qaId].map((x) => NeuralKit.dtypeOf(OURS[x] || x)))].join("+"), qaModel: qaId, enumModel: zsId };
     m.qa = async (q, c) => { let r = await qa(q, c); if (Array.isArray(r)) r = r[0]; return r || { answer: "", score: 0 }; };
-    m.classify = async (text, hyps) => { const r = await zs(text, hyps, { hypothesis_template: "{}" }); return Array.isArray(r) ? r[0] : r; };
-    await m.qa("What is drawn?", "A red circle is drawn."); await m.classify("draw a circle", ["This asks the editor to change the diagram.", "This asks a question about the diagram."]);
+    if (FINETUNED) {
+      const clf = await make("text-classification", zsId);
+      m.act = async (text) => { const r = await clf(text, { top_k: null }); return Array.isArray(r[0]) ? r[0] : r; };   // every class, best first
+      await m.act("draw a circle");
+    } else {
+      const zs = await make("zero-shot-classification", zsId);
+      m.classify = async (text, hyps) => { const r = await zs(text, hyps, { hypothesis_template: "{}" }); return Array.isArray(r) ? r[0] : r; };
+      await m.classify("draw a circle", ["This asks the editor to change the diagram.", "This asks a question about the diagram."]);
+    }
+    await m.qa("What is drawn?", "A red circle is drawn.");
     return m;
   };
   if (DEVICE === "cuda") {
@@ -53,17 +91,17 @@ async function buildModels() {
   return await build("cpu");
 }
 const t0load = performance.now(), models = await buildModels();
-console.error(`models loaded in ${((performance.now() - t0load) / 1000).toFixed(1)} s: ${models.enumModel} + ${models.qaModel} · device ${models.device} · dtype ${models.dtype}`);
+console.error(`models loaded in ${((performance.now() - t0load) / 1000).toFixed(1)} s: ${JOINT ? models.enumModel + " (joint)" : models.enumModel + " + " + models.qaModel} · device ${models.device} · dtype ${models.dtype}`);
 const rsys = K.createSystem(), nsys = K.createSystem(), neural = NeuralKit.create(nsys.engine, nsys.formalize);
-neural.setModels(models); neural.setStrategy("zeroshot");
-console.log(`neural: ${models.enumModel} + ${models.qaModel} · device ${models.device} · dtype ${models.dtype}${STUB ? " (STUB models)" : ""}${LIMIT < Infinity ? ` · LIMIT ${LIMIT} per folder` : ""}`);
+neural.setModels(models); neural.setStrategy(FINETUNED ? "finetuned" : "zeroshot");
+console.log(`neural: ${JOINT ? models.enumModel + " (joint: act and roles in one call)" : models.enumModel + " + " + models.qaModel} · device ${models.device} · dtype ${models.dtype}${STUB ? " (STUB models)" : ""}${LIMIT < Infinity ? ` · LIMIT ${LIMIT} per folder` : ""}`);
 
 const blank = () => ({ exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0, byAct: {} });
 const fresh = () => Object.fromEntries(READERS.map((f) => [f, blank()]));
 const newMs = () => Object.fromEntries(READERS.map((f) => [f, 0]));
 const pc = (x, T) => (x / T.gold * 100).toFixed(1) + "%";
 const ctxOf = (r) => ({ names: (r.names || []).slice(), last: [], spans: r.wires.every((w) => w.span) ? r.wires.map((w) => w.span) : null });
-let done = 0, neuralErrors = 0;
+let done = 0, neuralErrors = 0; const SEEN = new Set();
 const ALLT = fresh(), ALLMS = newMs(); let ALLN = 0;
 
 function report(title, tot, ms, n) {
@@ -78,7 +116,9 @@ function report(title, tot, ms, n) {
 
 for (const d of dirs) {
   const files = readdirSync(d).filter((f) => f.endsWith(".jsonl")).sort();
-  const rows = files.flatMap((f) => readFileSync(`${d}/${f}`, "utf8").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l))).slice(0, LIMIT);
+  const rows = files.flatMap((f) => readFileSync(`${d}/${f}`, "utf8").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l))).filter((r) => Array.isArray(r.wires) && (!IDS || (IDS.has(r.id) && !SEEN.has(r.id)))).slice(0, LIMIT);
+  rows.forEach((r) => SEEN.add(r.id));   // a message is scored once, in the first folder that holds it
+  if (!rows.length) { console.log(`\n${d}: no messages to score`); continue; }
   const tot = fresh(), ms = newMs();
   for (const r of rows) {
     const out = {}, time = async (f, fn) => { const t = performance.now(); try { out[f] = await fn(); } catch (e) { out[f] = []; if (f === NAME) { neuralErrors++; if (neuralErrors <= 5) console.error(`neural error on "${r.text}": ${e && e.message || e}`); } } ms[f] += performance.now() - t; };

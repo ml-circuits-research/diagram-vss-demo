@@ -73,3 +73,5 @@ corrections ("X, no wait, purple"), where the right value is the later, unseen o
 
 For skills/vss-world-design: an operator world can read values it never saw when they are alone in the request, but not against a seen
 value of the same kind; the values a world must choose between belong in its data.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/micro/set_nopurple` (43ed76c), `docs/model/micro/set_w` (0776f18). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

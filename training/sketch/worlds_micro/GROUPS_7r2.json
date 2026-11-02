@@ -1,0 +1,56 @@
+{
+ "_about": "GROUPS_7 (coordinator, 2026-11-01): grouping from measured confusion (action_confusion.py: the cutter perceptron with one B label per event, test 20%, 516 confusions at the gold request's first token). Actions the cutter mixes up go in one world: 64.5% of the confusions fall inside a group (GROUPS_6: 46.9%, GROUPS_16: 20.0%). Differences from GROUPS_6: check, connected, path, reachable, cycle, exists form one world of questions about the graph (check/connected 30, cycle/path 17, check/path 14, exists/path 6); toFront, toBack go with move (15 + 9). The confusions left across groups are between the big commands (move/set 23, arrange/connect 16, connect/set 13), under 3% of their requests. ROUND 2 (2026-11-02, DIAGRAM_OPS.md section 5): manage += group, ungroup; questions += members, groupOf. The old file GROUPS_7.json is unchanged (cutter_worlds7 / 7s).",
+ "shapes": [
+  "create",
+  "set",
+  "resize",
+  "fact",
+  "rule"
+ ],
+ "links": [
+  "connect",
+  "disconnect"
+ ],
+ "position": [
+  "move",
+  "swap",
+  "arrange",
+  "align",
+  "distribute",
+  "toFront",
+  "toBack"
+ ],
+ "graphq": [
+  "check",
+  "connected",
+  "path",
+  "reachable",
+  "cycle",
+  "exists"
+ ],
+ "questions": [
+  "count",
+  "list",
+  "extreme",
+  "nearest",
+  "describe",
+  "neighbors",
+  "degree",
+  "property",
+  "members",
+  "groupOf"
+ ],
+ "manage": [
+  "delete",
+  "duplicate",
+  "rename",
+  "label",
+  "group",
+  "ungroup"
+ ],
+ "history": [
+  "undo",
+  "redo",
+  "forget"
+ ]
+}

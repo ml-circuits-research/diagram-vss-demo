@@ -1,3 +1,0 @@
-{"world": "create_w", "events": "create", "command": "training/sketch/train_micro.sh create_w create", "DATA": "spans", "FRAC": "1.0", "QCOLOR": "1",
- "MARKER": "0", "ROW_SHAPE": "", "FRONT_ROWS": "world", "KINDMAP": "diagnosis_kinds/kinds_comb1.json", "CAL_FALLBACK": "train", "D": 1024, "EPOCHS": 10, "SEED": 0, "rows": 922,
- "run_log": "training/sketch/runs/micro_create_w_D1024_e10_s0.log"}

@@ -130,3 +130,5 @@ The exported model docs/model/data2_p80_s0 is NOT in git: its routebook.bin is 1
 book grows with the square of the number of kinds: 186 here, 106 before). It stays in the workspace; size is an open problem for the demo.
 Update (MODEL_SIZE.md): docs/model/data2_p80_s0 is now the SPARSE export of the same model (only the trained rows of bg / A / L;
 routebook.bin 12.2 MB); the numbers above were measured on the dense export (sparse: identical on old and msg2 SEG=gold, +1 wire on long).
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/data2_p80_s0` (fbaa8dc), `docs/model/fix_p80_s0` (cf0545a). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

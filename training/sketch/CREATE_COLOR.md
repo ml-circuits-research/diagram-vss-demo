@@ -74,3 +74,5 @@ place of micro/shapes7 (scratch cc_comp/registry_g7c.json):
 
 Per action, right: create +83, set -1, every other action unchanged. Why set loses 2.6 points on the per-event gold but only 1 request
 here is not established.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/micro/create_w` (f2725dd), `docs/model/micro/shapes7` (9aaacfc). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

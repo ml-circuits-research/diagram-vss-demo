@@ -76,9 +76,16 @@ export function toNodes(reading, info, ctx, seq) {
   // a position: a canvas region, up to two relations, or a region with relations (training/sketch/DIAGRAM_OPS.md). Roles: region;
   // relation + landmark (+ landmark2 for between); relation2 + landmark3 (the second relation's shape; a second `between` is not read).
   // One role alone gives the old single position (position=<region> or position=<relation> anchor=...).
+  // A value is placed by what it IS, not by the role that holds it: the reader sometimes puts a relation value in the region role ("put
+  // Check to the right of Done" -> region=right_of, landmark=Done) or a region value in the relation role ("Move Process to the top left"
+  // -> relation=top_left). Both roles map to the same SOP arg `position`; before, such a value matched neither table and was dropped
+  // silently (SHORT2.md, H2). The value tables REL / REGION are legend value -> SOP value, not words.
+  const isRel = (v) => v != null && Object.hasOwn(REL, v), isReg = (v) => v != null && Object.hasOwn(REGION, v);
+  const rel1 = isRel(R.relation) ? R.relation : isRel(R.region) ? R.region : null;
+  const regV = isReg(R.region) ? R.region : isReg(R.relation) ? R.relation : isReg(R.relation2) ? R.relation2 : null;
   const place = (args) => {
-    const reg = R.region && REGION[R.region], rels = [];
-    if (R.relation && REL[R.relation]) rels.push({ p: REL[R.relation], anc: [ref(R.landmark), R.landmark2 ? ref(R.landmark2) : undefined] });
+    const reg = regV && REGION[regV], rels = [];
+    if (rel1) rels.push({ p: REL[rel1], anc: [ref(R.landmark), R.landmark2 ? ref(R.landmark2) : undefined] });
     if (R.relation2 && REL[R.relation2]) rels.push({ p: REL[R.relation2], anc: [R.landmark3 ? ref(R.landmark3) : (rels.length ? undefined : ref(R.landmark))] });
     if (!rels.length) { if (reg) args.position = reg; return; }
     const set = (pk, ak, r) => { args[pk] = r.p; const anc = r.anc.filter((x) => x !== undefined); if (anc.length) args[ak] = anc.length === 1 ? anc[0] : anc; };

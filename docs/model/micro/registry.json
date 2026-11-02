@@ -3,7 +3,6 @@
  "router": "cutter",
  "cutter": "micro/cutter_worlds7s.json",
  "context": "context/weights.json",
- "fallback": "kinds_p80_s0",
  "worlds": [
   {
    "world": "shapes",
@@ -94,6 +93,5 @@
  "event_hint": "H1",
  "cutter_version": "a1203fdc7e",
  "event_cutter_version": "08e2afb5e4",
- "context_version": "a946d13e1e",
- "fallback_version": "25d6aebfee"
+ "context_version": "a946d13e1e"
 }

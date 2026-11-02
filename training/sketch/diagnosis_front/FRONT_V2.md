@@ -201,3 +201,5 @@ msg2 / long (not criterion): SEG=gold 46.8% (x98) / 46.6% (x48), own cut 38.4% (
 - Where the cause sits: the own cut (`vssCentres`) turns every firing of a learned rule into a centre, and v2 learns 1.7 times as many rules (1676 against 961), which fire more often inside a span.
   The front-end counts we pre-registered (a, b, spans with 2+ tokens) do not measure that; the measure that does is the number of centres per annotated span in the cut path.
   Any next step has to be measured there first, and the cut, not the rules, may be the place to change (it is the debt already listed: the cut is the limit of the full pipeline).
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/fix_p80_s0` (cf0545a), `docs/model/fv2_p80_s0` (81e1d04), `docs/model/fv3_p80_s0` (7639c7a). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

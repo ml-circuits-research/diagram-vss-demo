@@ -256,3 +256,5 @@ Root-cause note from aggregate numbers only (the per-act counts llm_score prints
   are hit by the same rule. Describe alone is 91 wires = 1.6 points of the 3.0. A rule from the legend that says which roles an event
   needs is not in the legend today (it lists roles, not required ones); whether to learn "required" from the annotated data, or to drop
   part 3, is a new decision and a new pre-registration, not a patch of this run.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/centres2_p80_s0` (28e1385), `docs/model/comb1_p80_s0` (a76b4e3), `docs/model/fix_p80_s0` (cf0545a), `docs/model/fv2_p80_s0` (81e1d04), `docs/model/kinds_p80_s0` (a76b4e3), `docs/model/m0_p80_s0` (bced516). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

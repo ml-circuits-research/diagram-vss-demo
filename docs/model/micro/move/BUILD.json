@@ -1,3 +1,0 @@
-{"world": "move", "events": "move", "command": "training/sketch/train_micro.sh move move", "DATA": "everything", "FRAC": "1.0", "QCOLOR": "1",
- "MARKER": "0", "KINDMAP": "diagnosis_kinds/kinds_comb1.json", "CAL_FALLBACK": "train", "D": 1024, "EPOCHS": 10, "SEED": 0, "rows": 2378,
- "run_log": "training/sketch/runs/micro_move_D1024_e10_s0.log"}

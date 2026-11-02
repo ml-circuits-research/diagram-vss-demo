@@ -1,3 +1,0 @@
-{"world": "describe_w", "events": "describe,property,neighbors,degree", "command": "training/sketch/train_micro.sh describe_w describe,property,neighbors,degree", "DATA": "spans", "FRAC": "1.0", "QCOLOR": "1",
- "MARKER": "0", "ROW_SHAPE": "", "FRONT_ROWS": "world", "KINDMAP": "diagnosis_kinds/kinds_comb1.json", "CAL_FALLBACK": "train", "D": 1024, "EPOCHS": 10, "SEED": 0, "rows": 1080,
- "run_log": "training/sketch/runs/micro_describe_w_D1024_e10_s0.log"}

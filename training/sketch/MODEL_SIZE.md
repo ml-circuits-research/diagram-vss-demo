@@ -199,3 +199,5 @@ here (no criterion was pre-registered for it); a 4-bit export is `--bits 4` at e
 - `training/sketch/parity_reader.py` / `parity_reader.mjs`: the one-request reader's Python / JS parity on an export folder.
   `python3 parity_reader.py --web <dir> --msgs <jsonl> ... --out g.json; node parity_reader.mjs g.json <dir> [--against <other dir>]`.
 - run_curve.sh / build.sh still export dense: switching them is the coordinator's choice (other runs compare against dense baselines).
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/data2_p80_s0` (fbaa8dc), `docs/model/fix_p80_s0` (cf0545a), `docs/model/m0_p80_s0` (bced516). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

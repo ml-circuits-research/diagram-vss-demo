@@ -233,3 +233,5 @@ at 0.1 and 0.2 the share of right lost (19%, 50%) is about the same as the share
 - The verbless kinds use regular expressions on the annotated trigger (copula list, determiners, names of the message, value tokens of the fallback lexicon);
   a few cases are put in a neighbouring kind (e.g. "Copy" was seen in K3).
 - All numbers are on the data the worlds were trained on (owner's rule: no hidden test set).
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/kinds_p80_s0` (a76b4e3), `docs/model/micro/cutter.json` (98fb038). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

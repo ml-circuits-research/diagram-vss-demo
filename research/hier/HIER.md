@@ -238,3 +238,5 @@ D value not reachable 27, E name not reachable 46 (165 of 383 misses). The model
   - Then one fresh test set, scored once.
   - Then the per-world kinds (E3), and cross-world "not mine" negatives (E4). E4 only if wrong-world choices are the first measured
     cause. It also needs a key term that reads the predicate, since negatives alone did not reach any status: ERROR_ANALYSIS.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/comb1_p80_s0` (a76b4e3). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

@@ -368,3 +368,5 @@ Examples:
 - Partial lists (VSS read part of a chain) are not completed by anything after VSS: 106 + 54 keys.
 - The 9 folders are training data for the worlds (owner's rule: no hidden test set). The 20% test split is held out only from the
   filler's weights.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/kinds_p80_s0` (a76b4e3), `docs/model/micro/cutter.json` (98fb038). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

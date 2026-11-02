@@ -245,3 +245,5 @@ centre_tokens), docs/js/vss/routebook.js and docs/js/vss/reader.js (centre_token
 (CENTRE_KEY); new docs/model/centres2_p80_s0/ (37 MB). With CENTRES unset nothing changed in behaviour, checked after these changes:
 fix_p80_s0 SEG=gold 60.5% / 71, default 46.5% / 335 (--dump byte-identical to the HEAD scripts'), the browser's one-request reader
 identical on all 1126 dev spans (SOP text, residual, status) to the code before the port, run_curve.sh command lines identical.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/centres2_p80_s0` (28e1385), `docs/model/centres_p80_s0` (28e1385), `docs/model/fix_p80_s0` (cf0545a), `docs/model/real` (530e54e). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

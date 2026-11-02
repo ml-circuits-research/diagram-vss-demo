@@ -1,3 +1,0 @@
-{"world": "shapes7", "events": "create,set,resize,fact,rule", "command": "training/sketch/train_micro.sh shapes7 create,set,resize,fact,rule", "DATA": "spans", "FRAC": "1.0", "QCOLOR": "1",
- "MARKER": "0", "ROW_SHAPE": "", "FRONT_ROWS": "world", "KINDMAP": "diagnosis_kinds/kinds_comb1.json", "CAL_FALLBACK": "train", "D": 1024, "EPOCHS": 10, "SEED": 0, "N_EVAL": 150, "EVAL_MODES": "primary", "rows": 6334,
- "run_log": "training/sketch/runs/micro_shapes7_D1024_e10_s0.log"}

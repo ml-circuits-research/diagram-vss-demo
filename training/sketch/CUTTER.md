@@ -232,3 +232,5 @@ are decisions that need the meaning of the next words, which a window of +-2 wor
 - The route books were trained on DATA=old (947 messages) while the cutter used DATA=all (2109); this mixes two fit sets but the dev files are outside both.
 - Dev scores of the three dev files were seen before by others (they are held-out training messages, not a fresh test set); fresh1 was scored before.
 - No hand-written equivalence was added; the cutter is the existing code, unmodified.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/comb1_p80_s0` (a76b4e3), `docs/model/kinds_p80_s0` (a76b4e3). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

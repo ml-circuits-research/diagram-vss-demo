@@ -93,3 +93,5 @@ The first composer runs (base 956/885/2799, set step 954/897/2789, move step 974
 ## Files changed
 
 docs/model/micro/registry.json (set -> set_s, move -> move_s); new: docs/model/micro/{set_s,connect_s,move_s,graph_s}/, training/sketch/worlds_micro/{set_s,connect_s,move_s,graph_s}/, training/sketch/runs/micro_{set_s,connect_s,move_s,graph_s}_D1024_e10_s0*, this file. connect_s and graph_s are trained but not registered.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/kinds_p80_s0` (a76b4e3), `docs/model/micro/connect_s` (68b0656), `docs/model/micro/graph_s` (68b0656), `docs/model/micro/move_s` (68b0656), `docs/model/micro/set_s` (cf15a5d). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

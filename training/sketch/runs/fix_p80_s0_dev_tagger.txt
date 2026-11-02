@@ -1,3 +1,0 @@
-/tmp/claude-0/-home-claude/8941735c-db18-5907-b7c8-a224e2065054/scratchpad/dev20c: 253 messages, 1126 gold wires
-  rules messages fully right 17.4% · wires right 70.4% (793/1126) · act found 87.8% · extra wires 182
-  vss   messages fully right 12.6% · wires right 58.7% (661/1126) · act found 83.2% · extra wires 84

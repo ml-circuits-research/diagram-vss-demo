@@ -1,3 +1,0 @@
-{"world": "set_s", "events": "set", "command": "training/sketch/train_micro.sh set_s set", "DATA": "spans", "FRAC": "1.0", "QCOLOR": "1",
- "MARKER": "0", "ROW_SHAPE": "", "KINDMAP": "diagnosis_kinds/kinds_comb1.json", "CAL_FALLBACK": "train", "D": 1024, "EPOCHS": 10, "SEED": 0, "rows": 4188,
- "run_log": "training/sketch/runs/micro_set_s_D1024_e10_s0.log"}

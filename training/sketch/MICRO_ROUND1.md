@@ -121,3 +121,5 @@ Cause: the micro front end (front.json, learned from 3640 messages, DATA=everyth
 
 ## Files
 docs/model/micro/registry.json (16 worlds), docs/model/micro/{set,connect,connect_single,connect_lists,connect_chain}/ (new models), docs/model/micro/cutter_spans.json (test copy), training/sketch/worlds_micro/{set,connect,connect_single,connect_lists,connect_chain}/, training/sketch/runs/micro_{set,connect,connect_single,connect_lists,connect_chain}_* , this file.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/kinds_p80_s0` (a76b4e3), `docs/model/micro/connect_chain` (cd4be6a), `docs/model/micro/connect_lists` (cd4be6a), `docs/model/micro/connect_single` (cd4be6a), `docs/model/micro/cutter.json` (98fb038). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.
