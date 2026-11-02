@@ -19,6 +19,10 @@ BR=${BR:-gpu-runs}
 MAXJOBS=${MAXJOBS:-2}
 POLL=${POLL:-120}
 export PATH="$HOME/vss-box/venv/bin:$HOME/.local/bin:$PATH"
+# CPU threads per job: the cores divided among the jobs that run at once, so that two trainings do not fight over the same threads
+# (2026-11-02: two runs with 16 threads each stalled each other in their CPU phases). A job may set its own.
+THREADS=${THREADS:-$(( $(nproc) / MAXJOBS ))}; [ "$THREADS" -ge 1 ] || THREADS=1
+export OMP_NUM_THREADS=$THREADS MKL_NUM_THREADS=$THREADS OPENBLAS_NUM_THREADS=$THREADS
 mkdir -p "$STATE"
 cd "$REPO" || exit 1
 [ "$(git rev-parse --abbrev-ref HEAD)" = "$BR" ] || { echo "runner: $REPO is not on branch $BR (git checkout $BR)"; exit 1; }
@@ -33,7 +37,7 @@ push() {
   log "push failed 3 times; will retry next round"; return 1
 }
 
-log "runner on $(hostname), repo $REPO, branch $BR, at most $MAXJOBS jobs, poll every ${POLL}s"
+log "runner on $(hostname), repo $REPO, branch $BR, at most $MAXJOBS jobs, $THREADS CPU threads each, poll every ${POLL}s"
 while :; do
   git pull -q --rebase --autostash origin "$BR" || { git rebase --abort 2>/dev/null; log "pull failed"; }
 
