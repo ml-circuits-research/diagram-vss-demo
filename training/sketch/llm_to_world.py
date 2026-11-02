@@ -91,7 +91,13 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
         if head is None and not soft: raise Skip(f"no shape word {sh}")
         if head is None: lost.append(f"shape word {sh}")
         e = {"head": head}
-        if a.get("color"): e["attr"] = need(a["color"])
+        # CREATE_COLOR=role (off by default; PLAN_B.md, HOLD: CREATE_COLOR.md): the colour of the new shape fills the event role `color`,
+        # as its size fills `size` here and as a colour set on a shape does in set / fact / rule. Default: the attribute of the shape word,
+        # which a world that also holds set / fact reads into the event role instead (shapes7: create colour lost in 53.8% of requests).
+        # docs/js/vss-adapter.js reads both (obj.attr, then R.color).
+        if a.get("color"):
+            if os.environ.get("CREATE_COLOR") == "role": roles["color"] = need(a["color"])
+            else: e["attr"] = need(a["color"])
         roles["object"] = e
         if a.get("size"): roles["size"] = need(a["size"])
         if cnt: roles["quantity"] = need(str(cnt))
