@@ -24,3 +24,9 @@ for gname,sets,note in GROUPS:
             line+=f" {f} {R/g*100:5.1f}/{W/g*100:4.1f}/{M/g*100:5.1f} (wrong act {MA/g*100:4.1f}) x{E} |"
         print(line)
     for f in T: t=T[f]; g=t['G']; print(f'ALL {gname} {f}', f"{t['R']/g*100:.1f}/{t['W']/g*100:.1f}/{t['M']/g*100:.1f} (wrong act {t['MA']/g*100:.1f}) extra {t['E']}")
+    rows=[r for r in D if r['set'] in sets and 'gated' in r['vss']]
+    if rows:   # GATE=<level> (short_bench.mjs): VSS executes a request only when its confidence clears the level's threshold (PRECISION.md)
+        G=collections.Counter()
+        for r in rows: G.update(r['vss']['gated'])
+        ex=G['r']+G['w']+G['e']; g=G['gold']; pc=lambda x: f"{x/g*100:.1f}"
+        print(f"ALL {gname} vss gated {rows[0]['gate']}%: precision {G['r']/ex*100 if ex else 0:.1f} · right {pc(G['r'])} · asked {pc(G['ar']+G['aw'])} · unread {pc(g-G['r']-G['w']-G['ar']-G['aw'])} · executed wrong {pc(G['w'])} · extras executed {G['e']} (of {G['e']+G['ae']}) · executed {ex} of {G['n']} produced")

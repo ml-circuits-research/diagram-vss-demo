@@ -11,6 +11,9 @@
 //   LLM_SHORT=0 skips llm_short. node short_bench.mjs <out.json>
 // Options (default: off; the default run is unchanged):
 //   BENCH_DIR=<dir>  read the sets from <dir>/<set>.json instead of docs/bench/ (e.g. the typo'd sets of training/sketch/spell/build_spell.mjs --typo-out)
+//   GATE=95|97|99    also score VSS gated (llm_score.mjs GATE, PRECISION.md): each row gets vss.gated {r, w, e executed; ar, aw, ae asked;
+//                    n produced; gold} and `gate` (the level); agg.py prints the gated line per group. Not with BEST=1 (its copy of the
+//                    composer gives no signals, so everything would be asked).
 //   SPELL=1          run the VSA spell checker (docs/js/spell.js, docs/model/spell/vocab.json + the legend) on each text before both readers,
 //                    with the row's names as the canvas, as the demo does; the row gets `spell` (the fixes)
 process.env.LLM_SCORE_LIB = "1"; process.env.PAIR = "value"; process.env.SEG = "composer";
@@ -40,6 +43,7 @@ const loadModel = async (name) => {
 const CUTW = J(REG.cutter);
 if (process.env.WHOLE === "1") { const S = { ...CUTW.segmenter }; for (const L of CUTW.labels) if (L.startsWith("B-")) S["pl=<s>\t" + L] = (S["pl=<s>\t" + L] || 0) + 2e9; S["bias\tI"] = (S["bias\tI"] || 0) + 1e9; CUTW.segmenter = S; }
 const comp = await loadComposer(REG, CUTW, loadModel, { context: J(REG.context), eventCutter: J(REG.event_cutter) });
+if (process.env.GATE && process.env.BEST === "1") throw new Error("GATE with BEST=1: the BEST copy of the composer gives no signals");
 const sys = L.logic.createSystem();
 let speller = null;
 if (process.env.SPELL === "1") {
@@ -102,6 +106,7 @@ for (const id of SETS) {
     const rn = sys.formalize(r.text, ctx).nodes;
     const res = process.env.BEST === "1" ? formalizeCuts(comp, r.text, { names: r.names || [], last: [] }) : comp.formalize(r.text, { names: r.names || [], last: [] });
     const sR = L.scoreMessage(rn, row), sV = L.scoreMessage(res.nodes, row);
+    const gated = process.env.GATE ? L.gateBlank() : null; if (gated) L.gateTally(gated, res.nodes, row);
     const units = res.units.map((u) => ({ src: u.src, zone: u.zone, world: u.world, event: u.event, status: u.status, reason: u.reason,
       candidates: u.candidates, forced: u.forced, tried: u.tried, hint: u.hint, normalized: u.normalized, notUnderstood: u.notUnderstood, gaps: u.gaps, decidedBy: u.decidedBy }));
     // per-world normalization of the whole text (front end of each world), for the front-normalization check
@@ -110,7 +115,8 @@ for (const id of SETS) {
     out.push({ set: id, group, i: k, text: r.text, names: r.names, wires: wires.map((w) => ({ ...w, event: evOf(w.type, w.args), world: evWorld.get(String(evOf(w.type, w.args)).toLowerCase()) || "fallback" })),
       demoOk: isLLM ? null : { rules: score(rn, r).ok, vss: score(res.nodes, r).ok },
       rules: { right: sR.right, wrong: sR.wrongAligned, missed: sR.missed, extra: sR.extra, bad: sR.bad, acts: rn.filter((n) => n.type !== "mention").map((n) => `${n.type}:${n.args.action || n.args.ask || ""}`) },
-      vss: { right: sV.right, wrong: sV.wrongAligned, missed: sV.missed, extra: sV.extra, bad: sV.bad, acts: res.nodes.filter((n) => n.type !== "mention").map((n) => `${n.type}:${n.args.action || n.args.ask || ""}`) },
+      vss: Object.assign({ right: sV.right, wrong: sV.wrongAligned, missed: sV.missed, extra: sV.extra, bad: sV.bad, acts: res.nodes.filter((n) => n.type !== "mention").map((n) => `${n.type}:${n.args.action || n.args.ask || ""}`) }, gated ? { gated } : {}),
+      ...(gated ? { gate: process.env.GATE } : {}),
       units, notes: res.notes, norm, segw, ...(sp ? { spell: sp.fixes } : {}), ...(r.typo !== undefined ? { typo: r.typo } : {}) });
   }
   console.error(id, rows.length);

@@ -23,6 +23,19 @@ let sub = 'drawing';                                // the active reader's subta
 // browser storage is a convenience only: every access is guarded and the page works without it
 const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { } } };
 const clock = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+// The gate (owner's main metric, 2026-11-02: do only what you are sure of, ask about the rest; training/sketch/PRECISION.md): a learned reader
+// executes a request only when its own confidence clears the threshold of the chosen precision level; below it the request is not executed,
+// the reply says why the reader is not sure (vss-confidence.js reasons) and offers "Do it anyway" (that one reading, as one undoable turn).
+// GATES[reader id](its formalize result) -> Promise<gate> | null; a gate is {level, threshold, units: [{index, src, conf, execute, nodes,
+// reasons: [{text}]}], executed (the nodes to run, message order), held (the units not executed)} (vss-confidence.js gate).
+// VSS: the combined confidence (docs/model/confidence/vss.json) at the level of VSS › Settings (95 / 97 / 99 / execute all; default 97,
+// kept in this browser when storage works). Neural: no gate yet: its confidence and threshold come from another measurement
+// (training/sketch/PRECISION_BERT.md, in progress). HOOK: set GATES.neural to a function of the same shape and readWith, the reply,
+// "Do it anyway" and the details work for it unchanged. The Rules have no confidence and execute everything.
+const GATE_KEY = 'sop.vss.gate', GATE_LEVELS = ['95', '97', '99', 'all'];
+let vssGate = GATE_LEVELS.includes(store.get(GATE_KEY)) ? store.get(GATE_KEY) : '97';
+const GATES = { vss: v => window.VSSFormalizer && window.VSSFormalizer.gate ? window.VSSFormalizer.gate(v, vssGate) : null, neural: null };
+const gateLabel = l => l === 'all' ? 'execute all' : `${l}% precision`;
 // spelling (docs/js/spell.js): a VSA spell checker corrects typed messages before the readers read them; every reader reads the same
 // corrected text. Its vocabulary: docs/model/spell/vocab.json (the VSS worlds' words), the legend's values and cue words, and the names
 // on the active reader's canvas. The switch is in ⋮ › Settings (Spelling); it is kept in this browser when storage works.
@@ -217,7 +230,7 @@ function meBubble(text, sp) {
 }
 function botBubble(o) {
   const d = document.createElement('div'); d.className = 'b bot' + (o.err ? ' err' : '');
-  let h = o.lines ? o.lines.map(p => `<div class="rl${p.err ? ' err' : ''}${p.off ? ' off' : ''}"><b>${escH(p.rd.label)}${p.ms != null ? ` · ${fmtMs(p.ms)}` : ''}:</b> <span class="t">${escH(p.off || p.text)}</span>${p.sub ? `<div class="sub">${escH(p.sub)}</div>` : ''}</div>`).join('')
+  let h = o.lines ? o.lines.map(p => `<div class="rl${p.err ? ' err' : ''}${p.off ? ' off' : ''}"><b>${escH(p.rd.label)}${p.ms != null ? ` · ${fmtMs(p.ms)}` : ''}:</b> <span class="t">${escH(p.off || p.text)}</span>${p.held && p.held.length ? heldHTML(p.held) : ''}${p.sub ? `<div class="sub">${escH(p.sub)}</div>` : ''}</div>`).join('')
     : `<div class="txt">${escH(o.text)}</div>`;
   if (o.sub) h += `<div class="sub">${escH(o.sub)}</div>`;
   if (o.chips && o.chips.length) h += `<div class="chips">${o.chips.map(c => `<button type="button" data-pick="${escH(c)}">${escH(c)}</button>`).join('')}</div>`;
@@ -239,6 +252,8 @@ function offText(rd) {
 const idleStatus = () => 'reads with ' + listing(READERS.filter(isReady).map(r => r.label));
 msgs.addEventListener('click', ev => {
   const p = ev.target.closest('[data-pick]'); if (p) { submit(p.dataset.pick); return; }
+  const a = ev.target.closest('[data-anyway]');
+  if (a) { const [rid, turn, idx] = a.dataset.anyway.split(':'); a.disabled = true; queue = queue.then(() => doAnyway(rid, +turn, +idx)).catch(e => { console.error(e); botBubble({ text: 'Something went wrong: ' + e.message, err: true }); }); return; }
   const t = ev.target.closest('[data-turn]'); if (t) openSheet('turn', null, +t.dataset.turn);
 });
 
@@ -313,7 +328,53 @@ async function run(text, sop) {
   if (mine && mine.highlight) flash(mine.highlight); else renderCanvas();
   updateTabs(); renderSopBar();
 }
-/** one reader reads one message into its own world; returns its line of the reply ({text, sub, err, chips, ms, highlight}) */
+/** a question of the engine ("which Hub?") -> the reader's pending choice: the wire asked about, its dependents, the wires they refer to
+ *  (with the values they had), so a reply with a name runs them again */
+function pendingOf(er, nodes, result, overrides) {
+  const e = er.error, keep = new Set([e.wire, ...er.dependents.map(n => n.id)]);
+  const need = new Set(); const refsOf = v => K.isRef(v) ? [v.ref] : Array.isArray(v) ? v.flatMap(refsOf) : [];
+  for (const n of nodes) if (keep.has(n.id)) Object.values(n.args).flatMap(refsOf).forEach(x => need.add(x));
+  const ov = Object.assign({}, overrides); for (const st of result.steps) if (need.has(st.node.id) && !keep.has(st.node.id) && st.value !== undefined) ov[st.node.id] = st.value;
+  return { nodes: nodes.filter(n => keep.has(n.id) || need.has(n.id)), wire: e.wire, candidates: e.candidates, overrides: ov };
+}
+/** "Do it anyway" (see GATES): the reading of one request the reader was not sure of, run now in that reader's world as one turn (undoable
+ *  like any message). The wires of the message it refers to that ran earlier keep their values; a request that uses what another request
+ *  that was not done would have made is not run (the reply says which to do first). */
+async function doAnyway(rid, turn, idx) {
+  const rec = history.find(x => x.id === turn), rd = RD[rid], r = rec && rec.readers[rid], h = r && r.gate && r.gate.units.find(u => u.index === idx);
+  const mark = () => document.querySelectorAll(`[data-anyway="${rid}:${turn}:${idx}"]`).forEach(b => { b.disabled = true; b.textContent = 'Done anyway'; });
+  if (!h || h.doneAnyway) { mark(); return; }
+  const env = r.env || (r.env = Object.assign({}, r.result ? r.result.env : {}));
+  const own = new Set(h.nodes.map(n => n.id)), refsOf = v => K.isRef(v) ? [v.ref] : Array.isArray(v) ? v.flatMap(refsOf) : [];
+  const need = [...new Set(h.nodes.flatMap(n => Object.values(n.args).flatMap(refsOf)).filter(x => !own.has(x)))];
+  const missing = need.filter(x => !(x in env));
+  if (missing.length) {
+    const deps = r.gate.units.filter(u => u.nodes.some(n => missing.includes(n.id)));
+    botBubble({ lines: [{ rd, text: `“${h.src}” uses what ${listing(deps.map(d => `“${d.src}”`))} would make; do ${deps.length > 1 ? 'those' : 'that'} first.`, err: true }], turn });
+    return;
+  }
+  const overrides = Object.fromEntries(need.map(x => [x, env[x]]));
+  const list = (r.allNodes || []).filter(n => need.includes(n.id)).concat(h.nodes);
+  const result = rd.engine.run(list, { overrides });
+  Object.assign(env, result.env); h.doneAnyway = true; (r.anyway || (r.anyway = [])).push({ index: idx, src: h.src, nodes: list, result });
+  mark();
+  const clarE = (result.errors || []).find(er => er.error instanceof K.Clarify);
+  if (clarE) rd.pending = pendingOf(clarE, list, result, overrides);
+  const problems = (result.errors || []).filter(er => !(er.error instanceof K.Clarify)).map(er => er.error.message);
+  const done = result.steps.some(st => !st.error && !st.skipped && st.node.type !== 'mention' && !(st.node.id in overrides));
+  const touched = [];
+  result.steps.forEach(st => st.patches.forEach(p => { if (p.op === 'add') touched.push(p.shape.name); else if (p.op === 'set') touched.push(p.name); else if (p.op === 'rename') touched.push(p.to); }));
+  const alive = [...new Set(touched)].filter(n => rd.world.find(n)); if (alive.length) rd.last = alive;
+  const text = `Did “${h.src}” anyway: ` + [done ? summarize(result) : '', clarE ? clarE.error.message.replace(/ Reply with a name\.$/, '') : '', problems.join(' ')].filter(Boolean).join(' ');
+  botBubble({ lines: [{ rd, text: text.replace(/: $/, ': nothing changed.'), err: !done && !clarE }], chips: clarE ? clarE.error.candidates : [], turn, tag: 'Do it anyway' });
+  if (rd === cur) { if (alive.length) flash({ shapes: alive, edges: [] }); else renderCanvas(); }
+  updateTabs(); renderSopBar();
+}
+/** the requests a reader did not do because it was not sure (see GATES): the reason of each and its "Do it anyway" button */
+function heldHTML(held) {
+  return `<ul class="held">${held.map(h => `<li><span class="src">“${escH(h.src || '')}”</span> <span class="why">${Number.isFinite(h.conf) ? `confidence ${h.conf.toFixed(2)}, it acts from ${h.t.toFixed(2)}: ` : ''}${escH(h.reasons.join('; ') || 'not sure')}.</span> <button type="button" class="anyway" data-anyway="${escH(h.reader)}:${h.turn}:${h.index}" title="Run exactly this reading now (undo takes it back)">Do it anyway</button></li>`).join('')}</ul>`;
+}
+/** one reader reads one message into its own world; returns its line of the reply ({text, sub, err, chips, ms, highlight, held}) */
 async function readWith(rd, text, rec, pk) {
   const r = { nodes: [], notes: [] }; rec.readers[rd.id] = r;
   let overrides = {};
@@ -327,12 +388,23 @@ async function readWith(rd, text, rec, pk) {
     else if (rd.id === 'vss') { const v = await window.VSSFormalizer.formalize(text, ctx, rd.formalize, Object.assign({}, VSS_OPTS, rec.cut ? { units: rec.cut.units } : {})); r.ms = performance.now() - t0; r.vss = v; r.nodes = v.nodes; r.notes = v.notes; }
     else { const n = await neural.formalize(text, ctx, rec.cut ? { units: rec.cut.units } : undefined); r.ms = performance.now() - t0; r.neural = n; r.nodes = n.nodes; r.notes = n.notes.filter(x => !/couldn't find an action/.test(x)); }
     if (rec.cut && !pk && !rec.raw) r.cutBy = rec.cut.strategy;
+    // the gate (see GATES): the requests this reader is not sure of are not executed; the reply lists them with "Do it anyway"
+    const gf = !pk && !rec.raw ? GATES[rd.id] : null, gsrc = rd.id === 'vss' ? r.vss : r.neural;
+    if (gf && gsrc) { const g = await gf(gsrc); if (g) { r.gate = g; r.allNodes = r.nodes; r.nodes = g.executed; } }
   } catch (e) { r.error = e; r.ms = performance.now() - t0; return { text: `The ${rd.label} reader failed: ${e.message}`, err: true, ms: r.ms }; }
   const ms = r.ms, nodes = r.nodes, notes = r.notes, world = rd.world, engine = rd.engine;
   rd.reads++; rd.lastRead = { turn: rec.id, nodes };
   // the parts no reading took: the Rules reader's "couldn't find an action in …" and the VSS reader's "Ignored (not understood): “…”, “…”"
   const unread = notes.filter(n => /couldn't find an action/.test(n)).map(n => (n.match(/in "(.*)"\.?$/) || [])[1]).filter(Boolean)
     .concat(notes.filter(n => /^Ignored \(not understood\):/.test(n)).flatMap(n => [...n.matchAll(/“([^”]*)”/g)].map(m => m[1])).filter(u => u.trim().split(/\s+/).length > 1));   // a one-word unit ("and") stays in the details only
+  const held = r.gate ? r.gate.held.map(h => ({ reader: rd.id, turn: rec.id, index: h.index, src: h.src, conf: h.conf, t: r.gate.threshold, reasons: h.reasons.map(x => x.text) })) : [];
+  const nReq = r.gate ? r.gate.units.length : 0;
+  // the reply's line with the requests not executed (their reasons and buttons are rendered under the line, botBubble)
+  const withHeld = o => held.length ? Object.assign(o, { held, text: (o.text && o.text !== 'Done.' ? o.text + ' ' : '') + `Not sure about ${held.length === nReq ? (nReq === 1 ? 'the request' : `any of the ${nReq} requests`) : `${held.length} of the ${nReq} requests`}, so ${held.length === 1 ? 'it was' : 'they were'} not done:` }) : o;
+  if (!nodes.length && held.length) {
+    const sub = unread.length ? unread.map(u => `I didn’t understand “${u}”.`).join(' ') : null;
+    return withHeld({ text: '', sub, ms });
+  }
   if (!nodes.length) {
     r.error = new K.SOPError('No wires.');
     return { text: unread.length ? 'I didn’t get what to do there. Try something like “draw a red circle next to Start” or “what is connected to Start?”.' : 'I couldn’t turn that into anything I can do.', err: true, ms };
@@ -343,18 +415,11 @@ async function readWith(rd, text, rec, pk) {
   let clar = null;
   for (const er of result.errors || []) {
     const e = er.error;
-    if (e instanceof K.Clarify && !clar) {
-      clar = e;
-      const keep = new Set([e.wire, ...er.dependents.map(n => n.id)]);
-      const need = new Set(); const refsOf = v => K.isRef(v) ? [v.ref] : Array.isArray(v) ? v.flatMap(refsOf) : [];
-      for (const n of nodes) if (keep.has(n.id)) Object.values(n.args).flatMap(refsOf).forEach(x => need.add(x));
-      const ov = Object.assign({}, overrides); for (const st of result.steps) if (need.has(st.node.id) && !keep.has(st.node.id) && st.value !== undefined) ov[st.node.id] = st.value;
-      rd.pending = { nodes: nodes.filter(n => keep.has(n.id) || need.has(n.id)), wire: e.wire, candidates: e.candidates, overrides: ov };
-    } else if (!(e instanceof K.Clarify)) problems.push(e.message + (er.dependents.length ? ` (so I also skipped ${er.dependents.length} step${er.dependents.length > 1 ? 's' : ''} that needed it)` : ''));
+    if (e instanceof K.Clarify && !clar) { clar = e; rd.pending = pendingOf(er, nodes, result, overrides); } else if (!(e instanceof K.Clarify)) problems.push(e.message + (er.dependents.length ? ` (so I also skipped ${er.dependents.length} step${er.dependents.length > 1 ? 's' : ''} that needed it)` : ''));
   }
   for (const u of unread) asks.push(`I didn’t understand “${u}”. Could you say it another way?`);
   const anyDone = result.steps.some(st => !st.error && !st.skipped && st.node.type !== 'mention');
-  if (!anyDone && !clar && !problems.length && !asks.length) return { text: 'Done.', ms };
+  if (!anyDone && !clar && !problems.length && !asks.length) return withHeld({ text: 'Done.', ms });
   const highlight = { shapes: [], edges: [] }, touched = [];
   result.steps.forEach(s => {
     s.patches.forEach(p => { if (p.op === 'add') touched.push(p.shape.name); else if (p.op === 'set') touched.push(p.name); else if (p.op === 'rename') touched.push(p.to); });
@@ -367,9 +432,9 @@ async function readWith(rd, text, rec, pk) {
   const odd = notes.filter(n => /is not a shape I know|couldn't tell|^I read /.test(n));
   const did = anyDone ? summarize(result) : '';
   const tail = problems.concat(asks).join(' ');
-  if (clar) return { text: (did && did !== 'Done.' ? did + ' ' : '') + clar.message.replace(/ Reply with a name\.$/, ''), sub: [tail, odd.join(' ')].filter(Boolean).join(' ') || null, chips: clar.candidates, ms, highlight };
-  if (problems.length && !anyDone) return { text: problems.join(' '), sub: [asks.join(' '), odd.join(' ')].filter(Boolean).join(' ') || null, err: true, ms, highlight };
-  return { text: did || 'Done.', sub: [tail, odd.join(' ')].filter(Boolean).join(' ') || null, ms, highlight };
+  if (clar) return withHeld({ text: (did && did !== 'Done.' ? did + ' ' : '') + clar.message.replace(/ Reply with a name\.$/, ''), sub: [tail, odd.join(' ')].filter(Boolean).join(' ') || null, chips: clar.candidates, ms, highlight });
+  if (problems.length && !anyDone) return withHeld({ text: problems.join(' '), sub: [asks.join(' '), odd.join(' ')].filter(Boolean).join(' ') || null, err: true, ms, highlight });
+  return withHeld({ text: did || 'Done.', sub: [tail, odd.join(' ')].filter(Boolean).join(' ') || null, ms, highlight });
 }
 
 /* ---------------- technical history ---------------- */
@@ -381,9 +446,11 @@ function turnHTML(r) {
     let h = `<div class="minihead">${escH(rd.label)} <span>${x.ms != null ? 'formalized in ' + fmtMs(x.ms) : r.raw ? 'SOP Lang, nothing to formalize' : 'your choice from the question'}${x.neural ? ` · ${x.neural.calls} model calls` : ''}${x.cutBy ? ` · cut by: ${escH(cutLabel(x.cutBy))}` : ''}</span></div>`;
     if (x.nodes && x.nodes.length) h += `<pre class="sop">${r.raw ? `<span class="cm"># ${r.button ? 'toolbar button, sent as SOP Lang' : 'typed as SOP Lang'}</span>\n` : ''}${x.nodes.map(hlNode).join('\n')}</pre>`;
     (x.notes || []).forEach(n => { h += `<div class="note">${escH(n)}</div>`; });
+    if (x.gate) h += gateHTML(x, rd);
     if (x.vss) h += vssHTML(x.vss);
     if (x.neural) h += neuralHTML(x.neural);
     if (x.result) h += x.result.steps.map(stepHTML).join('');
+    for (const a of x.anyway || []) h += `<div class="note">Done anyway: “${escH(a.src)}”</div><pre class="sop">${a.nodes.map(hlNode).join('\n')}</pre>` + a.result.steps.map(stepHTML).join('');
     const err = x.error && x.error.message !== 'No wires.' ? x.error : x.result && !x.result.ok ? x.result.error : null;
     if (err) h += `<div class="errt">${escH(err.message)}</div>`;
     if (!x.nodes || !x.nodes.length) h += '<div class="note">No wires were produced.</div>';
@@ -446,6 +513,16 @@ function stepHTML(st) {
   return `<div class="row"><span class="chip">@${escH(st.node.id)} <span class="p">${escH(plug ? plug.name : st.plugin || '')}</span></span><div class="res">${bits.join('')}</div></div>`;
 }
 const fmtV = v => v == null ? '' : K.fmtValue(v);
+/** the gate of one reader on one message (see GATES): the level, each request's confidence, executed or not and why, the wires not run */
+function gateHTML(x, rd) {
+  const g = x.gate, ex = g.units.filter(u => u.execute).length, t = g.threshold;
+  const tt = Number.isFinite(t) ? ` (it acts from confidence ${t.toFixed(4)})` : t === -Infinity ? ' (every request is executed)' : ' (no confidence: every request is asked)';
+  let h = `<div class="note">${escH(rd.label)} gate: ${escH(gateLabel(g.effective || g.level))}${g.effective && g.effective !== g.level ? ` (${escH(gateLabel(g.level))} is not reached)` : ''}${escH(tt)}; executed ${ex} of ${g.units.length} request${g.units.length === 1 ? '' : 's'}${g.held.length ? `, not sure about ${g.held.length}` : ''}.</div>`;
+  if (g.units.length) h += `<ul class="units">${g.units.map(u => `<li><span class="src">“${escH(u.src || '')}”</span> → ${Number.isFinite(u.conf) ? `confidence ${u.conf.toFixed(3)}, ` : ''}${u.execute ? 'executed' : `<b>not executed</b>: ${escH(u.reasons.map(r => r.text).join('; ') || 'not sure')}${u.doneAnyway ? ' (then done anyway)' : ''}`}</li>`).join('')}</ul>`;
+  const heldNodes = g.held.flatMap(u => u.nodes);
+  if (heldNodes.length) h += `<pre class="sop"><span class="cm"># not executed (not sure)</span>\n${heldNodes.map(hlNode).join('\n')}</pre>`;
+  return h;
+}
 function vssHTML(v) {
   let h = '';
   if (v.units) h += `<div class="note">The requests and the world that read each:</div><ul class="units">${v.units.map(u => `<li><span class="src">“${escH(u.src || '')}”</span> → ${u.zone === 'ignored' ? 'not read' + (u.reason ? ' (' + escH(u.reason) + ')' : '') : `world <code>${escH(((vssInfo && vssInfo.worlds || []).find(w => w.world === u.world) || { model: u.world || '' }).model)}</code>, ${escH(u.event || '?')}${u.zone === 'ask' ? ', asked which shape' : ''}${u.tie > 1 ? `, ${u.tie} worlds read it, decided by ${escH(u.decidedBy || '?')}` : ''}${u.reread ? ', action from the event hint' : ''}`}${u.noWorldSignal ? ' (the VSS cutter named no world here: every world read it)' : ''}</li>`).join('')}</ul>`;
@@ -668,6 +745,12 @@ async function ensureVSS(announce) {
   try {
     if (!window.VSSFormalizer) await import(new URL('js/vss-formalizer.js', document.baseURI).href);
     await window.VSSFormalizer.loadComposerAt(); vssInfo = window.VSSFormalizer.composerInfo();
+    try {
+      await window.VSSFormalizer.loadConfidence();
+      // a level kept from before that the model does not reach (e.g. 99): the highest reached level below it
+      const ci = window.VSSFormalizer.confidenceInfo(), eff = ci && ci.effective(vssGate);
+      if (eff && eff !== vssGate) { sysNote(`VSS does not reach ${vssGate}% precision on held-out messages; it uses ${gateLabel(eff)} instead.`); vssGate = eff; store.set(GATE_KEY, vssGate === '97' ? null : vssGate); }
+    } catch (e) { sysNote('The VSS confidence model could not be loaded (' + (e && e.message || e) + '): VSS will ask about every request.'); }
     vssState = 'ready'; vssError = null;
     const fresh = !RD.vss.reads;
     if (announce !== false) sysNote((vssInfo.composer ? `VSS ready: ${vssInfo.worlds.length} micro-worlds, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
@@ -754,10 +837,26 @@ function renderSub() {
 }
 function setSub(k) { if (k === sub || !SUBS.some(x => x[0] === k)) return; sub = k; renderSub(); renderCard(); if (k === 'drawing') renderCanvas(); }
 subbar.addEventListener('click', ev => { const b = ev.target.closest('[data-sub]'); if (b) setSub(b.dataset.sub); });
+rpanel.addEventListener('change', ev => {
+  if (ev.target.name === 'vss-gate' && GATE_LEVELS.includes(ev.target.value)) { vssGate = ev.target.value; store.set(GATE_KEY, vssGate === '97' ? null : vssGate); sysNote(`VSS now ${vssGate === 'all' ? 'executes every request it reads (no gate)' : `executes a request only at ${vssGate}% precision; below it, it asks`}.`); if (sub === 'settings') renderSub(); }
+});
 rpanel.addEventListener('click', ev => { const h = ev.target.closest('[data-help]'); if (h) { openHelp(h.dataset.help); return; } const b = ev.target.closest('[data-open]'); if (b) openSheet('settings', b.dataset.open); });
 function vssStatusHTML() {
   return escH(vssState === 'ready' ? (vssInfo.composer ? `Ready: ${vssInfo.worlds.length} micro-worlds, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
     : `Ready: D ${vssInfo.D}, ${vssInfo.bits || 8}-bit route book, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`) : vssState === 'failed' ? 'Failed: ' + (vssError && vssError.message || vssError) : `Loading (about ${mb0(VSS_HINT)} from this site)…`);
+}
+/** VSS › Settings: the precision level of the gate (see GATES), with what each level gave on the held-out messages (PRECISION.md) */
+function gateSettingsHTML() {
+  const info = window.VSSFormalizer && window.VSSFormalizer.confidenceInfo ? window.VSSFormalizer.confidenceInfo() : null, L = info ? info.levels : {};
+  const pc = v => (v * 100).toFixed(1) + '%';
+  // a level the model does not reach (no threshold gives it on held-out) is shown, disabled, with the highest precision VSS reaches
+  const opt = l => { const x = L[l], off = !!info && l !== 'all' && !x, about = l === 'all' ? 'no gate: VSS executes every request it reads (as before 2026-11-02)'
+      : x ? `acts when its confidence is at least ${x.threshold.toFixed(4)}; on the held-out messages (out-of-fold scores): ${pc(x.precision)} of what it executed was right, it did ${pc(x.coverage)} of the requests right and asked about ${pc(x.asked)}`
+      : off ? `not offered: no threshold reaches it on the held-out messages (the highest is ${info.best != null ? pc(info.best) : 'lower'} with at least 50 requests executed)` : 'thresholds not loaded yet';
+    return `<label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:${off ? 'default' : 'pointer'}${off ? ';opacity:.6' : ''}"><input type="radio" name="vss-gate" value="${l}" ${l === vssGate ? 'checked' : ''} ${off ? 'disabled' : ''}> <span><b>${escH(gateLabel(l))}</b>${l === '97' ? ' (default)' : ''}: ${escH(about)}</span></label>`; };
+  return `<h3 class="sub">When VSS acts</h3>
+  <p class="intro">VSS executes a request only when its confidence clears the threshold of the precision level chosen here; below it, it does not execute the request, says why it is not sure (words it did not understand, an uncertain cut, a world that is often wrong, a reference filled from context with a weak margin) and offers <b>Do it anyway</b>. The confidence combines 14 numbers from the whole chain (the cut, the world, the reading, the words, the context filler, the world's own accuracy); the thresholds were fixed on held-out messages from out-of-fold scores (training/sketch/PRECISION.md, PRECISION_BERT.md; on other messages the precision came out about a point lower). The level is kept in this browser.</p>
+  ${GATE_LEVELS.map(opt).join('')}${info && info.version ? `<p class="note">Model <code>confidence/vss.json</code>, version <code>${escH(info.version)}</code>.</p>` : ''}`;
 }
 /** what every reader's Settings subtab starts with: its drawing and what it has read */
 function readerFacts(rd) {
@@ -771,8 +870,9 @@ function renderReaderSettings(rd) {
   if (rd.id === 'vss') {
     const vrows = vssState === 'ready' && vssInfo.composer ? `<table class="kv">${vssInfo.worlds.map(w => `<tr><td><code>${escH(w.model)}</code></td><td>${escH(w.events.join(', '))}</td><td>${mb(w.bytes)}</td></tr>`).join('')}<tr><td>cutters, registry</td><td>which world reads which request</td><td>${mb(vssInfo.cutterBytes)}</td></tr></table>` : '';
     return `<h3 class="sub">VSS reader</h3>${readerFacts(rd)}<div class="actions"><span class="status" id="vss-st">${vssStatusHTML()}</span></div>
-    <p class="intro">Seven small VSS readers (micro-worlds), each trained on a few actions of SOP Lang (VSA route books, no transformer). The world cutter names the worlds that could read each request (and cuts the message when the VSS cutter is the chosen cut); each of those worlds reads it, and the reading that leaves the fewest words not understood is kept (no drawing is passed to a world). A tie, and a reference such as “it” or a role left empty, go to the context filler, which fills it from the conversation and the names on the canvas when one candidate ranks first, and asks otherwise (the rule of 2026-11-01; a confidence threshold below which VSS asks instead of acting is in progress). In a world with several actions, a request without a verb (“Hub teal”) gets its action from a second cutter (the event hint). The files come from this site and load when the page opens.</p>
+    <p class="intro">Seven small VSS readers (micro-worlds), each trained on a few actions of SOP Lang (VSA route books, no transformer). The world cutter names the worlds that could read each request (and cuts the message when the VSS cutter is the chosen cut); each of those worlds reads it, and the reading that leaves the fewest words not understood is kept (no drawing is passed to a world). A tie, and a reference such as “it” or a role left empty, go to the context filler, which fills it from the conversation and the names on the canvas when one candidate ranks first, and asks otherwise (the rule of 2026-11-01). In a world with several actions, a request without a verb (“Hub teal”) gets its action from a second cutter (the event hint). The files come from this site and load when the page opens.</p>
     <p class="intro"><button type="button" class="btn" data-help="vss-reader">How the VSS reader works</button> <button type="button" class="btn" data-help="vss-worlds">What a VSS world is</button></p>
+    ${gateSettingsHTML()}
     ${vssState === 'ready' ? '<h3 class="sub">Worlds: actions and sizes</h3>' + vrows : ''}`;
   }
   const N = NeuralKit.NAMES, A = NeuralKit.ABOUT, info = nStatus ? nStatus.info : {}, ids = NeuralKit.modelsFor();
