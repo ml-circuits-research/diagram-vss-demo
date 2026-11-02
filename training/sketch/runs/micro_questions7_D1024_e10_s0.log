@@ -1,0 +1,29 @@
+[splits] written to /home/claude/diagram-vss-demo/training/sketch/runs/micro_questions7_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 169, heldout_formulations 183, train 3607
+[schema] roles ['object', 'color', 'relation', 'landmark', 'landmark2', 'notcolor', 'superlative', 'members'] (core []), max depth 0, event negation False
+[train] seed 0: 3607 training rows x 10 epoch(s) -> 36070 steps' sentences; D=1024; kinds 57; vocab 1784; predicate lemma not found in 1140 targets
+[train] phase table: 2042 of 10016 rows reached by the training sentences, held and trained; the other 7974 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.63 GB (peak 0.63 GB) | cpu | MemAvailable 5.8 GB
+[trace] text: show me the which
+[trace] tokens/kinds: show/c11_what me/c5_me the/the which/VERB
+[trace] gold frame: {"event": "list", "lemma": "which", "neg": false, "roles": {}, "scope": null, "shape": "ok", "speakers": []}
+/home/claude/diagram-vss-demo/training/vss/tool/sop/train.py:593: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  print(f"[trace] target |S_world| = {np.linalg.norm(target(0)):.2f} (sqrt(D) per unit term = {np.sqrt(a.D):.1f}); initial gates all {float(torch.sigmoid(m.logits[0])):.2f} (closed start)")
+[trace] target |S_world| = 32.00 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[train seed 0] start: RSS 0.74 GB (peak 0.74 GB) | cpu | MemAvailable 5.7 GB
+[train seed 0] step 500 sent 4000/36070 loss -0.795 (660s) | RSS 1.02 GB (peak 1.16 GB) | cpu | MemAvailable 5.5 GB
+[train seed 0] step 1000 sent 8000/36070 loss -0.894 (1276s) | RSS 0.92 GB (peak 1.17 GB) | cpu | MemAvailable 5.6 GB
+[train seed 0] step 1500 sent 12000/36070 loss -0.883 (1958s) | RSS 1.02 GB (peak 1.17 GB) | cpu | MemAvailable 5.5 GB
+[train seed 0] step 2000 sent 16000/36070 loss -0.942 (2697s) | RSS 0.93 GB (peak 1.17 GB) | cpu | MemAvailable 5.6 GB
+[train seed 0] step 2500 sent 20000/36070 loss -0.936 (3499s) | RSS 0.92 GB (peak 1.18 GB) | cpu | MemAvailable 5.6 GB
+[train seed 0] step 3000 sent 24000/36070 loss -0.908 (4295s) | RSS 0.95 GB (peak 1.18 GB) | cpu | MemAvailable 5.6 GB
+[train seed 0] step 3500 sent 28000/36070 loss -0.897 (5093s) | RSS 0.96 GB (peak 1.18 GB) | cpu | MemAvailable 5.6 GB
+[train seed 0] step 4000 sent 32000/36070 loss -0.926 (5654s) | RSS 0.92 GB (peak 1.18 GB) | cpu | MemAvailable 5.7 GB
+[train seed 0] step 4500 sent 36000/36070 loss -0.933 (6229s) | RSS 1.02 GB (peak 1.18 GB) | cpu | MemAvailable 5.7 GB
+[train seed 0] end: RSS 1.02 GB (peak 1.18 GB) | cpu | MemAvailable 5.8 GB (6245s)
+[export] route book written | RSS 1.02 GB (peak 1.18 GB) | cpu | MemAvailable 5.8 GB
+[export] numpy reader vs torch states: max relative difference 7.27e-08 (float32 phases in the route book)
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.933 | residual 0.101
+[eval] seed 0 train (sample): FULL catalog candidates 0.953 | residual 0.127
+[mem] after seed 0: RSS 1.02 GB (peak 1.18 GB) | cpu | MemAvailable 5.8 GB
+[done] model written to /home/claude/diagram-vss-demo/training/sketch/worlds_micro/questions7/model; REPORT.md and metrics.json there; run log /home/claude/diagram-vss-demo/training/sketch/runs/micro_questions7_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)

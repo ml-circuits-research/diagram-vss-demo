@@ -1,0 +1,23 @@
+[splits] written to /home/claude/diagram-vss-demo/training/sketch/runs/micro_graphq7_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 138, heldout_formulations 131, train 2460
+[schema] roles ['object', 'shape', 'color', 'size', 'relation', 'landmark', 'landmark2', 'region', 'source', 'target', 'notcolor', 'comparison'] (core []), max depth 0, event negation False
+[train] seed 0: 2460 training rows x 10 epoch(s) -> 24600 steps' sentences; D=1024; kinds 57; vocab 2781; predicate lemma not found in 1410 targets
+[train] phase table: 1917 of 10016 rows reached by the training sentences, held and trained; the other 8099 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.70 GB (peak 0.70 GB) | cpu | MemAvailable 5.7 GB
+[trace] text: does n_card1 connected_q n_card2 in either direction
+[trace] tokens/kinds: does/c18_does n_card1/NAME connected_q/VERB n_card2/NAME in/c23_in either/None direction/None
+[trace] gold frame: {"event": "connected", "lemma": "connected_q", "neg": false, "roles": {"landmark": ["entity", "n_card2", null, null], "object": ["entity", "n_card1", null, null]}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 55.52 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[train seed 0] start: RSS 0.80 GB (peak 0.80 GB) | cpu | MemAvailable 5.7 GB
+[train seed 0] step 500 sent 4000/24600 loss -0.805 (511s) | RSS 0.99 GB (peak 1.20 GB) | cpu | MemAvailable 5.5 GB
+[train seed 0] step 1000 sent 8000/24600 loss -0.890 (1204s) | RSS 1.00 GB (peak 1.21 GB) | cpu | MemAvailable 5.7 GB
+[train seed 0] step 1500 sent 12000/24600 loss -0.892 (1877s) | RSS 0.98 GB (peak 1.21 GB) | cpu | MemAvailable 5.6 GB
+[train seed 0] step 2000 sent 16000/24600 loss -0.893 (2422s) | RSS 0.90 GB (peak 1.21 GB) | cpu | MemAvailable 5.6 GB
+[train seed 0] step 2500 sent 20000/24600 loss -0.888 (3041s) | RSS 0.95 GB (peak 1.21 GB) | cpu | MemAvailable 5.8 GB
+[train seed 0] step 3000 sent 24000/24600 loss -0.905 (3699s) | RSS 0.99 GB (peak 1.21 GB) | cpu | MemAvailable 5.6 GB
+[train seed 0] end: RSS 0.99 GB (peak 1.21 GB) | cpu | MemAvailable 5.6 GB (3807s)
+[export] route book written | RSS 0.99 GB (peak 1.21 GB) | cpu | MemAvailable 5.6 GB
+[export] numpy reader vs torch states: max relative difference 8.72e-08 (float32 phases in the route book)
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.885 | residual 0.091
+[eval] seed 0 train (sample): FULL catalog candidates 0.900 | residual 0.075
+[mem] after seed 0: RSS 1.00 GB (peak 1.21 GB) | cpu | MemAvailable 5.5 GB
+[done] model written to /home/claude/diagram-vss-demo/training/sketch/worlds_micro/graphq7/model; REPORT.md and metrics.json there; run log /home/claude/diagram-vss-demo/training/sketch/runs/micro_graphq7_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)

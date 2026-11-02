@@ -1,0 +1,95 @@
+{
+ "world": "questions7",
+ "D": 1024,
+ "seed": 0,
+ "star_version": 2,
+ "language": "en",
+ "legend_sha256": "sha256:757204772f3855f62d89934d0b8d2f39a7789f4a4971d0eeaeefce8a4fc856a7",
+ "legend_version": 1,
+ "training_code_commit": "9b2fa1c",
+ "trained": "2026-11-02T04:48:08",
+ "codes": [
+  "path",
+  "chainL",
+  "bigram"
+ ],
+ "gate_init": "closed",
+ "depth_estimator": "kinds",
+ "presence_readout": "decided",
+ "batch": 8,
+ "lr": 0.02,
+ "epochs": 10,
+ "n_train_steps_sentences": 36070,
+ "decoder": "contract",
+ "candidates": "sentence",
+ "undecided_adjacent": true,
+ "residual": "explained",
+ "presence_query": true,
+ "activation": null,
+ "thresholds": {
+  "tau": 0.05,
+  "tau_source": "stated (the repository's v16 value), not fitted on any rows",
+  "no_sense_share": 0.5,
+  "no_sense_source": "stated",
+  "no_fit_residual": 0.9,
+  "no_fit_source": "stated (dispatcher only, spec section 9)",
+  "presence": {
+   "object": 0.6236317414589323,
+   "color": 0.36645027539203295,
+   "relation": 0.43514910465018297,
+   "landmark": 0.33921543693094747,
+   "landmark2": null,
+   "notcolor": 0.661114707984746,
+   "superlative": 0.5297194342511163,
+   "members": null
+  },
+  "attr_presence": {
+   "object": 0.20902782036746867
+  },
+  "det_presence": {},
+  "scope_term": null,
+  "set_member": {
+   "members": null
+  },
+  "calibration_split": "train (a sample of 400 training sentences, rng 1234+seed) + the CALIBRATION half of the held-out formulations (169 sentences, splits calibration_*), disjoint from the reported half (rule 25)",
+  "rule": "FITTED: per role, the threshold that maximises the balanced present / absent accuracy on the calibration rows (judgment 752853c \u00a72); the pooled midpoint of the same rows is kept as thresholds_pooled_midpoint, the comparison",
+  "presence_margin": "|presence ratio - threshold| (ratio units), on the wire as _presence_margin.<role> (SOP Lang keys carry one dot); the role's _margin = min(identity margin, presence margin): a near-threshold reading abstains"
+ },
+ "thresholds_training_rows_only": {
+  "presence": {
+   "object": 0.6479164304635421,
+   "color": 0.6369624387074972,
+   "relation": 0.43514910465018297,
+   "landmark": 0.30997371460543,
+   "landmark2": null,
+   "notcolor": 0.661114707984746,
+   "superlative": 0.5297194342511163,
+   "members": null
+  },
+  "attr_presence": {
+   "object": 0.20902782036746867
+  },
+  "det_presence": {},
+  "scope_term": null,
+  "set_member": {
+   "members": null
+  },
+  "calibration_split": "train (a sample of 400 training sentences, rng 1234+seed); never the scored rows (rule 25)"
+ },
+ "thresholds_pooled_midpoint": {
+  "presence": {
+   "object": 1.0535815346159332,
+   "color": 0.4557098658991737,
+   "relation": 0.5326542248057857,
+   "landmark": 0.40503534146892306,
+   "notcolor": 0.6374803672127911,
+   "superlative": 0.5238832081738226
+  },
+  "attr_presence": {
+   "object": 0.46674223258194447
+  },
+  "det_presence": {},
+  "scope_term": null,
+  "set_member": {}
+ }
+}
