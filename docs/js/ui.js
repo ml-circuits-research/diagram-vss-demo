@@ -275,7 +275,7 @@ async function run(text, sop) {
 async function readWith(rd, text, rec, pk) {
   const r = { nodes: [], notes: [] }; rec.readers[rd.id] = r;
   let overrides = {};
-  const ctx = { names: rd.world.state.shapes.map(s => s.name), last: rd.last };
+  const ctx = { names: rd.world.state.shapes.map(s => s.name).concat((rd.world.state.groups || []).map(g => g.name)), last: rd.last };   // group names are names too (VSS reads a name only if it is listed)
   // the time is the formalizing only (text -> SOP wires), not the engine or the drawing; VSS and Neural are loaded before they read
   const t0 = performance.now();
   try {
@@ -908,6 +908,7 @@ function renderWorld(rd) {
   for (const s of S.shapes) lines.push(hlNode({ id: s.name, type: 'shape', args: Object.assign({ shape: s.shape, size: K.sizeName(s.size), color: s.color }, s.outline ? { outline: s.outline } : {}, s.label ? { label: s.label } : {}, { at: [s.x, s.y] }) }));
   for (const e of S.edges) lines.push(hlNode({ id: e.id, type: 'edge', args: Object.assign({ from: { ref: e.from }, to: { ref: e.to }, style: e.style, arrow: e.arrow }, e.color ? { color: e.color } : {}, e.label ? { label: e.label } : {}) }));
   for (const r of S.rules) { const a = {}; ['shape', 'size', 'color', 'outline'].forEach(k => { if (r[k]) a[k] = r[k]; }); lines.push(hlNode({ id: r.id, type: 'rule', args: a })); }
+  for (const g of S.groups || []) lines.push(hlNode({ id: g.name, type: 'group', args: { members: g.members.map(m => ({ ref: m })) } }));
   if (!lines.length) lines.push('<span class="cm"># empty</span>');
   return `${isReady(rd) ? '' : `<p class="intro">This reader is ${escH(offText(rd).replace(/, did not read this$/, '').replace(/ \(see Neural › Settings\)$/, ''))}; its Settings subtab shows how to load it.</p>`}<p class="intro">The ${escH(rd.label)} reader’s drawing, written back as SOP wires. This is what a backend such as Datalog, Prolog or Z3 would receive after lowering. ${w.undoStack.length} step${w.undoStack.length === 1 ? '' : 's'} can be undone.</p><pre class="sop">${lines.join('\n')}</pre>`;
 }
