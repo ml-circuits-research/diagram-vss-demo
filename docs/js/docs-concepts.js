@@ -680,9 +680,24 @@ say that it is unsure, not what is missing.</p>
   <li><b>Training data is written from the list</b>, by constructions and actions, not by copying the examples.</li>
   <li><b>Both readers are retrained on the same data</b>, VSS and SOP-BERT, and measured once on the untouched test part.</li>
 </ol>
-<div class="callout warn" id="loop-result"><p><b>Being measured.</b> Whether the list is informative (how much of the misses the top 10 / 20 / 50
-needs cover) and whether data written from it helps VSS more than the same amount of general data, at equal training data for both readers:
-<code>training/sketch/feedback/DATA_NEEDS.md</code> and the retraining runs, in progress (2026-11-02).</p></div>
+<div class="callout" id="loop-result">
+<p><b>First check (2026-11-02, <code>training/sketch/feedback/DATA_NEEDS.md</code>): the list is informative.</b> VSS read only the text of the
+new writer’s calibration part (195 messages) and listed 501 needs. The labels were then used only to check the list:</p>
+<table>
+<tr><th>What VSS said it could not do</th><th>Real cause (from the labels)</th><th>Matched</th></tr>
+<tr><td>text left outside every request that a world could read</td><td>the cutter lost the request</td><td>29 of 35 (sample: 127 of 146)</td></tr>
+<tr><td>it asked about a reference</td><td>the context filler asked</td><td>25 of 25 (sample: 146 of 151)</td></tr>
+<tr><td>words it could place in no role</td><td>a value in no role</td><td>8 of 8</td></tr>
+<tr><td>a world chosen against the cutter</td><td>another world won</td><td>5 of 6 (sample: 49 of 65)</td></tr>
+</table>
+<p>These specific causes touch 64% of VSS’s wrong and undone requests and only 19% of its right ones (sample: 60% and 13%). The broad doubts
+(“the links world is often wrong”, “part of the request is unexplained”) touch right requests about as often as wrong ones: they say VSS is
+unsure, not what to add. Two blind spots: a wrong action read with confidence, and a value the phrase tables do not turn into a word, give
+no specific cause. From the calibration text alone the list also predicted the largest causes found with the labels (FRESH2_CAUSES.md): the
+cut, terse “A to B” connects, “them”.</p>
+<p><b>Whether data written from it helps</b> is the experiment of <code>FEEDBACK_PLAN.md</code>, running: 600 messages written from the list
+against 600 written from the general brief, both readers trained on each, measured once on the test part with the cost score.</p>
+</div>
 
 <h2 id="fair">What keeps it honest</h2>
 <ul>
