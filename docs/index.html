@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
 /* Layout: a messaging app with a drawing board pinned beside it (desktop) or above it (phone).
-   Chat bubbles carry plain-language replies; wires, patches and model evidence live in History. */
+   Chat bubbles carry plain-language replies; a bubble's "details" shows the wires, patches and model evidence of that message. */
 :root {
   --app: #DADFE3;
   --head: #F0F2F5;
@@ -75,7 +75,7 @@ svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-widt
 .ib { width: 40px; height: 40px; border-radius: 50%; border: 0; background: transparent; display: grid; place-items: center; cursor: pointer; color: var(--muted); flex: none; }
 .ib:hover { background: rgba(127, 127, 127, .14); color: var(--ink); }
 
-.stage { grid-area: stage; position: relative; background: var(--canvas); min-height: 0; min-width: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+.stage { grid-area: stage; position: relative; background: var(--canvas); min-height: 0; min-width: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr); }
 /* reader tabs: each reader (Rules, VSS, Neural) has its own drawing; the canvas shows the active one */
 .rbar { display: flex; align-items: center; gap: 8px; padding: max(8px, env(safe-area-inset-top, 0px)) 10px 0 16px; border-bottom: 1px solid var(--line); background: var(--head); min-width: 0; }
 .rtabs { display: flex; gap: 2px; flex: 1; min-width: 0; }
@@ -89,6 +89,15 @@ svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-widt
 .tools .ib { width: 36px; height: 36px; }
 .tools .ib svg.i { width: 19px; height: 19px; }
 .board { position: relative; min-height: 0; min-width: 0; }
+/* subtabs of the active reader: Drawing (the canvas) | SOP (its drawing as SOP wires) | Settings (that reader's settings and state) */
+.subbar { display: flex; align-items: center; gap: 4px; padding: 5px 16px; border-bottom: 1px solid var(--line); background: var(--head); min-width: 0; }
+.subtab { border: 1px solid transparent; background: none; border-radius: 999px; padding: 2px 11px; cursor: pointer; color: var(--muted); font-size: 12.5px; font-weight: 500; white-space: nowrap; }
+.subtab:hover { color: var(--ink); }
+.subtab[aria-selected="true"] { background: var(--pill); border-color: var(--line); color: var(--ink); font-weight: 600; }
+.subbar .of { margin-left: auto; font-size: 11.5px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.rpanel { position: absolute; inset: 0; z-index: 3; overflow-y: auto; overflow-x: hidden; background: var(--canvas); padding: 12px 16px 20px; font-size: 14px; overscroll-behavior: contain; }
+.rpanel .sop { max-width: 100%; }
+.rpanel h3.sub:first-child { margin-top: 2px; }
 #canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
 .rcard { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); overflow-wrap: anywhere; width: min(380px, calc(100% - 32px)); max-height: calc(100% - 20px); overflow-y: auto; background: var(--sheet); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; box-shadow: 0 4px 18px rgba(0, 0, 0, .14); font-size: 13.5px; display: grid; gap: 6px; }
 .rcard.small { top: 12px; transform: translateX(-50%); }
@@ -199,7 +208,7 @@ h3.sub:first-child { margin-top: 0; }
 .opts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 10px; }
 select { border: 1px solid var(--line); background: var(--sheet); border-radius: 6px; padding: 4px 8px; max-width: 100%; }
 
-/* technical: history, legend, plugins, world, formalizer */
+/* technical: message details, SOP language, plugins, reader SOP and settings */
 .turn { border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px; background: var(--sheet); }
 .turn > summary { cursor: pointer; padding: 8px 12px; display: flex; gap: 10px; align-items: baseline; list-style: none; }
 .turn > summary::-webkit-details-marker { display: none; }
@@ -278,11 +287,24 @@ table.kv td:last-child { text-align: right; white-space: nowrap; color: var(--mu
 .bench td { font-family: var(--font); }
 .bench .ok { color: var(--str); font-weight: 600; } .bench .no { color: var(--err); font-weight: 600; }
 code { font-family: var(--mono); font-size: .92em; }
+/* help */
+.cmds { display: grid; grid-template-columns: 9em minmax(0, 1fr); gap: 0 12px; font-size: 13.5px; }
+.cmds > dt { font-weight: 600; padding: 6px 0; border-top: 1px solid var(--line); }
+.cmds > dd { margin: 0; padding: 6px 0; border-top: 1px solid var(--line); color: var(--muted); display: grid; gap: 2px; min-width: 0; }
+.cmds > dd q { color: var(--ink); quotes: "“" "”"; }
+.cmds > dd .soon { font-size: 12px; color: var(--faint); }
+.help p, .help ul { margin: 0 0 10px; max-width: 68ch; }
+.help ul { padding-left: 18px; }
+.help li { margin: 3px 0; }
+.help .eg { font-family: var(--mono); font-size: 12.5px; background: var(--code-bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; margin: 0 0 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.msghead { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; margin-bottom: 10px; display: grid; gap: 2px; }
+.msghead .q { white-space: pre-wrap; overflow-wrap: anywhere; }
+.msghead .note { font-size: 12px; }
 
 /* ---------- phone ---------- */
 /* phone keyboard open: shrink the drawing so the conversation stays usable */
 .app.kb { grid-template-rows: auto minmax(0, 24%) minmax(0, 1fr) auto auto; }
-.app.kb .readout, .app.kb .sopbar { display: none; }
+.app.kb .readout, .app.kb .sopbar, .app.kb .subbar { display: none; }
 @media (max-width: 860px) {
   .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(180px, 46%) minmax(0, 1fr) auto auto; grid-template-areas: "head" "stage" "msgs" "player" "comp"; }
   .head { border-left: 0; padding-top: max(10px, env(safe-area-inset-top, 0px)); padding-left: max(12px, env(safe-area-inset-left, 0px)); }
@@ -296,6 +318,8 @@ code { font-family: var(--mono); font-size: .92em; }
   .sop.mini { max-height: 3.6em; }
   .b { max-width: 90%; }
   .sheet { width: 100%; }
+  .cmds { grid-template-columns: minmax(0, 1fr); }
+  .cmds > dd { border-top: 0; padding-top: 0; }
 }
 </style>
 
@@ -305,7 +329,7 @@ code { font-family: var(--mono); font-size: .92em; }
   <header class="head">
     <div class="avatar" aria-hidden="true">@</div>
     <div class="who"><b>Sketchpad</b><span id="status">draws what you write</span></div>
-    <button class="ib" type="button" id="open-settings" aria-label="History and settings" title="History and settings">
+    <button class="ib" type="button" id="open-settings" aria-label="Help, SOP language, plugins and benchmark" title="Help, SOP language, plugins and benchmark">
       <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg>
     </button>
   </header>
@@ -313,7 +337,7 @@ code { font-family: var(--mono); font-size: .92em; }
   <section class="stage" aria-label="Drawing">
     <div class="rbar">
       <div class="rtabs" id="rtabs" role="tablist" aria-label="Readers"></div>
-      <div class="tools">
+      <div class="tools" id="tools">
         <button class="ib" type="button" id="align-btn" hidden aria-label="Copy this drawing to the other tabs" title="Copy this drawing to the other tabs"><svg class="i" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>
         <button class="ib" type="button" id="view-btn" aria-label="Show the whole canvas" title="Show the whole canvas"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
         <button class="ib" type="button" data-say="Undo" data-sop="@t1 command action=undo" aria-label="Undo" title="Undo"><svg class="i" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
@@ -321,6 +345,7 @@ code { font-family: var(--mono); font-size: .92em; }
         <button class="ib" type="button" data-say="Clear the canvas" data-sop="@m1 mention quantifier=all&#10;@t1 command action=delete target=$m1" aria-label="Clear the canvas" title="Clear the canvas"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg></button>
       </div>
     </div>
+    <div class="subbar" id="subtabs" role="tablist" aria-label="What to show for this reader"></div>
     <div class="board">
       <svg id="canvas" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Diagram">
         <defs><pattern id="dots" width="25" height="25" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1.1" style="fill: var(--grid)"/></pattern></defs>
@@ -330,6 +355,7 @@ code { font-family: var(--mono); font-size: .92em; }
       </svg>
       <div class="readout" id="readout">0 shapes</div>
       <div class="rcard" id="rcard" hidden></div>
+      <div class="rpanel" id="rpanel" role="tabpanel" hidden></div>
     </div>
   </section>
 
