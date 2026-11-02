@@ -695,8 +695,18 @@ new writer’s calibration part (195 messages) and listed 501 needs. The labels 
 unsure, not what to add. Two blind spots: a wrong action read with confidence, and a value the phrase tables do not turn into a word, give
 no specific cause. From the calibration text alone the list also predicted the largest causes found with the labels (FRESH2_CAUSES.md): the
 cut, terse “A to B” connects, “them”.</p>
-<p><b>Whether data written from it helps</b> is the experiment of <code>FEEDBACK_PLAN.md</code>, running: 600 messages written from the list
-against 600 written from the general brief, both readers trained on each, measured once on the test part with the cost score.</p>
+<p><b>Whether data written from it helps: no</b> (2026-11-02, <code>FEEDBACK_RESULT.md</code>, verdicts fixed beforehand). 600 messages
+written from the list against 600 written from the general brief, each on top of the same 1200 new messages, both readers trained on
+each, measured once on the test part with the cost score (one confident mistake = 10 right answers):</p>
+<table>
+<tr><th>Reader</th><th>General data</th><th>Data from VSS’s list</th></tr>
+<tr><td>VSS</td><td>12.9 [9.2, 16.5]</td><td>8.5 [4.1, 12.7]</td></tr>
+<tr><td>SOP-BERT</td><td>14.4 [2.0, 26.7]</td><td>18.6 [9.3, 28.0]</td></tr>
+</table>
+<p>The targeted data made VSS worse (−4.3 [−8.4, −0.4]); it did not help VSS more than SOP-BERT, and VSS did not reach SOP-BERT. A negative
+result, reported as such. What did help VSS: more varied writers. On the same test, the shipped VSS scores 4.0; trained with the new Opus
+messages, 12.9, with the fewest confident mistakes of any reader (1.9% of what it executes), within SOP-BERT’s interval. Why the targeted
+data hurt is not measured yet: the list’s top needs were broad doubts, and the targeted data came out skewed toward a few kinds of requests.</p>
 </div>
 
 <h2 id="fair">What keeps it honest</h2>
