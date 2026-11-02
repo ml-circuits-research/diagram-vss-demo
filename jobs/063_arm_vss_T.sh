@@ -1,4 +1,4 @@
-# AFTER: 061_arm_vss_G
+# AFTER: 065_arm_vss_G_resume
 # FEEDBACK_PLAN.md arm VSS-T: the SHIPPED VSS chain retrained on base + T (EXTRA_DIRS below), then measured on fresh2.
 # Nothing under docs/model/micro, docs/model/context or docs/model/neural is written: every export goes to docs/model/arms/T/.
 #   - 7 worlds: the settings of their shipped docs/model/micro/<world>/BUILD.json (DATA=spans FRONT_ROWS=world N_EVAL=150 EVAL_MODES=primary D=1024
@@ -67,8 +67,9 @@ acquire_slot() {   # sets FD to a locked slot file among the first WORLD_PAR
 }
 run_world() {   # base events settings...   (runs in a subshell that owns FD)
   local base=$1 events=$2; shift 2; local w="${base}_${ARMLC}" t=$(date +%s)
+  if [ -f "$A/micro/$base/BUILD.json" ]; then echo "[$(date +%T)] skip $base (already trained)" >> "$TL"; return 0; fi
   echo "[$(date +%T)] start $w" >> "$TL"
-  env "$@" EXTRA_DIRS="$EXTRA_DIRS" DEVICE=cuda VSA_MEM_FRACTION=0.35 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True SOP_PYTHON=python3 VSA_MAX_HOURS=4 \
+  env "$@" EXTRA_DIRS="$EXTRA_DIRS" DEVICE=cuda VSA_MEM_FRACTION=${MEMFRAC:-0.35} PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True SOP_PYTHON=python3 VSA_MAX_HOURS=4 \
     OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 bash training/sketch/train_micro.sh "$w" "$events" > "$R/train_$base.log" 2>&1
   local rc=$?
   cp "training/sketch/runs/micro_${w}_D1024_e10_s0.log" "$A/logs/$base.run.log" 2>/dev/null; cp "training/sketch/runs/micro_${w}_D1024_e10_s0/train.log" "$A/logs/$base.train.log" 2>/dev/null
@@ -78,9 +79,9 @@ run_world() {   # base events settings...   (runs in a subshell that owns FD)
 }
 
 # ---- 1. world cutter + event cutter (CPU, one process each) at the same time as the worlds
-( stamp "world cutter start"; cd training/sketch && SHORT=1 EXTRA_DIRS="$EXTRA_DIRS" python3 train_cutter.py --worlds worlds_micro/GROUPS_7.json --out "$ROOT/$A/cutter_worlds7s.json" > "$ROOT/$R/cutter_worlds.log" 2>&1; echo "world cutter exit $?" >> "$ROOT/$TL" ) &
+[ -s "$A/cutter_worlds7s.json" ] && stamp "world cutter: already trained" || ( stamp "world cutter start"; cd training/sketch && SHORT=1 EXTRA_DIRS="$EXTRA_DIRS" python3 train_cutter.py --worlds worlds_micro/GROUPS_7.json --out "$ROOT/$A/cutter_worlds7s.json" > "$ROOT/$R/cutter_worlds.log" 2>&1; echo "world cutter exit $?" >> "$ROOT/$TL" ) &
 PID_CW=$!
-( stamp "event cutter start"; cd training/sketch && EXTRA_DIRS="$EXTRA_DIRS" python3 train_cutter.py --worlds worlds_micro/GROUPS_EVENTS.json --out "$ROOT/$A/cutter_events.json" > "$ROOT/$R/cutter_events.log" 2>&1; echo "event cutter exit $?" >> "$ROOT/$TL" ) &
+[ -s "$A/cutter_events.json" ] && stamp "event cutter: already trained" || ( stamp "event cutter start"; cd training/sketch && EXTRA_DIRS="$EXTRA_DIRS" python3 train_cutter.py --worlds worlds_micro/GROUPS_EVENTS.json --out "$ROOT/$A/cutter_events.json" > "$ROOT/$R/cutter_events.log" 2>&1; echo "event cutter exit $?" >> "$ROOT/$TL" ) &
 PID_CE=$!
 
 # ---- 2. the 7 worlds, WORLD_PAR at a time, biggest first
@@ -92,6 +93,16 @@ while IFS=$'\t' read -r base events settings; do
   exec {FD}>&-          # the child keeps the lock (its copy of FD); this one is closed
 done < "$R/worlds.tsv"
 bad=0; for p in "${PIDS[@]}"; do wait "$p" || bad=$((bad + 1)); done
+if [ "$bad" != 0 ]; then   # a world that ran out of the 0.35 cap (job 061: shapes, links) is retried alone, holding every slot, at 0.85
+  stamp "retrying $bad failed world(s) alone, VSA_MEM_FRACTION=0.85"; LOCKS=()
+  for i in 0 1 2; do exec {L}>"$LOCK/slot.$i"; flock "$L"; LOCKS+=($L); done
+  bad=0
+  while IFS=$'\t' read -r base events settings; do
+    [ -f "$A/micro/$base/BUILD.json" ] && continue
+    MEMFRAC=0.85 run_world "$base" "$events" $settings < /dev/null || bad=$((bad + 1))
+  done < "$R/worlds.tsv"
+  for L in "${LOCKS[@]}"; do exec {L}>&-; done
+fi
 wait "$PID_CW" "$PID_CE"
 stamp "worlds done ($bad failed); cutters done"
 [ "$bad" = 0 ] || fail "$bad world(s) failed (see $R/train_*.log)"
