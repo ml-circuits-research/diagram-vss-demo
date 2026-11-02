@@ -1,0 +1,108 @@
+{
+ "_about": "GROUPS_EVENTS (2026-11-02, EVENT_HINT.md): one world per legend event, world id = event id, so the cutter's B label is B-<event> (the EVENT CUTTER of the composer's event hint, vss-composer.js router \"cutter\" with registry field event_cutter). Exactly the 35 events of GROUPS_7, in its order; every legend event has a world, so there is no B-fallback label.",
+ "create": [
+  "create"
+ ],
+ "set": [
+  "set"
+ ],
+ "resize": [
+  "resize"
+ ],
+ "fact": [
+  "fact"
+ ],
+ "rule": [
+  "rule"
+ ],
+ "connect": [
+  "connect"
+ ],
+ "disconnect": [
+  "disconnect"
+ ],
+ "move": [
+  "move"
+ ],
+ "swap": [
+  "swap"
+ ],
+ "arrange": [
+  "arrange"
+ ],
+ "align": [
+  "align"
+ ],
+ "distribute": [
+  "distribute"
+ ],
+ "toFront": [
+  "toFront"
+ ],
+ "toBack": [
+  "toBack"
+ ],
+ "check": [
+  "check"
+ ],
+ "connected": [
+  "connected"
+ ],
+ "path": [
+  "path"
+ ],
+ "reachable": [
+  "reachable"
+ ],
+ "cycle": [
+  "cycle"
+ ],
+ "exists": [
+  "exists"
+ ],
+ "count": [
+  "count"
+ ],
+ "list": [
+  "list"
+ ],
+ "extreme": [
+  "extreme"
+ ],
+ "nearest": [
+  "nearest"
+ ],
+ "describe": [
+  "describe"
+ ],
+ "neighbors": [
+  "neighbors"
+ ],
+ "degree": [
+  "degree"
+ ],
+ "property": [
+  "property"
+ ],
+ "delete": [
+  "delete"
+ ],
+ "duplicate": [
+  "duplicate"
+ ],
+ "rename": [
+  "rename"
+ ],
+ "label": [
+  "label"
+ ],
+ "undo": [
+  "undo"
+ ],
+ "redo": [
+  "redo"
+ ],
+ "forget": [
+  "forget"
+ ]
+}

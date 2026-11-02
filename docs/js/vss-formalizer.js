@@ -56,7 +56,8 @@ export async function loadComposerAt(root = new URL("../model/", import.meta.url
     const t0 = performance.now(), json = async (u) => JSON.parse(new TextDecoder().decode(await fetchSize(new URL(u, root), comp)));
     const registry = await json("micro/registry.json"), cutter = await json(registry.cutter);
     const context = registry.router === "cutter" ? await json(registry.context || "context/weights.json") : undefined;   // CandidateRouter needs the context filler
-    comp.c = await loadComposer(registry, cutter, (name) => modelAt(new URL(name.replace(/\/?$/, "/"), root).href), { context });
+    const eventCutter = registry.event_cutter ? await json(registry.event_cutter) : undefined;   // the event hint (vss-composer.js, EVENT_HINT.md)
+    comp.c = await loadComposer(registry, cutter, (name) => modelAt(new URL(name.replace(/\/?$/, "/"), root).href), { context, eventCutter });
     comp.loadMs = performance.now() - t0; return comp.c;
   })();
   return comp.loading;

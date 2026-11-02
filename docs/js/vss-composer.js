@@ -39,6 +39,19 @@
 //      order); the VSS layer never asks;
 //   5. the post-VSS context filler (vss-context.js Context with docs/model/context/weights.json) fills the reference gaps of the chosen
 //      reading; a request with a gap it cannot fill is asked (zone "ask"), not executed.
+// EVENT HINT (router "cutter" only; training/sketch/EVENT_HINT.md; registry field "event_cutter", a path under docs/model/ like "cutter";
+// absent = the composer above, unchanged):
+//   1. the EVENT CUTTER (train_cutter.py --worlds worlds_micro/GROUPS_EVENTS.json: one world per legend event, labels B-<event>) is decoded
+//      once over the whole message (front.js segDecodeLabels, the same tokens as segmentWorlds); a unit's EVENT HINT is the B-<event> label
+//      with the largest score at the unit's first token (equal scores: label order). The event cutter does not cut; the units stay those
+//      of the cutter with worlds;
+//   2. each candidate world reads the unit as above; then, only when the hint is one of that world's events, the world reads the unit
+//      again with the event given (vss.read opts.event, reader.js: the predicate's candidates are that event's verb lemmas and the verb
+//      check is met) and that second reading replaces the first in step 3:
+//      mode "H1" (registry field "event_hint", the default): when the first reading's status is unknown-event;
+//      mode "H2": also when the first reading is readable (ok, abstain) and its event differs from the hint.
+//   Each unit carries hint, hintApplies (the hint is an event of a candidate world), reread (readings replaced) and hintChanged (the unit's
+//   chosen reading, world and SOP text, or ignored, differs from the one the first readings give).
 import * as FRONT from "./front.js";
 import { fillerWords } from "./vss/reader.js";
 import { readingFromWires, toNodes } from "./vss-adapter.js";
@@ -66,8 +79,9 @@ export function nextContext(c, main) {
 
 export class Composer {
   /** cutter: {segmenter}; fallback: makeWorld(..., null, ...); worlds: makeWorld(...) in registry order */
-  constructor({ cutter, fallback, worlds = [], router = "token", context = null, k = ROUTER_K }) {
+  constructor({ cutter, fallback, worlds = [], router = "token", context = null, k = ROUTER_K, eventCutter = null, eventHint = null }) {
     this.cutter = cutter; this.fallback = fallback; this.worlds = worlds; this.router = router; this.contextModel = context; this.k = k;
+    this.eventCutter = eventCutter || null; this.eventHint = eventCutter ? eventHint || "H1" : null;
     const fev = new Set(fallback.vss.model.legend.events.map((e) => e.id));
     for (const w of worlds) {
       const lev = new Set(w.vss.model.legend.events.map((e) => e.id));
@@ -84,6 +98,14 @@ export class Composer {
       const G = cutter.grouping || {}, same = (a, b) => a.size === b.size && [...a].every((x) => b.has(x));
       for (const w of worlds) if (!cutter.worlds.includes(w.id) || !same(new Set(G[w.id] || []), w.events)) throw new Error(`composer: world ${w.id} [${[...w.events]}] is not a world of the cutter (${cutter.command || "?"}); retrain it with this grouping`);
       for (const cw of cutter.worlds) if (cw !== "fallback" && !worlds.some((w) => w.id === cw)) throw new Error(`composer: the cutter's world ${cw} is not in the registry`);
+    }
+    if (eventHint && !eventCutter) throw new Error("composer: event_hint needs an event cutter (registry field event_cutter)");
+    if (eventCutter) {      // the event hint (see the head of the file)
+      if (router !== "cutter") throw new Error("composer: the event cutter is used only with router cutter");
+      if (this.eventHint !== "H1" && this.eventHint !== "H2") throw new Error(`composer: event_hint ${this.eventHint}: expected H1 or H2`);
+      if (!Array.isArray(eventCutter.labels) || !Array.isArray(eventCutter.worlds)) throw new Error("composer: the event cutter has no labels (train_cutter.py --worlds)");
+      const G = eventCutter.grouping || {};
+      for (const e of eventCutter.worlds) if (e !== "fallback" && (!fev.has(e) || (G[e] || []).length !== 1 || G[e][0] !== e)) throw new Error(`composer: the event cutter's world ${e} is not one legend event (${eventCutter.command || "?"}); train it with worlds_micro/GROUPS_EVENTS.json`);
     }
     this.valueTokens = new Set(Object.entries(fallback.vss.model.lexicon || {}).filter(([, e]) => /^[A-Z]+$/.test(e.kind) && e.kind !== "VERB").map(([w]) => w));
   }
@@ -144,8 +166,8 @@ export class Composer {
 
   // ---------------------------------------------------------------- router "cutter" (see the head of the file)
   /** one world reads one unit with its own front end; -> the reading with its words not understood (wnu: {words, n, notU}) */
-  readWnu(w, src, names) {
-    const tr = FRONT.normalizeTrace(src, names, w.F), r = w.vss.read(tr.tokens.join(" "));
+  readWnu(w, src, names, ropts) {      // ropts: the reader's options (the event hint: {event})
+    const tr = FRONT.normalizeTrace(src, names, w.F), r = w.vss.read(tr.tokens.join(" "), ropts);
     const x = { world: w.id, w, tokens: tr.tokens, info: tr.info, r, status: r.status, event: UNREADABLE.has(r.status) ? null : r.frame.event };
     const und = new Set();
     if (x.event) {
@@ -164,19 +186,47 @@ export class Composer {
 
   /** route one unit (router "cutter"); ranked: the cutter's worlds of the unit -> {zone "read" | "ignored", options (the tied best
    *  readings, cutter order), tried, candidates, reason} */
-  routeCutter(src, names, ranked) {
+  routeCutter(src, names, ranked, hint = null) {
     const cands = ranked.slice(0, this.k), byId = new Map(this.worlds.map((w) => [w.id, w]));
     const tried = cands.map((c) => this.readWnu(c.world === "fallback" ? this.fallback : byId.get(c.world), src, names));
+    let first = null, reread = 0, hintApplies = false;
+    if (hint !== null) {      // the event hint (see the head of the file): a world whose events include the hint may read the unit again
+      first = tried.slice();
+      tried.forEach((x, i) => {
+        if (!x.w.events || !x.w.events.has(hint)) return;
+        hintApplies = true;
+        if (x.status === "unknown-event" || (this.eventHint === "H2" && x.event && x.event !== hint)) { tried[i] = Object.assign(this.readWnu(x.w, src, names, { event: hint }), { reread: x.status + (x.event ? " " + x.event : "") }); reread++; }
+      });
+    }
+    const out = Object.assign({ src, candidates: cands.map((c) => ({ world: c.world, score: c.score })),
+      tried: tried.map((x) => Object.assign({ world: x.world, event: x.event, status: x.status, words: x.wnu.words, notUnderstood: x.wnu.n, held: !!x.held }, x.reread ? { reread: x.reread } : {})) },
+      this.pickCutter(tried));
+    if (hint !== null) Object.assign(out, { hint, hintApplies, reread }, reread ? { first: this.pickCutter(first) } : {});
+    return out;
+  }
+
+  /** the readings of one unit (router "cutter") -> {zone "read", options (the readings tied at the fewest words not understood)} or
+   *  {zone "ignored", world, event, status, options [], reason} */
+  pickCutter(tried) {
     const usable = tried.filter((x) => x.event && !x.held && x.wnu.n < x.wnu.words);
-    const out = { src, candidates: cands.map((c) => ({ world: c.world, score: c.score })),
-      tried: tried.map((x) => ({ world: x.world, event: x.event, status: x.status, words: x.wnu.words, notUnderstood: x.wnu.n, held: !!x.held })) };
     if (!usable.length) {
       const reason = tried.some((x) => x.held) && !tried.some((x) => x.event && !x.held) ? "only the fallback read it, with an event a world holds"
         : tried.some((x) => x.event) ? "no candidate world understood any word" : "no candidate world could read it (" + [...new Set(tried.map((x) => x.status))].join(", ") + ")";
-      return Object.assign(out, { zone: "ignored", world: null, event: null, status: tried[0] ? tried[0].status : "no-sense", options: [], reason });
+      return { zone: "ignored", world: null, event: null, status: tried[0] ? tried[0].status : "no-sense", options: [], reason };
     }
     const min = Math.min(...usable.map((x) => x.wnu.n)), options = usable.filter((x) => x.wnu.n === min);
-    return Object.assign(out, { zone: "read", options });
+    return { zone: "read", options };
+  }
+
+  /** the event hint of every unit start: the event cutter decoded over the message -> (c0) => event | null (see the head of the file) */
+  eventHints(text, canvas) {
+    const E = this.eventCutter, [toks] = FRONT.tokenize(text, canvas), { scores } = FRONT.segDecodeLabels(toks.map((x) => x[0]), E.segmenter, E.labels);
+    const at = new Map(toks.map(([, s], k) => [s, k])), B = E.labels.filter((L) => L.startsWith("B-") && L !== "B-fallback");
+    return (c0) => {
+      const k = at.get(c0); if (k === undefined) return null;
+      let best = null; for (const L of B) if (best === null || scores[k][L] > scores[k][best]) best = L;
+      return best === null ? null : best.slice(2);
+    };
   }
 
   /** a whole message with router "cutter" -> the same shape as formalize; units carry candidates, tried, decidedBy, gaps */
@@ -184,18 +234,33 @@ export class Composer {
     const t0 = performance.now(), update = opts.update || nextContext, seq = { s: 0, m: 0 }, canvas = ctx.names || [];
     const c = { names: canvas, last: (ctx.last || []).slice(), refs: new Map() }, filler = new Context({ text, canvas, model: this.contextModel });
     const nodes = [], notes = [], units = [];
-    const rawOf = (x) => { const verb = x.tokens.find((t) => x.w.verbEvent.has(t)) || x.r.frame.lemma || null, reading = readingFromWires(x.r.wires, verb, x.tokens);
-      return { reading, raw: rawNodes(reading, x.info, canvas, seq) }; };
+    const rawOf = (x, sq = seq) => { const verb = x.tokens.find((t) => x.w.verbEvent.has(t)) || x.r.frame.lemma || null, reading = readingFromWires(x.r.wires, verb, x.tokens);
+      return { reading, raw: rawNodes(reading, x.info, canvas, sq) }; };
+    const hintAt = this.eventCutter ? this.eventHints(text, canvas) : null;
     for (const cu of FRONT.segmentWorlds(text, canvas, this.cutter)) {
       const { c0, c1 } = cu, src = text.slice(c0, c1), names = c.names.concat([...c.refs.keys()]);
-      const u = Object.assign({ c0, c1 }, this.routeCutter(src, names, cu.worlds));
+      const u = Object.assign({ c0, c1 }, this.routeCutter(src, names, cu.worlds, hintAt ? hintAt(c0) : null));
       units.push(u);
-      if (u.zone === "ignored") { notes.push(`VSS could not read “${src}” (${u.reason})`); delete u.options; continue; }
+      // the event hint: the reading the first readings would have given (same choice, dry; a scratch id counter), to count the changes
+      let before;
+      if (u.first) {
+        const p = u.first; delete u.first;
+        if (p.zone === "ignored") before = null;
+        else if (p.options.length === 1) before = p.options[0];
+        else { const sq = { s: seq.s, m: seq.m }; before = p.options[chooseReading(filler, p.options.map((o) => rawOf(o, sq).raw), c0, c1).index]; }
+      }
+      const changed = (x) => {
+        if (before === undefined) return;
+        u.hintChanged = x === null ? before !== null : before === null || before.world !== x.world || before.r.sop !== x.r.sop;
+        if (u.hintChanged) u.hintBefore = before === null ? null : { world: before.world, event: before.event, status: before.status };
+      };
+      if (u.zone === "ignored") { notes.push(`VSS could not read “${src}” (${u.reason})`); delete u.options; changed(null); continue; }
       let x = u.options[0], R = null; u.tie = u.options.length; u.decidedBy = "words";
       if (u.options.length > 1) {
-        const rs = u.options.map(rawOf), d = chooseReading(filler, rs.map((q) => q.raw), c0, c1);
+        const rs = u.options.map((o) => rawOf(o)), d = chooseReading(filler, rs.map((q) => q.raw), c0, c1);
         x = u.options[d.index]; R = rs[d.index]; u.decidedBy = d.by; u.tiedWorlds = u.options.map((o, i) => ({ world: o.world, event: o.event, fits: d.fits[i] }));
       }
+      changed(x);
       if (!R) R = rawOf(x);
       Object.assign(u, { world: x.world, event: x.event, status: x.status, normalized: x.tokens.join(" "), reading: R.reading, notUnderstood: x.wnu.notU,
         vss: { status: x.r.status, sop: x.r.sop, margins: x.r.margins, residual: x.r.residual, unplaced: x.r.unplaced } });
@@ -253,13 +318,18 @@ export class Composer {
 
 /** registry + cutter + a model loader -> a Composer. loadModel(folder relative to docs/model/) -> Promise<{vss, F}>.
  *  opts.router (else registry.router, else "token"); with "cutter": cutter = a cutter with worlds and opts.context = the context filler's
- *  model (weights.json, parsed); opts.k (default ROUTER_K) */
+ *  model (weights.json, parsed); opts.k (default ROUTER_K). When the registry names an "event_cutter", opts.eventCutter = that file,
+ *  parsed (the caller reads it, as the cutter); the mode is registry.event_hint (default H1). */
 export async function loadComposer(registry, cutter, loadModel, opts = {}) {
+  if (registry.event_hint && !registry.event_cutter) throw new Error("composer: the registry's event_hint needs an event_cutter");
+  if (registry.event_cutter && !opts.eventCutter) throw new Error(`composer: the registry names the event cutter ${registry.event_cutter}; pass it parsed as opts.eventCutter`);
   const fbName = opts.fallback || registry.fallback;
   if (!fbName) throw new Error("composer: the registry names no fallback");
   const fb = await loadModel(fbName), fallback = makeWorld(fbName, null, fb.vss, fb.F);
   const worlds = [];
   for (const e of registry.worlds || []) { const m = await loadModel(e.model); worlds.push(makeWorld(e.world, e.events, m.vss, m.F)); }
   const router = opts.router || registry.router || "token";
-  return router === "token" ? new Composer({ cutter, fallback, worlds }) : new Composer({ cutter, fallback, worlds, router, context: opts.context, k: opts.k || ROUTER_K });
+  const hint = registry.event_cutter ? { eventCutter: opts.eventCutter, eventHint: registry.event_hint || "H1" } : {};
+  if (router === "token" && registry.event_cutter) throw new Error("composer: the event cutter is used only with router cutter");
+  return router === "token" ? new Composer({ cutter, fallback, worlds }) : new Composer(Object.assign({ cutter, fallback, worlds, router, context: opts.context, k: opts.k || ROUTER_K }, hint));
 }

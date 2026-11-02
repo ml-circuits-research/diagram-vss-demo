@@ -164,6 +164,14 @@ export class Reader {
     const rs = this.schema.roles[r];
     return this.cands(rs.main === "entity" ? rs.head_kinds : rs.kinds);
   }
+  /** opts.event of read / formalize (EVENT_HINT.md): the event given by the caller, when the world has a predicate role and the event is
+   *  one of its legend with at least one verb lemma among the predicate's candidates; else null (the option does nothing) */
+  hintEvent(opts) {
+    const e = opts ? opts.event : null;
+    if (e === null || e === undefined || !this.legend.reader.predicate_role || !Object.hasOwn(this.legend.events, e)) return null;
+    const vs = new Set(this.verbCands()[0]);
+    return this.legend.events[e].some((l) => vs.has(l)) ? e : null;
+  }
   verbCands() {
     if (!this._cands.has("__verbs")) { const ws = this.legend.allVerbs(); this._cands.set("__verbs", [ws, this._rows(ws, (w) => this.st.id(w))]); }
     return this._cands.get("__verbs");
@@ -325,7 +333,11 @@ export class Reader {
     }
     if (this.legend.reader.predicate_role) {
       let vc = this.verbCands();
-      if (this.cfg.candidates === "sentence") {      // D14 item 4 (infer.py): the predicate's candidates are the sentence's verbs
+      const hint = this.hintEvent(opts);
+      if (hint !== null) {      // opts.event (EVENT_HINT.md, the composer's event hint): the predicate's candidates are that event's verb lemmas
+        const inv = new Map(vc[0].map((w, i) => [w, i])), js = [...new Set(this.legend.events[hint].filter((l) => inv.has(l)).map((l) => inv.get(l)))].sort((x, y) => x - y);
+        vc = [js.map((j) => vc[0][j]), js.map((j) => vc[1][j])];
+      } else if (this.cfg.candidates === "sentence") {      // D14 item 4 (infer.py): the predicate's candidates are the sentence's verbs
         const inv = new Map(vc[0].map((w, i) => [w, i])); const js = [...new Set(tokens.map((t) => this.lemma(t)).filter((l) => inv.has(l)).map((l) => inv.get(l)))].sort((x, y) => x - y);
         if (js.length) vc = [js.map((j) => vc[0][j]), js.map((j) => vc[1][j])];
       }
@@ -639,7 +651,7 @@ export class Reader {
     this.filt = this.cfg.candidates === "sentence" ? new Set(tokens.concat(tokens.map((t) => t.toLowerCase()))) : null;   // the sentence-candidates decoder (R46)
     let f;
     try {
-      f = kept.length ? this.read(S, tokens, { estimator, presence, force: opts.force, forceDepth: opts.forceDepth }) : { shape: "unknown", roles: {}, speakers: [], margins: {}, neg: false, lemma: null };
+      f = kept.length ? this.read(S, tokens, { estimator, presence, force: opts.force, forceDepth: opts.forceDepth, event: opts.event }) : { shape: "unknown", roles: {}, speakers: [], margins: {}, neg: false, lemma: null };
       if (kept.length && f.shape === "ok" && this.cfg.presence_without_placed) {
         // vss-demo Q17 / D28 (infer.py): a second reading of the roles left absent, on the state WITHOUT the deposits of the words already
         // placed in other roles (a label read as the landmark is no evidence of a text); the same thresholds
@@ -651,7 +663,7 @@ export class Reader {
             const F = this.st.id(this.ident(tokens[kept[j]])); if (!F) continue; const a = addr[j];
             for (let d = 0; d < D; d++) { S2.re[d] -= a.re[d] * F.re[d] - a.im[d] * F.im[d]; S2.im[d] -= a.re[d] * F.im[d] + a.im[d] * F.re[d]; }
           }
-          const f2 = this.read(S2, tokens, { estimator, presence, force: [f.depth, f.neg] });
+          const f2 = this.read(S2, tokens, { estimator, presence, force: [f.depth, f.neg], event: opts.event });
           if (f2.shape === "ok") for (const [r, fl] of Object.entries(f2.roles)) {
             if ((f.roles[r] === undefined || f.roles[r] === null) && fl !== null && fl !== undefined && !fillerWords(fl).some((w) => placed0.has(w))) {
               f.roles[r] = fl; f.presence[r] = f2.presence[r]; (f.second_pass = f.second_pass || []).push(r);
@@ -695,7 +707,7 @@ export class Reader {
     const undecided = f.shape === "ok" && this.cfg.undecided_adjacent ? this.undecidedAdjacent(f, tokens, unplaced) : {};
     for (const [r, [, b]] of Object.entries(undecided)) { f.margins[r] = 0.0; unplaced = unplaced.filter((i) => tokens[i] !== b); }
     let status = "ok";
-    const hasVerb = tokens.some((t) => this.legend.eventOfLemma(this.lemma(t))) || !this.legend.reader.predicate_role;
+    const hasVerb = tokens.some((t) => this.legend.eventOfLemma(this.lemma(t))) || !this.legend.reader.predicate_role || this.hintEvent(opts) !== null;   // opts.event meets the verb check
     const nss = this.legend.reader.no_sense_share || (this.th.no_sense_share !== undefined ? this.th.no_sense_share : 0.5);
     if (tokens.length && unplaced.length > nss * tokens.length) status = "no-sense";
     else if (f.shape !== "ok" || !hasVerb) status = "unknown-event";

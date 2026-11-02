@@ -14,6 +14,9 @@
 //   registry's "cutter" when the registry says "router": "cutter", else docs/model/micro/cutter_worlds.json; the filler's model is
 //   CONTEXT=<file>, else the registry's "context" (relative to docs/model/), else docs/model/context/weights.json. Requests the filler asks
 //   about are not executed (they count as not done); the extra "composer v2" line reports them.
+//   When the registry names an "event_cutter" (EVENT_HINT.md; mode registry "event_hint", H1 or H2), that file is passed to the composer
+//   and the line "event hint" reports: units, units whose hint is an event of a candidate world, readings re-read with the hint, units
+//   whose chosen reading the re-reading changed; with --dump, the units with a re-read reading go to <dump>_hint.json.
 // PAIR=value: produced and gold actions are paired by layer_common.mjs pairValue (per action label, a maximum-weight matching: most pairs,
 //   then most gold keys right, then most letters shared by the unit and the gold span; the unit is node.span when the composer gives it,
 //   else the first occurrence of node.src in the text) instead of the order-only LCS. Default (unset or PAIR=order): the LCS, as before.
@@ -38,6 +41,7 @@ const MODEL = COMPOSER ? process.env.MODEL || REG.fallback : process.env.MODEL |
 const dir = new URL(`${MODEL}/`, MODELS);
 const ROUTER = COMPOSER ? process.env.ROUTER || REG.router || "token" : null, V2 = ROUTER === "cutter";
 const CUT = process.env.CUTTER || (V2 ? new URL(REG.router === "cutter" ? REG.cutter : "micro/cutter_worlds.json", MODELS) : COMPOSER && REG.cutter ? new URL(REG.cutter, MODELS) : null), CUTF = CUT ? JSON.parse(readFileSync(CUT, "utf8")) : null;
+const ECUTF = V2 && REG.event_cutter ? new URL(REG.event_cutter, MODELS) : null, ECUT = ECUTF ? JSON.parse(readFileSync(ECUTF, "utf8")) : null;
 const CTXF = V2 ? process.env.CONTEXT || new URL(REG.context || "context/weights.json", MODELS) : null, CTXM = CTXF ? JSON.parse(readFileSync(CTXF, "utf8")) : null;
 if (process.env.PAIR && !["value", "order"].includes(process.env.PAIR)) throw new Error(`PAIR=${process.env.PAIR}: expected value or order`);
 const PAIRV = process.env.PAIR === "value" ? (await import("./layer_common.mjs")).pairValue : null;
@@ -59,7 +63,7 @@ function scorerUpdate(c, main) {
   }
 }
 let comp = null; const CSTAT = { units: 0, byWorld: {}, ask: 0, ignored: 0, ignoredNoToken: 0, multi: 0 };
-const V2STAT = { decided: {}, ignoredWhy: {}, tieSize: {} };
+const V2STAT = { decided: {}, ignoredWhy: {}, tieSize: {} }, HSTAT = { units: 0, applies: 0, reread: 0, unitsReread: 0, changed: 0, log: [] };
 if (COMPOSER) {
   const cache = new Map([[MODEL, { vss, F }]]);
   const loadModel = async (name) => {
@@ -68,13 +72,18 @@ if (COMPOSER) {
     const m = { vss: await load(null, { readFile: rf, sentenceCandidates: true }), F: existsSync(new URL("front.json", d)) ? JSON.parse(await rf("front.json")) : null };
     cache.set(name, m); return m;
   };
-  comp = await loadComposer(REG, CUTF, loadModel, V2 ? { fallback: MODEL, router: "cutter", context: CTXM } : { fallback: MODEL });
+  comp = await loadComposer(REG, CUTF, loadModel, V2 ? Object.assign({ fallback: MODEL, router: "cutter", context: CTXM }, ECUT ? { eventCutter: ECUT } : {}) : { fallback: MODEL });
   console.log(`composer: cutter ${CUT ? CUT.toString().replace(/^file:\/\//, "") : "-"} · fallback ${MODEL} · worlds ${comp.worlds.map((w) => `${w.id} [${[...w.events]}]`).join(", ") || "none"}`);
   if (V2) console.log(`composer v2: router cutter (top ${comp.k} of ${CUTF.worlds.length} cutter worlds) · fewest words not understood · ties and gaps: context filler ${CTXF.toString().replace(/^file:\/\//, "")} margin ${CTXM.margin}`);
+  if (ECUT) console.log(`event hint: mode ${comp.eventHint} · event cutter ${ECUTF.toString().replace(/^file:\/\//, "")}`);
 }
 function composerFormalize(text, ctx) {
   const out = comp.formalize(text, { names: ctx.names, last: [] }, { update: scorerUpdate });
   for (const u of out.units) {
+    if (u.hint !== undefined) {
+      HSTAT.units++; if (u.hintApplies) HSTAT.applies++; HSTAT.reread += u.reread; if (u.reread) HSTAT.unitsReread++; if (u.hintChanged) HSTAT.changed++;
+      if (u.reread) HSTAT.log.push({ text, src: u.src, hint: u.hint, changed: !!u.hintChanged, before: u.hintBefore, zone: u.zone, world: u.world, event: u.event, tried: u.tried });
+    }
     CSTAT.units++; if (u.tried.length > 1) CSTAT.multi++;
     if (u.zone === "read") CSTAT.byWorld[u.world] = (CSTAT.byWorld[u.world] || 0) + 1;
     else if (u.zone === "ask") CSTAT.ask++;
@@ -200,4 +209,8 @@ if (dirs.length > 1) { const n = ALL.n, pc = (x, T) => (x / T.gold * 100).toFixe
   console.log("  " + msgLine("rules", ALL.rules, n)); console.log("  " + msgLine("vss", ALL.vss, n)); }
 if (V2) console.log(`\ncomposer v2: units read, decided by: ${Object.entries(V2STAT.decided).map(([k, n]) => `${k} ${n}`).join(", ")} · readings tied at the fewest words not understood: ${Object.entries(V2STAT.tieSize).sort((a, b) => a[0] - b[0]).map(([k, n]) => `${k}: ${n}`).join(", ")} · asked by the context filler (not executed) ${CSTAT.ask} · ignored: ${Object.entries(V2STAT.ignoredWhy).map(([k, n]) => `${k} ${n}`).join(", ") || "none"}`);
 if (PAIRV) console.log(`pairing: PAIR=value (layer_common.mjs pairValue)`);
+if (ECUT) {
+  console.log(`\nevent hint (${comp.eventHint}): units ${HSTAT.units} · hint an event of a candidate world ${HSTAT.applies} · readings re-read ${HSTAT.reread} (in ${HSTAT.unitsReread} units) · units whose chosen reading changed ${HSTAT.changed}`);
+  if (dumpAt >= 0) writeFileSync(argv[dumpAt + 1].replace(/(\.json)?$/, "_hint.json"), JSON.stringify(HSTAT.log, null, 1));
+}
 if (COMPOSER) console.log(`\ncomposer units: ${CSTAT.units} (read by several candidate worlds: ${CSTAT.multi}) · read per world: ${Object.entries(CSTAT.byWorld).map(([w, k]) => `${w} ${k}`).join(", ") || "none"} · asked ${CSTAT.ask} · ignored ${CSTAT.ignored} (no action token ${CSTAT.ignoredNoToken})`);
