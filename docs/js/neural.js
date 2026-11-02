@@ -264,6 +264,32 @@ const DTYPE = 'q8', HF = 'https://huggingface.co/', CACHE = 'transformers-cache'
    turns out to be too degraded; training/laptop/zs_check.mjs compares q8 and fp32). The file name, the cache check and the size shown
    in Settings follow it. */
 const DTYPES = {};
+/* Versions (owner's rule 2026-11-02: never use an older model after a new one is published).
+   - Hugging Face models: pinned to a commit (REVISIONS). transformers.js 3.8.1 puts the revision in the URL
+     (https://huggingface.co/<id>/resolve/<revision>/<file>), which is also the Cache API key, so a new commit is a new URL. To move to a newer
+     commit, change the hash here (https://huggingface.co/api/models/<id> -> "sha"). Hashes of 2026-11-02, read from the API with WebFetch.
+   - Our own models (OURS: model id -> folder docs/model/neural/<folder>/ with config.json, tokenizer files, onnx/model_quantized.onnx): the
+     content version is in docs/model/versions.json ("neural/<folder>", written by training/sketch/stamp_models.py). The id is requested from
+     transformers.js as a model on the (never contacted) Hugging Face URL with the version as revision; the custom cache below maps that key to the
+     real file URL ...?v=<version> (fetching it on a miss) and stores it under the versioned URL. Nothing is added to OURS yet. */
+const REVISIONS = {
+  'Xenova/nli-deberta-v3-xsmall': '2a4f614a701367a02d51389039afc998faeda637',
+  'Xenova/distilbert-base-uncased-mnli': 'fddd480db7392a87114a6813c6acb5ede13ff4ee',   // TODO(coordinator): hashes were read through WebFetch, not verifiable from the shell; re-check with the API once
+  'Xenova/all-MiniLM-L6-v2': '751bff37182d3f1213fa05d7196b954e230abad9',
+  'Xenova/distilbert-base-cased-distilled-squad': 'bdbb0a5e9c617c3c7ea9f3cbaf2be3ad871bcd7d'
+};
+const OURS = {};   // e.g. 'ours/zeroshot-v1': 'zeroshot-v1' (id of the form <owner>/<name>, as transformers.js requires)
+/* docs/model/ as an absolute URL: this file is a classic script, so its own URL is read now, while it runs (browser only) */
+const MODEL_ROOT = (() => { try { return new URL('../model/', document.currentScript.src).href; } catch (e) { return null; } })();
+let NVERS = {};   // 'neural/<folder>' -> version, from versions.json (loadVersions)
+async function loadVersions() {
+  if (!Object.keys(OURS).length || !MODEL_ROOT) return;
+  try { const r = await fetch(MODEL_ROOT + 'versions.json', { cache: 'no-cache' }); NVERS = r.ok ? (await r.json()).files || {} : {}; } catch (e) { NVERS = {}; }
+}
+const revOf = id => OURS[id] ? (NVERS['neural/' + OURS[id]] || 'unversioned') : REVISIONS[id] || 'main';
+const keyOf = (id, f) => `${HF}${id}/resolve/${revOf(id)}/${f}`;   // the URL transformers.js requests and uses as Cache API key
+/** the Cache API key an entry is stored under: keyOf for Hugging Face models, the versioned real URL for ours (makeCache) */
+const storeKey = (id, f) => OURS[id] && MODEL_ROOT ? `${MODEL_ROOT}neural/${OURS[id]}/${f}?v=${encodeURIComponent(revOf(id))}` : keyOf(id, f);
 const dtypeOf = id => DTYPES[id] || DTYPE;
 const ONNX = { fp32: 'model.onnx', int8: 'model_int8.onnx', q8: 'model_quantized.onnx' };   // src/utils/dtypes.js DEFAULT_DTYPE_SUFFIX_MAPPING
 const filesOf = id => ['config.json', 'tokenizer.json', 'tokenizer_config.json', 'onnx/' + ONNX[dtypeOf(id)]];
@@ -281,27 +307,68 @@ const modelsFor = opts => [opts.strategy === 'embed' ? MODELS.embed : MODELS.zer
 const BITS = { q8: '8-bit', int8: '8-bit', fp32: '32-bit' };
 const dtypeText = opts => { const [a, b] = modelsFor(opts).map(dtypeOf); return a === b ? `${BITS[a]} files` : `classifier ${BITS[a]}, answers ${BITS[b]} files`; };
 /** the exact URLs transformers.js requests (and uses as Cache API keys) for these models */
-const urlsFor = opts => modelsFor(opts).flatMap(id => filesOf(id).map(f => `${HF}${id}/resolve/main/${f}`));
+const urlsFor = opts => modelsFor(opts).flatMap(id => filesOf(id).map(f => keyOf(id, f)));
 /** true when every file of the choice is already in this browser's transformers.js cache (nothing to download) */
 async function cached(opts) {
   try {
+    await loadVersions();
     if (typeof caches === 'undefined' || !(await caches.has(CACHE))) return false;
     const c = await caches.open(CACHE);
-    for (const u of urlsFor(opts)) if (!(await c.match(u))) return false;
+    for (const id of modelsFor(opts)) for (const f of filesOf(id)) if (!(await c.match(storeKey(id, f)))) return false;
     return true;
   } catch (e) { return false; }
 }
+/* The cache transformers.js uses (env.customCache): the Cache API 'transformers-cache', as before, except that the keys of our own models
+   (keyOf with an OURS id) are answered from the versioned real URL: <docs/model/neural/<folder>/<file>?v=<version>. A hit is returned; a
+   miss is fetched from that URL (HTTP-revalidated like any file, new URL per version) and stored under the versioned key. */
+function makeCache() {
+  const open = () => caches.open(CACHE);
+  const real = key => {
+    const m = key.startsWith(HF) && key.slice(HF.length).match(/^([^/]+\/[^/]+)\/resolve\/([^/]+)\/(.+)$/);
+    return m && OURS[m[1]] && MODEL_ROOT ? { url: `${MODEL_ROOT}neural/${OURS[m[1]]}/${m[3]}?v=${encodeURIComponent(m[2])}`, id: m[1] } : null;
+  };
+  return {
+    async match(key) {
+      try {
+        const c = await open(), r = real(key), k = r ? r.url : key, hit = await c.match(k);
+        if (hit || !r) return hit;
+        const res = await fetch(r.url);
+        if (!res.ok) return undefined;
+        await c.put(k, res.clone()).catch(() => {});
+        return res;
+      } catch (e) { return undefined; }
+    },
+    async put(key, res) { if (real(key)) return; try { await (await open()).put(key, res); } catch (e) { /* quota: not cached */ } }
+  };
+}
+/** delete the entries of other versions of the models we know (their key prefix is the same, the revision / ?v differs) */
+async function pruneStale() {
+  try {
+    if (typeof caches === 'undefined' || !(await caches.has(CACHE))) return 0;
+    const c = await open_(), cur = new Set(), prefixes = [];
+    for (const id of Object.keys(DEFAULT_IDS())) {
+      for (const f of filesOf(id)) cur.add(storeKey(id, f));
+      prefixes.push(OURS[id] ? `${MODEL_ROOT}neural/${OURS[id]}/` : `${HF}${id}/resolve/`);
+    }
+    let n = 0;
+    for (const req of await c.keys()) if (!cur.has(req.url) && prefixes.some(p => req.url.startsWith(p))) { await c.delete(req); n++; }
+    return n;
+  } catch (e) { return 0; }
+}
+const open_ = () => caches.open(CACHE);
+const DEFAULT_IDS = () => { const o = {}; for (const id of [...Object.values(MODELS.zeroshot), MODELS.embed, MODELS.qa, ...Object.keys(OURS)]) o[id] = 1; return o; };
 const looksNetwork = e => /failed to fetch|networkerror|load failed|network|dynamically imported module|importing a module script failed|err_|timeout|cors/i.test(String(e && e.message || e)) || (e && e.name === 'TypeError' && /fetch/i.test(String(e.message)));
 async function load(opts, onProgress) {
   let T;
   try { T = await import(LIB); }
   catch (e) { throw Object.assign(new Error(`The transformers.js library could not be loaded: ${e && e.message || e}`), { url: LIB, network: true, cause: e }); }
   T.env.allowLocalModels = false;
-  try { T.env.useBrowserCache = typeof caches !== 'undefined'; } catch (e) { T.env.useBrowserCache = false; }
+  await loadVersions();
+  try { T.env.useBrowserCache = false; T.env.useCustomCache = typeof caches !== 'undefined'; T.env.customCache = makeCache(); } catch (e) { T.env.useCustomCache = false; }   // see makeCache
   const open = new Set();   // files asked for and not finished: transformers.js loads them in parallel, so a failure names no single file
-  const track = e => { if (e && e.name && e.file) { const u = `${HF}${e.name}/resolve/main/${e.file}`; if (e.status === 'initiate') open.add(u); else if (e.status === 'done') open.delete(u); } if (onProgress) onProgress(e); };
+  const track = e => { if (e && e.name && e.file) { const u = keyOf(e.name, e.file); if (e.status === 'initiate') open.add(u); else if (e.status === 'done') open.delete(u); } if (onProgress) onProgress(e); };
   const build = async device => {
-    const make = (task, model) => T.pipeline(task, model, { device, dtype: dtypeOf(model), progress_callback: track });
+    const make = (task, model) => T.pipeline(task, model, { device, dtype: dtypeOf(model), revision: revOf(model), progress_callback: track });
     const qa = await make('question-answering', MODELS.qa);
     const m = { device, dtype: [...new Set(modelsFor(opts).map(dtypeOf))].join('+'), dtypeText: dtypeText(opts), qaModel: MODELS.qa };
     m.qa = async (q, c) => { let r = await qa(q, c); if (Array.isArray(r)) r = r[0]; return r || { answer: '', score: 0 }; };
@@ -318,7 +385,9 @@ async function load(opts, onProgress) {
     return m;
   };
   try {
-    return await build('wasm');
+    const m = await build('wasm');
+    pruneStale();   // older versions of the models are of no use any more (not awaited)
+    return m;
   } catch (e) {
     const msg = String(e && e.message || e || 'unknown error');
     const pending = /https?:\/\//.test(msg) ? [] : [...open];

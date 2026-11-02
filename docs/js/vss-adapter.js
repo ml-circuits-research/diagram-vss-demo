@@ -8,8 +8,8 @@ const SHAPES = { circle: "circle", circles: "circle", square: "square", squares:
   triangles: "triangle", diamond: "diamond", diamonds: "diamond", ellipse: "ellipse", ellipses: "ellipse", hexagon: "hexagon", hexagons: "hexagon", star: "star", stars: "star" };
 const PLURAL = new Set(["circles", "squares", "rectangles", "triangles", "diamonds", "ellipses", "hexagons", "stars", "shapes"]);
 const PROPERTY = { what_color: "color", where_is: "position", how_big: "size", what_shape: "shape", what_says: "label" };
-const COMMANDS = new Set(["create", "delete", "move", "set", "resize", "rename", "label", "duplicate", "swap", "connect", "disconnect", "align", "arrange", "distribute", "toFront", "toBack", "undo", "redo", "forget"]);
-const QUESTIONS = new Set(["count", "exists", "list", "property", "describe", "neighbors", "path", "reachable", "cycle", "check", "extreme", "nearest", "connected", "degree"]);
+const COMMANDS = new Set(["create", "delete", "move", "set", "resize", "rename", "label", "duplicate", "swap", "connect", "disconnect", "align", "arrange", "distribute", "toFront", "toBack", "undo", "redo", "forget", "group", "ungroup"]);
+const QUESTIONS = new Set(["count", "exists", "list", "property", "describe", "neighbors", "path", "reachable", "cycle", "check", "extreme", "nearest", "connected", "degree", "members", "groupOf"]);
 const SUPER = { biggest: "biggest", smallest: "smallest", leftmost: "leftmost", rightmost: "rightmost", topmost: "topmost", bottommost: "bottommost", mostconnected: "mostConnected", leastconnected: "leastConnected", closest: "closest", farthest: "farthest" };
 
 /** VSS wires -> { event, roles, verb }; roles: role -> string | {head, attr, det} */
@@ -36,7 +36,7 @@ export function readingFromWires(wires, verb, tokens = null) {
   }
   return { event: top.type, roles, verb: verb || top.value("_verb"), offered, tokens };
 }
-const ENTITY_ROLES = new Set(["object", "landmark", "landmark2", "source", "target", "edge"]);
+const ENTITY_ROLES = new Set(["object", "landmark", "landmark2", "landmark3", "source", "target", "edge"]);
 
 /** the gold frame of an eval row -> the same shape */
 export function readingFromGold(row, normalizedTokens, verbsOfEvent) {
@@ -73,13 +73,18 @@ export function toNodes(reading, info, ctx, seq) {
     if (R.notcolor && !negUsed) { a.notColor = String(R.notcolor).replace(/^not_/, ""); negUsed = true; }
     const id = "m" + (++seq.m); nodes.push({ id, type: "mention", args: a }); return { ref: id };
   };
+  // a position: a canvas region, up to two relations, or a region with relations (training/sketch/DIAGRAM_OPS.md). Roles: region;
+  // relation + landmark (+ landmark2 for between); relation2 + landmark3 (the second relation's shape; a second `between` is not read).
+  // One role alone gives the old single position (position=<region> or position=<relation> anchor=...).
   const place = (args) => {
-    if (R.region && REGION[R.region]) args.position = REGION[R.region];
-    else if (R.relation && REL[R.relation]) {
-      args.position = REL[R.relation];
-      const anc = [ref(R.landmark), R.landmark2 ? ref(R.landmark2) : undefined].filter((x) => x !== undefined);
-      if (anc.length) args.anchor = anc.length === 1 ? anc[0] : anc;
-    }
+    const reg = R.region && REGION[R.region], rels = [];
+    if (R.relation && REL[R.relation]) rels.push({ p: REL[R.relation], anc: [ref(R.landmark), R.landmark2 ? ref(R.landmark2) : undefined] });
+    if (R.relation2 && REL[R.relation2]) rels.push({ p: REL[R.relation2], anc: [R.landmark3 ? ref(R.landmark3) : (rels.length ? undefined : ref(R.landmark))] });
+    if (!rels.length) { if (reg) args.position = reg; return; }
+    const set = (pk, ak, r) => { args[pk] = r.p; const anc = r.anc.filter((x) => x !== undefined); if (anc.length) args[ak] = anc.length === 1 ? anc[0] : anc; };
+    set("position", "anchor", rels[0]);
+    if (rels[1]) set("position2", "anchor2", rels[1]);
+    if (reg) args.region = reg;
   };
   // a VSS set role is unordered; a list's order is the order of its members in the text (the reader knows the tokens)
   const pos = (e) => { const h = e && (e.head || e); const i = (reading.tokens || []).indexOf(h); return i < 0 ? 1e9 : i; };
@@ -137,6 +142,7 @@ export function toNodes(reading, info, ctx, seq) {
     case "arrange": args.target = ref(obj); if (R.layout) args.layout = R.layout === "ring" ? "circle" : R.layout; break;
     case "count": case "exists": case "list": {
       if (obj && obj.head === "rules") { args.ask = "rules"; break; }
+      if (obj && (obj.head === "groups" || obj.head === "group")) { args.kind = "group"; break; }   // "what groups are there?"
       if (obj) { const s = shapeOf(obj); if (s) args.shape = s; if (obj.attr) args.color = obj.attr; }
       if (R.color && !args.color) args.color = R.color;      // a colour without a shape word (world built with QCOLOR=1, CAPACITY.md S7); inert for a model whose count / exists / list take no `color` role
       if (R.notcolor) args.notColor = String(R.notcolor).replace(/^not_/, "");
@@ -156,6 +162,9 @@ export function toNodes(reading, info, ctx, seq) {
       break;
     }
     case "connected": args.target = ref(obj); if (R.landmark) args.anchor = ref(R.landmark); break;
+    // groups (DIAGRAM_OPS.md): group = members (set role) or object, + name; ungroup / members / groupOf = object (a group or shape name)
+    case "group": if (obj) args.target = ref(obj); if (R.name) args.name = plainName(R.name); break;
+    case "ungroup": case "members": case "groupOf": if (obj) args.target = ref(obj); break;
     case "degree": args.target = ref(obj); break;
     case "rule": { const s = shapeOf(obj); if (s) args.shape = s; if (R.color) args.color = R.color; if (R.size) args.size = R.size; break; }
     default: break;

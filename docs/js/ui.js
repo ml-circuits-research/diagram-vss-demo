@@ -89,6 +89,17 @@ function drawEdge(g, e, a, b, offset) {
   if (e.label) { const t = el('text', { class: 'elbl', x: (x1 + x2) / 2 - uy * 12, y: (y1 + y2) / 2 + ux * 12, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, grp); t.textContent = e.label; }
 }
 
+/* a group: a light dashed frame around its members with its name, drawn behind them and recomputed from the members on every render */
+function drawGroups(g, S) {
+  for (const gr of S.groups || []) {
+    const b = K.groupBox(S, gr); if (!b) continue;
+    const pad = 12, x = b.x1 - pad, y = b.y1 - pad - 14, w = b.w + 2 * pad, h = b.h + 2 * pad + 14;
+    const grp = el('g', { class: 'grp', 'data-group': gr.name }, g);
+    el('rect', { x, y, width: w, height: h, rx: 12, style: 'fill: var(--accent); fill-opacity: .045; stroke: var(--faint); stroke-width: 1.25; stroke-dasharray: 6 5; pointer-events: none' }, grp);
+    const t = el('text', { x: x + 10, y: y - 6, style: 'font-family: var(--font); font-size: 12px; font-weight: 600; fill: var(--faint); pointer-events: none' }, grp);
+    t.textContent = gr.name;
+  }
+}
 function cellsInUse() {
   const S = world.state, cells = new Map(), add = c => cells.set(c.x + ',' + c.y, c);
   S.shapes.forEach(s => add(K.cellOf(s.x, s.y)));
@@ -124,7 +135,8 @@ function renderCanvas() {
     if (f && f.title) { const t = el('text', { class: 'ftitle', x: c.x + 14, y: c.y - 9 }, framesG); t.textContent = f.title; }
   }
   if (!S.shapes.length) { const f = S.frame || { x: 0, y: 0 }, t = el('text', { class: 'empty-note', x: f.x + 400, y: f.y + 250, 'text-anchor': 'middle' }, layer); t.textContent = 'Nothing here yet. Write what to draw.'; }
-  const eg = el('g', {}, layer), sg = el('g', {}, layer);
+  const gg = el('g', {}, layer), eg = el('g', {}, layer), sg = el('g', {}, layer);
+  drawGroups(gg, S);
   for (const e of S.edges) {
     const a = by.get(e.from), b = by.get(e.to); if (!a || !b) continue;
     drawEdge(eg, e, a, b, S.edges.some(o => o !== e && o.from === e.to && o.to === e.from) ? 6 : 0);
@@ -263,7 +275,7 @@ async function run(text, sop) {
 async function readWith(rd, text, rec, pk) {
   const r = { nodes: [], notes: [] }; rec.readers[rd.id] = r;
   let overrides = {};
-  const ctx = { names: rd.world.state.shapes.map(s => s.name), last: rd.last };
+  const ctx = { names: rd.world.state.shapes.map(s => s.name).concat((rd.world.state.groups || []).map(g => g.name)), last: rd.last };   // group names are names too (VSS reads a name only if it is listed)
   // the time is the formalizing only (text -> SOP wires), not the engine or the drawing; VSS and Neural are loaded before they read
   const t0 = performance.now();
   try {
@@ -896,6 +908,7 @@ function renderWorld(rd) {
   for (const s of S.shapes) lines.push(hlNode({ id: s.name, type: 'shape', args: Object.assign({ shape: s.shape, size: K.sizeName(s.size), color: s.color }, s.outline ? { outline: s.outline } : {}, s.label ? { label: s.label } : {}, { at: [s.x, s.y] }) }));
   for (const e of S.edges) lines.push(hlNode({ id: e.id, type: 'edge', args: Object.assign({ from: { ref: e.from }, to: { ref: e.to }, style: e.style, arrow: e.arrow }, e.color ? { color: e.color } : {}, e.label ? { label: e.label } : {}) }));
   for (const r of S.rules) { const a = {}; ['shape', 'size', 'color', 'outline'].forEach(k => { if (r[k]) a[k] = r[k]; }); lines.push(hlNode({ id: r.id, type: 'rule', args: a })); }
+  for (const g of S.groups || []) lines.push(hlNode({ id: g.name, type: 'group', args: { members: g.members.map(m => ({ ref: m })) } }));
   if (!lines.length) lines.push('<span class="cm"># empty</span>');
   return `${isReady(rd) ? '' : `<p class="intro">This reader is ${escH(offText(rd).replace(/, did not read this$/, '').replace(/ \(see Neural › Settings\)$/, ''))}; its Settings subtab shows how to load it.</p>`}<p class="intro">The ${escH(rd.label)} reader’s drawing, written back as SOP wires. This is what a backend such as Datalog, Prolog or Z3 would receive after lowering. ${w.undoStack.length} step${w.undoStack.length === 1 ? '' : 's'} can be undone.</p><pre class="sop">${lines.join('\n')}</pre>`;
 }
