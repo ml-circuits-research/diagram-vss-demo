@@ -19,6 +19,7 @@
 //   IDS     a file of message ids (one per line): only those messages (before LIMIT), each scored once
 //   (rows without gold `wires`, e.g. the texts_*.jsonl files saved before annotation, are skipped)
 //   PAIR / SEG / REGISTRY ...: the variables of llm_score.mjs; here PAIR defaults to value and SEG to composer
+//   CUT=rules   the joint model reads the units the rules' segmenter cuts (its own span head is not used); default: the model's own cut when it has one
 //   NEURAL_STUB=1: no models (classify returns the first hypothesis, qa an empty answer), to test the plumbing without the network
 // Milliseconds per message: the time of formalizing only (the models are loaded, and warmed up, before the timing starts).
 import { existsSync, readFileSync, readdirSync } from "node:fs";
@@ -65,6 +66,7 @@ async function buildModels() {
       const tokenizer = await T.AutoTokenizer.from_pretrained(ZS, { local_files_only: true });
       const model = await T.AutoModel.from_pretrained(ZS, { device, dtype: NeuralKit.dtypeOf(OURS[ZS] || ZS), local_files_only: true });
       const m = Object.assign({ device, dtype: NeuralKit.dtypeOf(OURS[ZS] || ZS), qaModel: ZS, enumModel: ZS }, NeuralKit.makeReader(T, tokenizer, model));
+      if (process.env.CUT === "rules") delete m.cut;
       await m.read("draw a circle");
       return m;
     }

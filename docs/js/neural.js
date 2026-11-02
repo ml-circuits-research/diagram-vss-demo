@@ -102,7 +102,8 @@ function cosine(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] 
    whose answer is written in the request (names, a new name, a label, a number):
      models.read(text)                 → {words, acts, classes, tags, spans}   (makeReader)
      models.reader                     → the head layout (config.json "reader": acts, tags, classes, act_keys, number_words)
-   The kind follows from the act (an ACTION -> command, an ASK -> question, else fact or rule). The keys read for an act are the keys its
+   The kind follows from the act (an ACTION -> command, an ASK -> question, else fact or rule). The act "none" (top-1) means the unit is not
+   a request ("Thanks", "I run a small bakery"): no wire and no question come from it; it is listed in the notes as "Ignored (not a request)". The keys read for an act are the keys its
    requests have in the training gold (reader.act_keys). A names key the request does not write ("it", "the red circle", a shape created
    before) is taken from the rules' reading of the same request when the rules resolved it to a reference.
    Earlier pair (until the joint model is published): our act classifier (training/neural/finetune.py) + extractive QA for the roles:
@@ -113,8 +114,10 @@ function cosine(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] 
      'embed':    models.embed(texts)               → number[][]          (similarity to the examples above)
    and answer the roles with extractive QA (models.qa).
    ===================================================================== */
+let ACTIVE = null;   // the models last given to setModels (NeuralKit.cut / canCut use them)
+const cutOf = async (m, text) => { if (!m || !m.cut) throw new Error('The loaded neural model has no span head (cut).'); return (await m.cut(text)).map(({ c0, c1 }) => ({ c0, c1 })); };
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
-const KIND_OF = act => own(ACTION, act) ? 'command' : own(ASK, act) ? 'question' : act === 'fact' || act === 'rule' ? act : null;
+const KIND_OF = act => own(ACTION, act) ? 'command' : own(ASK, act) ? 'question' : act === 'fact' || act === 'rule' || act === 'none' ? act : null;
 function create(engine, rulesFormalize) {
   const L = engine.legend;
   const st = { models: null, strategy: 'finetuned', protoCache: new Map(), calls: 0 };
@@ -216,21 +219,43 @@ function create(engine, rulesFormalize) {
     return out;
   }
 
-  async function formalize(input, ctx) {
+  async function formalize(input, ctx, opts) {
     if (!st.models) throw new K.SOPError('The neural models are not loaded yet. Open the Neural tab and load them.');
     const t0 = Date.now(); st.calls = 0;
     const rules = rulesFormalize(input, ctx);
     const names = new Map((ctx.names || []).map(n => [n.toLowerCase(), n]));
     const mentionById = new Map(rules.nodes.filter(n => n.type === 'mention').map(n => [n.id, n]));
-    const nodes = [], analyses = [], used = new Set();
+    const nodes = [], analyses = [], used = new Set(), notRequest = [];
     const taken = new Set(rules.nodes.map(n => n.id)); let k = 0;
-    for (const seg of rules.segments) {
+    // the units to read: opts.units ([{c0, c1}] character offsets into input, given by the caller) when given, else the joint model's own cut
+    // (its span head, one call) when it has one, else the rules' segments. A unit the cut gives takes the rules' reading of the same words
+    // as its reference source (ruleNode: "it" -> Cart) when a rules segment shares most of its words.
+    let segs = rules.segments, cutBy = 'rules';
+    const given = opts && Array.isArray(opts.units) ? opts.units : null;
+    const cuts = given || (st.strategy === 'finetuned' && st.models.cut ? await st.models.cut(input) : null);
+    if (cuts) {
+      if (!given) st.calls++;
+      cutBy = given ? 'given' : 'model';
+      const toks = t => new Set(wordsOf(t).map(w => w.w.toLowerCase()).filter(w => /[\p{L}\p{N}]/u.test(w))), usedSeg = new Set();
+      segs = cuts.map(u => String(input).slice(u.c0, u.c1).trim()).filter(Boolean).map(src => {
+        const ws = toks(src); let best = null, bs = 0;
+        for (const sg of rules.segments) { if (!sg.id || usedSeg.has(sg)) continue; const ov = [...toks(sg.src)].filter(w => ws.has(w)).length / Math.max(ws.size, 1); if (ov > bs) { bs = ov; best = sg; } }
+        if (best && bs >= 0.5) { usedSeg.add(best); return { src, id: best.id }; }
+        return { src, id: null };
+      });
+    }
+    const reads = st.strategy === 'finetuned' && st.models.read
+      ? (st.models.readMany ? await st.models.readMany(segs.map(g => g.src)) : await Promise.all(segs.map(g => st.models.read(g.src)))) : null;   // the joint model: all the units in one batched call
+    if (reads) st.calls += st.models.readMany ? 1 : segs.length;
+    let si = -1;
+    for (const seg of segs) {
+      si++;
       const rn = seg.id ? rules.nodes.find(n => n.id === seg.id) : { id: null, type: null, args: {}, src: seg.src };
       if (!rn.id) { do { rn.id = 'n' + (++k); } while (taken.has(rn.id)); taken.add(rn.id); }
       const a = { id: rn.id, src: seg.src, rules: seg.id ? rn : null, keys: {} };
       let type, act = null, actKey = null, R = null;
       if (st.strategy === 'finetuned' && st.models.read) {   // the joint model: act and roles in one call
-        R = await st.models.read(seg.src); st.calls++;
+        R = reads[si];
         const c = actFrom(R.acts); a.kind = c.kind; if (c.act) a.act = c.act;
         type = a.kind.value; if (a.act) { act = a.act.value; actKey = type === 'command' ? 'action' : 'ask'; }
       } else if (st.strategy === 'finetuned') {
@@ -240,6 +265,9 @@ function create(engine, rulesFormalize) {
         a.kind = await classify('wire', seg.src, KIND); type = a.kind.value;
         if (type === 'command') { actKey = 'action'; a.act = await classify('action', seg.src, ACTION); act = a.act.value; }
         else if (type === 'question') { actKey = 'ask'; a.act = await classify('ask', seg.src, ASK); act = a.act.value; }
+      }
+      if (type === 'none') {   // the joint model's top-1 act is "not a request": no wire, no question
+        notRequest.push(seg.src); analyses.push(a); continue;
       }
       const frame = R ? st.models.reader.act_keys[act || type] : type === 'command' ? FRAMES.command[act] : type === 'question' ? FRAMES.question[act] : FRAMES[type];
       const args = {}; if (actKey) args[actKey] = act;
@@ -258,7 +286,9 @@ function create(engine, rulesFormalize) {
       if (act === 'create' && args.name != null && !args.count) names.set(String(args.name).toLowerCase(), { ref: id });
       if (act === 'rename' && args.name != null) names.set(String(args.name).toLowerCase(), String(args.name));
     }
-    return { nodes, notes: rules.notes, rulesNodes: rules.nodes, analyses, ms: Date.now() - t0, calls: st.calls };
+    const notes = rules.notes.filter(n => !notRequest.some(src => n === `I couldn't find an action in "${src}".`));   // the rules' question about a unit the model reads as not a request
+    if (notRequest.length) notes.push('Ignored (not a request): ' + notRequest.map(z => `“${z}”`).join(', '));
+    return { nodes, notes, rulesNodes: rules.nodes, analyses, cutBy, ms: Date.now() - t0, calls: st.calls };
   }
 
   /* ---------------- benchmark: hand-labelled sentences ---------------- */
@@ -316,7 +346,9 @@ function create(engine, rulesFormalize) {
     return { rows, rules: sum('rules'), neural: sum('neural') };
   }
 
-  return { formalize, bench, state: st, setModels(m) { st.models = m; st.protoCache.clear(); }, setStrategy(s) { st.strategy = s; }, BENCH, FRAMES, WORDING };
+  return { formalize, bench, state: st, setModels(m) { st.models = m; ACTIVE = m; st.protoCache.clear(); },
+    /** the BERT cut of a message (character offsets [{c0, c1}]) and whether the loaded model has the span head */
+    cut: text => cutOf(st.models, text), canCut: () => !!(st.models && st.models.cut), setStrategy(s) { st.strategy = s; }, BENCH, FRAMES, WORDING };
 }
 
 /* ---------------- the joint model's decoding (browser and node) ---------------- */
@@ -333,27 +365,37 @@ function makeReader(T, tokenizer, model) {
   const R = model.config && model.config.reader;
   if (!R) throw new Error('This model has no "reader" in its config.json: not a joint model (training/neural/finetune_roles.py).');
   const nA = R.acts.length, nT = R.tags.length, maxlen = R.max_length || 128, offs = [];
+  const cutLen = R.cut ? R.cut.max_length || 512 : 0;   // R.cut: the span head over the whole message (output cut_logits: O / B / I per word)
   let o = nA; for (const [, vals] of R.classes) { offs.push(o); o += vals.length; }
   const sp = tokenizer.encode('');   // [CLS] [SEP]
   if (sp.length !== 2) throw new Error(`The tokenizer adds ${sp.length} special tokens to a text; 2 ([CLS] [SEP]) are expected.`);
-  async function read(text) {
+  function prep(text, limit) {
     const ws = wordsOf(text), ids = [sp[0]], first = new Map();
-    for (let i = 0; i < ws.length && ids.length < maxlen - 1; i++) {   // truncation as in training: at most maxlen - 2 word pieces
+    for (let i = 0; i < ws.length && ids.length < limit - 1; i++) {   // truncation as in training: at most limit - 2 word pieces
       const p = tokenizer.encode(ws[i].w, { add_special_tokens: false });
-      for (let j = 0; j < p.length && ids.length < maxlen - 1; j++) { if (j === 0) first.set(i, ids.length); ids.push(p[j]); }
+      for (let j = 0; j < p.length && ids.length < limit - 1; j++) { if (j === 0) first.set(i, ids.length); ids.push(p[j]); }
     }
     ids.push(sp[1]);
-    const n = ids.length, big = BigInt64Array.from(ids.map(x => BigInt(x)));
-    const out = await model({ input_ids: new T.Tensor('int64', big, [1, n]), attention_mask: new T.Tensor('int64', new BigInt64Array(n).fill(1n), [1, n]) });
-    const tl = out.token_logits.data, sl = Array.from(out.seq_logits.data);
+    return { text: String(text), ws, ids, first };
+  }
+  /** one model call over a batch of prepared texts (padded; the attention mask hides the padding) */
+  async function run(ps) {
+    const B = ps.length, n = Math.max(...ps.map(p => p.ids.length));
+    const ids = new BigInt64Array(B * n), mask = new BigInt64Array(B * n);
+    ps.forEach((p, b) => p.ids.forEach((x, i) => { ids[b * n + i] = BigInt(x); mask[b * n + i] = 1n; }));
+    return { out: await model({ input_ids: new T.Tensor('int64', ids, [B, n]), attention_mask: new T.Tensor('int64', mask, [B, n]) }), n };
+  }
+  function decodeOne(p, out, n, b) {
+    const { ws, ids, first, text } = p, tl = out.token_logits.data, nTok = n;
+    const sl = Array.from(out.seq_logits.data.slice(b * (out.seq_logits.dims[1]), (b + 1) * out.seq_logits.dims[1]));
     const pa = softmax(sl.slice(0, nA)), acts = R.acts.map((label, i) => ({ label, score: pa[i] })).sort((x, y) => y.score - x.score);
     const classes = {};
-    R.classes.forEach(([k, vals], c) => { const p = softmax(sl.slice(offs[c], offs[c] + vals.length)); let b = 0; p.forEach((x, i) => { if (x > p[b]) b = i; }); classes[k] = { value: b ? vals[b] : null, score: p[b] }; });
+    R.classes.forEach(([k, vals], c) => { const q = softmax(sl.slice(offs[c], offs[c] + vals.length)); let bi = 0; q.forEach((x, i) => { if (x > q[bi]) bi = i; }); classes[k] = { value: bi ? vals[bi] : null, score: q[bi] }; });
     const tags = [], probs = [];
     for (let i = 0; i < ws.length; i++) {
       const t = first.get(i); if (t == null) { tags.push('O'); probs.push(1); continue; }
-      const p = softmax(Array.from(tl.slice(t * nT, (t + 1) * nT))); let b = 0; p.forEach((x, k) => { if (x > p[b]) b = k; });
-      tags.push(R.tags[b]); probs.push(p[b]);
+      const q = softmax(Array.from(tl.slice((b * nTok + t) * nT, (b * nTok + t + 1) * nT))); let bi = 0; q.forEach((x, k) => { if (x > q[bi]) bi = k; });
+      tags.push(R.tags[bi]); probs.push(q[bi]);
     }
     const spans = {}; let cur = null;   // B starts a role; I continues the role of the same key just before it, else starts one
     tags.forEach((t, i) => {
@@ -365,7 +407,29 @@ function makeReader(T, tokenizer, model) {
     for (const k of Object.keys(spans)) spans[k] = spans[k].map(s => ({ text: String(text).slice(ws[s.i].start, ws[s.j - 1].end), start: ws[s.i].start, end: ws[s.j - 1].end, score: s.p }));
     return { words: ws.map(w => w.w), ids, acts, classes, tags, spans };
   }
-  return { read, act: async text => (await read(text)).acts, reader: R };
+  /** readMany(texts): ONE model call for all the texts (the requests of one message) -> [read result] */
+  async function readMany(texts) {
+    if (!texts.length) return [];
+    const ps = texts.map(t => prep(t, maxlen)), { out, n } = await run(ps);
+    return ps.map((p, b) => decodeOne(p, out, n, b));
+  }
+  const read = async text => (await readMany([text]))[0];
+  /** cut(text): the request spans of a whole message, from the span head: [{c0, c1, score}] character offsets into text (one model call);
+      words beyond the first cut.max_length word pieces are outside every request */
+  async function cut(text) {
+    if (!cutLen) throw new Error('This model has no span head (config.json reader.cut): retrain with training/neural/finetune_roles.py.');
+    const p = prep(text, cutLen), { out, n } = await run([p]), cl = out.cut_logits.data, spans = [];
+    let cur = null;
+    p.ws.forEach((w, i) => {
+      const t = p.first.get(i); let tag = 'O', pr = 1;
+      if (t != null) { const q = softmax(Array.from(cl.slice(t * 3, t * 3 + 3))); let bi = 0; q.forEach((x, k) => { if (x > q[bi]) bi = k; }); tag = 'OBI'[bi]; pr = q[bi]; }
+      if (tag === 'O') { cur = null; return; }
+      if (tag === 'I' && cur) { cur.c1 = w.end; cur.score = Math.min(cur.score, pr); }
+      else { cur = { c0: w.start, c1: w.end, score: pr }; spans.push(cur); }
+    });
+    return spans;
+  }
+  return { read, readMany, act: async text => (await read(text)).acts, reader: R, ...(cutLen ? { cut } : {}) };
 }
 
 /* ---------------- Transformers.js loader (browser only) ---------------- */
@@ -574,7 +638,7 @@ async function load(onProgress) {
   }
 }
 
-return { create, load, status, cached, modelsFor, urlsFor, bytesOf, revOf, dtypeOf, dtypeText, makeReader, wordsOf, KIND_OF, MODELS, OURS, NAMES, ABOUT, ACT_MODEL, QA_MODEL, READER_MODEL, DTYPE };
+return { cut: (text, ctx) => cutOf(ACTIVE, text), canCut: () => !!(ACTIVE && ACTIVE.cut), create, load, status, cached, modelsFor, urlsFor, bytesOf, revOf, dtypeOf, dtypeText, makeReader, wordsOf, KIND_OF, MODELS, OURS, NAMES, ABOUT, ACT_MODEL, QA_MODEL, READER_MODEL, DTYPE };
 })();
 if (typeof module !== 'undefined') module.exports = NeuralKit;
 /*NEURAL-END*/
