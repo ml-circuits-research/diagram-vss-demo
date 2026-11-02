@@ -80,8 +80,8 @@ Values:
   two wires. Its trigger is a word of its own span, as in the existing data (390 elided-verb wires counted 2026-10-31): set / create /
   fact / label / rename / rule -> the leading words of the span (136 of 137, "Tue"); move -> its position or direction phrase (180 of
   205); extreme / nearest -> the superlative word (12 of 12). connect is not settled ("Core to" 21, leading name 12 of 33).
-- A request the legend cannot express gets no wire (e.g. restyling or recolouring an existing link: `connect` on two shapes already
-  linked only reports that the link exists, docs/js/logic.js).
+- A request the legend cannot express gets no wire. (Restyling or recolouring an existing link is expressible since 2026-11-02: see the
+  last section.)
 - A chain that closes a loop ("A to B, B to C, C to A") -> a chain from "A,B,C" plus a separate connect from "C" to "A" (4 of 4 in
   the existing data; a repeated name inside one chain makes a self-loop in logic.js).
 
@@ -102,3 +102,43 @@ in hm2-0162, hm2-0384); 85 already had `arrow: "none"`, the other 316 had no arr
   `mention(quantifier=all,recency=newest)`: with quantifier=all the editor ignores recency and matches every shape (23 wires changed,
   all in the sonnet folders). A single copy picked among several ("the copy at the right", "the last one") stays `mention(recency=newest)`.
   Open: copies from two duplicate wires in one message (sl-0060) cannot be written with one `$new`.
+
+## Forms added 2026-11-02 (layout operations, "all", arrow labels, created layouts, free text, templates, help)
+
+Source of each convention: `training/sketch/ops/HIGH_LEVEL_OPS.md` sections 2-3 (layout operations, arrow restyle), `training/sketch/legend_ext/LEGEND_EXT.md`
+section 7 (free text, templates, help), the coordinator's decisions of 2026-11-02 (the "all" target, arrow labels). The Rules reader
+(`docs/js/logic.js`) reads all of them; `training/sketch/llm_train/synth_rules*` and `ops_formulations` hold examples it reads exactly.
+
+- **New actions** (no new keys): `improve` (tidy / tidy up / clean up / neaten / declutter / make it look better; "tidy" is no longer
+  `arrange layout=grid`), `respace comparison=bigger|smaller [scale] [distance]` (more / less space, compact, tighten), `snap [distance]`,
+  `flip [axis]`, `reverse from= to= | target= | quantifier=all` (turn arrows around; "reverse that" is an undo), `sort [property]
+  [superlative] [layout]`, `groupBy [property]`, `equalize property= [anchor=model]` ("make them the same size"; "equalize the spacing" is
+  distribute), `straighten`, `untangle`, `fit [position=center]`; `arrange layout=tree|layers|radial|organic [direction] [anchor=root]`;
+  `align direction=left|right|up|down` (line up the left edges / tops / bottoms); "flip A and B" (two named shapes) is a `swap`.
+- **Every shape as the object**: all / everything / all the shapes / every shape / the (whole) diagram / the canvas / the drawing / the
+  whole thing / them all / all of them, as the object of any command (align, arrange, distribute, set, move, improve ...) ->
+  `target=mention(quantifier=all)`, wherever it stands in the clause ("align all horizontally", "arrange them all in a row"). "them all" /
+  "all of them" after several shapes named or described in the same message -> those shapes. "all" before a noun quantifies the noun
+  ("all circles" -> `mention(quantifier=all,shape=circle)`). No target word -> no `target` key. No axis word -> no `axis` key (the engine
+  uses horizontal).
+- **Restyling existing arrows**: `set` (or `resize` for thicker / thinner) with the arrow named by its ends, `from=` / `to=`, and the new
+  `style` / `color` / `arrow` / `size` (thick -> large, thin -> small); every arrow -> `kind=edge` (+ `quantifier=all` when all / every / each
+  is said). A new arrow ("a dotted line from A to B") stays `connect`. This replaces the earlier rule that recolouring a link gets no wire.
+- **Arrow labels**: `label from= to= label=` names the arrow by its ends ("label the arrow from A to B "yes""); `label=""` removes it.
+  Removing labels never deletes: "remove all the labels on the arrows" -> `label kind=edge quantifier=all label=""`; "the labels on A→B and
+  B→C: remove them both" -> `label from=A,B to=B,C label=""`. A pronoun after a request about an arrow refers to that arrow: "what does the
+  arrow between A and B say? rename it to "x"" -> `label from=A to=B label=x`; "connect A to B, label it "x"" -> ONE connect with
+  `label=x` (the arrow just made; one request).
+- **Several new shapes in a layout**: "add 4 dots in a circle / as a ring / side by side / stacked" -> `create count= shape= layout=`.
+- **Several to one**: "connect A and B to C" -> one connect from "A,B", to "C". "connect A and B" (no to) -> from "A", to "B" (the Rules'
+  reading, kept). "undo twice" -> `count=2` (the Rules' reading, kept).
+- **Free text** -> `create shape=text label=… [size] [color] [position] [anchor]`: a quoted text with nothing to be written on ("add a
+  title "Q3" at the top", "write "Draft" in the corner", "title the diagram "X""). A text placed next to a shape is a free text ("write "START
+  HERE" above Room1" -> position above, anchor Room1); "write "X" on Done" is a label of Done.
+- **Templates** -> `create template=… items=…` (items comma-joined as written, without quotes; a courtesy word at the end is not an item),
+  `title`, `scheme`, `color`, `size`, `position`, `axis`, `count` ("a 5-step process" -> count 5, no items), `items2` (second list),
+  `parents`; existing shapes -> `arrange template=… target=…`. A link layout word on existing shapes (tree, hierarchy, org chart, flow,
+  layers, spokes, mind map) is a re-layout (`arrange layout=`), not a template.
+- **Help questions** -> `question ask=help [topic] [aspect] [about]` (LEGEND_EXT.md section 7: topic = the most specific legend thing named,
+  aspect how / can / values / example / overview, about = the words the legend does not know). A question about the drawing written with a
+  help lead stays a drawing question ("which shapes can be reached from the rect?" -> reachable; "tell me about the hexagon" -> describe).

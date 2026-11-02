@@ -296,6 +296,7 @@ function drawEdge(g, e, a, b, offset) {
   const ln = el('line', { class: 'ln', x1: sx, y1: sy, x2: ex, y2: ey, style: col ? `stroke:${col}` : '' }, grp);
   if (e.style === 'dashed') ln.setAttribute('stroke-dasharray', '8 6');
   if (e.style === 'dotted') { ln.setAttribute('stroke-dasharray', '0.5 6'); ln.setAttribute('stroke-linecap', 'round'); ln.setAttribute('stroke-width', '2.6'); }
+  if (e.width) ln.setAttribute('stroke-width', String(e.style === 'dotted' ? Math.max(2.6, e.width + 0.6) : e.width));   /* an arrow restyled thicker / thinner (size -> px, logic.js EDGE_PX) */
   if (e.arrow !== 'none') head(x2, y2, ux, uy);
   if (e.arrow === 'both') head(x1, y1, -ux, -uy);
   if (e.label) { const t = el('text', { class: 'elbl', x: (x1 + x2) / 2 - uy * 12, y: (y1 + y2) / 2 + ux * 12, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, grp); t.textContent = e.label; }

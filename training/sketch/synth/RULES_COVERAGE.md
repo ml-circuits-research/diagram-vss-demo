@@ -1,5 +1,10 @@
 # RULES_COVERAGE: what the Rules reader can detect (inventory for the synthetic training data)
 
+**Update 2026-11-03:** the synthetic data were regenerated against the working-tree logic.js (sha256 27a2145c4956ef03: the Rules fixes for
+the reject classes, and the ops patch of `docs/js/ops-integration.md`), with the ops and ext builders; current counts and the reject table are
+in `llm_train/synth_rules/README.md` ("Current version") and `llm_train/synth_rules_ext/README.md`. The line numbers and the inventory below
+are still those of ca2850a.
+
 Source: `docs/js/logic.js` **as committed at ca2850a** (unchanged at 576e88a; sha256 f9f2ac617b32694c; 2026-11-02 21:49, "Rules: label an existing arrow, the shape X, several new shapes in a
 layout"); line numbers below are of that version. The working-tree logic.js was being edited by another agent while this was written (its
 hash changed three times; at one point the uncommitted version no longer read `title Db "x"`), so every script here reads a pinned copy

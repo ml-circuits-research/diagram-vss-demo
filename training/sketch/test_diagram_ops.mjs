@@ -316,5 +316,87 @@ const base = () => { const S = K.createSystem(); run(S, `@a command action=creat
   eq("row below Process: all below it, one y", [made(S).every((s) => s.y > S.world.find("Process").y + 20), new Set(made(S).map((s) => s.y)).size], [true, 1]);
   run(S, "@u command action=undo"); eq("one undo removes the whole row", made(S).length, 0);
 }
+// ---------- the Rules readings fixed after the synthetic data's rejects (training/sketch/synth/rejects.jsonl, class R), one per cause ----------
+{
+  const { canon } = await import("../../docs/js/bench-canon.js");
+  const S0 = K.createSystem();
+  const read = (t, names) => { const f = S0.formalize(t, { names: names || [], last: [] }); return f.nodes.filter((x) => x.type !== "mention").map((x) => `${x.type} ${Object.entries(canon(x, f.nodes)).map(([k, v]) => `${k}=${v}`).join(" ")}`).join(" ; "); };
+  const ALL = "target=mention(quantifier=all)";
+  const R = [
+    // 1. every shape as the object, anywhere in the clause; "all" before a noun quantifies the noun; no axis word -> no axis
+    ["align all horizontally", [], `command action=align axis=horizontal ${ALL}`],
+    ["arrange all in a circle", [], `command action=arrange layout=circle ${ALL}`],
+    ["arrange them all in a row", [], `command action=arrange layout=row ${ALL}`],
+    ["distribute everything evenly", [], `command action=distribute ${ALL}`],
+    ["make the whole diagram blue", [], `command action=set color=blue ${ALL}`],
+    ["line up all of them", [], `command action=align ${ALL}`],
+    ["tidy up the diagram", [], `command action=improve ${ALL}`],   // tidy -> improve (the ops patch, HIGH_LEVEL_OPS.md)
+    ["arrange the whole diagram in a grid", [], `command action=arrange layout=grid ${ALL}`],
+    ["make all red", [], `command action=set color=red ${ALL}`],
+    ["make all circles red", [], "command action=set color=red target=mention(quantifier=all,shape=circle)"],
+    ["move Db to the center of the diagram", ["Db"], "command action=move position=center target=db"],
+    ["forget all rules", [], "command action=forget"],
+    ["remove all connections", [], "command action=disconnect quantifier=all"],
+    ["make the circles red and arrange them all in a row", [], "command action=set color=red target=mention(quantifier=all,shape=circle) ; command action=arrange layout=row target=mention(quantifier=all,shape=circle)"],
+    // 2. "A to B and B to C" with every connect verb
+    ["tie Db to Billing and Billing to Queue", ["Db", "Billing", "Queue"], "command action=connect from=db,billing,queue pairing=chain"],
+    ["attach Jupiter to Pluto, Pluto to Comet", ["Jupiter", "Pluto", "Comet"], "command action=connect from=jupiter,pluto,comet pairing=chain"],
+    // 3. several to one; "connect A and B" stays from A to B (convention kept)
+    ["hook Hr and Coo to Ceo", ["Hr", "Coo", "Ceo"], "command action=connect from=hr,coo to=ceo"],
+    ["connect Api and Db", ["Api", "Db"], "command action=connect from=api to=db"],
+    ["wire Web to Api, then Api to Cache and Api to Db", ["Web", "Api", "Cache", "Db"], "command action=connect from=web,api,cache pairing=chain ; command action=connect from=api to=db"],   // A to B, B to C: one chain (the existing chain merge)
+    // 4. a valid word is not corrected into a cue
+    ["what does the ellipse point to?", [], "question ask=neighbors target=mention(shape=ellipse)"],
+    ["is Kafka part of any group?", ["Kafka"], "question ask=groupof target=kafka"],
+    ["what's written on Crab?", ["Crab"], "question ask=property property=label target=crab"],
+    ["draw a star labeled cold", [], "command action=create label=cold shape=star"],
+    // 5. label it "x": the pronoun is the target
+    ["make Salt smaller, and then label it \"end\"", ["Salt"], "command action=resize target=salt ; command action=label label=end target=salt"],
+    // 6. put the label "x" on a description
+    ["put the label \"retry\" on each indigo box", [], "command action=label label=retry target=mention(color=indigo,quantifier=all,shape=rectangle)"],
+    ["add a title \"Q3\" at the top", [], "command action=create label=q3 position=top shape=text"],
+    // 7. the edge of the canvas is not a connection
+    ["how many boxes along the left edge?", [], "question ask=count position=left shape=rectangle"],
+    // 8. a connection between two shapes
+    ["is there a connection between Scene2 and Climax?", ["Scene2", "Climax"], "question anchor=scene2 ask=connected target=climax"],
+    // 9. one-letter names in the clause splitters ("A" before a shape noun stays the article)
+    ["hook C to X, then G to E", ["C", "X", "G", "E"], "command action=connect from=c to=x ; command action=connect from=g to=e"],
+    ["Set K to orange, Z to pink.", ["K", "Z"], "command action=set color=orange target=k ; command action=set color=pink target=z"],
+    ["Q right under B", ["Q", "B"], "command action=move anchor=b position=below target=q"],
+    ["A circle near B", ["A", "B"], "command action=create anchor=b position=near shape=circle"],
+    // 10. polite openers before verb ellipsis and several created objects; a list of names before one value stays one request
+    ["can you make Lead normal and Manager big", ["Lead", "Manager"], "command action=set size=medium target=lead ; command action=set size=large target=manager"],
+    ["now please create a black ellipse and a hexagon", [], "command action=create color=black shape=ellipse ; command action=create shape=hexagon"],
+    ["paint Ab, Bc and Cd red", ["Ab", "Bc", "Cd"], "command action=set color=red target=ab,bc,cd"],
+    ["change the shape of S3 and Bucket to a triangle", ["S3", "Bucket"], "command action=set shape=triangle target=s3,bucket"],
+    // label removals and arrow labels are never shape deletions or renames (opus_ext_1 README: destructive readings)
+    ["remove all the labels on the arrows", [], "command action=label kind=edge label= quantifier=all"],
+    ["The labels on Gate→Ramp and Ramp→Runway: remove them both", ["Gate", "Ramp", "Runway"], "command action=label from=gate,ramp label= to=ramp,runway"],
+    ["what does the arrow between Icu and Ward say? and can you delete that label", ["Icu", "Ward"], "question ask=property from=icu property=label to=ward ; command action=label from=icu label= to=ward"],
+    ["what's the arrow between Spark and Lake say? rename it to \"parquet\"", ["Spark", "Lake"], "question ask=property from=spark property=label to=lake ; command action=label from=spark label=parquet to=lake"],
+    ["connect Plan to Work and label it \"approved\"", ["Plan", "Work"], "command action=connect from=plan label=approved to=work"],
+    ["connect Plan to Work and make it red", ["Plan", "Work"], "command action=connect from=plan to=work ; command action=set color=red target=work"],
+    ["clean up please", [], "command action=improve"],
+    ["tighten it up", [], "command action=respace comparison=smaller"],
+    ["write \"Decisions\" in big bold letters", [], "command action=create label=decisions shape=text size=large"],
+    ["write \"START HERE\" above Room1", ["Room1"], "command action=create anchor=room1 label=start here position=above shape=text"],
+    ["write \"x\" on Room1", ["Room1"], "command action=label label=x target=room1"],
+    ["clear arrow label check done", ["Start", "Check", "Done"], "command action=label from=check label= to=done"],
+    ["sketch a sunrise of Autumn, Design and Support thanks", [], "command action=create items=autumn,design,support template=sunrise"],
+    ["flip Cat and Dog", ["Cat", "Dog"], "command action=swap target=cat,dog"],
+    ["reverse that", [], "command action=undo"],
+    ["Decision tree for the hiring flow.", [], ""],
+    ["which shapes can be reached from the rect?", [], "question ask=reachable from=mention(shape=rectangle)"],
+    // 11. a typo in the capitalised first word; a title is not corrected
+    ["Deelte Db", ["Db"], "command action=delete target=db"],
+    ["Brong Hero in front", ["Hero"], "command action=tofront target=hero"],
+    ["Spice rack. Make Salt white.", ["Salt"], "command action=set color=white target=salt"]
+  ];
+  const sortKeys = (s) => s.split(" ; ").map((w) => { const [t, ...kv] = w.split(" "); return [t, ...kv.sort()].join(" "); }).join(" ; ");
+  for (const [t, names, want] of R) eq(`rules reader: ${t.padEnd(52)}`, sortKeys(read(t, names)), sortKeys(want));
+  // the words the formalizer's own patterns read are never "corrected" (a word the Rules read is not a typo)
+  const words = "point points part written read reads stays note notes zones tones clean cold".split(" ");
+  eq("no pattern word or legend cue is corrected by the spelling step", words.filter((w) => S0.formalize(`${w}`, { names: [], last: [] }).corrections.length), []);
+}
 console.log(`\n${n - fail}/${n} passed`);
 process.exit(fail ? 1 : 0);

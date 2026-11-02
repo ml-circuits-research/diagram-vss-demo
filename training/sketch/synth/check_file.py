@@ -22,8 +22,12 @@ def main():
     ap.add_argument("--mode", choices=["rules", "report"], default="rules"); ap.add_argument("--per_file", type=int, default=1000)
     a = ap.parse_args()
     rows = [json.loads(l) for l in open(a.inp, encoding="utf8") if l.strip()]
-    tmp = os.path.join(HERE, ".check_file_v.jsonl")
-    subprocess.run(["node", os.path.join(HERE, "check_rules.mjs"), a.inp, tmp], check=True)
+    for r in rows:   # a file written with "gold" (the wire list, e.g. ops/formulations.jsonl) instead of "wires": the training format is "wires"
+        if "wires" not in r and isinstance(r.get("gold"), list): r["wires"] = r.pop("gold")
+    tmp, tin = os.path.join(HERE, ".check_file_v.jsonl"), os.path.join(HERE, ".check_file_in.jsonl")
+    with open(tin, "w", encoding="utf8") as f:
+        for r in rows: f.write(json.dumps(r, ensure_ascii=False) + "\n")
+    subprocess.run(["node", os.path.join(HERE, "check_rules.mjs"), tin, tmp], check=True); os.remove(tin)
     V = {v["id"]: v for v in (json.loads(l) for l in open(tmp) if l.strip())}; os.remove(tmp)
     T = G.test_texts()
     exact = {G.norm(t): s for s, ts in T.items() for t in ts}

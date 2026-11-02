@@ -32,6 +32,7 @@ SK = os.path.dirname(HERE)
 REPO = os.path.dirname(os.path.dirname(SK))
 OUT_CORE = os.path.join(SK, "llm_train", "synth_rules")
 OUT_OPS = os.path.join(SK, "llm_train", "synth_rules_ops")
+OUT_EXT = os.path.join(SK, "llm_train", "synth_rules_ext")   # free text, templates, help (39be436): its own folder, so synth_rules stays comparable
 
 # ---------------------------------------------------------------------------------------------------------------------------------
 # The legend, read from logic.js (rules_inventory.mjs): value cue words of shape, colour, size and the action verbs
@@ -39,9 +40,12 @@ OUT_OPS = os.path.join(SK, "llm_train", "synth_rules_ops")
 from pin_logic import LOGIC_JS, LOGIC_FROM   # the copy of logic.js the gold is checked against (committed HEAD by default)
 INV = json.loads(subprocess.run(["node", os.path.join(HERE, "rules_inventory.mjs")], capture_output=True, text=True, check=True).stdout)
 LEG = INV["legend"]
-SHAPES = [v for v in LEG["shape"]["values"] if v != "any"]
+# shape=text (a free text, 39be436) is not a shape noun of descriptions in the Rules ("the title" is not a mention): it has its own builders
+# (free text, synth_rules_ext), so the core shapes leave it out
+SHAPES = [v for v in LEG["shape"]["values"] if v not in ("any", "text")]
 SHAPE_SG, SHAPE_PL = {}, {}
 for v, cues in LEG["shape"]["values"].items():
+    if v == "text": continue
     forms = ([v] if v != "any" else []) + cues
     SHAPE_PL[v] = [c for c in forms if c.endswith("s") and c != "rhombus"]
     SHAPE_SG[v] = [c for c in forms if not (c.endswith("s") and c != "rhombus")]
@@ -645,10 +649,10 @@ def r_arrange(g, m):
     lay = g.pick("val:layout", list(LAYOUT)); lw = g.pick(f"layout:{lay}", LAYOUT[lay])
     args = {"action": "arrange", "layout": lay}
     tags = ["act:arrange", f"verb:arrange={v}", f"layout:{lay}={lw}"]
-    if v == "tidy":
-        if g.coin(0.5): return Req([T("tidy"), X(" up")], "command", {"action": "arrange", "layout": "grid"}, ["act:arrange", "verb:arrange=tidy", "layout:grid=tidy"])
-        tc, tg, tt, num = target(g, m, ["list", "all", "theplural", "everything"], whole=True); args = {"action": "arrange", "layout": "grid", "target": tg}
-        return Req([T("tidy"), X(" up ")] + tc, "command", args, ["act:arrange", "verb:arrange=tidy", "layout:grid=tidy"] + tt)
+    if v == "tidy":   # "tidy (up)" is the improve operation since the ops patch (HIGH_LEVEL_OPS.md section 8); kept for a legend that still lists it
+        if g.coin(0.5): return Req([T("tidy"), X(" up")], "command", {"action": "improve"}, ["act:improve", "verb:improve=tidy"])
+        tc, tg, tt, num = target(g, m, ["everything"], whole=True)
+        return Req([T("tidy"), X(" up ")] + tc, "command", {"action": "improve", "target": tg}, ["act:improve", "verb:improve=tidy"] + tt)
     tf = g.pick("arr_t", ["list", "all", "theplural", "none", "everything"], [4, 2, 2, 2, 4])
     if tf == "none": ch = [T(v), X(" "), C(lw)]
     else:
@@ -669,7 +673,7 @@ def r_whole(g, m):
     if act == "arrange":
         v = g.pick("verb:arrange", ["arrange", "layout", "lay out", "organize", "organise", "arrange", "tidy up"])
         if g.coin(0.2) and v != "tidy up": return Req([T(v), X(" " + ph)], "command", args, tags + [f"verb:arrange={v}"])   # "arrange all": no layout key
-        if v == "tidy up": return Req([T("tidy"), X(" up " + ph)], "command", dict(args, layout="grid"), tags + ["verb:arrange=tidy", "layout:grid=tidy"])
+        if v == "tidy up": return Req([T("tidy"), X(" up " + ph)], "command", {"action": "improve", "target": mention(quantifier="all")}, [f"whole:{ph}", "act:improve", "verb:improve=tidy"])   # tidy -> improve (ops patch)
         lay = g.pick("val:layout", list(LAYOUT)); lw = g.pick(f"layout:{lay}", LAYOUT[lay]); args["layout"] = lay
         return Req([T(v), X(" " + ph + " "), C(lw)], "command", args, tags + [f"verb:arrange={v}", f"layout:{lay}={lw}"])
     v = g.pick(f"verb:{act}", ["align", "line up"] if act == "align" else ["distribute", "space", "spread", "space out", "spread out"])
@@ -1209,6 +1213,197 @@ def o_disc_all(g, m):
     return Req([T(trig), X(p[len(trig):])], "command", {"action": "disconnect", "quantifier": "all"}, ["act:disconnect", f"discall:{p}"], folder="ops")
 
 # ---------------------------------------------------------------------------------------------------------------------------------
+# OPS (synth_rules_ops): the high-level layout operations and arrow restyling of the ops patch (training/sketch/ops/HIGH_LEVEL_OPS.md);
+# their cue words from the legend (action improve / respace / snap / flip / reverse / sort / equalize / straighten / untangle / fit,
+# layout tree / layers / radial / organic). Gold by HIGH_LEVEL_OPS.md sections 2-3; kept only when the Rules read it exactly.
+# ---------------------------------------------------------------------------------------------------------------------------------
+WHOLE_OBJ = [("", None), (" the diagram", "all"), (" everything", "all"), (" the whole diagram", "all"), (" the whole thing", "all"), (" it all", "all")]
+def whole_obj(g, tag):
+    ph, q = g.pick(tag, WHOLE_OBJ, [3, 2, 2, 1, 1, 1])
+    return ph, ({"target": mention(quantifier="all")} if q else {})
+
+def o_relayout(g, m):
+    k = g.pick("relayout_kind", ["improve", "respace", "snap", "flip", "reverse", "sort", "equalize", "straighten", "untangle", "fit", "layout", "align_edge"])
+    if k == "improve":
+        v = g.pick("verb:improve", VERBS.get("improve", ["tidy up"]))
+        ph, tg = whole_obj(g, "improve_obj")
+        return Req([T(v), X(ph)], "command", dict({"action": "improve"}, **tg), ["act:improve", f"verb:improve={v}"], folder="ops")
+    if k == "respace":
+        v = g.pick("verb:respace", VERBS.get("respace", ["compact"]))
+        ph, tg = whole_obj(g, "respace_obj")
+        return Req([T(v), X(ph)], "command", dict({"action": "respace", "comparison": "smaller"}, **tg), ["act:respace", f"verb:respace={v}"], folder="ops")
+    if k == "snap":
+        ph, tg = g.pick("snap_obj", [(" everything", "all"), (" the shapes", "all"), ("", None)], [3, 1, 1])
+        ch = [T("snap"), X(ph + " to the grid")]
+        return Req(ch, "command", dict({"action": "snap"}, **({"target": mention(quantifier="all")} if tg else {})), ["act:snap", "verb:snap=snap"], folder="ops")
+    if k == "flip":
+        v = g.pick("verb:flip", VERBS.get("flip", ["flip"]))
+        ph, tg = whole_obj(g, "flip_obj")
+        ax = g.pick("flip_axis", ["", " horizontally", " vertically", " upside down", " left to right"])
+        args = dict({"action": "flip"}, **tg)
+        if ax.strip() in ("vertically", "upside down"): args["axis"] = "vertical"
+        elif ax.strip() in ("horizontally", "left to right"): args["axis"] = "horizontal"
+        return Req([T(v), X(ph + ax)], "command", args, ["act:flip", f"verb:flip={v}", f"flip_axis:{ax.strip() or 'none'}"], folder="ops")
+    if k == "reverse":
+        v = g.pick("verb:reverse", VERBS.get("reverse", ["reverse"]))
+        if g.coin(0.4): return Req([T(v), X(" " + g.ch(["all the arrows", "every arrow", "all arrows", "all the lines"]))], "command", {"action": "reverse", "quantifier": "all"}, ["act:reverse", f"verb:reverse={v}", "reverse:all"], folder="ops")
+        a = m.name(); b = m.name(avoid=[a]); noun = g.pick("rev_noun", ["arrow", "line", "link", "connection"])
+        return Req([T(v), X(f" the {noun} from "), N(a), X(" to "), N(b)], "command", {"action": "reverse", "from": a, "to": b}, ["act:reverse", f"verb:reverse={v}", "reverse:ends"], folder="ops")
+    if k == "sort":
+        v = g.pick("verb:sort", [x for x in VERBS.get("sort", ["sort"])])
+        obj = g.ch(["", " everything", " the shapes"]); tg = {"target": mention(quantifier="all")} if obj else {}   # "everything" / "the shapes": every shape (convention)
+        if v.startswith("alphabeti"): return Req([T(v), X(obj)], "command", dict({"action": "sort", "property": "name"}, **tg), ["act:sort", f"verb:sort={v}"], folder="ops")
+        prop, pw = g.pick("sort_by", [("name", "name"), ("size", "size"), ("color", "colour"), ("color", "color"), ("shape", "shape"), ("label", "label")])
+        obj = obj or " them"; tg = {"target": mention(quantifier="all")} if obj != " them" else {}
+        return Req([T(v), X(f"{obj} by {pw}")], "command", dict({"action": "sort", "property": prop}, **tg), ["act:sort", f"verb:sort={v}", f"sort_by:{pw}"], folder="ops")
+    if k == "equalize":
+        v = g.pick("verb:equalize", VERBS.get("equalize", ["equalize"]))
+        prop, pw = g.pick("eq_prop", [("size", "sizes"), ("color", "colours"), ("color", "colors")])   # "equalize the shapes" is ambiguous (kind or every shape): not written
+        return Req([T(v), X(f" the {pw}")], "command", {"action": "equalize", "property": prop}, ["act:equalize", f"verb:equalize={v}"], folder="ops")
+    if k == "straighten":
+        return Req([T("straighten"), X(" the " + g.ch(["arrows", "lines", "links", "connections"]))], "command", {"action": "straighten"}, ["act:straighten", "verb:straighten=straighten"], folder="ops")
+    if k == "untangle":
+        v = g.pick("verb:untangle", VERBS.get("untangle", ["untangle"]))
+        return Req([T(v), X(" the " + g.ch(["arrows", "lines", "links", "connections"]))], "command", {"action": "untangle"}, ["act:untangle", f"verb:untangle={v}"], folder="ops")
+    if k == "fit":
+        v = g.pick("verb:fit", VERBS.get("fit", ["fit"]))
+        if v == "fit": return Req([T("fit"), X(" everything on the canvas")], "command", {"action": "fit", "target": mention(quantifier="all")}, ["act:fit", "verb:fit=fit"], folder="ops")
+        return Req([T(v), X(g.ch([" the diagram", " everything"]))], "command", {"action": "fit", "position": "center", "target": mention(quantifier="all")}, ["act:fit", f"verb:fit={v}"], folder="ops")
+    if k == "layout":
+        lay = g.pick("relayout_lay", ["tree", "layers", "radial", "organic"])
+        cue = g.pick(f"layout:{lay}", [c for c in LEG["layout"]["values"][lay] if " " not in c] or [lay])
+        v = g.pick("verb:arrange_ops", ["arrange", "lay out", "rearrange", "organize", "reorganize"])
+        ph, tg = g.pick("relayout_obj", [(" everything", "all"), (" the diagram", "all"), (" the whole diagram", "all"), ("", None)])
+        how = {"tree": [" as a tree", " as a hierarchy"], "layers": [" in layers", " as a flowchart", " in tiers"], "radial": [" radially", " as a radial layout"], "organic": [" organically", " as an organic layout"]}[lay]
+        hw = g.pick(f"relayout_how:{lay}", how)
+        return Req([T(v), X(ph + hw)], "command", dict({"action": "arrange", "layout": lay}, **({"target": mention(quantifier="all")} if tg else {})), ["act:arrange", f"layout:{lay}={hw.strip()}"], folder="ops")
+    # align by an edge
+    ns = m.names(3); edge, d = g.pick("align_edge", [("left edges", "left"), ("right edges", "right"), ("tops", "up"), ("bottoms", "down")])
+    return Req([T(g.ch(["align", "line up"])), X(f" the {edge} of ")] + names_list(g, ns, " and "), "command", {"action": "align", "direction": d, "target": ",".join(ns)}, ["act:align", f"align_edge:{edge}"], folder="ops")
+
+def o_restyle(g, m):
+    """an existing arrow restyled: by its ends (set from= to=), or every arrow (set kind=edge quantifier=all); thicker / thinner: resize"""
+    noun = g.pick("restyle_noun", ["arrow", "line", "link", "connection"])
+    a = m.name(); b = m.name(avoid=[a])
+    every = g.coin(0.35)
+    ref = [X(f"all the {noun}s")] if every else [X(f"the {noun} from "), N(a), X(" to "), N(b)]
+    ends = {"kind": "edge", "quantifier": "all"} if every else {"from": a, "to": b}
+    k = g.pick("restyle_kind", ["style", "color", "arrow", "size", "thicker"])
+    if k == "style":
+        st = g.pick("restyle_style", ["dashed", "dotted", "solid"])
+        return Req([T("make"), X(" ")] + ref + [X(" " + st)], "command", dict({"action": "set", "style": st}, **ends), ["act:set", f"restyle:style={st}"], folder="ops")
+    if k == "color":
+        c = color_w(g)
+        return Req([T("make"), X(" ")] + ref + [X(" "), C(c[0])], "command", dict({"action": "set", "color": c[1]}, **ends), ["act:set", "restyle:color"] + c[2], folder="ops")
+    if k == "arrow":
+        aw, av = g.pick("restyle_arrow", [("two-way", "both"), ("bidirectional", "both"), ("double-headed", "both")])
+        return Req([T("make"), X(" ")] + ref + [X(" " + aw)], "command", dict({"action": "set", "arrow": av}, **ends), ["act:set", f"restyle:arrow={aw}"], folder="ops")
+    if k == "size":
+        sw, sv = g.pick("restyle_size", [("thick", "large"), ("thin", "small"), ("bold", "large")])
+        return Req([T("make"), X(" ")] + ref + [X(" " + sw)], "command", dict({"action": "set", "size": sv}, **ends), ["act:set", f"restyle:size={sw}"], folder="ops")
+    cw = g.pick("restyle_comp", ["thicker", "thinner"])
+    return Req([T("make"), X(" ")] + ref + [X(" " + cw)], "command", dict({"action": "resize"}, **ends), ["act:resize", f"restyle:{cw}"], folder="ops")
+
+# ---------------------------------------------------------------------------------------------------------------------------------
+# EXT (synth_rules_ext): the forms of 39be436 (LEGEND_EXT.md): free text (create shape=text), templates (create / arrange template=…),
+# help questions (question ask=help topic aspect about). Gold by the proposed conventions of LEGEND_EXT.md section 7.
+# Not covered: width / height / fill / layer (the Rules do not read them from a sentence; only the engine and templates set them).
+# ---------------------------------------------------------------------------------------------------------------------------------
+TEXT_NOUNS = ["text", "title", "heading", "headline", "caption", "subtitle", "banner", "note"]
+TEXT_PLACES = [("", None), (" at the top", "top"), (" at the bottom", "bottom"), (" in the top left", "topLeft"), (" in the bottom right", "bottomRight"), (" in the middle", "center"),
+               (" in the top right", "topRight"), (" at the bottom left", "bottomLeft")]
+TEXT_LABELS = ["Q3 plan", "Draft", "Order flow", "Team map", "v2", "Week 1", "Read me", "Ideas wall", "Budget 2027", "Notes", "Overview", "Main flow", "Do not edit", "Legend"]
+def e_text(g, m):
+    lab = g.pick("text_label", TEXT_LABELS); pl, pv = g.pick("text_place", TEXT_PLACES)
+    args = {"action": "create", "shape": "text", "label": lab}
+    if pv: args["position"] = pv
+    k = g.pick("text_frame", ["add_noun", "write", "title", "colour"])
+    if k == "add_noun":
+        v = g.pick("text_verb", ["add", "put", "place", "insert", "write"]); tn = g.pick("text_noun", TEXT_NOUNS)
+        ch = [T(v), X(f" {art(tn)} {tn} \"{lab}\"{pl}")]; tags = [f"text:{v} a {tn}"]
+    elif k == "write":
+        ch = [T("write"), X(f" \"{lab}\"{pl}")]; tags = ["text:write"]
+    elif k == "title":
+        ch = [T("title"), X(f" the diagram \"{lab}\"")]; tags = ["text:title the diagram"]; args.pop("position", None)
+    else:
+        c = color_w(g); tn = g.pick("text_noun", TEXT_NOUNS)
+        ch = [T("add"), X(f" {art(c[0])} "), C(c[0]), X(f" {tn} \"{lab}\"{pl}")]; args["color"] = c[1]; tags = ["text:colour"] + c[2]
+    return Req(ch, "command", args, ["act:create", "shape:text"] + tags, folder="ext")
+
+ITEM_WORDS = ["Plan", "Build", "Test", "Launch", "Research", "Design", "Review", "Ship", "Idea", "Draft", "Edit", "Publish", "Morning", "Noon", "Evening",
+              "Awareness", "Interest", "Decision", "Action", "Basics", "Practice", "Mastery", "Kickoff", "Pilot", "Rollout", "Feedback", "Spring", "Summer",
+              "Autumn", "Winter", "Sales", "Support", "Product", "Finance", "Hiring", "Training", "Growth", "Safety", "Quality", "Speed"]
+TPL = LEG.get("template", {}).get("values", {})
+def tpl_cue(g, v):
+    cues = [v] + TPL[v]   # every cue, also the multi-word ones ("hierarchy of needs", "pros and cons"); the Rules filter what they do not read
+    return g.pick(f"template:{v}", cues)
+def e_template(g, m):
+    v = g.pick("val:template", list(TPL)); cue = tpl_cue(g, v)
+    n = g.ch([3, 3, 4, 4, 5]); items = g.r.sample(ITEM_WORDS, n)
+    il = ", ".join(items[:-1]) + " and " + items[-1]
+    vb = g.pick("tpl_verb", ["draw", "make", "create", "build", "add", "sketch"])
+    args = {"action": "create", "template": v}
+    k = g.pick("tpl_frame", ["of", "colon", "titled", "scheme", "count", "arrange", "place"])
+    if k == "arrange" and re.search(r"\b(?:tree|hierarchy|org chart|organigram|flow|flowchart|layers|levels|spokes|mind map|radial|sunburst)\b", cue): k = "of"   # a re-layout by the links (ops patch), not the template
+    if k == "count":
+        c = g.ch([3, 4, 5, 6]); ch = [T(vb), X(f" {art(str(c))} {c}-step {cue}")]; args["count"] = str(c)
+        return Req(ch, "command", args, ["act:create", f"tpl:{v}={cue}", "tpl:count"], folder="ext")
+    if k == "arrange":
+        ns = m.names(g.ch([3, 4])); av = g.pick("tpl_arr_verb", ["arrange", "lay out", "organize"])
+        ch = [T(av), X(" ")] + names_list(g, ns, " and ") + [X(f" as {art(cue)} {cue}")]
+        return Req(ch, "command", {"action": "arrange", "template": v, "target": ",".join(ns)}, ["act:arrange", f"tpl:{v}={cue}", "tpl:arrange"], folder="ext")
+    args["items"] = ",".join(items)
+    if k == "colon": ch = [T(vb), X(f" {art(cue)} {cue}: {il}")]
+    elif k == "titled":
+        t = g.ch(["Our year", "Plan B", "Next steps", "The roadmap", "Team values"]); ch = [T(vb), X(f" {art(cue)} {cue} titled \"{t}\" of {il}")]; args["title"] = t
+    elif k == "scheme":
+        sv = g.pick("val:scheme", list(LEG["scheme"]["values"])); sc = g.pick(f"scheme:{sv}", [sv] + [c for c in LEG["scheme"]["values"][sv] if "colo" not in c])
+        ch = [T(vb), X(f" {art(cue)} {cue} of {il} in {sc} colours")]; args["scheme"] = sv
+    elif k == "place":
+        pw, pv = g.pick("tpl_place", [(" in the top left", "topLeft"), (" in the bottom right", "bottomRight"), (" at the top", "top"), (" in the middle", "center")])
+        ch = [T(vb), X(f" {art(cue)} {cue}{pw} of {il}")]; args["position"] = pv
+    else: ch = [T(vb), X(f" {art(cue)} {cue} of {il}")]
+    return Req(ch, "command", args, ["act:create", f"tpl:{v}={cue}", f"tpl_frame:{k}"], folder="ext")
+
+TOPIC = LEG.get("topic", {}).get("values", {})
+GENERIC_VERBS = {"add", "make", "put", "draw", "create", "set", "change", "give", "place", "insert", "build", "turn", "stick", "pop", "throw", "spawn", "sketch", "write", "call",
+                 "tie", "hook", "attach", "cut", "separate", "fill", "push", "drop", "clear", "scale", "title", "tag", "send", "bring", "space", "line up", "transform", "convert",
+                 "reset", "trade", "exchange", "park", "tuck", "dissolve", "split up", "break up", "stamp", "color", "colour", "tidy"}
+FAMILY = {"connections": "arrows", "groups": "groups", "text": "titles", "color": "colours", "size": "sizes", "position": "positions", "style": "styles",
+          "template": "templates", "layout": "layouts", "rules": "rules", "outline": "outlines", "fill": "fills", "layer": "backgrounds"}
+def help_phrases():
+    """topic -> (verb phrase for how/can, noun phrase for overview/example) the Rules map to that topic"""
+    out = {}
+    for a, cues in VERBS.items():
+        if a not in TOPIC: continue
+        sp = [c for c in [a] + cues if c not in GENERIC_VERBS and c.isalpha() and c.islower()]
+        if sp: out[a] = (f"{sp[0]} shapes" if a not in ("undo", "redo", "forget") else sp[0], None)
+    for v in TPL:
+        if v in TOPIC: out[v] = (f"make {art(v)} {v}", f"{art(v)} {v}")
+    for t, w in FAMILY.items():
+        if t in TOPIC: out[t] = (None, w)
+    for key in ("shape", "color", "style"):
+        for v in LEG[key]["values"]:
+            if v in TOPIC and v not in out and v not in ("any", "text", "solid"): out[v] = ("use " + (v + "s" if key == "shape" else v), None)   # a value: "can I use stars"
+    return out
+HELP_PH = help_phrases()
+HELP_ABOUT = ["images", "photos", "emojis", "fonts", "shadows", "animations", "comments", "videos"]
+def e_help(g, m):
+    k = g.pick("help_kind", ["topic", "topic", "topic", "topic", "about", "bare"])
+    if k == "bare":
+        p = g.pick("help_bare", ["help", "what can you do", "help me"])
+        return Req([T(p)], "question", {"ask": "help"}, ["act:help", f"help:bare={p}"], question=True, folder="ext")
+    if k == "about":
+        w = g.pick("help_about", HELP_ABOUT); lead = g.pick("help_about_lead", ["can I add", "is it possible to add"])
+        return Req([T(lead), X(f" {w}")], "question", {"ask": "help", "aspect": "can", "about": w}, ["act:help", "help:about"], question=True, folder="ext")
+    t = g.pick("help_topic", list(HELP_PH)); vp, np_ = HELP_PH[t]
+    leads = ([("how do I", "how"), ("how can I", "how"), ("how to", "how"), ("can I", "can"), ("is it possible to", "can")] if vp else []) + \
+            ([("tell me about", "overview"), ("help with", "overview"), ("show me an example of", "example")] if np_ else [])
+    lead, asp = g.pick(f"help_lead", leads)
+    ph = vp if asp in ("how", "can") else np_
+    return Req([T(lead), X(f" {ph}")], "question", {"ask": "help", "topic": t, "aspect": asp}, ["act:help", f"help:topic={t}", f"help:lead={lead}"], question=True, folder="ext")
+
+# ---------------------------------------------------------------------------------------------------------------------------------
 # the mix (requests): roughly how often people use each, every one present
 # ---------------------------------------------------------------------------------------------------------------------------------
 CORE = [(r_create, 13), (r_create_verbless, 1), (r_delete, 6), (r_clear, 0.8), (r_move, 10), (r_move_verbless, 1.5), (r_set, 12), (r_resize, 3), (r_rename, 2.5),
@@ -1216,7 +1411,8 @@ CORE = [(r_create, 13), (r_create_verbless, 1), (r_delete, 6), (r_clear, 0.8), (
         (r_history, 4), (q_count, 3.5), (q_exists, 2.5), (q_list, 3), (q_property, 3.5), (q_describe, 1.5), (q_neighbors, 1.5), (q_connected, 1.5), (q_degree, 1.2),
         (q_path, 1.5), (q_reachable, 1.2), (q_simple, 3), (q_check, 4), (q_extreme, 4.5), (q_nearest, 2), (r_fact, 3), (r_rule, 2.5)]
 OPS = [(o_group, 3), (o_add_to_group, 1), (o_ungroup, 2), (o_group_q, 3), (o_group_target, 2.5), (o_double, 4), (o_outline, 2.5), (o_coords, 2), (o_linked, 2), (o_disc_all, 1),
-       (o_edge_label, 4), (o_unlabel, 2), (o_create_layout, 2.5)]
+       (o_edge_label, 4), (o_unlabel, 2), (o_create_layout, 2.5), (o_relayout, 6), (o_restyle, 3)]
+EXT = [(e_text, 3), (e_template, 6), (e_help, 5)]
 
 # ---------------------------------------------------------------------------------------------------------------------------------
 # a follow-up that refers back: a pronoun, "that one", the created shape's name
@@ -1366,14 +1562,22 @@ def joiner(g, prev, nxt):
         return g.ch([". ", ". ", "! "])
     return g.pick("join", [" and ", ", then ", " then ", " and then ", ", and then ", ". ", "; ", ", after that ", ". Then ", ", finally "])
 
-def make_message(g, idx, ops=False):
-    dom = g.ch(list(DOMAINS)) if not ops else g.ch([d for d in DOMAINS if d != "letters"])
+def make_message(g, idx, ops=False, ext=False):
+    dom = g.ch(list(DOMAINS)) if not (ops or ext) else g.ch([d for d in DOMAINS if d != "letters"])
     m = Msg(g, dom)
-    table = OPS if ops else CORE
+    table = EXT if ext else OPS if ops else CORE
     fns, ws = zip(*table)
     nreq = 1 if ops and g.coin(0.85) else g.r.choices([1, 2, 3], [70, 22, 8])[0]
     reqs, joins = [], []
-    if not ops and nreq > 1 and g.coin(0.18):
+    if ext:   # one new-form request, alone (75%) or with an ordinary request before or after it
+        r = g.r.choices(fns, ws)[0](g, m)
+        reqs = [r]
+        if g.coin(0.25):
+            o = g.r.choices(*zip(*CORE))[0](g, m)
+            while o.verbless: o = g.r.choices(*zip(*CORE))[0](g, m)
+            reqs = [o, r] if g.coin(0.5) else [r, o]
+            joins = [joiner(g, reqs[0], reqs[1]) if not reqs[1].question and not reqs[0].question else (". " if not reqs[0].question else "? ")]
+    elif not ops and nreq > 1 and g.coin(0.18):
         reqs, j = (ellipsis if g.coin(0.6) else multi_objects)(g, m)
         joins = [j or g.ch([", ", " and "])] * (len(reqs) - 1)
         if len(reqs) == 3 and j is None: joins = [", ", " and "]
@@ -1397,7 +1601,7 @@ def make_message(g, idx, ops=False):
     others = [n for n in m.pool if n not in used and n not in m.created and n not in groups]
     canvas = used + g.r.sample(others, min(len(others), g.ch([0, 1, 2, 3])))
     g.r.shuffle(canvas)
-    row = {"id": f"{'so' if ops else 'sr'}-{idx:05d}", "domain": dom, "names": canvas}
+    row = {"id": f"{'se' if ext else 'so' if ops else 'sr'}-{idx:05d}", "domain": dom, "names": canvas}
     if ops: row["groups"] = {k: v for k, v in groups.items()}
     row.update({"text": text, "wires": wires})
     tags = sorted({t for r in reqs for t in r.tags} | set(mtags) | {f"requests:{len(reqs)}"})
@@ -1620,11 +1824,16 @@ def classify(r, tg, v):
     if "requests:" in c: return "R a clause merged into or split from its neighbour (other)"
     return "G/R other (read the row)"
 
-NO_TOPUP = {"relabel", "unlabel"}   # label cues added to logic.js in the working tree during this run (label removal / arrow labels): no frames yet
+NO_TOPUP = {"relabel", "unlabel"}
+# values of the forms added after ca2850a (free text, the ops actions and layouts): their cues are covered by the ops / ext builders with
+# least-used picks, not by the top-up of core candidates (which cannot make them)
+NEW_VALUES = {("shape", "text")} | {("action", v) for v in ("improve", "respace", "snap", "flip", "reverse", "sort", "groupBy", "equalize", "straighten", "untangle", "fit")} \
+    | {("layout", v) for v in ("tree", "layers", "radial", "organic")} | {("action", "arrange")}   # label cues added to logic.js in the working tree during this run (label removal / arrow labels): no frames yet
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--seed", type=int, default=0); ap.add_argument("--n", type=int, default=9000); ap.add_argument("--n_ops", type=int, default=1100)
+    ap.add_argument("--n_ext", type=int, default=3500, help="candidates of the forms of 39be436 (free text, templates, help) -> llm_train/synth_rules_ext")
     ap.add_argument("--per_file", type=int, default=1000); ap.add_argument("--dry", action="store_true")
     ap.add_argument("--combo", type=int, default=0, help="write N raw combination messages (synth_combo_raw) and stop")
     a = ap.parse_args()
@@ -1636,6 +1845,9 @@ def main():
         row, t = make_message(g, i + 1); cands.append(row); tags[row["id"]] = t
     for i in range(a.n_ops):
         row, t = make_message(g, i + 1, ops=True); cands.append(row); tags[row["id"]] = t
+    ge = Gen(a.seed + 7)   # its own stream: the core and ops candidates stay those of the same seed without --n_ext
+    for i in range(a.n_ext):
+        row, t = make_message(ge, i + 1, ext=True); cands.append(row); tags[row["id"]] = t
     def rules_check(rows):
         tmp_in, tmp_out = os.path.join(HERE, ".cands.jsonl"), os.path.join(HERE, ".verdicts.jsonl")
         with open(tmp_in, "w") as f:
@@ -1668,7 +1880,7 @@ def main():
     # are added (the cues the Rules never read in a kept message stay low and are reported: RULES_COVERAGE.md)
     topup, nxt = 0, a.n + 1
     for rnd in range(4):
-        need = CC.low(CC.counts([w for r in final for w in r["wires"]]), 5, skip=NO_TOPUP)
+        need = [x for x in CC.low(CC.counts([w for r in final for w in r["wires"]]), 5, skip=NO_TOPUP) if (x[0], x[1]) not in NEW_VALUES]
         if not need: break
         extra = []
         for i in range(2000):
@@ -1698,7 +1910,7 @@ def main():
     summary = {"seed": a.seed, "logic_js": LOGIC_FROM, "logic_js_sha256": hashlib.sha256(open(LOGIC_JS, "rb").read()).hexdigest()[:16], "candidates": len(cands), "kept_by_rules": len(kept), "rejected": len(rej), "removed_overlap_exact": dict(ov_exact),
                "removed_overlap_tokenset": dict(ov_tok), "near_dup_jaccard08_reported": dict(near), "removed_duplicate_texts_within_synth": dup_within, "topup_messages": topup,
                "low_cues_after_topup": [" ".join(x) for x in CC.low(CC.counts([w for r in final for w in r["wires"]]), 5)], "final": len(final),
-               "final_core": sum(1 for r in final if r["id"].startswith("sr")), "final_ops": sum(1 for r in final if r["id"].startswith("so"))}
+               "final_core": sum(1 for r in final if r["id"].startswith("sr")), "final_ops": sum(1 for r in final if r["id"].startswith("so")), "final_ext": sum(1 for r in final if r["id"].startswith("se"))}
     print(json.dumps(summary, indent=1))
     if a.dry:
         for c, n in causes.most_common(60): print(f"{n:5d}  {c}")
@@ -1707,7 +1919,7 @@ def main():
                 for r in rej: f.write(json.dumps({"id": r["id"], "text": r["text"], "names": r["names"], "cause": V[r["id"]]["cause"], "gold": [w["args"] for w in r["wires"]], "rules": V[r["id"]]["rules"], "corr": V[r["id"]]["corrections"]}, ensure_ascii=False) + "\n")
         return
     # write
-    for out, pre in [(OUT_CORE, "sr"), (OUT_OPS, "so")]:
+    for out, pre in [(OUT_CORE, "sr"), (OUT_OPS, "so"), (OUT_EXT, "se")]:
         os.makedirs(out, exist_ok=True)
         for f in glob.glob(os.path.join(out, "msg_*.jsonl")): os.remove(f)
         rows = [r for r in final if r["id"].startswith(pre)]

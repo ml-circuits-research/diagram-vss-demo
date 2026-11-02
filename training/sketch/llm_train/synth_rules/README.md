@@ -8,6 +8,39 @@ detect). Not realistic LLM-written text: keep it in its own folders and name it 
 | `llm_train/synth_rules/` (msg_01..08) | 7822 | 10755 | the legend of LABEL_CONVENTIONS.md: 5475 one-request, 1761 two-request, 586 three-request one-liners (median 7 words) |
 | `llm_train/synth_rules_ops/` (msg_01..02) | 1340 | 1409 | what the Rules detect beyond that legend: groups (field `groups`), double positions (position2/anchor2/region), outline, x/y coordinates (`at`), "X is connected to Y" / created "connected to" / count of shapes connected (`linked`), "remove all connections" (disconnect quantifier=all), arrow labels (label with from/to, label="" removes), shape label removal (label=""), create count + layout. Train these only where the converters read the keys (VSS: DIAGRAM_OPS=1 for groups and double positions; outline, at, linked, layout and label with from/to are not read by llm_to_world.py today) |
 
+## Current version (re-run 2026-11-03, replaces the counts below where they differ)
+
+`LOGIC_REV=worktree python3 training/sketch/synth/gen_rules_cover.py --n 9200 --n_ops 1500 --n_ext 3500` (seed 0), gold checked against the
+**working-tree logic.js** (sha256 27a2145c4956ef03: the Rules fixes for the rejects below + the ops patch of `docs/js/ops-integration.md`).
+Kept: synth_rules 8404 messages (11707 requests), synth_rules_ops 1374 (1470), synth_rules_ext 2783 (3664 requests; new folder, its README).
+Candidates 22200, rejected 553 (2.5%; before: 1100 of 12700, 8.7%), removed as test-set overlap 477 exact + 9 token set, duplicates 1391.
+Changes of the generator: "tidy (up)" -> `improve` (ops patch); shape=text left out of the core shapes (it has its own builders, ext);
+new ops builders (re-layouts, arrow restyle) in synth_rules_ops; ext builders (free text, templates, help) in synth_rules_ext.
+
+Rejects by class now (R classes fixed in the Rules: the "all" object 247 -> 0, several to one 104 -> 0, wire/attach/tie chains 54 -> 0,
+verb ellipsis 45 -> 0 in this class, several objects in one create 38 -> 1, no axis word 26 -> 0, one-letter names 25 -> 4, point/part
+21 -> 0, written 19 -> 0, list of three names 18 -> 0, put the label on a description 16 -> 0, is there a connection between 16 -> 0,
+label it 14 -> 0, the edge of the canvas 9 -> 0, typos 129 -> 115):
+
+| rejects | class |
+|---|---|
+| 115 | R a typo the Rules' spelling step does not fix (a new name, a tie between two cue words, a word mid-sentence) |
+| 77 | C connect A and B: gold from=A,B; Rules from=A to=B (the Rules' reading is kept, coordinator) |
+| 39 | C undo twice / 3 times: gold no count; Rules count=2 / 3 (the Rules' reading is kept) |
+| 33 | R a rule with 'from now on' at the end is not read |
+| 30 | R 'what is the shape of X': read as list |
+| 29 | R 'draw a two-way arrow ...': read as create |
+| 28 | R 'show me the connections': neighbors without a target |
+| 27 | R rename followed by more words |
+| 26 | R a clause merged into or split from its neighbour (incl. a template clause that swallows the next request) |
+| 25 | G/R other |
+| 21 | R 'is B downstream of A': from/to in text order |
+| 19 | R a verbless placement with by / around / close to / left side of |
+| 15 | R notColor of a described set in list/count dropped |
+| 15 | R 'set the outline/border of X to C' read as a colour |
+| 14 | C a shape filter on extreme |
+| 25 | R smaller classes (groupOf 9, undo words 7, both ways 5, question form 5, can A reach B 4, one-letter 4, spaced dash 3, ...) |
+
 ## How it was made
 
 `python3 training/sketch/synth/gen_rules_cover.py --n 9200 --n_ops 1500` (seed 0; about 2 minutes). Gold checked against **logic.js as committed at
