@@ -244,6 +244,7 @@ class DiagramWorld {
       case 'renameGroup': { const g = (S.groups || []).find(x => x.name === p.from); g.name = p.to; break; }
       case 'link': S.edges.push(p.edge); break;
       case 'unlink': p.edge = S.edges.find(e => e.id === p.id); S.edges = S.edges.filter(e => e.id !== p.id); break;
+      case 'edgeSet': { const e = S.edges.find(x => x.id === p.id); if (!e) throw new SOPError('Unknown connection ' + p.id); p.before = {}; for (const k of Object.keys(p.props)) p.before[k] = e[k]; Object.assign(e, p.props); p.edge = Object.assign({}, e); break; }   /* change an existing connection (its label) */
       case 'rule': S.rules.push(p.rule); break;
       case 'forget': S.rules = []; break;
       case 'reorder': { const i = S.shapes.findIndex(x => x.name === p.name); p.from = i; const [sh] = S.shapes.splice(i, 1); if (p.to === 'front') S.shapes.push(sh); else S.shapes.unshift(sh); break; }
@@ -409,6 +410,19 @@ const plural = (w, n) => n === 1 ? w : (w.endsWith('x') || w.endsWith('s') ? w +
 const listing = arr => arr.length <= 1 ? arr.join('') : arr.slice(0, -1).join(', ') + ' and ' + arr[arr.length - 1];
 const describeShape = s => `${s.name} is a ${sizeName(s.size)} ${s.color} ${s.shape}${s.outline ? ' with a ' + s.outline + ' outline' : ''}${s.label ? ` labeled "${s.label}"` : ''} in the ${region(s)}`;
 const edgeText = e => `${e.from} ${e.arrow === 'forward' ? '→' : e.arrow === 'both' ? '↔' : '—'} ${e.to}${e.style !== 'solid' ? ' (' + e.style + ')' : ''}${e.label ? ` "${e.label}"` : ''}`;
+const edgeEnds = e => `${e.from} ${e.arrow === 'forward' ? '→' : e.arrow === 'both' ? '↔' : '—'} ${e.to}`;
+/* the existing connections a wire names by its ends: from= and/or to= (shape names). With both ends: the connection from -> to; when there
+   is none, the one between them that points the other way. With one end: every connection that starts (from=) or ends (to=) there. */
+function edgesNamed(W, a) {
+  const F = names(a.from).map(n => need(W, n).name), T = names(a.to).map(n => need(W, n).name);
+  const fit = (f, t) => W.state.edges.filter(e => (!f.length || f.includes(e.from)) && (!t.length || t.includes(e.to)));
+  let es = fit(F, T);
+  if (!es.length && F.length && T.length) es = fit(T, F);
+  const what = F.length && T.length ? `between ${listing(F)} and ${listing(T)}` : F.length ? `from ${listing(F)}` : `into ${listing(T)}`;
+  if (!F.length && !T.length) throw new SOPError('Which arrow? Name its two ends, e.g. "the arrow from Start to Done".');
+  if (!es.length) { const near = W.state.edges.filter(e => F.concat(T).some(n => e.from === n || e.to === n)); throw new SOPError(`There is no arrow ${what}.` + (near.length ? ` Arrows there: ${near.map(edgeText).join('; ')}.` : '')); }
+  return { es, what, both: F.length > 0 && T.length > 0 };
+}
 const adjacent = (W, a, b) => W.state.edges.some(e => (e.from === a && e.to === b) || (e.from === b && e.to === a));
 const degree = (W, n) => W.state.edges.filter(e => e.from === n || e.to === n).length;
 const POS_WORDS = { leftOf: 'left of', rightOf: 'right of', above: 'above', below: 'below', near: 'near', between: 'between' };
@@ -571,6 +585,18 @@ function dupGroup(W, g, a, ctx, i, after) {
   return { made, group: W.findGroup(gname) };
 }
 
+/* create count>1 with layout=row|column|grid|circle: the offsets of the n shapes from the centre of their block, and the block's size.
+   The block is placed like one shape (position / anchor / region / at, or a free spot), so a layout and a position combine. */
+function layoutOffsets(lay, n, w, h) {
+  const gx = w + 28, gy = h + 28; let pts;
+  if (lay === 'column') pts = Array.from({ length: n }, (_, i) => [0, (i - (n - 1) / 2) * gy]);
+  else if (lay === 'grid') { const cols = Math.ceil(Math.sqrt(n)), rows = Math.ceil(n / cols); pts = Array.from({ length: n }, (_, i) => [((i % cols) - (cols - 1) / 2) * gx, (Math.floor(i / cols) - (rows - 1) / 2) * gy]); }
+  else if (lay === 'circle') { const r = Math.max(Math.max(w, h) + 20, (Math.max(w, h) + 28) * n / (2 * Math.PI)); pts = Array.from({ length: n }, (_, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; return [Math.round(Math.cos(a) * r), Math.round(Math.sin(a) * r)]; }); }
+  else pts = Array.from({ length: n }, (_, i) => [(i - (n - 1) / 2) * gx, 0]);   // row
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  return { pts, w: Math.max(...xs) - Math.min(...xs) + w, h: Math.max(...ys) - Math.min(...ys) + h };
+}
+
 const shapesPlugin = {
   name: 'shapes', title: 'Shapes',
   description: 'Create, delete, move, restyle, rename, label, duplicate and swap shapes.',
@@ -597,7 +623,12 @@ const shapesPlugin = {
       const rp = ctx.engine.plugin('rules');
       if (rp && rp.enabled) for (const r of W.state.rules) { if (r.shape && r.shape !== shape) continue; for (const k of ['color', 'size', 'outline']) if (props[k] == null && r[k] != null) { props[k] = r[k]; notes.push(`rule ${r.id} filled in ${k}=${r[k]}`); } }
       const n = Math.max(1, Math.min(12, Math.round(+a.count || 1)));
-      const made = []; let prev = null, answer;
+      const made = []; let prev = null, answer, block = null;
+      if (a.layout && n > 1) {   // several new shapes in a layout: the block of the layout is placed like one shape, then each shape in it
+        const d0 = dims({ shape, size: SIZE_PX[props.size || 'medium'] }), L = layoutOffsets(a.layout, n, d0.w, d0.h), c = placeFor(W, a, L.w, L.h, []);
+        const u = unmetText(`the ${a.layout}`, c); if (u) answer = u;
+        block = L.pts.map(([dx, dy]) => inCell(c.x, c.y, () => clampPt(c.x + dx, c.y + dy, d0.w, d0.h)));
+      }
       for (let i = 0; i < n; i++) {
         const name = a.name != null ? String(a.name) + (i > 0 ? String(i + 1) : '') : W.nextName(shape);
         if (!/^[A-Za-z_][\w-]*$/.test(name)) throw new SOPError(`"${name}" can't be a name: use letters, digits, - or _ and start with a letter.`);
@@ -605,12 +636,14 @@ const shapesPlugin = {
         if (W.findGroup(name)) throw new SOPError(`"${W.findGroup(name).name}" is already the name of a group.`);
         const size = SIZE_PX[props.size || 'medium'], d = dims({ shape, size });
         let p;
-        if (i > 0) { const chain = a.position === 'leftOf' ? 'leftOf' : a.position === 'above' ? 'above' : a.position === 'below' && !a.anchor ? 'rightOf' : 'rightOf'; p = relSpot(W, d.w, d.h, a.position === 'below' || a.position === 'above' ? 'rightOf' : chain, [prev], null, []); }
+        if (block) p = block[i];
+        else if (i > 0) { const chain = a.position === 'leftOf' ? 'leftOf' : a.position === 'above' ? 'above' : a.position === 'below' && !a.anchor ? 'rightOf' : 'rightOf'; p = relSpot(W, d.w, d.h, a.position === 'below' || a.position === 'above' ? 'rightOf' : chain, [prev], null, []); }
         else { p = placeFor(W, a, d.w, d.h, []); const u = unmetText(name, p); if (u) answer = u; }
         ctx.emit({ op: 'add', shape: { name, shape, size, color: props.color || 'white', outline: props.outline && props.outline !== 'none' ? props.outline : null, label: a.label != null ? String(a.label) : null, x: p.x, y: p.y } });
         made.push(name); prev = W.find(name);
         for (const l of names(a.linked)) { const t = need(W, l); ctx.emit({ op: 'link', edge: W.newEdge(t.name, name) }); }
       }
+      if (block) notes.push(`${a.layout} layout`);
       return { value: made, notes, answer };
     } },
     { type: 'command', when: { action: 'delete' }, run(a, ctx) {
@@ -671,7 +704,7 @@ const shapesPlugin = {
     } },
     { type: 'command', when: { action: 'label' }, run(a, ctx) {
       const t = needTargets(a, 'label'); if (a.label == null) throw new SOPError('What should the label say? Put it in quotes, e.g. label A "Start".');
-      for (const n of expandGroups(ctx.world, t)) ctx.emit({ op: 'set', name: need(ctx.world, n).name, props: { label: String(a.label) } });
+      for (const n of expandGroups(ctx.world, t)) ctx.emit({ op: 'set', name: need(ctx.world, n).name, props: { label: String(a.label) === '' ? null : String(a.label) } });   // label="" removes the label
       return { value: t };
     } },
     { type: 'command', when: { action: 'duplicate' }, run(a, ctx) {
@@ -767,7 +800,7 @@ const groupsPlugin = {
 
 const connectionsPlugin = {
   name: 'connections', title: 'Connections',
-  description: 'Arrows and lines between shapes, with style, direction, color and label.',
+  description: 'Arrows and lines between shapes, with style, direction, color and label; the label of an existing arrow can be set, changed, removed and asked about.',
   legend: {
     action: { values: { connect: ['connect', 'link', 'join', 'wire', 'attach', 'hook', 'tie'], disconnect: ['disconnect', 'unlink', 'detach', 'separate', 'cut', 'unhook', 'sever', 'snip'] } },
     from: { ask: 'Where does the connection start?', kind: 'names' },
@@ -811,9 +844,32 @@ const connectionsPlugin = {
       if (!doomed.length) return { notes: ['there was nothing to disconnect'] };
       for (const e of doomed) ctx.emit({ op: 'unlink', id: e.id });
       return { value: from.concat(to) };
-    } }
+    } },
+    /* the label of an existing connection: action=label with from=/to= (its ends) instead of target=; label="" removes it */
+    { type: 'command', when: { action: 'label', from: true }, run: labelEdge },
+    { type: 'command', when: { action: 'label', to: true }, run: labelEdge },
+    /* what an existing connection says: ask=property (property=label, or color) with from=/to= */
+    { type: 'question', when: { ask: 'property', from: true }, run: edgeProperty },
+    { type: 'question', when: { ask: 'property', to: true }, run: edgeProperty }
   ]
 };
+function labelEdge(a, ctx) {
+  const W = ctx.world;
+  if (a.label == null) throw new SOPError('What should the arrow say? Put it in quotes, e.g. label the arrow from Start to Done "yes".');
+  const { es, what, both } = edgesNamed(W, a);
+  if (es.length > 1) throw new SOPError(`There are ${es.length} arrows ${what}: ${es.map(edgeEnds).join('; ')}. Which one? Name both ends, e.g. "label the arrow from ${es[0].from} to ${es[0].to} …".`);
+  const e = es[0], text = String(a.label) === '' ? null : String(a.label);
+  const other = both ? W.state.edges.find(x => x !== e && x.from === e.to && x.to === e.from) : null;
+  const also = other ? ` There is also an arrow ${edgeEnds(other)}; say “the arrow from ${other.from} to ${other.to}” for that one.` : '';
+  if ((e.label || null) === text) return { value: [e.id], notes: [text == null ? `${edgeEnds(e)} already has no label` : `${edgeEnds(e)} already says "${text}"`], highlight: { edges: [e.id] } };
+  ctx.emit({ op: 'edgeSet', id: e.id, props: { label: text } });
+  return { value: [e.id], answer: (text == null ? `Removed the label of the arrow ${edgeEnds(e)}.` : `The arrow ${edgeEnds(e)} now says “${text}”.`) + also, highlight: { edges: [e.id] } };
+}
+function edgeProperty(a, ctx) {
+  const W = ctx.world, { es } = edgesNamed(W, a), prop = a.property || 'label';
+  const say = e => prop === 'color' ? `The arrow ${edgeEnds(e)} is ${e.color || 'black (the default)'}` : prop === 'label' ? (e.label ? `The arrow ${edgeEnds(e)} says “${e.label}”` : `The arrow ${edgeEnds(e)} has no label`) : edgeText(e);
+  return { value: es.map(e => prop === 'color' ? e.color || null : prop === 'label' ? e.label || null : edgeText(e)), answer: es.map(say).join('; ') + '.', highlight: { shapes: [...new Set(es.flatMap(e => [e.from, e.to]))], edges: es.map(e => e.id) } };
+}
 
 const layoutPlugin = {
   name: 'layout', title: 'Layout',
@@ -1231,7 +1287,7 @@ const COMMON = new Set(('the and for all too also not but with without from into
   + 'describe summary count number total close closest near nearest far farthest furthest big bigger biggest small smaller smallest large larger largest '
   + 'labeled labelled colored coloured connected linked attached joined filled outlined titled reading actually slightly horizontally vertically really maybe instead '
   + 'new newest last latest recent first oldest earliest get rid got back front take bring send next chain order sequence pair pairs other evenly apart behind non '
-  + 'leftmost rightmost highest lowest corner side edge row column grid ring stack dashed dotted solid plain border outline stroke yourself up down').split(' '));
+  + 'leftmost rightmost highest lowest corner side edge row column grid ring stack dashed dotted solid plain border outline stroke yourself up down unlabel').split(' '));
 const STOP = new Set(['a', 'an', 'the', 'and', 'or', 'to', 'of', 'in', 'on', 'at', 'it', 'is', 'are', 'be', 'with', 'by', 'from', 'into', 'as', 'that', 'this', 'please', 'new', 'another']);
 
 function makeFormalizer(engine) {
@@ -1254,6 +1310,17 @@ function makeFormalizer(engine) {
     const verbCues = [...ACTION.keys()].filter(w => !['undo', 'redo', 'revert'].includes(w));
     const ARTICLE_AHEAD = new RegExp(`^\\s+(?:new\\s+|few\\s+|couple\\b|copy\\b|bit\\b|little\\b|lot\\b|(?:(?:${colorRe}|${sizeRe}|dashed|dotted|solid)\\s+){0,3}(?:${nounRe}|${EDGE_WORDS})\\b)`, 'i');
     const VERB_RE = new RegExp(`\\b(${alt(verbCues)})\\b`, 'i');
+    /* a shape noun before a name refers to the shape of that name: "the shape Process", "the box Process", "the node Process", "the circle
+       named Process", "circle1" after "the circle". The noun phrase is replaced by the name (nounBeforeName in clause()). Not after a/an/another
+       or a number ("draw a circle named Hub" declares a new shape), not a plural noun, and a word after the noun counts only when it is a
+       known name; after "named"/"called" any word counts, except right after a verb of creation ("draw the circle named Hub"). */
+    const NOUN_NAME = new RegExp(`\\b(?:(the|this|that)\\s+)?((?:(?:${colorRe}|${sizeRe})\\s+){0,3})(${nounRe})\\s+(?:(named|called)\\s+)?([A-Za-z_][\\w-]*)(?=['\u2019\\s,.;:!?]|$)`, 'gi');
+    const CREATE_VERBS = new RegExp(`\\b(?:${alt([...ACTION.entries()].filter(([, v]) => v === 'create').map(([k]) => k))})\\s+$`, 'i');
+    /* an existing connection named by its ends: "the arrow between A and B", "the arrow from A to B", "the link A–B", "the A→B line" (the
+       raw test; the ends are read after names are marked, edgeRef in clause()) */
+    const EDGE_RAW = new RegExp(`\\b(?:${EDGE_WORDS})\\s+(?:(?:that\\s+)?(?:goes|going|leads|leading|runs|running|points|pointing)\\s+)?(?:between|from|to|into|out\\s+of|leaving)\\b|\\b(?:${EDGE_WORDS})\\s+(?:the\\s+)?[A-Za-z_][\\w-]*\\s*(?:\u2013|\u2014|->|\u2192|-|\\bto\\b)\\s*(?:the\\s+)?[A-Za-z_]|[A-Za-z_][\\w-]*\\s*(?:\u2013|\u2014|->|\u2192)\\s*[A-Za-z_][\\w-]*\\s+(?:${EDGE_WORDS})\\b`, 'i');
+    /* removing a label: "remove the label of Done", "delete the label from the arrow between A and B", "clear Done's label", "unlabel Done" */
+    const REMOVE_LABEL = /\b(?:remove|delete|clear|erase|drop|wipe|strip|get\s+rid\s+of)\s+(?:the\s+|its\s+|their\s+|any\s+|all\s+)?(?:labels?|captions?|titles?|text)\b(?!\s+box)|\b(?:remove|delete|clear|erase|drop|wipe|strip|get\s+rid\s+of)\s+(?:the\s+)?[A-Za-z_][\w-]*['\u2019]s\s+(?:labels?|captions?|titles?|text)\b|^\s*unlabel\b/i;
 
     const F = { nodes: [], notes: [], s: 0, m: 0, segments: [] };
     // group names are names too (ctx.groups, or the groups of this formalizer's own world)
@@ -1332,6 +1399,26 @@ function makeFormalizer(engine) {
     const PLACE_ONLY = nameAltRe ? new RegExp(`^\\s*(?:the\\s+)?(?:${nameAltRe})\\s+(?:(?:is|goes|sits|stays|should\\s+be|just|right|way|then)\\s+)*(?:(?:at|in|on|to)\\s+the\\s+(?:top|bottom|left|right|center|centre|middle|upper|lower)|(?:top|bottom|upper|lower)(?:[\\s-]+(?:left|right))?\\s*$|on\\s+top\\s*$|(?:in\\s+the\\s+)?(?:center|centre|middle)\\s*$|(?:above|below|under|over|beneath|underneath|left\\s+of|right\\s+of|next\\s+to|near|beside|between|on\\s+top\\s+of)\\b)`, 'i') : null;
     const CONNECT_ONLY = nameAltRe ? new RegExp(`^\\s*(?:the\\s+)?(?:${nameAltRe})(?:\\s*(?:,|and)\\s*(?:the\\s+)?(?:${nameAltRe}))*\\s+(?:(?:both\\s+|each\\s+|all\\s+)?(?:goes|go|leads?|flows?|feeds?|sends?|files|points?|runs?|passes|connects?)\\s+(?:in)?to|to)\\s+(?:the\\s+)?(?:${nameAltRe}|the\\s+next)\\b`, 'i') : null;
     const FACT_LIST = nameAltRe ? new RegExp(`\\s*,\\s*(?:and\\s+)?(?=(?:the\\s+)?(?:${nameAltRe})\\s+(?:is|are)\\s)|\\s*,\\s*(?:and\\s+)?(?=(?:the\\s+)?(?:${nameAltRe})\\s+(?:(?:at|in|on)\\s+the|top|bottom|upper|lower|center|centre|middle|on\\s+top|(?:goes\\s+)?to\\s+(?:the\\s+)?(?:${nameAltRe}))\\b|(?:the\\s+)?(?:${nameAltRe})\\s+(?:above|below|under|over|left\\s+of|right\\s+of|next\\s+to|near|beside)\\b)`, 'i') : null;
+    /** "label the shape Process", "move the box Process", "the circle named Done", "the node Start": the noun phrase -> the name (see NOUN_NAME);
+     *  "Process-Check" next to an arrow word -> "Process – Check" when both are known names */
+    function nounBeforeName(t, forced) {
+      const knownName = (w, after) => {
+        const k = nameIndex.get(w.toLowerCase()); if (k == null || w === 'a' || w === 'I') return false;
+        if (w === 'A' && ARTICLE_AHEAD.test(after)) return false;
+        return /^[A-Z]|\d/.test(w) || (typeof k === 'string' && k === w);
+      };
+      t = t.replace(NOUN_NAME, (m, art, mods, noun, nm, w, off, whole) => {
+        const before = whole.slice(0, off), after = whole.slice(off + m.length);
+        if (!art && /\b(?:a|an|another|some|any|each|every|no|one|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+$/i.test(before)) return m;
+        if (pluralNoun(noun.toLowerCase())) return m;
+        if (!nm && /\b(?:rename|call|name)\s+(?:the\s+|this\s+|that\s+)?$/i.test(before + (art ? art + ' ' : '')) && !/^\s+(?:to|as|into)\b/i.test(after)) return m;   /* "call the triangle Output": the new name */
+        if (knownName(w, after)) return (/\S$/.test(before) ? ' ' : '') + w;
+        if (nm && art && !CREATE_VERBS.test(before) && !/^(?:a|an|the|it|one)$/i.test(w)) { forced.add(w.toLowerCase()); return (/\S$/.test(before) ? ' ' : '') + w; }
+        return m;
+      });
+      if (new RegExp(`\\b(?:${EDGE_WORDS})\\b`, 'i').test(t)) t = t.replace(/\b([A-Za-z_]\w*)-([A-Za-z_]\w*)\b/g, (m, a, b) => nameIndex.has(m.toLowerCase()) || !nameIndex.has(a.toLowerCase()) || !nameIndex.has(b.toLowerCase()) ? m : a + ' \u2013 ' + b);
+      return t;
+    }
     if (given) {   // the units of another cut (see opts.units above): one clause per unit, the context carried as in the loop below
       for (const u of given) {
         const tail = original.slice(Math.max(u.c0, u.c1 - 1)), end = /[.!?;]/.exec(tail.replace(/^[\s,]+/, ''));
@@ -1385,12 +1472,35 @@ function makeFormalizer(engine) {
       let t = ' ' + raw.trim().replace(/[,\s]+$/, '') + ' ';
       t = t.replace(/^\s*(?:(?:please|kindly|now|ok(?:ay)?|so|and|also|hey|next|can you|could you|would you|will you|i want you to|i'd like you to|i would like you to|let's|lets|go ahead and)\b[\s,]*)+/i, ' ');
       if (!t.trim()) return;
+      const forced = new Set();   // words read as shape names because a shape noun + named/called stands before them
+      t = nounBeforeName(t, forced);
       const firstWord = (t.trim().match(/^[A-Za-z']+/) || [''])[0].toLowerCase();
       const secondWord = (t.trim().split(/\s+/)[1] || '').toLowerCase();
       const C = { t, args: {}, marks: [] };
       const take = (re, fn) => { const m = C.t.match(re); if (!m) return null; C.t = C.t.slice(0, m.index) + ' ' + C.t.slice(m.index + m[0].length) + ' '; if (fn) fn(m); return m; };
       const mark = v => { C.marks.push(v); return ' ⟦' + (C.marks.length - 1) + '⟧ '; };
       const refsIn = s => [...s.matchAll(/⟦(\d+)⟧/g)].map(m => +m[1]);
+      /* the ends of a connection: "between A and B", "from A to B", "A–B", "A→B line", "from A", "into B" -> from= / to= (a name, or a
+         description such as "the red circle"); a capitalised word that is not a known name still counts as a name. Then the label text
+         when it is not in quotes: after "as" / "to" / ":", or the words left after the verb. */
+      function edgeRef() {
+        const END = `(⟦\\d+⟧|[A-Z][\\w-]*|[a-z_]+\\d[\\w-]*)`, E = `(?:(?:the|this|that|an?)\\s+)?(?:${EDGE_WORDS})`, VIA = `(?:(?:that\\s+)?(?:goes|going|leads|leading|runs|running|points|pointing)\\s+)?`, ARW = `\\s*(?:\u2013|\u2014|->|\u2192|-|\\bto\\b|\\band\\b)\\s*`;
+        const EP = [[`${E}\\s+${VIA}between\\s+${END}\\s+and\\s+${END}`, 'ft'], [`${E}\\s+${VIA}from\\s+${END}\\s+(?:to|into|towards?)\\s+${END}`, 'ft'], [`${E}\\s+${END}${ARW}${END}`, 'ft'],
+          [`${END}${ARW}${END}\\s+(?:${EDGE_WORDS})`, 'ft'], [`${E}\\s+${VIA}(?:from|out\\s+of|leaving)\\s+${END}`, 'f'], [`${E}\\s+${VIA}(?:to|into|towards?|entering)\\s+${END}`, 't']];
+        const val = x => { const m = /^⟦(\d+)⟧$/.exec(x); return m ? markVals([+m[1]]) : x; };
+        for (const [re, how] of EP) {
+          const m = take(new RegExp(re, 'i')); if (!m) continue;
+          if (how === 'ft') { C.args.from = val(m[1]); C.args.to = val(m[2]); } else if (how === 'f') C.args.from = val(m[1]); else C.args.to = val(m[1]);
+          C.edge = true; break;
+        }
+        if (!C.edge || kind !== 'command' || C.args.label != null) return;
+        C.t = C.t.replace(/\b(?:the\s+|its\s+|a\s+|new\s+)*(?:label|caption|title|text|tag|name)\s+(?:of|on|for)\b/gi, ' ');
+        const asText = x => x.split(/\s+/).filter(Boolean).map(w => { const m = /^⟦(\d+)⟧$/.exec(w); return m ? names(C.marks[+m[1]]).join(' ') : w; }).join(' ');
+        const m = C.t.match(/(?:\bas|\bto|:)\s+((?:⟦\d+⟧|[A-Za-z0-9_][\w'-]*)(?:\s+(?:⟦\d+⟧|[A-Za-z0-9_][\w'-]*))*)\s*$/i);
+        if (m) { C.args.label = asText(m[1]); C.t = C.t.slice(0, m.index) + ' '; return; }
+        const rest = C.t.replace(VERB_RE, ' ').replace(/^\s*(?:name|call|retitle|relabel)\b/i, ' ').split(/\s+/).filter(w => w && !/^(?:the|a|an|it|its|of|on|with|label|caption|title|text|tag|name|say|says|read|reads|new|please)$/i.test(w));
+        if (rest.length) { C.args.label = asText(rest.join(' ')); C.t = ' '; }
+      }
       const markVals = idx => { const vs = idx.map(i => C.marks[i]); const out = [], seen = new Set(); vs.forEach(v => [].concat(v).forEach(x => { const k = JSON.stringify(x); if (!seen.has(k)) { seen.add(k); out.push(x); } })); return out.length === 1 ? out[0] : out; };
 
       // ---- what kind of wire is this? ----
@@ -1405,6 +1515,22 @@ function makeFormalizer(engine) {
       else if (isQ && !VERB_RE.test(t)) kind = 'question';
       else kind = 'command';
 
+      // ---- the label of an existing connection, and removing a label ----
+      let edgeLabel = false, unlabel = false;
+      if (kind === 'command' || kind === 'question') {
+        const vm0 = t.match(VERB_RE), act0 = vm0 ? ACTION.get(vm0[1].toLowerCase()) : null, lead = (t.trim().match(/^[A-Za-z]+/) || [''])[0].toLowerCase();
+        const labelObj = /\b(?:put|add|place|write|stick|attach|give|set)\s+(?:(?:a|an|the|this|that|its|new)\s+)*(?:label|caption|title|text|tag|name)\b/i.test(t);
+        const quoteOn = /\b(?:put|place|stick|add|write)\s+⟪\d+⟫\s+(?:on|onto|in|inside|to)\b/i.test(t);   /* "put "Tray 2" on Tray": a label */
+        unlabel = kind === 'command' && (lead === 'unlabel' || (act0 === 'delete' && REMOVE_LABEL.test(t)));   /* "unlabel" is not a verb cue (it would take "relabel" from the spelling fix), only a first word */
+        const masked = t.replace(/[A-Za-z_][\w-]*/g, w => /^[A-Z]/.test(w) && nameIndex.has(w.toLowerCase()) ? 'Xname' : w);   // a shape named Wire or Link is not an arrow word
+        if (EDGE_RAW.test(masked)) {
+          if (kind === 'question') edgeLabel = /\b(?:say|says|said|label|labell?ed|caption|title|text|tag|read|reads|written|called|named)\b/i.test(t);
+          else edgeLabel = unlabel || /^(?:name|call|label|relabel|unlabel|title|retitle|caption|tag|write|rename)$/.test(lead) || ['label', 'rename'].includes(act0) || labelObj || quoteOn
+            || (act0 === 'set' && !['make', 'put', 'place'].includes(lead) && /\b(?:label|caption|title|text|tag|name|say|says|read|reads)\b/i.test(t))
+            || (lead === 'make' && /\b(?:label|caption|title|text|say|says|read|reads)\b/i.test(t) && !/^\s*make\s+(?:a|an|another|new|\d+)\s/i.test(t));
+        }
+        if (kind === 'command' && (edgeLabel || unlabel || quoteOn)) action = 'label';   /* "label the arrow between A and B as X", "remove the label of Done" */
+      }
       if (kind === 'command' && !action) {
         const vm = t.match(VERB_RE);
         if (vm) {
@@ -1446,6 +1572,7 @@ function makeFormalizer(engine) {
       const isCmd = kind === 'command';
 
       // ---- rename's new name, declared names, labels ----
+      if (unlabel) { C.args.label = ''; C.t = C.t.replace(REMOVE_LABEL, m => ' ' + ((/([A-Za-z_][\w-]*)['\u2019]s\s/.exec(m) || [])[1] || '') + ' ').replace(/\bunlabel\b/i, ' '); }   /* "delete Done's label" keeps Done */
       if (action === 'rename') take(/\b(?:to|as|into)\s+(⟪\d+⟫|[A-Za-z_][\w-]*)\s*$/i, m => C.args.name = unq(m[1]));
       if (action === 'group') { take(/\btogether\b/i); if (C.args.name == null) take(/\b(?:as|into)\s+(?:(?:a|an|one|the|new|single)\s+)*(?:group\s+)?(?:(?:called|named)\s+)?(⟪\d+⟫|[A-Za-z_][\w-]*)/i, m => { if (!/^(?:group|one|a)$/i.test(m[1])) C.args.name = unq(m[1]); }); }
       take(/\b(?:named|called|with\s+the\s+name|name\s+it)\s+(⟪\d+⟫|[A-Za-z_][\w-]*)/i, m => C.args.name = unq(m[1]));
@@ -1454,6 +1581,16 @@ function makeFormalizer(engine) {
       if (C.args.label == null && ['create', 'connect'].includes(action)) take(/\blabell?ed\s+([A-Za-z0-9_][\w-]*)/i, m => C.args.label = m[1]);
       if (kind === 'question' || kind === 'fact') take(/⟪(\d+)⟫/, m => C.args.label = quotes[+m[1]]);
 
+      // ---- several new shapes in a layout: "in a circle (layout)", "arranged in a grid", "as a ring", "side by side", "stacked", "in a line" ----
+      if (action === 'create') {
+        const many = new RegExp(`\\b(?:${NUMRE}|several|few|couple|some)\\b`, 'i').test(C.t) || C.t.split(/\s+/).some(w => SHAPE.has(w.toLowerCase()) && pluralNoun(w.toLowerCase()));
+        const LAY = { circle: 'circle', ring: 'circle', row: 'row', line: 'row', column: 'column', stack: 'column', grid: 'grid' };
+        const arranged = `(?:(?:arranged|laid\\s+out|placed|set\\s+out|organi[sz]ed|positioned|spaced)\\s+)`;
+        const LRE = new RegExp(`\\b(${arranged})?(?:in|into|as|on)\\s+(?:a|an|one)\\s+(circle|ring|row|line|column|stack|grid)(?:\\s+(?:layout|formation|pattern|arrangement|shape))?\\b`, 'i');
+        const m0 = C.t.match(LRE);
+        if (m0 && (many || m0[1])) take(LRE, m => C.args.layout = LAY[m[2].toLowerCase()]);
+        else if (many) take(/\bside\s+by\s+side\b|\bnext\s+to\s+each\s+other\b/i, () => C.args.layout = 'row') || take(/\b(?:stacked(?:\s+up)?|in\s+a\s+stack|one\s+(?:above|on\s+top\s+of)\s+the\s+other|on\s+top\s+of\s+each\s+other)\b/i, () => C.args.layout = 'column');
+      }
       // ---- coordinates, distances, scale, outline ----
       take(/\b(?:at|to)\s+(?:position\s+|point\s+|coordinates?\s+)?\(?\s*(\d+)\s*,\s*(\d+)\s*\)?/i, m => C.args.at = [+m[1], +m[2]]);
       if (!C.args.at) take(/\bx\s*=?\s*(\d+)\s*,?\s*(?:and\s+)?y\s*=?\s*(\d+)/i, m => C.args.at = [+m[1], +m[2]]);
@@ -1507,19 +1644,22 @@ function makeFormalizer(engine) {
         const lw = w.toLowerCase();
         if (/^(it|its)$/.test(lw)) { if (lastRef != null) return mark(lastRef); F.notes.push(`I couldn't tell what "${w}" refers to.`); return w; }
         if (/^(them|they|both|those|these)$/.test(lw)) { if (lastGroup != null) return mark(lastGroup); return w; }
+        if (forced.has(lw) && !nameIndex.has(lw)) return mark(w);
         if (!nameIndex.has(lw) || w === 'a' || w === 'I') return w;
         if (w === 'A' && ARTICLE_AHEAD.test(whole.slice(off + 1))) return w;
         return mark(nameIndex.get(lw));
       });
 
       C.t = C.t.replace(/\bthe\s+(?=⟦)/gi, ' ');
+      if (edgeLabel) edgeRef();
       { const toks = C.t.replace(/⟦\d+⟧|⟪\d+⟫/g, ' ').trim().split(/\s+/); toks.slice(1).forEach(w => { const c = w.replace(/[^\w-]/g, ''); if (c && /[A-Z]|\d/.test(c) && /^[A-Za-z_]/.test(c) && !COLOR.has(c.toLowerCase()) && !SHAPE.has(c.toLowerCase()) && !SIZE.has(c.toLowerCase()) && c !== 'A' && c !== 'I') F.notes.push(`"${c}" is not a shape I know.`); }); }
       // ---- question type, decided on the marked text ----
       let ask = null;
       if (kind === 'question') {
         const T = C.t.toLowerCase(), nref = refsIn(T).length;
         const groupRefs = refsIn(T).filter(i => typeof C.marks[i] === 'string' && groupSet.has(C.marks[i].toLowerCase()));
-        if (/\b(rules?|defaults?)\b/.test(T)) ask = 'rules';
+        if (C.edge) { ask = 'property'; C.args.property = 'label'; delete C.args.label; }   /* "what does the arrow from A to B say?" */
+        else if (/\b(rules?|defaults?)\b/.test(T)) ask = 'rules';
         else if (nref && /\b(?:which|what)\s+groups?\b|\bbelongs?\s+to\b|\bpart\s+of\s+(?:a|any|which|what)\b|\bin\s+(?:a|any)\s+group\b|\bgroup\s+(?:is|does)\b/.test(T)) ask = 'groupOf';   /* "which group is Check in?" */
         else if (groupRefs.length && (/\b(?:in|inside|of)\s+⟦\d+⟧(?:\s+group)?\s*$/.test(T) || /\bcontains?\b|\bmembers?\b|\bholds?\b/.test(T))) ask = 'members';   /* "what is in Pipeline?" */
         else if (/\b(cycles?|loops?|circular)\b/.test(T)) ask = 'cycle';
@@ -1642,8 +1782,9 @@ function makeFormalizer(engine) {
 
       // ---- whatever references are left are the targets ----
       const left = refsIn(C.t);
+      if (C.edge && isCmd) left.length = 0;   /* a connection's label: the ends are from= / to=, nothing else is a target */
       if (left.length) {
-        if (action === 'label' && C.args.label == null) { const m = C.t.match(new RegExp(`${M}\\s+(?:as\\s+|with\\s+)?([A-Za-z0-9_][\\w-]*)`)); if (m) C.args.label = m[2]; }
+        if (action === 'label' && C.args.label == null && !C.edge) { const m = C.t.match(new RegExp(`${M}\\s+(?:as\\s+|with\\s+)?([A-Za-z0-9_][\\w-]*)`)); if (m) C.args.label = m[2]; }
         if (action === 'rename' && C.args.name == null && left.length >= 2) { C.args.name = markVals([left.pop()]); }
         if (action === 'rename' && C.args.name == null) { const m = C.t.match(new RegExp(`${M}\\s+([A-Za-z_][\\w-]*)\\s*$`)); if (m) C.args.name = m[2]; }
         if (ask === 'nearest' && C.args.anchor == null) C.args.anchor = markVals([left.shift()]);
@@ -1671,7 +1812,7 @@ function makeFormalizer(engine) {
       else if (args.target != null && !Array.isArray(args.target)) lastRef = args.target;
       else if (Array.isArray(args.target)) lastGroup = args.target;
       if (action === 'connect' && args.to != null && !Array.isArray(args.to)) lastRef = args.to;
-      if (isCmd && ['move', 'set', 'resize', 'delete', 'label', 'rename', 'duplicate', 'swap', 'align'].includes(action) && args.target == null) F.notes.push(`@${id}: no target found; the interpreter will ask which shape you mean.`);
+      if (isCmd && ['move', 'set', 'resize', 'delete', 'label', 'rename', 'duplicate', 'swap', 'align'].includes(action) && args.target == null && args.from == null && args.to == null) F.notes.push(`@${id}: no target found; the interpreter will ask which shape you mean.`);
     }
   };
 }

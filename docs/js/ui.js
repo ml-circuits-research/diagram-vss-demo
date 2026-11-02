@@ -428,6 +428,7 @@ function summarize(result) {
       else if (p.op === 'rule') rules.push(p.rule);
       else if (p.op === 'forget') said.push('Forgot all default rules.');
       else if (p.op === 'reorder') said.push(p.to === 'front' ? `Brought ${p.name} to the front.` : `Sent ${p.name} to the back.`);
+      else if (p.op === 'edgeSet') { if (!st.answer && p.edge) said.push(`The arrow ${p.edge.from}–${p.edge.to} ${p.edge.label ? `now says “${p.edge.label}”` : 'has no label now'}.`); }
       else if (p.op === 'set') {
         if ('x' in p.props && !moved.includes(p.name)) moved.push(p.name);
         const ch = Object.entries(p.props).filter(([k]) => k !== 'x' && k !== 'y').map(([k, v]) => k === 'size' ? K.sizeName(v) : k === 'label' ? `labeled “${v}”` : k === 'outline' ? (v ? `${v} outline` : 'no outline') : k === 'shape' ? `a ${v}` : String(v));
@@ -653,6 +654,7 @@ function patchLine(p) {
     case 'rename': return ['chg', '~', `${p.from} is now ${p.to}`];
     case 'link': return ['add', '+', K.edgeText(p.edge)];
     case 'unlink': return ['del', '−', p.edge ? K.edgeText(p.edge) : p.id];
+    case 'edgeSet': return ['chg', '~', p.edge ? `${K.edgeText(p.edge)}${'label' in p.props && p.props.label == null ? '  label removed' : ''}` : p.id];
     case 'rule': return ['add', '+', `rule ${p.rule.id}`];
     case 'forget': return ['del', '−', 'all rules'];
   }

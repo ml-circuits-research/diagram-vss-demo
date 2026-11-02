@@ -29,14 +29,14 @@ const icon = k => `<svg class="i inl" viewBox="0 0 24 24" aria-hidden="true">${I
 
 /* ---------------- what each action and question is, in plain words ---------------- */
 const ACTIONS = {
-  create: { t: 'Draw', d: 'Add one or more shapes (up to 12 at once). Say the kind, colour, size, name, label and place you want; whatever you leave out gets a default: a medium white circle in a free spot, named circle1, circle2…', ex: ['Draw a red circle named Hub in the center', 'Add three small squares in a row below Process', 'Draw a gold star named Gem with a black outline in the top right'] },
+  create: { t: 'Draw', d: 'Add one or more shapes (up to 12 at once). Say the kind, colour, size, name, label and place you want; whatever you leave out gets a default: a medium white circle in a free spot, named circle1, circle2…. Several new shapes can be laid out together: “in a row” (also “side by side”, “in a line”), “in a column” (“stacked”), “in a grid”, “in a circle” (“as a ring”), next to a shape or in a part of the canvas.', ex: ['Draw a red circle named Hub in the center', 'Add three small squares in a row below Process', 'Add 6 triangles in a circle layout', 'Add 5 red stars arranged in a grid', 'Draw a gold star named Gem with a black outline in the top right'] },
   delete: { t: 'Delete', d: 'Remove shapes together with their arrows.', ex: ['Delete Done', 'Delete the yellow diamond', 'Clear the canvas'] },
   duplicate: { t: 'Copy', d: 'Make copies next to the original, with the same look.', ex: ['Copy Check', 'Duplicate Done twice'] },
   move: { t: 'Move', d: 'Put a shape next to another one, in a part of the canvas, at x,y coordinates, or a distance in a direction (80 pixels if you give no distance).', ex: ['Move Done to the top right', 'Move Done left by 100', 'Put Done between Start and Check'] },
   swap: { t: 'Swap', d: 'Two shapes trade places.', ex: ['Swap Start and Done'] },
   set: { t: 'Change', d: 'Change the colour, the kind of shape, the size or the outline. “all” changes every shape that fits.', ex: ['Make Done red', 'Turn Done into a star', 'Give Process a red outline', 'Make all circles red'] },
   resize: { t: 'Resize', d: 'Make a shape bigger or smaller. “Bigger” alone means one and a half times; you can also say a factor or a size name.', ex: ['Make Process bigger', 'Shrink Start', 'Make Check twice as big'] },
-  label: { t: 'Label', d: 'Write text inside a shape. Put the text in quotes. Long text is shortened with “…” to fit.', ex: ['Label Done "finish"'] },
+  label: { t: 'Label', d: 'Write text inside a shape. Put the text in quotes. Long text is shortened with “…” to fit. “Remove the label” takes it away again. A shape can also be named with its kind in front: “the shape Process”, “the box Process”, “the circle named Done”.', ex: ['Label Done "finish"', 'Label the shape Process as "Great"', 'Remove the label of Process'] },
   rename: { t: 'Rename', d: 'Give a shape (or a group) a new name. Arrows stay attached.', ex: ['Rename Done to End'] },
   connect: { t: 'Connect', d: 'Draw arrows or lines between shapes. One shape can connect to several at once, and a list can be joined as a chain.', ex: ['Connect Start to Done with a dashed arrow', 'Connect Start to Process, Check and Done', 'Connect Start, Check and Done in a chain'] },
   disconnect: { t: 'Disconnect', d: 'Remove the arrows between two shapes, all arrows of one shape, or every arrow.', ex: ['Disconnect Start from Process', 'Remove all connections'] },
@@ -51,6 +51,8 @@ const ACTIONS = {
   redo: { t: 'Redo', d: 'Put back what undo took away.', ex: [{ text: 'Redo', pre: ['Make Done red', 'Undo'] }] },
   forget: { t: 'Forget the rules', d: 'Drop every “from now on” rule.', ex: [{ text: 'Forget the rules', pre: ['From now on, circles are orange'] }] }
 };
+/* the label of an arrow already drawn: action=label with from= / to= (its two ends) instead of target= (listed under Arrows and lines) */
+const EDGE_LABEL = { t: 'Label an arrow', d: 'Write, change or remove the text next to an arrow or line that is already drawn. Name the arrow by its two ends: “the arrow between Process and Check”, “the arrow from Check to Done”, “the link Process–Check”. Text without spaces needs no quotes. If one end has several arrows, the reply asks which one; if there is no such arrow, it says so.', ex: ['Label the arrow between Process and Check as Valid', 'Put the label "maybe" on the arrow from Check to Done', 'Name the link Start–Process Begin', 'Remove the label of the arrow between Check and Done', 'What does the arrow from Check to Done say?'] };
 /* requests that are not an action: a rule for new shapes, and a statement of fact (wire types `rule` and `fact`) */
 const WIRE_ITEMS = {
   rule: { t: 'Rules for new shapes', d: '“From now on …” sets a default for shapes drawn later. It fills in only what you leave out, and it does not change shapes already drawn.', ex: ['From now on, circles are orange', 'From now on, new shapes are small and purple'] },
@@ -60,7 +62,7 @@ const ACTION_GROUPS = [
   ['Draw, copy, delete', ['create', 'duplicate', 'delete']],
   ['Move and swap', ['move', 'swap']],
   ['Change how it looks', ['set', 'resize', 'label', 'rename']],
-  ['Arrows and lines', ['connect', 'disconnect']],
+  ['Arrows and lines', ['connect', 'disconnect', 'labelEdge']],
   ['Tidy up', ['align', 'distribute', 'arrange', 'toFront', 'toBack']],
   ['Groups', ['group', 'ungroup']],
   ['Rules and statements', ['rule', 'forget', 'fact']],
@@ -70,7 +72,7 @@ const ASKS = {
   count: { t: 'How many', ex: ['How many circles are there?', 'How many connections are there?', 'How many groups are there?'] },
   list: { t: 'Which ones', ex: ['Which shapes are green?', 'Which shapes are below Start?', 'Which circles are not blue?'] },
   exists: { t: 'Is there…', ex: ['Is there a red shape?', 'Are there any stars?'] },
-  property: { t: 'What colour, where, how big, what text', ex: ['What color is Check?', 'Where is Done?', 'How big is Start?', 'What does Process say?'] },
+  property: { t: 'What colour, where, how big, what text', d: 'Of a shape, or the text of an arrow (named by its two ends).', ex: ['What color is Check?', 'Where is Done?', 'How big is Start?', 'What does Process say?', 'What does the arrow from Check to Done say?'] },
   check: { t: 'Yes-or-no checks', ex: ['Is Check above Done?', 'Is Done a green circle?', 'Is Start bigger than Done?'] },
   describe: { t: 'Describe', ex: ['Describe Check', 'Describe the diagram'] },
   neighbors: { t: 'What is it connected to', ex: ['What is connected to Check?'] },
@@ -92,7 +94,7 @@ const CAPS = {
   history: { t: 'Undo and redo', d: 'Steps back through your changes and forward again. The arrow buttons above the drawing use it too.', ex: ['Undo', { text: 'Redo', pre: ['Make Done red', 'Undo'] }] },
   shapes: { t: 'Shapes', d: 'Drawing, deleting, moving, copying, swapping, recolouring, resizing, labelling and renaming shapes, and placing them by position.', ex: ['Draw a red circle named Hub in the center', 'Move Done to the top right', 'Turn Done into a star'] },
   groups: { t: 'Groups', d: 'Several shapes under one name, handled as one block.', ex: GROUP_PRE.concat([{ text: 'Move Intake to the bottom right', pre: GROUP_PRE }]) },
-  connections: { t: 'Arrows and lines', d: 'Connecting and disconnecting shapes, with a line style, arrow heads, a colour and a label.', ex: ['Connect Start to Done with a dashed arrow', 'Disconnect Start from Process'] },
+  connections: { t: 'Arrows and lines', d: 'Connecting and disconnecting shapes, with a line style, arrow heads, a colour and a label; writing, changing or removing the label of an arrow already drawn, and saying what an arrow says.', ex: ['Connect Start to Done with a dashed arrow', 'Disconnect Start from Process', 'Label the arrow between Process and Check as Valid', 'What does the arrow from Check to Done say?'] },
   layout: { t: 'Tidying up', d: 'Aligning, spacing evenly, arranging as a row, column, grid or circle, and bringing to the front or sending to the back.', ex: ['Arrange everything in a circle', 'Align Start, Process and Check'] },
   queries: { t: 'Questions about the drawing', d: 'Answers questions by looking at the drawing: how many, which, where, what colour, what is connected, biggest, closest, and so on.', ex: ['How many circles are there?', 'Describe Check', 'Which shape is the biggest?'] },
   reasoning: { t: 'Paths and cycles', d: 'Follows the arrows from shape to shape to answer whether there is a path, what can be reached and whether there are loops.', ex: ['Is there a path from Start to Done?', 'Are there any cycles?'] },
@@ -136,7 +138,7 @@ const NAMES_ON_START = ['Start', 'Process', 'Check', 'Done', 'Intake'];
 const START_EX = ['Draw a red circle named Hub in the center', 'Connect Done to Start with a dotted line', 'Is there a path from Start to Done?'];
 function examples() {
   const out = [], add = e => out.push(typeof e === 'string' ? { text: e, pre: [] } : { text: e.text, pre: e.pre || [] });
-  Object.values(ACTIONS).concat(Object.values(WIRE_ITEMS), Object.values(ASKS), Object.values(CAPS)).forEach(x => x.ex.forEach(add));
+  Object.values(ACTIONS).concat(Object.values(WIRE_ITEMS), [EDGE_LABEL], Object.values(ASKS), Object.values(CAPS)).forEach(x => x.ex.forEach(add));
   Object.values(KEY_EX).forEach(add);
   START_EX.forEach(add); WORKED.forEach(add);
   return out.filter((e, i) => out.findIndex(o => o.text === e.text && o.pre.join('|') === e.pre.join('|')) === i);
@@ -303,10 +305,13 @@ function arrows(env) {
   }, 'a chain A to B to C', 'mid')}
   <p>One shape to several, or a list joined as a chain: ${escH(listing(valuesOf(engine, 'pairing').map(v => `“${cuesOf(L('pairing'), v)[0] || words(v)}”`)))}.</p>
   ${says(['Connect Start, Check and Done in a chain', 'Connect Start to Process, Check and Done'])}
+  <h2 id="edge-labels">Labels on arrows already drawn</h2>
+  <p>Name the arrow by its two ends (${['the arrow between Process and Check', 'the arrow from Check to Done', 'the link Process–Check', 'the Process→Check line'].map(x => `“${escH(x)}”`).join(', ')}) and say the text. A new label replaces the old one; “remove the label” takes it away. With only one end (“the arrow from Process”) it works when that shape has one arrow; with several the reply asks which one. If there is no arrow between the two shapes, the reply says so and nothing changes.</p>
+  ${says(['Label the arrow between Process and Check as Valid', 'Put the label "maybe" on the arrow from Check to Done', 'Name the link Start–Process Begin', 'Remove the label of the arrow between Check and Done', 'What does the arrow from Check to Done say?'])}
   <h2 id="remove">Removing connections</h2>
   <p>Between two shapes, all arrows of one shape, or every arrow.</p>
   ${says(['Disconnect Start from Process', 'Remove all connections'])}
-  <p class="note">To change an arrow you already drew (its style, colour or label), disconnect it and connect again; an existing arrow cannot be edited. A shape cannot be connected to itself.</p>`;
+  <p class="note">The label of an arrow can be changed (above); to change its style or colour, disconnect it and connect again. A shape cannot be connected to itself.</p>`;
 }
 
 /* ================================================================== WHERE THINGS GO ================================================================== */
@@ -357,12 +362,13 @@ function doPage(env) {
     const ps = type === 'command' ? providers(engine, 'command', 'action', key) : providers(engine, key, null, null);
     return `<div class="hitem"><div class="ht"><b>${escH(x.t)}</b>${offNote(ps)}</div><p>${escH(x.d || '')}${extra || ''}</p>${says(x.ex)}</div>`;
   };
-  let h = `<p class="lead">Every action the engine knows, with sentences to try. Point at shapes by name (“Done”), by description (“the yellow diamond”, “the newest circle”), or all at once (“all circles”, “everything”).</p>
+  let h = `<p class="lead">Every action the engine knows, with sentences to try. Point at shapes by name (“Done”, or with its kind in front: “the shape Done”, “the circle named Done”), by description (“the yellow diamond”, “the newest circle”), or all at once (“all circles”, “everything”).</p>
   <p>One message can hold several requests: <q>draw a black circle named A, a white circle named B and connect A to B</q>.</p>
   <nav class="jump" aria-label="On this page">${ACTION_GROUPS.map(([t], i) => `<a href="#help/do/g${i}">${escH(t)}</a>`).join('')}</nav>`;
   ACTION_GROUPS.forEach(([title, keys], i) => {
     const parts = keys.map(k => {
       if (WIRE_ITEMS[k]) return engine.wireTypes.has(k) ? item(k, k, WIRE_ITEMS[k]) : '';
+      if (k === 'labelEdge') return acts.includes('label') && engine.handlers.some(h => h.type === 'command' && h.when && h.when.action === 'label' && (h.when.from || h.when.to)) ? item('label', 'command', EDGE_LABEL) : '';
       if (!acts.includes(k)) return '';
       seen.add(k);
       const x = ACTIONS[k], ex = k === 'arrange' ? ` Layouts: ${valuesOf(engine, 'layout').join(', ')}.` : '';
@@ -399,7 +405,7 @@ function limits(env) {
   return `<p class="lead">What the editor does not do, by design or not yet. The readers’ own weak spots are in ${go('limits-today', 'Where it is weak today')}.</p>
   <ul>
     <li>Only the ${kinds.length} shapes, ${colors.length} colours and ${sizes.length} sizes of ${go('draw', 'What you can draw')}: no free drawing, no curves, no images, no icons, no text without a shape around it.</li>
-    <li>Arrows are straight lines between two shapes: no curved or bent arrows, no arrow to empty space, no arrow from a shape to itself. An existing arrow cannot be restyled; disconnect and connect again.</li>
+    <li>Arrows are straight lines between two shapes: no curved or bent arrows, no arrow to empty space, no arrow from a shape to itself. An existing arrow cannot be restyled (only its label can be changed); disconnect and connect again.</li>
     <li>No text formatting (font, size, bold), no line thickness, no transparency, no rotation.</li>
     <li>At most two positions next to shapes and one part of the canvas in one request; at most 12 new shapes in one request.</li>
     <li>Groups cannot be nested, and a shape is in one group at a time.</li>
@@ -543,6 +549,6 @@ function capSwitches(env) {
 
 /* the pages, by the id docs/js/docs.js shows them under (#help/<id>) */
 const pages = { start, draw, arrows, where, do: doPage, ask: askPage, limits, 'sop-lang': sop, capabilities };
-const HelpKit = { pages, capSwitches, examples, hlWire, ACTIONS, ASKS, CAPS };
+const HelpKit = { pages, capSwitches, examples, hlWire, ACTIONS, ASKS, CAPS, EDGE_LABEL };
 if (typeof module !== 'undefined') module.exports = HelpKit; else root.HelpKit = HelpKit;
 })(typeof window !== 'undefined' ? window : this);
