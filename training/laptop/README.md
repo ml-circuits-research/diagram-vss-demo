@@ -55,3 +55,28 @@ claim folder in the local queue's scratch folder first.
 
 **Comparing results.** A model trained on the card may differ slightly in its numbers from one trained on the CPU. Compare variants
 trained on the same device, or say which device each one used.
+
+## Without a link: the git runner (Fedora, 2026-11-02)
+
+The Claude desktop app's link needs Ubuntu or Debian, and the coordinator's cloud session cannot message a Remote Control session on
+another machine. On a machine that can only be reached through git (the owner's Fedora box with a 4 GB card, a dedicated account, no
+Docker), `runner.sh` is the channel: the coordinator pushes job scripts to the branch `gpu-runs` (jobs/<id>.sh), the runner runs them
+and pushes back results/<id>.{log,exit} and the paths each job names (models, run logs). The coordinator fetches the branch, scores
+the models here and commits them to main. Nothing from `gpu-runs` reaches main without the coordinator's check.
+
+**Once, in the dedicated account** (the push key is a GitHub deploy key of this repository only, with write access):
+```
+ssh-keygen -t ed25519 -C "vss-gpu deploy key" -f ~/.ssh/vss_deploy -N ""
+cat ~/.ssh/vss_deploy.pub        # GitHub: repository Settings -> Deploy keys -> Add deploy key, tick "Allow write access"
+printf 'Host github-vss\n  HostName github.com\n  User git\n  IdentityFile ~/.ssh/vss_deploy\n  IdentitiesOnly yes\n' >> ~/.ssh/config
+chmod 600 ~/.ssh/config
+ssh -T git@github-vss            # "Hi ml-circuits-research/diagram-vss-demo! You've successfully authenticated"
+cd ~/vss-box/diagram-vss-demo
+git remote set-url origin git@github-vss:ml-circuits-research/diagram-vss-demo.git
+git config user.name vss-gpu; git config user.email vss-gpu@users.noreply.github.com
+git fetch origin && git checkout gpu-runs
+tmux new -d -s runner 'cp training/laptop/runner.sh ~/vss-box/runner.sh && bash ~/vss-box/runner.sh 2>&1 | tee -a ~/vss-box/runner.log'
+```
+The first jobs set up Python 3.13 with `uv` in ~/vss-box/venv (numpy 2.5.4, torch 2.15.0, no sudo), check the card and measure
+sentences/s on cuda and on cpu (probe.sh). A training job uses `DEVICE=cuda VSA_MEM_FRACTION=0.45` (2 on the card at once) or
+`DEVICE=cpu OMP_NUM_THREADS=2`, and names `docs/model/micro/<world>` and its run logs on its `# PATHS:` line.
