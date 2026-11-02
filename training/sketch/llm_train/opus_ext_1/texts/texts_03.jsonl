@@ -1,0 +1,100 @@
+{"id": "oe1-0201", "domain": "quarterly planning", "names": [], "text": "I'm prepping for the board meeting. Make a timeline of Jan, Mar, Jun, Sep, Dec in blue, titled \"2027 plan\". After that, how would I add a little note next to Jun?"}
+{"id": "oe1-0202", "domain": "incident response", "names": ["Detect", "Page", "Fix", "Review"], "text": "connect Review back to Detect with a dashed arrow and write \"lessons\" on it"}
+{"id": "oe1-0203", "domain": "cafe floor plan", "names": ["Counter", "Table1", "Table2", "Table3", "Door"], "text": "Move Door to the bottom left. Then line the tables up along their bottom edges and give them more space"}
+{"id": "oe1-0204", "domain": "friend group", "names": [], "text": "could you sketch a venn of Hiking, Board games and Cooking? we're trying to find what we have in common"}
+{"id": "oe1-0205", "domain": "homework planner", "names": ["Math", "English", "History"], "text": "what can I ask you?"}
+{"id": "oe1-0206", "domain": "ai pipeline", "names": ["Prompt", "Model", "Filter", "Answer"], "text": "Answer should be green. Model a hexagon. And the arrow from Filter to Answer needs a label \"safe\""}
+{"id": "oe1-0207", "domain": "childhood memories", "names": [], "text": "hey!! make a spiral of my childhood: Garden, School, Piano, Summer camp, First bike"}
+{"id": "oe1-0208", "domain": "routing table", "names": ["R1", "R2", "R3", "R4", "R5"], "text": "can you reverse the arrows going out of R3"}
+{"id": "oe1-0209", "domain": "coaching session", "names": ["Goal", "Reality", "Options", "Will"], "text": "turn Goal, Reality, Options and Will into a process from top to bottom"}
+{"id": "oe1-0210", "domain": "security review", "names": ["Threat", "Asset", "Control"], "text": "how do I make a dotted outline?"}
+{"id": "oe1-0211", "domain": "presentation", "names": [], "text": "Slide title: add \"Why we win\" huge at the top centre. Then three boxes under it called Price, Speed, Trust, in a row"}
+{"id": "oe1-0212", "domain": "family reunion", "names": ["Grandpa", "Grandma", "Uncle", "Aunt", "Cousin"], "text": "So Grandpa and Grandma are the top, Uncle and Aunt their kids, Cousin is Uncle's son. The arrows are there already, just lay it out as a family tree please and then make everything a bit smaller"}
+{"id": "oe1-0213", "domain": "exam stress", "names": [], "text": "draw an hourglass for my exams: Notes, Flashcards, Mock tests up top and Exam day below"}
+{"id": "oe1-0214", "domain": "api versions", "names": ["V1", "V2", "V3"], "text": "what does each template need?"}
+{"id": "oe1-0215", "domain": "electrical panel", "names": ["Main", "Breaker1", "Breaker2", "Outlet"], "text": "The arrow from Breaker1 to Outlet is the wrong way round. Turn it around, and make it red so the electrician sees it"}
+{"id": "oe1-0216", "domain": "careers fair", "names": [], "text": "Ladder of my career please: Intern, Junior, Mid, Senior, Staff. Make it rainbow!"}
+{"id": "oe1-0217", "domain": "choir seating", "names": ["Sop", "Alto", "Tenor", "Bass"], "text": "put Sop, Alto, Tenor and Bass in a half circle. no wait, a full circle is fine"}
+{"id": "oe1-0218", "domain": "project tracker", "names": ["BoardTitle", "Alpha", "Beta", "Launch"], "text": "Make the words bigger on the canvas title thing. it's named BoardTitle"}
+{"id": "oe1-0219", "domain": "ecosystem", "names": ["Sun", "Grass", "Rabbit", "Fox"], "text": "What's the arrow from Rabbit to Fox labelled? Change it to \"eaten by\""}
+{"id": "oe1-0220", "domain": "sports club", "names": [], "text": "pyramid of training: Rest at the base, then Strength, Speed, and Skill at the top. Title it \"Season prep\". Then add \"v1 draft\" in tiny letters in the bottom right"}
+{"id": "oe1-0221", "domain": "neural network", "names": ["In1", "In2", "H1", "H2", "Out"], "text": "arrange as layers left to right"}
+{"id": "oe1-0222", "domain": "gallery wall", "names": ["Frame1", "Frame2", "Frame3", "Frame4"], "text": "Is it possible to rotate a shape a little?"}
+{"id": "oe1-0223", "domain": "pizza recipe", "names": ["Dough", "Sauce", "Cheese", "Oven"], "text": "draw an arrow from Cheese to Oven. Also a dotted one from Sauce to Cheese. Then how do I name an arrow?"}
+{"id": "oe1-0224", "domain": "commute options", "names": [], "text": "balance please: Bike - Healthy, Cheap, Slow vs Car - Fast, Expensive"}
+{"id": "oe1-0225", "domain": "app architecture", "names": ["Ui", "State", "Store", "Api"], "text": "how can I change all arrows at once"}
+{"id": "oe1-0226", "domain": "game levels", "names": ["L1", "L2", "L3", "L4", "Boss"], "text": "The arrows L1→L2, L2→L3 should be thicker, and L4→Boss the thickest"}
+{"id": "oe1-0227", "domain": "marriage prep", "names": [], "text": "Draw a heart around \"Us\" with Patience, Laughter, Honesty, Adventure. Use the love colours. Put it in the middle."}
+{"id": "oe1-0228", "domain": "crypto flow", "names": ["Wallet", "Exchange", "Bank"], "text": "can you tell me what reachable means"}
+{"id": "oe1-0229", "domain": "shipping", "names": ["Origin", "Hub1", "Hub2", "Dest"], "text": "improve it pls and tell me if there's a path from Origin to Dest"}
+{"id": "oe1-0230", "domain": "sticky wall", "names": [], "text": "new title at the top: \"Retro 14 Nov\". under it a caption \"what went well / what didn't\""}
+{"id": "oe1-0231", "domain": "tutoring", "names": ["Read", "Write", "Speak", "Listen"], "text": "what's a seesaw? is it a template?"}
+{"id": "oe1-0232", "domain": "traffic system", "names": ["Sensor", "Ctrl", "Light"], "text": "the arrow Ctrl to Light should be double headed"}
+{"id": "oe1-0233", "domain": "nonprofit", "names": [], "text": "We're a small food bank. Could you build a road to \"No one hungry\" with the stops Collect, Sort, Pack, Deliver? Make it small and put it top left. Thanks!!"}
+{"id": "oe1-0234", "domain": "mesh network", "names": ["A1", "A2", "A3", "A4", "A5", "A6"], "text": "organic layout please, it's a mesh"}
+{"id": "oe1-0235", "domain": "toddler routine", "names": [], "text": "make a cycle for Leo's day: Wake, Eat, Play, Nap, Bath, Sleep"}
+{"id": "oe1-0236", "domain": "pricing tiers", "names": ["Free", "Pro", "Team", "Enterprise"], "text": "sort them by name and then make them all the same size"}
+{"id": "oe1-0237", "domain": "data model", "names": ["Customer", "Account", "Txn"], "text": "help with arrows"}
+{"id": "oe1-0238", "domain": "medieval castle", "names": ["Keep", "Wall", "Gate", "Moat"], "text": "write \"1350 AD\" as a caption in the top right corner and make the Gate to Keep line thick"}
+{"id": "oe1-0239", "domain": "hackathon teams", "names": ["TeamA", "TeamB", "TeamC", "Judges"], "text": "connect every team to Judges, label each arrow \"pitch\""}
+{"id": "oe1-0240", "domain": "revision", "names": [], "text": "explain venn diagrams to me"}
+{"id": "oe1-0241", "domain": "vpn setup", "names": ["Laptop", "Vpn", "Office"], "text": "arrow from Laptop to Vpn: make it two-way and dashed, it's a tunnel. And add the text \"encrypted\" above Vpn"}
+{"id": "oe1-0242", "domain": "meditation", "names": [], "text": "can u draw calm waves - Breathe in, Hold, Breathe out, Rest"}
+{"id": "oe1-0243", "domain": "league table", "names": ["Lions", "Tigers", "Bears", "Wolves"], "text": "arrange all four teams into a 2x2 matrix"}
+{"id": "oe1-0244", "domain": "cloud costs", "names": ["Compute", "Storage", "Network", "Support"], "text": "whats the best template for a cost breakdown?"}
+{"id": "oe1-0245", "domain": "hospital", "names": ["Er", "Xray", "Ward", "Pharmacy"], "text": "everything looks crooked. snap it to the grid, then straighten the arrows"}
+{"id": "oe1-0246", "domain": "wiki", "names": ["Home", "Guides", "Faq", "Contact"], "text": "can you put the labels in the middle of arrows?"}
+{"id": "oe1-0247", "domain": "conference", "names": [], "text": "draw a list with the title \"Speakers\" and Ada, Grace, Linus, Margaret, Tim, then a small venn of Web and AI next to it"}
+{"id": "oe1-0248", "domain": "payroll", "names": ["Hours", "Gross", "Tax", "Net"], "text": "the label on Gross→Tax says \"minus\"; it should be \"withhold\". And change the one on Tax→Net to \"pay\""}
+{"id": "oe1-0249", "domain": "escape plan", "names": ["Bedroom", "Hall", "Stairs", "Exit"], "text": "how do I see what's connected to Hall?"}
+{"id": "oe1-0250", "domain": "data science", "names": [], "text": "hub with \"Data science\" in the middle and Stats, Coding, Domain, Communication around it, in ocean colors"}
+{"id": "oe1-0251", "domain": "tournament", "names": ["Round1", "Round2", "Final", "Champion"], "text": "put the bracket in layers from bottom to top so Champion is the highest"}
+{"id": "oe1-0252", "domain": "todo app", "names": ["Inbox", "Today", "Someday"], "text": "make a green circle called Done, link Today to Done and label that link \"finish\""}
+{"id": "oe1-0253", "domain": "branding", "names": ["Logo", "Font", "Palette"], "text": "what's the difference between the hub and the burst templates"}
+{"id": "oe1-0254", "domain": "shop flow", "names": ["Browse", "Cart", "Checkout", "Thanks"], "text": "bump up the spacing a bit, then put the whole thing in the centre"}
+{"id": "oe1-0255", "domain": "team rituals", "names": [], "text": "Make a cycle of Standup, Build, Demo, Retro titled \"Our sprint\" in warm tones. Make it large."}
+{"id": "oe1-0256", "domain": "dns resolution", "names": ["Client", "Resolver", "Root", "Tld", "Auth"], "text": "what's the difference between tree and layers layout?"}
+{"id": "oe1-0257", "domain": "poetry class", "names": [], "text": "add the text \"Roses are red\" at the top in red, and \"violets are blue\" right under it in blue"}
+{"id": "oe1-0258", "domain": "payment states", "names": ["Pending", "Paid", "Failed", "Refunded"], "text": "the line from Paid to Refunded: remove its label and make it gray"}
+{"id": "oe1-0259", "domain": "gym program", "names": [], "text": "draw rising steps from Couch to 5k: Walk, Jog 1 min, Jog 5 min, Run 20 min, 5k"}
+{"id": "oe1-0260", "domain": "library catalogue", "names": ["Books", "Dvds", "Maps", "Archive"], "text": "Can you group these by color? and then how many groups are there?"}
+{"id": "oe1-0261", "domain": "machine states", "names": ["Off", "Standby", "On"], "text": "how do I make Standby a diamond"}
+{"id": "oe1-0262", "domain": "soccer formation", "names": ["Gk", "Lb", "Cb1", "Cb2", "Rb"], "text": "align the tops of Lb, Cb1, Cb2 and Rb"}
+{"id": "oe1-0263", "domain": "small biz", "names": [], "text": "Give me a 2 by 2 for my shop: Loyal regulars, Tourists, Online buyers, Wholesale. Axis names Frequency and Spend"}
+{"id": "oe1-0264", "domain": "game tree", "names": ["Start", "Left", "Right", "Win", "Lose"], "text": "tree from Start, growing to the right, please"}
+{"id": "oe1-0265", "domain": "weather station", "names": ["Temp", "Humidity", "Wind", "Logger"], "text": "add a title \"Station 7\" and then tell me where it ended up"}
+{"id": "oe1-0266", "domain": "parenting", "names": [], "text": "How do you draw a heart?"}
+{"id": "oe1-0267", "domain": "ticket flow", "names": ["Open", "InProgress", "Blocked", "Closed"], "text": "Label the arrow from InProgress to Blocked \"waiting on vendor\". Label Blocked→InProgress \"unblocked\". Make Blocked red"}
+{"id": "oe1-0268", "domain": "airport", "names": ["CheckIn", "Security", "Gate", "Plane"], "text": "fit everything inside the canvas"}
+{"id": "oe1-0269", "domain": "novel outline", "names": [], "text": "I'm writing a fantasy novel. Draw a mountain of the hero's journey: Village, Forest, Ruins, Dragon's lair, and the Crown at the summit. Then put a title \"Book One\" at the top left"}
+{"id": "oe1-0270", "domain": "kpi board", "names": ["Revenue", "Churn", "Nps"], "text": "can you make the arrows less thick"}
+{"id": "oe1-0271", "domain": "school canteen", "names": ["Queue", "Tray", "Pay", "Seat"], "text": "Hello. I would like to know if it is possible to make text in italics"}
+{"id": "oe1-0272", "domain": "meeting notes", "names": ["Note1", "Note2", "Note3"], "text": "delete Note3. then write \"Decisions\" in big bold letters at the top"}
+{"id": "oe1-0273", "domain": "bioinformatics", "names": ["Reads", "Align", "Call", "Annotate"], "text": "put Reads, Align, Call and Annotate in a vertical timeline"}
+{"id": "oe1-0274", "domain": "sprint review", "names": ["Story1", "Story2", "Story3", "Story4"], "text": "Story1 → Story2 needs the label \"blocks\"; the Story3 → Story4 arrow should be dotted; and what does the arrow from Story2 to Story3 say?"}
+{"id": "oe1-0275", "domain": "university admin", "names": [], "text": "show me an example of an org chart"}
+{"id": "oe1-0276", "domain": "moving house", "names": ["Pack", "Truck", "Unpack"], "text": "color all arrows orange and make them thicker. also how do I undo if I don't like it?"}
+{"id": "oe1-0277", "domain": "bands", "names": [], "text": "Draw a sunrise for our new band \"Dawn Patrol\": Songs, Gigs, Fans, Album"}
+{"id": "oe1-0278", "domain": "language map", "names": ["Latin", "French", "Spanish", "Italian"], "text": "arrange Latin at the centre with the others around it"}
+{"id": "oe1-0279", "domain": "insurance claim", "names": ["Report", "Assess", "Approve", "Pay"], "text": "can I lock a shape so it doesn't move?"}
+{"id": "oe1-0280", "domain": "birthday party", "names": [], "text": "write \"Happy 30th Sam!\" huge in the middle, in pink. then a burst of Cake, Music, Friends, Dancing around \"Party\" under it"}
+{"id": "oe1-0281", "domain": "shipping lanes", "names": ["Shanghai", "Rotterdam", "Panama", "Suez"], "text": "these arrows cross a lot, can you swap things around so they don't"}
+{"id": "oe1-0282", "domain": "note taking", "names": ["Idea1", "Idea2", "Idea3", "Idea4"], "text": "Make Idea1 and Idea2 the same size as Idea3"}
+{"id": "oe1-0283", "domain": "vet clinic", "names": ["Reception", "Exam", "Lab", "Surgery"], "text": "add a light yellow zone called Clinic behind Exam, Lab and Surgery"}
+{"id": "oe1-0284", "domain": "compiler course", "names": [], "text": "What kinds of diagrams can you draw?"}
+{"id": "oe1-0285", "domain": "firewall rules", "names": ["Internet", "Dmz", "Lan"], "text": "draw an arrow from Internet to Dmz labelled \"443 only\" and a dotted one from Dmz to Lan labelled \"ssh\""}
+{"id": "oe1-0286", "domain": "school trip", "names": ["Bus", "Museum", "Lunch", "Park"], "text": "Bus, Museum, Lunch, Park: make it a road with \"Home\" as the goal"}
+{"id": "oe1-0287", "domain": "podcast network", "names": ["Show1", "Show2", "Show3", "Network"], "text": "mirror it"}
+{"id": "oe1-0288", "domain": "chemistry", "names": ["Acid", "Base", "Salt", "Water"], "text": "what values can fill have?"}
+{"id": "oe1-0289", "domain": "startup okrs", "names": ["Growth", "Retention", "Hiring"], "text": "take away the arrowheads from all the lines, they're just relations"}
+{"id": "oe1-0290", "domain": "wedding seating", "names": ["Table1", "Table2", "Table3", "Table4", "Table5", "Table6"], "text": "arrange the tables in a grid and then put the title \"Seating plan\" above them"}
+{"id": "oe1-0291", "domain": "board game", "names": ["Start", "Jail", "Park", "Go"], "text": "how many arrows go into Jail? also please label the arrow from Park to Jail \"unlucky\""}
+{"id": "oe1-0292", "domain": "learning path", "names": [], "text": "create a 6 step process going down, called \"Onboarding\", in mono colours"}
+{"id": "oe1-0293", "domain": "org chart", "names": ["Ceo", "Cfo", "Cto", "Cmo", "Eng1", "Eng2"], "text": "how do I put Eng1 and Eng2 under Cto"}
+{"id": "oe1-0294", "domain": "webinar", "names": [], "text": "agenda list: Intro (5 min), Demo (20 min), Q&A (15 min)"}
+{"id": "oe1-0295", "domain": "social network", "names": ["Ann", "Bob", "Cid", "Dee", "Eve"], "text": "can you make the layout more organic, less grid-like"}
+{"id": "oe1-0296", "domain": "pollination", "names": ["Bee", "Flower", "Fruit"], "text": "make a big caption \"How bees help\" at the top and connect Bee to Flower with a label \"visits\""}
+{"id": "oe1-0297", "domain": "devops", "names": ["Plan", "Code", "Build", "Test", "Release", "Deploy", "Operate", "Monitor"], "text": "Arrange Plan, Code, Build, Test, Release, Deploy, Operate and Monitor as a loop. Then make Deploy and Release gold"}
+{"id": "oe1-0298", "domain": "team mood", "names": [], "text": "draw a target of feelings: Calm in the centre, Busy, Stressed, Burned out further out"}
+{"id": "oe1-0299", "domain": "ski resort", "names": ["Base", "Lift1", "Lift2", "Peak"], "text": "reverse the direction of every arrow from Base"}
+{"id": "oe1-0300", "domain": "nothing yet", "names": [], "text": "hello, I'm new. Can I make diagrams from a list of words?"}
