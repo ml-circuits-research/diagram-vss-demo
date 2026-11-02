@@ -301,10 +301,33 @@ A curve of risk against coverage separates a reader that is <b>better</b> (fewer
 </div>
 <figcaption>The idea only: the shapes of these curves are drawn by hand. A reader that abstains ends its curve before 100% coverage (the dot).</figcaption>
 </figure>
-<div class="callout warn" id="rc-result">
-<!-- COORDINATOR: fill in from training/sketch/RISK_COVERAGE.md when it has a result (numbers, the two curves, which confidence each reader uses). -->
-<p><b>Result: not yet available.</b> The experiment is running (<code>training/sketch/RISK_COVERAGE.md</code>). Its numbers will be written here
-when the result is committed: for each reader, the share of wrong actions at equal coverage.</p>
+<div class="callout" id="rc-result">
+<p><b>Result (2026-11-02, <code>training/sketch/RISK_COVERAGE.md</code>): SOP-BERT knows better than VSS when it does not know.</b>
+The confidence of each reader was fixed before the run. For VSS it is the smallest margin of the chosen reading, the same number its
+"abstain" comes from. For SOP-BERT it is the smallest probability among the action and every value the request fills.</p>
+<p>How well each confidence tells right requests from wrong ones (0.5 = no information, 1 = perfect):</p>
+<table>
+<tr><th>Data</th><th>VSS</th><th>SOP-BERT</th></tr>
+<tr><td>Sample, 1000 messages</td><td>0.59</td><td>0.72</td></tr>
+<tr><td>Held-out, 585 messages</td><td>0.58</td><td>0.73</td></tr>
+<tr><td>Short commands, 299 held-out</td><td>0.57</td><td>0.82</td></tr>
+</table>
+<p>Both readers cut back to the same share of wrong requests, on the sample:</p>
+<table>
+<tr><th>Wrong</th><th>VSS right</th><th>SOP-BERT right</th></tr>
+<tr><td>11.4%</td><td>77.2%</td><td>73.8%</td></tr>
+<tr><td>6%</td><td>55.5%</td><td>55.0%</td></tr>
+<tr><td>4%</td><td>38.5%</td><td>45.9%</td></tr>
+<tr><td>2%</td><td>10.1%</td><td>26.8%</td></tr>
+</table>
+<p>In plain words: VSS says "I don't know" more often (11.4% of requests not done) because there is more it cannot read at all. Among the
+requests it does execute, its margin barely separates right from wrong: its most confident readings are right 74% of the time, about as often
+as its middling ones. SOP-BERT's probabilities do separate them: 89% right when it is at least 0.99 sure, 42% under 0.5. So with one threshold
+on its own probabilities, and no training, SOP-BERT can ask instead of guessing: at 0.36 it goes from 80.8 / 16.5 / 2.8 (right / wrong / not
+done) to 79.6 / 14.3 / 6.1; at 0.6 to 75.1 / 12.0 / 12.9, close to VSS's 77.2 / 11.4 / 11.4. This threshold is not in the demo yet.</p>
+<p>What it means for VSS: its margin is not a good confidence. Other VSS signals, looked at only after the result, do better (residual 0.68,
+words not understood 0.66) but still below SOP-BERT. Finding a confidence that works is the open question for VSS; explainability alone does
+not give it.</p>
 </div>
 
 <h2 id="both">Why both readers stay in the demo</h2>
