@@ -13,3 +13,4 @@ coordinator; label check by Sonnet agents against the conventions and the majori
 
 opus_train label check: a 3 changed, 1 removed; b 9 changed, 3 removed; c 5 changed; d 16 changed, 1 added (3958 wires after).
 opus_gen label check: 1: 10 changed, 9 removed; 2: 3 changed (2085 wires after). The same check, with the same instructions, is run on opus_tgt.
+opus_tgt label check: 1 (the rewritten file; the first version set aside, FEEDBACK_PLAN amendment 19:45): 22 changed (extreme with keys the legend does not allow); 2: 6 changed.
