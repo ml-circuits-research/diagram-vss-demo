@@ -48,3 +48,9 @@ wrong", which is still reported beside it.
 Calibration is the fresh2 calibration part only (195 messages), for every arm and both readers. The old held-out split is dropped from it:
 every arm is trained on all data, so that split is training data for the arms and their confidences on it would be in-sample (thresholds
 too lax). The cost-score threshold (a maximum, not a 97% target) can be fitted on 195 messages.
+
+## Amendment 2026-11-02 19:45 (before arm T is trained; no T result exists)
+The first `opus_tgt_1` (ox-0001..0300) was set aside before any training (kept outside the repository): its writer reported that most long
+messages end with the same block of questions (a repeated frame the spec forbids), 144 facts in 300 messages (G: 43 in 600), and need 2
+under-covered while the question needs were 5–8 times over-covered. Data of lower realism than G would confound "targeted" with "worse".
+It is rewritten by a new Opus writer with the same brief plus explicit proportions and the same variety rules as G.
