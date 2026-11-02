@@ -37,6 +37,8 @@ def event(w):   # the event of a gold wire (micro_tools.py event, cutter_worlds_
 
 DIRS = ["llm_train/sonnet_msg", "llm_train/haiku_msg", "llm_train/sonnet_msg2", "llm_train/haiku_msg2", "llm_train/sonnet_long",
         "llm_bench/fresh1/sonnet", "llm_bench/fresh1/haiku"]
+if os.environ.get("SHORT") == "1":  # pre-registered in SHORT.md section 5: add the one-request short messages (default unchanged)
+    DIRS = DIRS + ["llm_train/sonnet_short", "llm_train/haiku_short"]
 
 
 def main():

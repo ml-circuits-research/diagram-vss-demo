@@ -105,7 +105,14 @@ def fit_threshold(present, absent):
     present, absent = np.asarray(present, float), np.asarray(absent, float)
     v = np.unique(np.concatenate([present, absent]))
     cands = (v[:-1] + v[1:]) / 2 if len(v) > 1 else v
-    return float(max(cands, key=lambda t: ((present >= t).mean() + (absent < t).mean()) / 2 - 1e-12 * t))
+    if len(present) == 0 or len(absent) == 0:      # degenerate (nan means): the original loop, unchanged
+        return float(max(cands, key=lambda t: ((present >= t).mean() + (absent < t).mean()) / 2 - 1e-12 * t))
+    # same value as the loop above, in O(n log n) instead of O(n^2) (the loop was ~70 % of the post-training time of a big world): counts by
+    # binary search, then the same float operations ((count / n) + (count / n)) / 2 - 1e-12 * t; np.argmax = the first (lowest) maximum, like max()
+    sp, sa = np.sort(present), np.sort(absent)
+    hit_p = (len(sp) - np.searchsorted(sp, cands, side="left")) / len(sp)      # present >= t
+    hit_a = np.searchsorted(sa, cands, side="left") / len(sa)                  # absent < t
+    return float(cands[int(np.argmax((hit_p + hit_a) / 2 - 1e-12 * cands))])
 
 
 def make_splits(rows, legend, hints, seed, cal_forms=False):
