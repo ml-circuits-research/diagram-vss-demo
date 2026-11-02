@@ -5,7 +5,8 @@
 // Per message (line "per message"): right (every gold wire right, no extra wire) / honest (some request not done, nothing wrong) /
 // wrong (at least one wrong or extra wire).
 // SEG=composer: the composer (docs/js/vss-composer.js): the cutter, the registry of micro-worlds, the router, the fallback world.
-//   REGISTRY=<file> (default docs/model/micro/registry.json); the fallback is MODEL when set, else the registry's "fallback";
+//   REGISTRY=<file> (default docs/model/micro/registry.json); the fallback is MODEL when set, else the registry's "fallback", else none
+//   (router cutter only; no single model is loaded then);
 //   CUTTER=<file> (default the registry's "cutter"). Reported in addition: units per world, asked, ignored.
 // CUTTER=<file> with SEG=tagger: the units come from that file's `segmenter` (e.g. docs/model/micro/cutter.json) instead of the
 //   model's front.json (whose segmenter is empty unless FRONT_TAGGER=1 built it).
@@ -37,8 +38,8 @@ const argv = process.argv.slice(2), verbose = argv.includes("-v"), dumpAt = argv
 const dirs = argv.filter((a, i) => !a.startsWith("-") && (dumpAt < 0 || i !== dumpAt + 1));
 const MODELS = new URL("../../docs/model/", import.meta.url), COMPOSER = process.env.SEG === "composer";
 const REG = COMPOSER ? JSON.parse(readFileSync(process.env.REGISTRY || new URL("micro/registry.json", MODELS), "utf8")) : null;
-const MODEL = COMPOSER ? process.env.MODEL || REG.fallback : process.env.MODEL || "sketch";   // SEG=composer: MODEL names the fallback
-const dir = new URL(`${MODEL}/`, MODELS);
+const MODEL = COMPOSER ? process.env.MODEL || REG.fallback || null : process.env.MODEL || "sketch";   // SEG=composer: MODEL names the fallback (optional)
+const dir = MODEL ? new URL(`${MODEL}/`, MODELS) : null;
 const ROUTER = COMPOSER ? process.env.ROUTER || REG.router || "token" : null, V2 = ROUTER === "cutter";
 const CUT = process.env.CUTTER || (V2 ? new URL(REG.router === "cutter" ? REG.cutter : "micro/cutter_worlds.json", MODELS) : COMPOSER && REG.cutter ? new URL(REG.cutter, MODELS) : null), CUTF = CUT ? JSON.parse(readFileSync(CUT, "utf8")) : null;
 const ECUTF = V2 && REG.event_cutter ? new URL(REG.event_cutter, MODELS) : null, ECUT = ECUTF ? JSON.parse(readFileSync(ECUTF, "utf8")) : null;
@@ -49,11 +50,11 @@ const readFile = async (n) => { const b = readFileSync(new URL(n, dir)); return 
 // EXCL=1 / Q1B=1 (DECODE.md): the decode data learned from the training frames, decode.json in the model folder (tool/sop/decode_stats.py)
 const DEC = process.env.EXCL === "1" || process.env.Q1B === "1" ? JSON.parse(readFileSync(new URL("decode.json", dir), "utf8")) : null;
 if (process.env.Q1B === "1" && process.env.SEG !== "q1") throw new Error("Q1B=1 is a switch of the q1 cut: use it with SEG=q1");
-const vss = await load(null, Object.assign({ readFile, sentenceCandidates: true }, process.env.EXCL === "1" ? { excl: DEC.excl_pairs } : {}));
-const F = existsSync(new URL("front.json", dir)) ? JSON.parse(await readFile("front.json")) : null;   // the learned front end (world real)
-const C = F ? null : compile(JSON.parse(await readFile("normalize.json")));
-const lex = new Set(Object.keys(vss.model.lexicon || {})), verbEvent = new Map();
-for (const e of vss.model.legend.events) for (const v of e.verbs) verbEvent.set(v, e.id);
+const vss = MODEL ? await load(null, Object.assign({ readFile, sentenceCandidates: true }, process.env.EXCL === "1" ? { excl: DEC.excl_pairs } : {})) : null;   // null: the composer with no fallback
+const F = MODEL && existsSync(new URL("front.json", dir)) ? JSON.parse(await readFile("front.json")) : null;   // the learned front end (world real)
+const C = !MODEL || F ? null : compile(JSON.parse(await readFile("normalize.json")));
+const lex = new Set(Object.keys((vss && vss.model.lexicon) || {})), verbEvent = new Map();
+if (vss) for (const e of vss.model.legend.events) for (const v of e.verbs) verbEvent.set(v, e.id);
 const sys = K.createSystem();
 // the context carried from one request to the next in this scorer (names created earlier, `last`); SEG=composer uses the same rule
 function scorerUpdate(c, main) {
@@ -65,7 +66,7 @@ function scorerUpdate(c, main) {
 let comp = null; const CSTAT = { units: 0, byWorld: {}, ask: 0, ignored: 0, ignoredNoToken: 0, multi: 0 };
 const V2STAT = { decided: {}, ignoredWhy: {}, tieSize: {} }, HSTAT = { units: 0, applies: 0, reread: 0, unitsReread: 0, changed: 0, log: [] };
 if (COMPOSER) {
-  const cache = new Map([[MODEL, { vss, F }]]);
+  const cache = new Map(MODEL ? [[MODEL, { vss, F }]] : []);
   const loadModel = async (name) => {
     if (cache.has(name)) return cache.get(name);
     const d = new URL(`${name}/`, MODELS), rf = async (n) => { const b = readFileSync(new URL(n, d)); return n.endsWith(".json") ? b.toString("utf8") : b.buffer.slice(b.byteOffset, b.byteOffset + b.length); };
@@ -73,7 +74,7 @@ if (COMPOSER) {
     cache.set(name, m); return m;
   };
   comp = await loadComposer(REG, CUTF, loadModel, V2 ? Object.assign({ fallback: MODEL, router: "cutter", context: CTXM }, ECUT ? { eventCutter: ECUT } : {}) : { fallback: MODEL });
-  console.log(`composer: cutter ${CUT ? CUT.toString().replace(/^file:\/\//, "") : "-"} · fallback ${MODEL} · worlds ${comp.worlds.map((w) => `${w.id} [${[...w.events]}]`).join(", ") || "none"}`);
+  console.log(`composer: cutter ${CUT ? CUT.toString().replace(/^file:\/\//, "") : "-"} · fallback ${MODEL || "none"} · worlds ${comp.worlds.map((w) => `${w.id} [${[...w.events]}]`).join(", ") || "none"}`);
   if (V2) console.log(`composer v2: router cutter (top ${comp.k} of ${CUTF.worlds.length} cutter worlds) · fewest words not understood · ties and gaps: context filler ${CTXF.toString().replace(/^file:\/\//, "")} margin ${CTXM.margin}`);
   if (ECUT) console.log(`event hint: mode ${comp.eventHint} · event cutter ${ECUTF.toString().replace(/^file:\/\//, "")}`);
 }

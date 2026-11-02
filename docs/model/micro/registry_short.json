@@ -3,7 +3,6 @@
  "router": "cutter",
  "cutter": "micro/cutter_worlds7s.json",
  "context": "context/weights.json",
- "fallback": "kinds_p80_s0",
  "worlds": [
   {
    "world": "shapes",
@@ -14,7 +13,8 @@
     "fact",
     "rule"
    ],
-   "model": "micro/shapes7c"
+   "model": "micro/shapes7c",
+   "version": "8b1d6877da"
   },
   {
    "world": "links",
@@ -22,7 +22,8 @@
     "connect",
     "disconnect"
    ],
-   "model": "micro/links7"
+   "model": "micro/links7",
+   "version": "7bdd38271f"
   },
   {
    "world": "position",
@@ -35,7 +36,8 @@
     "toFront",
     "toBack"
    ],
-   "model": "micro/position7"
+   "model": "micro/position7",
+   "version": "524c92ad1b"
   },
   {
    "world": "graphq",
@@ -47,7 +49,8 @@
     "cycle",
     "exists"
    ],
-   "model": "micro/graphq7"
+   "model": "micro/graphq7",
+   "version": "3cdc3e20fa"
   },
   {
    "world": "questions",
@@ -61,7 +64,8 @@
     "degree",
     "property"
    ],
-   "model": "micro/questions7"
+   "model": "micro/questions7",
+   "version": "b5eeb2d2e5"
   },
   {
    "world": "manage",
@@ -71,7 +75,8 @@
     "rename",
     "label"
    ],
-   "model": "micro/manage7"
+   "model": "micro/manage7",
+   "version": "d19f5b0e3b"
   },
   {
    "world": "history",
@@ -80,9 +85,13 @@
     "redo",
     "forget"
    ],
-   "model": "micro/history7"
+   "model": "micro/history7",
+   "version": "d2be6b87ae"
   }
  ],
  "event_cutter": "micro/cutter_events.json",
- "event_hint": "H1"
+ "event_hint": "H1",
+ "cutter_version": "a1203fdc7e",
+ "event_cutter_version": "08e2afb5e4",
+ "context_version": "a946d13e1e"
 }
