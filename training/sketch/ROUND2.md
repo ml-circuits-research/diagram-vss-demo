@@ -246,3 +246,267 @@ Scratch (not in the repository): scratchpad/r2/ (dry-build reports dry/*.txt, va
 scratchpad/round2_jobs/ (the 7 GPU jobs).
 
 Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/kinds_p80_s0` (a76b4e3), `docs/model/micro/shapes7` (9aaacfc). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.
+
+## Result (2026-11-02, measured after training; nothing below was patched)
+
+How it was measured. Every number is per requested action: right / wrong / not done (%), and extra (actions nobody requested).
+"Sample" = the 1000-message sample (scratchpad/planA/sampleF, 4858 requests, PAIR=value, SEG=composer). "Short" = the six short
+sets of the demo (short_bench.mjs with LLM_SHORT=0, 1140 requests; "wrong act" = requests not done because another action was done
+instead: they are counted in not done, and the action done counts as extra). The code under test was frozen (docs/js and the
+scorers copied to scratchpad/r2m/snap at 15:40, models linked) because other work edited docs/js during the runs; the default
+registry reproduces 77.2 / 11.4 / 11.4, extra 334 and 61.1 / 11.1 / 27.7, extra 53 there. Sections 1-6 use the context filler of
+that time (weights.json a946d13e1e) in every configuration, so the comparisons isolate one change; section 7 repeats the finalists
+with the fillers retrained at 16:37 (weights.json 17808ca5c0, weights_r2.json 3907acc62f). A configuration mixing old and r2 parts
+is a scratch registry (scratchpad/r2m/reg/<name>.json, built by mkreg.py); when a world's events differ from the cutter's grouping
+(manage7r2 / questions7r2 with cutter_worlds7s, or the reverse) the scratch copy of the cutter gets the registry's events in its
+`grouping` field, which only the composer's consistency check reads.
+
+### 1. The pre-registered measures
+
+| measure | round 2 as built | verdict |
+|---|---|---|
+| B. sample (baseline today 77.2 / 11.4 / 11.4, extra 334; the pre-registered baseline 75.5 / 13.1 / 11.3 is older) | 75.3 / 11.1 / 13.7, extra 403 | missed (right >= 76.5 needed); against today's default right -1.9, not done +2.3, extra +69 |
+| C. short sets (baseline 60.5 / 12.4 / 27.1 pre-registered; 61.1 / 11.1 / 27.7 today) | 62.5 / 11.0 / 26.6, extra 81 | worked by the letter (right >= 61.5, wrong <= 12.4), but wrong act 4.6 -> 6.9 and extra 53 -> 81 |
+| A. shapes7r2 thresholds (create >= 76.0 and wrong <= 16.5, set >= 65.7, resize >= 67.6, fact >= 84.5, rule >= 72.0) | create 77.1 / 16.9, set 69.0, resize 69.2, fact 84.5, rule 80.0 | worked, except create wrong 16.9 (> 16.5); the between and the count-of-a-new-group checks were not measured here |
+| A. regressions (right more than 1 point below or wrong more than 1 point above, any event) | position7r2, graphq7r2, links7r2, manage7r2 cross the line (table 4) | those four worlds are not adopted as they are |
+| D. new operations (each event right >= 60 and wrong <= 15; every part of a double position right >= 50%) | members, groupOf pass; group, ungroup fail; position2 / anchor2 / region below 50% in most events | partly (section 6) |
+
+### 2. One change at a time
+
+Default registry with ONE part replaced by its round-2 version:
+
+| change | sample | short (wrong act) |
+|---|---|---|
+| none (default) | 77.2 / 11.4 / 11.4, extra 334 | 61.1 / 11.1 / 27.7 (4.6), extra 53 |
+| cutter_worlds7r2 | 77.2 / 11.4 / 11.4, extra 334 | 61.4 / 11.3 / 27.3 (4.9), extra 57 |
+| cutter_events_r2 | 77.2 / 11.3 / 11.5, extra 338 | 61.9 / 11.2 / 26.8 (4.4), extra 51 |
+| shapes7r2 | 77.5 / 11.1 / 11.4, extra 335 | 63.1 / 11.1 / 25.9 (4.6), extra 54 |
+| links7r2 | 77.1 / 11.4 / 11.5, extra 334 | 61.4 / 11.6 / 27.0 (4.3), extra 50 |
+| position7r2 | 77.0 / 11.6 / 11.4, extra 334 | 59.6 / 11.9 / 28.4 (4.4), extra 51 |
+| graphq7r2 | 75.4 / 11.4 / 13.2, extra 381 | 60.4 / 10.0 / 29.6 (6.7), extra 77 |
+| questions7r2 | 77.2 / 11.1 / 11.7, extra 340 | 61.1 / 10.8 / 28.2 (4.9), extra 57 |
+| manage7r2 | 77.2 / 11.4 / 11.4, extra 332 | 61.1 / 10.9 / 28.1 (4.7), extra 55 |
+| history7r2 | 77.3 / 11.4 / 11.4, extra 333 | 61.2 / 11.1 / 27.6 (4.6), extra 54 |
+
+Round-2 registry with ONE part put back to today's version:
+
+| put back | sample | short (wrong act) |
+|---|---|---|
+| none (registry_r2) | 75.3 / 11.1 / 13.7, extra 403 | 62.5 / 11.0 / 26.6 (6.9), extra 81 |
+| cutter_worlds7s | 75.3 / 11.2 / 13.5, extra 394 | 61.5 / 11.0 / 27.5 (6.2), extra 73 |
+| cutter_events | 75.3 / 11.1 / 13.6, extra 398 | 62.1 / 10.8 / 27.1 (6.9), extra 81 |
+| shapes7c | 74.9 / 11.3 / 13.8, extra 401 | 59.6 / 10.7 / 29.6 (7.8), extra 90 |
+| links7 | 75.3 / 11.1 / 13.6, extra 401 | 62.3 / 10.4 / 27.3 (7.1), extra 83 |
+| position7 | 75.5 / 10.9 / 13.7, extra 404 | 63.9 / 10.0 / 26.1 (7.3), extra 85 |
+| graphq7 | 77.2 / 11.1 / 11.7, extra 351 | 63.2 / 12.2 / 24.6 (4.8), extra 57 |
+| questions7 | 75.3 / 11.4 / 13.4, extra 390 | 62.5 / 11.1 / 26.3 (6.7), extra 78 |
+| manage7 | 75.3 / 11.1 / 13.7, extra 405 | 62.6 / 11.5 / 25.9 (6.8), extra 79 |
+| history7 | 75.2 / 11.1 / 13.7, extra 404 | 62.3 / 11.0 / 26.8 (6.8), extra 80 |
+
+Reading: the whole sample loss is graphq7r2 (swapped in alone: right -1.8, not done +1.8, extra +47; put back: right +1.9).
+shapes7r2 gains everywhere (sample +0.3, short +2.0). The event cutter r2 gains on the short sets (+0.8, wrong act -0.2). The world
+cutter r2 is neutral on the sample and +0.3 / +1.0 on the short sets. position7r2 loses on the short sets (-1.5 right, +0.8 wrong).
+links7r2 adds wrong on the short sets (+0.5). questions7r2 and manage7r2 are neutral on these sets (they carry the new events).
+graphq7r2 lowers "wrong" on the short sets (11.1 -> 10.0) only because it turns requests that were done wrong into a different
+action (wrong act 4.6 -> 6.7, extra 53 -> 77): "how many red stars on top of Error do we have" was a count with a wrong position and
+is now an exists question nobody asked. The same shows when graphq7 is put back into r2 (short wrong 11.0 -> 12.2, wrong act 6.9 ->
+4.8). Wrong acts are executed wrong commands, so "wrong" has to be read together with the extras.
+
+Per action on the sample, registry_r2 against the default (right of n): extreme 260 -> 208 of 272 (not done 8 -> 60), count 124 ->
+108 of 167, fact 161 -> 149 of 206, list 86 -> 78 of 99, move 513 -> 504 of 638; extras: check 18 -> 57, exists 6 -> 27, nearest 10
+-> 19. Gains: set 759 -> 767, create 145 -> 151, undo 36 -> 39.
+
+### 3. Per stage
+
+- The world cutter (cutter_worlds7r2 against cutter_worlds7s, sample, 4858 gold spans): units 4853 -> 4866, lost 147 -> 144, merged
+  53 -> 54, split 56 -> 56, units on no gold span 136 -> 147. The cut is the same; it is not where round 2 loses.
+- The event cutter: the hint is the gold event in 91.9% of the units that meet exactly one gold span, old and r2 alike. The event
+  chosen by the composer is the gold event in 95.2% (default), 95.3% (only the cutter swapped), 92.8% (registry_r2): the drop is in
+  the worlds.
+- The worlds on their events' gold (planB7/goldev, SEG=gold, default pairing, right / wrong / not done; the regression rule of A):
+
+| event | current world | r2 world |
+|---|---|---|
+| create | 70.6 / 19.7 / 9.7 | 77.1 / 16.9 / 6.0 |
+| set | 61.7 / 21.0 / 17.3 | 69.0 / 15.1 / 15.9 |
+| resize | 65.6 / 26.7 / 7.7 | 69.2 / 22.0 / 8.8 |
+| fact | 83.5 / 8.0 / 8.5 | 84.5 / 5.5 / 10.0 |
+| rule | 70.6 / 1.7 / 27.8 | 80.0 / 1.1 / 18.9 |
+| connect | 41.2 / 54.8 / 4.0 | 41.2 / 54.4 / 4.3 |
+| disconnect | 84.7 / 9.4 / 5.9 | 84.7 / 10.6 / 4.7 (wrong +1.2: 2 requests) |
+| move | 78.4 / 20.4 / 1.2 | 76.8 / 22.0 / 1.2 (regression) |
+| swap | 91.1 / 6.7 / 2.2 | 91.6 / 7.3 / 1.1 |
+| arrange | 53.9 / 40.4 / 5.6 | 52.8 / 41.3 / 5.8 (right -1.1) |
+| align | 57.2 / 27.3 / 15.5 | 62.9 / 34.0 / 3.1 (wrong +6.7) |
+| distribute | 41.2 / 53.8 / 4.9 | 40.7 / 53.3 / 6.0 |
+| toFront | 78.3 / 17.1 / 4.6 | 79.4 / 16.6 / 4.0 |
+| toBack | 85.5 / 7.8 / 6.6 | 87.3 / 7.8 / 4.8 |
+| check | 85.9 / 12.4 / 1.7 | 87.4 / 11.0 / 1.6 |
+| connected | 88.9 / 6.5 / 4.7 | 88.9 / 6.5 / 4.7 |
+| path | 90.1 / 4.8 / 5.0 | 90.5 / 4.5 / 5.0 |
+| reachable | 77.2 / 0.7 / 22.1 | 78.6 / 0.7 / 20.7 |
+| cycle | 89.3 / 0.0 / 10.7 | 86.7 / 0.0 / 13.3 (regression) |
+| exists | 67.8 / 12.0 / 20.3 | 58.3 / 10.9 / 30.8 (regression) |
+| count | 68.9 / 27.2 / 3.9 | 69.1 / 22.3 / 8.7 (extra 6 -> 37) |
+| list | 66.7 / 4.3 / 29.0 | 67.8 / 4.3 / 27.9 |
+| extreme | 98.5 / 0.8 / 0.7 | 98.3 / 0.6 / 1.1 |
+| nearest | 92.2 / 6.4 / 1.4 | 93.6 / 5.4 / 0.9 |
+| describe | 95.1 / 0.7 / 4.2 | 95.4 / 0.7 / 3.9 |
+| neighbors | 77.7 / 2.2 / 20.1 | 78.1 / 2.2 / 19.6 |
+| degree | 89.9 / 1.9 / 8.2 | 90.6 / 1.9 / 7.5 |
+| property | 82.4 / 13.8 / 3.8 | 82.0 / 14.2 / 3.8 |
+| delete | 81.2 / 15.8 / 3.0 | 81.7 / 13.9 / 4.5 |
+| duplicate | 93.3 / 4.9 / 1.8 | 92.9 / 5.8 / 1.2 |
+| rename | 92.3 / 5.8 / 1.9 | 92.3 / 6.9 / 0.8 (wrong +1.1: 4 of 364 requests) |
+| label | 59.8 / 30.2 / 10.1 | 59.8 / 31.2 / 9.0 |
+| undo | 98.5 / 0.0 / 1.5 | 99.6 / 0.0 / 0.4 |
+| redo | 97.7 / 0.0 / 2.3 | 99.2 / 0.0 / 0.8 |
+| forget | 96.8 / 0.0 / 3.2 | 98.7 / 0.0 / 1.3 |
+
+  On its own events graphq7r2 is nearly as good as graphq7 (except exists and cycle); its harm is in the composer, where it now
+  reads units of OTHER worlds with fewer words not understood (section 4).
+- The context filler (not retrained in sections 1-6) and the ties, per registry on the sample:
+
+| registry | asked by the filler | ties decided by cutter order / by context |
+|---|---|---|
+| default | 188 | 310 / 152 |
+| registry_r2 | 252 | 521 / 117 |
+| default + graphq7r2 only | 231 | 389 / 122 |
+| default + cutter_worlds7r2 only | 200 | 341 / 148 |
+| default + questions7r2 only | 197 | 340 / 150 |
+| registry_r2 with graphq7 put back | 207 | 440 / 146 |
+| registry_r2best (section 5) | 206 | 426 / 146 |
+| shapes7r2 + cutter_events_r2 only | 188 | 309 / 148 |
+
+  The extra questions come from the readings, not from the filler: of the 64 extra asks of registry_r2, 38 are "graphq check,
+  target vague" on units such as "Which one is the rightmost" (graphq7r2's wrong reading, section 4.1); the filler asks because
+  the target "which" cannot be resolved, which is the honest outcome for that reading. The extra order-decided ties are graphq /
+  shapes ("Customer is a star": graphq7r2 now reads it as check with as few words not understood as shapes' fact; 142 ties) and
+  links / questions ("Connect Start to End": questions7r2 now reads it as nearest; 55-58 ties, all decided by order in favour of
+  links). The filler knows nothing of group, ungroup, members, groupOf: on the 480 messages of ops_groups, registry_r2 reads 741
+  units of those events and the filler asks about 5 of them (group, target a pronoun). Not measured here: its keys anchor2 /
+  landmark3 (the coordinator's review); section 7 has the retrained fillers.
+
+### 4. Root causes of the losses (with examples)
+
+1. graphq7r2 reads units of other worlds (the whole sample loss). Two causes, both in the new data, none in the model:
+   - trigger rules learned from the relation words that ops_positions annotates as the trigger of a check question (180 of its 182
+     check requests: "above" 34, "right of" 26, "left of" 26, "below" 24, "beneath" 15; the long data mostly annotate "is" or
+     "bigger than"). graphq7r2's front now has left_of -> is_q (69 rows, precision 0.73), "right of" -> is_q (32, 0.8), "next to"
+     -> is_q (8, 0.8), "on top of" -> above + is_q, "is" after a name -> is_q (14, 0.88), "do we have" -> is_there (5, 0.63; the
+     bar is 0.6). Examples: "Floor2 on top of Floor1" -> check; "Customer is a star" -> check (a fact before); "How many shapes do
+     we have" -> exists (a count before); on its own gold, "Is anything left of the Pool" -> check instead of exists (exists 67.8
+     -> 58.3).
+   - one row of ops_groups, "is there a group yet" (exists, object = "group"), gives the object role a head of kind VERB ("group"
+     is the trigger of an event of another world, so its kind is VERB). The reader then offers any unplaced VERB-kind word to the
+     object role; "which" has kind VERB, so in "Which one is the rightmost" graphq7r2 places "which" and leaves 3 words not
+     understood against 4 for questions' extreme; the composer takes the reading with fewer words not understood: check, target
+     "which", asked or done wrong. 51 extreme requests of the sample go this way.
+2. questions7r2: the value n-gram "to" -> closest (learned with VAL_PREC=event: its precision is counted only over the events that
+   carry the superlative kind, where "closest to", "nearest to" dominate). "Connect Start to End" then reads as a nearest question
+   with as few words not understood as links' connect (55-58 ties on the sample, decided by cutter order; nearest extras 10 -> 19).
+   Also the trigger "how many connections" (any next word) -> degree_q at precision 0.618 (bar 0.6): "How many connections do we
+   have" -> degree (a count before).
+3. position7r2: value n-grams "circles", "squares", "diamonds" -> all (the quantifier; the shape is lost: "align all the circles
+   vertically" -> "align all the all vertically", target every shape); the 1-gram "under" -> below is gone (only "under the" is
+   kept): "Put Check under Done" loses its position. This is the short-set loss (-1.5 right, +0.8 wrong) and part of move / align
+   on gold.
+4. links7r2: +0.5 wrong on the short sets, disconnect +2 wrong requests on gold; not traced further (small).
+5. Regions are not read (all worlds, old and r2): the fronts map no region phrase ("in the top left", "bottom right corner", "in
+   the middle") to a region token ("top left" -> "top left_of" or "top left"), so the conversion leaves the region out of the
+   rows (dry build: graphq7r2 drops 196 position values of 3402 rows, position7r2 316 of 5565). The pre-registered check (section
+   3: "if POS dropped in the new rows is still above a third of them, report it before training") was not done before training.
+6. group / ungroup: the annotation puts two operations in each event. "add Cto to Execs" = group, target [Cto, Execs], name Execs;
+   "take Eve out of Kids" = ungroup, target Eve (the group is not written). The world reads which name is the target by position,
+   not by which name is a group: adding a member 20.3 right / 79.7 wrong (59 requests), removing a member 7.8 / 71.8 / 20.4 (103);
+   making a new group 74.0 / 16.1 / 9.9 (242), dissolving 91.3 / 3.9 / 4.9 (103). The cause is the annotation scheme (a membership
+   change has no role of its own), not the model.
+
+What round 2 gained, and why: shapes7r2 (fixes 1-4 and the short data: create, set, resize, rule all up on gold, +2.0 on the
+short sets), history7r2 (short data: undo / redo / forget up), the event cutter (short data: +0.8 on the short sets).
+
+### 5. The best combination found
+
+Scratch combinations (same frozen code and filler as sections 1-4):
+
+| registry | sample | short (wrong act) |
+|---|---|---|
+| default | 77.2 / 11.4 / 11.4, extra 334 | 61.1 / 11.1 / 27.7 (4.6), extra 53 |
+| registry_r2 | 75.3 / 11.1 / 13.7, extra 403 | 62.5 / 11.0 / 26.6 (6.9), extra 81 |
+| shapes7r2 + cutter_events_r2 | 77.5 / 11.0 / 11.5, extra 338 | 63.9 / 11.1 / 24.9 (4.3), extra 51 |
+| + cutter_worlds7r2, manage7r2, history7r2 | 77.5 / 11.2 / 11.3, extra 339 | 64.6 / 10.9 / 24.5 (4.8), extra 57 |
+| + questions7r2 = registry_r2best | 77.5 / 10.9 / 11.6, extra 350 | 64.5 / 10.8 / 24.7 (5.2), extra 61 |
+| + links7r2 (= r2 without graphq, position) | 77.4 / 10.9 / 11.7, extra 352 | 64.6 / 11.2 / 24.1 (5.1), extra 60 |
+
+In requests: registry_r2best against the default, sample right 3751 -> 3765, wrong 552 -> 528, extra 334 -> 350 (wrong + extra
+886 -> 878); short right 697 -> 735, wrong 127 -> 123, extra 53 -> 61 (wrong + extra 180 -> 184). The extras it adds are
+questions7r2's ("to" -> closest, 4.2). shapes7r2 + cutter_events_r2 alone has wrong + extra 874 and 178 (both lower than the
+default) but cannot read the new operations.
+
+`docs/model/micro/registry_r2best.json` = the r2 cutters, shapes7r2, questions7r2, manage7r2, history7r2, and today's links7,
+position7, graphq7 (their r2 models lose, section 4), context weights_r2.json (as registry_r2.json now names it). It reads all four
+new events; it does not read a second relation in move, check or exists (position7 and graphq7 have no position2 / anchor2).
+
+### 6. The new operations (measure D; ops messages, which are training messages)
+
+| event (requests) | SEG=gold, its r2 world | composer registry_r2, ops_groups messages |
+|---|---|---|
+| group (301) | 63.1 / 28.9 / 8.0 (fails: wrong > 15) | 58.5 / 24.3 / 17.3 |
+| ungroup (206) | 49.0 / 38.3 / 12.6 (fails) | 51.0 / 42.2 / 6.8 |
+| members (145) | 92.4 / 1.4 / 6.2 (passes) | 93.1 / 1.4 / 5.5 |
+| groupOf (150) | 97.3 / 0.0 / 2.7 (passes) | 97.3 / 0.0 / 2.7 |
+
+registry_r2best reads ops_groups the same (group 177 / 72 / 52, ungroup 105 / 87 / 14 requests); the default reads none of them
+(36.5 / 8.2 / 55.3 on all 1693 requests of ops_groups, against 74.6 / 17.5 / 7.9 for registry_r2).
+
+Double positions, per part, right % (SEG=gold, one request at a time; the part is right when the request is done and that key is
+right):
+
+| event: part | r2 world | current world |
+|---|---|---|
+| create (257): position / anchor | 78.2 / 76.7 | 58.8 / 45.1 |
+| create: position2 / anchor2 / region | 56.8 / 40.0 / 28.6 | 0.0 / 0.0 / 46.7 |
+| move (249): position / anchor | 71.9 / 68.3 | 53.0 / 59.0 |
+| move: position2 / anchor2 / region | 37.3 / 33.3 / 61.9 | 0.0 / 0.0 / 67.6 |
+| fact (69): position2 / anchor2 / region | 63.4 / 63.4 / 16.7 | 0.0 / 0.0 / 0.0 |
+| check (144): position2 / anchor2 / region | 40.5 / 38.1 / 18.3 | 0.0 / 0.0 / 18.3 |
+| exists (43): position2 / anchor2 / region | 29.4 / 29.4 / 7.4 | 0.0 / 0.0 / 0.0 |
+| count (29): position2 / anchor2 / region | 22.2 / 22.2 / 0.0 | 0.0 / 0.0 / 0.0 |
+| list (37): position2 / anchor2 / region | 36.0 / 36.0 / 0.0 | 0.0 / 0.0 / 0.0 |
+
+Whole requests right: create 31.5 (7.4 before), move 33.3 (18.5), fact 42.0 (0), check 27.8 (2.8), exists 16.3 (0), count 13.8
+(0), list 24.3 (0). The threshold (every part >= 50%) is met only by create position2 and fact position2 / anchor2. Regions are
+the weakest part (cause 4.5). In the composer on the 464 ops_positions messages: default 14.0 / 62.1 / 23.9, registry_r2 38.9 /
+44.5 / 16.5, registry_r2best 29.9 / 51.7 / 18.4 (no second relation in move / check / exists).
+
+### 7. With the retrained context fillers (16:37), and the decision
+
+Same frozen-code method, the code of 17:40 (scratchpad/r2m/snap2: docs/js as of the confidence-gate commit, gate off in the
+scorers), the official scorers (llm_score.mjs, short_bench.mjs), each registry with its retrained filler (default and the scratch
+"shapes7r2 + cutter_events_r2": weights.json 17808ca5c0; registry_r2 and registry_r2best: weights_r2.json 3907acc62f):
+
+| registry | sample (asked; ties by order / by context) | short (wrong act) |
+|---|---|---|
+| default (registry.json) | 77.1 / 11.0 / 11.9, extra 315 (asked 229; 260 / 202) | 61.1 / 11.0 / 27.9 (4.6), extra 53 |
+| registry_r2 | 75.1 / 10.8 / 14.1, extra 373 (asked 302; 490 / 148) | 62.5 / 11.0 / 26.6 (6.9), extra 81 |
+| registry_r2best | 77.4 / 10.6 / 12.1, extra 342 (asked 235; 385 / 187) | 64.5 / 10.8 / 24.7 (5.2), extra 61 |
+| shapes7r2 + cutter_events_r2 | 77.4 / 10.7 / 11.9, extra 321 (asked 226; 258 / 199) | 63.9 / 11.1 / 24.9 (4.3), extra 51 |
+
+The retrained fillers do not change the picture: registry_r2 still loses 2.0 points of right on the sample (and asks 302 times:
+the misread units of section 4 are still there); the short sets do not move with the filler at all.
+
+Decision by the rule "adopt if it helps and does not make wrong worse":
+- registry_r2 as built: not adopted. It loses on the sample (right -1.9, extra +69) and four worlds cross the regression line of A.
+- registry_r2best: adopt as the demo default by the rule. It helps (sample right +0.3, short +3.4) and
+  wrong does not get worse (sample 11.0 -> 10.6, short 125 -> 123 requests). Two costs to state: extras rise (sample 315 -> 342,
+  short 53 -> 61; mostly questions7r2's "to" -> closest), so wrong + extra is about 849 -> 857 on the sample and 178 -> 184 on the
+  short sets; and it does not read a second relation in move / check / exists. If the owner counts every extra as wrong, the
+  alternative that passes on that reading too is shapes7r2 + cutter_events_r2 only (wrong + extra about 841 and 178; short wrong
+  127 against 125, i.e. 2 requests, extra 51), which reads none of the new operations. registry_r2best.json is written; registry.json
+  is not changed here.
+- Before the next round (not done here, a miss is reported, not patched): the check-question triggers of ops_positions (relation
+  words annotated as the trigger), the "is there a group yet" row, value n-grams that replace a word carrying two values ("circles"
+  -> all) and context-free trigger rules that pass the 0.6 bar by a few rows; region phrases in the fronts; a role for the member
+  of a membership change in group / ungroup.
+
+Scratch: scratchpad/r2m (mkreg.py, one2.sh, run2.mjs, perwire.mjs, res2/, gold/, ops/, dry_graphq7r2, dry_position7r2).
