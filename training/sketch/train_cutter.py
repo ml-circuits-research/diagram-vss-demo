@@ -47,6 +47,7 @@ if os.environ.get("SHORT") == "1":  # pre-registered in SHORT.md section 5: add 
     DIRS = DIRS + ["llm_train/sonnet_short", "llm_train/haiku_short"]
 if os.environ.get("OPS") == "1":  # ROUND2.md: add the messages of the new operations (DIAGRAM_OPS.md section 7; same folders as front.py train_dirs OPS=1)
     DIRS = DIRS + ["llm_train/ops_groups", "llm_train/ops_positions"]
+DIRS = DIRS + FR.extra_dirs()   # EXTRA_DIRS (FEEDBACK_PLAN.md arms; default: none), the same folders as front.py train_dirs
 if os.environ.get("DIAGRAM_OPS") == "1":  # the new events group / ungroup / members / groupOf become legend events (generate.EVENTS, updated in place by llm_to_world.py)
     import llm_to_world  # noqa: F401  (side effect only)
 

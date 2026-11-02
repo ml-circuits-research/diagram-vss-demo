@@ -22,6 +22,12 @@ REPO = os.path.normpath(os.path.join(HERE, "..", ".."))
 SK = os.path.join(REPO, "training", "sketch")
 DIRS = ["llm_train/sonnet_msg", "llm_train/haiku_msg", "llm_train/sonnet_msg2", "llm_train/haiku_msg2", "llm_train/sonnet_long",
         "llm_bench/fresh1/sonnet", "llm_bench/fresh1/haiku", "llm_train/sonnet_short", "llm_train/haiku_short"]
+# EXTRA_DIRS (FEEDBACK_PLAN.md arms): the same extra folders as training/sketch/front.py extra_dirs(); unset: none, nothing changes
+for _d in os.environ.get("EXTRA_DIRS", "").replace(",", " ").split():
+    _d = os.path.relpath(os.path.join(SK, _d), SK) if not os.path.isabs(_d) else _d
+    if not (glob.glob(os.path.join(SK, _d, "msg_*.jsonl")) or glob.glob(os.path.join(SK, _d, "batch_*.jsonl"))):
+        raise SystemExit(f"EXTRA_DIRS: {_d!r} has no msg_*.jsonl / batch_*.jsonl")
+    if _d not in DIRS: DIRS.append(_d)
 SAMPLE_DIRS = ["llm_bench/sonnet_spans", "llm_bench/haiku_spans"]   # where the sample's h-/s- ids live
 EVAL = ["hand", "blind", "broad", "seen", "new_identities", "heldout_formulations"]
 

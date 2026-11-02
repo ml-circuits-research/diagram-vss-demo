@@ -33,9 +33,10 @@ def rd(n):
     except OSError: return ""
 rows = []
 s = rd("sample.txt")
+g0 = None
 m = re.search(r"^ALL \(.*?: (\d+) messages, (\d+) gold wires\n\s+rules correct ([\d.]+)% · not done ([\d.]+)% · done wrong ([\d.]+)% · plus (\d+) extra.*\n\s+vss\s+correct ([\d.]+)% · not done ([\d.]+)% · done wrong ([\d.]+)% · plus (\d+) extra", s, re.M)
 if m:
-    n, g, r1, d1, w1, e1, r2, d2, w2, e2 = m.groups()
+    n, g, r1, d1, w1, e1, r2, d2, w2, e2 = m.groups(); g0 = int(g)
     rows.append((f"sample ({n} msgs)", g, (r1, w1, d1, e1), (r2, w2, d2, e2)))
 else: rows.append(("sample", "?", None, None))
 t = rd("short.txt")
@@ -50,15 +51,20 @@ print(f"{'':22s}{'gold':>5}  {'Rules':<26}{'VSS':<26}")
 for name, g, a, b in rows: print(f"{name:22s}{g:>5}  {f(a):<26}{f(b):<26}")
 print("  * templates are written or generated from the rules' own templates (they favour the Rules); llm_short: the VSS cutter trained on them")
 gl = re.search(r"^ALL \(.*\n(?:.*\n)*?\s+vss gated (\d+)% \(t=([\d.]+)\): precision of execution ([\d.]+)% · right ([\d.]+)% · asked ([\d.]+)% · unread ([\d.]+)% · executed wrong ([\d.]+)% · extras executed (\d+)", s, re.M)
-gated = [("sample (1000 msgs)" if m else "sample", gl.groups()[2:] if gl else None)]
+gated = [("sample (1000 msgs)" if m else "sample", gl.groups()[2:] if gl else None, g0 if m else None)]
 for grp, label in (("templates", "short: templates*"), ("llm_short", "short: llm_short")):
     a = re.search(rf"^ALL {grp} vss gated \d+%: precision ([\d.]+) · right ([\d.]+) · asked ([\d.]+) · unread ([\d.]+) · executed wrong ([\d.]+) · extras executed (\d+)", t, re.M)
-    gated.append((label, a.groups() if a else None))
+    gated.append((label, a.groups() if a else None, int(rows[1 if grp == "templates" else 2][1]) if a and rows[1 if grp == "templates" else 2][1].isdigit() else None))
 print(f"VSS gated at {gl.group(1) if gl else '97'}% (t = {gl.group(2) if gl else "?"}, docs/model/confidence/vss.json: out-of-fold thresholds, PRECISION_BERT.md): precision of execution / right / asked / unread (%) / executed wrong (%) + extras executed")
-for name, x in gated: print(f"{name:22s}       " + ("  -" if x is None else f"{x[0]:>5} / {x[1]:>4} / {x[2]:>4} / {x[3]:>4} / {x[4]:>3} +{x[5]}"))
+for name, x, g in gated: print(f"{name:22s}       " + ("  -" if x is None else f"{x[0]:>5} / {x[1]:>4} / {x[2]:>4} / {x[3]:>4} / {x[4]:>3} +{x[5]}"))
+# the cost score (AGENTS.md 2026-11-02): (right - 10 x (executed wrong + extras executed)) per 100 requested actions; asked / not done = 0. At the demo's 97% threshold.
+# The score-optimal threshold (COST_SCORE.md) is NOT here: it would need a second composer run with another threshold (about 3 more minutes); COST_SCORE.md has it from the records.
+print("cost score at the demo's 97% threshold (right - 10 x (executed wrong + extras executed), per 100 requested actions; 0 = asks everything):")
+for name, x, g in gated:
+    print(f"{name:22s}       " + ("  -" if x is None or not g else f"{float(x[1]) - 10 * (float(x[4]) + 100 * int(x[5]) / g):7.1f}"))
 print("rules sets (score_rules): " + " ".join(re.findall(r"^(\w+): rules (\d+/\d+)", rd("rules_sets.txt"), re.M) and [f"{a} {b}" for a, b in re.findall(r"^(\w+): rules (\d+/\d+)", rd("rules_sets.txt"), re.M)]))
 for name, fn in (("test_diagram_ops", "test_ops.txt"), ("test_editor_history", "test_hist.txt")):
     x = rd(fn); print(f"{name}: " + ("PASS" if x.rstrip().endswith("exit 0") else "FAIL") + " (" + (re.findall(r"\d+/\d+ passed|all passed", x) or ["?"])[0] + ")")
 bad = [n for n in ("sample.txt", "short.txt") if not rd(n)]
-if bad or any(r[2] is None for r in rows) or any(x is None for _, x in gated): print("WARNING: a run did not finish; see the files in " + O)
+if bad or any(r[2] is None for r in rows) or any(x is None for _, x, _g in gated): print("WARNING: a run did not finish; see the files in " + O)
 E

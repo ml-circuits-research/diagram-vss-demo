@@ -15,6 +15,8 @@ HERE = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.abspath(os.pat
 # Every annotated folder whose wires carry spans (the same list as train_cutter.py plus the spans sets).
 DIRS = ["llm_train/sonnet_msg", "llm_train/haiku_msg", "llm_train/sonnet_msg2", "llm_train/haiku_msg2", "llm_train/sonnet_long",
         "llm_bench/fresh1/sonnet", "llm_bench/fresh1/haiku", "llm_bench/sonnet_spans", "llm_bench/haiku_spans"]
+sys.path.insert(0, HERE); import front as _FR
+DIRS = DIRS + _FR.extra_dirs()   # EXTRA_DIRS (FEEDBACK_PLAN.md arms; default: none): also the context filler's folders (layer_common.mjs dirsAll)
 
 
 def event(w):
