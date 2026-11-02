@@ -90,6 +90,20 @@ function curveAt(items, G, target) {   // most requests done right with confiden
   return best == null ? NaN : best / G;
 }
 
+// ------------------------------------------------------------------ the cost score (AGENTS.md, owner 2026-11-02 19:09)
+// score = (requests done right - COST * (executed wrong + extras executed)) / requested actions * 100; asked / not done = 0.
+const COST = process.env.COST ? +process.env.COST : 10;
+const scoreOf = (st, cost = COST) => (st.G ? ((st.r - cost * (st.w + st.e)) / st.G) * 100 : NaN);
+function costThreshold(oofItems, G, cost = COST) {   // the t maximising the score on out-of-fold items [{c, o}]; ties keep the HIGHER (more cautious) t
+  const s = oofItems.slice().sort((a, b) => b.c - a.c); let r = 0, bad = 0, best = { t: Infinity, score: 0, n: 0, kind: "asks everything" };
+  for (let i = 0; i < s.length;) { let j = i; while (j < s.length && s[j].c === s[i].c) { if (s[j].o === "right") r++; else bad++; j++; }
+    const sc = ((r - cost * bad) / G) * 100; if (sc > best.score + 1e-12) best = { t: s[i].c, score: sc, n: j, kind: "threshold" }; i = j; }
+  const all = ((r - cost * bad) / G) * 100;   // r, bad now count everything: the "execute everything" candidate
+  if (best.kind === "threshold" && best.n === s.length) best = { t: -Infinity, score: best.score, n: s.length, kind: "executes everything" };
+  else if (all > best.score + 1e-12) best = { t: -Infinity, score: all, n: s.length, kind: "executes everything" };
+  return best;
+}
+
 // ------------------------------------------------------------------ the two learned confidences: signals
 const VSS_NAMES = [["cut_start", 1], ["cut_end", 1], ["world_gap", 1], ["world_rank", 1], ["wnu_gap", 1], ["tie", 1], ["role_min", 1], ["residual", -1], ["unplaced", -1], ["abstain", -1], ["notu_frac", -1], ["ctx_fill", -1], ["ctx_margin", 1], ["world_prior", 1]];   // the event stage (event_gap, event_agree, event_margin) left out
 const SOP_NAMES = [["act_p", 1], ["act_margin", 1], ["act_negent", 1], ["act_prior", 1], ["val_p_min", 1], ["val_margin_min", 1], ["none_p_min", 1], ["fill_p_min", 1], ["fill_margin_min", 1], ["ctx_fill", -1],
@@ -128,7 +142,7 @@ function fitReader(items, kind) {   // items: calibration produced requests [{mi
   const model = fitModel(items, kind, best.lam);
   const oofItems = items.map((x, i) => ({ c: best.oof[i], o: x.o }));
   const thr = {}; for (const p of [0.95, 0.97, 0.99]) { const o = operatingPoint(oofItems, p); thr[p] = o ? { t: o.t, n: o.n, prec: o.right / o.n } : null; }
-  return { model, lam: best.lam, oofAuc: best.auc, thr, nCal: items.length };
+  return { model, lam: best.lam, oofAuc: best.auc, thr, nCal: items.length, oofItems };
 }
 
 // ------------------------------------------------------------------ records -> readers
@@ -191,6 +205,9 @@ for (const R of READERS) {
   for (const p of [0.95, 0.97, 0.99]) R.t[p] = R.fit.thr[p] ? R.fit.thr[p].t : Infinity;
 }
 for (const R of READERS) for (const x of R.items) x.c = R.conf(x);
+function calOof(R) {   // calibration items [{c, o}] on which the score threshold is read: out-of-fold for fitted readers, the calibration part itself otherwise (Rules, old fits: never fitted on it)
+  return R.fit ? R.fit.oofItems : R.items.filter((x) => x.cal).map((x) => ({ c: x.c, o: x.o }));
+}
 const testItems = (R, pred = () => true) => R.items.filter((x) => !x.cal && pred(x)).map((x) => ({ c: x.c, o: x.o, kind: x.kind, k: x.k }));
 const Gtest = (R, pred = () => true) => R.msgs.filter((m) => !m.cal && pred(m)).reduce((a, m) => a + m.gold, 0);
 
@@ -210,6 +227,15 @@ function bootstrap(R, p) {
   const q = (a, z) => { a.sort((x, y) => x - y); return a.length ? a[Math.min(a.length - 1, Math.max(0, Math.floor(z * a.length)))] : NaN; };
   return { cw: [q(cw, 0.025), q(cw, 0.975)], rt: [q(rt, 0.025), q(rt, 0.975)], nCw: cw.length };
 }
+function bootstrapScore(R, t, cost = COST) {   // same resamples as bootstrap(): the rng restarts at SEED and draws the same way
+  const per = new Map(testIds.map((id) => [id, { g: 0, r: 0, bad: 0 }]));
+  for (const m of R.msgs) if (!m.cal) per.get(m.id).g = m.gold;
+  for (const x of R.items) if (!x.cal && x.c >= t) { const e = per.get(x.id); if (x.o === "right") e.r++; else e.bad++; }
+  const arr = testIds.map((id) => per.get(id)), rand = rng(SEED), sc = [];
+  for (let b = 0; b < BOOT; b++) { let g = 0, r = 0, bad = 0; for (let i = 0; i < arr.length; i++) { const e = arr[Math.floor(rand() * arr.length)]; g += e.g; r += e.r; bad += e.bad; } if (g) sc.push(((r - cost * bad) / g) * 100); }
+  sc.sort((x, y) => x - y); const q = (z) => (sc.length ? sc[Math.min(sc.length - 1, Math.max(0, Math.floor(z * sc.length)))] : NaN);
+  return [q(0.025), q(0.975)];
+}
 const ci = (a) => (Number.isFinite(a[0]) ? `[${pc(a[0])}, ${pc(a[1])}]` : "[-]");
 
 // ------------------------------------------------------------------ report
@@ -218,6 +244,33 @@ log("# FRESH2 report (test part), written by training/sketch/fresh2/fit_report.m
 log(`Records: ${RECDIR}. Messages: ${META.size} in the data dirs (${[...new Set([...META.values()].map((m) => m.writer))].sort().join(", ")}); calibration ${R0.nMsg.cal} messages / ${R0.G.cal} requested actions; test ${R0.nMsg.test} messages / ${R0.G.test} requested actions.`);
 log(`Split: int(sha256(id), 16) % 3 == 0 is calibration. Thresholds and confidences are fitted on the calibration part only. MINEXEC ${MINEXEC}; bootstrap ${BOOT} resamples of the test messages, seed ${SEED}.`);
 log("Definitions (per requested action, PAIR=value as llm_score.mjs): confidently wrong % = (executed wrong + executed extras) / everything executed; done right % = executed right / requested actions; asked % = right or wrong requests below the threshold / requested; not read % = requested actions with no produced request / requested; extras = produced requests nobody asked for. Execute when confidence >= threshold.\n");
+
+
+const sc1 = (x) => (Number.isFinite(x) ? x.toFixed(1) : "-"), sci = (a) => (Number.isFinite(a[0]) ? `[${sc1(a[0])}, ${sc1(a[1])}]` : "[-]");
+log("## Cost score: one confident mistake costs 10 right answers (the main measure, AGENTS.md 2026-11-02 19:09)\n");
+log(`Score = (requests done right - ${COST} x (executed wrong + extras executed)) / requested actions x 100. A question, or a request not done, scores 0. Each reader's threshold is the one that maximises this score on the calibration part (out-of-fold confidences, the same folds and recipe as the fits below; the candidates are every out-of-fold confidence value, "execute everything" and "ask everything" = score 0; a tie keeps the higher threshold). Rules have no confidence: their only candidates are execute everything and ask everything. The old fits (unchanged JSONs) were never fitted on this data, so their threshold is read from their confidences on the calibration part. No threshold is chosen on the test part. 95% intervals: ${BOOT} bootstrap resamples of the test messages, the same resamples as the rest of the report.\n`);
+log("| reader | score-optimal threshold (calibration score, executed) | test score [95% CI] |\n|---|---|---|");
+const CR = [], costExtra = [];
+for (const R of READERS) {
+  const cal = calOof(R), Gc = R.G.cal, ct = costThreshold(cal, Gc), t = ct.t;
+  const st = stats(testItems(R), Gtest(R), t), sc = scoreOf(st), b = bootstrapScore(R, t);
+  const stAll = stats(testItems(R), Gtest(R), -Infinity), scAll = scoreOf(stAll), bAll = bootstrapScore(R, -Infinity);
+  const thTxt = ct.kind === "threshold" ? `${t.toFixed(4)} (${sc1(ct.score)}, ${ct.n})` : ct.kind === "executes everything" ? `none: executes everything (${sc1(ct.score)}, ${ct.n})` : "none: asks everything (0.0, 0)";
+  CR.push({ R, t, ct, st, sc, b, scAll, bAll, stAll });
+  log(`| ${R.label} | ${thTxt} | ${sc1(sc)} ${sci(b)} |`);
+}
+log("\n| reader | confidently wrong % (executed) · done right % | asked % · extras executed |\n|---|---|---|");
+for (const c of CR) log(`| ${c.R.label} | ${pc(c.st.conf_wrong)} · ${pc(c.st.cov)} (${c.st.n} executed) | ${pc(c.st.asked)} · ${c.st.e} |`);
+log("\nEvery reader executing everything (test part, no threshold):\n");
+log("| reader | score [95% CI] | right / wrong / not done % · extras |\n|---|---|---|");
+for (const c of CR) log(`| ${c.R.label} | ${sc1(c.scAll)} ${sci(c.bAll)} | ${pc(c.stAll.cov)} / ${pc(c.stAll.wrong_all)} / ${pc(c.stAll.unread)} · ${c.stAll.e} |`);
+// sensitivity: the threshold re-optimised for each cost, the test score ranks the five main readers
+const sens = [5, 20].map((cost) => {
+  const rows = READERS.filter((r) => r.group === "main").map((R) => { const ct = costThreshold(calOof(R), R.G.cal, cost); return { label: R.label, sc: scoreOf(stats(testItems(R), Gtest(R), ct.t), cost) }; }).sort((a, b) => b.sc - a.sc);
+  return `cost ${cost}: ` + rows.map((x) => `${x.label} ${sc1(x.sc)}`).join(" > ");
+});
+const rank10 = CR.filter((c) => c.R.group === "main").sort((a, b) => b.sc - a.sc).map((c) => `${c.R.label} ${sc1(c.sc)}`).join(" > ");
+log(`\nRanking of the five readers on their own cut (test score; the threshold is re-optimised on calibration for each cost; sensitivity only, 10 is the measure): cost 10: ${rank10}. ${sens.join(". ")}.\n`);
 
 log("## 0. The fits (calibration part)\n");
 log("| reader | produced requests · L2 · out-of-fold AUROC | thresholds 95 / 97 / 99 (out-of-fold precision, executed) |\n|---|---|---|");

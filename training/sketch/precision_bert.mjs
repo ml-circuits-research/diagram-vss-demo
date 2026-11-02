@@ -2,7 +2,8 @@
 //   node training/sketch/precision_bert.mjs <pb dir> <vss_items.json> <out dir>
 //   <pb dir>: the records of precision_bert_collect.mjs (heldout, sample, short299, hand, blind, broad, seen, new_identities, heldout_formulations .jsonl)
 //   <vss_items.json>: VSS combined items per set + out-of-fold held-out scores, from a copy of precision.mjs (see PRECISION_BERT.md)
-//   <out dir>: numbers_bert.md, and training/sketch/precision_thresholds_bert.json is written.
+//   <out dir>: numbers_bert.md, and training/sketch/precision_thresholds_bert.json is written (NOWRITE=1: not written).
+//   COST score section (COST_SCORE.md): needs PR=<dir with rules.jsonl of precision.mjs rules> and the short299 ids in <pb dir>/short299_ids.txt.
 import { readFileSync, writeFileSync } from "node:fs";
 import { percentile, bertConfidence, bertTemperatureConfidence } from "./precision_confidence_bert.mjs";
 
@@ -214,6 +215,47 @@ log("\n## equal-precision reference (NOT the protocol: the threshold read off th
 const bestCov = (items, g, p) => { const o = operatingPoint(items, p); return o ? pc(o.right / g) : "not reached"; };
 for (const s of ["sample", "heldout", "short299", "six"]) log(`| ${s} | ${bestCov(itemsBert(s), G[s], 0.97)} | ${bestCov(Vitems[s], G[s], 0.97)} |`);
 
+
+// ---------------------------------------------------------------- the cost score (AGENTS.md 2026-11-02 19:09; COST_SCORE.md)
+// score = (right - COST x (executed wrong + extras executed)) / requested x 100; asked / not done = 0. Threshold = argmax of the score on the held-out
+// split's OUT-OF-FOLD confidences (ties keep the higher t; candidates: every confidence value, execute everything, ask everything), applied unchanged.
+{
+  const COST = process.env.COST ? +process.env.COST : 10, sc1 = (x) => x.toFixed(1);
+  const sOf = (st, cost = COST) => ((st.r - cost * (st.w + st.e)) / st.G) * 100;
+  function costT(items, Gh, cost) {
+    const s = items.slice().sort((a, b) => b.c - a.c); let r = 0, bad = 0, best = { t: Infinity, score: 0, n: 0, kind: "asks everything" };
+    for (let i = 0; i < s.length;) { let j = i; while (j < s.length && s[j].c === s[i].c) { if (s[j].o === "right") r++; else bad++; j++; } const sc = ((r - cost * bad) / Gh) * 100; if (sc > best.score + 1e-12) best = { t: s[i].c, score: sc, n: j, kind: "threshold" }; i = j; }
+    const all = ((r - cost * bad) / Gh) * 100;
+    if (best.kind === "threshold" && best.n === s.length) best = { t: -Infinity, score: best.score, n: s.length, kind: "executes everything" }; else if (all > best.score + 1e-12) best = { t: -Infinity, score: all, n: s.length, kind: "executes everything" };
+    return best;
+  }
+  const short299ids = new Set(readFileSync(`${PB}/short299_ids.txt`, "utf8").split(/\s+/).filter(Boolean));
+  const rl = process.env.PR ? readJ(`${process.env.PR}/rules.jsonl`) : [];
+  const rlItems = (set, pred = () => true) => rl.filter((r) => r.set === set && pred(r)).flatMap((r) => r.rules.map((o) => ({ c: 1, o })));
+  const rlSets = { heldout: rlItems("heldout"), sample: rlItems("sample"), short299: rlItems("short", (r) => short299ids.has(r.id)) };
+  const READ = [
+    { nm: "SOP-BERT fitted (logistic, 24 signals)", cal: Hoof, items: (s) => itemsBert(s) },
+    { nm: "VSS combined", cal: V.oof, items: (s) => Vitems[s] },
+    { nm: "SOP-BERT today (minimum of probabilities)", cal: H.map((x) => ({ c: x.c0, o: x.o })), items: (s) => itemsMin(s) },
+  ];
+  if (rl.length) READ.push({ nm: "Rules", cal: rlSets.heldout, items: (s) => rlSets[s] });
+  const SETS = ["heldout", "sample", "short299"];
+  log("\n## cost score: one confident mistake costs " + COST + " right answers (threshold = the score-optimal one on held-out out-of-fold, applied unchanged)\n");
+  log("| reader | threshold (held-out out-of-fold score, executed) | score: sample1000 · short 299 |\n|---|---|---|");
+  const res = [];
+  for (const R of READ) {
+    const ct = costT(R.cal, G.heldout, COST), per = {};
+    for (const s of SETS) { const its = R.items(s), st = stats(its, G[s], ct.t); per[s] = { st, sc: sOf(st) }; }
+    const e = (s) => `${sc1(per[s].sc)} (right ${pc(per[s].st.cov)}, confidently wrong ${per[s].st.n ? pc((per[s].st.w + per[s].st.e) / per[s].st.n) : "-"}, asked ${pc(per[s].st.asked)}, extras ${per[s].st.e})`;
+    log(`| ${R.nm} | ${ct.kind === "threshold" ? ct.t.toFixed(4) : ct.kind} (${sc1(ct.score)}, ${ct.n}) | ${sc1(per.sample.sc)} · ${sc1(per.short299.sc)} |`);
+    res.push({ nm: R.nm, ct, per, e });
+  }
+  log("\n| reader | sample1000: score (details) | short 299: score (details) |\n|---|---|---|");
+  for (const r of res) log(`| ${r.nm} | ${r.e("sample")} | ${r.e("short299")} |`);
+  log("\nExecuting everything (score): " + READ.map((R) => `${R.nm} ${["heldout", "sample", "short299"].map((s) => sc1(sOf(stats(R.items(s), G[s], -Infinity)))).join(" / ")}`).join("; ") + " (held-out / sample1000 / short 299).");
+  for (const cost of [5, 20]) log(`Sensitivity, cost ${cost}, sample1000 / short 299: ` + READ.map((R) => { const ct = costT(R.cal, G.heldout, cost); return `${R.nm} ${sc1(sOf(stats(R.items("sample"), G.sample, ct.t), cost))} / ${sc1(sOf(stats(R.items("short299"), G.short299, ct.t), cost))}`; }).join("; "));
+}
+
 // ---------------------------------------------------------------- export + verification
 const point = (op, items) => Object.fromEntries(PS.map((p) => { const o = op[p]; if (!o) return [String(Math.round(p * 100)), null]; const st = stats(items, G.heldout, o.t); return [String(Math.round(p * 100)), { threshold: o.t, heldout_precision: st.prec, heldout_coverage: st.cov, heldout_executed: st.n, heldout_produced: items.length }]; }));
 const exp = {
@@ -223,7 +265,7 @@ const exp = {
   how_to: "Execute a request when confidence >= threshold. confidence = bertConfidence(spec, f, act) of precision_confidence_bert.mjs (rule logistic: z = intercept + sum(weight_i * percentile_i), 1/(1+exp(-z)); percentile as described in that file; the signals f come from precision_bert_collect.mjs `features`), or bertTemperatureConfidence(spec, heads) (rule temperature).",
   ...spec, threshold: opOof[0.97] ? opOof[0.97].t : null,
 };
-writeFileSync(`${REPO}training/sketch/precision_thresholds_bert.json`, JSON.stringify(exp));
+if (!process.env.NOWRITE) writeFileSync(`${REPO}training/sketch/precision_thresholds_bert.json`, JSON.stringify(exp));   // NOWRITE=1: leave the repository JSON as it is
 const J = JSON.parse(readFileSync(`${REPO}training/sketch/precision_thresholds_bert.json`, "utf8"));
 const pool = ["sample", "heldout", "short299", "six"].flatMap((s) => X[s]);
 const pick = Array.from({ length: 200 }, (_, i) => pool[Math.floor(i * pool.length / 200)]);
