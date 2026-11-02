@@ -631,6 +631,68 @@ ours, on the same data (UPSTREAM_AUDIT.md, running).</p>
 </ul>
 `);
 
+/* ============================================================ fresh writer */
+page('fresh-writer', 'A new writer: the honest test',
+'All earlier numbers came from messages written by the same two models that wrote the training data. On 600 messages written by a third model, blind, every reader is worse, and VSS loses more than SOP-BERT, on the main metric too.', `
+<h2 id="why">Why a new writer</h2>
+<p>The training data and the earlier test sets were written by Sonnet and Haiku, from the same brief. A reader can then score well by learning
+those writers’ habits (their verbs, their phrases, their sentence shapes) instead of the language. To test that, four Opus agents wrote 600
+new messages, blind: they read only the legend and the labelling conventions, saved every text before annotating it, and two other agents
+checked the labels without seeing any reader (<code>training/sketch/llm_bench/fresh2/README.md</code>). The comparison was written down before
+any reader read a message (<code>FRESH2_PLAN.md</code>): one third of the messages (195) to fit each reader’s confidence and threshold, the other
+405 to measure, once.</p>
+
+<h2 id="result">What it showed</h2>
+<p>Executing everything (right / wrong % of the requested actions), new writer against the 1000-message sample:</p>
+<div class="tw"><table>
+<thead><tr><th>Reader</th><th>New writer</th><th>Sample</th></tr></thead>
+<tbody>
+<tr><td>Rules</td><td>55.5 / 19.0</td><td>68.0 / 16.5</td></tr>
+<tr><td>VSS</td><td>58.6 / 18.2</td><td>77.1 / 11.0</td></tr>
+<tr><td>SOP-BERT</td><td>70.8 / 24.2</td><td>80.8 / 16.5</td></tr>
+<tr><td>SOP-BERT trained on all the data</td><td>75.1 / 20.5</td><td>(trained on it)</td></tr>
+</tbody></table></div>
+<p>On the main metric (<a href="#help/research-question">What this project measures</a>), the share of requests done right when each reader is
+allowed the same rate of confident mistakes, read off the test part:</p>
+<div class="tw"><table>
+<thead><tr><th>Reader</th><th>At most 3% confidently wrong</th><th>At most 1%</th></tr></thead>
+<tbody>
+<tr><td>VSS</td><td>6–10%</td><td>2–5%</td></tr>
+<tr><td>SOP-BERT</td><td>31–37%</td><td>18–23%</td></tr>
+</tbody></table></div>
+<p>And the confidence fitted earlier, at its 97% threshold: VSS was confidently wrong on 3.4% of what it executed on the old data and 7.3% on
+the new writer; SOP-BERT 3.0% and 3.5%. VSS’s confidence did not carry over to a new writer; SOP-BERT’s did. Source: <code>FRESH2_RESULT.md</code>.</p>
+<p class="callout warn"><b>So, today:</b> the expectation that VSS knows better when it does not know is not confirmed on text from a new writer.
+On text like its training data it looked close; on new text SOP-BERT is ahead on every measure. One limit of the plan, stated as it is: the
+195 calibration messages were too few for any reader to reach 97% by the rule written beforehand, so by that rule every reader would have
+asked about everything at 97%.</p>
+
+<h2 id="loop">Using VSS’s own failures to decide what data it needs</h2>
+<p>Until now the training data was written from a general brief, blind to what VSS could not read. But VSS can say, for each request, <b>why</b>
+it is unsure, with a name: a word it has never seen, a word it could not place in any role, a phrase none of its tables has, no action word,
+a world that is often wrong. Collected over many messages, these become a list of what it lacks, e.g. “the verb <i>hook</i> before two names,
+probably connect: 23 requests”. The list comes from text alone, without labels. A fine-tuned transformer cannot give such a list: its scores
+say that it is unsure, not what is missing.</p>
+<ol>
+  <li><b>VSS lists its needs</b> from unlabelled text (<code>training/sketch/feedback/data_needs.mjs</code>).</li>
+  <li><b>The list is checked</b>: the labels are used only to measure how much of VSS’s wrong and undone requests the top needs cover, on the
+  calibration part of the new set and on the sample; never on the test part.</li>
+  <li><b>Training data is written from the list</b>, by constructions and actions, not by copying the examples.</li>
+  <li><b>Both readers are retrained on the same data</b>, VSS and SOP-BERT, and measured once on the untouched test part.</li>
+</ol>
+<div class="callout warn" id="loop-result"><p><b>Being measured.</b> Whether the list is informative (how much of the misses the top 10 / 20 / 50
+needs cover) and whether data written from it helps VSS more than the same amount of general data, at equal training data for both readers:
+<code>training/sketch/feedback/DATA_NEEDS.md</code> and the retraining runs, in progress (2026-11-02).</p></div>
+
+<h2 id="fair">What keeps it honest</h2>
+<ul>
+  <li>The test part (405 messages) is read by no person and no agent before the final measurement.</li>
+  <li>The data written from VSS’s needs is given to SOP-BERT too: if VSS gains more, it is because it asked for the right data, not because it
+  had more.</li>
+  <li>Every number names its document; a negative result is reported as such (AGENTS.md).</li>
+</ul>
+`);
+
 /* ============================================================ limits today */
 page('limits-today', 'Where it is weak today',
 'The known weak spots of the readers, with the numbers. The editor’s own limits (what it cannot draw) are in What it cannot do.', `
