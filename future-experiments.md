@@ -100,3 +100,31 @@ the new domain (VSS_CONFIDENCE.md notes that a threshold may have to be chosen p
 **Risk.** Writing and annotating realistic data for a new legend is the main cost (the diagram data took several batches and checks).
 LLM-written messages in such a domain may be cleaner than real ones. A new legend means new worlds and a new SOP-BERT: the owner's
 approval is needed before it starts. Nothing in it may be presented as usable for real orders or payments.
+
+## Smaller and different vector representations for the VSS worlds (owner, 2026-11-02 20:36: documented, not now)
+
+**What the worlds use today.** Every vector is D = 1024 complex numbers of modulus 1, that is 1024 phases (Fourier HRR, also called a
+phasor or FHRR code; docs/js/vss/stars.js): binding is adding phases, unbinding subtracting them, bundling a sum, and similarity the real
+part of the inner product. The route book learns phase rotations by gradient descent and is stored with 8 bits per phase; the word
+vectors are fixed and generated from a seed (training/sketch/shrink/SHRINK.md measures storing vs generating them, and 4-bit phases).
+
+**Questions.**
+1. **D = 512 (or 256)** with the same code: half the size and about half the compute. The capacity of a bundle (how many bound terms
+   a sentence vector can hold and still be read back) grows with D, so long requests may suffer first. Measure: retrain the 7 worlds at
+   D = 512 with FAST=1 (training/vss/FAST_TRAIN.md), the same data and seed; compare on the fresh2 test part with the cost score, per
+   request length.
+2. **Dense binary vectors** (binary spatter codes / MAP-B: 1024 bits, binding = XOR, bundling = bitwise majority, similarity = Hamming):
+   a vector is 128 bytes instead of 1024 phases (8x smaller at 8-bit phases), and reading is popcounts, very fast in a browser. Costs:
+   binary codes hold fewer terms in a bundle at the same D than phasor codes, so more bits may be needed for the same reading (an
+   expected D of a few thousand bits, still smaller than today); and XOR has no "small rotation", so the route book cannot be learned
+   by plain gradient descent: either train in phases and binarise (sign of the real part) after training, measuring what is lost, or
+   train with a straight-through estimator. Measure: (a) binarise today's trained worlds at D = 1024 and 2048 without retraining, decisions
+   changed on the sample and fresh2; (b) only if (a) loses little, a trainer for binary route books.
+3. **Other codes** to compare on the same protocol if 1 or 2 is promising: real-valued HRR (circular convolution; same size as phases at
+   float, harder to quantise), and sparse block codes (k-of-n blocks; very small and fast, binding by block-wise rotation).
+
+**How it is judged.** The cost score and the confidently-wrong rate on the fresh2 test part (same readers otherwise), the download size,
+the load and read time in the browser. A smaller code is adopted only if the score stays within the bootstrap interval of today's.
+
+**Risk.** Each step needs retraining all worlds (minutes with FAST on the GPU machine, once the memory fix lands). Binarising after
+training may lose much more than quantising phases; that is what step 2(a) measures before any trainer is written.
