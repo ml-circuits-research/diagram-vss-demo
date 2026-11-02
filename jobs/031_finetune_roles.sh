@@ -1,5 +1,5 @@
 # Fine-tune the neural reader's joint model (one DistilBERT: act + class heads + role tags, one call per request) on our span-annotated requests and export q8 ONNX for transformers.js.
-# AFTER: 028_links7r2
+# AFTER: 028_links7r2 hold_sopbert
 # PATHS: docs/model/neural/reader-distilbert
 # training/neural/: make_roles.py -> finetune_roles.py (cuda, fp16) -> torch.onnx + q8 -> node check through docs/js/neural.js makeReader. Then training/laptop/neural_score.mjs
 # scores it per request on the 100 sample messages (training/neural/sample100_ids.txt) next to the current pair act-distilbert + qa-distilbert-squad,
