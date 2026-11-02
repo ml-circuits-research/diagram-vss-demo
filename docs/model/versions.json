@@ -1,6 +1,7 @@
 {
  "about": "Content versions of the model folders and files the demo loads (training/sketch/stamp_models.py). The loader appends ?v=<version>.",
  "files": {
+  "confidence/vss.json": "eb5baef660",
   "context/weights.json": "17808ca5c0",
   "context/weights_r2.json": "3907acc62f",
   "micro/cutter_events.json": "08e2afb5e4",

@@ -21,6 +21,13 @@
 // PAIR=value: produced and gold actions are paired by layer_common.mjs pairValue (per action label, a maximum-weight matching: most pairs,
 //   then most gold keys right, then most letters shared by the unit and the gold span; the unit is node.span when the composer gives it,
 //   else the first occurrence of node.src in the text) instead of the order-only LCS. Default (unset or PAIR=order): the LCS, as before.
+// GATE=95|97|99 (SEG=composer; PRECISION.md, the demo's gate): the VSS requests are also scored gated: a produced request is executed only when
+//   its combined confidence (docs/js/vss-confidence.js on the composer's unit.signals, model CONFIDENCE=<file>, default
+//   docs/model/confidence/vss.json, thresholds from the out-of-fold scores, PRECISION_BERT.md; CONFIDENCE=training/sketch/precision_thresholds.json
+//   gives PRECISION.md's in-sample thresholds) clears the level's threshold; a level the model does not reach is an error. Each produced request keeps the outcome it has when everything is executed
+//   (right / wrong / extra, the pairing above; PRECISION.md's simplification) and the line "vss gated" reports: precision of execution =
+//   right / (right + wrong + extra) over the executed ones, right % of the gold requests, asked % (gold requests whose produced request was
+//   not executed), unread % (gold requests with no produced request), executed wrong % and extras executed. The ungated lines are unchanged.
 // node llm_score.mjs <dir> [<dir> ...] [--dump out.json] [-v]
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -49,6 +56,12 @@ const ECUTF = V2 && REG.event_cutter ? new URL(REG.event_cutter, MODELS) : null,
 const CTXF = V2 ? process.env.CONTEXT || new URL(REG.context || "context/weights.json", MODELS) : null, CTXM = CTXF ? JSON.parse(readFileSync(CTXF, "utf8")) : null;
 if (process.env.PAIR && !["value", "order"].includes(process.env.PAIR)) throw new Error(`PAIR=${process.env.PAIR}: expected value or order`);
 const PAIRV = process.env.PAIR === "value" ? (await import("./layer_common.mjs")).pairValue : null;
+const GATE = process.env.GATE || null;      // the gated VSS score (see the head of the file)
+if (GATE && !COMPOSER) throw new Error("GATE needs SEG=composer (the signals are the composer's)");
+const CONF = GATE ? await import("../../docs/js/vss-confidence.js") : null;
+const CONFM = GATE ? JSON.parse(readFileSync(process.env.CONFIDENCE || new URL("confidence/vss.json", MODELS), "utf8")) : null;
+if (GATE && CONF.effectiveLevel(CONFM, GATE) !== GATE) throw new Error(`GATE=${GATE}: the confidence model does not reach this level (reached: ${CONF.reachedLevels(CONFM).join(", ") || "none"})`);
+const GATE_T = GATE ? CONF.threshold(CONFM, GATE) : null;
 const readFile = async (n) => { const b = readFileSync(new URL(n, dir)); return n.endsWith(".json") ? b.toString("utf8") : b.buffer.slice(b.byteOffset, b.byteOffset + b.length); };
 if (process.env.EXCL === "1" || process.env.Q1B === "1") throw new Error("EXCL / Q1B were removed (they needed decode.json of a removed model; DECODE.md)");
 const vss = MODEL ? await load(null, { readFile, sentenceCandidates: true }) : null;
@@ -147,6 +160,22 @@ function scoreMessage(nodes, row) {
   return { right, wrongAligned: pairs.length - right, missed: gold.length - pairs.length, acts: pairs.length, gold: gold.length, extra: mains.length - pairs.length, exact: right === gold.length && mains.length === gold.length, bad, perAct: gold.map((g, j) => [g.act, pairs.some(([i, jj]) => jj === j && !bad.some((b) => false))]) };
 }
 
+// GATE: the produced VSS requests of one message, each with its outcome (right / wrong / extra, the pairing of scoreMessage) and its
+// confidence, added to G = {r, w, e (executed), ar, aw (asked), n (produced), gold}
+const gateBlank = () => ({ r: 0, w: 0, e: 0, ar: 0, aw: 0, ae: 0, n: 0, gold: 0 });
+function gateTally(G, nodes, row) {
+  const mains = nodes.filter((n) => n.type !== "mention").map((n) => ({ act: actOf(n.type, n.args), got: canon(n, nodes), n }));
+  const gold = row.wires.map((w) => ({ act: actOf(w.type, w.args), want: canonWant(w.type, w.args) }));
+  const res = mains.map(() => "extra");
+  for (const [i, j] of pairUp(mains, gold, row)) res[i] = Object.entries(gold[j].want).every(([k, v]) => (mains[i].got[k] ?? "∅") === v) ? "right" : "wrong";
+  mains.forEach((m, i) => {
+    const u = m.n.unit, c = u && u.signals ? CONF.confidence(CONFM, u.signals, u.world) : 0, o = res[i];
+    G.n++; if (c >= GATE_T) { if (o === "right") G.r++; else if (o === "wrong") G.w++; else G.e++; } else if (o === "right") G.ar++; else if (o === "wrong") G.aw++; else G.ae++;
+  });
+  G.gold += gold.length;
+}
+const gateLine = (G) => { const p = (x) => (x * 100).toFixed(1), ex = G.r + G.w + G.e;
+  return `vss gated ${GATE}% (t=${GATE_T.toFixed(4)}): precision of execution ${ex ? p(G.r / ex) : "-"}% · right ${p(G.r / G.gold)}% · asked ${p((G.ar + G.aw) / G.gold)}% · unread ${p((G.gold - G.r - G.w - G.ar - G.aw) / G.gold)}% · executed wrong ${p(G.w / G.gold)}% · extras executed ${G.e} (of ${G.e + G.ae}) · executed ${ex} of ${G.n} produced`; };
 // one message's outcome: right (all gold wires right, no extra) / wrong (a wrong or an extra wire) / honest (the rest: requests not done, nothing wrong)
 const outcome = (s) => (s.exact ? "mRight" : s.wrongAligned > 0 || s.extra > 0 ? "mWrong" : "mHonest");
 const msgLine = (f, T, n) => `${f.padEnd(5)} per message: right ${(T.mRight / n * 100).toFixed(1)}% (${T.mRight}) · honest ${(T.mHonest / n * 100).toFixed(1)}% (${T.mHonest}) · wrong ${(T.mWrong / n * 100).toFixed(1)}% (${T.mWrong})`;
@@ -163,22 +192,26 @@ function tally(T, nodes, r) {
 }
 // LLM_SCORE_LIB=1: import this file as a library (no scoring run); the exports are what training/laptop/neural_score.mjs reuses
 const LIB = process.env.LLM_SCORE_LIB === "1";
-export { vssFormalize, tally, outcome, msgLine, scoreMessage, K as logic };
+export { vssFormalize, tally, outcome, msgLine, scoreMessage, K as logic, gateBlank, gateTally, gateLine };
 if (!LIB) {
+const GALL = gateBlank();
 const report = {}, ALL = { n: 0, rules: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0 }, vss: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0 } };
 for (const d of dirs) {
   const files = readdirSync(d).filter((f) => f.endsWith(".jsonl")).sort();
   const rows = files.flatMap((f) => readFileSync(`${d}/${f}`, "utf8").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l)));
   const tot = { rules: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0, byAct: {} }, vss: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0, byAct: {} } }, dump = [];
+  const GD = gateBlank();
   for (const r of rows) {
     const ctx = { names: r.names || [], last: [], spans: r.wires.every((w) => w.span) ? r.wires.map((w) => w.span) : null };
     const out = { rules: sys.formalize(r.text, ctx).nodes, vss: vssFormalize(r.text, ctx) }, rec = { id: r.id, text: r.text };
     for (const f of ["rules", "vss"]) rec[f] = tally(tot[f], out[f], r).bad;
+    if (GATE) gateTally(GD, out.vss, r);
     dump.push(rec);
   }
   const n = rows.length, line = (f) => { const T = tot[f]; return `${f.padEnd(5)} wires right ${(T.right / T.gold * 100).toFixed(1)}% (${T.right}/${T.gold}) · act found ${(T.acts / T.gold * 100).toFixed(1)}% · extra wires ${T.extra}`; };
   console.log(`\n${d}: ${n} messages, ${tot.rules.gold} gold wires`); console.log("  " + line("rules")); console.log("  " + line("vss"));
   for (const f of ["rules", "vss"]) { const T = tot[f], p = (x) => (x / T.gold * 100).toFixed(1) + "%"; console.log(`  ${f.padEnd(5)} per request: correct ${p(T.right)} · not done ${p(T.missed)} · done wrong ${p(T.wrongAligned)} · extra ${T.extra} (${p(T.extra)})`); }
+  if (GATE) { console.log("  " + gateLine(GD)); for (const k of Object.keys(GALL)) GALL[k] += GD[k]; }
   const acts = Object.keys(tot.rules.byAct).sort((a, b) => tot.rules.byAct[b][1] - tot.rules.byAct[a][1]);
   console.log("  per act (rules · vss · n): " + acts.map((a) => `${a.split(":").pop() || a} ${tot.rules.byAct[a][0]}·${(tot.vss.byAct[a] || [0])[0]}·${tot.rules.byAct[a][1]}`).join(", "));
   report[d] = { n, tot }; ALL.n += n; for (const f of ["rules", "vss"]) for (const k of ["exact", "right", "wrongAligned", "missed", "acts", "extra", "gold", "mRight", "mHonest", "mWrong"]) ALL[f][k] += tot[f][k]; if (verbose) dump.slice(0, 12).forEach((x) => console.log(`  ${x.id} ${x.text}\n     rules: ${x.rules.join(" | ") || "ok"}\n     vss:   ${x.vss.join(" | ") || "ok"}`));
@@ -186,6 +219,7 @@ for (const d of dirs) {
 }
 if (dirs.length > 1) { const n = ALL.n, pc = (x, T) => (x / T.gold * 100).toFixed(1) + "%", line = (f) => { const T = ALL[f]; return `${f.padEnd(5)} correct ${pc(T.right, T)} · not done ${pc(T.missed, T)} · done wrong ${pc(T.wrongAligned, T)} · plus ${T.extra} extra wires not asked for (${pc(T.extra, T)} of the gold count)`; };
   console.log(`\nALL (${dirs.join(" + ")}): ${n} messages, ${ALL.rules.gold} gold wires`); console.log("  " + line("rules")); console.log("  " + line("vss"));
+  if (GATE) console.log("  " + gateLine(GALL));
 }
 if (V2) console.log(`\ncomposer v2: units read, decided by: ${Object.entries(V2STAT.decided).map(([k, n]) => `${k} ${n}`).join(", ")} · readings tied at the fewest words not understood: ${Object.entries(V2STAT.tieSize).sort((a, b) => a[0] - b[0]).map(([k, n]) => `${k}: ${n}`).join(", ")} · asked by the context filler (not executed) ${CSTAT.ask} · ignored: ${Object.entries(V2STAT.ignoredWhy).map(([k, n]) => `${k} ${n}`).join(", ") || "none"}`);
 if (PAIRV) console.log(`pairing: PAIR=value (layer_common.mjs pairValue)`);

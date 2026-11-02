@@ -1,10 +1,14 @@
 // vss-formalizer.js: the VSS formalizer of the demo: formalize(text, ctx) -> the composer (vss-composer.js): the cutter, the
 // micro-worlds of ../model/micro/registry.json, and the router; loaded on first use.
-// Exposes window.VSSFormalizer = { formalize, loadComposerAt, composerInfo, cut, CUT_STRATEGIES, DEFAULT_CUT }. (The single-model path, ../model/real/ read with
+// Exposes window.VSSFormalizer = { formalize, loadComposerAt, composerInfo, cut, CUT_STRATEGIES, DEFAULT_CUT, loadConfidence, gate, confidenceInfo,
+// GATE_LEVELS, DEFAULT_GATE }. The gate (vss-confidence.js, model docs/model/confidence/vss.json, versioned like every model): a request is executed only
+// when its combined confidence clears the threshold of the chosen precision level (PRECISION.md; default 97). (The single-model path, ../model/real/ read with
 // ?vss=single, was removed on 2026-11-02; it is in git history.)
 import { load as loadVSS } from "./vss.js";
 import { loadComposer, cutUnits, CUT_STRATEGIES, DEFAULT_CUT } from "./vss-composer.js";
+import * as CONF from "./vss-confidence.js";
 export { CUT_STRATEGIES, DEFAULT_CUT };
+export const GATE_LEVELS = CONF.LEVELS, DEFAULT_GATE = CONF.DEFAULT_LEVEL;
 
 // ---- model versions (owner's rule 2026-11-02: never use an older model after a new one is published). versions.json (written by
 // training/sketch/stamp_models.py) maps every model folder / file under docs/model/ to a content version; every model URL gets
@@ -83,4 +87,27 @@ export function composerInfo() {
     worlds: (r.worlds || []).map((w) => ({ world: w.world, model: w.model.replace(/^micro\//, ""), events: w.events || [], bytes: size(w.model) })) };
 }
 
-if (typeof window !== "undefined") window.VSSFormalizer = { formalize, loadComposerAt, composerInfo, cut, CUT_STRATEGIES, DEFAULT_CUT };
+// ---- the confidence gate (vss-confidence.js): the model docs/model/confidence/vss.json (PRECISION.md), fetched with ?v=<version>
+const conf = { model: null, loading: null };
+/** load the confidence model once -> the parsed file ({readers: {vss_combined: ...}}) */
+export async function loadConfidence() {
+  if (conf.model) return conf.model;
+  if (!conf.loading) conf.loading = (async () => { await ensureVersions(); const b = await fetchSize(new URL("confidence/vss.json", MODEL_ROOT).href, { bytes: 0 }); conf.model = JSON.parse(new TextDecoder().decode(b)); return conf.model; })();
+  return conf.loading;
+}
+/** the gate over a formalize() result at a precision level ("95" | "97" | "99" | "all") -> vss-confidence.js gate(): {threshold, units
+ *  (each with conf, execute, reasons), executed (the nodes to run), held (the units not executed)} */
+export async function gate(result, level = CONF.DEFAULT_LEVEL) {
+  let model = null; try { model = await loadConfidence(); } catch (e) { conf.loading = null; conf.error = e; }   // no model: every request is asked
+  return CONF.gate(model, result, level);
+}
+/** what the settings show about the gate: per level its threshold and the held-out precision / right share / asked share */
+export function confidenceInfo() {
+  if (!conf.model) return null;
+  const sp = CONF.specOf(conf.model), v = vmap["confidence/vss.json"] || null;
+  return { version: v, operating: conf.model.operating_level, best: sp.best_reachable_heldout_oof_precision ?? null, source: sp.threshold_source || "",
+    effective: (l) => CONF.effectiveLevel(conf.model, l),
+    levels: Object.fromEntries(Object.entries(sp.levels || {}).map(([k, L]) => [k, L ? { threshold: L.threshold, precision: L.heldout_oof_precision ?? L.heldout_precision, coverage: L.heldout_oof_coverage ?? L.heldout_coverage, asked: L.heldout_oof_asked ?? L.heldout_asked } : null])) };
+}
+
+if (typeof window !== "undefined") window.VSSFormalizer = { formalize, loadComposerAt, composerInfo, cut, CUT_STRATEGIES, DEFAULT_CUT, loadConfidence, gate, confidenceInfo, GATE_LEVELS, DEFAULT_GATE };

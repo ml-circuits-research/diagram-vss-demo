@@ -39,6 +39,19 @@
 // rule above (fewest words not understood) chooses. The event hint is read at the unit's first token. Everything else is unchanged. A unit
 // that coincides with a cutter unit holds exactly one cutter start, so with the cutter's own units the output is the cutter path's output
 // (checked by training/sketch/cut_bench.mjs, "identical").
+// SIGNALS (training/sketch/VSS_CONFIDENCE.md, PRECISION.md; read by vss-confidence.js): every unit that gives a request carries
+// unit.signals, the raw stage signals of the combined confidence, computed here from what the composer already has (no number tuned):
+//   found 1; cut_start: at the unit's first token, the world cutter's best B-<world> score minus its best I/O score; cut_end: at the token
+//   after the unit's last, max(best B, O) minus I (null when the unit ends the text); world_gap: the chosen world's cutter score minus the
+//   best other candidate's (null with one candidate); world_rank: 1 when the chosen world is the cutter's first candidate; wnu_gap: words
+//   not understood of the best other usable world minus the chosen one's (0 when no other world read it); tie: 1 / readings tied at the
+//   fewest words not understood; notu_frac: the chosen reading's words not understood / its words; event_agree, event_gap: the event
+//   cutter at the unit's first token (best B-<event> = the chosen event; its score minus the best other's); event_margin, role_min (min of
+//   the role margins, null with none), margin_min (min of all margins, 0 with none), residual, unplaced (count), abstain (status not ok):
+//   the reader's own numbers; ctx_fill (gaps the context filler filled), ctx_margin (the smallest finite margin of those fills, null with
+//   none), ctx_left (descriptions left to the engine). These are exactly the `f` records of training/sketch/vss_confidence.mjs collect
+//   (checked by training/sketch/test_vss_confidence.mjs). Every node a unit gives (its mentions and its request) carries the unit as a
+//   non-enumerable property `unit` (node.unit.signals, node.unit.world), so a caller can gate a request by its unit's confidence.
 import * as FRONT from "./front.js";
 import { fillerWords } from "./vss/reader.js";
 import { readingFromWires, toNodes } from "./vss-adapter.js";
@@ -197,6 +210,53 @@ export class Composer {
     };
   }
 
+  /** the cutters' scores over the whole message, for the signals (see the head of the file): the same tokens and decode as segmentWorlds
+   *  and eventHints -> {toks, cs (world cutter scores per token), es (event cutter scores per token, or null)} */
+  signalScores(text, canvas) {
+    const [toks] = FRONT.tokenize(text, canvas), words = toks.map((x) => x[0]), C = this.cutter, E = this.eventCutter;
+    return { toks, cs: FRONT.segDecodeLabels(words, C.segmenter, C.labels).scores, es: E ? FRONT.segDecodeLabels(words, E.segmenter, E.labels).scores : null };
+  }
+
+  /** the raw stage signals of one unit that gave a request (see the head of the file); S = signalScores(...), st = the context filler's step */
+  unitSignals(u, S, st) {
+    const maxOf = (sc, labs) => Math.max(...labs.map((l) => sc[l])), C = this.cutter, E = this.eventCutter, f = { found: 1 };
+    // cut: the world cutter at the unit's first token and at the token after its last
+    const k = S.toks.findIndex(([, s]) => s === u.c0), kEnd = S.toks.findIndex(([, , e]) => e === u.c1);
+    const Bw = C.labels.filter((l) => l.startsWith("B-")), IO = ["I", "O"];
+    f.cut_start = k >= 0 ? maxOf(S.cs[k], Bw) - maxOf(S.cs[k], IO) : null;
+    if (kEnd >= 0 && kEnd + 1 < S.toks.length) { const s = S.cs[kEnd + 1]; f.cut_end = Math.max(maxOf(s, Bw), s.O) - s.I; } else f.cut_end = null;
+    // world: the candidates (ranked by the cutter), the words not understood of every world tried
+    const cand = u.candidates || [], ch = cand.find((c) => c.world === u.world), others = cand.filter((c) => c.world !== u.world);
+    f.world_gap = ch && others.length ? ch.score - Math.max(...others.map((c) => c.score)) : null;
+    f.world_rank = cand.length && cand[0].world === u.world ? 1 : 0;
+    const tr = u.tried || [], me = tr.find((t) => t.world === u.world), oth = tr.filter((t) => t.world !== u.world && t.event && t.notUnderstood < t.words);
+    f.wnu_gap = me && oth.length ? Math.min(...oth.map((t) => t.notUnderstood)) - me.notUnderstood : 0;
+    f.tie = 1 / (u.tie || 1);
+    f.notu_frac = me && me.words ? me.notUnderstood / me.words : 1;
+    // event: the event cutter at the unit's first token
+    if (S.es && k >= 0) {
+      const sc = S.es[k], B = E.labels.filter((l) => l.startsWith("B-")), lab = "B-" + u.event;
+      const best = B.reduce((a, l) => (sc[l] > sc[a] ? l : a), B[0]);
+      f.event_agree = best === lab ? 1 : 0;
+      f.event_gap = sc[lab] !== undefined ? sc[lab] - Math.max(...B.filter((l) => l !== lab).map((l) => sc[l])) : null;
+    } else { f.event_agree = 0; f.event_gap = null; }
+    // roles: the reader's margins, residual, unplaced words, status
+    const mg = u.vss.margins || {}, rm = Object.entries(mg).filter(([key]) => key !== "structure" && key !== "event").map(([, v]) => +v).filter(Number.isFinite);
+    const all = Object.values(mg).map(Number).filter(Number.isFinite);
+    f.event_margin = Number.isFinite(+mg.event) ? +mg.event : null;
+    f.role_min = rm.length ? Math.min(...rm) : null;
+    f.margin_min = all.length ? Math.min(...all) : 0;
+    f.residual = Number.isFinite(+u.vss.residual) ? +u.vss.residual : 0;
+    f.unplaced = (u.vss.unplaced || []).length;
+    f.abstain = u.vss.status === "ok" ? 0 : 1;
+    // context: the filler's gaps of this unit
+    const gaps = st && st.gaps ? st.gaps : [], fills = gaps.filter((g) => g.decision === "fill"), fm = fills.map((g) => g.margin).filter((m) => Number.isFinite(m));
+    f.ctx_fill = fills.length;
+    f.ctx_margin = fm.length ? Math.min(...fm) : null;
+    f.ctx_left = gaps.filter((g) => g.decision === "left").length;
+    return f;
+  }
+
   /** units of another cut ([{c0, c1}]) -> the same shape as segmentWorlds ([{c0, c1, worlds, k}]): the candidate worlds of each unit from
    *  the cutter's own unit starts inside it (see the head of the file; k = how many candidates the unit gets) */
   worldsFor(text, canvas, units) {
@@ -224,6 +284,7 @@ export class Composer {
     const t0 = performance.now(), update = opts.update || nextContext, seq = { s: 0, m: 0 }, canvas = ctx.names || [];
     const c = { names: canvas, last: (ctx.last || []).slice(), refs: new Map() }, filler = new Context({ text, canvas, model: this.contextModel });
     const nodes = [], notes = [], units = [];
+    let sig = null;      // the cutters' scores for the signals, decoded once per message when a unit gives a request
     const rawOf = (x, sq = seq) => { const verb = x.tokens.find((t) => x.w.verbEvent.has(t)) || x.r.frame.lemma || null, reading = readingFromWires(x.r.wires, verb, x.tokens);
       return { reading, raw: rawNodes(reading, x.info, canvas, sq) }; };
     const hintAt = this.eventCutter ? this.eventHints(text, canvas) : null;
@@ -263,14 +324,16 @@ export class Composer {
       Object.defineProperty(u, "raw", { value: R.raw, enumerable: false, configurable: true });
       const st = filler.step(R.raw, c0, c1);
       if (!st) { notes.push(`VSS read “${src}” as ${x.event} (world ${x.world}) but it gave no request`); continue; }
-      u.gaps = st.gaps.map((g) => ({ key: g.key, kind: g.kind, decision: g.decision }));
+      // word: the reference the gap holds ("@it"); margin: a fill's margin over the runner-up (the reasons of vss-confidence.js name them)
+      u.gaps = st.gaps.map((g) => Object.assign({ key: g.key, kind: g.kind, decision: g.decision }, g.word ? { word: g.word } : {}, g.decision === "fill" && Number.isFinite(g.margin) ? { margin: g.margin } : {}));
       if (st.asked) {
         u.zone = "ask"; u.askedBy = "context";
         notes.push(`In “${src}” (${x.event}), which shape is meant by ` + st.gaps.filter((g) => g.decision === "ask").map((g) => g.key + (g.word ? " (" + g.word.replace(/^@/, "") + ")" : "")).join(", ") + "?");
       } else {
         const out = R.raw.nodes.filter((n) => n.type === "mention").concat([st.main]);
-        for (const n of out) { n.world = u.world; if (n.type !== "mention") Object.defineProperty(n, "src", { value: src, enumerable: false, configurable: true }); }
+        for (const n of out) { n.world = u.world; if (n.type !== "mention") Object.defineProperty(n, "src", { value: src, enumerable: false, configurable: true }); Object.defineProperty(n, "unit", { value: u, enumerable: false, configurable: true }); }
         Object.defineProperty(st.main, "span", { value: [c0, c1], enumerable: false, configurable: true });
+        u.signals = this.unitSignals(u, sig || (sig = this.signalScores(text, canvas)), st);   // the confidence's input (see the head of the file)
         nodes.push(...out);
       }
       update(c, st.main);
