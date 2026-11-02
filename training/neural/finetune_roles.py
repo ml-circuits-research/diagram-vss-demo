@@ -39,11 +39,13 @@ class Reader(nn.Module):
         self.pre = nn.Linear(H, H); self.drop = nn.Dropout(p)
         self.act = nn.Linear(H, n_acts); self.classes = nn.Linear(H, sum(class_sizes))
         self.tok_drop = nn.Dropout(getattr(encoder.config, "dropout", 0.1)); self.tags = nn.Linear(H, n_tags)
+        self.cut = nn.Linear(H, 3)   # request spans over the whole message: O / B / I per word (read on the first word piece)
 
     def forward(self, input_ids, attention_mask):
         h = self.encoder(input_ids=input_ids, attention_mask=attention_mask).last_hidden_state
         cls = self.drop(torch.relu(self.pre(h[:, 0])))
-        return self.tags(self.tok_drop(h)), torch.cat([self.act(cls), self.classes(cls)], dim=-1)
+        hd = self.tok_drop(h)
+        return self.tags(hd), torch.cat([self.act(cls), self.classes(cls)], dim=-1), self.cut(hd)
 
 
 def build(base, rows, n_acts, class_sizes, n_tags):
@@ -51,7 +53,7 @@ def build(base, rows, n_acts, class_sizes, n_tags):
     if base == "tiny":
         from finetune import tiny_tokenizer
         tok = tiny_tokenizer([" ".join(r["words"]) for r in rows], None)
-        enc = DistilBertModel(DistilBertConfig(vocab_size=len(tok), n_layers=2, n_heads=2, dim=64, hidden_dim=128, max_position_embeddings=128))
+        enc = DistilBertModel(DistilBertConfig(vocab_size=len(tok), n_layers=2, n_heads=2, dim=64, hidden_dim=128, max_position_embeddings=512))
     else:
         tok = AutoTokenizer.from_pretrained(base)
         enc = AutoModel.from_pretrained(base, attn_implementation="eager")
@@ -70,14 +72,18 @@ class Layout:
         return [vals.index(row["classes"][k]) if row["classes"].get(k) in vals else 0 for k, vals in self.classes]
 
 
-def encode(tok, rows, L, maxlen, dev):
+CUT_ID = {"O": 0, "B": 1, "I": 2}
+
+
+def encode(tok, rows, L, maxlen, dev, tagmap=None):
+    tagmap = tagmap or L.tag_id
     enc = tok([r["words"] for r in rows], is_split_into_words=True, truncation=True, max_length=maxlen, padding=True, return_tensors="pt")
     lab, first = [], []
     for b, r in enumerate(rows):
         wid, seen, row, fw = enc.word_ids(b), set(), [], {}
         for t, w in enumerate(wid):
             if w is None or w in seen: row.append(-100); continue
-            seen.add(w); fw[w] = t; row.append(L.tag_id.get(r["tags"][w], 0) if "tags" in r else -100)
+            seen.add(w); fw[w] = t; row.append(tagmap.get(r["tags"][w], 0) if "tags" in r else -100)
         lab.append(row); first.append(fw)
     x = {"input_ids": enc["input_ids"].to(dev), "attention_mask": enc["attention_mask"].to(dev)}
     return x, torch.tensor(lab, device=dev), first, enc
@@ -116,19 +122,55 @@ def predict(model, tok, rows, L, maxlen, dev, fp16, bs=128):
     model.eval(); out = []
     for part in batches(rows, bs, False, None):
         x, _, first, _ = encode(tok, part, L, maxlen, dev)
-        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=fp16): tl, sl = model(**x)
+        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=fp16): tl, sl, _ = model(**x)
         tl, sl = tl.float().cpu().numpy(), sl.float().cpu().numpy()
         for b, r in enumerate(part): out.append(decode(tl[b], sl[b], first[b], len(r["words"]), L))
     return out
+
+
+@torch.no_grad()
+def predict_cut(model, tok, rows, L, dev, fp16, maxlen=512, bs=8):
+    """whole messages -> the request spans, as [first word, last word + 1] lists (B starts a span, I continues it or starts one)"""
+    model.eval(); out = []
+    for part in batches(rows, bs, False, None):
+        x, _, first, _ = encode(tok, part, L, maxlen, dev, CUT_ID)
+        with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=fp16): _, _, cl = model(**x)
+        cl = cl.float().cpu().numpy()
+        for b, r in enumerate(part):
+            tg = ["OBI"[int(np.argmax(cl[b][first[b][w]]))] if w in first[b] else "O" for w in range(len(r["words"]))]
+            out.append(cut_spans(tg))
+    return out
+
+
+def cut_spans(tags):
+    sp = []
+    for i, t in enumerate(tags):
+        if t == "B" or (t == "I" and not (sp and sp[-1][1] == i)): sp.append([i, i + 1])
+        elif t == "I": sp[-1][1] = i + 1
+    return sp
+
+
+def evaluate_cut(model, tok, rows, L, dev, fp16):
+    """exact-span precision / recall / F1 of the cut, and word accuracy (inside / outside a request)"""
+    if not rows: return None
+    pred = predict_cut(model, tok, rows, L, dev, fp16); tp = np_ = ng = wr = nw = 0
+    for r, p in zip(rows, pred):
+        g = cut_spans(r["tags"]); tp += sum(x in g for x in p); np_ += len(p); ng += len(g)
+        gi = {i for a, b in g for i in range(a, b)}; pi = {i for a, b in p for i in range(a, b)}
+        wr += sum((i in gi) == (i in pi) for i in range(len(r["words"]))); nw += len(r["words"])
+    P, R = tp / max(np_, 1), tp / max(ng, 1)
+    return {"n": len(rows), "spans gold": ng, "spans predicted": np_, "exact": tp, "precision": P, "recall": R, "f1": 2 * P * R / max(P + R, 1e-9), "word accuracy": wr / max(nw, 1)}
 
 
 def evaluate(model, tok, rows, L, maxlen, dev, fp16):
     """share of requests read right + per key: right / gold, and keys produced that the gold does not have"""
     if not rows: return {"n": 0, "right": 0.0, "act": 0.0, "keys": {}}
     preds = predict(model, tok, rows, L, maxlen, dev, fp16)
-    keys = collections.defaultdict(lambda: [0, 0, 0]); right = act = 0
+    keys = collections.defaultdict(lambda: [0, 0, 0]); right = act = 0; none = [0, 0, 0]   # none: rows, read as none, requests read as none
     for r, p in zip(rows, preds):
         ok = p["act"] == r["act"]; act += ok
+        if r["act"] == "none": none[0] += 1; none[1] += ok
+        else: none[2] += p["act"] == "none"
         for k, _ in L.classes:
             g, q = r["classes"].get(k), p["classes"].get(k)
             if g is not None: keys[k][1] += 1; keys[k][0] += g == q; ok &= g == q
@@ -139,11 +181,12 @@ def evaluate(model, tok, rows, L, maxlen, dev, fp16):
             if g: keys[k][1] += 1; keys[k][0] += g == q; ok &= g == q
             else: keys[k][2] += 1
         right += ok
-    return {"n": len(rows), "right": right / len(rows), "act": act / len(rows), "keys": {k: {"right": v[0], "gold": v[1], "extra": v[2]} for k, v in sorted(keys.items())}}
+    return {"n": len(rows), "right": right / len(rows), "act": act / len(rows), "none": {"rows": none[0], "read as none": none[1], "requests read as none": none[2]}, "keys": {k: {"right": v[0], "gold": v[1], "extra": v[2]} for k, v in sorted(keys.items())}}
 
 
 def report(name, ev):
     print(f"  {name:22} n={ev['n']:5}  requests read right {ev['right']:.4f}  act {ev['act']:.4f}")
+    if ev.get("none", {}).get("rows"): print(f"      none rows read as none {ev['none']['read as none']}/{ev['none']['rows']} · requests read as none (lost) {ev['none']['requests read as none']}")
     print("      " + " · ".join(f"{k} {v['right']}/{v['gold']}" + (f" +{v['extra']}" if v['extra'] else "") for k, v in ev["keys"].items()))
 
 
@@ -153,14 +196,14 @@ def export(model, tok, L, R, out, work, maxlen, enc_config):
     ox = os.path.join(work, "onnx_fp32"); shutil.rmtree(ox, ignore_errors=True); os.makedirs(ox)
     x = tok([["draw", "a", "red", "circle"], ["connect", "Start", "to", "Done", "with", "a", "dashed", "arrow"]], is_split_into_words=True, padding=True, return_tensors="pt")
     torch.onnx.export(model, (x["input_ids"], x["attention_mask"]), os.path.join(ox, "model.onnx"), dynamo=False, opset_version=14,
-                      input_names=["input_ids", "attention_mask"], output_names=["token_logits", "seq_logits"],
+                      input_names=["input_ids", "attention_mask"], output_names=["token_logits", "seq_logits", "cut_logits"],
                       dynamic_axes={"input_ids": {0: "batch", 1: "sequence"}, "attention_mask": {0: "batch", 1: "sequence"},
-                                    "token_logits": {0: "batch", 1: "sequence"}, "seq_logits": {0: "batch"}})
+                                    "token_logits": {0: "batch", 1: "sequence"}, "seq_logits": {0: "batch"}, "cut_logits": {0: "batch", 1: "sequence"}})
     import onnxruntime as ort   # the fp32 graph must give torch's numbers before it is quantized
     s = ort.InferenceSession(os.path.join(ox, "model.onnx"), providers=["CPUExecutionProvider"])
     o = s.run(None, {"input_ids": x["input_ids"].numpy(), "attention_mask": x["attention_mask"].numpy()})
     with torch.no_grad(): t = model(x["input_ids"], x["attention_mask"])
-    print(f"onnx fp32 vs torch: max |diff| token {np.abs(o[0] - t[0].numpy()).max():.2e}, seq {np.abs(o[1] - t[1].numpy()).max():.2e}")
+    print(f"onnx fp32 vs torch: max |diff| token {np.abs(o[0] - t[0].numpy()).max():.2e}, seq {np.abs(o[1] - t[1].numpy()).max():.2e}, cut {np.abs(o[2] - t[2].numpy()).max():.2e}")
     shutil.rmtree(out, ignore_errors=True); os.makedirs(os.path.join(out, "onnx"))
     quantize_dynamic(os.path.join(ox, "model.onnx"), os.path.join(out, "onnx", "model_quantized.onnx"), per_channel=True, reduce_range=True, weight_type=QuantType.QUInt8)
     tok.save_pretrained(out)
@@ -191,14 +234,25 @@ def main():
     R = json.load(open(os.path.join(a.data, "reader.json"))); L = Layout(R); maxlen = R.get("max_length", 128)
     train, held = read(os.path.join(a.data, "train.jsonl")), read(os.path.join(a.data, "heldout.jsonl"))
     evals = {f[5:-6]: read(os.path.join(a.data, f)) for f in sorted(os.listdir(a.data)) if f.startswith("eval_")}
-    tok, model = build(a.base, train, len(L.acts), L.class_sizes, len(L.tags)); model.to(dev)
+    cut = {n: read(os.path.join(a.data, f"cut_{n}.jsonl")) for n in ("train", "heldout", "eval_sample1000") if os.path.exists(os.path.join(a.data, f"cut_{n}.jsonl"))}
+    tok, model = build(a.base, train + cut.get("train", []), len(L.acts), L.class_sizes, len(L.tags)); model.to(dev)
     print(f"base {a.base}: {sum(p.numel() for p in model.parameters()) / 1e6:.1f}M parameters, device {dev}, fp16 {fp16}; train {len(train)} held-out {len(held)}; "
           f"acts {len(L.acts)}, class keys {len(L.classes)} ({sum(L.class_sizes)} classes), tags {len(L.tags)}", flush=True)
+    if cut.get("train"):
+        npieces = [len(tok(r["words"], is_split_into_words=True)["input_ids"]) for r in cut["train"] + cut.get("heldout", [])]
+        print(f"cut: {len(cut['train'])} train messages; word pieces per message: median {int(np.median(npieces))}, max {max(npieces)}; "
+              f"{sum(n > 512 for n in npieces)} of {len(npieces)} exceed 512 (the words beyond are read as outside every request)", flush=True)
+    cut_iter = None
     steps_per_epoch = (len(train) + a.bs - 1) // a.bs; total = a.max_steps or steps_per_epoch * a.epochs
     from transformers import get_linear_schedule_with_warmup
     opt = torch.optim.AdamW(model.parameters(), lr=a.lr, weight_decay=0.01)
     sch = get_linear_schedule_with_warmup(opt, int(0.06 * total), total); scaler = torch.amp.GradScaler("cuda", enabled=fp16)
     ce = nn.functional.cross_entropy
+    # class balance of the act: "none" (text that is not a request) is weighted down when it would be more than 40% of the rows (no subsampling)
+    n_none = sum(r["act"] == "none" for r in train); share = n_none / max(len(train), 1); act_w = None
+    if "none" in L.act_id and share > 0.40:
+        act_w = torch.ones(len(L.acts), device=dev); act_w[L.act_id["none"]] = 0.40 / 0.60 * (len(train) - n_none) / n_none
+    print(f"act none: {n_none}/{len(train)} train rows = {share * 100:.1f}%" + (f"; > 40%, loss weight of none {act_w[L.act_id['none']].item():.3f}" if act_w is not None else "; weight 1 (not above 40%)"), flush=True)
     best, bad, step, best_state, t0, done = -1.0, 0, 0, None, time.time(), False
     for ep in range(1, a.epochs + 1):
         model.train(); loss_sum = n = 0
@@ -207,25 +261,37 @@ def main():
             ya = torch.tensor([L.act_id[r["act"]] for r in part], device=dev)
             yc = torch.tensor([L.class_targets(r) for r in part], device=dev)
             with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=fp16):
-                tl, sl = model(**x)
+                tl, sl, _ = model(**x)
             tl, sl = tl.float(), sl.float()
-            loss = ce(sl[:, :len(L.acts)], ya)
+            loss = ce(sl[:, :len(L.acts)], ya, weight=act_w)
             loss = loss + sum(ce(sl[:, s:s + c], yc[:, i]) for i, (s, c) in enumerate(zip(L.offsets[:-1], L.class_sizes))) / len(L.class_sizes)
             loss = loss + ce(tl.reshape(-1, tl.shape[-1]), lab.reshape(-1), ignore_index=-100)
+            if cut.get("train"):   # one batch of whole messages per step: the cut head
+                if cut_iter is None: cut_iter = iter(())
+                cb = next(cut_iter, None)
+                if cb is None: cut_iter = batches(cut["train"], 8, True, rng); cb = next(cut_iter)
+                cx, clab, _, _ = encode(tok, cb, L, 512, dev, CUT_ID)
+                with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=fp16): _, _, cl = model(**cx)
+                loss = loss + ce(cl.float().reshape(-1, 3), clab.reshape(-1), ignore_index=-100)
             opt.zero_grad(); scaler.scale(loss).backward(); scaler.unscale_(opt); torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             scaler.step(opt); scaler.update(); sch.step(); loss_sum += loss.item(); n += 1; step += 1
             if a.max_steps and step >= a.max_steps: done = True; break
-        ev = evaluate(model, tok, held, L, maxlen, dev, fp16)
-        print(f"epoch {ep}: loss {loss_sum / max(n, 1):.4f}  held-out: requests read right {ev['right']:.4f}, act {ev['act']:.4f}  ({time.time() - t0:.0f}s)", flush=True)
-        if ev["right"] > best: best, bad, best_state = ev["right"], 0, {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+        ev = evaluate(model, tok, held, L, maxlen, dev, fp16); ec = evaluate_cut(model, tok, cut.get("heldout"), L, dev, fp16)
+        score = (ev["right"] + ec["f1"]) / 2 if ec else ev["right"]   # early stop on the mean of requests read right and the cut F1
+        print(f"epoch {ep}: loss {loss_sum / max(n, 1):.4f}  held-out: requests read right {ev['right']:.4f}, act {ev['act']:.4f}"
+              + (f", cut F1 {ec['f1']:.4f} (P {ec['precision']:.4f} R {ec['recall']:.4f})" if ec else "") + f"  ({time.time() - t0:.0f}s)", flush=True)
+        if score > best: best, bad, best_state = score, 0, {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
         else: bad += 1
         if done or bad >= a.patience: break
     model.load_state_dict(best_state); model.to(dev)
     torch.save(best_state, os.path.join(work, "best.pt"))
-    print(f"\nbest epoch: held-out requests read right {best:.4f} (act right, every gold class key right, every gold role on exactly its words)")
+    print(f"\nbest epoch: held-out score {best:.4f} (mean of requests read right and cut F1; requests read right = act right, every gold class key right, every gold role on exactly its words)")
     print("per key: right/gold (+ produced where the gold has none)")
     res = {"heldout": evaluate(model, tok, held, L, maxlen, dev, fp16)}; report("heldout", res["heldout"])
     for k, rows in evals.items(): res[k] = evaluate(model, tok, rows, L, maxlen, dev, fp16); report(k, res[k])
+    for k, rows in cut.items():
+        res["cut_" + k] = evaluate_cut(model, tok, rows, L, dev, fp16)
+        if res["cut_" + k]: print("  cut " + k + ": " + ", ".join(f"{a} {v:.4f}" if isinstance(v, float) else f"{a} {v}" for a, v in res["cut_" + k].items()))
     json.dump(res, open(os.path.join(work, "eval.json"), "w"), indent=1)
     model.to("cpu"); dev = "cpu"
     chk = held[:50]
@@ -234,11 +300,14 @@ def main():
         for r, p in zip(chk, predict(model, tok, chk, L, maxlen, "cpu", False)):
             ids = tok([r["words"]], is_split_into_words=True, truncation=True, max_length=maxlen)["input_ids"][0]
             f.write(json.dumps({"text": r["text"], "words": r["words"], "ids": ids, **p}, ensure_ascii=False) + "\n")
+    cref = os.path.join(work, "torch_cut_ref.jsonl"); cchk = cut.get("heldout", [])[:20]
+    with open(cref, "w") as f:
+        for r, sp in zip(cchk, predict_cut(model, tok, cchk, L, "cpu", False)): f.write(json.dumps({"text": r["text"], "words": r["words"], "spans": sp}, ensure_ascii=False) + "\n")
     export(model, tok, L, R, out, work, maxlen, model.encoder.config)
     q = os.path.getsize(os.path.join(out, "onnx", "model_quantized.onnx"))
     agree = None
     if not a.no_node_check and shutil.which("node"):
-        r = subprocess.run(["node", os.path.join(HERE, "check_roles_node.mjs"), os.path.dirname(os.path.abspath(out)), os.path.basename(os.path.abspath(out)), ref],
+        r = subprocess.run(["node", os.path.join(HERE, "check_roles_node.mjs"), os.path.dirname(os.path.abspath(out)), os.path.basename(os.path.abspath(out)), ref, cref],
                            capture_output=True, text=True); print(r.stdout.strip(), r.stderr.strip()[-800:])
         agree = json.loads(r.stdout.strip().splitlines()[-1]) if r.returncode == 0 and r.stdout.strip() else None
     ho = res["heldout"]; s1 = res.get("sample1000")
@@ -246,8 +315,10 @@ def main():
         f.write(f"""# {a.name}: the demo's neural reader (act and roles in one model), fine-tuned on our annotated requests
 
 One DistilBERT encoder with three heads, one call per request (the text of one request, as the rules cut it):
-- the act ({len(L.acts)} classes: the action of a command, the ask of a question, else `fact` or `rule`);
+- the act ({len(L.acts)} classes: the action of a command, the ask of a question, else `fact` or `rule`, or `none`: the text is not a request);
 - {len(L.classes)} class heads, one per legend key with values ({", ".join(k for k, _ in L.classes)}): `none` or a value;
+- the CUT: a second token head (`cut_logits`, O / B / I per word) reads the WHOLE message (<= 512 word pieces) and marks the request spans; the
+  act / class / role heads then read the spans of the message in one batched second call (two calls per message);
 - a B / I / O tag per word for the keys whose answer is written in the request ({", ".join(R["span_keys"])}).
 The head layout is `reader` in config.json; docs/js/neural.js makeReader decodes it. Load with transformers.js as AutoTokenizer +
 AutoModel (dtype `q8`, file `onnx/model_quantized.onnx`); outputs `token_logits` and `seq_logits`.

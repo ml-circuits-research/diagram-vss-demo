@@ -53,3 +53,22 @@ epoch where it starts says when. Runs on the owner's GPU machine (about 1 hour).
 
 **Risk.** LoRA may reach a lower task accuracy than full fine-tuning; the comparison has to be made at equal training cost, and the
 merge before the ONNX export has to be checked to give the same outputs as the unmerged adapter.
+
+## ModernBERT as the base of the neural reader (owner, 2026-11-02: documented, not now)
+
+**Why.** The neural reader is DistilBERT (66 M parameters, 512-token limit, pretrained on ~3 billion words of Wikipedia and books),
+fine-tuned on our requests (training/neural/finetune.py, finetune_roles.py). ModernBERT-base (Answer.AI and LightOn, December 2024:
+149 M parameters, 8192 tokens, pretrained on ~2 trillion tokens including code, rotary positions and alternating local/global
+attention) reads language better on most published tasks and handles long texts. Our act head is already at ~99% on gold spans; a
+better base could matter for the harder parts: cutting a message into requests and reading the roles.
+
+**The idea.** The same fine-tuning scripts with `--base answerdotai/ModernBERT-base` (check first that transformers.js 3.8.1 runs its
+ONNX export; if not, the version that does), trained on the owner's GPU machine (estimated 10–15 min; smaller batches on 4 GB).
+
+**How it would be measured.** Against the fine-tuned DistilBERT joint reader on the same split: act accuracy, role accuracy per key,
+the cut's errors (lost / merged / split requests) and the per-request score on the fixed 1000-message sample and the demo's short sets;
+plus the browser cost: download size (~150 MB q8 vs ~68 MB) and ms per message on CPU (WASM). Adopt only if it reads clearly better
+for a cost the demo can carry.
+
+**Risk.** About 2-3x slower and 2x larger than DistilBERT in the browser for a gain that may be small on short commands; transformers.js
+support to be checked.

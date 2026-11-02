@@ -21,6 +21,15 @@ n(k=v, w)) over request spans (Jaccard). In a request with k=v, the word with th
 value of k (both directions agree); otherwise the value counts as not aligned. It is used for number words (the learned word -> number map
 is saved with the model) and, as evidence only, for the class keys: how many of their gold values a single word of the request expresses.
 
+Cutting (the model cuts the message itself): per message, a B / I / O tag per word of the WHOLE message (B first word of a gold span, I inside,
+O outside every span) -> cut_train.jsonl, cut_heldout.jsonl, cut_eval_sample1000.jsonl (same split); finetune_roles.py trains a separate token head on them.
+Spans of every annotated request count, also those whose act is not in the act set. Only with --none-rows (comparison, not the default):
+No request (act "none"): the text outside every annotated span is learned as the act "none", with no class and no role labels. The pieces are
+cut the way the reader sees them at use time: the rules' segmenter (docs/js/logic.js createSystem().formalize(text, ctx).segments, the
+units docs/js/neural.js reads) is run on every message of the set (train, held-out, sample), and a segment that overlaps no gold span (no
+word of it aligned to a word inside a span) is a "none" row. The segments the gold spans cover are not duplicated: the gold span is the row.
+The bench sets (one request per text, no spans) have no "none" rows. The counts are printed and saved in coverage.json.
+
 Words: the request split by WORD_RE (letters/digits runs, every other non-space character alone), the same split docs/js/neural.js
 uses (WORD_RE there). Output (default ~/vss-box/ft/roles): train.jsonl, heldout.jsonl, eval_<set>.jsonl, reader.json (the head layout
 the model folder's config.json carries: acts, tags, class keys and values, act_keys, number_words, word_re), coverage.json.
@@ -72,6 +81,62 @@ def find_seq(ws, seq, taken):
     return None
 
 
+SEG_JS = ("const K=require(process.argv[1]);const fs=require('fs');const ms=JSON.parse(fs.readFileSync(0,'utf8'));const sys=K.createSystem();"
+          "console.log(JSON.stringify(ms.map(t=>{try{return sys.formalize(t,{names:[],last:[],spans:null}).segments.map(s=>s.src)}catch(e){return []}})))")
+
+
+def segments(texts):
+    """the units the rules' segmenter cuts each text into (what neural.js reads at use time)"""
+    r = subprocess.run(["node", "-e", SEG_JS, os.path.join(REPO, "docs", "js", "logic.js")], input=json.dumps(texts), capture_output=True, text=True, check=True)
+    return json.loads(r.stdout)
+
+
+def span_words(text, spans):
+    """indices (in words(text)) of the words inside a gold span; each span is found at its first occurrence not overlapping an earlier span"""
+    ws = words(text); inside = set(); used = []
+    for sp in spans:
+        i = -1
+        while True:
+            i = text.find(sp, i + 1)
+            if i < 0 or not any(i < b and i + len(sp) > a for a, b in used): break
+        if i < 0: continue
+        used.append((i, i + len(sp)))
+        inside |= {k for k, w in enumerate(ws) if w[1] >= i and w[2] <= i + len(sp)}
+    return ws, inside
+
+
+def cut_tags(text, spans):
+    """(words, B / I / O per word of the whole message): each span at its first occurrence not overlapping an earlier span"""
+    ws = words(text); tg = ["O"] * len(ws); used = []
+    for sp in spans:
+        i = -1
+        while True:
+            i = text.find(sp, i + 1)
+            if i < 0 or not any(i < b and i + len(sp) > a for a, b in used): break
+        if i < 0: continue
+        idx = [k for k, w in enumerate(ws) if w[1] >= i and w[2] <= i + len(sp)]
+        if not idx: continue
+        used.append((i, i + len(sp)))
+        for n, k in enumerate(idx): tg[k] = "B" if n == 0 else "I"
+    return ws, tg
+
+
+def none_rows(msgs):
+    """(message id, segment, "none", {}, "none", []) per segment of the rules' segmenter that overlaps no gold span"""
+    import difflib
+    out = []; segs = segments([m["text"] for m in msgs])
+    for m, ss in zip(msgs, segs):
+        ws, inside = span_words(m["text"], [w["span"] for w in m.get("wires", []) if w.get("span")])
+        low = [w[0].lower() for w in ws]
+        for s in ss:
+            sw = [w[0].lower() for w in words(s)]
+            if not any(re.match(r"[^\W_]", w) for w in sw): continue
+            hit = any(b.size and any(j in inside for j in range(b.a, b.a + b.size)) for b in
+                      [type("B", (), {"a": b.a, "size": b.size}) for b in difflib.SequenceMatcher(None, low, sw, autojunk=False).get_matching_blocks()])
+            if not hit: out.append((m["id"], s, "none", {}, "none", []))
+    return out
+
+
 def requests(msgs, ACTS, skipped):
     """(message id, span, type, args, act, names created earlier in the message) per annotated request"""
     out = []
@@ -119,15 +184,18 @@ def main():
     ap.add_argument("--out", default=os.path.expanduser("~/vss-box/ft/roles"))
     ap.add_argument("--sample-ids", default=os.path.join(HERE, "sample1000_ids.txt"))
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--none-rows", action="store_true", help="comparison only: also the act \"none\" (segments of the rules' segmenter outside every span); the model cuts by itself now")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     LEG = legend()
-    ACTION, ASK = MD.acts_from_neural_js(); ACTS = ACTION + ASK + ["fact", "rule"]
+    ACTION, ASK = MD.acts_from_neural_js(); ACTS = ACTION + ASK + ["fact", "rule"] + (["none"] if a.none_rows else [])
     skipped = collections.Counter()
     train_msgs, held, sample_msgs, missing = MD.split_messages(a.sample_ids, a.seed)
-    sets = {"train": requests([m for m in train_msgs if m["id"] not in held], ACTS, skipped),
-            "heldout": requests([m for m in train_msgs if m["id"] in held], ACTS, skipped),
-            "eval_sample1000": requests(sample_msgs, ACTS, skipped)}
+    pools = {"train": [m for m in train_msgs if m["id"] not in held], "heldout": [m for m in train_msgs if m["id"] in held], "eval_sample1000": sample_msgs}
+    sets = {n: requests(ms, ACTS, skipped) for n, ms in pools.items()}
+    nreq = {n: len(r) for n, r in sets.items()}
+    for n, ms in pools.items():
+        if a.none_rows: sets[n] += none_rows(ms)
     for s in MD.EVAL:
         rows = []
         for i, r in enumerate(json.load(open(os.path.join(REPO, "docs", "bench", s + ".json"), encoding="utf8"))):
@@ -204,13 +272,26 @@ def main():
             ccov[k] = {"values": n, "one word expresses it (co-occurrence, both directions)": al, "top word->value": [f"{w}->{v} {c}" for (w, v), c in pairs.most_common(8)]}
         coverage[name] = {"span keys": {k: dict(v) for k, v in cov.items()}, "class keys": ccov, "rows": len(out)}
     number_words = {w: c.most_common(1)[0][0] for w, c in numword.items()}
-    reader = {"acts": ACTS, "tags": tags, "span_keys": span_keys, "classes": [[k, ["none"] + values[k]] for k in class_keys],
+    reader = {"cut": {"tags": ["O", "B", "I"], "max_length": 512}, "acts": ACTS, "tags": tags, "span_keys": span_keys, "classes": [[k, ["none"] + values[k]] for k in class_keys],
               "act_keys": act_keys, "number_words": number_words, "word_re": "[\\p{L}\\p{N}]+|[^\\s\\p{L}\\p{N}]", "max_length": 128}
     json.dump(reader, open(os.path.join(a.out, "reader.json"), "w"), indent=1)
+    cutn = {}
+    for n, ms in pools.items():
+        nsp = nw = 0
+        with open(os.path.join(a.out, "cut_" + n.replace("eval_", "eval_") + ".jsonl"), "w", encoding="utf8") as f:
+            for m in ms:
+                ws, tg = cut_tags(m["text"], [w["span"] for w in m.get("wires", []) if w.get("span")])
+                f.write(json.dumps({"id": m["id"], "text": m["text"], "words": [w[0] for w in ws], "tags": tg}, ensure_ascii=False) + "\n")
+                nw += len(ws); nsp += tg.count("B")
+        cutn[n] = {"messages": len(ms), "words": nw, "spans": nsp, "words outside every span": None}
+    coverage["cut"] = cutn
+    print("cut rows (whole messages, B/I/O per word): " + ", ".join(f"{n} {c['messages']} messages {c['spans']} spans" for n, c in cutn.items()))
+    coverage["none"] = {n: {"requests": nreq[n], "none": len(sets[n]) - nreq[n], "none share": round((len(sets[n]) - nreq[n]) / max(len(sets[n]), 1), 4)} for n in nreq}
     coverage["skipped"] = dict(skipped); coverage["sample1000_missing"] = len(missing)
     json.dump(coverage, open(os.path.join(a.out, "coverage.json"), "w"), indent=1)
 
     print(f"rows: " + ", ".join(f"{k} {coverage[k]['rows']}" for k in sets))
+    print("none rows (segments of the rules' segmenter that overlap no gold span): " + ", ".join(f"{n} {c['none']}/{c['none'] + c['requests']} = {c['none share'] * 100:.1f}%" for n, c in coverage["none"].items()))
     print(f"class keys ({len(class_keys)}): " + ", ".join(f"{k}({len(values[k])})" for k in class_keys))
     print(f"span keys ({len(span_keys)}): {', '.join(span_keys)}; tags {len(tags)}; number words learned: {number_words}")
     print("\nspan keys, training rows: gold values aligned to words")
