@@ -34,7 +34,7 @@ def mem_line():
     return f"RSS {_rss_gb():.2f} GB (peak {_hwm_gb():.2f} GB) | {dev} | MemAvailable {_avail_gb():.1f} GB"
 
 def train_loop(model, params, cats, ids, mask, tgt, batch, lr, log_every=500, ckpt=None, ckpt_every=2000, resume=False, tag="",
-               batch_fn=None, n=None, stop_after=0, loss_every_step=False):
+               batch_fn=None, n=None, stop_after=0, loss_every_step=False, lazy_loss=False):
     opt = torch.optim.Adam(params, lr=lr, betas=(0.9, 0.999), eps=1e-8); start = 0
     if batch_fn is None:
         n = cats.shape[0]; batch_fn = lambda i, j: (cats[i:j], ids[i:j], mask[i:j], tgt[i:j], {})
@@ -43,16 +43,25 @@ def train_loop(model, params, cats, ids, mask, tgt, batch, lr, log_every=500, ck
         with torch.no_grad():
             for p, v in zip(params, st["params"]): p.copy_(v)
         opt.load_state_dict(st["opt"]); start = st["step"]; print(f"[train{tag}] resumed from {ckpt} at step {start}", flush=True)
-    t0 = time.time(); last = None
+    t0 = time.time(); last = None; fin = None
     print(f"[train{tag}] start: {mem_line()}", flush=True)
     for i in range(start, n, batch):
         cb, ib, mb, t, kw = batch_fn(i, min(i + batch, n)); S = model.states(cb, ib, mb, **kw)
         cos = torch.real((torch.conj(t) * S).sum(-1)) / (S.abs().pow(2).sum(-1).sqrt() * t.abs().pow(2).sum(-1).sqrt())
-        assert torch.isfinite(cos).all(), f"non-finite loss at step {i}: a target or state is NaN (check the world)"
-        loss = -cos.mean(); opt.zero_grad(set_to_none=True); loss.backward(); opt.step(); last = loss.item()     # .item(): no graph survives
+        step = (i // batch) + 1
+        if lazy_loss:
+            # FAST=1 (tool/sop/train.py): no host <-> device sync per step; the finiteness of every step's loss is accumulated on the device
+            # and checked at the log lines and at the end (a non-finite step stops the run there, with the step range in the message)
+            fin = torch.isfinite(cos).all() if i == start or fin is None else fin & torch.isfinite(cos).all()
+            loss = -cos.mean(); opt.zero_grad(set_to_none=True); loss.backward(); opt.step(); last_t = loss.detach()
+            if loss_every_step or step % log_every == 0 or (stop_after and step >= stop_after) or i + batch >= n:
+                assert bool(fin), f"non-finite loss at a step <= {step}: a target or state is NaN (check the world)"
+                last = last_t.item(); fin = None
+        else:
+            assert torch.isfinite(cos).all(), f"non-finite loss at step {i}: a target or state is NaN (check the world)"
+            loss = -cos.mean(); opt.zero_grad(set_to_none=True); loss.backward(); opt.step(); last = loss.item()     # .item(): no graph survives
         with torch.no_grad(): model.theta[0] = 0
         del S, t, cos, loss, cb, ib, mb
-        step = (i // batch) + 1
         if loss_every_step: print(f"[train{tag}] step {step} loss {last!r}", flush=True)
         if step % log_every == 0: print(f"[train{tag}] step {step} sent {i + batch}/{n} loss {last:.3f} ({time.time()-t0:.0f}s) | {mem_line()}", flush=True)
         if ckpt and step % ckpt_every == 0:

@@ -409,6 +409,40 @@ def export_routebook(m, path, lean=None):
     np.savez_compressed(path, **z)
 
 
+# ------------------------------------------------------------------ FAST=1 (training/vss/FAST_TRAIN.md; off by default)
+FAST = os.environ.get("FAST") == "1"
+_FAST_FN, _FAST_ITEMS, _FAST_MEMO = None, None, True
+
+
+def fast_procs():
+    """FAST_PROCS (default: the CPUs this process may use, at most 8)"""
+    try: n = len(os.sched_getaffinity(0))
+    except AttributeError: n = os.cpu_count() or 1
+    return max(1, int(os.environ.get("FAST_PROCS") or min(8, n)))
+
+
+def _fast_call(i):
+    from . import infer
+    infer._MEMO = {} if _FAST_MEMO else None
+    try: return _FAST_FN(_FAST_ITEMS[i])
+    finally: infer._MEMO = None
+
+
+def fast_map(fn, items, memo=True):
+    """[fn(x) for x in items], in order, by a pool of FAST_PROCS forked processes (the reader and the rows are inherited, only the
+    indices and the results cross the pipe); one process when FAST_PROCS = 1 or the list is short. fn reads with the numpy reader only
+    (no torch in the children). memo: infer._MEMO on per item (the cleanups of one item are computed once)."""
+    global _FAST_FN, _FAST_ITEMS, _FAST_MEMO
+    _FAST_FN, _FAST_ITEMS, _FAST_MEMO = fn, list(items), memo
+    try:
+        n = fast_procs()
+        if n <= 1 or len(_FAST_ITEMS) < 4 * n: return [_fast_call(i) for i in range(len(_FAST_ITEMS))]
+        import multiprocessing as mp
+        with mp.get_context("fork").Pool(n) as pool:
+            return pool.map(_fast_call, range(len(_FAST_ITEMS)), chunksize=max(1, len(_FAST_ITEMS) // (n * 16)))
+    finally: _FAST_FN, _FAST_ITEMS = None, None
+
+
 # ------------------------------------------------------------------ memory-bounded training (the model, the batches)
 STREAM_ROWS = 1024       # rows of the phase table drawn per chunk when it is regenerated (8 MB at D = 1024)
 
@@ -499,6 +533,7 @@ class Compact:
     def theta(self): return self.lean.theta
     def states(self, cats, ids, mask, t_used=None):
         import torch
+        if FAST: return self.states_fast(cats, ids, mask, t_used)
         m = self.m; c = cats if t_used is None else cats[:, :t_used]
         tabs = {"ipath": m.ipath, "ibg0": m.ibg0, "ibg": m.ibg, "iA": m.iA, "iL": m.iL}
         read = torch.cat([m.ipath[c].reshape(-1), m.ibg0[c[:, :1]].reshape(-1), m.ibg[c[:, :-1], c[:, 1:]].reshape(-1),
@@ -510,6 +545,22 @@ class Compact:
         v.theta = torch.cat([self.lean.theta[held], torch.zeros(1, self.lean.D, dtype=m.dtype, device=m.device)])
         v.root_mask = torch.ones(len(held) + 1, 1, dtype=m.dtype, device=m.device)
         return self.v8.V8.states(v, cats, ids, mask, t_used=t_used)
+
+    def states_fast(self, cats, ids, mask, t_used=None):
+        """FAST=1: one view of the model for every batch instead of a phase table per batch (no torch.unique, no copy of the read rows, no
+        sync with the device): the index tables point into the held rows themselves, an entry no training sentence reads points to the
+        root row 0, which reads as 0 (root mask 0; LeanTheta holds it at 0) and gets no gradient. The same values and the same gradient
+        sums per row; V8.states_packed computes the chain pieces without the T x T tables."""
+        import torch
+        v = getattr(self, "_fast_view", None)
+        if v is None:
+            m = self.m; f2c = self.f2c.clone(); f2c[f2c == self.nh] = 0
+            v = copy.copy(m)
+            for n in ("ipath", "ibg0", "ibg", "iA", "iL"): setattr(v, n, f2c[getattr(m, n)])
+            v.root_mask = torch.ones(self.nh, 1, dtype=m.dtype, device=m.device); v.root_mask[0] = 0
+            self._fast_view = v
+        v.theta = self.lean.theta
+        return self.v8.V8.states_packed(v, cats, ids, mask, t_used=t_used)
 
 
 class Shim:
@@ -609,10 +660,30 @@ def train_one(a, legend, rows, splits, schema, seed, model_dir, run_dir):
             pad = lambda x: torch.cat([x, torch.zeros(x.shape[0], Tg - T, dtype=x.dtype, device=x.device)], 1)
             cb, ib, mb = pad(cb), pad(ib), pad(mb); kw = {} if getattr(a, "pad_to_longest", False) else {"t_used": T}
         return cb, ib, mb, torch.tensor(np.array([target(k) for k in range(i, j)]), dtype=m.F.dtype, device=m.device), kw
+    fast_loop = FAST and lean is not None and not a.length_buckets
+    if fast_loop:
+        # FAST=1: every training row encoded and its target compiled ONCE, held on the device (rows x D complex + rows x Tg indices;
+        # graphq7: 40 MB), a batch = the rows order[i:j] gathered there: the same tensors as batch_fn's, without the per-step compile and
+        # the host -> device copies. Memory: rows (not steps) x D x 16 bytes.
+        uniq = sorted(set(order)); pos_of = {i: k for k, i in enumerate(uniq)}
+        cA, iA_, mA = m.encode([list(train[i]["tokens"]) for i in uniq])
+        if cA.shape[1] < Tg:
+            padf = lambda x: torch.cat([x, torch.zeros(x.shape[0], Tg - x.shape[1], dtype=x.dtype, device=x.device)], 1)
+            cA, iA_, mA = padf(cA), padf(iA_), padf(mA)
+        tgA = torch.tensor(np.array([comp.wire(train[i]["wire"], train[i]["by"], train[i]["tokens"]) * (-1.0 if train[i].get("negative") else 1.0) for i in uniq]),
+                           dtype=m.F.dtype, device=m.device)
+        lens = np.array([len(s_) for s_ in sents]); rowpos = np.array([pos_of[i] for i in order], dtype=np.int64)
+        print(f"[fast] FAST=1: training loop with the rows encoded once ({len(uniq)} rows, targets {tgA.numel() * 16 / 2**20:.0f} MB on {m.device}), "
+              f"chain pieces packed (V8.states_packed), one model view for every batch, the loss read only at the log lines", flush=True)
+        def batch_fn(i, j):
+            ix = torch.as_tensor(rowpos[i:j], device=m.device); T = int(lens[i:j].max())
+            kw = {} if (getattr(a, "pad_to_longest", False) or T >= Tg) else {"t_used": T}
+            return cA[ix], iA_[ix], mA[ix], tgA[ix], kw
     t0 = time.time()
     tm = Compact(m, lean, v8) if lean is not None else m
     trainer.train_loop(tm, params, None, None, None, None, a.batch, a.lr, log_every=a.log_every, ckpt=None if a.no_ckpt else os.path.join(run_dir, f"ckpt_seed{seed}.pt"),
-                       resume=a.resume, tag=f" seed {seed}", batch_fn=batch_fn, n=len(sents), stop_after=getattr(a, 'stop_after', 0), loss_every_step=getattr(a, 'loss_every_step', False))
+                       resume=a.resume, tag=f" seed {seed}", batch_fn=batch_fn, n=len(sents), stop_after=getattr(a, 'stop_after', 0), loss_every_step=getattr(a, 'loss_every_step', False),
+                       **({"lazy_loss": True} if fast_loop else {}))
     t_train = time.time() - t0
     os.makedirs(model_dir, exist_ok=True)
     export_routebook(m, os.path.join(model_dir, "routebook.npz"), lean)
@@ -798,15 +869,17 @@ def calibrate_and_finish(a, legend, rows, schema, seed, model_dir, run_dir, cfg,
     def calibrate(crow):
         """thresholds = midpoints of the mean present / absent ratios on the given calibration rows (read with the gold structure)"""
         stats = collections.defaultdict(lambda: {"present": [], "absent": []})
+        prefetch(crow)
         for row in crow: add_row(row, stats)
         if os.environ.get("CAL_FALLBACK") == "train": fallback_rows(crow, stats)
         return thresholds_of(stats)
-    def add_row(row, stats):
-        """one calibration row's ratios into stats (the body of calibrate's loop before CAL_FALLBACK; unchanged)"""
-        g = row["frame"]
-        if g["shape"] != "ok": return
+    def row_entries(row):
+        """one calibration row's ratios as (stats key, class, value) in the order add_row appends them (the body of calibrate's loop
+        before CAL_FALLBACK; unchanged)"""
+        out = []; g = row["frame"]
+        if g["shape"] != "ok": return out
         cs = chart_of(row)
-        if cs is None: return
+        if cs is None: return out
         S, toks = cs
         f = rd.read(S, toks, force=(len(g["speakers"]), g["neg"]), table=row.get("table"))
         # diagram-vss-demo patch: attribute / determiner ratios read with every role read (presence 'all'), so that a role whose
@@ -815,18 +888,32 @@ def calibrate_and_finish(a, legend, rows, schema, seed, model_dir, run_dir, cfg,
         st_ = legend.reader.get("scope_terms") or {}
         for r in legend.reader.get("set_roles") or []:      # set members: the gold members vs the other candidates of the table
             mr = f["presence"].get(r + ".members") or {}; gold = set(world.filler_heads(g["roles"].get(r)))
-            for col, x in mr.items(): stats[("set_member", r)]["present" if col in gold else "absent"].append(x)
+            for col, x in mr.items(): out.append((("set_member", r), "present" if col in gold else "absent", x))
         for r in schema["role_order"]:
             gf = g["roles"].get(r)
             if st_ and gf is not None and gf[0] == "entity" and r + ".wide" in f["presence"]:
                 d = gf[3]; w_, q_ = f["presence"][r + ".wide"], f["presence"][r + ".q"]
-                if d in st_.get("wide", []): stats[("scope_term", "_")]["present"].append(w_); stats[("scope_term", "_")]["absent"].append(q_)
-                elif d in st_.get("q", []): stats[("scope_term", "_")]["present"].append(q_); stats[("scope_term", "_")]["absent"].append(w_)
-                else: stats[("scope_term", "_")]["absent"] += [w_, q_]
-            stats[("presence", r)]["present" if gf is not None else "absent"].append(f["presence"].get(r, 0))
+                if d in st_.get("wide", []): out += [(("scope_term", "_"), "present", w_), (("scope_term", "_"), "absent", q_)]
+                elif d in st_.get("q", []): out += [(("scope_term", "_"), "present", q_), (("scope_term", "_"), "absent", w_)]
+                else: out += [(("scope_term", "_"), "absent", w_), (("scope_term", "_"), "absent", q_)]
+            out.append((("presence", r), "present" if gf is not None else "absent", f["presence"].get(r, 0)))
             if gf is not None and gf[0] == "entity":
                 for part, idx in (("attr", 2), ("det", 3)):
-                    if r + "." + part in fa["presence"]: stats[(part + "_presence", r)]["present" if gf[idx] is not None else "absent"].append(fa["presence"][r + "." + part])
+                    if r + "." + part in fa["presence"]: out.append(((part + "_presence", r), "present" if gf[idx] is not None else "absent", fa["presence"][r + "." + part]))
+        return out
+    # FAST=1 (FAST_TRAIN.md): each row is read once per run (calibrate runs twice, on the training sample and again with the held-out
+    # calibration half; the reads do not depend on the stats), the rows are read by a pool of forked processes (FAST_PROCS), and the two
+    # reads of a row share their cleanups (infer._MEMO). The entries are applied in the same order: the same thresholds, bit for bit.
+    fast = FAST; cache = {}
+    def prefetch(rs_):
+        if not fast: return
+        todo = list({id(r): r for r in rs_ if id(r) not in cache}.values())
+        for r, e in zip(todo, fast_map(row_entries, todo)): cache[id(r)] = e
+    def add_row(row, stats):
+        """one calibration row's ratios into stats"""
+        e = cache.get(id(row)) if fast else None
+        if e is None: e = row_entries(row)
+        for key, cls, x in e: stats[key][cls].append(x)
     def fallback_rows(crow, stats):
         """CAL_FALLBACK=train (off by default; CAPACITY.md S6). A role (or an entity role's attribute / determiner) with fewer than 5
         present or 5 absent calibration rows gets no threshold and is then read by its training rate, i.e. NEVER for a rare role
@@ -844,7 +931,7 @@ def calibrate_and_finish(a, legend, rows, schema, seed, model_dir, run_dir, cfg,
                 if rs.get("det_kinds"): heads[("det_presence", r)] = lambda gf: gf is not None and gf[0] == "entity" and gf[3] is not None
         need = [k for k in heads if len(stats[k]["present"]) < 5 or len(stats[k]["absent"]) < 5]
         if not need: return
-        extra = collections.defaultdict(lambda: {"present": [], "absent": []}); n_abs = collections.Counter()
+        extra = collections.defaultdict(lambda: {"present": [], "absent": []}); n_abs = collections.Counter(); taken = []
         for row in pos:                     # the training rows, in their fixed order; the calibration rows are already in stats
             if id(row) in used or row["frame"]["shape"] != "ok": continue
             gr = row["frame"]["roles"]; take = False
@@ -853,7 +940,9 @@ def calibrate_and_finish(a, legend, rows, schema, seed, model_dir, run_dir, cfg,
                 if kind != "presence" and (gr.get(r) is None or gr.get(r)[0] != "entity"): continue   # attr / det: rows that fill the role only
                 if has and len(stats[(kind, r)]["present"]) < 5: take = True
                 if not has and len(stats[(kind, r)]["absent"]) < 5 and n_abs[(kind, r)] < 50: take = True; n_abs[(kind, r)] += 1
-            if take: add_row(row, extra)
+            if take: taken.append(row)
+        prefetch(taken)                     # FAST=1 only: the rows taken do not depend on their reads; read them at once
+        for row in taken: add_row(row, extra)
         for k in need:
             stats[k]["present"] += extra[k]["present"]; stats[k]["absent"] += extra[k]["absent"]; stats[k]["fallback"] = True
     def thresholds_of(stats):
@@ -878,7 +967,8 @@ def calibrate_and_finish(a, legend, rows, schema, seed, model_dir, run_dir, cfg,
                                                              "rule": "one class missing in the calibration rows: read by the training rate (always / never)"}
         th["_pooled_midpoint"] = mid
         return th, calrep, stats
-    rule = a.threshold_rule
+    rule = a.threshold_rule; t_cal = time.time()
+    if fast: print(f"[fast] FAST=1: calibration reads in {fast_procs()} processes, each row read once, cleanups shared by its two reads", flush=True)
     th_train, calrep, stats = calibrate(cal_rows); th = cfg["thresholds"]; th.update(th_train)
     th["calibration_split"] = f"train (a sample of {len(cal_rows)} training sentences, rng 1234+seed); never the scored rows (rule 25)"
     cal_forms = [r for r in rows if r.get("split", "").startswith("calibration_")]
@@ -898,8 +988,12 @@ def calibrate_and_finish(a, legend, rows, schema, seed, model_dir, run_dir, cfg,
     rd = Reader(model_dir, routebook=rd.rb); resid = []      # the same route book file: its tables are not loaded a second time
     if getattr(a, "store_presence_ratios", False): store_presence_ratios(rd, rows, cal_rows, schema, seed, run_dir)
     ids = (f"c{i}" for i in range(10 ** 9))
-    for row in cal_rows: resid.append(rd.formalize(row["text"], 0, ids)[2]["residual"])
+    if fast:            # FAST=1: the same formalize per row in the pool (the wire ids do not enter the residual)
+        resid = fast_map(lambda row: rd.formalize(row["text"], 0, (f"c{i}" for i in range(10 ** 9)))[2]["residual"], cal_rows, memo=False)
+    else:
+        for row in cal_rows: resid.append(rd.formalize(row["text"], 0, ids)[2]["residual"])
     pres = {k: np.array(v["present"] + v["absent"]) for (kk, r), v in stats.items() for k in [f"{kk}:{r}"]}
+    if fast: print(f"[fast] calibration: {len(cache)} rows read, {len(cal_rows)} background rows formalized in {time.time() - t_cal:.1f}s", flush=True)
     np.savez(os.path.join(model_dir, "background.npz"), residual=np.array(resid), residual_mean=np.mean(resid) if resid else 1.0,
              residual_std=np.std(resid) if resid else 0.0, **{f"presence_{k}": v for k, v in pres.items()})
     return rd, calrep
