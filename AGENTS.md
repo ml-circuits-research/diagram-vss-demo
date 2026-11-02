@@ -85,6 +85,10 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
     of execution**. It is reported together with the **share of requests done right** at that precision, and the comparison
     between readers is the share of requests done right at the same precision (the risk-coverage curve, RISK_COVERAGE.md); the
     discrimination of the confidence (AUROC) is reported beside it.
+  - **The cost score (owner, 2026-11-02 19:09): one confident mistake costs as much as 10 right answers** ("in reality something like
+    that, if not worse"). Score = (requests done right − 10 × (executed wrong + extras executed)) per 100 requested actions; a question
+    or a request not done scores 0. Each reader's threshold is the one that maximises this score on its calibration data (out-of-fold),
+    and the readers are compared by the score on the test data, with the confidently-wrong rate and the share done right beside it.
   - Every reader executes a request only when its own confidence clears a threshold, chosen on held-out data by the protocol written
     before the run; below it, it asks, and says why it is not sure (which words, which step). "Not done / asked" is never counted as
     an error; it is the price paid for precision, and it is reported.

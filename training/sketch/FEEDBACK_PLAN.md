@@ -37,3 +37,9 @@ Also reported: today's shipped readers (FRESH2_RESULT.md), for reference only.
 - **It helps VSS more than BERT** if (VSS-T − VSS-G) − (BERT-T − BERT-G) has its 95% interval above 0.
 - **VSS reaches SOP-BERT** if VSS-T's requests done right at <= 3% confidently wrong is within the 95% interval of BERT-T's.
 A miss on any line is reported as a negative result; no second try with the same test part.
+
+## Amendment 2026-11-02 19:10 (before any targeted data exists and before any arm is trained)
+The owner made the cost score the measure (AGENTS.md): score = (requests done right − 10 × (executed wrong + extras executed)) per 100
+requested actions; asked / not done = 0. Each arm's threshold maximises the score on the calibration data (out-of-fold). The three
+verdicts above are judged on this score on the test part (same 95% bootstrap rule) instead of "requests done right at <= 3% confidently
+wrong", which is still reported beside it.
