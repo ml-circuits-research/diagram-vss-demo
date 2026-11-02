@@ -75,12 +75,30 @@
   "micro/targets": "8e08483b6b",
   "micro/targets_w": "083bc47764",
   "neg_p80_s0": "dbb6fd520e",
+  "neural/act-distilbert": "e6397614dc",
+  "neural/qa-distilbert-squad": "cd43816c4a",
   "real": "f17cd31b92",
   "real_p100": "f17cd31b92",
   "real_p25": "60c2a41f62",
   "real_p50": "d46295dc51",
   "s6_p80_s0": "c659df1d25",
   "s7_p80_s0": "d87c9404fe",
-  "sketch": "b70e6b45cd"
+  "sketch": "b70e6b45cd",
+  "spell/vocab.json": "e81a0d4f79"
+ },
+ "sizes": {
+  "neural/act-distilbert": {
+   "README.md": 1182,
+   "config.json": 1909,
+   "tokenizer.json": 711648,
+   "tokenizer_config.json": 1227,
+   "onnx/model_quantized.onnx": 67585955
+  },
+  "neural/qa-distilbert-squad": {
+   "config.json": 569,
+   "tokenizer.json": 668923,
+   "tokenizer_config.json": 321,
+   "onnx/model_quantized.onnx": 65811627
+  }
  }
 }
