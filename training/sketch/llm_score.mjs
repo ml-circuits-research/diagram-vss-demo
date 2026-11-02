@@ -172,10 +172,25 @@ function scoreMessage(nodes, row) {
   return { right, wrongAligned: pairs.length - right, missed: gold.length - pairs.length, acts: pairs.length, gold: gold.length, extra: mains.length - pairs.length, exact: right === gold.length && mains.length === gold.length, bad, perAct: gold.map((g, j) => [g.act, pairs.some(([i, jj]) => jj === j && !bad.some((b) => false))]) };
 }
 
-const report = {}, ALL = { n: 0, rules: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0 }, vss: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0 } };
 // one message's outcome: right (all gold wires right, no extra) / wrong (a wrong or an extra wire) / honest (the rest: requests not done, nothing wrong)
 const outcome = (s) => (s.exact ? "mRight" : s.wrongAligned > 0 || s.extra > 0 ? "mWrong" : "mHonest");
 const msgLine = (f, T, n) => `${f.padEnd(5)} per message: right ${(T.mRight / n * 100).toFixed(1)}% (${T.mRight}) · honest ${(T.mHonest / n * 100).toFixed(1)}% (${T.mHonest}) · wrong ${(T.mWrong / n * 100).toFixed(1)}% (${T.mWrong})`;
+// one reader's output on one message added to its totals T (also used by training/laptop/neural_score.mjs); returns the message's score
+function tally(T, nodes, r) {
+  const s = scoreMessage(nodes, r);
+  T.exact += s.exact; T.right += s.right; T.wrongAligned += s.wrongAligned; T.missed += s.missed; T.acts += s.acts; T.extra += s.extra; T.gold += s.gold; T[outcome(s)]++;
+  // per gold act: right?
+  const mains = nodes.filter((n) => n.type !== "mention").map((n) => ({ act: actOf(n.type, n.args), got: canon(n, nodes), n }));
+  const gold = r.wires.map((w) => ({ act: actOf(w.type, w.args), want: canonWant(w.type, w.args) }));
+  const pairs = pairUp(mains, gold, r), ok = new Set(pairs.filter(([i, j]) => Object.entries(gold[j].want).every(([k, v]) => (mains[i].got[k] ?? "∅") === v)).map((p) => p[1]));
+  gold.forEach((g, j) => { const b = T.byAct[g.act] = T.byAct[g.act] || [0, 0]; b[1]++; if (ok.has(j)) b[0]++; });
+  return s;
+}
+// LLM_SCORE_LIB=1: import this file as a library (no scoring run); the exports are what training/laptop/neural_score.mjs reuses
+const LIB = process.env.LLM_SCORE_LIB === "1";
+export { vssFormalize, tally, outcome, msgLine, scoreMessage, K as logic };
+if (!LIB) {
+const report = {}, ALL = { n: 0, rules: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0 }, vss: { exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0 } };
 for (const d of dirs) {
   const files = readdirSync(d).filter((f) => f.endsWith(".jsonl")).sort();
   const rows = files.flatMap((f) => readFileSync(`${d}/${f}`, "utf8").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l)));
@@ -183,15 +198,7 @@ for (const d of dirs) {
   for (const r of rows) {
     const ctx = { names: r.names || [], last: [], spans: r.wires.every((w) => w.span) ? r.wires.map((w) => w.span) : null };
     const out = { rules: sys.formalize(r.text, ctx).nodes, vss: vssFormalize(r.text, ctx) }, rec = { id: r.id, text: r.text };
-    for (const f of ["rules", "vss"]) {
-      const s = scoreMessage(out[f], r), T = tot[f];
-      T.exact += s.exact; T.right += s.right; T.wrongAligned += s.wrongAligned; T.missed += s.missed; T.acts += s.acts; T.extra += s.extra; T.gold += s.gold; T[outcome(s)]++; rec[f] = s.bad;
-      // per gold act: right?
-      const mains = out[f].filter((n) => n.type !== "mention").map((n) => ({ act: actOf(n.type, n.args), got: canon(n, out[f]), n }));
-      const gold = r.wires.map((w) => ({ act: actOf(w.type, w.args), want: canonWant(w.type, w.args) }));
-      const pairs = pairUp(mains, gold, r), ok = new Set(pairs.filter(([i, j]) => Object.entries(gold[j].want).every(([k, v]) => (mains[i].got[k] ?? "∅") === v)).map((p) => p[1]));
-      gold.forEach((g, j) => { const b = T.byAct[g.act] = T.byAct[g.act] || [0, 0]; b[1]++; if (ok.has(j)) b[0]++; });
-    }
+    for (const f of ["rules", "vss"]) rec[f] = tally(tot[f], out[f], r).bad;
     dump.push(rec);
   }
   const n = rows.length, line = (f) => { const T = tot[f]; return `${f.padEnd(5)} messages fully right ${(T.exact / n * 100).toFixed(1)}% · wires right ${(T.right / T.gold * 100).toFixed(1)}% (${T.right}/${T.gold}) · act found ${(T.acts / T.gold * 100).toFixed(1)}% · extra wires ${T.extra}`; };
@@ -214,3 +221,4 @@ if (ECUT) {
   if (dumpAt >= 0) writeFileSync(argv[dumpAt + 1].replace(/(\.json)?$/, "_hint.json"), JSON.stringify(HSTAT.log, null, 1));
 }
 if (COMPOSER) console.log(`\ncomposer units: ${CSTAT.units} (read by several candidate worlds: ${CSTAT.multi}) · read per world: ${Object.entries(CSTAT.byWorld).map(([w, k]) => `${w} ${k}`).join(", ") || "none"} · asked ${CSTAT.ask} · ignored ${CSTAT.ignored} (no action token ${CSTAT.ignoredNoToken})`);
+}
