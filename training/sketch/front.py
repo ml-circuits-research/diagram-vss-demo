@@ -324,6 +324,7 @@ def requests(msgs):
     reqs, chatter = [], []
     for m in msgs:
         names = list(m.get("names") or []) + [w["args"]["name"] for w in m["wires"] if w["args"].get("name")]
+        if os.environ.get("DIAGRAM_OPS") == "1": names += list(m.get("groups") or {})   # the groups already on the canvas (DIAGRAM_OPS.md 6.2)
         cov = [0] * len(m["text"])
         for w in m["wires"]:
             sp = w.get("span") or ""; i = m["text"].find(sp)
@@ -343,11 +344,44 @@ def trigger_region(w, toks, names):
     return None if pos is None else (pos, pos + len(tr))
 
 
+def event_of(w):
+    """the legend event of a wire (as llm_to_world.QUESTION_EVENT: ask=rules is the event list)"""
+    a, t = w["args"], w["type"]
+    return a.get("action") if t == "command" else {"rules": "list"}.get(a.get("ask"), a.get("ask")) if t == "question" else t
+
+
+def value_kind(v, _vk={}):
+    """the kind of a gold value token (its legend question's): digits -> NUM, the rest from value_kinds()"""
+    if not _vk: _vk.update(value_kinds())
+    return "NUM" if v.isdigit() else _vk.get(v, "?")
+
+
+def val_prec(): return os.environ.get("VAL_PREC", "") or "all"
+def val_sub(): return os.environ.get("VAL_SUB", "") or "any"
+
+
 def learn_values(reqs, min_count, min_prec):
-    mask = v2()
+    """VAL_PREC=event (off by default; ROUND2.md fix 4, BETWEEN.md "the count of a new group"): the precision of n-gram -> value v is
+    counted only over the requests of the events that carry v's kind (an event carries a kind when the gold values of at least one of
+    its requests in `reqs` have that kind: the same rule as the legend's roles, which come from the rows). Default (all): over every
+    request, so "three" lost to the set spans that cannot have a count ("make the three rooms squares") and the bigram "add three"
+    won. The same rule for every kind.
+    VAL_SUB=value (off by default; ROUND2.md fix 3): a longer n-gram is blocked by a kept sub-n-gram only when the sub-n-gram explains
+    it: it gives the same value, or its own value is still in the gold of the longer n-gram's requests with precision >= min_prec
+    ("circles near": "near" -> next_to stays right there, so it is blocked). One whose sub-n-gram reads wrong inside it ("bottom left"
+    -> bottom_left while "left" -> left_of, and left_of is not gold there) is kept when it passes the thresholds on its own, and the
+    longest-first application makes it win. Default (any): any kept sub-n-gram blocks it."""
+    mask = v2(); per_event = val_prec() == "event"
+    if val_prec() not in ("all", "event"): raise SystemExit(f"VAL_PREC={val_prec()!r}: expected all or event")
+    if val_sub() not in ("any", "value"): raise SystemExit(f"VAL_SUB={val_sub()!r}: expected any or value")
+    ev_kinds = collections.defaultdict(set)
+    if per_event:
+        for m, w, sp, names in reqs:
+            ev_kinds[event_of(w)].update(value_kind(v) for v in gold_values(w))
     co, occ = collections.defaultdict(collections.Counter), collections.Counter()
+    occ_k = collections.defaultdict(collections.Counter)   # VAL_PREC=event: n-gram -> kind -> occurrences in requests of events that carry the kind
     for m, w, sp, names in reqs:
-        toks = [x[0] for x in tokenize(sp, names)[0]]; gv = gold_values(w)
+        toks = [x[0] for x in tokenize(sp, names)[0]]; gv = gold_values(w); ks = ev_kinds[event_of(w)] if per_event else ()
         grams = {" ".join(toks[i:i + n]) for n in (1, 2, 3) for i in range(len(toks) - n + 1) if all(is_word(x) for x in toks[i:i + n])}
         ok = grams
         if mask:   # MASK: an n-gram that overlaps the annotated trigger without being inside it is no evidence for a value (it still counts in occ)
@@ -357,17 +391,24 @@ def learn_values(reqs, min_count, min_prec):
                       and not (i < reg[1] and i + n > reg[0] and not (i >= reg[0] and i + n <= reg[1]))}
         for g in grams:
             occ[g] += 1
+            for kd in ks: occ_k[g][kd] += 1
             if g not in ok: continue
             for v in sorted(gv):   # sorted: a tie between two values is broken the same way in every run (gv is a set: its order follows the string hash)
                 if not v.isdigit() or not g.isdigit(): co[g][v] += 1
     V = {}
+    same = val_sub() == "value"
     for n in (1, 2, 3):
         for g, c in co.items():
             if len(g.split()) != n: continue
             v, k = c.most_common(1)[0]
-            if k < min_count or k / occ[g] < min_prec: continue
+            den = occ_k[g][value_kind(v)] if per_event else occ[g]
+            if k < min_count or k / den < min_prec: continue
             ws = g.split()
-            if any(" ".join(ws[i:i + j]) in V for j in range(1, n) for i in range(n - j + 1)): continue   # a shorter n-gram already explains it
+            subs = [" ".join(ws[i:i + j]) for j in range(1, n) for i in range(n - j + 1)]
+            dn = lambda u: occ_k[g][value_kind(u)] if per_event else occ[g]
+            # a shorter n-gram already explains it (VAL_SUB=value: when it gives the same value, or when its own value is still read
+            # right inside g, with the same precision bar: "circles near" -> circles must not swallow "near" -> next_to)
+            if any(s in V and (not same or V[s] == v or (dn(V[s]) and c[V[s]] / dn(V[s]) >= min_prec)) for s in subs): continue
             V[g] = v
     return V
 
@@ -444,7 +485,9 @@ def learn(msgs, params=None, keep=None):
     # labelled reference: FRONT_TAGGER=1
     S = train_segmenter(msgs, P["seg_epochs"]) if os.environ.get("FRONT_TAGGER") == "1" else {}
     return {"about": "front.json: the learned front end of the VSS world `real` (training/sketch/front.py); learned from " + str(len(msgs)) + " training messages",
-            "params": P, "values": dict(sorted(V.items())), "triggers": T, "segmenter": dict(sorted(S.items())), **({"v2": ["MASK", "CTX2", "NAMEPH"]} if v2() else {})}
+            "params": P, "values": dict(sorted(V.items())), "triggers": T, "segmenter": dict(sorted(S.items())), **({"v2": ["MASK", "CTX2", "NAMEPH"]} if v2() else {}),
+            **({"value_learning": {k: os.environ[k] for k in ("VAL_PREC", "VAL_SUB") if os.environ.get(k)}}
+               if any(os.environ.get(k) for k in ("VAL_PREC", "VAL_SUB")) else {})}
 
 
 # The training folders, in one place. DATA=old (or unset): the first two (exactly the original behaviour); DATA=all: all five.
@@ -456,9 +499,16 @@ TRAIN_DIRS = {"old": ["sonnet_msg", "haiku_msg"],
 
 
 def train_dirs():
+    """DATA picks the base folders; two switches add folders (default off: exactly the base folders; ROUND2.md):
+    SHORT=1 adds the one-request short messages llm_train/{sonnet,haiku}_short (the same folders train_cutter.py SHORT=1 adds);
+    OPS=1 adds the messages of the new operations llm_train/ops_groups, llm_train/ops_positions (DIAGRAM_OPS.md section 7; a folder
+    that does not exist yet adds nothing; only msg_*.jsonl / batch_*.jsonl are read, never the texts_*.jsonl saved before annotation)."""
     d = os.environ.get("DATA") or "old"
     if d not in TRAIN_DIRS: raise SystemExit(f"DATA={d!r}: expected one of {sorted(TRAIN_DIRS)}")
-    return TRAIN_DIRS[d]
+    out = list(TRAIN_DIRS[d])
+    if os.environ.get("SHORT") == "1": out += ["sonnet_short", "haiku_short"]
+    if os.environ.get("OPS") == "1": out += ["ops_groups", "ops_positions"]
+    return out
 
 
 def load_msgs(dirs=None):

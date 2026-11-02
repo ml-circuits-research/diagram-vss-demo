@@ -24,11 +24,24 @@ class Skip(Exception): pass
 
 LISTS = os.environ.get("LISTS", "1") == "1"   # lists of shapes -> the set roles `members` / `targets` (world real); 0: the first shape only
 
+# DIAGRAM_OPS=1 (off by default; DIAGRAM_OPS.md sections 4-6, ROUND2.md): groups and double positions. The events group / ungroup /
+# members / groupOf (verb tokens group, ungroup and the question openers members_q, group_q) and the roles relation2 / landmark3 (after
+# landmark2) are added to generate.EVENTS / generate.ROLES IN PLACE, so that msg_to_world.py (legend, kinds) and wires_for (role order)
+# see them; with the switch off nothing changes. Converter: group names (row field `groups`, and the `name` of an earlier group wire of
+# the same message, passed in `created`) are names; group / ungroup / members / groupOf are target events; count / list / exists with
+# kind=group get the object head `groups` (or `group`); a position may combine a region and up to two relations (place_ops).
+OPS = os.environ.get("DIAGRAM_OPS") == "1"
+if OPS:
+    EVENTS.update({"group": ["group"], "ungroup": ["ungroup"], "members": ["members_q"], "groupOf": ["group_q"]})
+    for _r, _q in (("landmark3", "relative to which other shape?"), ("relation2", "and where else, relative to another shape?")):
+        if _r not in dict(ROLES): ROLES.insert([x for x, _ in ROLES].index("landmark2") + 1, (_r, _q))
+    QUESTION_EVENT.update({"members": "members", "groupOf": "groupOf"})
+
 
 def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
     """soft: never set a row aside for a missing word; a role whose words are not in the clause is left out (listed in `lost`)"""
     lexicon = LEXICON if lexicon is None else lexicon; lost = [] if lost is None else lost
-    names = list(row.get("names") or []) + list(row.get("created") or [])
+    names = list(row.get("names") or []) + (list(row.get("groups") or []) if OPS else []) + list(row.get("created") or [])
     toks, info = norm(row["text"], names) if norm else normalize(row["text"], lexicon, names, table=table)
     T = set(toks); w = row["wire"]; a = w.get("args", {}); typ = w.get("type")
     ev = a.get("action") if typ == "command" else QUESTION_EVENT.get(a.get("ask")) if typ == "question" else typ
@@ -75,6 +88,7 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
         raise Skip(f"name not in the clause: {v}")
     roles, neg = {}, None
     def place():
+        if OPS: return place_ops()
         if "position" not in a: return
         p = a["position"]
         if p in REGION: roles["region"] = need(REGION[p]); return
@@ -85,6 +99,37 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
         anc = [x.strip() for x in str(a.get("anchor", "")).split(",") if x.strip()]
         if anc: roles["landmark"], _ = ent(anc[0])
         if len(anc) > 1: roles["landmark2"], _ = ent(anc[1])
+    def place_ops():   # DIAGRAM_OPS.md 6.5: one relation and no region -> exactly the roles of place()
+        p, p2, rg = a.get("position"), a.get("position2"), a.get("region")
+        if p is None and p2 is None and rg is None: return
+        rels, regs = [], [rg] if rg else []
+        for pk, ak in (("position", "anchor"), ("position2", "anchor2")):
+            v = a.get(pk)
+            if v is None: continue
+            if v in REGION: regs.append(v); continue            # a canvas place written in position / position2
+            if v not in REL:
+                if soft: lost.append(f"position {v}"); continue
+                raise Skip(f"position {v}")
+            rels.append((v, [x.strip() for x in str(a.get(ak, "")).split(",") if x.strip()]))
+        if not rels:                                           # a canvas place alone: exactly as before
+            if regs and regs[0] in REGION: roles["region"] = need(REGION[regs[0]])
+            elif regs: lost.append(f"position {regs[0]}")
+            return
+        if len(rels) == 2 and rels[1][0] == "between": rels.reverse()   # a between is always the first relation
+        if len(rels) == 2 and rels[1][0] == "between":
+            if not soft: raise Skip("two betweens")
+            lost.append("two betweens (second dropped)"); rels = rels[:1]
+        r1, anc1 = rels[0]
+        roles["relation"] = need(REL[r1])
+        if anc1: roles["landmark"], _ = ent(anc1[0])
+        if len(anc1) > 1: roles["landmark2"], _ = ent(anc1[1])
+        if len(rels) == 2:
+            r2, anc2 = rels[1]
+            roles["relation2"] = need(REL[r2])
+            if anc2: roles["landmark3"], _ = ent(anc2[0])
+        if regs:
+            if regs[0] in REGION: roles["region"] = need(REGION[regs[0]])
+            else: lost.append(f"region {regs[0]}")
     if ev == "create":
         sh = a.get("shape", "circle"); cnt = a.get("count")
         head = next((c for c in ([PLURAL[sh], sh] if cnt else [sh]) if c in T), None)
@@ -104,7 +149,8 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
         if a.get("name"): roles["name"] = need("n_" + slug(a["name"]))
         if a.get("label"): roles["text"] = need_text(a["label"])
         place()
-    elif ev in ("delete", "duplicate", "neighbors", "describe", "property", "degree", "toFront", "toBack", "resize", "rename", "label", "set", "align", "arrange", "distribute", "move", "check", "fact", "connected"):
+    elif ev in ("delete", "duplicate", "neighbors", "describe", "property", "degree", "toFront", "toBack", "resize", "rename", "label", "set", "align", "arrange", "distribute", "move", "check", "fact", "connected",
+                "group", "ungroup", "members", "groupOf"):   # the last four exist only with DIAGRAM_OPS=1 (EVENTS)
         if a.get("target") is not None:
             tg = [x.strip() for x in str(a["target"]).split(",") if x.strip()] if not str(a["target"]).startswith("mention(") else [a["target"]]
             if LISTS and len(tg) > 1: roles["members"] = [ent(x)[0] for x in tg]
@@ -113,6 +159,7 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
         elif ev in ("arrange", "distribute") and "everything" in T: roles["object"] = {"head": "everything"}
         if ev == "duplicate" and a.get("count"): roles["quantity"] = need(str(a["count"]))
         if ev == "rename": roles["name"] = need("n_" + slug(a.get("name", "")))
+        if ev == "group" and a.get("name"): roles["name"] = need("n_" + slug(a["name"]))   # a group without a name has no name role
         if ev == "label": roles["text"] = need_text(a.get("label", ""))
         if ev in ("set", "check", "fact"):
             if a.get("color"): roles["color"] = need(a["color"])
@@ -164,6 +211,8 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
             if a.get("pairing"): roles["pairing"] = need({"all": "each_other"}.get(a["pairing"], a["pairing"]))
     elif ev in ("count", "exists", "list", "extreme", "nearest", "rule"):
         if a.get("ask") == "rules": roles["object"] = {"head": need("rules")}
+        elif OPS and a.get("kind") == "group" and ev in ("count", "exists", "list"):   # DIAGRAM_OPS.md 6.4: no other filter
+            roles["object"] = {"head": "groups" if "groups" in T else "group" if "group" in T else need("groups")}
         else:
             sh = a.get("shape")
             cands = [PLURAL.get(sh, sh), sh] if sh else ["shapes", "shape"]
