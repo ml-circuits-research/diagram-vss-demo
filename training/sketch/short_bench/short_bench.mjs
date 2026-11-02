@@ -3,6 +3,10 @@
 // row turned into one gold wire (or its `wires`); also the demo Benchmark's bench-canon score().ok.
 // Cause of every VSS gold request not right: first stage that explains it, from the composer's units.
 // node short_bench.mjs <out.json>
+// Options (default: off; the default run is unchanged):
+//   BENCH_DIR=<dir>  read the sets from <dir>/<set>.json instead of docs/bench/ (e.g. the typo'd sets of training/sketch/spell/build_spell.mjs --typo-out)
+//   SPELL=1          run the VSA spell checker (docs/js/spell.js, docs/model/spell/vocab.json + the legend) on each text before both readers,
+//                    with the row's names as the canvas, as the demo does; the row gets `spell` (the fixes)
 process.env.LLM_SCORE_LIB = "1"; process.env.PAIR = "value"; process.env.SEG = "composer";
 const REPO = "/home/claude/diagram-vss-demo/";
 const { readFileSync, writeFileSync, existsSync } = await import("node:fs");
@@ -31,6 +35,11 @@ const CUTW = J(REG.cutter);
 if (process.env.WHOLE === "1") { const S = { ...CUTW.segmenter }; for (const L of CUTW.labels) if (L.startsWith("B-")) S["pl=<s>\t" + L] = (S["pl=<s>\t" + L] || 0) + 2e9; S["bias\tI"] = (S["bias\tI"] || 0) + 1e9; CUTW.segmenter = S; }
 const comp = await loadComposer(REG, CUTW, loadModel, { context: J(REG.context), eventCutter: J(REG.event_cutter) });
 const sys = L.logic.createSystem();
+let speller = null;
+if (process.env.SPELL === "1") {
+  const { createRequire } = await import("node:module"), SK = createRequire(import.meta.url)(REPO + "docs/js/spell.js"), V = J("spell/vocab.json");
+  speller = SK.create({ params: V.params, words: V.words.concat(SK.legendWords(sys.engine.legend)), keep: V.keep || [] });
+}
 // BEST=1: when the cutter makes NO unit (every token O), one unit from the token with the largest B-<world> score to the end of the
 // message, its worlds ranked at that token (what the cutter would give if it put a B there). Otherwise the cutter's own units.
 // A copy of Composer.formalizeCutter (vss-composer.js) with only the units' source changed; the hint path is kept as is.
@@ -74,10 +83,12 @@ const evOf = (type, a) => (type === "command" ? a.action : type === "question" ?
 const SETS = ["hand", "blind", "broad", "seen", "new_identities", "heldout_formulations"];
 const out = [];
 for (const id of SETS) {
-  const rows = JSON.parse(readFileSync(REPO + `docs/bench/${id}.json`, "utf8"));
-  for (const [k, r] of rows.entries()) {
+  const rows = JSON.parse(readFileSync(process.env.BENCH_DIR ? `${process.env.BENCH_DIR}/${id}.json` : REPO + `docs/bench/${id}.json`, "utf8"));
+  for (let [k, r] of rows.entries()) {
     const CASE = { tofront: "toFront", toback: "toBack" }, fix = (a) => (a && CASE[a.action] ? { ...a, action: CASE[a.action] } : a);
     const wires = (r.wires ? r.wires.map((w) => ({ type: w.type, args: w.gold ?? w.args })) : [{ type: r.type, args: r.gold ?? r.args }]).map((w) => ({ type: w.type, args: fix(w.args) }));   // gold action case as logic.js writes it (llm_score's act label is case-sensitive)
+    const sp = speller ? speller.check(r.text, { names: r.names || [] }) : null;
+    if (sp) r = { ...r, text: sp.text };
     const row = { text: r.text, names: r.names || [], wires };
     const ctx = { names: r.names || [], last: [] };
     const rn = sys.formalize(r.text, ctx).nodes;
@@ -92,7 +103,7 @@ for (const id of SETS) {
       demoOk: { rules: score(rn, r).ok, vss: score(res.nodes, r).ok },
       rules: { right: sR.right, wrong: sR.wrongAligned, missed: sR.missed, extra: sR.extra, bad: sR.bad, acts: rn.filter((n) => n.type !== "mention").map((n) => `${n.type}:${n.args.action || n.args.ask || ""}`) },
       vss: { right: sV.right, wrong: sV.wrongAligned, missed: sV.missed, extra: sV.extra, bad: sV.bad, acts: res.nodes.filter((n) => n.type !== "mention").map((n) => `${n.type}:${n.args.action || n.args.ask || ""}`) },
-      units, notes: res.notes, norm, segw });
+      units, notes: res.notes, norm, segw, ...(sp ? { spell: sp.fixes } : {}), ...(r.typo !== undefined ? { typo: r.typo } : {}) });
   }
   console.error(id, rows.length);
 }

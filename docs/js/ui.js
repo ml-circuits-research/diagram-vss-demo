@@ -22,8 +22,14 @@ const history = []; let turnSeq = 0;               // every message with what ea
 let sub = 'drawing';                                // the active reader's subtab: 'drawing' | 'sop' | 'settings' (the same for every reader)
 // browser storage is a convenience only: every access is guarded and the page works without it
 const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { } } };
-const NOTNOW = 'sop.neural.notNow', CHOICE = 'sop.neural.classifier';
 const clock = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+// spelling (docs/js/spell.js): a VSA spell checker corrects typed messages before the readers read them; every reader reads the same
+// corrected text. Its vocabulary: docs/model/spell/vocab.json (the VSS worlds' words), the legend's values and cue words, and the names
+// on the active reader's canvas. The switch is in ⋮ › Help (Spelling); it is kept in this browser when storage works.
+const SPELL_OFF = 'sop.spell.off';
+let spellEnabled = store.get(SPELL_OFF) !== '1', speller = null;
+const spellP = (window.SpellKit ? SpellKit.load(new URL('model/', document.baseURI).href, engine.legend) : Promise.resolve(null)).then(s => { speller = s; return s; });
+const canvasNames = rd => rd.world.state.shapes.map(s => s.name).concat((rd.world.state.groups || []).map(g => g.name));
 
 /* ---------------- canvas ---------------- */
 /* ---------------- canvas ---------------- */
@@ -173,9 +179,10 @@ svg.addEventListener('pointerup', endDrag); svg.addEventListener('pointercancel'
 
 /* ---------------- chat ---------------- */
 const scrollDown = () => { msgs.scrollTop = msgs.scrollHeight; };
-function meBubble(text) {
+function meBubble(text, sp) {
   const d = document.createElement('div'); d.className = 'b me';
-  d.innerHTML = `<div class="txt">${escH(text)}</div><div class="meta"><time>${clock()}</time></div>`;
+  const fix = sp && sp.fixes.length ? `<div class="fix" title="${escH('Every reader read: ' + sp.text)}">spelling: ${sp.fixes.map(f => `<s>${escH(f.from)}</s> → ${escH(f.to)}`).join(', ')}</div>` : '';
+  d.innerHTML = `<div class="txt">${escH(text)}</div>${fix}<div class="meta"><time>${clock()}</time></div>`;
   msgs.appendChild(d); scrollDown();
 }
 function botBubble(o) {
@@ -197,7 +204,7 @@ const isReady = rd => rd.id === 'rules' || (rd.id === 'vss' ? vssState === 'read
 /** what a reader that is not loaded says instead of an answer */
 function offText(rd) {
   if (rd.id === 'vss') return vssState === 'failed' ? 'not available (it could not be loaded)' : 'still loading, did not read this';
-  return { checking: 'checking the browser cache, did not read this', loading: 'still loading, did not read this', failed: 'not available (loading failed; see Neural › Settings)' }[nState] || 'not downloaded (see Neural › Settings)';
+  return { unpublished: 'not available (the neural model is not published yet)', failed: 'not available (loading failed; see Neural › Settings)' }[nState] || 'still loading, did not read this';
 }
 const idleStatus = () => 'reads with ' + listing(READERS.filter(isReady).map(r => r.label));
 msgs.addEventListener('click', ev => {
@@ -248,8 +255,12 @@ function summarize(result) {
 function submit(text, sop) { if (typeof sop !== 'string') sop = undefined; queue = queue.then(() => run(text, sop)).catch(e => { console.error(e); botBubble({ text: 'Something went wrong: ' + e.message, err: true }); }); return queue; }
 async function run(text, sop) {
   text = String(text).trim(); if (!text) return;
-  meBubble(text);
-  const id = ++turnSeq, rec = { id, time: clock(), text, raw: !!sop || text.startsWith('@'), sop: sop || text, button: !!sop, readers: {}, off: {}, ran: [] }; history.push(rec);
+  // the spell checker runs before every reader (not on SOP and toolbar buttons): they all read the corrected text
+  const typed = text, raw = !!sop || text.startsWith('@');
+  let sp = null;
+  if (!raw && spellEnabled) { const sc = await spellP; if (sc) { sp = sc.check(text, { names: canvasNames(cur) }); text = sp.text; } }
+  meBubble(typed, sp);
+  const id = ++turnSeq, rec = { id, time: clock(), text, typed, spell: sp, spellOff: !raw && !spellEnabled, raw, sop: sop || text, button: !!sop, readers: {}, off: {}, ran: [] }; history.push(rec);
   if (rec.raw) { try { K.parse(rec.sop); } catch (e) { rec.error = e; botBubble({ text: e.message, err: true, turn: id, tag: 'SOP' }); return; } }
   // the readers that read this message are fixed now: one that finishes loading meanwhile starts from the Rules drawing instead
   const live = READERS.filter(isReady);
@@ -350,7 +361,10 @@ const ranLabel = r => (r.button ? 'button · ' : r.raw ? 'SOP · ' : '') + (r.ra
 function renderTurn(id) {
   const r = history.find(x => x.id === id);
   if (!r) return '<p class="intro">This message is no longer here.</p>';
-  return `<div class="msghead"><div class="q">${escH(r.text)}</div><div class="note">${escH(r.time)} · read by ${escH(ranLabel(r))}</div></div>
+  const sp = r.spell, fixes = sp && sp.fixes.length ? sp.fixes.map(f => `${f.from} → ${f.to} (similarity ${f.sim.toFixed(2)}, next ${f.second.toFixed(2)})`).join(', ') : '';
+  const spell = fixes ? `<div class="note">Spelling, in ${fmtMs(sp.ms)}: ${escH(fixes)}. Every reader read the corrected text:</div><div class="q">${escH(r.text)}</div>`
+    : sp ? `<div class="note">Spelling: nothing corrected (${fmtMs(sp.ms)}).</div>` : r.spellOff ? '<div class="note">Spelling check was off (⋮ › Help).</div>' : '';
+  return `<div class="msghead"><div class="q">${escH(r.typed || r.text)}</div>${spell}<div class="note">${escH(r.time)} · read by ${escH(ranLabel(r))}</div></div>
   <p class="intro">What each reader wrote for this message: the SOP wires and how long writing them took, the plugin that ran each wire and the changes it made to that reader’s drawing, the VSS cutter’s requests and the neural model’s evidence.</p>${turnHTML(r)}`;
 }
 
@@ -433,7 +447,7 @@ function neuralHTML(n) {
 const sheet = $('#sheet'), scrim = $('#scrim'), sbody = $('#sbody'), stabs = $('#stabs');
 let sheetKind = null, sheetTab = null, sheetTurn = null;
 // the readers' own settings and their drawing as SOP are subtabs of each reader tab; the sheet keeps what is shared by every reader
-const TABS = { settings: [['help', 'Help'], ['sop', 'SOP language'], ['plugins', 'Plugins'], ['benchmark', 'Benchmark']], examples: [], turn: [] };
+const TABS = { settings: [['help', 'Help'], ['sop', 'SOP language'], ['plugins', 'Capabilities'], ['benchmark', 'Benchmark']], examples: [], turn: [] };
 function openSheet(kind, tab, focus) {
   sheetKind = kind; sheetTab = tab || (TABS[kind][0] || [])[0] || null;
   $('#sheet-title').textContent = kind === 'examples' ? 'Examples' : kind === 'turn' ? 'Message details' : 'Help and settings';
@@ -540,7 +554,7 @@ $('#player').addEventListener('click', async ev => {
 
 /* ---------------- formalizers: rules, VSS, neural ---------------- */
 let vssState = 'idle', vssInfo = null, vssError = null, neuralBytes = 0, neuralLoadMs = 0;
-// neural: 'checking' the cache, 'invite' (not downloaded), 'loading', 'ready', 'failed'
+// neural: 'checking' (is it published? in the cache?), 'loading', 'ready', 'unpublished' (our model is not on this site), 'failed'
 let nState = 'checking', nError = null, nProg = { L: 0, T: 0 }, nFromCache = false, nToken = 0;
 const VSS_HINT = 51.5e6;   // the composer's files (7 worlds, fallback, cutters), measured 2026-11-02; the loaded size is measured again in the page
 const RULES_BYTES_INLINE = (() => { try { return [...document.scripts].filter(s => !s.src && /SOPKit/.test(s.textContent.slice(0, 400))).reduce((a, s) => a + s.textContent.length, 0); } catch (e) { return 0; } })();
@@ -603,7 +617,7 @@ function renderCard() {
   const c = $('#rcard');
   if (cur.id === 'rules' || isReady(cur) || sub !== 'drawing') { c.hidden = true; return; }
   c.hidden = false;
-  c.className = 'rcard' + (cur.id === 'neural' && nState === 'invite' && notNow() ? ' small' : '');
+  c.className = 'rcard' + (cur.id === 'neural' && nState === 'unpublished' ? ' small' : '');
   c.innerHTML = cur.id === 'vss' ? `<b>VSS reader</b>${vssState === 'failed' ? errHTML(vssError) : `<p>Loading ${VSS_OPTS.composer ? 'the 7 micro-worlds' : 'the model'} from this site (about ${mb0(VSS_HINT)})…</p>`}`
     : `<b>Neural reader</b>${neuralBoxHTML()}`;
 }
@@ -626,77 +640,64 @@ async function ensureVSS(announce) {
   refreshReaders(); return vssState === 'ready';
 }
 
-/* ---------------- Neural: loads silently when its files are in the browser cache, otherwise invites ---------------- */
-function neuralOpts() { const [strategy, zs] = (store.get(CHOICE) || 'zeroshot:deberta').split(':'); return strategy === 'embed' ? { strategy: 'embed' } : { strategy: 'zeroshot', zeroshot: NeuralKit.MODELS.zeroshot[zs] ? zs : 'deberta' }; }
-const choiceValue = o => o.strategy === 'embed' ? 'embed' : 'zeroshot:' + o.zeroshot;
-const notNow = () => store.get(NOTNOW) === '1';
-function neededText(o) {
-  const ids = NeuralKit.modelsFor(o), S = NeuralKit.SIZES, N = NeuralKit.NAMES, tot = ids.reduce((a, id) => a + S[id], 0);
-  return `The neural reader needs ${mb0(tot)}: ${ids.map(id => `${N[id]} (${mb0(S[id])})`).join(' and ')}. They are kept in this browser’s cache after the first download.`;
-}
+/* ---------------- Neural: our model (act classifier + QA) loads by itself when the page opens, like VSS ---------------- */
+let nStatus = null;   // NeuralKit.status(): is our model published on this site
+const nBytesHint = () => NeuralKit.modelsFor().reduce((a, id) => a + (NeuralKit.bytesOf(id) || 0), 0);
 function errHTML(e) {
   if (!e) return '';
   const msg = String(e.message || e);
-  return `<div class="errt">${escH(msg)}</div>${e.files && e.files.length ? `<div class="note">Files still loading when it failed: ${e.files.map(u => `<code>${escH(u)}</code>`).join(', ')}</div>` : e.url && !msg.includes(e.url) ? `<div class="note">File: <code>${escH(e.url)}</code></div>` : ''}${e.network ? '<div class="note">This looks like a network failure. The page on GitHub Pages or a local server (<code>npx serve docs</code>) can reach the model host; a sandboxed preview cannot.</div>' : ''}`;
+  return `<div class="errt">${escH(msg)}</div>${e.files && e.files.length ? `<div class="note">Files still loading when it failed: ${e.files.map(u => `<code>${escH(u)}</code>`).join(', ')}</div>` : e.url && !msg.includes(e.url) ? `<div class="note">File: <code>${escH(e.url)}</code></div>` : ''}${e.network ? '<div class="note">This looks like a network failure (this site or the transformers.js library on cdn.jsdelivr.net could not be reached).</div>' : ''}`;
 }
 function progText() { return nFromCache ? 'Loading from this browser’s cache…' : nProg.T ? `Downloading ${(nProg.L / 1e6).toFixed(0)} of ${(nProg.T / 1e6).toFixed(0)} MB…` : 'Starting the download…'; }
+function unpublishedHTML() { return `<p>The neural model is not published yet.</p>${nStatus && nStatus.missing.length ? `<div class="note">Not on this site: ${nStatus.missing.map(m => `<code>${escH(m)}</code>`).join(', ')}</div>` : ''}`; }
 function neuralBoxHTML() {
-  const o = neuralOpts();
-  if (nState === 'checking') return '<p>Checking whether the models are in this browser’s cache…</p>';
-  if (nState === 'invite') return notNow() ? `<p>Not downloaded (${mb0(NeuralKit.modelsFor(o).reduce((a, id) => a + NeuralKit.SIZES[id], 0))}).</p><div class="acts"><button type="button" class="btn solid" data-nact="download">Download</button></div>`
-    : `<p>${escH(neededText(o))}</p><div class="acts"><button type="button" class="btn solid" data-nact="download">Download</button><button type="button" class="btn" data-nact="notnow">Not now</button></div>`;
+  if (nState === 'checking') return '<p>Checking whether the neural model is published and in this browser’s cache…</p>';
+  if (nState === 'unpublished') return unpublishedHTML();
   if (nState === 'loading') return `<p class="nprog-t">${escH(progText())}</p><div class="prog"><div style="width:${nProg.T ? (nProg.L / nProg.T * 100).toFixed(1) : 0}%"></div></div>`;
-  if (nState === 'failed') return `<p>The neural models could not be loaded:</p>${errHTML(nError)}<div class="acts"><button type="button" class="btn solid" data-nact="download">Try again</button></div>`;
-  return `<p>Ready: ${escH(NeuralKit.NAMES[models.enumModel] || models.enumModel)} + ${escH(NeuralKit.NAMES[models.qaModel] || models.qaModel)} on the CPU (WASM, ${escH(models.dtypeText || '8-bit files')}), ${mb(neuralBytes)}, loaded in ${(neuralLoadMs / 1000).toFixed(1)} s${nFromCache ? ' from the browser cache' : ''}.</p>`;
+  if (nState === 'failed') return `<p>The neural model could not be loaded:</p>${errHTML(nError)}<div class="acts"><button type="button" class="btn solid" data-nact="retry">Try again</button></div>`;
+  return `<p>Ready: ${escH(NeuralKit.NAMES[models.actModel] || models.actModel)} + ${escH(NeuralKit.NAMES[models.qaModel] || models.qaModel)} on the CPU (WASM, ${escH(models.dtypeText || '8-bit files')}), ${mb(neuralBytes)}, loaded in ${(neuralLoadMs / 1000).toFixed(1)} s${nFromCache ? ' from the browser cache' : ''}.</p>`;
 }
-function inviteHTML() {
-  if (nState === 'invite') return notNow() ? `${escH(neededText(neuralOpts()))} <span class="st">Not now. Neural › Settings can download it later.</span>` : `${escH(neededText(neuralOpts()))}<span class="acts"><button type="button" class="btn solid" data-nact="download">Download</button><button type="button" class="btn" data-nact="notnow">Not now</button></span>`;
-  if (nState === 'loading') return `Neural reader: <span class="st">${escH(progText())}</span>`;
-  if (nState === 'ready') return 'Neural reader ready.';
-  if (nState === 'failed') return 'The neural reader could not be loaded; Neural › Settings shows the error.';
-  return 'Checking the neural reader…';
-}
-function inviteNote() { const d = document.createElement('div'); d.className = 'sys invite'; d.innerHTML = inviteHTML(); msgs.appendChild(d); scrollDown(); }
 let nRaf = 0;
 function refreshReaders() {   // every place that shows a reader's state
   updateTabs(); renderCard(); setStatus(idleStatus());
-  msgs.querySelectorAll('.sys.invite').forEach(d => { d.innerHTML = inviteHTML(); });
+  const box = $('#nm-box'); if (box) box.innerHTML = neuralBoxHTML();
 }
-async function checkNeural(reason) {
+/** when the page opens: is our model published? then it loads (from the browser cache when it is there) */
+async function checkNeural() {
   const tok = ++nToken; models = null; neural.setModels(null); nState = 'checking'; nError = null; refreshReaders();
-  const hit = await NeuralKit.cached(neuralOpts());
+  nStatus = await NeuralKit.status();
   if (tok !== nToken) return;
-  if (hit) { loadModels(true); return; }
-  nState = 'invite'; refreshReaders();
-  if (reason === 'change' || !notNow()) inviteNote();
+  if (sub === 'settings' && cur.id === 'neural') renderSub();   // the sizes and the model facts are known now
+  if (nStatus.error) { nState = 'failed'; nError = Object.assign(new Error(nStatus.error), { network: true }); refreshReaders(); return; }
+  if (!nStatus.published) { nState = 'unpublished'; refreshReaders(); return; }
+  loadModels(await NeuralKit.cached());
 }
 async function loadModels(fromCache) {
-  const o = neuralOpts(), tok = ++nToken, files = {}, t0 = performance.now(); neuralBytes = 0;
+  const tok = ++nToken, files = {}, t0 = performance.now(); neuralBytes = 0;
   models = null; neural.setModels(null); nState = 'loading'; nError = null; nFromCache = !!fromCache; nProg = { L: 0, T: 0 }; refreshReaders();
   try {
-    const m = await NeuralKit.load(o, e => {
+    const m = await NeuralKit.load(e => {
       if (tok !== nToken || e.status !== 'progress' || !e.file) return;
       files[e.name + '/' + e.file] = [e.loaded || 0, e.total || 0]; const v = Object.values(files);
       nProg = { L: v.reduce((a, x) => a + x[0], 0), T: v.reduce((a, x) => a + x[1], 0) }; neuralBytes = nProg.T;
-      if (!nRaf) nRaf = requestAnimationFrame(() => { nRaf = 0; if (nState !== 'loading') return; document.querySelectorAll('.nprog-t').forEach(x => { x.textContent = progText(); }); document.querySelectorAll('.rcard .prog > div, #nm-box .prog > div').forEach(x => { x.style.width = (nProg.T ? nProg.L / nProg.T * 100 : 0).toFixed(1) + '%'; }); msgs.querySelectorAll('.sys.invite .st').forEach(x => { x.textContent = progText(); }); setStatus(`loading the neural reader ${(nProg.T ? nProg.L / nProg.T * 100 : 0).toFixed(0)}%`); });
+      if (!nRaf) nRaf = requestAnimationFrame(() => { nRaf = 0; if (nState !== 'loading') return; document.querySelectorAll('.nprog-t').forEach(x => { x.textContent = progText(); }); document.querySelectorAll('.rcard .prog > div, #nm-box .prog > div').forEach(x => { x.style.width = (nProg.T ? nProg.L / nProg.T * 100 : 0).toFixed(1) + '%'; }); setStatus(`loading the neural reader ${(nProg.T ? nProg.L / nProg.T * 100 : 0).toFixed(0)}%`); });
     });
     if (tok !== nToken) return;
-    neural.setStrategy(o.strategy); neural.setModels(m); models = m; nState = 'ready'; neuralLoadMs = performance.now() - t0;
-    if (!neuralBytes) neuralBytes = NeuralKit.modelsFor(o).reduce((a, id) => a + NeuralKit.SIZES[id], 0);
+    neural.setStrategy('finetuned'); neural.setModels(m); models = m; nState = 'ready'; neuralLoadMs = performance.now() - t0;
+    if (!neuralBytes) neuralBytes = nBytesHint();
     const fresh = !RD.neural.reads;
-    sysNote(`Neural reader ready: ${NeuralKit.NAMES[m.enumModel]} + ${NeuralKit.NAMES[m.qaModel]} on the CPU, ${mb(neuralBytes)}${fromCache ? ' from the browser cache' : ''}, ${(neuralLoadMs / 1000).toFixed(1)} s.` + (fresh ? ' It starts from the Rules drawing.' : ''));
+    sysNote(`Neural reader ready: ${NeuralKit.NAMES[m.actModel]} + ${NeuralKit.NAMES[m.qaModel]} on the CPU, ${mb(neuralBytes)}${fromCache ? ' from the browser cache' : ''}, ${(neuralLoadMs / 1000).toFixed(1)} s.` + (fresh ? ' It starts from the Rules drawing.' : ''));
     adoptRules(RD.neural);
   } catch (e) {
     if (tok !== nToken) return;
-    console.error(e); nState = 'failed'; nError = e;
-    sysNote('The neural models could not be loaded: ' + (e && e.message || e) + (e && e.files && e.files.length ? ` (while loading ${e.files.length === 1 ? e.files[0] : e.files.length + ' files; Neural › Settings lists them'})` : ''));
+    console.error(e); nState = e && e.unpublished ? 'unpublished' : 'failed'; nError = e;
+    if (nState === 'failed') sysNote('The neural model could not be loaded: ' + (e && e.message || e) + (e && e.files && e.files.length ? ` (while loading ${e.files.length === 1 ? e.files[0] : e.files.length + ' files; Neural › Settings lists them'})` : ''));
   }
   refreshReaders();
 }
 document.addEventListener('click', ev => {
   const b = ev.target.closest('[data-nact]'); if (!b) return;
-  if (b.dataset.nact === 'download') { store.set(NOTNOW, null); loadModels(false); }
-  if (b.dataset.nact === 'notnow') { store.set(NOTNOW, '1'); refreshReaders(); }
+  if (b.dataset.nact === 'retry') loadModels(false);
 });
 
 /* ---------------- reader subtabs: Drawing | SOP | Settings ---------------- */
@@ -710,11 +711,10 @@ function renderSub() {
   const top = rpanel.hidden ? 0 : rpanel.scrollTop;
   rpanel.hidden = false;
   rpanel.innerHTML = sub === 'sop' ? renderWorld(cur) : renderReaderSettings(cur);
-  syncFormalizer(); rpanel.scrollTop = top;
+  rpanel.scrollTop = top;
 }
 function setSub(k) { if (k === sub || !SUBS.some(x => x[0] === k)) return; sub = k; renderSub(); renderCard(); if (k === 'drawing') renderCanvas(); }
 subbar.addEventListener('click', ev => { const b = ev.target.closest('[data-sub]'); if (b) setSub(b.dataset.sub); });
-rpanel.addEventListener('change', ev => { if (ev.target.id === 'nm-strategy') { store.set(CHOICE, ev.target.value); store.set(NOTNOW, null); checkNeural('change'); } });
 rpanel.addEventListener('click', ev => { const b = ev.target.closest('[data-open]'); if (b) openSheet('settings', b.dataset.open); });
 function vssStatusHTML() {
   return escH(vssState === 'ready' ? (vssInfo.composer ? `Ready: ${vssInfo.worlds.length} micro-worlds and the fallback, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
@@ -725,7 +725,7 @@ function readerFacts(rd) {
   const S = rd.world.state, n = S.shapes.length, m = S.edges.length, u = rd.world.undoStack.length;
   return `<table class="kv"><tr><td>State</td><td>${escH(isReady(rd) ? 'ready' : offText(rd).replace(/, did not read this$/, '').replace(/ \(see Neural › Settings\)$/, '').replace(/; see Neural › Settings\)$/, ')'))}</td></tr><tr><td>Messages read</td><td>${rd.reads}</td></tr><tr><td>Its drawing</td><td>${n} shape${n === 1 ? '' : 's'} · ${m} link${m === 1 ? '' : 's'} · ${u} step${u === 1 ? '' : 's'} to undo</td></tr></table>`;
 }
-const sharedNote = `<p class="intro">The SOP language (the questions every reader answers) and the plugins (the interpreters that run the wires) are shared by all three readers: they belong to the engine, not to one reader. They are in the ⋮ menu: <button type="button" class="btn" data-open="sop">SOP language</button> <button type="button" class="btn" data-open="plugins">Plugins</button></p>`;
+const sharedNote = `<p class="intro">The SOP language (the commands every reader writes) and the engine’s capabilities are the same for all three readers. They are in the ⋮ menu: <button type="button" class="btn" data-open="sop">SOP language</button> <button type="button" class="btn" data-open="plugins">Capabilities</button></p>`;
 function renderReaderSettings(rd) {
   if (rd.id === 'rules') return `<h3 class="sub">Rules reader</h3>${readerFacts(rd)}
   <p class="intro">Hand-written code (<code>docs/js/logic.js</code>, ${mb(rulesBytes())}): it cuts the message into requests, finds the action by its cue words and answers the SOP questions from the words around it. Nothing to download and nothing to choose; it reads every message at once.</p>${sharedNote}`;
@@ -738,18 +738,19 @@ function renderReaderSettings(rd) {
     : `<p class="intro">One VSS model trained on the sketch world generated from the SOP language (training/sketch). A sentence is normalized, read into an event with its roles in a few milliseconds, and turned into SOP wires.</p>
     <p class="note">This page was opened with <code>?vss=single</code>. <a href="./">Open it without</a> to read with the seven micro-worlds.</p>`}`;
   }
-  const S = NeuralKit.SIZES, M = NeuralKit.MODELS, N = NeuralKit.NAMES, sz = id => mb(S[id]) + (id === M.embed ? ' (about)' : '');
+  const N = NeuralKit.NAMES, A = NeuralKit.ABOUT, info = nStatus ? nStatus.info : {};
+  const size = id => { const b = NeuralKit.bytesOf(id); return b ? mb(b) : 'size not known yet'; };
+  const facts = id => { const f = info[id] && info[id].facts; if (!f) return ''; const p = [f.base && `base model <code>${escH(f.base)}</code>`, f.spans && `${escH(f.spans)} annotated requests`, f.heldout && `held-out act accuracy ${(+f.heldout * 100).toFixed(1)}%`].filter(Boolean); return p.length ? ` (${p.join(', ')})` : ''; };
+  const row = (label, id) => `<label>${label}</label><div>${escH(N[id])} · ${size(id)}<div class="note">${escH(A[id])}${facts(id)}.${info[id] ? `${info[id].readme ? ` <a href="${escH(info[id].readme)}" target="_blank" rel="noopener">README</a> ·` : ''} version <code>${escH(info[id].version)}</code>` : ''}</div></div>`;
   return `<h3 class="sub">Neural reader</h3>${readerFacts(rd)}
-  <p class="intro">Pretrained transformers in this browser. A classifier picks the kind of message and the action; then each SOP question in that action’s frame is answered with extractive question answering (“Where does the connection start?”). The files come from the Hugging Face model host and stay in this browser’s cache.</p>
+  <p class="intro">Two small transformers of ours, run in this browser. A classifier trained on our annotated requests reads the act of each request (the action of a command, the ask of a question, or a fact or rule); then each SOP question in that act’s frame is answered with extractive question answering (“Where does the connection start?”). The files come from this site, load by themselves when the page opens, and stay in this browser’s cache.</p>
   <div class="form">
-    <label for="nm-strategy">Classifier</label>
-    <select id="nm-strategy"><option value="zeroshot:deberta">Zero-shot NLI · ${N[M.zeroshot.deberta]} · ${sz(M.zeroshot.deberta)}</option><option value="zeroshot:distilbert">Zero-shot NLI · ${N[M.zeroshot.distilbert]} · ${sz(M.zeroshot.distilbert)}</option><option value="embed">Similarity to SOP examples · ${N[M.embed]} · ${sz(M.embed)}</option></select>
-    <label>Answers</label><div>Extractive QA · ${N[M.qa]} · ${sz(M.qa)}</div>
-    <label>Device</label><div>CPU (WASM), ${escH(NeuralKit.dtypeText(neuralOpts()))}</div>
+    ${row('Act', NeuralKit.MODELS.act)}
+    ${row('Answers', NeuralKit.MODELS.qa)}
+    <label>Device</label><div>CPU (WASM), ${escH(NeuralKit.dtypeText())}</div>
   </div>
   <div class="nbox" id="nm-box">${neuralBoxHTML()}</div>`;
 }
-function syncFormalizer() { const sel = $('#nm-strategy'); if (sel) sel.value = choiceValue(neuralOpts()); }
 sbody.addEventListener('click', async ev => {
   const q = ev.target.closest('[data-quick]'); if (q) { closeSheet(); submit(q.dataset.quick); return; }
   const op = ev.target.closest('[data-open]'); if (op) { openSheet('settings', op.dataset.open); return; }
@@ -766,6 +767,7 @@ sbody.addEventListener('click', async ev => {
   const fx = ev.target.closest('[data-fails]'); if (fx) { const d = document.getElementById('fails-' + fx.dataset.fails); if (d) d.hidden = !d.hidden; }
 });
 sbody.addEventListener('change', ev => {
+  if (ev.target.id === 'spell-on') { spellEnabled = ev.target.checked; store.set(SPELL_OFF, spellEnabled ? null : '1'); sysNote(`Spelling check ${spellEnabled ? 'on' : 'off'}.`); return; }
   if (ev.target.id === 'sc-file' && ev.target.files[0]) {
     const f = ev.target.files[0], rd = new FileReader();
     rd.onload = () => { $('#sc-text').value = String(rd.result); $('#sc-status').textContent = `Loaded ${f.name}: ${parseScript(String(rd.result)).length} messages.`; };
@@ -773,7 +775,7 @@ sbody.addEventListener('change', ev => {
     rd.readAsText(f); ev.target.value = '';
   }
   const pl = ev.target.closest('[data-plug]');
-  if (pl) { for (const rd of READERS) rd.engine.plugin(pl.dataset.plug).enabled = pl.checked; const p = engine.plugin(pl.dataset.plug); sysNote(`${p.title} plugin switched ${p.enabled ? 'on' : 'off'} for every reader`); sbody.innerHTML = renderPlugins(); }
+  if (pl) { for (const rd of READERS) rd.engine.plugin(pl.dataset.plug).enabled = pl.checked; const p = engine.plugin(pl.dataset.plug); sysNote(`${(HelpKit.CAPS[p.name] || p).t || p.title} switched ${p.enabled ? 'on' : 'off'} for every reader`); sbody.innerHTML = renderPlugins(); }
 });
 
 /* ---------------- benchmark: every reader on the same labelled sentences ---------------- */
@@ -838,71 +840,24 @@ async function runBench(btn) {
   const out = $('#bm-out'); if (out) out.innerHTML = html;
   say(benchStop ? 'Stopped.' : `Done: ${fzs.length} reader${fzs.length > 1 ? 's' : ''} on ${sets.length} set${sets.length > 1 ? 's' : ''}.`);
 }
-/* ---------------- help ---------------- */
-const HELP_CMDS = [
-  ['Create', ['Draw a red circle named Hub in the center', 'Add three small squares in a row below Hub']],
-  ['Move, position', ['Move Hub to the top left', 'Put Note between Start and Done', 'Check is above Process']],
-  ['Connect', ['Connect Start to Process with a dashed arrow', 'Disconnect Hub from Note']],
-  ['Set', ['Make Hub teal', 'Label Process "Validate"', 'Rename Done to End', 'From now on, circles are orange']],
-  ['Resize', ['Make the green circle bigger', 'Shrink Hub']],
-  ['Delete', ['Delete Note', 'Clear the canvas']],
-  ['Group', [], 'coming: the engine is getting groups'],
-  ['Front and back', ['Bring Hub to the front', 'Send Note to the back']],
-  ['Align, distribute', ['Align Start, Process and Check', 'Distribute the circles evenly', 'Arrange everything in a circle']],
-  ['Undo', ['Undo', 'Redo']],
-  ['Questions', ['What is connected to Check?', 'Is there a path from Start to Done?', 'How many circles are there?', 'Describe the diagram']]
-];
-function renderHelp() {
-  return `<div class="help">
-  <p>A diagram editor you talk to in plain English. Each message is turned into <b>SOP wires</b> (one short line per request, answering a fixed set of questions: what to do, which shape, what colour, where…), and one engine runs the wires on a drawing.</p>
-  <h3 class="sub">Three readers</h3>
-  <ul>
-    <li><b>Rules</b>: hand-written code that looks for cue words.</li>
-    <li><b>VSS</b>: small readers trained on this demo’s messages (vector route books, no transformer); they load from this site when the page opens.</li>
-    <li><b>Neural</b>: pretrained transformers asked the same questions; an optional download, kept in this browser’s cache.</li>
-  </ul>
-  <p>Every message goes to every reader that is loaded, and each reader changes only its own drawing. The tabs above the canvas switch between the readers; under each one, <b>Drawing</b> shows the canvas, <b>SOP</b> shows that drawing written as SOP wires, and <b>Settings</b> shows that reader’s own settings and state. A dot on a tab means that reader’s drawing differs from the one on screen.</p>
-  <p>When the drawings differ, a copy button appears next to the tabs (two overlapping squares): it copies the drawing on screen, with its undo history, to the other readers.</p>
-  <h3 class="sub">What you can type</h3>
-  <dl class="cmds">${HELP_CMDS.map(([k, egs, soon]) => `<dt>${escH(k)}</dt><dd>${egs.map(e => `<q>${escH(e)}</q>`).join('')}${soon ? `<span class="soon">${escH(soon)}</span>` : ''}</dd>`).join('')}</dl>
-  <p class="note" style="margin-top:8px">Several requests in one message are fine. A line starting with <code>@</code> is read as SOP wires directly. The + button has more examples and whole scenarios.</p>
-  <h3 class="sub">Reading a reply</h3>
-  <p>The reply has one line per reader:</p>
-  <div class="eg">Rules · 0.6 ms: Drew Hub.
-VSS · 14 ms: Drew Hub.
-Neural: not downloaded (see Neural › Settings)</div>
-  <p>The time is how long that reader took to turn your message into SOP wires; drawing is not counted. A reader that is not loaded says so instead of a time. When a reader cannot tell which shape you mean it asks, and the buttons under the reply answer it. <b>details</b> under a reply shows what each reader wrote for that message: its SOP wires, the timing, the changes to its drawing, and for VSS the requests its cutter found.</p>
-  <h3 class="sub">In this menu</h3>
-  <p><b>SOP language</b>: the questions every reader answers. <b>Plugins</b>: the interpreters that run the wires, for all readers. <b>Benchmark</b>: every reader on the same labelled sentences.</p>
-  </div>`;
+/* ---------------- help, SOP language, capabilities (docs/js/help.js; their lists are read from the legend) ---------------- */
+/** what help.js needs: the engine (legend, plugins), the canvas drawing code for its small drawings, and sizes to quote */
+function helpEnv() {
+  let nb = neuralBytes; try { if (!nb) nb = nBytesHint(); } catch (e) { }
+  return { K, engine, drawShape, drawEdge, drawGroups, startMessages: START, vssBytes: vssInfo && vssInfo.bytes ? vssInfo.bytes : VSS_HINT, neuralBytes: nb };
 }
-function renderLegend() {
-  const groups = new Map();
-  for (const q of engine.legend.questions.values()) { const g = q.plugins[0]; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(q); }
-  let h = `<p class="intro">The questions every reader answers; the cue words (hover a value) are what the Rules reader looks for.</p><p class="intro">A message answers only the questions its meaning touches, and each answer becomes <code>question=value</code> on an SOP wire. Plugins add questions and values. This page is shared by all three readers, so it stays here and not under one reader’s Settings.</p>`;
-  for (const [plug, qs] of groups) {
-    const p = engine.plugin(plug);
-    h += `<h3 class="sub">${escH(p ? p.title : plug)}</h3>`;
-    for (const q of qs) {
-      h += `<div class="lq"><div class="key">${escH(q.key)}</div><div>${escH(q.ask || '')}<span class="kind">${escH(q.kind)}</span></div>`;
-      if (q.values) h += `<div class="vals">${Object.entries(q.values).map(([v, c]) => `<span${c && c.length ? ` title="cues: ${escH(c.join(', '))}"` : ''}>${escH(v)}</span>`).join('')}</div>`;
-      h += `</div>`;
-    }
-  }
-  return h;
+const renderHelp = () => spellHelpHTML() + HelpKit.help(helpEnv());
+/** the spell checker's switch, at the top of ⋮ › Help (it acts before every reader, so it is not one reader's setting) */
+function spellHelpHTML() {
+  const P = speller && speller.params;
+  const about = P ? `A word that no reader knows is replaced by the most similar known word when the similarity of their letter groups (VSA character n-grams, D ${P.D}) is at least ${P.threshold} and ${P.margin} above the next word. Known words: ${speller.size()} (the VSS worlds’ words, the legend’s values and cue words) and the names on the canvas; ${speller.keepSize()} more words of the training messages are left alone. Never changed: quoted text, numbers, words of one or two letters, the word after “named” or “called”, and capitalised names that are not on the canvas.`
+    : 'The spell checker’s vocabulary is not loaded (yet).';
+  return `<div class="help"><h3 class="sub">Spelling</h3>
+  <label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:pointer"><input type="checkbox" id="spell-on" ${spellEnabled ? 'checked' : ''}> <span>Correct typos before the readers read a message (“gree circle” → “green circle”). Every reader reads the corrected text; your message shows what was changed, and <b>details</b> shows the typed and the corrected text.</span></label>
+  <p class="note">${escH(about)}</p></div>`;
 }
-function renderPlugins() {
-  let h = `<p class="intro">A plugin brings wire types, legend questions and interpreters. Each interpreter registers a pattern; the most specific enabled one runs. Switch one off to see its messages fail cleanly.</p>`;
-  for (const p of engine.plugins) {
-    const pats = engine.handlers.filter(x => x.plugin === p).map(x => `${x.type}${Object.entries(x.when || {}).map(([k, v]) => ` ${k}=${[].concat(v).join('|')}`).join('')}`);
-    const types = Object.keys(p.wireTypes || {});
-    h += `<div class="plug${p.enabled ? '' : ' off'}"><header><h4>${escH(p.title)}</h4><label class="sw"><input type="checkbox" data-plug="${escH(p.name)}" ${p.enabled ? 'checked' : ''} ${p.locked ? 'disabled' : ''} aria-label="Enable ${escH(p.title)}">${p.locked ? 'required' : p.enabled ? 'on' : 'off'}</label></header><p>${escH(p.description)}</p>`;
-    if (types.length) h += `<div class="pats">${types.map(t => `<code>wire type: ${escH(t)}</code>`).join('')}</div>`;
-    if (pats.length) h += `<div class="pats">${pats.map(t => `<code>${escH(t)}</code>`).join('')}</div>`;
-    h += `</div>`;
-  }
-  return h;
-}
+const renderLegend = () => HelpKit.sop(helpEnv());
+const renderPlugins = () => HelpKit.capabilities(helpEnv());
 function renderWorld(rd) {
   const w = rd.world, S = w.state, lines = [];
   for (const s of S.shapes) lines.push(hlNode({ id: s.name, type: 'shape', args: Object.assign({ shape: s.shape, size: K.sizeName(s.size), color: s.color }, s.outline ? { outline: s.outline } : {}, s.label ? { label: s.label } : {}, { at: [s.x, s.y] }) }));
@@ -917,9 +872,34 @@ function renderWorld(rd) {
 const ta = $('#say');
 const grow = () => { ta.style.height = 'auto'; ta.style.height = Math.min(128, ta.scrollHeight) + 'px'; };
 ta.addEventListener('input', grow);
-function sendTyped() { const v = ta.value; if (!v.trim()) return; ta.value = ''; grow(); submit(v); }
+// the messages typed in this box, oldest first (this page only, like a shell's history). ArrowUp on the first line of the box goes to the
+// previous one, ArrowDown on the last line to the next one and, after the newest, back to the draft that was being typed. A recalled
+// message can be edited; the edit is kept while walking the history, until a message is sent.
+const sent = [], edits = new Map();
+let histPos = 0, draft = '';
+function sendTyped() {
+  const v = ta.value; if (!v.trim()) return;
+  if (sent[sent.length - 1] !== v) sent.push(v);
+  histPos = sent.length; draft = ''; edits.clear();
+  ta.value = ''; grow(); submit(v);
+}
+function recall(to) {
+  if (to < 0 || to > sent.length || to === histPos) return false;
+  if (histPos === sent.length) draft = ta.value; else if (ta.value !== sent[histPos]) edits.set(histPos, ta.value); else edits.delete(histPos);
+  histPos = to;
+  ta.value = to === sent.length ? draft : (edits.has(to) ? edits.get(to) : sent[to]);
+  grow(); const n = ta.value.length; ta.setSelectionRange(n, n);
+  return true;
+}
 const touchFirst = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
 ta.addEventListener('keydown', ev => {
+  if ((ev.key === 'ArrowUp' || ev.key === 'ArrowDown') && !ev.shiftKey && !ev.altKey && !ev.ctrlKey && !ev.metaKey && !ev.isComposing && ta.selectionStart === ta.selectionEnd) {
+    const v = ta.value, at = ta.selectionStart;
+    const firstLine = v.lastIndexOf('\n', at - 1) === -1, lastLine = v.indexOf('\n', at) === -1;
+    if (ev.key === 'ArrowUp' && firstLine && recall(histPos - 1)) ev.preventDefault();
+    else if (ev.key === 'ArrowDown' && lastLine && recall(histPos + 1)) ev.preventDefault();
+    return;
+  }
   if (ev.key !== 'Enter' || ev.shiftKey || ev.isComposing || ev.keyCode === 229) return;
   if (touchFirst && !ev.ctrlKey && !ev.metaKey) return; // phone keyboards: Enter adds a line, the button sends
   ev.preventDefault(); sendTyped();
@@ -947,12 +927,13 @@ window.addEventListener('resize', () => { if (!drag) renderCanvas(); });
 /* ---------------- start ---------------- */
 updateTabs(); renderCanvas(); setStatus(idleStatus());
 botBubble({ text: 'Hi! Tell me what to draw, change or connect, or ask me about the drawing. Three readers (Rules, VSS, Neural) read every message, each into its own drawing; the tabs above the canvas switch between them. Tap + for examples and whole scenarios, ⋮ for help.' });
-[
+const START = [
   'Draw a large blue circle named Start in the top left, then add a rectangle named Process to the right of it labeled "Validate". Connect Start to Process.',
   'Add a yellow diamond named Check right of Process labeled "ok?" and connect Process to it. Put a green circle named Done below Check and link Check to Done with a dashed arrow labeled "yes".',
   'Is there a path from Start to Done?'
-].forEach(t => submit(t));
+];
+START.forEach(t => submit(t));
 queue.then(() => { READERS.forEach(rd => { rd.world.undoStack = []; }); renderSopBar(); });
 ensureVSS();              // same site: no button, no question
-checkNeural('start');     // in the browser cache: loads silently; otherwise one invitation
+checkNeural();            // our neural model loads by itself (from the browser cache when it is there)
 })();
