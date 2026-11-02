@@ -106,3 +106,5 @@ position7 on move (3045 move requests; 2834 with a position):
 position7's `landmark2` threshold is fine: 0.220 keeps 100% of the present rows when read on all training rows. Its losses are a
 position read as nothing, for example "Put Books at the left" -> `move n_books left_side` with no position, or "Rb should be left of
 Qb" with no position. The cause of these is not established here.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/micro/create_w` (f2725dd), `docs/model/micro/shapes7` (9aaacfc). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

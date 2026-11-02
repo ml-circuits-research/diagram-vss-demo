@@ -52,3 +52,5 @@ The first model, on the benchmark of the first row's data, with the reader's off
    never measured, it gets no threshold, and the reader then never reads its colour or determiner ("connect the brown circle to Home" →
    source = circle). The patch measures those ratios with `presence="all"` on the rows whose gold fills the role. It is applied to a local
    vss-demo checkout only; the diagram world of vss-demo (landmark, source, target, edge) is probably affected the same way.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/sketch` (dcd89d8). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

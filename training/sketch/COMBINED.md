@@ -26,3 +26,5 @@ Verdict: **it worked** (right 74.9 >= 74.2, wrong 13.1 <= 14.8, extra 302 <= 330
 set +133 (verbless set requests now read, fix 2), create +93 (the colour, fix 1), exists +7, connect +6, count +5; no action loses.
 Against G16 with the _w worlds (A3: 72.8 / 11.5 / 15.7, extra 318): +2.1 right, +1.6 wrong, 16 fewer extra.
 Event hint: 295 readings re-read, 240 units changed (as H1 alone). Candidate for the demo registry; the owner decides.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/micro/shapes7` (9aaacfc). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

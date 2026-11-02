@@ -233,3 +233,5 @@ sets) to show nothing was lost, and measure the new requests per action (right /
 - `node training/sketch/test_editor_history.mjs`: all passed.
 - The demo in a browser (Playwright, Rules tab): a group drawn, moved to the bottom, undone and redone; create with two relations,
   with region + relation and with between + region; the check / groupOf / members questions; an impossible pair of relations reported.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/kinds_p80_s0` (a76b4e3). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

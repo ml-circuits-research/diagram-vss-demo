@@ -18,3 +18,5 @@ CREATE_COLOR.md.
 The CREATE_COLOR.md verdict stands as recorded; this adds what its set and fact differences mean.
 
 ## Result
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/micro/shapes7` (9aaacfc). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

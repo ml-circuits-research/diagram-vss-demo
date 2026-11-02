@@ -246,3 +246,5 @@ created names, per-kind dropped values in REAL_WORLD.md and on stdout), training
 docs/js/front.js is unchanged: front.json keeps its format (the new field is not read), and learning is Python only.
 Scratch (not in the repository): scratchpad/r2/ (dry-build reports dry/*.txt, valexp3.py, read-time models m/, readtime.txt),
 scratchpad/round2_jobs/ (the 7 GPU jobs).
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/kinds_p80_s0` (a76b4e3), `docs/model/micro/shapes7` (9aaacfc). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

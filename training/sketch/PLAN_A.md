@@ -98,3 +98,5 @@ Reading:
 Changed or new: docs/model/micro/cutter_worlds16.json (retrained), docs/model/micro/<world>_w/ for the 14 worlds (check, create, describe, disconnect, facts,
 filters, graph, history, layout, naming, resize, set, superlatives, targets), training/sketch/worlds_micro/<world>_w/ (build folders, gitignored),
 training/sketch/runs/micro_<world>_w*, training/sketch/PLAN_A.md.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/micro/check` (ffa8b0d), `docs/model/micro/check_w` (f2725dd), `docs/model/micro/connect` (cd4be6a), `docs/model/micro/cutter.json` (98fb038), `docs/model/micro/cutter_worlds16.json` (4626cf6), `docs/model/micro/describe_w` (f2725dd), `docs/model/micro/move` (ffa8b0d), `docs/model/micro/move_s` (68b0656), `docs/model/micro/set` (cd4be6a), `docs/model/micro/set_s` (cf15a5d), `docs/model/micro/set_w` (0776f18). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

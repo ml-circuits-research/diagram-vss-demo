@@ -340,3 +340,5 @@ move "... between Seat1 and Seat2" -> anchor Seat1 only), and "Are X and Y (dire
 - `build_tiny.py`, `run_tiny.sh`, `eval_tiny.py`, `tiny_missobj.py`, `tiny/<world>/` (worlds, models, logs), `tiny_<world>_e<N>.txt` (results; `*_m0`: marker off)
 - `s7build/` (build.sh, the three world builds, hashes h_*.txt), `s6check/` (run.sh, the HEAD tool copy, the three tiny models and logs)
 - `runs6s7/` (score.sh, run logs, per-model scores *_llm_score_gold.txt, *_llm_score_own.txt, *_error_analysis.txt, *_dev_rows.jsonl, REAL_WORLD.md.saved)
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/fix_p80_s0` (cf0545a), `docs/model/m0_p80_s0` (bced516), `docs/model/s6_p80_s0` (bced516), `docs/model/s7_p80_s0` (bced516). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

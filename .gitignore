@@ -1,14 +1,20 @@
-# the trained model inside the world folder is exported to docs/model/sketch (the copy the demo loads)
+# build folders of the VSS worlds (sop train writes model/, runs/, requests/, versions/ inside the world folder; the demo loads
+# only the exported copy under docs/model/)
 training/sketch/worlds/sketch/model/
 training/sketch/worlds/sketch/runs/
 training/sketch/worlds/sketch/requests/
 training/sketch/worlds/sketch/versions/
-training/sketch/__pycache__/
+training/sketch/worlds/real/
+training/sketch/worlds_centres/
+# micro-world build folders (train_micro.sh); the groupings GROUPS_*.json in it that are part of the workflow are added with git add -f
+training/sketch/worlds_micro/
+# scorer caches (short_bench outputs: training/sketch/short_bench/.gitignore)
+layer_cache*.json
+# Python / node
+__pycache__/
 *.pyc
 node_modules/
-training/sketch/worlds/real/
+# checkpoints of the research runs
 research/attention/**/*.pt
-training/sketch/worlds_centres/
+# agent worktrees
 .claude/worktrees/
-training/sketch/worlds_micro/
-training/laptop/node_modules/

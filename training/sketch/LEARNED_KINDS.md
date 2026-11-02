@@ -123,3 +123,5 @@ Three steps. Only the first two are new code; the third is the standard pipeline
    - the main comparison: M = 32 vs the frequency kinds, on old data, --frac 0.8, seed 0, 2 epochs, the baseline's switches, scored
      on the dev file with llm_score.mjs SEG=gold and the own cut, plus error_analysis.mjs and the route-book size;
    - the criterion: SEG=gold not more than 0.5 points below the baseline AND the route book at most half its size.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/fix_p80_s0` (cf0545a). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

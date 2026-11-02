@@ -43,3 +43,5 @@ The cut costs VSS about 2 points; the gap to the rules (~17-19 points) is in REA
 The centres find slightly more requests (act found 83.7% vs 80.8%) but chatter becomes centres (about 200 extra commands).
 Why it worked elsewhere: WikiSQL and SNIPS have ONE request per input (one question -> one query), so one centre was always enough;
 the several-centres reading was never tested there.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/final_p40` (cbe7971). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

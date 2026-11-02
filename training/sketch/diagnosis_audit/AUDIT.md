@@ -155,3 +155,5 @@ after a request already taken back), train #57 ("Redo that last move, I think I 
   The systematic problems are P1 ("line"), P2 ("next to" = neighbors), P3 (sonnet's `quantifier=all,recency=newest`), and two editor
   behaviours (P4: in-message undo / redo, chain order) that make some correct labels execute differently from the text.
 - `bench-canon.js` `score()` does not compare arguments for rows with `wires`; any number produced through it on such rows is type-only.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/comb1_p80_s0` (a76b4e3). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

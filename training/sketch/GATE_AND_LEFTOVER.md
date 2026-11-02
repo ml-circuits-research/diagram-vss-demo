@@ -249,3 +249,5 @@ Paired bootstrap over test messages (500 resamples): recall with minus without t
 - verbless, recall@1: +1.9 points (CI +0.5 to +3.7)
 - verbless, recall@2: +0.7 points (CI -0.2 to +1.7)
 - verbless, recall@3: +0.7 points (CI +0.1 to +1.6)
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/kinds_p80_s0` (a76b4e3). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

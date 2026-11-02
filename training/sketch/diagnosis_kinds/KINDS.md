@@ -502,3 +502,5 @@ total is +2 dev, +18 fit.
 What this does and does not show: one seed, one dev file that has been read before; the result says the 47 kinds removed (106 -> 59)
 were not needed by this reader on the old data, not that the new kinds help. Not run: the all-data version (`kinds_data2.json`
 would have to be rebuilt on a comb1-type all-data model first, as step 1 of the rule was rebuilt here).
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/comb1_p80_s0` (a76b4e3), `docs/model/data2_p80_s0` (fbaa8dc), `docs/model/fix_p80_s0` (cf0545a), `docs/model/kinds_p80_s0` (a76b4e3). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

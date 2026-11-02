@@ -284,3 +284,5 @@ vss-demo / diagram-vss-demo and the notes that cite those runs. I can therefore 
 7. Known risks from the existing results: the hard "explained" test is weak (67% of gold requests fully placed, EB l.17-20), and the no-fit residual is a
    stated constant tuned for sentence-length inputs; a zone of a few words has a noisy residual (1.0 whenever a core role is missing, l.583-588, 710). The
    dispatcher has only been exercised on whole sentences.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/A_p25` (54ad8dd), `docs/model/B_p25` (54ad8dd), `docs/model/final_p20` (cbe7971), `docs/model/final_p40` (cbe7971), `docs/model/learned_p25` (74b4e44), `docs/model/real_p25` (530e54e). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

@@ -70,3 +70,5 @@ observation, not a new test; no further run was made.
 
 Files: `training/sketch/run_curve.sh` (EPOCHS env, default 2, the command line is unchanged when it is unset), `training/sketch/EPOCHS.md`,
 `docs/model/ep8_p80_s0/`, `training/sketch/runs/ep8_p80_D1024_e8_s0*`. `llm_train/REAL_WORLD.md` was restored with git checkout.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/data2_p80_s0` (fbaa8dc), `docs/model/ep8_p80_s0` (b7f903c), `docs/model/fix_p80_s0` (cf0545a). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

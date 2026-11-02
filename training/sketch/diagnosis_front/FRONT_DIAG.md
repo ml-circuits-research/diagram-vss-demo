@@ -181,3 +181,5 @@ the verb to a value n-gram (`make all the` -> `all`) in `learn_values` before th
   route book was trained on. (2) (b) counts rule firings in text outside spans, which may include unannotated requests (see 2); baseline (b)
   is already 397 on fit. (3) Names for dev are the message names plus names in the wires, as `front.requests` does; fit (a) with this
   rule is also 328. (4) No parameter was searched; each variant was run once as defined.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/fix_p80_s0` (cf0545a). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

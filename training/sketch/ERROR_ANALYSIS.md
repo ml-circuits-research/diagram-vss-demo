@@ -129,3 +129,5 @@ an event token in one construction and not in another), not a "the reader has ne
 as built here do not reach the decision that makes the extra wires. Step 2 (centre attention: attachment of every word to a centre,
 trained on the spans) addresses cause 1 and 3 directly; whether a status that reads the predicate term should exist is a reader
 decision for the owner, not tuned here.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/final_p40` (cbe7971), `docs/model/fix_p80_s0` (cf0545a), `docs/model/neg_p80_s0` (6725953). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.

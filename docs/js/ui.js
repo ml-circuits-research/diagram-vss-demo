@@ -14,8 +14,8 @@ let cur = RD.rules, world = cur.world;               // the active tab
 const neural = NeuralKit.create(RD.neural.engine, RD.neural.formalize);
 let models = null, queue = Promise.resolve();
 // the VSS formalizer reads through the composer (docs/model/micro/registry.json: 7 micro-worlds, CandidateRouter, event hint;
-// training/sketch/COMBINED.md). ?vss=single in the URL reads with the single VSS model instead.
-const VSS_OPTS = new URLSearchParams(location.search).get('vss') === 'single' ? {} : { composer: true };
+// training/sketch/COMBINED.md).
+const VSS_OPTS = { composer: true };
 let view = 'auto';
 let hl = { shapes: new Set(), edges: new Set() }, hlTimer = null, drag = null;
 const history = []; let turnSeq = 0;               // every message with what each reader made of it; a bubble's "details" shows one
@@ -556,7 +556,7 @@ $('#player').addEventListener('click', async ev => {
 let vssState = 'idle', vssInfo = null, vssError = null, neuralBytes = 0, neuralLoadMs = 0;
 // neural: 'checking' (is it published? in the cache?), 'loading', 'ready', 'unpublished' (our model is not on this site), 'failed'
 let nState = 'checking', nError = null, nProg = { L: 0, T: 0 }, nFromCache = false, nToken = 0;
-const VSS_HINT = 51.5e6;   // the composer's files (7 worlds, fallback, cutters), measured 2026-11-02; the loaded size is measured again in the page
+const VSS_HINT = 38.0e6;   // the composer's files (7 worlds, cutters), measured 2026-11-02; the loaded size is measured again in the page
 const RULES_BYTES_INLINE = (() => { try { return [...document.scripts].filter(s => !s.src && /SOPKit/.test(s.textContent.slice(0, 400))).reduce((a, s) => a + s.textContent.length, 0); } catch (e) { return 0; } })();
 const rulesBytes = () => { try { const e = performance.getEntriesByType('resource').find(r => /\/js\/logic\.js$/.test(r.name)); return e && e.decodedBodySize ? e.decodedBodySize : RULES_BYTES_INLINE; } catch (e) { return RULES_BYTES_INLINE; } };
 const mb = b => b >= 1e6 ? (b / 1e6).toFixed(1) + ' MB' : (b / 1e3).toFixed(0) + ' KB';
@@ -618,7 +618,7 @@ function renderCard() {
   if (cur.id === 'rules' || isReady(cur) || sub !== 'drawing') { c.hidden = true; return; }
   c.hidden = false;
   c.className = 'rcard' + (cur.id === 'neural' && nState === 'unpublished' ? ' small' : '');
-  c.innerHTML = cur.id === 'vss' ? `<b>VSS reader</b>${vssState === 'failed' ? errHTML(vssError) : `<p>Loading ${VSS_OPTS.composer ? 'the 7 micro-worlds' : 'the model'} from this site (about ${mb0(VSS_HINT)})…</p>`}`
+  c.innerHTML = cur.id === 'vss' ? `<b>VSS reader</b>${vssState === 'failed' ? errHTML(vssError) : `<p>Loading the 7 micro-worlds from this site (about ${mb0(VSS_HINT)})…</p>`}`
     : `<b>Neural reader</b>${neuralBoxHTML()}`;
 }
 
@@ -629,8 +629,7 @@ async function ensureVSS(announce) {
   vssState = 'loading'; refreshReaders();
   try {
     if (!window.VSSFormalizer) await import(new URL('js/vss-formalizer.js', document.baseURI).href);
-    if (VSS_OPTS.composer) { await window.VSSFormalizer.loadComposerAt(); vssInfo = window.VSSFormalizer.composerInfo(); }
-    else vssInfo = await window.VSSFormalizer.load();
+    await window.VSSFormalizer.loadComposerAt(); vssInfo = window.VSSFormalizer.composerInfo();
     vssState = 'ready'; vssError = null;
     const fresh = !RD.vss.reads;
     if (announce !== false) sysNote((vssInfo.composer ? `VSS ready: ${vssInfo.worlds.length} micro-worlds, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
@@ -717,7 +716,7 @@ function setSub(k) { if (k === sub || !SUBS.some(x => x[0] === k)) return; sub =
 subbar.addEventListener('click', ev => { const b = ev.target.closest('[data-sub]'); if (b) setSub(b.dataset.sub); });
 rpanel.addEventListener('click', ev => { const b = ev.target.closest('[data-open]'); if (b) openSheet('settings', b.dataset.open); });
 function vssStatusHTML() {
-  return escH(vssState === 'ready' ? (vssInfo.composer ? `Ready: ${vssInfo.worlds.length} micro-worlds and the fallback, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
+  return escH(vssState === 'ready' ? (vssInfo.composer ? `Ready: ${vssInfo.worlds.length} micro-worlds, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
     : `Ready: D ${vssInfo.D}, ${vssInfo.bits || 8}-bit route book, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`) : vssState === 'failed' ? 'Failed: ' + (vssError && vssError.message || vssError) : `Loading (about ${mb0(VSS_HINT)} from this site)…`);
 }
 /** what every reader's Settings subtab starts with: its drawing and what it has read */
@@ -730,13 +729,10 @@ function renderReaderSettings(rd) {
   if (rd.id === 'rules') return `<h3 class="sub">Rules reader</h3>${readerFacts(rd)}
   <p class="intro">Hand-written code (<code>docs/js/logic.js</code>, ${mb(rulesBytes())}): it cuts the message into requests, finds the action by its cue words and answers the SOP questions from the words around it. Nothing to download and nothing to choose; it reads every message at once.</p>${sharedNote}`;
   if (rd.id === 'vss') {
-    const vrows = vssState === 'ready' && vssInfo.composer ? `<table class="kv">${vssInfo.worlds.map(w => `<tr><td><code>${escH(w.model)}</code></td><td>${escH(w.events.join(', '))}</td><td>${mb(w.bytes)}</td></tr>`).join('')}<tr><td><code>${escH(vssInfo.fallback || '')}</code></td><td>fallback: every action</td><td>${mb(vssInfo.fallbackBytes)}</td></tr><tr><td>cutters, registry</td><td>which world reads which request</td><td>${mb(vssInfo.cutterBytes)}</td></tr></table>` : '';
+    const vrows = vssState === 'ready' && vssInfo.composer ? `<table class="kv">${vssInfo.worlds.map(w => `<tr><td><code>${escH(w.model)}</code></td><td>${escH(w.events.join(', '))}</td><td>${mb(w.bytes)}</td></tr>`).join('')}<tr><td>cutters, registry</td><td>which world reads which request</td><td>${mb(vssInfo.cutterBytes)}</td></tr></table>` : '';
     return `<h3 class="sub">VSS reader</h3>${readerFacts(rd)}<div class="actions"><span class="status" id="vss-st">${vssStatusHTML()}</span></div>
-    ${VSS_OPTS.composer ? `<p class="intro">Seven small VSS readers (micro-worlds), each trained on a few actions of this demo’s SOP language (VSA route books, no transformer). A cutter splits the message into requests and names the worlds that could read each one; each of those worlds reads it, and the reading that fits the drawing and the conversation best is kept. In a world with several actions, a request without a verb (“Hub teal”) gets its action from a second cutter (the event hint). A request no world can read goes to a general fallback reader. The files come from this site and load when the page opens.</p>
-    ${vssState === 'ready' ? '<h3 class="sub">Worlds: actions and sizes</h3>' + vrows : ''}
-    <p class="note">Add <code>?vss=single</code> to the address (<a href="?vss=single">open it</a>) to read with the earlier single VSS model instead of the seven worlds.</p>`
-    : `<p class="intro">One VSS model trained on the sketch world generated from the SOP language (training/sketch). A sentence is normalized, read into an event with its roles in a few milliseconds, and turned into SOP wires.</p>
-    <p class="note">This page was opened with <code>?vss=single</code>. <a href="./">Open it without</a> to read with the seven micro-worlds.</p>`}`;
+    <p class="intro">Seven small VSS readers (micro-worlds), each trained on a few actions of this demo’s SOP language (VSA route books, no transformer). A cutter splits the message into requests and names the worlds that could read each one; each of those worlds reads it, and the reading that fits the drawing and the conversation best is kept. In a world with several actions, a request without a verb (“Hub teal”) gets its action from a second cutter (the event hint). The files come from this site and load when the page opens.</p>
+    ${vssState === 'ready' ? '<h3 class="sub">Worlds: actions and sizes</h3>' + vrows : ''}`;
   }
   const N = NeuralKit.NAMES, A = NeuralKit.ABOUT, info = nStatus ? nStatus.info : {};
   const size = id => { const b = NeuralKit.bytesOf(id); return b ? mb(b) : 'size not known yet'; };

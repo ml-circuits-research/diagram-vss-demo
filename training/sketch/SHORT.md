@@ -273,3 +273,5 @@ start with "could you / can you / I want you to", which the short data strips by
 - Texts were not touched; 25 rows name a second shape that is missing from `names` (copied unchanged); not a fix, listed in LABEL_FIXES_SHORT.md.
 - The sample's baseline extra was 302; the new run gives 336 (+11.3%, the limit was +10%).
 - Training the cutter took 82 seconds on CPU; no GPU.
+
+Models removed from the working tree on 2026-11-02 (cleanup; the numbers above stay valid): `docs/model/kinds_p80_s0` (a76b4e3), `docs/model/micro/cutter_worlds7.json` (d972545). To reproduce, restore one from the commit given: `git checkout <commit> -- docs/model/<path>`.
