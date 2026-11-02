@@ -98,11 +98,13 @@ def main():
         created = []
         for w in m["wires"]:
             if w.get("span") and w["span"] in m["text"]:
-                items.append((m, w, {"text": w["span"], "names": m.get("names") or [], "created": list(created), "wire": {"type": w["type"], "args": w["args"]}}))
+                items.append((m, w, {"text": w["span"], "names": m.get("names") or [], "groups": list(m.get("groups") or {}), "created": list(created), "wire": {"type": w["type"], "args": w["args"]}}))
             if w["type"] == "command" and w["args"].get("action") == "create" and w["args"].get("name"): created.append(w["args"]["name"])
+            # DIAGRAM_OPS=1: the name of a group made earlier in the message is a name too (DIAGRAM_OPS.md 6.2; off: as before)
+            elif os.environ.get("DIAGRAM_OPS") == "1" and w["type"] == "command" and w["args"].get("action") == "group" and w["args"].get("name"): created.append(w["args"]["name"])
     cnt = collections.Counter()
     for m, w, row in items:
-        toks, _ = nf(row)(row["text"], list(row["names"]) + row["created"])
+        toks, _ = nf(row)(row["text"], list(row["names"]) + (row.get("groups", []) if os.environ.get("DIAGRAM_OPS") == "1" else []) + row["created"])
         cnt.update(t for t in toks if FR.is_word(t))
     kinds = dict(base)
     # KINDMAP=<file.json> (off by default; diagnosis_kinds/KINDS.md): the kinds of the other words come from a kind map {"map": {word:
@@ -129,6 +131,14 @@ def main():
     SHAPE = os.environ.get("ROW_SHAPE", "")     # ROW_SHAPE (see shape_is): needs WORLD_EVENTS=connect; off by default
     if SHAPE and (SHAPE not in ("single", "lists", "chain") or WEV != {"connect"}): raise SystemExit("ROW_SHAPE=single|lists|chain needs WORLD_EVENTS=connect")
     rows, lost_why, dropped, by_ev = [], collections.Counter(), collections.Counter(), collections.Counter(); row_key = []
+    # the same losses grouped by the legend question of the value (ROUND2.md: values dropped per role kind); "verb" = no event token,
+    # "reference" = a name / pronoun / head word / $new / text not in the span (not a legend value)
+    lost_kind = collections.Counter()
+    def lost_kind_of(x):
+        if x.startswith("verb of"): return "verb"
+        if x in vk or x.isdigit(): return FR.value_kind(x)
+        if x.startswith("shape word"): return "SHAPE"
+        return "reference"
     for m, w, row in items:
         lost = []
         try: text, roles, ev = convert(row, lexicon, soft=True, lost=lost, norm=nf(row))
@@ -138,6 +148,7 @@ def main():
         if SHAPE and not shape_is(SHAPE, row["wire"]["args"]): continue   # ROW_SHAPE=single|lists|chain (connect only): rows of one construction
         if not (set(G.EVENTS[ev]) & set(text.split())) and not roles: dropped["no event token and no role (zero target)"] += 1; continue
         for x in lost: lost_why["event token not found" if x.startswith("verb of") else x.split(" ")[0]] += 1
+        for x in lost: lost_kind[lost_kind_of(x)] += 1
         rows.append((ev, text, roles, m["id"])); by_ev[ev] += 1; row_key.append(row.get("_key"))
     out = a.out
     for d in ("examples", "raw", "audit", "model", "runs", "versions", "requests"): os.makedirs(os.path.join(out, d), exist_ok=True)
@@ -219,10 +230,19 @@ def main():
            "Own-kind tokens: " + ", ".join(sorted(t for t, c in kinds.items() if c == t)), "",
            *(["Shared kinds (kind: words): " + "; ".join(f"{k}: {' '.join(sorted(w for w, x in kinds.items() if x == k))}"
                                                        for k in sorted({x for w, x in kinds.items() if x != w and w not in base})), ""] if KINDMAP else []),
+           "Values left out per legend question kind (value tokens not in the normalized span; rows kept): " + lost_kind_line(lost_kind), "",
            "Roles left out because their words are not in the normalized span (rows kept):", "", "| what | n |", "|---|---|"] + \
           [f"| {x} | {n} |" for x, n in lost_why.most_common(40)] + ["", "| event | rows |", "|---|---|"] + [f"| {e} | {n} |" for e, n in by_ev.most_common()]
     open(os.path.join(out, "REAL_WORLD.md") if CENTRES or WEV else os.path.join(HERE, "llm_train", "REAL_WORLD.md"), "w").write("\n".join(rep) + "\n")
     print("\n".join(rep[:9]))
+    print(f"Switches: VAL_PREC={FR.val_prec()} VAL_SUB={FR.val_sub()} CREATE_COLOR={os.environ.get('CREATE_COLOR', '') or 'attr'} "
+          f"DIAGRAM_OPS={os.environ.get('DIAGRAM_OPS', '') or '0'}; data folders {FR.train_dirs()}")
+    print("Values left out per legend question kind: " + lost_kind_line(lost_kind))
+
+
+def lost_kind_line(c):
+    vals = {k: n for k, n in c.items() if k not in ("verb", "reference")}
+    return f"values {sum(vals.values())} " + json.dumps(dict(sorted(vals.items()))) + f"; event token not found {c['verb']}; references {c['reference']}"
 
 
 if __name__ == "__main__":
