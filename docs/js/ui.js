@@ -7,6 +7,9 @@ const svg = $('#canvas'), layer = $('#layer'), framesG = $('#frames'), msgs = $(
 const escH = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const neural = NeuralKit.create(engine, sys.formalize);
 let mode = 'rules', models = null, loading = false, queue = Promise.resolve();
+// the VSS formalizer reads through the composer (docs/model/micro/registry.json: 7 micro-worlds, CandidateRouter, event hint;
+// training/sketch/COMBINED.md). ?vss=single in the URL reads with the single VSS model instead.
+const VSS_OPTS = new URLSearchParams(location.search).get('vss') === 'single' ? {} : { composer: true };
 let view = 'auto', focusCell = null;
 let last = [], pending = null, hl = { shapes: new Set(), edges: new Set() }, hlTimer = null, drag = null;
 const history = []; let turnSeq = 0;
@@ -232,7 +235,7 @@ async function run(text) {
       if (mode !== 'rules') {
         wait = typing(); setStatus('typing…');
         if ((mode === 'vss' || mode === 'compare') && await ensureVSS()) {
-          try { vOut = await window.VSSFormalizer.formalize(text, ctx, sys.formalize); } catch (e) { notes = notes.concat(['The VSS formalizer failed: ' + e.message]); }
+          try { vOut = await window.VSSFormalizer.formalize(text, ctx, sys.formalize, VSS_OPTS); } catch (e) { notes = notes.concat(['The VSS formalizer failed: ' + e.message]); }
           if (vOut && mode === 'vss') { nodes = vOut.nodes; notes = vOut.notes; ran = 'vss'; }
         }
         if ((mode === 'neural' || mode === 'compare') && models) {
@@ -632,7 +635,7 @@ async function runBench(btn) {
         const t0 = performance.now(); let nodes = [];
         try {
           if (f === 'rules') nodes = sys.formalize(r.text, ctx).nodes;
-          else if (f === 'vss') nodes = (await window.VSSFormalizer.formalize(r.text, ctx, sys.formalize)).nodes;
+          else if (f === 'vss') nodes = (await window.VSSFormalizer.formalize(r.text, ctx, sys.formalize, VSS_OPTS)).nodes;
           else nodes = (await neural.formalize(r.text, ctx)).nodes;
         } catch (e) { nodes = []; }
         const dt = performance.now() - t0; res[f].times.push(dt);

@@ -1,139 +1,88 @@
 {
- "about": "the registry of the composer (docs/js/vss-composer.js): micro-worlds (events -> model folder, relative to docs/model/), the cutter and the fallback world. Add a world: train it (training/sketch/train_micro.sh), then add one line {\"world\", \"events\", \"model\"} to worlds. \"router\": \"cutter\" = CandidateRouter (vss-composer.js head; owner 2026-11-01): the cutter (with world labels) proposes the top 3 worlds, each reads the unit, the fewest words not understood wins; ties and reference gaps go to the context filler (\"context\"). World ids must be the cutter grouping's ids.",
- "cutter": "micro/cutter_worlds16.json",
+ "about": "Default composer (2026-11-02, COMBINED.md): CandidateRouter on 7 worlds (cutter_worlds7), shapes7c (CREATE_COLOR.md) and the event cutter's hint H1 (EVENT_HINT.md). Sample of 1000 messages: 74.9 / 13.1 / 12.0 right / wrong / not done, extra 302. Previous default (G16, 2a8dc20): 67.7 / 12.7 / 19.7, extra 166.",
+ "router": "cutter",
+ "cutter": "micro/cutter_worlds7.json",
+ "context": "context/weights.json",
  "fallback": "kinds_p80_s0",
  "worlds": [
   {
-   "world": "create",
+   "world": "shapes",
    "events": [
-    "create"
-   ],
-   "model": "micro/create"
-  },
-  {
-   "world": "move",
-   "events": [
-    "move"
-   ],
-   "model": "micro/move_s"
-  },
-  {
-   "world": "graph",
-   "events": [
-    "path",
-    "reachable",
-    "connected"
-   ],
-   "model": "micro/graph"
-  },
-  {
-   "world": "facts",
-   "events": [
+    "create",
+    "set",
+    "resize",
     "fact",
     "rule"
    ],
-   "model": "micro/facts"
+   "model": "micro/shapes7c"
   },
   {
-   "world": "resize",
+   "world": "links",
    "events": [
-    "resize"
+    "connect",
+    "disconnect"
    ],
-   "model": "micro/resize"
+   "model": "micro/links7"
   },
   {
-   "world": "filters",
+   "world": "position",
+   "events": [
+    "move",
+    "swap",
+    "arrange",
+    "align",
+    "distribute",
+    "toFront",
+    "toBack"
+   ],
+   "model": "micro/position7"
+  },
+  {
+   "world": "graphq",
+   "events": [
+    "check",
+    "connected",
+    "path",
+    "reachable",
+    "cycle",
+    "exists"
+   ],
+   "model": "micro/graphq7"
+  },
+  {
+   "world": "questions",
    "events": [
     "count",
-    "exists",
-    "list"
+    "list",
+    "extreme",
+    "nearest",
+    "describe",
+    "neighbors",
+    "degree",
+    "property"
    ],
-   "model": "micro/filters"
+   "model": "micro/questions7"
   },
   {
-   "world": "superlatives",
+   "world": "manage",
    "events": [
-    "extreme",
-    "nearest"
+    "delete",
+    "duplicate",
+    "rename",
+    "label"
    ],
-   "model": "micro/superlatives"
+   "model": "micro/manage7"
   },
   {
    "world": "history",
    "events": [
     "undo",
     "redo",
-    "forget",
-    "cycle"
+    "forget"
    ],
-   "model": "micro/history"
-  },
-  {
-   "world": "describe",
-   "events": [
-    "describe",
-    "property",
-    "neighbors",
-    "degree"
-   ],
-   "model": "micro/describe"
-  },
-  {
-   "world": "naming",
-   "events": [
-    "rename",
-    "label"
-   ],
-   "model": "micro/naming"
-  },
-  {
-   "world": "targets",
-   "events": [
-    "delete",
-    "duplicate",
-    "toFront",
-    "toBack"
-   ],
-   "model": "micro/targets"
-  },
-  {
-   "world": "layout",
-   "events": [
-    "arrange",
-    "align",
-    "distribute"
-   ],
-   "model": "micro/layout"
-  },
-  {
-   "world": "set",
-   "events": [
-    "set"
-   ],
-   "model": "micro/set_s"
-  },
-  {
-   "world": "connect",
-   "events": [
-    "connect"
-   ],
-   "model": "micro/connect"
-  },
-  {
-   "world": "disconnect",
-   "events": [
-    "disconnect"
-   ],
-   "model": "micro/disconnect"
-  },
-  {
-   "world": "check",
-   "events": [
-    "check"
-   ],
-   "model": "micro/check"
+   "model": "micro/history7"
   }
  ],
- "router": "cutter",
- "context": "context/weights.json"
+ "event_cutter": "micro/cutter_events.json",
+ "event_hint": "H1"
 }
