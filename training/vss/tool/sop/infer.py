@@ -30,7 +30,7 @@ E = lambda ph: np.exp(1j * ph)
 # candidate matrix instead of once per call (the copy was ~60 % of a calibration read), and, inside a FAST_MEMO block (sop train's
 # calibration), best() remembers its result for the same candidate matrix and the same probe vector (the two reads of a calibration row
 # compute the same probes). Both give the same floats bit for bit: the same arrays go to the same BLAS call.
-FAST = os.environ.get("FAST") == "1"
+FAST = os.environ.get("FAST") in ("1", "2")
 _CONJ = {}          # id(M) -> (M, M.conj()); M is held so that its id is never reused
 _MEMO = None        # None = off; a dict {(id(M), probe bytes): result} while sop train's calibration reads one row
 

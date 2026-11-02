@@ -410,8 +410,26 @@ def export_routebook(m, path, lean=None):
 
 
 # ------------------------------------------------------------------ FAST=1 (training/vss/FAST_TRAIN.md; off by default)
-FAST = os.environ.get("FAST") == "1"
+FAST = os.environ.get("FAST") in ("1", "2")
+FAST2 = os.environ.get("FAST") == "2"      # FAST=2: FAST=1 + the chain recursions vectorised (V8.states_vec): equal within float tolerance, not bit for bit
 _FAST_FN, _FAST_ITEMS, _FAST_MEMO = None, None, True
+
+
+CHAIN_BYTES = 16 * 13     # bytes per (row, pair, dimension) one step holds at its peak, forward + backward (measured, FAST_TRAIN.md: ~12-14 complex128)
+
+
+def fast_micro_groups(lens, mem_mb, Tg, D=1024):
+    """FAST_MEM_MB: None when the batch's chain terms fit (estimated B x T(T-1)/2 x D x CHAIN_BYTES at its longest row T); else the rows
+    sorted by length and cut into consecutive groups that fit (a row alone always forms a group): [(row positions, t_used or None)]"""
+    est = lambda n, T: n * T * (T - 1) / 2 * D * CHAIN_BYTES / 2 ** 20
+    lens = np.asarray(lens); T = int(lens.max())
+    if est(len(lens), T) <= mem_mb: return None
+    out, cur = [], []
+    for r in np.argsort(-lens, kind="stable"):              # longest first: each group's own width is its first row's length
+        if cur and est(len(cur) + 1, int(lens[cur[0]])) > mem_mb: out.append(cur); cur = []
+        cur.append(int(r))
+    out.append(cur)
+    return [(sorted(g), (int(lens[g].max()) if int(lens[g].max()) < Tg else None)) for g in out]
 
 
 def fast_procs():
@@ -531,9 +549,9 @@ class Compact:
         self.m, self.lean, self.v8 = m, lean, v8; self.f2c = torch.tensor(lean.full2c, device=m.device); self.nh = len(lean.rows)
     @property
     def theta(self): return self.lean.theta
-    def states(self, cats, ids, mask, t_used=None):
+    def states(self, cats, ids, mask, t_used=None, held=None):
         import torch
-        if FAST: return self.states_fast(cats, ids, mask, t_used)
+        if FAST: return self.states_fast(cats, ids, mask, t_used, held)
         m = self.m; c = cats if t_used is None else cats[:, :t_used]
         tabs = {"ipath": m.ipath, "ibg0": m.ibg0, "ibg": m.ibg, "iA": m.iA, "iL": m.iL}
         read = torch.cat([m.ipath[c].reshape(-1), m.ibg0[c[:, :1]].reshape(-1), m.ibg[c[:, :-1], c[:, 1:]].reshape(-1),
@@ -546,12 +564,23 @@ class Compact:
         v.root_mask = torch.ones(len(held) + 1, 1, dtype=m.dtype, device=m.device)
         return self.v8.V8.states(v, cats, ids, mask, t_used=t_used)
 
-    def states_fast(self, cats, ids, mask, t_used=None):
-        """FAST=1: one view of the model for every batch instead of a phase table per batch (no torch.unique, no copy of the read rows, no
-        sync with the device): the index tables point into the held rows themselves, an entry no training sentence reads points to the
-        root row 0, which reads as 0 (root mask 0; LeanTheta holds it at 0) and gets no gradient. The same values and the same gradient
-        sums per row; V8.states_packed computes the chain pieces without the T x T tables."""
+    def states_fast(self, cats, ids, mask, t_used=None, held=None):
+        """FAST=1. With held (the batch's held rows, sorted, computed on the host before training: train_one): the batch's own small
+        phase table as states() builds it, but without torch.unique (a device -> host sync per step); the rows read only with weight 0
+        (padded positions) point to the zero row. Without held (checks after training): one view of the model for every batch: the
+        index tables point into the held rows themselves, an entry no training sentence reads points to the root row 0, which reads as 0
+        (root mask 0; LeanTheta holds it at 0) and gets no gradient. V8.states_packed (FAST=2: states_vec) computes the chain pieces
+        without the T x T tables."""
         import torch
+        fn = self.v8.V8.states_vec if FAST2 else self.v8.V8.states_packed
+        if held is not None:
+            m = self.m; h = held.shape[0]
+            c2b = torch.full((self.nh + 1,), h, dtype=torch.long, device=m.device); c2b[held] = torch.arange(h, device=m.device)
+            v = copy.copy(m)
+            for n in ("ipath", "ibg0", "ibg", "iA", "iL"): setattr(v, n, c2b[self.f2c[getattr(m, n)]])
+            v.theta = torch.cat([self.lean.theta[held], torch.zeros(1, self.lean.D, dtype=m.dtype, device=m.device)])
+            v.root_mask = torch.ones(h + 1, 1, dtype=m.dtype, device=m.device)
+            return fn(v, cats, ids, mask, t_used=t_used)
         v = getattr(self, "_fast_view", None)
         if v is None:
             m = self.m; f2c = self.f2c.clone(); f2c[f2c == self.nh] = 0
@@ -560,7 +589,7 @@ class Compact:
             v.root_mask = torch.ones(self.nh, 1, dtype=m.dtype, device=m.device); v.root_mask[0] = 0
             self._fast_view = v
         v.theta = self.lean.theta
-        return self.v8.V8.states_packed(v, cats, ids, mask, t_used=t_used)
+        return fn(v, cats, ids, mask, t_used=t_used)
 
 
 class Shim:
@@ -672,12 +701,26 @@ def train_one(a, legend, rows, splits, schema, seed, model_dir, run_dir):
             cA, iA_, mA = padf(cA), padf(iA_), padf(mA)
         tgA = torch.tensor(np.array([comp.wire(train[i]["wire"], train[i]["by"], train[i]["tokens"]) * (-1.0 if train[i].get("negative") else 1.0) for i in uniq]),
                            dtype=m.F.dtype, device=m.device)
-        lens = np.array([len(s_) for s_ in sents]); rowpos = np.array([pos_of[i] for i in order], dtype=np.int64)
+        lens = np.array([len(s_) for s_ in sents]); rowpos = torch.as_tensor(np.array([pos_of[i] for i in order], dtype=np.int64), device=m.device)
+        # the held rows each batch reads with a non-zero weight (reached_rows per row, as LeanTheta), as positions in lean.theta, for every
+        # batch at once: one array on the device, sliced per step (no host -> device copy, no torch.unique per step)
+        rowheld = [lean.full2c[reached_rows(m, [list(train[i]["tokens"])])] for i in uniq]
+        hb = [np.unique(np.concatenate([rowheld[pos_of[order[k]]] for k in range(i, min(i + a.batch, len(sents)))])) for i in range(0, len(sents), a.batch)]
+        hoff = np.concatenate([[0], np.cumsum([len(x) for x in hb])]); held_dev = torch.as_tensor(np.concatenate(hb), device=m.device); del hb, rowheld
         print(f"[fast] FAST=1: training loop with the rows encoded once ({len(uniq)} rows, targets {tgA.numel() * 16 / 2**20:.0f} MB on {m.device}), "
-              f"chain pieces packed (V8.states_packed), one model view for every batch, the loss read only at the log lines", flush=True)
+              f"chain pieces packed (V8.states_packed)" + (", chain recursions vectorised (FAST=2, V8.states_vec)" if FAST2 else "") + ", held rows per batch computed before training, the loss read only at the log lines", flush=True)
+        mem_mb = float(os.environ.get("FAST_MEM_MB") or 0); n_split = [0, 0]
+        if mem_mb: print(f"[fast] FAST_MEM_MB={mem_mb:g}: a batch whose chain terms would need more is computed in micro-batches of rows of "
+                          f"similar length (fast_micro_groups; the gradients summed: equal up to float order on those steps only)", flush=True)
         def batch_fn(i, j):
-            ix = torch.as_tensor(rowpos[i:j], device=m.device); T = int(lens[i:j].max())
+            ix = rowpos[i:j]; T = int(lens[i:j].max()); b = i // a.batch
             kw = {} if (getattr(a, "pad_to_longest", False) or T >= Tg) else {"t_used": T}
+            kw["held"] = held_dev[int(hoff[b]):int(hoff[b + 1])]
+            if mem_mb and not getattr(a, "pad_to_longest", False):
+                g = fast_micro_groups(lens[i:j], mem_mb, Tg, a.D)
+                n_split[0] += 1
+                if g is not None:
+                    n_split[1] += 1; kw["micro"] = [(torch.as_tensor(x, device=m.device), tu) for x, tu in g]
             return cA[ix], iA_[ix], mA[ix], tgA[ix], kw
     t0 = time.time()
     tm = Compact(m, lean, v8) if lean is not None else m
@@ -685,6 +728,7 @@ def train_one(a, legend, rows, splits, schema, seed, model_dir, run_dir):
                        resume=a.resume, tag=f" seed {seed}", batch_fn=batch_fn, n=len(sents), stop_after=getattr(a, 'stop_after', 0), loss_every_step=getattr(a, 'loss_every_step', False),
                        **({"lazy_loss": True} if fast_loop else {}))
     t_train = time.time() - t0
+    if fast_loop and mem_mb: print(f"[fast] FAST_MEM_MB: {n_split[1]} of {n_split[0]} steps computed in micro-batches", flush=True)
     os.makedirs(model_dir, exist_ok=True)
     export_routebook(m, os.path.join(model_dir, "routebook.npz"), lean)
     print(f"[export] route book written | {trainer.mem_line()}", flush=True)

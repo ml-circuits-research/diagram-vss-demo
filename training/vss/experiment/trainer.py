@@ -33,6 +33,23 @@ def mem_line():
     dev = f"torch alloc {torch.cuda.memory_allocated() / 1024**3:.2f} GB reserved {torch.cuda.memory_reserved() / 1024**3:.2f} GB" if torch.cuda.is_available() else "cpu"
     return f"RSS {_rss_gb():.2f} GB (peak {_hwm_gb():.2f} GB) | {dev} | MemAvailable {_avail_gb():.1f} GB"
 
+def micro_step(model, opt, cb, ib, mb, t, kw, groups):
+    """one Adam step on a batch computed in micro-batches (FAST_MEM_MB, tool/sop/train.py): groups = [(row index tensor, t_used or None)];
+    each group is a forward + backward of -sum(cos) / B (B = the batch's size), the gradients add up in .grad, then one opt.step(). The
+    same gradient as -cos.mean() over the whole batch up to the order of the float sums (the rows' contributions are added group by
+    group). The batch keeps its padded width (the gate products run over it, V8.states); each group is computed at its own longest row.
+    Returns (the batch's loss, all cos) detached."""
+    B = cb.shape[0]; opt.zero_grad(set_to_none=True); loss = 0; coss = []
+    for ix, tu in groups:
+        kg = {k: v for k, v in kw.items() if k != "t_used"}
+        if tu is not None: kg["t_used"] = tu
+        S = model.states(cb[ix], ib[ix], mb[ix], **kg); tg = t[ix]
+        cos = torch.real((torch.conj(tg) * S).sum(-1)) / (S.abs().pow(2).sum(-1).sqrt() * tg.abs().pow(2).sum(-1).sqrt())
+        lg = -cos.sum() / B; lg.backward(); loss = loss + lg.detach(); coss.append(cos.detach()); del S, cos, lg
+    opt.step()
+    return loss, torch.cat(coss)
+
+
 def train_loop(model, params, cats, ids, mask, tgt, batch, lr, log_every=500, ckpt=None, ckpt_every=2000, resume=False, tag="",
                batch_fn=None, n=None, stop_after=0, loss_every_step=False, lazy_loss=False):
     opt = torch.optim.Adam(params, lr=lr, betas=(0.9, 0.999), eps=1e-8); start = 0
@@ -46,9 +63,25 @@ def train_loop(model, params, cats, ids, mask, tgt, batch, lr, log_every=500, ck
     t0 = time.time(); last = None; fin = None
     print(f"[train{tag}] start: {mem_line()}", flush=True)
     for i in range(start, n, batch):
-        cb, ib, mb, t, kw = batch_fn(i, min(i + batch, n)); S = model.states(cb, ib, mb, **kw)
-        cos = torch.real((torch.conj(t) * S).sum(-1)) / (S.abs().pow(2).sum(-1).sqrt() * t.abs().pow(2).sum(-1).sqrt())
+        cb, ib, mb, t, kw = batch_fn(i, min(i + batch, n)); groups = kw.pop("micro", None)
         step = (i // batch) + 1
+        if groups:          # FAST_MEM_MB (tool/sop/train.py): a long batch in micro-batches, the gradients summed before the one Adam step
+            loss, cos = micro_step(model, opt, cb, ib, mb, t, kw, groups); S = None; last_t = loss
+            fin = torch.isfinite(cos).all() if fin is None else fin & torch.isfinite(cos).all()
+            if loss_every_step or step % log_every == 0 or (stop_after and step >= stop_after) or i + batch >= n:
+                assert bool(fin), f"non-finite loss at a step <= {step}: a target or state is NaN (check the world)"
+                last = last_t.item(); fin = None
+            with torch.no_grad(): model.theta[0] = 0
+            del S, t, cos, loss, cb, ib, mb
+            if loss_every_step: print(f"[train{tag}] step {step} loss {last!r}", flush=True)
+            if step % log_every == 0: print(f"[train{tag}] step {step} sent {i + batch}/{n} loss {last:.3f} ({time.time()-t0:.0f}s) | {mem_line()}", flush=True)
+            if ckpt and step % ckpt_every == 0:
+                torch.save({"step": i + batch, "params": [p.detach().clone() for p in params], "opt": opt.state_dict()}, ckpt)
+            if stop_after and step >= stop_after:
+                print(f"[train{tag}] stopped after {step} steps (stop_after)", flush=True); break
+            continue
+        S = model.states(cb, ib, mb, **kw)
+        cos = torch.real((torch.conj(t) * S).sum(-1)) / (S.abs().pow(2).sum(-1).sqrt() * t.abs().pow(2).sum(-1).sqrt())
         if lazy_loss:
             # FAST=1 (tool/sop/train.py): no host <-> device sync per step; the finiteness of every step's loss is accumulated on the device
             # and checked at the log lines and at the end (a non-finite step stops the run there, with the step range in the message)

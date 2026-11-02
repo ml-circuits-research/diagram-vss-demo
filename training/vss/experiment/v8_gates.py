@@ -28,6 +28,9 @@ import argparse, time
 import numpy as np, torch
 import v2, v5_scale as v5, v6_left as v6, v7_nested as v7
 
+_PAIR_CACHE = {}      # V8._pairs (FAST=1 / FAST=2): (T, device) -> the pair index tensors
+
+
 class V8(v6.V6):
     def __init__(self, world, D, rng, codes, device, gate_init="closed", hand=None):
         super().__init__(world, D, rng, v2.HAND_GATES(sorted(set(world.cat.values()))), codes, device)
@@ -161,9 +164,51 @@ class V8(v6.V6):
             terms = terms + addr
         return (terms * self.F[ids] * mask.unsqueeze(-1)).sum(1)
 
+    def states_vec(self, cats, ids, mask, t_used=None):
+        """FAST=2 (tool/sop/train.py, training/vss/FAST_TRAIN.md): states_packed with fewer operations per position (fewer kernel launches
+        on a GPU): the weights p(q, k) and pL(k, q) of every pair and the root / right products of every position are computed at once; the
+        right recursion keeps one loop over positions (addr_k needs addr_q, q < k) of 4 operations; the left re-addressing has no recursion
+        and is one product over the pairs summed per k (index_add). The same function; the floats are summed in another order, so the
+        result equals states() within float tolerance, not bit for bit."""
+        if "pos" in self.codes or getattr(self, "vo", None) is not None or getattr(self, "rel", None) is not None:
+            return self.states(cats, ids, mask, t_used=t_used)
+        cats_w, mask_w = cats, mask; Tw = cats.shape[1]
+        if t_used is not None and t_used < Tw: cats, ids, mask = cats[:, :t_used], ids[:, :t_used], mask[:, :t_used]
+        th = self.theta * self.root_mask; B, T = cats.shape
+        E = lambda ph: torch.polar(torch.ones_like(ph), ph)
+        terms = 0
+        if "path" in self.codes:
+            terms = terms + E(torch.cumsum(th[self.ipath[cats]] * mask.unsqueeze(-1), 1))
+        if "bigram" in self.codes:
+            ph = th[self.ibg[cats[:, :-1], cats[:, 1:]]]; ph = torch.cat([th[self.ibg0[cats[:, :1]]], ph], 1); terms = terms + E(ph)
+        if "chainL" in self.codes or "chain" in self.codes:
+            cdt = torch.complex128 if self.dtype == torch.float64 else torch.complex64
+            g = torch.sigmoid(self.logits)[cats_w] * mask_w; gT = g if T == Tw else g[:, :T]
+            u = torch.log1p(-g + 1e-9); Sx = torch.cat([torch.zeros(B, 1, dtype=self.dtype, device=self.device), torch.cumsum(u, 1)], 1)
+            pr = torch.exp(Sx[:, :T]).to(cdt)                                              # B x T : prod_{i<k} (1 - g_i)
+            addrs = [pr[:, 0].unsqueeze(-1).expand(B, th.shape[1])]
+            if T > 1:
+                lo, hi, perm, sz_a, sz_l = self._pairs(T)
+                p = (gT[:, lo] * torch.exp(Sx[:, hi] - Sx[:, lo + 1])).to(cdt)             # B x P : g_q prod_{q<i<k}(1-g_i), pair (q = lo, k = hi)
+                W = (p.unsqueeze(-1) * E(th[self.iA[cats[:, lo], cats[:, hi]]])).index_select(1, perm)   # by k
+                Wk = torch.split(W, sz_a, 1)
+                for k in range(1, T):
+                    addrs.append(pr[:, k].unsqueeze(-1) + (Wk[k - 1] * torch.stack(addrs, 1)).sum(1))
+            addr = torch.stack(addrs, 1)
+            if "chainL" in self.codes:
+                r = torch.exp(Sx[:, Tw:Tw + 1] - Sx[:, 1:T + 1]).to(cdt)                   # B x T : prod_{i>k} (1 - g_i), over the full width
+                addrL = r.unsqueeze(-1) * addr
+                if T > 1:
+                    pL = (gT[:, hi] * torch.exp(Sx[:, hi] - Sx[:, lo + 1])).to(cdt)        # pair (k = lo, q = hi): g_q prod_{k<i<q}(1-g_i)
+                    c = pL.unsqueeze(-1) * addr[:, hi] * E(th[self.iL[cats[:, hi], cats[:, lo]]])
+                    addrL = addrL.index_add(1, lo, c)
+                gk = gT.unsqueeze(-1).to(cdt); addr = gk * addr + (1 - gk) * addrL
+            terms = terms + addr
+        return (terms * self.F[ids] * mask.unsqueeze(-1)).sum(1)
+
     def _pairs(self, T):
         """(lo, hi, perm, sizes by k for A, sizes by k for L) of the pairs lo < hi of T positions, cached per T and device"""
-        c = self.__dict__.setdefault("_pair_cache", {}); key = (T, str(self.device))
+        c = _PAIR_CACHE; key = (T, str(self.device))                                       # module level: the per-batch views are copies
         if key not in c:
             lo, hi = torch.triu_indices(T, T, 1)                                          # row-major: lo ascending, then hi ascending
             perm = sorted(range(len(lo)), key=lambda i: (int(hi[i]), int(lo[i])))        # by k = hi, then q = lo
