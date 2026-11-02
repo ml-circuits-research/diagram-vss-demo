@@ -220,7 +220,7 @@ left unchanged), much like VSS worlds per family (<code>future-experiments.md</c
 
 /* ============================================================ knowing */
 page('knowing', 'Knowing what it does not know: VSS vs SOP-BERT',
-'SOP-BERT gets more requests right; VSS knows when it does not understand. In a drawing tool, a wrong action is worse than an action not done. This is why both readers are in the demo, and why the VSS reader is a research question worth asking.', `
+'In a drawing tool a wrong action is worse than an action not done, so a reader must know when it is unsure. We expected VSS to know this better. Measured: the VSS margin barely does, SOP-BERT’s probabilities do; a VSS confidence built from every step of its chain does best of the three. This page says how, and why.', `
 <h2 id="measured">The measured difference</h2>
 <div class="tw"><table>
 <thead><tr><th>Fixed 1000-message sample, 4858 requests</th><th class="num">Right</th><th class="num">Wrong</th><th class="num">Not done</th><th class="num">Extra</th></tr></thead>
@@ -256,13 +256,22 @@ Check” as not understood; the second it does not read at all and says so.</p>
 move: when the rest of a request looks like a known action (a shape and a place), the event hint and the world’s roles supply an action the
 verb did not give. Unknown words stay unknown, but a request around them can still be guessed. The experiment below compares how often each
 reader is wrong when it is confident.</p>
+<p class="callout warn"><b>What the measurement showed (below).</b> All of the above is true, and it is why VSS leaves more undone. But
+<i>among the requests VSS does execute</i>, its margin barely tells the right ones from the wrong ones. The margin compares the best reading with
+the runner-up <b>inside the world that was chosen</b>; it does not see whether the cut was right, whether the right world was chosen, or whether
+“it” was filled with the right shape. A request sent to the wrong world can still have one clearly best reading there: VSS is then sure of a
+wrong answer. Requests read by the links world are right only 54% of the time, and the margin does not show it (RISK_COVERAGE.md).</p>
 
-<h2 id="bert-doesnt">Why a fine-tuned transformer does not know it</h2>
+<h2 id="bert-doesnt">What a fine-tuned transformer knows, and what it does not</h2>
 <ul>
   <li><b>No unknown words.</b> Its tokenizer splits any word into word pieces it knows (an invented “zorble” becomes a few such pieces), and
-  every piece has a meaning. Nothing is ever “unknown”; an invented verb is read as the nearest thing it resembles.</li>
-  <li><b>Over-confident probabilities.</b> After fine-tuning, the scores of its heads are close to 0 or 1 even when it is wrong: a fine-tuned
-  classifier can read “draw a red circle” as a change of colour (set) with a probability of 0.999. A high score is not evidence of a right reading.</li>
+  every piece has a meaning. Nothing is ever “unknown”; an invented verb is read as the nearest thing it resembles. That is why it leaves only
+  2.8% undone.</li>
+  <li><b>Probabilities that rank well, but run high.</b> The expectation was that after fine-tuning its scores are close to 0 or 1 even when it is
+  wrong. Measured on our sample, they still <i>rank</i> its readings well: 89% right when it is at least 0.99 sure, 42% right under 0.5. They are
+  too high below 0.95 (a 0.8 is right less than 80% of the time), which a threshold chosen on held-out data takes care of (RISK_COVERAGE.md).</li>
+  <li><b>Its confidence covers every step.</b> We take the smallest probability among all its heads for the request: the action and every value
+  and every filled role. One head unsure is enough to lower it. The VSS margin covers only one step of a chain (above).</li>
   <li><b>Explanations are approximate.</b> Attention maps and gradient maps show which words weighed in a decision, roughly; they are not the
   reading itself, as a VSS frame is.</li>
 </ul>
@@ -275,7 +284,7 @@ reader is wrong when it is confident.</p>
   on is flagged.</li>
   <li><b>Several variants voting</b> (an ensemble, or dropout kept on at reading time): disagreement means uncertainty, at several times the cost.</li>
 </ul>
-<p>All three are approximations added on top of a model that was not built to abstain. In VSS, “I don’t know” is part of how it reads.</p>
+<p>The first one, a threshold to ask, is enough to make SOP-BERT about as careful as VSS (measured below), with no training.</p>
 
 <h2 id="experiment">The experiment: better, or bolder?</h2>
 <p>A reader that executes more requests will get more right <i>and</i> more wrong. To compare two readers fairly, let each one sort its own
@@ -325,15 +334,109 @@ requests it does execute, its margin barely separates right from wrong: its most
 as its middling ones. SOP-BERT's probabilities do separate them: 89% right when it is at least 0.99 sure, 42% under 0.5. So with one threshold
 on its own probabilities, and no training, SOP-BERT can ask instead of guessing: at 0.36 it goes from 80.8 / 16.5 / 2.8 (right / wrong / not
 done) to 79.6 / 14.3 / 6.1; at 0.6 to 75.1 / 12.0 / 12.9, close to VSS's 77.2 / 11.4 / 11.4. This threshold is not in the demo yet.</p>
-<p>What it means for VSS: its margin is not a good confidence. Other VSS signals, looked at only after the result, do better (residual 0.68,
-words not understood 0.66) but still below SOP-BERT. Finding a confidence that works is the open question for VSS; explainability alone does
-not give it.</p>
+<p>What it means for VSS: its margin is not a good confidence, because it sees one step of a chain (above).</p>
+</div>
+<div class="callout" id="vc-result">
+<p><b>Second result (2026-11-02, <code>training/sketch/VSS_CONFIDENCE.md</code>): a VSS confidence that sees the whole chain beats SOP-BERT’s.</b>
+The plan was written before measuring. For every executed request we took one or more numbers from every step: how sure the cut was, how
+clearly the chosen world beat the others, how much of the request the reading leaves unexplained (the residual), how many words it could
+not place or did not know, the context filler’s margin, and how often the chosen world is right in general. They were combined by a logistic
+regression fitted <b>only on the held-out split</b>, then measured once on the sample and the short commands.</p>
+<table>
+<tr><th>Confidence</th><th>Sample</th><th>Short, 299 held-out</th></tr>
+<tr><td>VSS margin (old)</td><td>0.59</td><td>0.57</td></tr>
+<tr><td>VSS, all steps combined</td><td><b>0.81</b></td><td><b>0.84</b></td></tr>
+<tr><td>SOP-BERT</td><td>0.72</td><td>0.82</td></tr>
+</table>
+<p>At equal wrong on the sample, VSS with the new confidence keeps far more right: at 4% wrong 60.9% right (old margin 38.5%, SOP-BERT
+45.9%); at 2% wrong 49.0% (old 10.1%, SOP-BERT 26.8%). On the short commands SOP-BERT stays ahead down to 6% wrong; VSS leads at 4% and 2%.</p>
+<p>Which numbers carry it, by weight: the residual (+1.26), how good the chosen world is in general (+1.26; links is right only 59% of the
+time), whether the world was the cutter’s first choice (+0.98), the share of words not understood (+0.85), the words left unplaced (+0.80).
+The roles’ own margin, the whole of the old confidence, gets almost no weight (+0.01). Each weight has a name, so a “not sure” can say why:
+“the words <i>…</i> were not understood”, or “this was read in the links world, which is often wrong”.</p>
+<p>Of VSS’s 552 wrong requests on the sample, 70.5% are flagged by at least one step; 29.5% are read confidently at every step and no number
+in the chain can catch them.</p>
+<p class="note"><b>Caveat on fairness:</b> VSS was trained on the sample’s messages and SOP-BERT never saw them (<a href="#help/chain-vs-one/fairness">One
+model or a chain</a>), so the two confidences are measured on different footing; the held-out split, where both saw similar text, gives the same
+order: 0.82 against 0.73. Not in the demo yet: the next step is to use it to decide when VSS asks instead of executing.</p>
 </div>
 
 <h2 id="both">Why both readers stay in the demo</h2>
-<p><b>SOP-BERT</b> for how much it gets right: it knows English beyond our data and reads the most requests right. <b>VSS</b> for being
-explainable and for saying when it does not know: every reading can be followed word by word, and what it cannot read it reports instead of
-guessing. Side by side, on the same cut, each reply shows what each approach does with the same words.</p>
+<p><b>SOP-BERT</b> for how much it gets right and, measured, for a confidence that ranks its readings. <b>VSS</b> for being explainable: every
+reading can be followed word by word, when it errs we can say at which step, and a confidence built from those steps ranks its readings
+better than SOP-BERT’s (above; <a href="#help/chain-vs-one">One model or a chain</a>). Side by side, on the same cut, each reply shows
+what each approach does with the same words.</p>
+`);
+
+/* ============================================================ chain vs one model */
+page('chain-vs-one', 'One model or a chain: why SOP-BERT reads more right',
+'VSS reads a message in a chain of separately trained steps; SOP-BERT does all of them in one model trained on the final result. That, and what a pretrained model already knows of English, explains most of the difference. The VSS core itself is the one of the paper.', `
+<h2 id="steps">The VSS chain</h2>
+<ol>
+  <li><b>Cut</b> the message into requests (the cutter of worlds).</li>
+  <li><b>Choose the world</b> of each piece: shapes, links, position, graph questions, questions, manage, history.</li>
+  <li><b>Read</b> the piece in that world: the action and its roles (the VSS reader, with the event hint).</li>
+  <li><b>Fill from context</b> what the piece leaves open: “it”, “them”, “the red circle” (the context filler).</li>
+  <li><b>Turn</b> the reading into SOP Lang wires for the drawing (the adapter).</li>
+</ol>
+<p>Each step is trained, or written, on its own goal: the cutter learns to cut, each world to read its own requests, the filler to rank
+candidates. None learns to repair the step before it. Errors multiply along the chain: as an illustration, not a measurement, four steps that are
+each right 93% of the time give 0.93<sup>4</sup> ≈ 75% for the whole. No step looks weak, the total is. Which step loses most is being measured
+(the round-2 analysis per component, ROUND2.md).</p>
+
+<h2 id="one">SOP-BERT: one model, trained on the result</h2>
+<ul>
+  <li><b>All steps at once.</b> One encoder with small heads cuts, names the action, reads the values and decides what each role is filled from, in
+  one pass; training corrects it on the final reading, so a head learns what the others need.</li>
+  <li><b>English it already knows.</b> It starts from DistilBERT, pretrained on a large amount of English text. A synonym or a phrasing missing
+  from our data still has a meaning for it. A VSS world knows only the words of our annotated requests, a few tens of thousands of sentences;
+  a new word is “unknown”. Most of the VSS “not done” comes from there.</li>
+  <li><b>The whole message in view.</b> When it decides what “it” means, it looks at the whole text; the VSS context filler sees only what the
+  steps before it produced.</li>
+</ul>
+
+<h2 id="fairness">Is the comparison fair?</h2>
+<p>Partly, and the unfairness favours VSS. There is no hidden test set (owner, 2026-11-01): the VSS worlds are trained on every annotated
+folder with spans, the sample’s messages included. SOP-BERT never saw any message of the sample: the 1000 sample ids are removed before its
+train/held-out split (<code>training/neural/make_data.py</code>). So on the sample, SOP-BERT reads text it never saw and VSS reads text it was
+trained on.</p>
+<p>A consequence: on the sample’s two benchmark folders (ids h- and s-) SOP-BERT is wrong on 21% and 28% of the requests, VSS on 12.9% and
+14.3% (RISK_COVERAGE.md). That is <b>not</b> evidence that VSS generalises better: the VSS worlds were trained on those very messages. A fair
+measure of both needs a fresh set of messages neither has seen; it is planned (<a href="#help/planned">In progress</a>).</p>
+
+<h2 id="core">Did we change the VSS core?</h2>
+<p>The reader comes from the paper’s repository (<code>vsa-semantic-space</code>), through <code>vss-demo</code>, copied here on 2026-10-30
+(<code>training/vss/PROVENANCE.md</code>). Its idea is unchanged:</p>
+<ul>
+  <li>every word has a fixed vector (its star);</li>
+  <li>its place in the sentence is a phase rotation, learned per pair of word kinds (the route book);</li>
+  <li>the sentence is the sum of its words’ vectors;</li>
+  <li>roles are read back by undoing the rotation and comparing with the candidates; calibrated thresholds decide what is present.</li>
+</ul>
+<p>What we changed inside it, on in the published worlds:</p>
+<div class="tw"><table>
+<thead><tr><th>Change</th><th>What it does</th><th>Kind of change</th></tr></thead>
+<tbody>
+<tr><td>Set roles</td><td>a role with several members: “connect A, B and C”</td><td>port: in the original Python, not in its browser reader</td></tr>
+<tr><td>Word kinds</td><td>which words share route rows: 106 → 59 kinds, chosen by a measured rule, same reading</td><td>a parameter (KINDS.md)</td></tr>
+<tr><td>Calibration</td><td>thresholds fitted on all training rows instead of 400</td><td>a fix (BETWEEN.md, ROUND2.md)</td></tr>
+<tr><td>Event hint</td><td>the cutter tells the reader which action to look for, used only when there is no verb</td><td>an input from outside (EVENT_HINT.md)</td></tr>
+</tbody></table></div>
+<p>Written, measured and left <b>off</b> in the published worlds: the centre reader (it failed its test), the sparse route book, the learned
+role exclusion (failed). The large difference from the paper is not inside the reader but around it: the paper reads one sentence, already
+isolated, of a known world; here the same reader is one step of the chain above. So 77.2% is the score of the chain, not of the reader alone,
+and it does not compare directly with the paper’s numbers.</p>
+<p>Whether our changes cost any correctness is being measured: the same world trained with the original <code>vss-demo</code> code and with
+ours, on the same data (UPSTREAM_AUDIT.md, running).</p>
+
+<h2 id="next">What follows for VSS</h2>
+<ul>
+  <li><b>A confidence that sees every step</b>: measured, it separates right from wrong better than SOP-BERT’s (0.81 against 0.72 on the
+  sample, 0.82 against 0.73 held-out) and keeps its explanations: every weight has a name (<a href="#help/knowing/vc-result">the result</a>).
+  Next: use it in the demo to decide when VSS asks.</li>
+  <li><b>Fewer separately trained steps</b>, if the per-component analysis shows that most is lost at the cut or the world choice: that is the
+  lesson of SOP-BERT.</li>
+</ul>
 `);
 
 /* ============================================================ limits today */
