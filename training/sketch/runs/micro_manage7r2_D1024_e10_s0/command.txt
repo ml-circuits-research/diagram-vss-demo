@@ -1,0 +1,2 @@
+sop train /home/claude/vss-box/diagram-vss-demo/training/sketch/worlds_micro/manage7r2 --D 1024 --seed 0 --seeds 1 --epochs 10 --shuffle --device cuda --candidate_sets catalog --n_eval 150 --eval_modes primary --n_cal 100000 --no_ckpt --star_version 2 --threshold_rule fit --calibrate_on_heldout_formulations --run_dir /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_manage7r2_D1024_e10_s0
+commit 09a2cfa

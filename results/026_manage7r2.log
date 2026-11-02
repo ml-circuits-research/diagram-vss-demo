@@ -1,0 +1,10 @@
+# World `real`: built from 8584 training messages (28417 requests with a span)
+
+WORLD_EVENTS=delete,duplicate,group,label,rename,ungroup: only the rows of these events; the legend lists only these events.
+
+FRONT_ROWS=world: the front end below is learned only from the 2003 requests of this world's events.
+
+Front end learned from the same messages: 28 value n-grams, 334 trigger rules, 0 segmenter weights; params {"seg_epochs": 8, "val_min_count": 5, "val_min_prec": 0.8, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}.
+2/2 files OK against legend(s) manage7r2 sha256:39d4725dae50…
+world manage7r2 [delete,duplicate,rename,label,group,ungroup] -> docs/model/micro/manage7r2 (2001 rows); registry line:
+{"world": "manage7r2", "events": ["delete", "duplicate", "rename", "label", "group", "ungroup"], "model": "micro/manage7r2"}

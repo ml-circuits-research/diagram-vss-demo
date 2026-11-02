@@ -1,0 +1,22 @@
+[splits] written to /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_manage7r2_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 84, heldout_formulations 78, train 1839
+[schema] roles ['object', 'name', 'text', 'quantity', 'members'] (core []), max depth 0, event negation False
+[guard] cuda allocator capped at 85% of 4 GB; watchdog: exit if MemAvailable < 1.5 GB or after 16.0 h
+[train] seed 0: 1839 training rows x 10 epoch(s) -> 18390 steps' sentences; D=1024; kinds 59; vocab 2552; predicate lemma not found in 940 targets
+[train] phase table: 1709 of 10720 rows reached by the training sentences, held and trained; the other 9011 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.83 GB (peak 0.88 GB) | torch alloc 0.05 GB reserved 0.06 GB | MemAvailable 8.6 GB
+[trace] text: rename n_web2 to n_spare
+[trace] tokens/kinds: rename/VERB n_web2/NAME to/to n_spare/NAME
+[trace] gold frame: {"event": "rename", "lemma": "rename", "neg": false, "roles": {"name": ["word", "n_spare"], "object": ["entity", "n_web2", null, null]}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 55.63 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[train seed 0] start: RSS 0.94 GB (peak 0.94 GB) | torch alloc 0.05 GB reserved 0.06 GB | MemAvailable 8.5 GB
+[train seed 0] step 500 sent 4000/18390 loss -0.883 (10s) | RSS 1.63 GB (peak 1.63 GB) | torch alloc 0.09 GB reserved 0.57 GB | MemAvailable 8.0 GB
+[train seed 0] step 1000 sent 8000/18390 loss -0.884 (19s) | RSS 1.63 GB (peak 1.63 GB) | torch alloc 0.09 GB reserved 0.57 GB | MemAvailable 8.1 GB
+[train seed 0] step 1500 sent 12000/18390 loss -0.905 (27s) | RSS 1.63 GB (peak 1.63 GB) | torch alloc 0.09 GB reserved 0.57 GB | MemAvailable 8.2 GB
+[train seed 0] step 2000 sent 16000/18390 loss -0.898 (35s) | RSS 1.63 GB (peak 1.63 GB) | torch alloc 0.09 GB reserved 0.57 GB | MemAvailable 8.2 GB
+[train seed 0] end: RSS 1.63 GB (peak 1.63 GB) | torch alloc 0.09 GB reserved 0.12 GB | MemAvailable 8.2 GB (40s)
+[export] route book written | RSS 1.63 GB (peak 1.73 GB) | torch alloc 0.05 GB reserved 0.12 GB | MemAvailable 8.2 GB
+[export] numpy reader vs torch states: max relative difference 6.52e-08 (float32 phases in the route book)
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.808 | residual 0.137
+[eval] seed 0 train (sample): FULL catalog candidates 0.840 | residual 0.145
+[mem] after seed 0: RSS 2.02 GB (peak 2.14 GB) | torch alloc 0.00 GB reserved 0.12 GB | MemAvailable 7.8 GB
+[done] model written to /home/claude/vss-box/diagram-vss-demo/training/sketch/worlds_micro/manage7r2/model; REPORT.md and metrics.json there; run log /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_manage7r2_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)
