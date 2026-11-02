@@ -129,5 +129,37 @@ const base = () => { const S = K.createSystem(); run(S, `@a command action=creat
     eq(`rules reader: ${t.padEnd(52)} ${got}`, got, want);
   }
 }
+
+// ---------- 4. changing a shape's kind: the rules reader gives action=set shape=..., and the engine redraws the shape ----------
+{
+  const T = [
+    ["change the shape of Box to a star", "@s1 command action=set shape=star target=Box", "star"],
+    ["transform Box into a hexagon", "@s1 command action=set shape=hexagon target=Box", "hexagon"],
+    ["convert Box to a square", "@s1 command action=set shape=square target=Box", "square"],
+    ["reshape Box as a rectangle", "@s1 command action=set shape=rectangle target=Box", "rectangle"],
+    ["Box should be a diamond instead", "@s1 command action=set shape=diamond target=Box", "diamond"],
+    ["swap Box's shape for a circle", "@s1 command action=set shape=circle target=Box", "circle"],
+    ["turn Box into a big red circle", "@s1 command action=set shape=circle size=large color=red target=Box", "circle"]
+  ];
+  for (const [t, want, shape] of T) {
+    const S = K.createSystem(); run(S, "@a command action=create shape=square name=Box at=200,200\n@b command action=create shape=square name=Hub at=500,200");
+    const nodes = S.formalize(t, { names: ["Box", "Hub"], last: [] }).nodes;
+    eq(`kind change: ${t}`, nodes.map(K.serialize).join(" ; "), want);
+    run(S, nodes.map(K.serialize).join("\n"));
+    eq(`  ... Box is now a ${shape}, Hub unchanged`, [S.world.find("Box").shape, S.world.find("Hub").shape], [shape, "square"]);
+  }
+  {
+    const S = K.createSystem(); run(S, "@a command action=create shape=square name=Box at=200,200\n@b command action=create shape=square name=Hub at=500,200\n@c command action=create shape=circle name=Dot at=300,400");
+    const nodes = S.formalize("make all the squares circles", { names: ["Box", "Hub", "Dot"], last: [] }).nodes;
+    eq("kind change: make all the squares circles", nodes.map(K.serialize).join(" ; "), "@m1 mention quantifier=all shape=square ; @s1 command action=set shape=circle target=$m1");
+    run(S, nodes.map(K.serialize).join("\n"));
+    eq("  ... both squares are circles", ["Box", "Hub"].map((n) => S.world.find(n).shape), ["circle", "circle"]);
+    const S2 = K.createSystem(); run(S2, "@a command action=create shape=square name=Box at=200,200\n@b command action=create shape=square name=Hub at=500,200");
+    const n2 = S2.formalize("change Hub and Box into triangles", { names: ["Box", "Hub"], last: [] }).nodes;
+    eq("kind change: change Hub and Box into triangles", n2.map(K.serialize).join(" ; "), "@s1 command action=set shape=triangle target=Hub,Box");
+    run(S2, n2.map(K.serialize).join("\n"));
+    eq("  ... both are triangles", ["Box", "Hub"].map((n) => S2.world.find(n).shape), ["triangle", "triangle"]);
+  }
+}
 console.log(`\n${n - fail}/${n} passed`);
 process.exit(fail ? 1 : 0);

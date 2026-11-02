@@ -575,7 +575,7 @@ const shapesPlugin = {
   name: 'shapes', title: 'Shapes',
   description: 'Create, delete, move, restyle, rename, label, duplicate and swap shapes.',
   legend: {
-    action: { values: { create: ['draw', 'create', 'add', 'make', 'put', 'place', 'insert', 'sketch', 'build', 'spawn', 'throw', 'slap', 'pop', 'stick', 'plonk'], delete: ['delete', 'remove', 'erase', 'drop', 'clear', 'wipe', 'reset', 'get rid of', 'kill', 'trash', 'axe', 'ditch', 'zap', 'banish', 'nuke'], move: ['move', 'shift', 'drag', 'push', 'nudge', 'slide', 'reposition', 'relocate', 'scoot', 'shove', 'park', 'tuck'], set: ['set', 'change', 'turn', 'color', 'colour', 'paint', 'fill', 'give', 'recolor', 'recolour'], resize: ['resize', 'grow', 'enlarge', 'shrink', 'scale'], rename: ['rename', 'call'], label: ['label', 'title', 'caption', 'write', 'inscribe', 'stamp', 'tag'], duplicate: ['duplicate', 'copy', 'clone', 'replicate', 'dupe'], swap: ['swap', 'exchange', 'trade', 'switch places', 'trade places'] } },
+    action: { values: { create: ['draw', 'create', 'add', 'make', 'put', 'place', 'insert', 'sketch', 'build', 'spawn', 'throw', 'slap', 'pop', 'stick', 'plonk'], delete: ['delete', 'remove', 'erase', 'drop', 'clear', 'wipe', 'reset', 'get rid of', 'kill', 'trash', 'axe', 'ditch', 'zap', 'banish', 'nuke'], move: ['move', 'shift', 'drag', 'push', 'nudge', 'slide', 'reposition', 'relocate', 'scoot', 'shove', 'park', 'tuck'], set: ['set', 'change', 'turn', 'color', 'colour', 'paint', 'fill', 'give', 'recolor', 'recolour', 'transform', 'convert', 'reshape', 'morph'], resize: ['resize', 'grow', 'enlarge', 'shrink', 'scale'], rename: ['rename', 'call'], label: ['label', 'title', 'caption', 'write', 'inscribe', 'stamp', 'tag'], duplicate: ['duplicate', 'copy', 'clone', 'replicate', 'dupe'], swap: ['swap', 'exchange', 'trade', 'switch places', 'trade places'] } },
     shape: { ask: 'What kind of shape?', kind: 'enum', values: SHAPE_VALUES },
     color: { ask: 'What color is it?', kind: 'enum', values: COLOR_VALUES },
     outline: { ask: 'What color is its outline?', kind: 'enum', values: OUTLINE_VALUES },
@@ -1400,12 +1400,14 @@ function makeFormalizer(engine) {
           if (action === 'delete' && new RegExp(`\\b(?:${EDGE_WORDS})\\b`, 'i').test(t)) action = 'disconnect';
           if (action === 'delete' && /\b(clear|wipe|reset)\b/i.test(verb) && !/⟦/.test(t)) { /* clear the canvas */ }
           if (verb === 'give' && !/\b(border|outline|stroke|label|colou?r)\b/i.test(after)) action = 'set';
+          if (action === 'swap' && /\b(?:shape|form)\b/i.test(after) && !/\bplaces?\b/i.test(after)) action = 'set';   /* "swap Box's shape for a circle": a change of kind, not an exchange of positions */
           if (groupAltRe) {   /* membership of an existing group: "add Done to Pipeline" -> group; "take Done out of Pipeline" -> ungroup */
             const into = new RegExp(`(?<!\\b(?:next|close|closer)\\s)\\b(?:to|into|in)\\s+(?:the\\s+)?(?:group\\s+)?(${groupAltRe})(?:\\s+group)?\\s*$`, 'i'), outOf = new RegExp(`\\b(?:from|out\\s+of)\\s+(?:the\\s+)?(?:group\\s+)?(${groupAltRe})(?:\\s+group)?\\s*$`, 'i');
             if (['create', 'move', 'put', 'set'].includes(action) && !articleNext && into.test(t)) { action = 'group'; C.args.name = nameIndex.get(t.match(into)[1].toLowerCase()); }
             else if (['delete', 'move', 'set'].includes(action) && outOf.test(t)) { action = 'ungroup'; C.t = C.t.replace(outOf, ' '); }
           }
         } else if (/^\s*(?:a|an|another|\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s/i.test(t)) action = 'create';
+        else if (!isQ && isKnown(firstTok) && new RegExp(`^\\s*\\S+\\s+(?:should|must|needs\\s+to|ought\\s+to)\\s+(?:be|become)\\s+(?:(?:an?|the)\\s+)?(?:(?:${colorRe}|${sizeRe})\\s+){0,3}(?:${nounRe})\\b`, 'i').test(t) && !/^\\s*\\S+\\s+(?:should|must)\\s+be\\s+(?:an?\\s+)?(?:${colorRe})\\s*$/i.test(t)) action = 'set';   /* "Box should be a diamond instead" */
         else if (CONNECT_ONLY && CONNECT_ONLY.test(t)) action = 'connect';   /* "Ingress to Pod1 and Pod2", "Syn goes to SynAck" */
         else if (PLACE_ONLY && PLACE_ONLY.test(t)) action = 'move';   /* "Kitchen at the left", "Pit just below the Stage": a placement */
         else if (/^\s*start over\b/i.test(t)) action = 'delete';
@@ -1444,6 +1446,13 @@ function makeFormalizer(engine) {
       take(new RegExp(`\\b(?:border|outline|stroke)\\s+(?:colou?r\\s+)?(?:to\\s+|of\\s+|in\\s+)?(${colorRe})\\b`, 'i'), m => C.args.outline = COLOR.get(m[1].toLowerCase())) ||
       take(/\b(?:no|without\s+(?:a|an|the)?)\s*(?:border|outline)s?\b|\bremove\s+(?:the\s+|its\s+)?(?:border|outline)\b/i, () => C.args.outline = 'none');
 
+      // ---- a change of kind: "change the shape of Box to a star", "turn Box into a big red circle", "make all the squares circles" ----
+      if (action === 'set' && isCmd) {
+        C.t = C.t.replace(/\b(?:the\s+)?(?:shape|form)\s+of\b/gi, ' ').replace(/[\u2019']s\s+(?:shape|form)\b/gi, ' ');
+        const newKind = (m, mods, noun) => { if (generic.has(noun.toLowerCase())) return false; C.args.shape = SHAPE.get(noun.toLowerCase()); C.t += ' ' + (mods || ''); return true; };
+        take(new RegExp(`\\b(?:into|to|as|for|be|become|becomes)\\s+(?:(?:an?|the)\\s+)?((?:(?:${colorRe}|${sizeRe})\\s+){0,3})(${nounRe})\\b(?:\\s+instead)?`, 'i'), m => { if (!newKind(m, m[1], m[2])) C.t += ' ' + m[0]; }) ||
+        take(new RegExp(`(?<=\\b(?:${nounRe})\\s+)((?:(?:${colorRe}|${sizeRe})\\s+){0,3})(${nounRe})\\s*$`, 'i'), m => { if (!newKind(m, m[1], m[2])) C.t += ' ' + m[0]; });
+      }
       // ---- descriptions become mention wires ----
       const mention = (quant, mods, noun, rec) => {
         const a = {};
