@@ -1,0 +1,28 @@
+[splits] written to /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_graphq7_t_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 166, heldout_formulations 158, train 2996
+[schema] roles ['object', 'shape', 'color', 'size', 'relation', 'landmark', 'landmark2', 'region', 'source', 'target', 'notcolor', 'comparison'] (core []), max depth 0, event negation False
+[guard] cuda allocator capped at 35% of 4 GB; watchdog: exit if MemAvailable < 1.5 GB or after 4.0 h
+[train] seed 0: 2996 training rows x 10 epoch(s) -> 29960 steps' sentences; D=1024; kinds 57; vocab 3169; predicate lemma not found in 1680 targets
+[train] phase table: 2275 of 10016 rows reached by the training sentences, held and trained; the other 7741 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.85 GB (peak 0.91 GB) | torch alloc 0.07 GB reserved 0.08 GB | MemAvailable 8.8 GB
+[trace] text: is this a cycle_q
+[trace] tokens/kinds: is/VERB this/c3_rules a/a cycle_q/VERB
+[trace] gold frame: {"event": "cycle", "lemma": "cycle_q", "neg": false, "roles": {}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 32.00 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[fast] FAST=1: training loop with the rows encoded once (2996 rows, targets 47 MB on cuda), chain pieces packed (V8.states_packed), one model view for every batch, the loss read only at the log lines
+[train seed 0] start: RSS 1.00 GB (peak 1.00 GB) | torch alloc 0.11 GB reserved 0.12 GB | MemAvailable 8.3 GB
+[train seed 0] step 500 sent 4000/29960 loss -0.657 (8s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.16 GB reserved 0.38 GB | MemAvailable 7.4 GB
+[train seed 0] step 1000 sent 8000/29960 loss -0.870 (17s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.16 GB reserved 0.38 GB | MemAvailable 6.9 GB
+[train seed 0] step 1500 sent 12000/29960 loss -0.829 (24s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.16 GB reserved 0.38 GB | MemAvailable 7.8 GB
+[train seed 0] step 2000 sent 16000/29960 loss -0.839 (31s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.16 GB reserved 0.38 GB | MemAvailable 7.6 GB
+[train seed 0] step 2500 sent 20000/29960 loss -0.839 (40s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.16 GB reserved 0.38 GB | MemAvailable 6.9 GB
+[train seed 0] step 3000 sent 24000/29960 loss -0.798 (49s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.16 GB reserved 0.38 GB | MemAvailable 7.0 GB
+[train seed 0] step 3500 sent 28000/29960 loss -0.914 (58s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.16 GB reserved 0.38 GB | MemAvailable 6.9 GB
+[train seed 0] end: RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.16 GB reserved 0.18 GB | MemAvailable 6.7 GB (62s)
+[export] route book written | RSS 1.69 GB (peak 1.78 GB) | torch alloc 0.11 GB reserved 0.18 GB | MemAvailable 6.6 GB
+[export] numpy reader vs torch states: max relative difference 8.54e-08 (float32 phases in the route book)
+[fast] FAST=1: calibration reads in 4 processes, each row read once, cleanups shared by its two reads
+[fast] calibration: 590 rows read, 400 background rows formalized in 11.9s
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.860 | residual 0.094
+[eval] seed 0 train (sample): FULL catalog candidates 0.947 | residual 0.072
+[mem] after seed 0: RSS 1.89 GB (peak 1.89 GB) | torch alloc 0.00 GB reserved 0.18 GB | MemAvailable 7.2 GB
+[done] model written to /home/claude/vss-box/diagram-vss-demo/training/sketch/worlds_micro/graphq7_t/model; REPORT.md and metrics.json there; run log /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_graphq7_t_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)

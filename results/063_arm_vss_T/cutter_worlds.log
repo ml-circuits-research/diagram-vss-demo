@@ -1,0 +1,17 @@
+llm_train/sonnet_msg: 600 messages, 600 used (0 with a wire whose span is missing)
+llm_train/haiku_msg: 600 messages, 600 used (0 with a wire whose span is missing)
+llm_train/sonnet_msg2: 600 messages, 600 used (0 with a wire whose span is missing)
+llm_train/haiku_msg2: 600 messages, 600 used (0 with a wire whose span is missing)
+llm_train/sonnet_long: 240 messages, 240 used (0 with a wire whose span is missing)
+llm_bench/fresh1/sonnet: 500 messages, 500 used (0 with a wire whose span is missing)
+llm_bench/fresh1/haiku: 500 messages, 500 used (0 with a wire whose span is missing)
+llm_train/sonnet_short: 1500 messages, 1500 used (0 with a wire whose span is missing)
+llm_train/haiku_short: 1500 messages, 1500 used (0 with a wire whose span is missing)
+llm_train/opus_train_a: 300 messages, 300 used (0 with a wire whose span is missing)
+llm_train/opus_train_b: 300 messages, 300 used (0 with a wire whose span is missing)
+llm_train/opus_train_c: 300 messages, 300 used (0 with a wire whose span is missing)
+llm_train/opus_train_d: 300 messages, 300 used (0 with a wire whose span is missing)
+llm_train/opus_tgt_1: 300 messages, 300 used (0 with a wire whose span is missing)
+llm_train/opus_tgt_2: 300 messages, 300 used (0 with a wire whose span is missing)
+requests per world label: shapes 7467, position 5181, questions 4873, links 4085, graphq 3410, manage 1464, history 770
+8440 messages, 289755 tokens, 47941 weights -> /home/claude/vss-box/diagram-vss-demo/docs/model/arms/T/cutter_worlds7s.json

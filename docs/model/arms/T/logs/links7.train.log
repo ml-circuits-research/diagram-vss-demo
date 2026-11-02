@@ -1,0 +1,11 @@
+[splits] written to /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_links7_t_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 212, heldout_formulations 204, train 4186
+[schema] roles ['text', 'source', 'target', 'style', 'arrow', 'edge', 'pairing', 'members', 'targets'] (core []), max depth 0, event negation False
+[guard] cuda allocator capped at 35% of 4 GB; watchdog: exit if MemAvailable < 1.5 GB or after 4.0 h
+[train] seed 0: 4186 training rows x 10 epoch(s) -> 41860 steps' sentences; D=1024; kinds 59; vocab 4904; predicate lemma not found in 1640 targets
+[train] phase table: 3672 of 10720 rows reached by the training sentences, held and trained; the other 7048 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.87 GB (peak 0.98 GB) | torch alloc 0.10 GB reserved 0.12 GB | MemAvailable 7.4 GB
+[trace] text: connect n_dept1 to the labs , both of them
+[trace] tokens/kinds: connect/VERB n_dept1/NAME to/to the/the labs/None ,/None both/c6_both of/of them/c27_them
+[trace] gold frame: {"event": "connect", "lemma": "connect", "neg": false, "roles": {"source": ["entity", "n_dept1", null, null], "target": ["entity", "them", null, null]}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 53.77 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[fast] FAST=1: training loop with the rows encoded once (4186 rows, targets 65 MB on cuda), chain pieces packed (V8.states_packed), one model view for every batch, the loss read only at the log lines
+[train seed 0] start: RSS 1.04 GB (peak 1.04 GB) | torch alloc 0.17 GB reserved 0.18 GB | MemAvailable 7.4 GB

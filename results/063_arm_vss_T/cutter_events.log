@@ -1,0 +1,15 @@
+llm_train/sonnet_msg: 600 messages, 600 used (0 with a wire whose span is missing)
+llm_train/haiku_msg: 600 messages, 600 used (0 with a wire whose span is missing)
+llm_train/sonnet_msg2: 600 messages, 600 used (0 with a wire whose span is missing)
+llm_train/haiku_msg2: 600 messages, 600 used (0 with a wire whose span is missing)
+llm_train/sonnet_long: 240 messages, 240 used (0 with a wire whose span is missing)
+llm_bench/fresh1/sonnet: 500 messages, 500 used (0 with a wire whose span is missing)
+llm_bench/fresh1/haiku: 500 messages, 500 used (0 with a wire whose span is missing)
+llm_train/opus_train_a: 300 messages, 300 used (0 with a wire whose span is missing)
+llm_train/opus_train_b: 300 messages, 300 used (0 with a wire whose span is missing)
+llm_train/opus_train_c: 300 messages, 300 used (0 with a wire whose span is missing)
+llm_train/opus_train_d: 300 messages, 300 used (0 with a wire whose span is missing)
+llm_train/opus_tgt_1: 300 messages, 300 used (0 with a wire whose span is missing)
+llm_train/opus_tgt_2: 300 messages, 300 used (0 with a wire whose span is missing)
+requests per world label: set 4232, connect 3672, move 3123, extreme 1242, create 1188, check 1137, count 856, fact 829, path 585, connected 557, list 543, nearest 491, arrange 489, rename 378, duplicate 348, property 328, resize 315, describe 289, exists 284, neighbors 281, undo 279, degree 250, delete 240, align 239, cycle 228, label 219, distribute 207, swap 203, rule 191, toFront 188, toBack 180, disconnect 180, reachable 171, forget 162, redo 146
+5440 messages, 272471 tokens, 57252 weights -> /home/claude/vss-box/diagram-vss-demo/docs/model/arms/T/cutter_events.json
