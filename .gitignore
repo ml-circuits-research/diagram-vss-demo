@@ -11,3 +11,4 @@ research/attention/**/*.pt
 training/sketch/worlds_centres/
 .claude/worktrees/
 training/sketch/worlds_micro/
+training/laptop/node_modules/
