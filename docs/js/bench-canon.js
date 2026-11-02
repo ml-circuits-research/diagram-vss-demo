@@ -67,7 +67,7 @@ export function canon(main, nodes) {
 /** the gold side of the same form: the args of a gold wire (values string or array) -> key -> string, same order-free rule as canon */
 export function canonWant(type, args) {
   const el = {};
-  for (const [k, v] of Object.entries(args || {})) el[k] = (Array.isArray(v) ? v : parts(v)).map((x) => String(x).toLowerCase());
+  for (const [k, v] of Object.entries(args || {})) { if (SKIP.has(k)) continue; el[k] = (Array.isArray(v) ? v : parts(v)).map((x) => String(x).toLowerCase()); }   // the gold skips what canon skips (scale)
   return finish(type, el);
 }
 /** score one formalizer output against a row (a row, or a wire of a `wires` row, holds its gold arguments in `gold` or `args`): { ok, per: {key: {got, want, ok}} }. A row with `wires` (a message of several clauses)
