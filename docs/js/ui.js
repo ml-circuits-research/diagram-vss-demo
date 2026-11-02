@@ -1,18 +1,27 @@
 (function () {
 'use strict';
-const K = SOPKit, sys = K.createSystem(), world = sys.world, engine = sys.engine;
+const K = SOPKit;
 const $ = s => document.querySelector(s);
 const NS = 'http://www.w3.org/2000/svg';
 const svg = $('#canvas'), layer = $('#layer'), framesG = $('#frames'), msgs = $('#msgs');
 const escH = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const neural = NeuralKit.create(engine, sys.formalize);
-let mode = 'rules', models = null, loading = false, queue = Promise.resolve();
+// Three readers turn each message into SOP wires. Each has its own system (world, engine, undo/redo), changed only by its own readings;
+// the canvas shows the active tab's world. Every message goes to every reader that is loaded.
+const READERS = [['rules', 'Rules'], ['vss', 'VSS'], ['neural', 'Neural']].map(([id, label]) => Object.assign({ id, label, last: [], pending: null, focusCell: null, reads: 0, lastRead: null }, K.createSystem()));
+const RD = Object.fromEntries(READERS.map(r => [r.id, r]));
+const sys = RD.rules, engine = sys.engine;          // the legend, plugins and SOP rendering are the same in every reader; the Rules system serves them
+let cur = RD.rules, world = cur.world;               // the active tab
+const neural = NeuralKit.create(RD.neural.engine, RD.neural.formalize);
+let models = null, queue = Promise.resolve();
 // the VSS formalizer reads through the composer (docs/model/micro/registry.json: 7 micro-worlds, CandidateRouter, event hint;
 // training/sketch/COMBINED.md). ?vss=single in the URL reads with the single VSS model instead.
 const VSS_OPTS = new URLSearchParams(location.search).get('vss') === 'single' ? {} : { composer: true };
-let view = 'auto', focusCell = null;
-let last = [], pending = null, hl = { shapes: new Set(), edges: new Set() }, hlTimer = null, drag = null;
+let view = 'auto';
+let hl = { shapes: new Set(), edges: new Set() }, hlTimer = null, drag = null;
 const history = []; let turnSeq = 0;
+// browser storage is a convenience only: every access is guarded and the page works without it
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { } } };
+const NOTNOW = 'sop.neural.notNow', CHOICE = 'sop.neural.classifier';
 const clock = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
 /* ---------------- canvas ---------------- */
@@ -91,7 +100,7 @@ function renderCanvas() {
   const narrow = svg.clientWidth > 0 && svg.clientWidth < 640;
   const focus = view === 'focus' || (view === 'auto' && narrow);
   if (focus) {
-    const fc = focusCell || S.frame || { x: 0, y: 0 };
+    const fc = cur.focusCell || S.frame || { x: 0, y: 0 };
     const inside = S.shapes.filter(s => { const c = K.cellOf(s.x, s.y); return c.x === fc.x && c.y === fc.y; });
     let bx1 = fc.x, by1 = fc.y, bx2 = fc.x + 800, by2 = fc.y + 500;
     if (inside.length) {
@@ -145,7 +154,7 @@ svg.addEventListener('pointermove', ev => {
 });
 const endDrag = () => {
   if (!drag) return; const d = drag; drag = null;
-  if (d.moved) { world.commit(d.before); last = [d.name]; }
+  if (d.moved) { world.commit(d.before); cur.last = [d.name]; updateTabs(); }
 };
 svg.addEventListener('pointerup', endDrag); svg.addEventListener('pointercancel', endDrag);
 
@@ -158,7 +167,8 @@ function meBubble(text) {
 }
 function botBubble(o) {
   const d = document.createElement('div'); d.className = 'b bot' + (o.err ? ' err' : '');
-  let h = `<div class="txt">${escH(o.text)}</div>`;
+  let h = o.lines ? o.lines.map(p => `<div class="rl${p.err ? ' err' : ''}${p.off ? ' off' : ''}"><b>${escH(p.rd.label)}${p.ms != null ? ` · ${fmtMs(p.ms)}` : ''}:</b> <span class="t">${escH(p.off || p.text)}</span>${p.sub ? `<div class="sub">${escH(p.sub)}</div>` : ''}</div>`).join('')
+    : `<div class="txt">${escH(o.text)}</div>`;
   if (o.sub) h += `<div class="sub">${escH(o.sub)}</div>`;
   if (o.chips && o.chips.length) h += `<div class="chips">${o.chips.map(c => `<button type="button" data-pick="${escH(c)}">${escH(c)}</button>`).join('')}</div>`;
   h += `<div class="meta">${o.tag ? `<span class="tag2">${escH(o.tag)}</span>` : ''}${o.turn ? `<button type="button" data-turn="${o.turn}">details</button>` : ''}<time>${clock()}</time></div>`;
@@ -169,7 +179,14 @@ function botBubble(o) {
 function sysNote(text) { const d = document.createElement('div'); d.className = 'sys'; d.textContent = text; msgs.appendChild(d); scrollDown(); }
 function typing() { const d = document.createElement('div'); d.className = 'b bot'; d.innerHTML = '<div class="typing" aria-label="Thinking"><i></i><i></i><i></i></div>'; msgs.appendChild(d); scrollDown(); return d; }
 function setStatus(t) { $('#status').textContent = t; }
-const idleStatus = () => ({ rules: 'draws what you write', vss: 'reading you with the VSS model', neural: 'reading you with a neural model', compare: 'comparing every reader' })[mode];
+const fmtMs = ms => ms < 10 ? ms.toFixed(1) + ' ms' : Math.round(ms) + ' ms';
+const isReady = rd => rd.id === 'rules' || (rd.id === 'vss' ? vssState === 'ready' : !!models && nState === 'ready');
+/** what a reader that is not loaded says instead of an answer */
+function offText(rd) {
+  if (rd.id === 'vss') return vssState === 'failed' ? 'not available (it could not be loaded)' : 'still loading, did not read this';
+  return { checking: 'checking the browser cache, did not read this', loading: 'still loading, did not read this', failed: 'not available (loading failed; see the Neural tab)' }[nState] || 'not downloaded (see the Neural tab)';
+}
+const idleStatus = () => 'reads with ' + listing(READERS.filter(isReady).map(r => r.label));
 msgs.addEventListener('click', ev => {
   const p = ev.target.closest('[data-pick]'); if (p) { submit(p.dataset.pick); return; }
   const t = ev.target.closest('[data-turn]'); if (t) openSheet('settings', 'history', +t.dataset.turn);
@@ -215,48 +232,54 @@ function summarize(result) {
 }
 
 /* ---------------- running a turn ---------------- */
-function submit(text) { queue = queue.then(() => run(text)).catch(e => { console.error(e); botBubble({ text: 'Something went wrong: ' + e.message, err: true }); }); return queue; }
-async function run(text) {
+function submit(text, sop) { if (typeof sop !== 'string') sop = undefined; queue = queue.then(() => run(text, sop)).catch(e => { console.error(e); botBubble({ text: 'Something went wrong: ' + e.message, err: true }); }); return queue; }
+async function run(text, sop) {
   text = String(text).trim(); if (!text) return;
   meBubble(text);
-  let nodes = null, notes = [], raw = false, overrides = {}, nOut = null, vOut = null, ran = 'rules', wait = null;
-  if (pending) {
-    const want = text.toLowerCase().replace(/^(?:i\s+mean|use|the\s+one\s+(?:named|called))\s+/, '').replace(/[.!]+$/, '').trim();
-    const pick = pending.candidates.find(c => c.toLowerCase() === want);
-    if (pick) { nodes = pending.nodes; overrides = Object.assign({}, pending.overrides, { [pending.wire]: [pick] }); }
-    pending = null;
+  const id = ++turnSeq, rec = { id, time: clock(), text, raw: !!sop || text.startsWith('@'), sop: sop || text, button: !!sop, readers: {}, off: {}, ran: [] }; history.push(rec);
+  if (rec.raw) { try { K.parse(rec.sop); } catch (e) { rec.error = e; botBubble({ text: e.message, err: true, turn: id, tag: 'SOP' }); return; } }
+  // the readers that read this message are fixed now: one that finishes loading meanwhile starts from the Rules drawing instead
+  const live = READERS.filter(isReady);
+  // a reply to a question ("which Hub?") goes to the readers that asked it; the others have nothing to choose
+  const want = text.toLowerCase().replace(/^(?:i\s+mean|use|the\s+one\s+(?:named|called))\s+/, '').replace(/[.!]+$/, '').trim();
+  const picks = new Map(live.map(rd => [rd, rd.pending && rd.pending.candidates.find(c => c.toLowerCase() === want)]));
+  const anyPick = [...picks.values()].some(Boolean);
+  const wait = live.length > 1 ? typing() : null; if (wait) setStatus('typing…');
+  const parts = [];
+  for (const rd of READERS) {
+    if (!live.includes(rd)) { rec.off[rd.id] = offText(rd); parts.push({ rd, off: rec.off[rd.id] }); continue; }
+    const pend = rd.pending; rd.pending = null;
+    const p = anyPick && !picks.get(rd) ? { text: 'No question was open here; nothing to choose.' } : await readWith(rd, text, rec, picks.get(rd) ? { pend, pick: picks.get(rd) } : null);
+    rec.ran.push(rd.id); parts.push(Object.assign(p, { rd }));
   }
-  const id = ++turnSeq, rec = { id, time: clock(), text, ran: 'rules' }; history.push(rec);
-  if (!nodes) {
-    if (text.startsWith('@')) { raw = true; try { nodes = K.parse(text); } catch (e) { rec.error = e; botBubble({ text: e.message, err: true, turn: id, tag: 'SOP' }); return; } }
-    else {
-      const ctx = { names: world.state.shapes.map(s => s.name), last };
-      const f = sys.formalize(text, ctx); nodes = f.nodes; notes = f.notes;
-      if (mode !== 'rules') {
-        wait = typing(); setStatus('typing…');
-        if ((mode === 'vss' || mode === 'compare') && await ensureVSS()) {
-          try { vOut = await window.VSSFormalizer.formalize(text, ctx, sys.formalize, VSS_OPTS); } catch (e) { notes = notes.concat(['The VSS formalizer failed: ' + e.message]); }
-          if (vOut && mode === 'vss') { nodes = vOut.nodes; notes = vOut.notes; ran = 'vss'; }
-        }
-        if ((mode === 'neural' || mode === 'compare') && models) {
-          try { nOut = await neural.formalize(text, ctx); } catch (e) { notes = notes.concat(['The neural formalizer failed: ' + e.message]); }
-          if (nOut && mode === 'neural') { nodes = nOut.nodes; notes = nOut.notes.filter(n => !/couldn't find an action/.test(n)); ran = 'neural'; }
-        }
-        if (mode === 'neural' && !models) notes = notes.concat([neuralLoading ? 'The neural models are still loading; the rules read this message.' : 'The neural models are not loaded; the rules read this message.']);
-        if (mode === 'vss' && !vOut) notes = notes.concat(['The VSS model is not available; the rules read this message.']);
-        setStatus(idleStatus());
-      }
-    }
-  }
-  Object.assign(rec, { nodes, notes, raw, neural: nOut, vss: vOut, ran });
+  setStatus(idleStatus());
+  botBubble({ lines: parts, chips: [...new Set(parts.flatMap(p => p.chips || []))], turn: id, tag: rec.button ? 'button' : rec.raw ? 'SOP' : null, replace: wait });
+  const mine = parts.find(p => p.rd === cur);
+  if (mine && mine.highlight) flash(mine.highlight); else renderCanvas();
+  updateTabs(); renderSopBar();
+}
+/** one reader reads one message into its own world; returns its line of the reply ({text, sub, err, chips, ms, highlight}) */
+async function readWith(rd, text, rec, pk) {
+  const r = { nodes: [], notes: [] }; rec.readers[rd.id] = r;
+  let overrides = {};
+  const ctx = { names: rd.world.state.shapes.map(s => s.name), last: rd.last };
+  // the time is the formalizing only (text -> SOP wires), not the engine or the drawing; VSS and Neural are loaded before they read
+  const t0 = performance.now();
+  try {
+    if (pk) { r.nodes = pk.pend.nodes; overrides = Object.assign({}, pk.pend.overrides, { [pk.pend.wire]: [pk.pick] }); }
+    else if (rec.raw) r.nodes = K.parse(rec.sop);   // SOP: nothing to formalize, no time
+    else if (rd.id === 'rules') { const f = rd.formalize(text, ctx); r.ms = performance.now() - t0; r.nodes = f.nodes; r.notes = f.notes; }
+    else if (rd.id === 'vss') { const v = await window.VSSFormalizer.formalize(text, ctx, rd.formalize, VSS_OPTS); r.ms = performance.now() - t0; r.vss = v; r.nodes = v.nodes; r.notes = v.notes; }
+    else { const n = await neural.formalize(text, ctx); r.ms = performance.now() - t0; r.neural = n; r.nodes = n.nodes; r.notes = n.notes.filter(x => !/couldn't find an action/.test(x)); }
+  } catch (e) { r.error = e; r.ms = performance.now() - t0; return { text: `The ${rd.label} reader failed: ${e.message}`, err: true, ms: r.ms }; }
+  const ms = r.ms, nodes = r.nodes, notes = r.notes, world = rd.world, engine = rd.engine;
+  rd.reads++; rd.lastRead = { turn: rec.id, nodes };
   const unread = notes.filter(n => /couldn't find an action/.test(n)).map(n => (n.match(/in "(.*)"\.?$/) || [])[1]).filter(Boolean);
   if (!nodes.length) {
-    const unknown = unread.length;
-    rec.error = new K.SOPError('No wires.');
-    botBubble({ text: unknown ? 'I didn’t get what to do there. Try something like “draw a red circle next to Start” or “what is connected to Start?”.' : 'I couldn’t turn that into anything I can do.', err: true, turn: id, replace: wait });
-    return;
+    r.error = new K.SOPError('No wires.');
+    return { text: unread.length ? 'I didn’t get what to do there. Try something like “draw a red circle next to Start” or “what is connected to Start?”.' : 'I couldn’t turn that into anything I can do.', err: true, ms };
   }
-  const result = engine.run(nodes, { overrides }); rec.result = result;
+  const result = engine.run(nodes, { overrides }); r.result = result;
   // do what was understood; ask about the rest (a question never blocks the other wires of the message)
   const asks = [], problems = [];
   let clar = null;
@@ -266,49 +289,54 @@ async function run(text) {
       clar = e;
       const keep = new Set([e.wire, ...er.dependents.map(n => n.id)]);
       const need = new Set(); const refsOf = v => K.isRef(v) ? [v.ref] : Array.isArray(v) ? v.flatMap(refsOf) : [];
-      for (const n of nodes) if (keep.has(n.id)) Object.values(n.args).flatMap(refsOf).forEach(r => need.add(r));
+      for (const n of nodes) if (keep.has(n.id)) Object.values(n.args).flatMap(refsOf).forEach(x => need.add(x));
       const ov = Object.assign({}, overrides); for (const st of result.steps) if (need.has(st.node.id) && !keep.has(st.node.id) && st.value !== undefined) ov[st.node.id] = st.value;
-      pending = { nodes: nodes.filter(n => keep.has(n.id) || need.has(n.id)), wire: e.wire, candidates: e.candidates, overrides: ov };
+      rd.pending = { nodes: nodes.filter(n => keep.has(n.id) || need.has(n.id)), wire: e.wire, candidates: e.candidates, overrides: ov };
     } else if (!(e instanceof K.Clarify)) problems.push(e.message + (er.dependents.length ? ` (so I also skipped ${er.dependents.length} step${er.dependents.length > 1 ? 's' : ''} that needed it)` : ''));
   }
   for (const u of unread) asks.push(`I didn’t understand “${u}”. Could you say it another way?`);
   const anyDone = result.steps.some(st => !st.error && !st.skipped && st.node.type !== 'mention');
-  if (!anyDone && !clar && !problems.length && !asks.length) { botBubble({ text: 'Done.', turn: id, replace: wait }); return; }
+  if (!anyDone && !clar && !problems.length && !asks.length) return { text: 'Done.', ms };
   const highlight = { shapes: [], edges: [] }, touched = [];
   result.steps.forEach(s => {
     s.patches.forEach(p => { if (p.op === 'add') touched.push(p.shape.name); else if (p.op === 'set') touched.push(p.name); else if (p.op === 'rename') touched.push(p.to); });
     if (s.highlight) { highlight.shapes.push(...(s.highlight.shapes || [])); highlight.edges.push(...(s.highlight.edges || [])); }
   });
-  const live = [...new Set(touched)].filter(n => world.find(n));
-  if (live.length) last = live; else if (highlight.shapes.length) last = [...new Set(highlight.shapes)].filter(n => world.find(n));
-  if (!highlight.shapes.length) highlight.shapes = live;
-  { const f = world.find(highlight.shapes[0] || live[0]); if (f) focusCell = K.cellOf(f.x, f.y); }
-  const odd = notes.filter(n => /is not a shape I know|couldn't tell|^I read |still loading|not loaded|not available/.test(n));
-  const tag = ran !== 'rules' ? (ran === 'vss' ? 'VSS' : ran) : (nOut || vOut) ? 'compared' : null;
+  const alive = [...new Set(touched)].filter(n => world.find(n));
+  if (alive.length) rd.last = alive; else if (highlight.shapes.length) rd.last = [...new Set(highlight.shapes)].filter(n => world.find(n));
+  if (!highlight.shapes.length) highlight.shapes = alive;
+  { const f = world.find(highlight.shapes[0] || alive[0]); if (f) rd.focusCell = K.cellOf(f.x, f.y); }
+  const odd = notes.filter(n => /is not a shape I know|couldn't tell|^I read /.test(n));
   const did = anyDone ? summarize(result) : '';
   const tail = problems.concat(asks).join(' ');
-  if (clar) botBubble({ text: (did && did !== 'Done.' ? did + ' ' : '') + clar.message.replace(/ Reply with a name\.$/, ''), sub: [tail, odd.join(' ')].filter(Boolean).join(' ') || null, chips: clar.candidates, turn: id, tag, replace: wait });
-  else if (problems.length && !anyDone) botBubble({ text: problems.join(' '), sub: [asks.join(' '), odd.join(' ')].filter(Boolean).join(' ') || null, err: true, turn: id, tag, replace: wait });
-  else botBubble({ text: did || 'Done.', sub: [tail, odd.join(' ')].filter(Boolean).join(' ') || null, turn: id, tag, replace: wait });
-  flash(highlight);
+  if (clar) return { text: (did && did !== 'Done.' ? did + ' ' : '') + clar.message.replace(/ Reply with a name\.$/, ''), sub: [tail, odd.join(' ')].filter(Boolean).join(' ') || null, chips: clar.candidates, ms, highlight };
+  if (problems.length && !anyDone) return { text: problems.join(' '), sub: [asks.join(' '), odd.join(' ')].filter(Boolean).join(' ') || null, err: true, ms, highlight };
+  return { text: did || 'Done.', sub: [tail, odd.join(' ')].filter(Boolean).join(' ') || null, ms, highlight };
 }
 
 /* ---------------- technical history ---------------- */
 function turnHTML(r) {
-  let h = '';
-  if (r.nodes && r.nodes.length) h += `<pre class="sop">${r.raw ? '<span class="cm"># typed as SOP</span>\n' : ''}${r.nodes.map(hlNode).join('\n')}</pre>`;
-  (r.notes || []).forEach(n => { h += `<div class="note">${escH(n)}</div>`; });
-  if (r.vss) h += vssHTML(r.vss, r.ran);
-  if (r.neural) h += neuralHTML(r.neural, r.ran);
-  if (r.result) h += r.result.steps.map(stepHTML).join('');
-  const err = r.error && r.error.message !== 'No wires.' ? r.error : r.result && !r.result.ok ? r.result.error : null;
-  if (err) h += `<div class="errt">${escH(err.message)}</div>`;
-  return h || '<div class="note">No wires were produced.</div>';
+  if (r.error) return `<pre class="sop"><span class="cm"># typed as SOP</span>\n${escH(r.sop)}</pre><div class="errt">${escH(r.error.message)}</div>`;
+  return READERS.map(rd => {
+    const x = r.readers[rd.id];
+    if (!x) return `<section class="rdsec"><div class="minihead">${escH(rd.label)} <span>${escH(r.off[rd.id] || 'did not read this')}</span></div></section>`;
+    let h = `<div class="minihead">${escH(rd.label)} <span>${x.ms != null ? 'formalized in ' + fmtMs(x.ms) : r.raw ? 'SOP, nothing to formalize' : 'your choice from the question'}${x.neural ? ` · ${x.neural.calls} model calls` : ''}</span></div>`;
+    if (x.nodes && x.nodes.length) h += `<pre class="sop">${r.raw ? `<span class="cm"># ${r.button ? 'toolbar button, sent as SOP' : 'typed as SOP'}</span>\n` : ''}${x.nodes.map(hlNode).join('\n')}</pre>`;
+    (x.notes || []).forEach(n => { h += `<div class="note">${escH(n)}</div>`; });
+    if (x.vss) h += vssHTML(x.vss);
+    if (x.neural) h += neuralHTML(x.neural);
+    if (x.result) h += x.result.steps.map(stepHTML).join('');
+    const err = x.error && x.error.message !== 'No wires.' ? x.error : x.result && !x.result.ok ? x.result.error : null;
+    if (err) h += `<div class="errt">${escH(err.message)}</div>`;
+    if (!x.nodes || !x.nodes.length) h += '<div class="note">No wires were produced.</div>';
+    return `<section class="rdsec">${h}</section>`;
+  }).join('');
 }
+const ranLabel = r => (r.button ? 'button · ' : r.raw ? 'SOP · ' : '') + (r.ran.length ? r.ran.map(id => RD[id].label).join(' · ') : 'none');
 function renderHistory(focus) {
   if (!history.length) return '<p class="intro">Nothing yet.</p>';
-  return `<p class="intro">Every message, as the system saw it: the SOP wires the formalizer wrote, the plugin that interpreted each wire, the patches applied to the drawing, Datalog programs for graph questions, and the neural model’s answers when it is on.</p>` +
-    history.slice().reverse().map(r => `<details class="turn" id="turn-${r.id}"${r.id === focus ? ' open' : ''}><summary><time>${escH(r.time)}</time><span>${escH(r.text)}</span><em>${escH(r.ran === 'neural' ? 'neural' : r.ran === 'vss' ? 'VSS' : r.neural || (r.vss && r.ran === 'rules') ? 'compare' : r.raw ? 'SOP' : 'rules')}</em></summary><div class="tb">${turnHTML(r)}</div></details>`).join('');
+  return `<p class="intro">Every message, as each reader saw it: the SOP wires it wrote and how long that took, the plugin that interpreted each wire, the patches applied to that reader’s drawing, Datalog programs for graph questions, and the VSS and neural evidence. The label on the right names the readers that read the message.</p>` +
+    history.slice().reverse().map(r => `<details class="turn" id="turn-${r.id}"${r.id === focus ? ' open' : ''}><summary><time>${escH(r.time)}</time><span>${escH(r.text)}</span><em>${escH(ranLabel(r))}</em></summary><div class="tb">${turnHTML(r)}</div></details>`).join('');
 }
 
 /* ---------------- SOP rendering for History ---------------- */
@@ -355,8 +383,8 @@ function stepHTML(st) {
   return `<div class="row"><span class="chip">@${escH(st.node.id)} <span class="p">${escH(plug ? plug.name : st.plugin || '')}</span></span><div class="res">${bits.join('')}</div></div>`;
 }
 const fmtV = v => v == null ? '' : K.fmtValue(v);
-function vssHTML(v, ran) {
-  let h = ran === 'vss' ? `<div class="minihead">Formalized by the VSS reader <span>${v.ms.toFixed(1)} ms</span></div>` : `<div class="minihead">VSS reader, for comparison <span>${v.ms.toFixed(1)} ms</span></div><pre class="sop">${v.nodes.map(hlNode).join('\n') || '<span class="cm"># no wires</span>'}</pre>`;
+function vssHTML(v) {
+  let h = '';
   if (v.units) h += `<div class="note">Requests found by the cutter:</div><ul class="units">${v.units.map(u => `<li><span class="src">“${escH(u.src || '')}”</span> → ${u.zone === 'ignored' ? 'not read' + (u.reason ? ' (' + escH(u.reason) + ')' : '') : `world <code>${escH(((vssInfo && vssInfo.worlds || []).find(w => w.world === u.world) || { model: u.world || '' }).model)}</code>, ${escH(u.event || '?')}${u.zone === 'ask' ? ', asked which shape' : ''}${u.tie > 1 ? `, ${u.tie} worlds read it, decided by ${escH(u.decidedBy || '?')}` : ''}${u.reread ? ', action from the event hint' : ''}`}</li>`).join('')}</ul>`;
   for (const c of v.clauses) {
     if (!c.vss) continue;
@@ -367,11 +395,9 @@ function vssHTML(v, ran) {
   }
   return h;
 }
-function neuralHTML(n, ran) {
+function neuralHTML(n) {
   const pct = x => (x * 100).toFixed(0) + '%';
   let h = '';
-  if (ran === 'rules') h += `<div class="minihead">Neural formalizer, for comparison <span>${n.ms} ms · ${n.calls} model calls</span></div><pre class="sop alt">${n.nodes.map(hlNode).join('\n') || '<span class="cm"># no wires</span>'}</pre>`;
-  else h += `<div class="minihead">Formalized by the neural model <span>${n.ms} ms · ${n.calls} model calls</span></div>`;
   for (const a of n.analyses) {
     const r = a.rules, rows = [];
     const actKey = a.kind.value === 'command' ? 'action' : a.kind.value === 'question' ? 'ask' : null;
@@ -384,7 +410,7 @@ function neuralHTML(n, ran) {
       rows.push([k, r ? fmtV(r.args[k]) : '', q ? fmtV(q.value) : '', why, false]);
     }
     const body = rows.filter(x => x[1] !== '' || x[2] !== '' || x[4]).map(([k, rv, nv, why]) => `<tr class="${rv === nv ? 'same' : 'diff'}"><th>${escH(k)}</th><td>${escH(rv || '–')}</td><td>${escH(nv || '–')}</td><td class="why">${escH(why)}</td></tr>`).join('');
-    h += `<details class="cmp"${ran === 'rules' ? ' open' : ''}><summary>@${escH(a.id)} <span class="src">${escH(a.src)}</span></summary><div class="tbl"><table><thead><tr><th>question</th><th>rules</th><th>neural</th><th>model evidence</th></tr></thead><tbody>${body}</tbody></table></div></details>`;
+    h += `<details class="cmp"><summary>@${escH(a.id)} <span class="src">${escH(a.src)}</span></summary><div class="tbl"><table><thead><tr><th>question</th><th>rules</th><th>neural</th><th>model evidence</th></tr></thead><tbody>${body}</tbody></table></div></details>`;
   }
   return h;
 }
@@ -452,7 +478,8 @@ const parseScript = txt => txt.split(/\r?\n/).map(l => l.trim()).filter(l => l &
 function renamedForCanvas(turns) {
   const declared = new Set(); turns.forEach(t => (t.match(/\b(?:named|called)\s+([A-Za-z_][\w-]*)/g) || []).forEach(m => declared.add(m.split(/\s+/).pop())));
   const map = {};
-  for (const n of declared) if (world.find(n)) { let k = 2; while (world.find(n + k) || declared.has(n + k)) k++; map[n] = n + k; }
+  const taken = n => READERS.some(rd => rd.world.find(n));
+  for (const n of declared) if (taken(n)) { let k = 2; while (taken(n + k) || declared.has(n + k)) k++; map[n] = n + k; }
   const keys = Object.keys(map); if (!keys.length) return { turns, map };
   const re = new RegExp(`\\b(${keys.join('|')})\\b`, 'g');
   return { turns: turns.map(t => t.replace(re, m => map[m])), map };
@@ -477,10 +504,13 @@ async function startScript(name, turns, how) {
   player.stop = true; await queue; player.playing = false;
   closeSheet();
   const fixed = renamedForCanvas(turns);
-  if (world.state.shapes.length) { const before = world.snapshot(); world.newFrame(name); world.commit(before); }
-  else { world.state.frame = { x: 0, y: 0 }; world.state.frames = [{ x: 0, y: 0, title: name }]; }
+  for (const rd of READERS) {   // every reader's drawing gets the new area
+    const w = rd.world;
+    if (w.state.shapes.length) { const before = w.snapshot(); w.newFrame(name); w.commit(before); }
+    else { w.state.frame = { x: 0, y: 0 }; w.state.frames = [{ x: 0, y: 0, title: name }]; }
+    rd.focusCell = Object.assign({}, w.state.frame);
+  }
   const ren = Object.entries(fixed.map).map(([a, b]) => `${a} → ${b}`);
-  focusCell = Object.assign({}, world.state.frame);
   sysNote(`Scenario: ${name}` + (ren.length ? ` · renamed ${ren.join(', ')} to avoid clashes` : ''));
   renderCanvas();
   Object.assign(player, { name, turns: fixed.turns, i: 0 });
@@ -497,63 +527,195 @@ $('#player').addEventListener('click', async ev => {
 });
 
 /* ---------------- formalizers: rules, VSS, neural ---------------- */
-let vssState = 'idle', vssInfo = null, vssError = null, neuralLoading = false, neuralBytes = 0, neuralLoadMs = 0;
+let vssState = 'idle', vssInfo = null, vssError = null, neuralBytes = 0, neuralLoadMs = 0;
+// neural: 'checking' the cache, 'invite' (not downloaded), 'loading', 'ready', 'failed'
+let nState = 'checking', nError = null, nProg = { L: 0, T: 0 }, nFromCache = false, nToken = 0;
+const VSS_HINT = 51.5e6;   // the composer's files (7 worlds, fallback, cutters), measured 2026-11-02; the loaded size is measured again in the page
 const RULES_BYTES_INLINE = (() => { try { return [...document.scripts].filter(s => !s.src && /SOPKit/.test(s.textContent.slice(0, 400))).reduce((a, s) => a + s.textContent.length, 0); } catch (e) { return 0; } })();
 const rulesBytes = () => { try { const e = performance.getEntriesByType('resource').find(r => /\/js\/logic\.js$/.test(r.name)); return e && e.decodedBodySize ? e.decodedBodySize : RULES_BYTES_INLINE; } catch (e) { return RULES_BYTES_INLINE; } };
 const mb = b => b >= 1e6 ? (b / 1e6).toFixed(1) + ' MB' : (b / 1e3).toFixed(0) + ' KB';
+const mb0 = b => Math.round(b / 1e6) + ' MB';
+
+/* a reader that finishes loading before it has read anything starts from the Rules drawing */
+function copyDrawing(src, dst) {
+  const c = x => JSON.parse(JSON.stringify(x));
+  dst.world.restore(src.world.state); dst.world.undoStack = c(src.world.undoStack); dst.world.redoStack = c(src.world.redoStack);
+  dst.last = src.last.slice(); dst.focusCell = src.focusCell && Object.assign({}, src.focusCell); dst.pending = null;
+}
+function adoptRules(rd) { queue = queue.then(() => { if (!rd.reads) { copyDrawing(RD.rules, rd); if (rd === cur) renderCanvas(); } updateTabs(); renderSopBar(); }); return queue; }
+function alignDrawings() {
+  queue = queue.then(() => {
+    for (const rd of READERS) if (rd !== RD.rules) copyDrawing(RD.rules, rd);
+    sysNote('Drawings aligned: VSS and Neural now have the Rules drawing and its undo history.');
+    renderCanvas(); updateTabs(); renderSopBar();
+  });
+}
+/* what a drawing shows (shapes, links, rules), independent of ids and counters */
+function sig(w) {
+  const S = w.state;
+  return JSON.stringify([S.shapes.map(s => [s.name, s.shape, s.color, s.size, s.x, s.y, s.label || '', s.outline || ''].join('|')).sort(),
+    S.edges.map(e => [e.from, e.to, e.style, e.arrow, e.label || '', e.color || ''].join('|')).sort(), S.rules.map(r => [r.shape, r.size, r.color, r.outline].join('|')).sort()]);
+}
+const differs = rd => rd !== RD.rules && isReady(rd) && sig(rd.world) !== sig(RD.rules.world);
+
+/* ---------------- reader tabs, SOP bar, loading card ---------------- */
+const rtabs = $('#rtabs');
+function tabTitle(rd) {
+  if (!isReady(rd)) return `${rd.label}: ${offText(rd).replace(/, did not read this$/, '')}`;
+  return differs(rd) ? `${rd.label}: this drawing differs from the Rules drawing` : `${rd.label}: show this reader’s drawing`;
+}
+function updateTabs() {
+  rtabs.innerHTML = READERS.map(rd => `<button type="button" role="tab" class="rtab${isReady(rd) ? '' : ' off'}" data-rtab="${rd.id}" aria-selected="${rd === cur}" title="${escH(tabTitle(rd))}">${escH(rd.label)}${differs(rd) ? '<i class="dot" aria-label="differs from Rules"></i>' : ''}${!isReady(rd) && (rd.id === 'vss' ? vssState === 'loading' : nState === 'loading' || nState === 'checking') ? '<i class="spin" aria-hidden="true"></i>' : ''}</button>`).join('');
+}
+function setActive(id) {
+  if (!RD[id] || drag) return;
+  cur = RD[id]; world = cur.world; hl = { shapes: new Set(), edges: new Set() }; clearTimeout(hlTimer);
+  renderCanvas(); updateTabs(); renderCard(); renderSopBar();
+  if (sheetKind === 'settings' && sheetTab === 'world' && !sheet.hidden) sbody.innerHTML = renderWorld();
+}
+rtabs.addEventListener('click', ev => { const b = ev.target.closest('[data-rtab]'); if (b) setActive(b.dataset.rtab); });
+rtabs.addEventListener('keydown', ev => {
+  if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return;
+  const i = READERS.indexOf(cur), n = READERS[(i + (ev.key === 'ArrowRight' ? 1 : READERS.length - 1)) % READERS.length];
+  setActive(n.id); const b = rtabs.querySelector(`[data-rtab="${n.id}"]`); if (b) b.focus();
+});
+function renderSopBar() {
+  const bar = $('#sopbar'), lr = cur.lastRead, anyDiff = READERS.some(differs);
+  if (!turnSeq && !anyDiff) { bar.hidden = true; return; }
+  bar.hidden = false;
+  const body = !turnSeq ? '' : lr && lr.turn === turnSeq ? (lr.nodes.length ? lr.nodes.map(hlNode).join('\n') : '<span class="cm"># no wires</span>') : `<span class="cm"># ${escH(cur.label)} did not read the last message</span>`;
+  bar.innerHTML = `<div class="sophead"><span>${turnSeq ? `${escH(cur.label)} wrote, for the last message` : ''}</span>${anyDiff ? '<button type="button" class="btn" id="align-btn" title="Copy the Rules drawing and its undo history to VSS and Neural">Align drawings</button>' : ''}</div>${body ? `<pre class="sop mini">${body}</pre>` : ''}`;
+}
+$('#sopbar').addEventListener('click', ev => { if (ev.target.id === 'align-btn') alignDrawings(); });
+function renderCard() {
+  const c = $('#rcard');
+  if (cur.id === 'rules' || isReady(cur)) { c.hidden = true; return; }
+  c.hidden = false;
+  c.className = 'rcard' + (cur.id === 'neural' && nState === 'invite' && notNow() ? ' small' : '');
+  c.innerHTML = cur.id === 'vss' ? `<b>VSS reader</b>${vssState === 'failed' ? errHTML(vssError) : `<p>Loading ${VSS_OPTS.composer ? 'the 7 micro-worlds' : 'the model'} from this site (about ${mb0(VSS_HINT)})…</p>`}`
+    : `<b>Neural reader</b>${neuralBoxHTML()}`;
+}
+
+/* ---------------- VSS: loads by itself when the page opens (same site) ---------------- */
 async function ensureVSS(announce) {
   if (vssState === 'ready') return true;
   if (vssState === 'loading') { while (vssState === 'loading') await sleep(100); return vssState === 'ready'; }
-  vssState = 'loading'; refreshFormalizer();
+  vssState = 'loading'; refreshReaders();
   try {
     if (!window.VSSFormalizer) await import(new URL('js/vss-formalizer.js', document.baseURI).href);
     if (VSS_OPTS.composer) { await window.VSSFormalizer.loadComposerAt(); vssInfo = window.VSSFormalizer.composerInfo(); }
     else vssInfo = await window.VSSFormalizer.load();
     vssState = 'ready'; vssError = null;
-    if (announce !== false) sysNote(vssInfo.composer ? `VSS ready: ${vssInfo.worlds.length} micro-worlds, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s`
-      : `VSS model ready: ${mb(vssInfo.bytes)}, D ${vssInfo.D}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s`);
-  } catch (e) { vssState = 'failed'; vssError = e; sysNote('The VSS model could not be loaded: ' + (e && e.message || e)); }
-  refreshFormalizer(); return vssState === 'ready';
+    const fresh = !RD.vss.reads;
+    if (announce !== false) sysNote((vssInfo.composer ? `VSS ready: ${vssInfo.worlds.length} micro-worlds, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
+      : `VSS model ready: ${mb(vssInfo.bytes)}, D ${vssInfo.D}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`) + (fresh ? ' It starts from the Rules drawing.' : ''));
+    adoptRules(RD.vss);
+  } catch (e) { vssState = 'failed'; vssError = e; sysNote('The VSS reader could not be loaded: ' + (e && e.message || e)); }
+  refreshReaders(); return vssState === 'ready';
 }
+
+/* ---------------- Neural: loads silently when its files are in the browser cache, otherwise invites ---------------- */
+function neuralOpts() { const [strategy, zs] = (store.get(CHOICE) || 'zeroshot:deberta').split(':'); return strategy === 'embed' ? { strategy: 'embed' } : { strategy: 'zeroshot', zeroshot: NeuralKit.MODELS.zeroshot[zs] ? zs : 'deberta' }; }
+const choiceValue = o => o.strategy === 'embed' ? 'embed' : 'zeroshot:' + o.zeroshot;
+const notNow = () => store.get(NOTNOW) === '1';
+function neededText(o) {
+  const ids = NeuralKit.modelsFor(o), S = NeuralKit.SIZES, N = NeuralKit.NAMES, tot = ids.reduce((a, id) => a + S[id], 0);
+  return `The neural reader needs ${mb0(tot)}: ${ids.map(id => `${N[id]} (${mb0(S[id])})`).join(' and ')}. They are kept in this browser’s cache after the first download.`;
+}
+function errHTML(e) {
+  if (!e) return '';
+  const msg = String(e.message || e);
+  return `<div class="errt">${escH(msg)}</div>${e.files && e.files.length ? `<div class="note">Files still loading when it failed: ${e.files.map(u => `<code>${escH(u)}</code>`).join(', ')}</div>` : e.url && !msg.includes(e.url) ? `<div class="note">File: <code>${escH(e.url)}</code></div>` : ''}${e.network ? '<div class="note">This looks like a network failure. The page on GitHub Pages or a local server (<code>npx serve docs</code>) can reach the model host; a sandboxed preview cannot.</div>' : ''}`;
+}
+function progText() { return nFromCache ? 'Loading from this browser’s cache…' : nProg.T ? `Downloading ${(nProg.L / 1e6).toFixed(0)} of ${(nProg.T / 1e6).toFixed(0)} MB…` : 'Starting the download…'; }
+function neuralBoxHTML() {
+  const o = neuralOpts();
+  if (nState === 'checking') return '<p>Checking whether the models are in this browser’s cache…</p>';
+  if (nState === 'invite') return notNow() ? `<p>Not downloaded (${mb0(NeuralKit.modelsFor(o).reduce((a, id) => a + NeuralKit.SIZES[id], 0))}).</p><div class="acts"><button type="button" class="btn solid" data-nact="download">Download</button></div>`
+    : `<p>${escH(neededText(o))}</p><div class="acts"><button type="button" class="btn solid" data-nact="download">Download</button><button type="button" class="btn" data-nact="notnow">Not now</button></div>`;
+  if (nState === 'loading') return `<p class="nprog-t">${escH(progText())}</p><div class="prog"><div style="width:${nProg.T ? (nProg.L / nProg.T * 100).toFixed(1) : 0}%"></div></div>`;
+  if (nState === 'failed') return `<p>The neural models could not be loaded:</p>${errHTML(nError)}<div class="acts"><button type="button" class="btn solid" data-nact="download">Try again</button></div>`;
+  return `<p>Ready: ${escH(NeuralKit.NAMES[models.enumModel] || models.enumModel)} + ${escH(NeuralKit.NAMES[models.qaModel] || models.qaModel)} on the CPU (WASM, 8-bit files), ${mb(neuralBytes)}, loaded in ${(neuralLoadMs / 1000).toFixed(1)} s${nFromCache ? ' from the browser cache' : ''}.</p>`;
+}
+function inviteHTML() {
+  if (nState === 'invite') return notNow() ? `${escH(neededText(neuralOpts()))} <span class="st">Not now. The Neural tab can download it later.</span>` : `${escH(neededText(neuralOpts()))}<span class="acts"><button type="button" class="btn solid" data-nact="download">Download</button><button type="button" class="btn" data-nact="notnow">Not now</button></span>`;
+  if (nState === 'loading') return `Neural reader: <span class="st">${escH(progText())}</span>`;
+  if (nState === 'ready') return 'Neural reader ready.';
+  if (nState === 'failed') return 'The neural reader could not be loaded; the Neural tab shows the error.';
+  return 'Checking the neural reader…';
+}
+function inviteNote() { const d = document.createElement('div'); d.className = 'sys invite'; d.innerHTML = inviteHTML(); msgs.appendChild(d); scrollDown(); }
+let nRaf = 0;
+function refreshReaders() {   // every place that shows a reader's state
+  updateTabs(); renderCard(); setStatus(idleStatus());
+  msgs.querySelectorAll('.sys.invite').forEach(d => { d.innerHTML = inviteHTML(); });
+  const box = $('#nm-box'); if (box) box.innerHTML = neuralBoxHTML();
+  const vs = $('#vss-st'); if (vs) vs.innerHTML = vssStatusHTML();
+}
+async function checkNeural(reason) {
+  const tok = ++nToken; models = null; neural.setModels(null); nState = 'checking'; nError = null; refreshReaders();
+  const hit = await NeuralKit.cached(neuralOpts());
+  if (tok !== nToken) return;
+  if (hit) { loadModels(true); return; }
+  nState = 'invite'; refreshReaders();
+  if (reason === 'change' || !notNow()) inviteNote();
+}
+async function loadModels(fromCache) {
+  const o = neuralOpts(), tok = ++nToken, files = {}, t0 = performance.now(); neuralBytes = 0;
+  models = null; neural.setModels(null); nState = 'loading'; nError = null; nFromCache = !!fromCache; nProg = { L: 0, T: 0 }; refreshReaders();
+  try {
+    const m = await NeuralKit.load(o, e => {
+      if (tok !== nToken || e.status !== 'progress' || !e.file) return;
+      files[e.name + '/' + e.file] = [e.loaded || 0, e.total || 0]; const v = Object.values(files);
+      nProg = { L: v.reduce((a, x) => a + x[0], 0), T: v.reduce((a, x) => a + x[1], 0) }; neuralBytes = nProg.T;
+      if (!nRaf) nRaf = requestAnimationFrame(() => { nRaf = 0; if (nState !== 'loading') return; document.querySelectorAll('.nprog-t').forEach(x => { x.textContent = progText(); }); document.querySelectorAll('.rcard .prog > div, #nm-box .prog > div').forEach(x => { x.style.width = (nProg.T ? nProg.L / nProg.T * 100 : 0).toFixed(1) + '%'; }); msgs.querySelectorAll('.sys.invite .st').forEach(x => { x.textContent = progText(); }); setStatus(`loading the neural reader ${(nProg.T ? nProg.L / nProg.T * 100 : 0).toFixed(0)}%`); });
+    });
+    if (tok !== nToken) return;
+    neural.setStrategy(o.strategy); neural.setModels(m); models = m; nState = 'ready'; neuralLoadMs = performance.now() - t0;
+    if (!neuralBytes) neuralBytes = NeuralKit.modelsFor(o).reduce((a, id) => a + NeuralKit.SIZES[id], 0);
+    const fresh = !RD.neural.reads;
+    sysNote(`Neural reader ready: ${NeuralKit.NAMES[m.enumModel]} + ${NeuralKit.NAMES[m.qaModel]} on the CPU, ${mb(neuralBytes)}${fromCache ? ' from the browser cache' : ''}, ${(neuralLoadMs / 1000).toFixed(1)} s.` + (fresh ? ' It starts from the Rules drawing.' : ''));
+    adoptRules(RD.neural);
+  } catch (e) {
+    if (tok !== nToken) return;
+    console.error(e); nState = 'failed'; nError = e;
+    sysNote('The neural models could not be loaded: ' + (e && e.message || e) + (e && e.files && e.files.length ? ` (while loading ${e.files.length === 1 ? e.files[0] : e.files.length + ' files; the Neural tab lists them'})` : ''));
+  }
+  refreshReaders();
+}
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-nact]'); if (!b) return;
+  if (b.dataset.nact === 'download') { store.set(NOTNOW, null); loadModels(false); }
+  if (b.dataset.nact === 'notnow') { store.set(NOTNOW, '1'); refreshReaders(); }
+});
+
+/* ---------------- settings: Formalizer ---------------- */
 function refreshFormalizer() { if (sheetKind === 'settings' && sheetTab === 'formalizer' && !sheet.hidden) { sbody.innerHTML = renderFormalizer(); syncFormalizer(); } }
+function vssStatusHTML() {
+  return escH(vssState === 'ready' ? (vssInfo.composer ? `Ready: ${vssInfo.worlds.length} micro-worlds and the fallback, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
+    : `Ready: D ${vssInfo.D}, ${vssInfo.bits || 8}-bit route book, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`) : vssState === 'failed' ? 'Failed: ' + (vssError && vssError.message || vssError) : `Loading (about ${mb0(VSS_HINT)} from this site)…`);
+}
 function renderFormalizer() {
-  const nst = models ? `Ready on ${models.device.toUpperCase()}: ${models.enumModel} + ${models.qaModel}, ${mb(neuralBytes)} downloaded.` : neuralLoading ? 'Loading…' : 'Not loaded (about 100–200 MB on first use, then cached).';
-  const vst = vssState === 'ready' ? (vssInfo.composer ? `Ready: ${vssInfo.worlds.length} micro-worlds and the fallback, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
-    : `Ready: D ${vssInfo.D}, ${vssInfo.bits || 8}-bit route book, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`) : vssState === 'loading' ? 'Loading…' : vssState === 'failed' ? 'Failed: ' + (vssError && vssError.message || vssError) : 'Not loaded yet (loads on first use).';
-  return `<h3 class="sub">Who reads your messages</h3>
-  <div class="seg" role="radiogroup" aria-label="Formalizer">
-    ${['rules', 'vss', 'neural', 'compare'].map(m => `<button type="button" role="radio" data-mode="${m}" aria-checked="${mode === m}">${{ rules: 'Rules', vss: 'VSS', neural: 'Neural', compare: 'Compare' }[m]}</button>`).join('')}
-  </div>
-  <p class="intro" style="margin-top:8px">Every reader writes the same SOP wires, and the same engine and Datalog reasoner run them. <b>Rules</b> use the legend’s cue words. <b>VSS</b> is a set of small readers trained on this demo’s legend (VSA route books, no transformer). <b>Neural</b> asks pretrained transformers the legend questions. <b>Compare</b> runs the rules and records what the other readers wrote in History. Picking a reader loads its model.</p>
+  const S = NeuralKit.SIZES, M = NeuralKit.MODELS, N = NeuralKit.NAMES, sz = id => mb(S[id]) + (id === M.embed ? ' (about)' : '');
+  const vrows = vssState === 'ready' && vssInfo.composer ? `<table class="kv">${vssInfo.worlds.map(w => `<tr><td><code>${escH(w.model)}</code></td><td>${escH(w.events.join(', '))}</td><td>${mb(w.bytes)}</td></tr>`).join('')}<tr><td><code>${escH(vssInfo.fallback || '')}</code></td><td>fallback: every action</td><td>${mb(vssInfo.fallbackBytes)}</td></tr><tr><td>cutters, registry</td><td>which world reads which request</td><td>${mb(vssInfo.cutterBytes)}</td></tr></table>` : '';
+  return `<h3 class="sub">Readers</h3>
+  <p class="intro">Every message goes to every reader that is loaded. <b>Rules</b> use the legend’s cue words. <b>VSS</b> is a set of small readers trained on this demo’s legend (VSA route books, no transformer). <b>Neural</b> asks pretrained transformers the legend questions. All three write the same SOP wires, and the same engine and Datalog reasoner run them. Each reader has its own drawing, changed only by its own readings; the tabs above the canvas switch between them, and a dot on a tab means that drawing differs from the Rules drawing. <b>Align drawings</b> (under the canvas) copies the Rules drawing and its undo history to the other readers. A reader that finishes loading before it has read anything starts from the Rules drawing.</p>
+  <table class="kv"><tr><td>Rules</td><td>code, ${mb(rulesBytes())}</td><td>ready</td></tr><tr><td>VSS</td><td>${vssState === 'ready' ? mb(vssInfo.bytes) : 'about ' + mb(VSS_HINT)}</td><td>${escH(isReady(RD.vss) ? 'ready' : offText(RD.vss).replace(/, did not read this$/, ''))}</td></tr><tr><td>Neural</td><td>${mb(NeuralKit.modelsFor(neuralOpts()).reduce((a, id) => a + S[id], 0))}</td><td>${escH(isReady(RD.neural) ? 'ready' : offText(RD.neural).replace(/, did not read this$/, ''))}</td></tr></table>
   <h3 class="sub">VSS</h3>
-  ${VSS_OPTS.composer ? `<p class="intro">Seven small VSS readers (micro-worlds), each trained on a few actions of this legend. A cutter splits the message into requests and names the worlds that could read each one; each of those worlds reads it, and the reading that fits the drawing and the conversation best is kept. In a world with several actions, a request without a verb (“Hub teal”) gets its action from a second cutter (the event hint). A request no world can read goes to a general fallback reader. Add <code>?vss=single</code> to the address to use the earlier single model.</p>
-  ${vssState === 'ready' && vssInfo.composer ? `<table class="kv">${vssInfo.worlds.map(w => `<tr><td><code>${escH(w.model)}</code></td><td>${escH(w.events.join(', '))}</td></tr>`).join('')}<tr><td><code>${escH(vssInfo.fallback || '')}</code></td><td>fallback: every action</td></tr></table>` : ''}`
+  ${VSS_OPTS.composer ? `<p class="intro">Seven small VSS readers (micro-worlds), each trained on a few actions of this legend. A cutter splits the message into requests and names the worlds that could read each one; each of those worlds reads it, and the reading that fits the drawing and the conversation best is kept. In a world with several actions, a request without a verb (“Hub teal”) gets its action from a second cutter (the event hint). A request no world can read goes to a general fallback reader. The files come from this site and load when the page opens. Add <code>?vss=single</code> to the address to use the earlier single model.</p>`
     : `<p class="intro">One VSS model trained on the sketch world generated from this legend (training/sketch). A sentence is normalized, read into an event with its roles in a few milliseconds, and turned into the demo’s wires.</p>`}
-  <div class="actions"><button type="button" class="btn${vssState === 'ready' ? '' : ' solid'}" id="vss-load"${vssState === 'loading' || vssState === 'ready' ? ' disabled' : ''}>${vssState === 'ready' ? 'Loaded' : 'Load VSS'}</button><span class="status">${escH(vst)}</span></div>
-  <h3 class="sub">Neural models</h3>
-  <p class="intro">The model classifies the kind of message and the action, then answers each legend question in that action’s frame with extractive question answering (“Where does the connection start?”).</p>
+  <div class="actions"><span class="status" id="vss-st">${vssStatusHTML()}</span></div>${vrows}
+  <h3 class="sub">Neural</h3>
+  <p class="intro">The model classifies the kind of message and the action, then answers each legend question in that action’s frame with extractive question answering (“Where does the connection start?”). The files come from the Hugging Face model host and stay in this browser’s cache.</p>
   <div class="form">
     <label for="nm-strategy">Message type</label>
-    <select id="nm-strategy"><option value="zeroshot:deberta">Zero-shot NLI · DeBERTa-v3 xsmall</option><option value="zeroshot:distilbert">Zero-shot NLI · DistilBERT MNLI</option><option value="embed">Similarity to legend examples · MiniLM-L6</option></select>
-    <label>Answers</label><div>Extractive QA · DistilBERT SQuAD</div>
-    <label for="nm-device">Device</label>
-    <select id="nm-device"><option value="auto">WebGPU if available, else WASM</option><option value="wasm">WASM (CPU)</option></select>
+    <select id="nm-strategy"><option value="zeroshot:deberta">Zero-shot NLI · ${N[M.zeroshot.deberta]} · ${sz(M.zeroshot.deberta)}</option><option value="zeroshot:distilbert">Zero-shot NLI · ${N[M.zeroshot.distilbert]} · ${sz(M.zeroshot.distilbert)}</option><option value="embed">Similarity to legend examples · ${N[M.embed]} · ${sz(M.embed)}</option></select>
+    <label>Answers</label><div>Extractive QA · ${N[M.qa]} · ${sz(M.qa)}</div>
+    <label>Device</label><div>CPU (WASM), 8-bit files</div>
   </div>
-  <div class="actions"><button type="button" class="btn solid" id="nm-load"${neuralLoading ? ' disabled' : ''}>${models ? 'Reload models' : 'Load models'}</button><span class="status" id="nm-status">${escH(nst)}</span></div>
-  <div class="prog" id="nm-prog" hidden><div></div></div>
-  <div class="local" id="nm-local" hidden>The model files couldn’t be downloaded from the model host. The page on GitHub Pages or a local server (<code>npx serve docs</code>) can reach it; a sandboxed preview cannot.</div>`;
+  <div class="nbox" id="nm-box">${neuralBoxHTML()}</div>`;
 }
-function syncFormalizer() {
-  const sel = $('#nm-strategy'); if (!sel) return;
-  sel.value = neural.state.strategy === 'embed' ? 'embed' : 'zeroshot:' + (neural.state.zeroshot || 'deberta');
-  $('#nm-device').value = neural.state.device || 'auto';
-}
-function setMode(m) {
-  mode = m; setStatus(idleStatus());
-  document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.mode === m)));
-  if (m === 'vss' || m === 'compare') ensureVSS();
-  if ((m === 'neural' || m === 'compare') && !models && !neuralLoading) { sysNote(m === 'neural' ? 'Loading the neural models; the rules read your messages until they are ready.' : 'Compare records the VSS reader now, and the neural one once its models load.'); loadModels(); }
-}
+function syncFormalizer() { const sel = $('#nm-strategy'); if (sel) sel.value = choiceValue(neuralOpts()); }
 sbody.addEventListener('click', async ev => {
   const q = ev.target.closest('[data-quick]'); if (q) { closeSheet(); submit(q.dataset.quick); return; }
   const b = ev.target.closest('[data-sc]');
@@ -564,9 +726,6 @@ sbody.addEventListener('click', async ev => {
   }
   const o = ev.target.closest('[data-own]');
   if (o) { const v = $('#sc-text').value, turns = parseScript(v); if (!turns.length) { $('#sc-status').textContent = 'Write at least one line first.'; return; } startScript((v.match(/^\s*#\s*(.+)$/m) || [])[1] || 'Your script', turns, o.dataset.own); return; }
-  const md = ev.target.closest('[data-mode]'); if (md) { setMode(md.dataset.mode); return; }
-  if (ev.target.id === 'nm-load') loadModels();
-  if (ev.target.id === 'vss-load') ensureVSS(true);
   if (ev.target.id === 'bm-run') runBench(ev.target);
   if (ev.target.id === 'bm-stop') benchStop = true;
   const fx = ev.target.closest('[data-fails]'); if (fx) { const d = document.getElementById('fails-' + fx.dataset.fails); if (d) d.hidden = !d.hidden; }
@@ -578,34 +737,10 @@ sbody.addEventListener('change', ev => {
     rd.onerror = () => { $('#sc-status').textContent = `Couldn't read ${f.name}.`; };
     rd.readAsText(f); ev.target.value = '';
   }
+  if (ev.target.id === 'nm-strategy') { store.set(CHOICE, ev.target.value); store.set(NOTNOW, null); checkNeural('change'); }
   const pl = ev.target.closest('[data-plug]');
-  if (pl) { const p = engine.plugin(pl.dataset.plug); p.enabled = pl.checked; sysNote(`${p.title} plugin switched ${p.enabled ? 'on' : 'off'}`); sbody.innerHTML = renderPlugins(); }
+  if (pl) { for (const rd of READERS) rd.engine.plugin(pl.dataset.plug).enabled = pl.checked; const p = engine.plugin(pl.dataset.plug); sysNote(`${p.title} plugin switched ${p.enabled ? 'on' : 'off'} for every reader`); sbody.innerHTML = renderPlugins(); }
 });
-async function loadModels() {
-  const sel = $('#nm-strategy'), dev = $('#nm-device');
-  const [strategy, zs] = (sel ? sel.value : (neural.state.strategy === 'embed' ? 'embed' : 'zeroshot:' + (neural.state.zeroshot || 'deberta'))).split(':');
-  const device = dev ? dev.value : (neural.state.device || 'auto');
-  neural.state.zeroshot = zs || 'deberta'; neural.state.device = device;
-  neuralLoading = true; refreshFormalizer();
-  const files = {}, t0 = performance.now(); const prog = $('#nm-prog'); if (prog) prog.hidden = false;
-  try {
-    const m = await NeuralKit.load({ strategy, zeroshot: zs, device }, e => {
-      if (e.status === 'progress' && e.file) {
-        files[e.name + '/' + e.file] = [e.loaded || 0, e.total || 0]; const v = Object.values(files), L = v.reduce((a, x) => a + x[0], 0), T = v.reduce((a, x) => a + x[1], 0);
-        neuralBytes = T; const bar = $('#nm-prog > div'), stat = $('#nm-status');
-        if (bar) bar.style.width = (T ? L / T * 100 : 0).toFixed(1) + '%'; if (stat) stat.textContent = `Downloading ${(L / 1e6).toFixed(0)} of ${(T / 1e6).toFixed(0)} MB`;
-        setStatus(`loading models ${(T ? L / T * 100 : 0).toFixed(0)}%`);
-      }
-    });
-    neural.setStrategy(strategy); neural.setModels(m); models = m; neuralLoading = false; neuralLoadMs = performance.now() - t0;
-    refreshFormalizer(); setStatus(idleStatus());
-    sysNote(`Neural models ready (${m.device.toUpperCase()}, ${mb(neuralBytes)}, ${(neuralLoadMs / 1000).toFixed(0)} s).`);
-  } catch (e) {
-    neuralLoading = false; setStatus(idleStatus());
-    sysNote('The neural models could not be loaded: ' + (e && e.message || e));
-    refreshFormalizer(); const l = $('#nm-local'); if (l) l.hidden = false;
-  }
-}
 
 /* ---------------- benchmark: every reader on the same labelled sentences ---------------- */
 let benchStop = false, benchSets = null, benchLast = null;
@@ -618,7 +753,7 @@ function renderBench() {
   ${sets.length ? sets.map(s => `<label class="ck" style="display:flex;margin:4px 0"><input type="checkbox" data-bset="${s.id}" ${['blind', 'broad', 'new_identities'].includes(s.id) ? 'checked' : ''}> ${escH(s.title)} <span class="status">&nbsp;· ${s.n}</span></label>`).join('') : '<p class="intro">Loading the test sets…</p>'}
   <div class="opts" style="margin-top:8px"><label for="bm-limit">Sentences per generated set</label><select id="bm-limit"><option value="50">50</option><option value="100" selected>100</option><option value="300">300</option></select></div>
   <h3 class="sub">Readers</h3>
-  ${fz.map(([k, l, ok]) => `<label class="ck" style="display:flex;margin:4px 0"><input type="checkbox" data-bfz="${k}" ${ok ? 'checked' : ''}> ${l}${k === 'neural' && !models ? ' <span class="status">&nbsp;(load the models in Formalizer first; about 40 model calls per message)</span>' : ''}</label>`).join('')}
+  ${fz.map(([k, l, ok]) => `<label class="ck" style="display:flex;margin:4px 0"><input type="checkbox" data-bfz="${k}" ${ok ? 'checked' : ''}> ${l}${k === 'neural' && !models ? ' <span class="status">&nbsp;(not loaded: download it in the Neural tab first; about 40 model calls per message)</span>' : ''}</label>`).join('')}
   <div class="actions" style="margin-top:10px"><button type="button" class="btn solid" id="bm-run">Run benchmark</button><button type="button" class="btn" id="bm-stop">Stop</button><span class="status" id="bm-status"></span></div>
   <div id="bm-out">${benchLast || ''}</div>`;
 }
@@ -657,7 +792,7 @@ async function runBench(btn) {
   }
   const size = { rules: rulesBytes(), vss: vssInfo ? vssInfo.bytes : 0, neural: neuralBytes };
   const load = { rules: 0, vss: vssInfo ? vssInfo.loadMs : 0, neural: neuralLoadMs };
-  const label = { rules: 'Rules', vss: `VSS (D ${vssInfo ? vssInfo.D : '?'})`, neural: models ? `Neural (${models.enumModel.split('/')[1]} + ${models.qaModel.split('/')[1]})` : 'Neural' };
+  const label = { rules: 'Rules', vss: vssInfo && vssInfo.composer ? `VSS (${vssInfo.worlds.length} micro-worlds)` : `VSS (D ${vssInfo ? vssInfo.D : '?'})`, neural: models ? `Neural (${models.enumModel.split('/')[1]} + ${models.qaModel.split('/')[1]})` : 'Neural' };
   const sets = setIds.filter(id => fzs.some(f => res[f].sets[id] && res[f].sets[id].n));
   const cell = S => S && S.n ? `<b>${(S.ok / S.n * 100).toFixed(0)}%</b> <span class="why">${S.ok}/${S.n} · answers ${(S.kok / Math.max(1, S.keys) * 100).toFixed(0)}%</span>` : '–';
   const html = `<h3 class="sub">Results</h3><div class="tbl"><table class="bench"><thead><tr><th>reader</th>${sets.map(id => `<th>${escH(benchSets.find(s => s.id === id).title.split(' (')[0])}</th>`).join('')}<th>model size</th><th>load</th><th>ms / message (median · p95)</th></tr></thead><tbody>
@@ -702,7 +837,7 @@ function renderWorld() {
   for (const e of S.edges) lines.push(hlNode({ id: e.id, type: 'edge', args: Object.assign({ from: { ref: e.from }, to: { ref: e.to }, style: e.style, arrow: e.arrow }, e.color ? { color: e.color } : {}, e.label ? { label: e.label } : {}) }));
   for (const r of S.rules) { const a = {}; ['shape', 'size', 'color', 'outline'].forEach(k => { if (r[k]) a[k] = r[k]; }); lines.push(hlNode({ id: r.id, type: 'rule', args: a })); }
   if (!lines.length) lines.push('<span class="cm"># empty</span>');
-  return `<p class="intro">The drawing, written back as SOP wires. This is what a backend such as Datalog, Prolog or Z3 would receive after lowering. ${world.undoStack.length} step${world.undoStack.length === 1 ? '' : 's'} can be undone.</p><pre class="sop">${lines.join('\n')}</pre>`;
+  return `<p class="intro">The ${escH(cur.label)} reader’s drawing (the active tab), written back as SOP wires. This is what a backend such as Datalog, Prolog or Z3 would receive after lowering. ${world.undoStack.length} step${world.undoStack.length === 1 ? '' : 's'} can be undone.</p><pre class="sop">${lines.join('\n')}</pre>`;
 }
 
 /* ---------------- composer ---------------- */
@@ -731,17 +866,20 @@ function fitViewport() {
   msgs.scrollTop = msgs.scrollHeight;
 }
 if (window.visualViewport) { visualViewport.addEventListener('resize', fitViewport); visualViewport.addEventListener('scroll', fitViewport); fitViewport(); }
-document.querySelectorAll('[data-say]').forEach(b => b.addEventListener('click', () => submit(b.dataset.say)));
+// the toolbar buttons are not language: their SOP wires go straight to every loaded reader (each undoes or clears its own drawing)
+document.querySelectorAll('[data-say]').forEach(b => b.addEventListener('click', () => submit(b.dataset.say, b.dataset.sop)));
 $('#view-btn').addEventListener('click', () => { const narrow = svg.clientWidth < 640, focused = view === 'focus' || (view === 'auto' && narrow); view = focused ? 'all' : 'focus'; renderCanvas(); });
 window.addEventListener('resize', () => { if (!drag) renderCanvas(); });
 
 /* ---------------- start ---------------- */
-renderCanvas(); setStatus(idleStatus());
-botBubble({ text: 'Hi! Tell me what to draw, change or connect, or ask me about the drawing. Tap + for examples and whole scenarios.' });
+updateTabs(); renderCanvas(); setStatus(idleStatus());
+botBubble({ text: 'Hi! Tell me what to draw, change or connect, or ask me about the drawing. Three readers (Rules, VSS, Neural) read every message, each into its own drawing; the tabs above the canvas switch between them. Tap + for examples and whole scenarios.' });
 [
   'Draw a large blue circle named Start in the top left, then add a rectangle named Process to the right of it labeled "Validate". Connect Start to Process.',
   'Add a yellow diamond named Check right of Process labeled "ok?" and connect Process to it. Put a green circle named Done below Check and link Check to Done with a dashed arrow labeled "yes".',
   'Is there a path from Start to Done?'
-].forEach(submit);
-queue.then(() => { world.undoStack = []; });
+].forEach(t => submit(t));
+queue.then(() => { READERS.forEach(rd => { rd.world.undoStack = []; }); renderSopBar(); });
+ensureVSS();              // same site: no button, no question
+checkNeural('start');     // in the browser cache: loads silently; otherwise one invitation
 })();
