@@ -23,6 +23,12 @@ The label order (the decode's tie order) is the grouping's worlds, then fallback
 (default with --worlds): {..., labels, worlds, grouping, segmenter}; read by front.js segmentWorlds (the composer with router "cutter",
 vss-composer.js), which checks that the registry's worlds and events are the cutter's grouping.
 Run: python3 training/sketch/train_cutter.py --worlds [GROUPING] [--out docs/model/micro/cutter_worlds.json]
+
+Switches (environment; default off = the old build byte for byte; ROUND2.md section 5.2): SHORT=1 adds llm_train/{sonnet,haiku}_short;
+OPS=1 adds llm_train/ops_groups and ops_positions (the new-operation messages); DIAGRAM_OPS=1 makes the events group, ungroup,
+members, groupOf legend events (needed for a grouping that lists them). Round 2:
+  SHORT=1 OPS=1 DIAGRAM_OPS=1 python3 training/sketch/train_cutter.py --worlds training/sketch/worlds_micro/GROUPS_7r2.json --out docs/model/micro/cutter_worlds7r2.json
+  SHORT=1 OPS=1 DIAGRAM_OPS=1 python3 training/sketch/train_cutter.py --worlds training/sketch/worlds_micro/GROUPS_EVENTS_r2.json --out docs/model/micro/cutter_events_r2.json
 """
 import argparse, collections, glob, hashlib, json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -39,6 +45,10 @@ DIRS = ["llm_train/sonnet_msg", "llm_train/haiku_msg", "llm_train/sonnet_msg2", 
         "llm_bench/fresh1/sonnet", "llm_bench/fresh1/haiku"]
 if os.environ.get("SHORT") == "1":  # pre-registered in SHORT.md section 5: add the one-request short messages (default unchanged)
     DIRS = DIRS + ["llm_train/sonnet_short", "llm_train/haiku_short"]
+if os.environ.get("OPS") == "1":  # ROUND2.md: add the messages of the new operations (DIAGRAM_OPS.md section 7; same folders as front.py train_dirs OPS=1)
+    DIRS = DIRS + ["llm_train/ops_groups", "llm_train/ops_positions"]
+if os.environ.get("DIAGRAM_OPS") == "1":  # the new events group / ungroup / members / groupOf become legend events (generate.EVENTS, updated in place by llm_to_world.py)
+    import llm_to_world  # noqa: F401  (side effect only)
 
 
 def main():

@@ -1,0 +1,120 @@
+{
+ "_about": "GROUPS_EVENTS_r2 (round 2, 2026-11-02): GROUPS_EVENTS plus one world per new event (group, ungroup, members, groupOf), in the order of GROUPS_7r2: the 39 events of GROUPS_7r2, world id = event id, no B-fallback. The old GROUPS_EVENTS.json is unchanged.",
+ "create": [
+  "create"
+ ],
+ "set": [
+  "set"
+ ],
+ "resize": [
+  "resize"
+ ],
+ "fact": [
+  "fact"
+ ],
+ "rule": [
+  "rule"
+ ],
+ "connect": [
+  "connect"
+ ],
+ "disconnect": [
+  "disconnect"
+ ],
+ "move": [
+  "move"
+ ],
+ "swap": [
+  "swap"
+ ],
+ "arrange": [
+  "arrange"
+ ],
+ "align": [
+  "align"
+ ],
+ "distribute": [
+  "distribute"
+ ],
+ "toFront": [
+  "toFront"
+ ],
+ "toBack": [
+  "toBack"
+ ],
+ "check": [
+  "check"
+ ],
+ "connected": [
+  "connected"
+ ],
+ "path": [
+  "path"
+ ],
+ "reachable": [
+  "reachable"
+ ],
+ "cycle": [
+  "cycle"
+ ],
+ "exists": [
+  "exists"
+ ],
+ "count": [
+  "count"
+ ],
+ "list": [
+  "list"
+ ],
+ "extreme": [
+  "extreme"
+ ],
+ "nearest": [
+  "nearest"
+ ],
+ "describe": [
+  "describe"
+ ],
+ "neighbors": [
+  "neighbors"
+ ],
+ "degree": [
+  "degree"
+ ],
+ "property": [
+  "property"
+ ],
+ "members": [
+  "members"
+ ],
+ "groupOf": [
+  "groupOf"
+ ],
+ "delete": [
+  "delete"
+ ],
+ "duplicate": [
+  "duplicate"
+ ],
+ "rename": [
+  "rename"
+ ],
+ "label": [
+  "label"
+ ],
+ "group": [
+  "group"
+ ],
+ "ungroup": [
+  "ungroup"
+ ],
+ "undo": [
+  "undo"
+ ],
+ "redo": [
+  "redo"
+ ],
+ "forget": [
+  "forget"
+ ]
+}
