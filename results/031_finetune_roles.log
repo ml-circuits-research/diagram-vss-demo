@@ -1,0 +1,273 @@
+Using Python 3.13.18 environment at: /home/claude/vss-box/venv
+Checked 13 packages in 10ms
+torch 2.15.0+cu132 cuda True
+cut rows (whole messages, B/I/O per word): train 5269 messages 15680 spans, heldout 585 messages 1711 spans, eval_sample1000 1000 messages 4856 spans
+rows: train 15683, heldout 1711, eval_sample1000 4858, eval_hand 40, eval_blind 60, eval_broad 118, eval_seen 300, eval_new_identities 300, eval_heldout_formulations 300
+none rows (segments of the rules' segmenter that overlap no gold span): train 0/15683 = 0.0%, heldout 0/1711 = 0.0%, eval_sample1000 0/4858 = 0.0%
+class keys (15): arrow(2), axis(2), color(18), comparison(2), direction(4), kind(1), layout(4), notColor(18), pairing(3), position(15), property(5), shape(8), size(5), style(2), superlative(10)
+span keys (8): anchor, count, distance, from, label, name, target, to; tags 17; number words learned: {'three': '3', 'two': '2', 'twice': '2', 'four': '4', 'five': '5', 'ten': '10', 'day': '100', 'six': '6', '90px': '90'}
+
+span keys, training rows: gold values aligned to words
+  anchor     2807/ 3037 =  92.4%  aligned: $new: name written 15 · aligned: written 2792 · not written in the request 224 · reference $new (no name written) 5 · reference mention(...) 1
+  count       231/  231 = 100.0%  aligned: number word (co-occurrence) 190 · aligned: written 41
+  distance    195/  196 =  99.5%  aligned: number word (co-occurrence) 2 · aligned: written 193 · not written in the request 1
+  from       4031/ 4576 =  88.1%  aligned: $new: name written 53 · aligned: written 3978 · not written in the request 519 · reference $new (no name written) 24 · reference mention(...) 2
+  label       360/  360 = 100.0%  aligned: written 360
+  name        751/  751 = 100.0%  aligned: written 751
+  target     8759/10328 =  84.8%  aligned: $new: name written 95 · aligned: written 8664 · already tagged for another key 1 · not written in the request 1187 · reference $new (no name written) 41 · reference mention(...) 340
+  to         2125/ 2383 =  89.2%  aligned: $new: name written 50 · aligned: written 2075 · not written in the request 212 · reference $new (no name written) 30 · reference mention(...) 16
+
+class keys, training rows (evidence only; the class head needs no alignment): one word expresses the value
+  arrow         413/  414 =  99.8%   e.g. line->none 216, with->none 94, way->both 34, lines->none 24, ways->both 14
+  axis          314/  339 =  92.6%   e.g. horizontally->horizontal 147, vertically->vertical 100, align->horizontal 19, distribute->horizontal 15, horizontal->horizontal 11
+  color        3644/ 3648 =  99.9%   e.g. red->red 491, green->green 387, blue->blue 383, gray->gray 344, gold->gold 264
+  comparison    293/  293 = 100.0%   e.g. bigger->bigger 208, smaller->smaller 75, than->bigger 8, check->bigger 2
+  direction     171/  215 =  79.5%   e.g. up->up 54, pixels->right 47, down->down 44, left->left 9, px->left 5
+  kind          121/  121 = 100.0%   e.g. connections->edge 79, count->edge 35, arrows->edge 5, many->edge 1, total->edge 1
+  layout        281/  327 =  85.9%   e.g. row->row 149, column->column 64, grid->grid 48, circle->circle 17, go->row 1
+  notColor       59/  123 =  48.0%   e.g. not->blue 18, black->black 10, lime->lime 3, gray->gray 2, isn->orange 2
+  pairing       708/  714 =  99.2%   e.g. chain->chain 197, connect->chain 185, and->chain 163, each->next 74, to->chain 31
+  position     2388/ 2849 =  83.8%   e.g. near->near 385, above->above 304, right->rightOf 265, below->below 262, left->leftOf 257
+  property      237/  237 = 100.0%   e.g. color->color 79, shape->shape 43, where->position 29, size->size 25, what->color 18
+  shape        2466/ 2481 =  99.4%   e.g. circle->circle 537, star->star 308, square->square 258, rectangle->rectangle 244, hexagon->hexagon 174
+  size         1603/ 1607 =  99.8%   e.g. small->small 387, huge->huge 374, large->large 268, tiny->tiny 227, big->large 218
+  style         269/  270 =  99.6%   e.g. dotted->dotted 140, dashed->dashed 126, line->dotted 1, connect->dotted 1, to->dotted 1
+  superlative  1005/ 1016 =  98.9%   e.g. most->mostConnected 157, closest->closest 126, farthest->farthest 108, leftmost->leftmost 98, biggest->biggest 97
+
+who fills the name-roles (REF keys ['anchor', 'from', 'target', 'to']; desc keys ['color', 'notColor', 'quantifier', 'recency', 'shape']): written / context / description of the gold fillers
+  train:
+    anchor    2841 fillers: written 2650 (93.3%) · context 190 (6.7%) · description 1 (0.0%)
+    from      2763 fillers: written 2532 (91.6%) · context 229 (8.3%) · description 2 (0.1%)
+    target    8884 fillers: written 7879 (88.7%) · context 665 (7.5%) · description 340 (3.8%)
+    to        1899 fillers: written 1734 (91.3%) · context 149 (7.8%) · description 16 (0.8%)
+    all      16387 fillers: written 14795 (90.3%) · context 1233 (7.5%) · description 359 (2.2%)
+    requests with 2+ described roles 0 · with 2+ context roles 86 · context fillers that are a list (several names) 526 {'target': 284, 'from': 147, 'anchor': 38, 'to': 57}
+    context fillers the shared rule (nextContext, gold earlier requests) gives right: 335/1233 = 27.2%  {'target wrong': 471, 'from wrong': 192, 'anchor wrong': 125, 'target right': 194, 'anchor right': 65, 'to right': 39, 'from right': 37, 'to wrong': 110}
+  heldout:
+    anchor     322 fillers: written 308 (95.7%) · context 14 (4.3%) · description 0 (0.0%)
+    from       297 fillers: written 285 (96.0%) · context 12 (4.0%) · description 0 (0.0%)
+    target     967 fillers: written 872 (90.2%) · context 62 (6.4%) · description 33 (3.4%)
+    to         210 fillers: written 194 (92.4%) · context 15 (7.1%) · description 1 (0.5%)
+    all       1796 fillers: written 1659 (92.4%) · context 103 (5.7%) · description 34 (1.9%)
+    requests with 2+ described roles 0 · with 2+ context roles 7 · context fillers that are a list (several names) 41 {'from': 8, 'target': 25, 'anchor': 3, 'to': 5}
+    context fillers the shared rule (nextContext, gold earlier requests) gives right: 34/103 = 33.0%  {'target right': 19, 'from wrong': 10, 'target wrong': 43, 'anchor wrong': 9, 'to right': 8, 'from right': 2, 'to wrong': 7, 'anchor right': 5}
+  eval_sample1000:
+    anchor     915 fillers: written 850 (92.9%) · context 65 (7.1%) · description 0 (0.0%)
+    from       944 fillers: written 873 (92.5%) · context 70 (7.4%) · description 1 (0.1%)
+    target    2805 fillers: written 2481 (88.4%) · context 226 (8.1%) · description 98 (3.5%)
+    to         660 fillers: written 605 (91.7%) · context 53 (8.0%) · description 2 (0.3%)
+    all       5324 fillers: written 4809 (90.3%) · context 414 (7.8%) · description 101 (1.9%)
+    requests with 2+ described roles 0 · with 2+ context roles 25 · context fillers that are a list (several names) 174 {'target': 94, 'to': 23, 'from': 41, 'anchor': 16}
+    context fillers the shared rule (nextContext, gold earlier requests) gives right: 120/414 = 29.0%  {'from right': 12, 'anchor wrong': 44, 'from wrong': 58, 'to wrong': 34, 'target wrong': 158, 'target right': 68, 'anchor right': 21, 'to right': 19}
+skipped: {'bench broad: multi-request message without spans': 10}
+base distilbert-base-uncased: 67.1M parameters, device cuda, fp16 True; train 15683 held-out 1711; acts 36, class keys 24 (175 classes), tags 17
+cut: 5269 train messages; word pieces per message: median 14, max 269; 0 of 5854 exceed 512 (the words beyond are read as outside every request)
+act none: 0/15683 train rows = 0.0%; weight 1 (not above 40%)
+/home/claude/vss-box/diagram-vss-demo/training/neural/finetune_roles.py:297: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  scaler.step(opt); scaler.update(); sch.step(); loss_sum += loss.item(); n += 1; step += 1
+epoch 1: loss 2.5789  held-out: requests read right 0.3559, act 0.9795, cut F1 0.8962 (P 0.8663 R 0.9281)  (53s)
+epoch 2: loss 0.3276  held-out: requests read right 0.4652, act 0.9854, cut F1 0.9137 (P 0.8965 R 0.9316)  (108s)
+epoch 3: loss 0.2081  held-out: requests read right 0.5996, act 0.9895, cut F1 0.9250 (P 0.9134 R 0.9369)  (161s)
+epoch 4: loss 0.1353  held-out: requests read right 0.7165, act 0.9895, cut F1 0.9349 (P 0.9173 R 0.9532)  (214s)
+epoch 5: loss 0.0824  held-out: requests read right 0.7978, act 0.9895, cut F1 0.9339 (P 0.9225 R 0.9456)  (267s)
+epoch 6: loss 0.0529  held-out: requests read right 0.8591, act 0.9895, cut F1 0.9358 (P 0.9262 R 0.9456)  (321s)
+epoch 7: loss 0.0388  held-out: requests read right 0.8743, act 0.9883, cut F1 0.9371 (P 0.9249 R 0.9497)  (374s)
+epoch 8: loss 0.0301  held-out: requests read right 0.8808, act 0.9889, cut F1 0.9356 (P 0.9242 R 0.9474)  (427s)
+/home/claude/vss-box/diagram-vss-demo/training/neural/finetune_roles.py:218: DeprecationWarning: You are using the legacy TorchScript-based ONNX export. Starting in PyTorch 2.9, the new torch.export-based ONNX exporter has become the default. Learn more about the new export logic: https://docs.pytorch.org/docs/stable/onnx_export.html. For exporting control flow: https://pytorch.org/tutorials/beginner/onnx/export_control_flow_model_to_onnx_tutorial.html
+  torch.onnx.export(model, (x["input_ids"], x["attention_mask"]), os.path.join(ox, "model.onnx"), dynamo=False, opset_version=14,
+/home/claude/vss-box/venv/lib/python3.13/site-packages/transformers/models/distilbert/modeling_distilbert.py:215: TracerWarning: torch.tensor results are registered as constants in the trace. You can safely ignore this warning if you use this function to create tensors out of constant variables that would be the same every time you call this function. In any other case, this might cause the trace to be incorrect.
+  mask, torch.tensor(torch.finfo(scores.dtype).min)
+WARNING:root:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+
+best epoch: held-out score 0.9082 (mean of requests read right and cut F1; requests read right = act right, every gold class key right, every gold role on exactly its words)
+per key: right/gold (+ produced where the gold has none)
+  heldout                n= 1711  requests read right 0.8808  act 0.9889
+      anchor 303/308 +4 · arrow 8/45 · axis 39/44 · color 370/388 +1 · comparison 35/35 · count 25/25 · desc:color 0/8 · desc:notColor 0/2 · desc:quantifier 15/18 · desc:recency 9/17 · desc:shape 3/22 +1 · direction 22/23 · distance 22/22 · fill:anchor 314/322 +2 · fill:from 294/297 +2 · fill:target 946/967 +9 · fill:to 196/210 +2 · from 272/285 +1 · kind 15/16 · label 46/47 · layout 20/21 · name 72/73 · notColor 2/15 · pairing 69/69 +8 · position 301/326 +4 · property 22/23 · shape 242/256 · size 166/173 · style 35/36 · superlative 105/106 · target 858/872 +10 · to 185/194 +2
+      name-roles per filler kind (kind read right / value read right / gold): context 83/83/103 (80.6%) · description 28/4/34 (11.8%) · written 1639/1611/1659 (97.1%)  ->  description accuracy 4/34
+  blind                  n=   60  requests read right 0.7500  act 0.9833
+      anchor 8/8 +2 · arrow 0/2 · axis 0/1 +1 · color 10/10 · comparison 1/1 · count 1/1 · desc:color 0/1 · desc:notColor 0/1 · desc:quantifier 5/7 · desc:shape 1/5 · direction 2/2 · distance 0/1 · fill:anchor 8/8 · fill:from 7/9 +1 · fill:target 29/30 +1 · fill:to 6/6 · from 7/7 · label 2/2 · layout 1/1 · name 2/2 · pairing 2/2 · position 5/8 · property 3/3 · shape 11/12 · size 4/4 · style 1/1 · superlative 1/1 +1 · target 25/25 · to 6/6
+      name-roles per filler kind (kind read right / value read right / gold): description 5/1/7 (14.3%) · written 45/45/46 (97.8%)  ->  description accuracy 1/7
+  broad                  n=  118  requests read right 0.7712  act 0.9746
+      anchor 15/15 +3 · arrow 1/2 · axis 1/2 · color 27/29 · comparison 1/1 · count 3/3 · desc:color 0/3 · desc:notColor 0/1 · desc:quantifier 7/9 · desc:recency 0/2 +1 · desc:shape 2/13 · direction 3/3 · distance 1/1 +1 · fill:anchor 15/15 · fill:from 14/17 · fill:target 53/54 +1 · fill:to 14/14 · from 14/14 · kind 1/1 · label 4/4 · layout 2/2 · name 5/5 · notColor 0/1 · pairing 2/2 · position 11/17 · property 5/6 · shape 30/33 · size 7/8 · style 2/2 · superlative 2/3 · target 43/43 +3 · to 14/14
+      name-roles per filler kind (kind read right / value read right / gold): context 0/0/1 (0.0%) · description 10/2/13 (15.4%) · written 86/86/86 (100.0%)  ->  description accuracy 2/13
+  hand                   n=   40  requests read right 0.8500  act 1.0000
+      anchor 5/5 +1 · axis 1/2 · color 10/10 · count 1/1 · desc:notColor 0/1 · desc:quantifier 2/4 · desc:shape 1/4 · direction 1/1 · distance 1/1 · fill:anchor 5/5 · fill:from 5/7 · fill:target 19/19 +1 · fill:to 4/4 · from 5/5 · label 1/1 · layout 1/1 · name 2/2 · notColor 1/1 · pairing 2/2 · position 2/4 +1 · property 2/2 · shape 7/7 · size 3/3 · style 1/1 · superlative 2/2 · target 17/17 · to 4/4
+      name-roles per filler kind (kind read right / value read right / gold): description 2/1/4 (25.0%) · written 31/31/31 (100.0%)  ->  description accuracy 1/4
+  heldout_formulations   n=  300  requests read right 0.4433  act 0.9467
+      anchor 34/37 +8 · arrow 2/10 · axis 7/9 +2 · color 77/98 +14 · count 14/14 · desc:color 0/46 · desc:notColor 0/19 · desc:quantifier 30/42 +1 · desc:recency 1/3 +4 · desc:shape 5/97 · fill:anchor 30/53 · fill:from 49/85 +3 · fill:target 92/104 +10 · fill:to 54/77 · from 48/50 +8 · label 26/26 · name 27/28 · notColor 0/1 · pairing 5/11 · position 37/81 +2 · shape 83/94 +4 · size 19/24 · style 23/24 · target 62/63 +1 · to 53/54 +5
+      name-roles per filler kind (kind read right / value read right / gold): description 30/0/115 (0.0%) · written 195/193/204 (94.6%)  ->  description accuracy 0/115
+  new_identities         n=  300  requests read right 0.5500  act 0.9667
+      anchor 21/24 +9 · arrow 2/8 · axis 4/5 +1 · color 65/75 +2 · count 3/3 +1 · desc:color 0/37 · desc:notColor 0/5 · desc:quantifier 27/47 +1 · desc:recency 0/3 · desc:shape 4/82 · direction 5/6 · distance 4/4 · fill:anchor 21/39 +1 · fill:from 36/65 +1 · fill:target 129/143 +12 · fill:to 31/40 · from 39/40 +3 · label 16/16 +1 · layout 10/11 · name 24/25 · notColor 0/1 · pairing 8/16 · position 27/58 +2 · property 8/9 · shape 59/70 +1 · size 22/23 +1 · style 13/13 · target 99/99 +3 · to 30/31 +1
+      name-roles per filler kind (kind read right / value read right / gold): description 30/2/93 (2.2%) · written 187/184/194 (94.8%)  ->  description accuracy 2/93
+  sample1000             n= 4858  requests read right 0.8666  act 0.9879
+      anchor 830/850 +9 · arrow 7/158 · axis 51/72 · color 1168/1199 +2 · comparison 78/79 · count 53/55 +1 · desc:color 0/18 · desc:notColor 0/13 · desc:quantifier 35/52 · desc:recency 16/36 +1 · desc:shape 10/62 +7 · direction 32/34 +2 · distance 34/34 · fill:anchor 870/915 +7 · fill:from 911/944 +3 · fill:target 2734/2805 +23 · fill:to 618/660 +13 · from 819/878 +4 · kind 36/36 · label 104/110 · layout 100/102 · name 196/198 · notColor 13/54 · pairing 230/252 +19 · position 874/914 +4 · property 47/49 +1 · shape 676/723 +1 · size 486/506 +1 · style 131/139 · superlative 353/359 +1 · target 2460/2484 +27 · to 576/605 +20
+      name-roles per filler kind (kind read right / value read right / gold): context 315/315/414 (76.1%) · description 76/12/101 (11.9%) · written 4742/4664/4809 (97.0%)  ->  description accuracy 12/101
+  seen                   n=  300  requests read right 0.6067  act 0.9700
+      anchor 29/33 +7 · arrow 1/5 · axis 5/5 · color 61/74 +4 · count 9/9 +1 · desc:color 0/34 · desc:notColor 0/2 · desc:quantifier 14/28 +1 · desc:recency 1/3 +3 · desc:shape 2/63 · direction 6/10 · distance 9/9 · fill:anchor 30/41 · fill:from 32/47 +3 · fill:target 150/170 +14 · fill:to 25/35 · from 32/33 +2 · label 15/15 · layout 7/7 · name 22/22 · notColor 0/1 · pairing 4/8 · position 25/55 · property 6/8 · shape 48/61 +4 · size 15/16 +1 · style 7/7 · target 126/129 +6 · to 26/26 +2
+      name-roles per filler kind (kind read right / value read right / gold): description 23/0/72 (0.0%) · written 214/211/221 (95.5%)  ->  description accuracy 0/72
+  cut train: n 5269, spans gold 15680, spans predicted 15687, exact 15648, precision 0.9975, recall 0.9980, f1 0.9977, word accuracy 0.9996
+  cut heldout: n 585, spans gold 1711, spans predicted 1754, exact 1621, precision 0.9242, recall 0.9474, f1 0.9356, word accuracy 0.9763
+  cut eval_sample1000: n 1000, spans gold 4856, spans predicted 5103, exact 4419, precision 0.8660, recall 0.9100, f1 0.8874, word accuracy 0.9598
+onnx fp32 vs torch: max |diff| token 6.68e-06, seq 6.68e-06, cut 5.72e-06
+differs: "Hub controls Lamp, Sensor and Fan" {"act":["connect","connect"],"classes":[{"fill:from":"written","fill:target":"written"},{"fill:from":"written","fill:target":"written"}],"tags":["B-from O B-to O B-to O B-to","B-from O B-from O B-to O B-to"],"ids":true}
+node makeReader q8 vs torch on 50 requests: word pieces 50/50, act 50/50, classes 50/50, tags 49/50 (17 tags, 24 class keys)
+node cut() vs torch on 20 whole messages: spans identical 19/20
+{"ids":"50/50","act":"50/50","classes":"50/50","tags":"49/50","cut":"19/20"} 
+
+wrote /home/claude/vss-box/diagram-vss-demo/docs/model/neural/sop-bert (67.8 MB q8); README.md inside
+-rw-r--r--. 1 claude claude     8576 Nov  2 16:22 docs/model/neural/sop-bert/config.json
+-rw-r--r--. 1 claude claude 67769917 Nov  2 16:22 docs/model/neural/sop-bert/onnx/model_quantized.onnx
+-rw-r--r--. 1 claude claude     2612 Nov  2 16:22 docs/model/neural/sop-bert/README.md
+-rw-r--r--. 1 claude claude     1227 Nov  2 16:22 docs/model/neural/sop-bert/tokenizer_config.json
+-rw-r--r--. 1 claude claude   711551 Nov  2 16:22 docs/model/neural/sop-bert/tokenizer.json
+# SOP-BERT: DistilBERT fine-tuned on our requests — cuts the message, reads the action, the values, the names and the descriptions
+
+One DistilBERT encoder with these heads (two calls per message: the cut, then all its requests in one batch):
+- the act (36 classes: the action of a command, the ask of a question, else `fact` or `rule`, or `none`: the text is not a request);
+- 15 class heads, one per legend key with values (arrow, axis, color, comparison, direction, kind, layout, notColor, pairing, position, property, shape, size, style, superlative): `none` or a value;
+- per name-role (anchor, from, target, to) a head `fill:<key>`: none / written (the word tags give the names) / context (a pronoun
+  or vague reference: the value comes from the context rule all readers share, the last shape created or named) / description (a `mention`
+  wire); and the description's own keys (color, notColor, quantifier, recency, shape) as heads `desc:<key>`;
+- the CUT: a second token head (`cut_logits`, O / B / I per word) reads the WHOLE message (<= 512 word pieces) and marks the request spans; the
+  act / class / role heads then read the spans of the message in one batched second call (two calls per message);
+- a B / I / O tag per word for the keys whose answer is written in the request (anchor, count, distance, from, label, name, target, to).
+The head layout is `reader` in config.json; docs/js/neural.js makeReader decodes it. Load with transformers.js as AutoTokenizer +
+AutoModel (dtype `q8`, file `onnx/model_quantized.onnx`); outputs `token_logits` and `seq_logits`.
+
+- Base model: `distilbert-base-uncased` (license: Apache-2.0); fine-tuned here, weights are a derivative of it.
+- Data: 15683 request spans from the span-annotated messages of training/sketch (made by training/neural/make_roles.py; split by message id,
+  10% of the messages held out; the fixed 1000-message sample and the docs/bench sets are never trained on).
+- Held-out act accuracy (fp32 torch): 0.9889. Held-out requests read right (act, every gold class key incl. fill / desc, every gold role on exactly its words): 0.8808.
+  Held-out name-roles per filler kind (value read right / gold): context 83/103, description 4/34, written 1611/1659.
+  1000-message sample: act 0.9879, requests read right 0.8666.
+- Size: onnx/model_quantized.onnx 67.8 MB (q8). Node check (docs/js/neural.js makeReader, q8) vs torch on 50 held-out requests: {"ids": "50/50", "act": "50/50", "classes": "50/50", "tags": "49/50", "cut": "19/20"}.
+- Trained with training/neural/finetune_roles.py (epochs <= 8, lr 6e-05, batch 32, fp16 on cuda, seed 0).
+== the 100 sample messages: SOP-BERT, its own cut
+composer: cutter /home/claude/vss-box/diagram-vss-demo/docs/model/micro/cutter_worlds7s.json · fallback none · worlds shapes [create,set,resize,fact,rule], links [connect,disconnect], position [move,swap,arrange,align,distribute,toFront,toBack], graphq [check,connected,path,reachable,cycle,exists], questions [count,list,extreme,nearest,describe,neighbors,degree,property], manage [delete,duplicate,rename,label], history [undo,redo,forget]
+composer v2: router cutter (top 3 of 7 cutter worlds) · fewest words not understood · ties and gaps: context filler /home/claude/vss-box/diagram-vss-demo/docs/model/context/weights.json margin 0
+event hint: mode H1 · event cutter /home/claude/vss-box/diagram-vss-demo/docs/model/micro/cutter_events.json
+models loaded in 0.4 s: sop-bert (joint) · device cpu · dtype q8
+neural: sop-bert (joint; cut: its own span head; no Rules reader) · device cpu · dtype q8
+
+../sketch/llm_bench/haiku_spans: 50 messages, 220 gold wires
+  rules messages fully right 28.0% · wires right 79.5% (175/220) · act found 91.8% · extra wires 25
+  vss   messages fully right 40.0% · wires right 78.6% (173/220) · act found 93.6% · extra wires 17
+  neural-sop-bert messages fully right 38.0% · wires right 80.5% (177/220) · act found 98.6% · extra wires 17
+  rules per message: right 28.0% (14) · honest 8.0% (4) · wrong 64.0% (32)
+  vss   per message: right 40.0% (20) · honest 4.0% (2) · wrong 56.0% (28)
+  neural-sop-bert per message: right 38.0% (19) · honest 0.0% (0) · wrong 62.0% (31)
+  rules per request: correct 79.5% · not done 8.2% · done wrong 12.3% · extra 25 (11.4%)
+  vss   per request: correct 78.6% · not done 6.4% · done wrong 15.0% · extra 17 (7.7%)
+  neural-sop-bert per request: correct 80.5% · not done 1.4% · done wrong 18.2% · extra 17 (7.7%)
+  per act (rules · vss · neural-sop-bert · n): set 39·39·44·47, move 37·39·38·45, connect 21·18·12·32, extreme 12·12·12·12, list 8·8·5·8, create 6·2·7·7, path 7·4·7·7, neighbors 7·7·7·7, check 4·5·5·7, count 7·6·6·7, connected 6·7·7·7, nearest 6·4·3·6, degree 1·5·5·6, rename 2·4·4·4, exists 2·1·1·3, arrange 3·3·3·3, label 1·1·1·2, swap 2·2·2·2, duplicate 1·1·2·2, fact: 1·2·2·2, property 1·1·1·1, delete 0·0·1·1, rule: 1·1·1·1, redo 0·1·1·1
+  mean ms per message (formalizing only): rules 14.0 · vss 80.2 · neural-sop-bert 21.3
+
+../sketch/llm_bench/sonnet_spans: 50 messages, 202 gold wires
+  rules messages fully right 8.0% · wires right 46.5% (94/202) · act found 70.8% · extra wires 39
+  vss   messages fully right 6.0% · wires right 56.4% (114/202) · act found 72.3% · extra wires 15
+  neural-sop-bert messages fully right 10.0% · wires right 62.9% (127/202) · act found 91.6% · extra wires 36
+  rules per message: right 8.0% (4) · honest 4.0% (2) · wrong 88.0% (44)
+  vss   per message: right 6.0% (3) · honest 20.0% (10) · wrong 74.0% (37)
+  neural-sop-bert per message: right 10.0% (5) · honest 0.0% (0) · wrong 90.0% (45)
+  rules per request: correct 46.5% · not done 29.2% · done wrong 24.3% · extra 39 (19.3%)
+  vss   per request: correct 56.4% · not done 27.7% · done wrong 15.8% · extra 15 (7.4%)
+  neural-sop-bert per request: correct 62.9% · not done 8.4% · done wrong 28.7% · extra 36 (17.8%)
+  per act (rules · vss · neural-sop-bert · n): set 28·38·40·52, connect 13·13·15·44, move 7·11·15·19, create 10·12·12·17, count 7·5·6·8, extreme 3·5·6·7, arrange 0·0·3·7, check 4·3·3·6, delete 2·4·3·5, neighbors 1·2·3·4, cycle 3·0·4·4, resize 2·1·1·3, path 2·2·2·3, describe 2·3·2·3, exists 0·1·1·3, label 1·2·1·3, toBack 1·2·2·2, swap 0·0·0·1, duplicate 1·1·1·1, property 1·1·1·1, rename 1·1·1·1, undo 1·1·1·1, connected 1·1·1·1, align 0·0·0·1, disconnect 1·1·1·1, list 1·1·0·1, nearest 1·1·1·1, toFront 0·1·0·1, fact: 0·1·1·1
+  mean ms per message (formalizing only): rules 12.7 · vss 64.0 · neural-sop-bert 21.2
+
+ALL (../sketch/llm_bench/haiku_spans + ../sketch/llm_bench/sonnet_spans): 100 messages, 422 gold wires
+  rules messages fully right 18.0% · wires right 63.7% (269/422) · act found 81.8% · extra wires 64
+  vss   messages fully right 23.0% · wires right 68.0% (287/422) · act found 83.4% · extra wires 32
+  neural-sop-bert messages fully right 24.0% · wires right 72.0% (304/422) · act found 95.3% · extra wires 53
+  rules per message: right 18.0% (18) · honest 6.0% (6) · wrong 76.0% (76)
+  vss   per message: right 23.0% (23) · honest 12.0% (12) · wrong 65.0% (65)
+  neural-sop-bert per message: right 24.0% (24) · honest 0.0% (0) · wrong 76.0% (76)
+  rules per request: correct 63.7% · not done 18.2% · done wrong 18.0% · extra 64 (15.2%)
+  vss   per request: correct 68.0% · not done 16.6% · done wrong 15.4% · extra 32 (7.6%)
+  neural-sop-bert per request: correct 72.0% · not done 4.7% · done wrong 23.2% · extra 53 (12.6%)
+  per act (rules · vss · neural-sop-bert · n): set 67·77·84·99, connect 34·31·27·76, move 44·50·53·64, create 16·14·19·24, extreme 15·17·18·19, count 14·11·12·15, check 8·8·8·13, neighbors 8·9·10·11, path 9·6·9·10, arrange 3·3·6·10, list 9·9·5·9, connected 7·8·8·8, nearest 7·5·4·7, exists 2·2·2·6, degree 1·5·5·6, delete 2·4·4·6, label 2·3·2·5, rename 3·5·5·5, cycle 3·0·4·4, swap 2·2·2·3, duplicate 2·2·3·3, fact: 1·3·3·3, resize 2·1·1·3, describe 2·3·2·3, property 2·2·2·2, toBack 1·2·2·2, rule: 1·1·1·1, redo 0·1·1·1, undo 1·1·1·1, align 0·0·0·1, disconnect 1·1·1·1, toFront 0·1·0·1
+  mean ms per message (formalizing only): rules 13.3 · vss 72.1 · neural-sop-bert 21.2
+
+neural-sop-bert: calls to the Rules reader made by the neural reader: 0
+== the 100 sample messages: SOP-BERT, CUT=rules
+composer: cutter /home/claude/vss-box/diagram-vss-demo/docs/model/micro/cutter_worlds7s.json · fallback none · worlds shapes [create,set,resize,fact,rule], links [connect,disconnect], position [move,swap,arrange,align,distribute,toFront,toBack], graphq [check,connected,path,reachable,cycle,exists], questions [count,list,extreme,nearest,describe,neighbors,degree,property], manage [delete,duplicate,rename,label], history [undo,redo,forget]
+composer v2: router cutter (top 3 of 7 cutter worlds) · fewest words not understood · ties and gaps: context filler /home/claude/vss-box/diagram-vss-demo/docs/model/context/weights.json margin 0
+event hint: mode H1 · event cutter /home/claude/vss-box/diagram-vss-demo/docs/model/micro/cutter_events.json
+models loaded in 0.5 s: sop-bert (joint) · device cpu · dtype q8
+neural: sop-bert (joint; cut: the rules' segmenter (CUT=rules); no Rules reader) · device cpu · dtype q8
+
+../sketch/llm_bench/haiku_spans: 50 messages, 220 gold wires
+  rules messages fully right 28.0% · wires right 79.5% (175/220) · act found 91.8% · extra wires 25
+  vss   messages fully right 40.0% · wires right 78.6% (173/220) · act found 93.6% · extra wires 17
+  neural-sop-bert messages fully right 14.0% · wires right 75.5% (166/220) · act found 97.3% · extra wires 34
+  rules per message: right 28.0% (14) · honest 8.0% (4) · wrong 64.0% (32)
+  vss   per message: right 40.0% (20) · honest 4.0% (2) · wrong 56.0% (28)
+  neural-sop-bert per message: right 14.0% (7) · honest 2.0% (1) · wrong 84.0% (42)
+  rules per request: correct 79.5% · not done 8.2% · done wrong 12.3% · extra 25 (11.4%)
+  vss   per request: correct 78.6% · not done 6.4% · done wrong 15.0% · extra 17 (7.7%)
+  neural-sop-bert per request: correct 75.5% · not done 2.7% · done wrong 21.8% · extra 34 (15.5%)
+  per act (rules · vss · neural-sop-bert · n): set 39·39·41·47, move 37·39·37·45, connect 21·18·9·32, extreme 12·12·11·12, list 8·8·5·8, create 6·2·5·7, path 7·4·7·7, neighbors 7·7·7·7, check 4·5·5·7, count 7·6·7·7, connected 6·7·6·7, nearest 6·4·3·6, degree 1·5·5·6, rename 2·4·4·4, exists 2·1·1·3, arrange 3·3·3·3, label 1·1·1·2, swap 2·2·2·2, duplicate 1·1·1·2, fact: 1·2·2·2, property 1·1·1·1, delete 0·0·1·1, rule: 1·1·1·1, redo 0·1·1·1
+  mean ms per message (formalizing only): rules 14.0 · vss 78.5 · neural-sop-bert 24.8
+
+../sketch/llm_bench/sonnet_spans: 50 messages, 202 gold wires
+  rules messages fully right 8.0% · wires right 46.5% (94/202) · act found 70.8% · extra wires 39
+  vss   messages fully right 6.0% · wires right 56.4% (114/202) · act found 72.3% · extra wires 15
+  neural-sop-bert messages fully right 6.0% · wires right 54.0% (109/202) · act found 88.1% · extra wires 50
+  rules per message: right 8.0% (4) · honest 4.0% (2) · wrong 88.0% (44)
+  vss   per message: right 6.0% (3) · honest 20.0% (10) · wrong 74.0% (37)
+  neural-sop-bert per message: right 6.0% (3) · honest 0.0% (0) · wrong 94.0% (47)
+  rules per request: correct 46.5% · not done 29.2% · done wrong 24.3% · extra 39 (19.3%)
+  vss   per request: correct 56.4% · not done 27.7% · done wrong 15.8% · extra 15 (7.4%)
+  neural-sop-bert per request: correct 54.0% · not done 11.9% · done wrong 34.2% · extra 50 (24.8%)
+  per act (rules · vss · neural-sop-bert · n): set 28·38·33·52, connect 13·13·14·44, move 7·11·10·19, create 10·12·11·17, count 7·5·6·8, extreme 3·5·5·7, arrange 0·0·2·7, check 4·3·3·6, delete 2·4·2·5, neighbors 1·2·2·4, cycle 3·0·4·4, resize 2·1·1·3, path 2·2·2·3, describe 2·3·2·3, exists 0·1·1·3, label 1·2·1·3, toBack 1·2·2·2, swap 0·0·0·1, duplicate 1·1·1·1, property 1·1·1·1, rename 1·1·1·1, undo 1·1·1·1, connected 1·1·1·1, align 0·0·0·1, disconnect 1·1·1·1, list 1·1·0·1, nearest 1·1·1·1, toFront 0·1·0·1, fact: 0·1·1·1
+  mean ms per message (formalizing only): rules 11.2 · vss 58.4 · neural-sop-bert 19.0
+
+ALL (../sketch/llm_bench/haiku_spans + ../sketch/llm_bench/sonnet_spans): 100 messages, 422 gold wires
+  rules messages fully right 18.0% · wires right 63.7% (269/422) · act found 81.8% · extra wires 64
+  vss   messages fully right 23.0% · wires right 68.0% (287/422) · act found 83.4% · extra wires 32
+  neural-sop-bert messages fully right 10.0% · wires right 65.2% (275/422) · act found 92.9% · extra wires 84
+  rules per message: right 18.0% (18) · honest 6.0% (6) · wrong 76.0% (76)
+  vss   per message: right 23.0% (23) · honest 12.0% (12) · wrong 65.0% (65)
+  neural-sop-bert per message: right 10.0% (10) · honest 1.0% (1) · wrong 89.0% (89)
+  rules per request: correct 63.7% · not done 18.2% · done wrong 18.0% · extra 64 (15.2%)
+  vss   per request: correct 68.0% · not done 16.6% · done wrong 15.4% · extra 32 (7.6%)
+  neural-sop-bert per request: correct 65.2% · not done 7.1% · done wrong 27.7% · extra 84 (19.9%)
+  per act (rules · vss · neural-sop-bert · n): set 67·77·74·99, connect 34·31·23·76, move 44·50·47·64, create 16·14·16·24, extreme 15·17·16·19, count 14·11·13·15, check 8·8·8·13, neighbors 8·9·9·11, path 9·6·9·10, arrange 3·3·5·10, list 9·9·5·9, connected 7·8·7·8, nearest 7·5·4·7, exists 2·2·2·6, degree 1·5·5·6, delete 2·4·3·6, label 2·3·2·5, rename 3·5·5·5, cycle 3·0·4·4, swap 2·2·2·3, duplicate 2·2·2·3, fact: 1·3·3·3, resize 2·1·1·3, describe 2·3·2·3, property 2·2·2·2, toBack 1·2·2·2, rule: 1·1·1·1, redo 0·1·1·1, undo 1·1·1·1, align 0·0·0·1, disconnect 1·1·1·1, toFront 0·1·0·1
+  mean ms per message (formalizing only): rules 12.6 · vss 68.4 · neural-sop-bert 21.9
+
+neural-sop-bert: calls to the Rules reader made by the neural reader: 0
+== the whole 1000-message sample: SOP-BERT, its own cut
+ALL (../sketch/llm_train/sonnet_msg + ../sketch/llm_train/haiku_msg + ../sketch/llm_train/sonnet_msg2 + ../sketch/llm_train/haiku_msg2 + ../sketch/llm_train/sonnet_long + ../sketch/llm_bench/fresh1/sonnet + ../sketch/llm_bench/fresh1/haiku + ../sketch/llm_train/sonnet_short + ../sketch/llm_train/haiku_short + ../sketch/llm_bench/sonnet_spans + ../sketch/llm_bench/haiku_spans): 1000 messages, 4858 gold wires
+  rules messages fully right 19.7% · wires right 67.9% (3300/4858) · act found 84.7% · extra wires 821
+  vss   messages fully right 33.7% · wires right 77.2% (3751/4858) · act found 88.6% · extra wires 334
+  neural-sop-bert messages fully right 38.3% · wires right 80.8% (3924/4858) · act found 97.2% · extra wires 348
+  rules per message: right 19.7% (197) · honest 5.3% (53) · wrong 75.0% (750)
+  vss   per message: right 33.7% (337) · honest 11.5% (115) · wrong 54.8% (548)
+  neural-sop-bert per message: right 38.3% (383) · honest 1.8% (18) · wrong 59.9% (599)
+  rules per request: correct 67.9% · not done 15.3% · done wrong 16.8% · extra 821 (16.9%)
+  vss   per request: correct 77.2% · not done 11.4% · done wrong 11.4% · extra 334 (6.9%)
+  neural-sop-bert per request: correct 80.8% · not done 2.8% · done wrong 16.5% · extra 348 (7.2%)
+  per act (rules · vss · neural-sop-bert · n): set 615·759·749·888, connect 371·374·410·747, move 401·513·534·638, extreme 252·260·268·272, fact: 92·161·179·206, check 171·174·179·193, create 143·145·143·190, count 158·124·153·167, connected 96·114·123·127, path 117·107·119·126, arrange 30·59·53·102, list 89·86·70·99, nearest 78·82·79·87, rename 42·74·73·79, degree 33·65·67·71, exists 47·47·52·66, duplicate 52·55·55·60, describe 45·49·48·51, resize 27·36·38·50, property 34·41·44·49, toFront 21·41·44·48, delete 26·39·29·47, cycle 43·34·44·47, label 12·25·31·46, neighbors 37·36·44·46, undo 43·36·43·44, disconnect 34·33·33·39, align 18·26·24·37, distribute 16·14·11·35, toBack 19·33·34·35, swap 23·29·28·34, reachable 29·20·30·32, rule: 20·20·20·27, redo 22·24·26·26, forget 25·16·25·25, rules 19·0·22·22
+  mean ms per message (formalizing only): rules 11.9 · vss 64.5 · neural-sop-bert 22.6
+
+neural-sop-bert: calls to the Rules reader made by the neural reader: 0
+== the whole 1000-message sample: SOP-BERT, CUT=rules
+ALL (../sketch/llm_train/sonnet_msg + ../sketch/llm_train/haiku_msg + ../sketch/llm_train/sonnet_msg2 + ../sketch/llm_train/haiku_msg2 + ../sketch/llm_train/sonnet_long + ../sketch/llm_bench/fresh1/sonnet + ../sketch/llm_bench/fresh1/haiku + ../sketch/llm_train/sonnet_short + ../sketch/llm_train/haiku_short + ../sketch/llm_bench/sonnet_spans + ../sketch/llm_bench/haiku_spans): 1000 messages, 4858 gold wires
+  rules messages fully right 19.7% · wires right 67.9% (3300/4858) · act found 84.7% · extra wires 821
+  vss   messages fully right 33.7% · wires right 77.2% (3751/4858) · act found 88.6% · extra wires 334
+  neural-sop-bert messages fully right 6.2% · wires right 74.5% (3619/4858) · act found 95.2% · extra wires 1425
+  rules per message: right 19.7% (197) · honest 5.3% (53) · wrong 75.0% (750)
+  vss   per message: right 33.7% (337) · honest 11.5% (115) · wrong 54.8% (548)
+  neural-sop-bert per message: right 6.2% (62) · honest 0.2% (2) · wrong 93.6% (936)
+  rules per request: correct 67.9% · not done 15.3% · done wrong 16.8% · extra 821 (16.9%)
+  vss   per request: correct 77.2% · not done 11.4% · done wrong 11.4% · extra 334 (6.9%)
+  neural-sop-bert per request: correct 74.5% · not done 4.8% · done wrong 20.7% · extra 1425 (29.3%)
+  per act (rules · vss · neural-sop-bert · n): set 615·759·675·888, connect 371·374·347·747, move 401·513·474·638, extreme 252·260·255·272, fact: 92·161·138·206, check 171·174·175·193, create 143·145·137·190, count 158·124·151·167, connected 96·114·119·127, path 117·107·118·126, arrange 30·59·41·102, list 89·86·71·99, nearest 78·82·77·87, rename 42·74·74·79, degree 33·65·67·71, exists 47·47·54·66, duplicate 52·55·53·60, describe 45·49·46·51, resize 27·36·39·50, property 34·41·42·49, toFront 21·41·37·48, delete 26·39·27·47, cycle 43·34·44·47, label 12·25·23·46, neighbors 37·36·44·46, undo 43·36·43·44, disconnect 34·33·33·39, align 18·26·24·37, distribute 16·14·12·35, toBack 19·33·28·35, swap 23·29·28·34, reachable 29·20·31·32, rule: 20·20·21·27, redo 22·24·26·26, forget 25·16·25·25, rules 19·0·20·22
+  mean ms per message (formalizing only): rules 10.8 · vss 59.3 · neural-sop-bert 19.7
+
+neural-sop-bert: calls to the Rules reader made by the neural reader: 0
+== name-roles per filler kind (the model's reading of the gold request span; context: the kind only, its value comes from the shared context rule)
+  heldout: context: kind right 83/103, value right 83/103 (80.6%) · description: kind right 28/34, value right 4/34 (11.8%) · written: kind right 1639/1659, value right 1611/1659 (97.1%)
+  heldout: description accuracy (read as a description, every key of the mention right): 4/34 = 11.8%
+  sample1000: context: kind right 315/414, value right 315/414 (76.1%) · description: kind right 76/101, value right 12/101 (11.9%) · written: kind right 4742/4809, value right 4664/4809 (97.0%)
+  sample1000: description accuracy (read as a description, every key of the mention right): 12/101 = 11.9%
