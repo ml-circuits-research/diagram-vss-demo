@@ -86,6 +86,13 @@ ${AH}
 each with <code>K.createSystem()</code>). The cut is described in <a href="#help/cutting">One cut for all readers</a>.</figcaption>
 </figure>
 
+<h2 id="judged">How the readers are judged</h2>
+<p>The main number of every reader is its <b>precision of execution</b>: of everything it executes, the share done right. Each reader is to
+execute a request only when its own confidence clears a threshold chosen on held-out data, and to ask below it, saying why; readers are
+compared by the share of requests they do right at equal precision (owner, 2026-11-02; AGENTS.md). In the demo described here no reader has
+such a threshold yet: that is in progress. <a href="#help/measurement">Measurement and current numbers</a>,
+<a href="#help/research-question">What this project measures</a>.</p>
+
 <h2 id="parts">The parts, their code and their models</h2>
 <div class="tw"><table>
 <thead><tr><th>Part</th><th>Code</th><th>Models it loads</th><th class="num">Size</th></tr></thead>
@@ -310,7 +317,9 @@ commands (switch <code>SHORT=1</code>). The “s” in the name is that switch (
 an address from its path, bigram and position, and the reader (<code>docs/js/vss/reader.js</code>) decodes the frame: the predicate (which
 event, from the world’s verb lemmas) and the role fillers (target, colour, landmark, …). The reader returns a status:
 <code>ok</code>, <code>abstain</code> (margin under 0.05: uncertain, still executed today), <code>unknown-event</code> (no action word found) or
-<code>no-sense</code> (more than half of the tokens could not be placed).</p>
+<code>no-sense</code> (more than half of the tokens could not be placed). Executing <code>abstain</code> readings goes against the main metric
+of 2026-11-02 (execute only what it is sure of); the confidence gate that replaces it is in progress (<a href="#help/planned">In progress</a>).
+The margin behind <code>abstain</code> is also a poor confidence (AUROC 0.59 on the sample, RISK_COVERAGE.md).</p>
 <p>Before the model, the world’s own <b>front end</b> <code>front.json</code> normalizes the tokens: learned value n-grams (“bottom right” →
 <code>bottom_right</code>) and trigger rules, learned from the annotated rows of that world’s events only (<code>FRONT_ROWS=world</code>;
 thresholds <code>val_min_count</code> 5, <code>val_min_prec</code> 0.8, <code>trig_min_count</code> 2, <code>trig_share</code> 0.75, <code>trig_min_prec</code> 0.6).
@@ -356,9 +365,14 @@ one”), <code>desc</code> (“the blue one”: filled only by a context shape w
 mention) and <code>empty</code> (a role the action needs but the reading left empty; the needs are learned from the gold args). Candidates are
 a closed set (shapes created or named earlier in the message, shapes on the canvas, names in the text, recent groups); hard filters (one vs
 several, description constraints, recency); a linear ranker with 155 features and a learned “nobody” candidate, trained by
-<code>training/sketch/train_context.mjs</code> on the gold args of an 80% split. Decision: fill with the best candidate when it beats the
-runner-up by the <code>margin</code>; the margin is <b>0</b> (owner, 2026-11-01: in drawing a mistake costs one undo, a question costs more), so
-it asks only when “nobody” ranks first. A request with a gap it cannot fill becomes a question to the user, not an execution.</p>
+<code>training/sketch/train_context.mjs</code> on the gold args of an 80% split. Decision today: fill with the best candidate when it beats the
+runner-up by the <code>margin</code>; the margin is <b>0</b>, so it asks only when “nobody” ranks first. A request with a gap it cannot fill
+becomes a question to the user, not an execution.</p>
+<p class="callout warn">The margin 0 comes from the owner’s rule of 2026-11-01, “ask as little as possible” (in drawing a mistake costs one undo,
+a question costs more). It was replaced on 2026-11-02 by the main metric: do only what you are sure of, ask about the rest (AGENTS.md). The
+filler keeps ranking the candidates, but whether its filling is executed is to be decided by the reader’s confidence against a threshold
+chosen on held-out data (the VSS confidence measured in VSS_CONFIDENCE.md includes the filler’s own margin, <code>ctx_margin</code>). In progress; the demo still
+fills at margin 0.</p>
 
 <h2 id="adapter">(e) The adapter to SOP Lang wires</h2>
 <p><code>docs/js/vss-adapter.js</code>: <code>readingFromWires</code> turns the reader’s wires into an event with roles; <code>toNodes</code> maps the
@@ -375,7 +389,7 @@ relation (left_of, below, between, …) is a relation and a region (top_left, ce
   <li>A <b>tie</b> goes to the context layer (<code>chooseReading</code> in <code>vss-context.js</code>: the reading the message context can
   complete); if still tied, the cutter’s order (the higher <code>B-&lt;world&gt;</code> score).</li>
   <li>No reading: the unit is ignored and the reply says what was not understood.</li>
-  <li>The context filler then fills or asks; the adapter writes the wires; the references (names created, <code>last</code>) carry to the next
+  <li>The context filler then fills or asks (today: fills whenever a candidate ranks first); the adapter writes the wires; the references (names created, <code>last</code>) carry to the next
   unit (<code>nextContext</code>).</li>
 </ol>
 <p class="callout"><b>No fallback world, no single model.</b> The general fallback model <code>kinds_p80_s0</code> was removed from the composer and
@@ -475,7 +489,10 @@ requests through the demo’s decoding code and compares them with torch.</p>
 </tbody></table></div>
 <p>SOP-BERT gets more requests right than VSS on whole messages (80.8 vs 77.2) and also more wrong (16.5 vs 11.4): it almost never leaves a
 request undone (2.8%), so what it does not know it guesses. Descriptions in roles (“next to the orange hexagon”) are its weakest part: 4 of 34
-held-out. Why the difference between guessing and stopping matters: <a href="#help/knowing">Knowing what it does not know</a>.</p>
+held-out. These are the earlier measure, every request executed. Under the main metric (precision of execution, owner 2026-11-02) SOP-BERT
+is to execute only when its confidence (the smallest probability among its heads for the request) clears a threshold chosen on held-out data:
+measured offline in RISK_COVERAGE.md, in the demo in progress. Why the difference between guessing and stopping matters:
+<a href="#help/knowing">Knowing what it does not know</a>.</p>
 <p class="note">Trained by <code>training/neural/finetune_roles.py</code> on the GPU machine: epochs ≤ 8, lr 6e-5, batch 32, fp16 on cuda, seed 0; 15,683
 request spans. The milliseconds are from the scoring run in node; the time of each message in the demo is in its reply.</p>
 <h2 id="pair">Before SOP-BERT: the act classifier and the QA model (removed)</h2>
@@ -760,11 +777,30 @@ reviews and commits.</p>
 
 /* ============================================================ measurement */
 page('measurement', 'Measurement and current numbers', `
-<h2 id="metric">The metric (owner, 2026-11-01)</h2>
+<h2 id="metric">The main metric (owner, 2026-11-02)</h2>
+<p><b>Do only what you are sure of, ask about the rest.</b> The research question is a reader that says clearly where it is not sure, not one
+that approximates well (<a href="#help/research-question">What this project measures</a>). This replaces “ask as little as possible” of
+2026-11-01 (DECISIONS.md).</p>
+<div class="tw"><table>
+<thead><tr><th>Number</th><th>Definition</th><th>Use</th></tr></thead>
+<tbody>
+<tr><td><b>Precision of execution</b></td><td>right / everything executed (requested actions executed, right or wrong, plus extras)</td><td>the headline of every reader</td></tr>
+<tr><td>Requests done right</td><td>right / gold requests, at that precision</td><td>reported with it</td></tr>
+<tr><td>Right at equal precision</td><td>the same, read off each reader’s risk-coverage curve at one precision</td><td>the comparison between readers</td></tr>
+<tr><td>AUROC</td><td>how well the reader’s confidence separates its right from its not-right requests</td><td>reported beside</td></tr>
+</tbody></table></div>
+<p>Each reader executes a request only when its confidence clears a threshold chosen on held-out data by a protocol written before the run;
+below it, it asks and says why (which words, which step). <b>Not done / asked</b> is never an error: it is the price paid for precision, and it
+is reported. The Rules, which have no confidence, are measured the same way: what they execute and how much of it is right. The context
+filler may still rank candidates, but the reader’s confidence decides whether its filling is executed.</p>
+<h3 id="metric-requests">Under it: per requested action (owner, 2026-11-01)</h3>
 <p>Per <b>requested action</b>, never per message: of the gold requests, the share done <b>right</b>, done <b>wrong</b> (executed with the wrong
-action, shape or value), and <b>not done</b> (not understood, or asked back); plus <b>extra</b>: the count of requests nobody asked for.
-Wrong is worse than not done: decisions weigh “done wrong” first, then “right”. A reference the reader leaves for the context
-(“it”, a name from an earlier sentence) is not an error. Questions back to the user have a cost too: ask as little as possible.</p>
+action, shape or value), and <b>not done</b> (not understood, or asked); plus <b>extra</b>: the count of requests nobody asked for.
+Decisions weigh “done wrong” first. A reference the reader leaves for the context (“it”, a name from an earlier sentence) is not an error.
+Every number measured before 2026-11-02, including the table below, is in this form, with every request executed.</p>
+<div class="callout warn" id="precision-measure"><p><b>Being measured.</b> The precision of execution of VSS and SOP-BERT at thresholds chosen on
+held-out data, and of the Rules, with the share of requests done right and the comparison at equal precision:
+<code>training/sketch/PRECISION.md</code>, being written.</p></div>
 <dl class="kv">
   <dt><code>training/sketch/llm_score.mjs</code></dt><dd>Scores a reader on folders of annotated messages. <code>SEG=composer</code>: the whole
   composer on whole messages; <code>SEG=gold</code> with <code>MODEL=micro/&lt;world&gt;</code>: one world on gold spans (no cut). <code>PAIR=value</code>
@@ -777,13 +813,29 @@ Wrong is worse than not done: decisions weigh “done wrong” first, then “ri
   recognized, B wrong action, C reader refuses, D value not reachable, E name not reachable, F role missed, G role wrong.</dd>
   <dt><code>training/laptop/neural_score.mjs</code></dt><dd>Rules, VSS and Neural on the same gold, with the scoring of <code>llm_score.mjs</code>,
   plus milliseconds per message.</dd>
+  <dt><code>training/sketch/risk_coverage.mjs</code></dt><dd>Every produced request of VSS and SOP-BERT with its outcome and the reader’s
+  confidence; the risk-coverage curves, AUROC, calibration and the thresholds chosen on held-out (RISK_COVERAGE.md).</dd>
+  <dt><code>training/sketch/vss_confidence.mjs</code></dt><dd>A VSS confidence from every step of the chain, read from the composer from
+  outside, combined by a logistic regression fitted on the held-out split (VSS_CONFIDENCE.md).</dd>
 </dl>
 <div class="callout"><b>Discipline (AGENTS.md “Experiments”).</b> Before a run: the hypothesis, the measure and the threshold for “it worked”,
 written down and shown. No knobs turned on the fly; one change at a time; a miss is reported, not patched. After every evaluation: a
 root-cause analysis of the misses, each classified by the first cause that explains it and <i>where</i> it sits (data, front end, our code,
 calibration, model); fixes go where the cause is.</div>
 
-<h2 id="now">Current numbers per reader</h2>
+<h2 id="confidence-now">How well each confidence knows when it is unsure</h2>
+<div class="tw"><table>
+<thead><tr><th>Confidence</th><th class="num">AUROC: sample · held-out · short held-out</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td>VSS margin (the number behind <code>abstain</code>)</td><td class="num">0.59 · 0.58 · 0.57</td><td>RISK_COVERAGE.md</td></tr>
+<tr><td>VSS, every step of the chain combined</td><td class="num">0.81 · 0.82 · 0.84</td><td>VSS_CONFIDENCE.md</td></tr>
+<tr><td>SOP-BERT, smallest probability of its heads</td><td class="num">0.72 · 0.73 · 0.82</td><td>RISK_COVERAGE.md</td></tr>
+</tbody></table></div>
+<p class="note">Sample: the fixed 1000 messages (4858 requests); held-out: the 585 messages of SOP-BERT’s held-out split (for the combined VSS
+confidence, which is fitted there, the out-of-fold value of 5 folds by message); short held-out: 299 one-line commands. The VSS worlds were trained on the sample, SOP-BERT never saw it (<a href="#help/chain-vs-one/fairness">fairness</a>).
+Neither confidence decides anything in the demo yet.</p>
+
+<h2 id="now">Current numbers per reader (earlier measure, every request executed)</h2>
 <div class="tw"><table>
 <thead><tr><th>Reader</th><th>Data, cut</th><th class="num">Right / wrong / not done (%)</th><th class="num">Extra</th><th>Source</th></tr></thead>
 <tbody>
@@ -811,7 +863,7 @@ inside <code>registry.json</code> still quotes 75.5 / 13.1 / 11.3, the figure be
 <p>From commit 63274ae. On the sample, round 2 is below the “it worked” line (75.3 &lt; 76.5) but not a regression (≥ 75.0, wrong 11.1); on the
 short sets it meets it. It is not the demo’s default; the per-component measures (A per event, D new operations) and their analysis were still
 running when this page was written. The thresholds in ROUND2.md were set against an older baseline (75.5 / 13.1 / 11.3).</p>
-`, 'The per-request metric, the scripts that compute it, and every reader’s current numbers with their source.');
+`, 'The main metric (precision of execution, readers compared at equal precision), the per-request counts under it, the scripts that compute them, and every reader’s current numbers with their source.');
 
 /* ============================================================ repository */
 page('repository', 'Repository map', `
@@ -848,6 +900,9 @@ page('repository', 'Repository map', `
 <tr><td><code>DIAGRAM_OPS.md</code></td><td>Groups and double positions: SOP Lang forms, engine, Rules reader and adapter done and tested (<code>test_diagram_ops.mjs</code>); what the VSS worlds need.</td></tr>
 <tr><td><code>ROUND2.md</code></td><td>Pre-registration of round 2: every world retrained once with all measured fixes, the 7 commands, thresholds A–D. Trained afterwards (commit 63274ae): not the default.</td></tr>
 <tr><td><code>CUT_SHARED.md</code></td><td>One cut for all three readers: the VSS cut is better on whole messages for both readers, the Rules segmenter on one-line commands; default VSS.</td></tr>
+<tr><td><code>RISK_COVERAGE.md</code></td><td>Does each reader know when it does not know? AUROC VSS margin 0.59, SOP-BERT 0.72 on the sample; risk-coverage curves; thresholds for SOP-BERT chosen on held-out.</td></tr>
+<tr><td><code>VSS_CONFIDENCE.md</code></td><td>A VSS confidence from every step of the chain: AUROC 0.81 on the sample, 0.84 on short held-out commands; each weight named.</td></tr>
+<tr><td><code>PRECISION.md</code></td><td>Being written: precision of execution of each reader at its threshold, compared at equal precision.</td></tr>
 </tbody></table></div>
 <p class="note">Older documents in the same folder: <code>VSS_READER_SPEC.md</code> (what is given and learned), <code>ROUTER_V2.md</code> (the router),
 <code>CUTTER.md</code>, <code>PLAN_A.md</code> (16 worlds), <code>LABEL_CONVENTIONS.md</code>, <code>ERROR_ANALYSIS.md</code>, <code>COMPOSER_ERRORS.md</code>,
@@ -859,8 +914,18 @@ each says from which commit to restore them.</p>
 page('planned', 'In progress', `
 <p class="callout warn">Everything on this page is work in progress or a plan. None of it is used by the published demo today.</p>
 <ul>
-  <li><b>SOP-BERT, further measures</b>: the short sets, the BERT cut read by the other readers (<code>cut_bench.mjs</code>), the root-cause analysis
-  of its misses, and the risk-coverage comparison with VSS (<a href="#help/knowing/experiment">Knowing what it does not know</a>).</li>
+  <li><b>The confidence gate for VSS and SOP-BERT in the demo</b> (in progress; owner, 2026-11-02): each reader executes a request only when
+  its confidence clears a threshold chosen on held-out data by a protocol written before the run, and below it asks, saying why (which words,
+  which step). It replaces, for VSS, executing <code>abstain</code> readings and filling a gap whenever a candidate ranks first. The confidences
+  measured so far: for VSS the one from every step of the chain (VSS_CONFIDENCE.md), for SOP-BERT the smallest probability of its heads
+  (RISK_COVERAGE.md). Then the
+  precision of execution of every reader, the Rules included, and the comparison at equal precision (<code>training/sketch/PRECISION.md</code>,
+  being written).</li>
+  <li><b>A fresh test set neither reader has seen</b> (planned): realistic messages written and annotated after the models, read by no training.
+  Today the sample is VSS training data and SOP-BERT never saw it, so neither the old measure nor precision compares them on equal footing
+  (<a href="#help/chain-vs-one/fairness">Is the comparison fair?</a>).</li>
+  <li><b>SOP-BERT, further measures</b>: the short sets, the BERT cut read by the other readers (<code>cut_bench.mjs</code>) and the root-cause
+  analysis of its misses. The risk-coverage comparison with VSS is done (<a href="#help/knowing/experiment">Knowing what it does not know</a>).</li>
   <li><b>Round 2 of the VSS worlds</b>: trained (<code>registry_r2.json</code>), not the default (<a href="#help/measurement/round2">numbers</a>); the
   per-event and new-operation measures of ROUND2.md §6 and their root-cause analysis decide what is adopted, per world.</li>
   <li><b>Data for descriptions in roles</b> (SHORT2.md §3): annotated messages where descriptions (“the red circle”, “every gray square”, “the last
@@ -869,7 +934,7 @@ page('planned', 'In progress', `
   (<code>make_roles.py</code> counts these context fillers as ones that cannot come out right).</li>
   <li><b><code>future-experiments.md</code></b>: the VSS reader decides the action from the construction, not only from a verb (variant (b) of the
   event hint; needs the owner’s approval); catastrophic forgetting in the fine-tuned BERT readers, and LoRA adapters per family of actions;
-  ModernBERT as the base of the neural reader.</li>
+  ModernBERT as the base of the neural reader; the same readers on a legend where a wrong action is costly, as the real test of the main metric.</li>
   <li><b>Debt listed in ROUND2.md §7</b>: value n-grams applied longest-first, ambiguous position phrases inside move, chain pairing words in
   links, names that are colour words, “box” as rectangle.</li>
 </ul>

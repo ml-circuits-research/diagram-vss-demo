@@ -10,9 +10,82 @@ const AH = '<defs><marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerW
 const pages = [];
 const page = (id, title, lead, html) => pages.push({ id, title, lead, html });
 
+/* ============================================================ the research question and the metric (owner, 2026-11-02) */
+page('research-question', 'What this project measures',
+'The research question: a reader that says clearly where it is not sure, does only what it is sure of, and asks about the rest. The main number is its precision of execution; readers are compared by how much they get done at equal precision.', `
+<h2 id="rq-question">The question</h2>
+<p>Three readers turn English into SOP Lang wires (<a href="#help/why-three">Three readers side by side</a>). Which of them gets the most
+requests right is not the question this project studies. The question is: <b>can a reader tell, request by request, whether it is sure, do
+only what it is sure of, and ask about the rest, saying why?</b></p>
+<div class="callout" id="rq-owner">
+<p>“Let VSS show what it is good at: tell us clearly where it is not sure. In drawing it is not that important, although in the end
+correctness beats everything in general; better that it asks, does only what it is sure of, and this should be the most important metric we
+follow; that is how we compare. For approximations there are solutions, we have LLMs, but the important result, and what we pursue in
+research, is this. In the diagram world the consequence is not that big, it can be annoying, but if the decisions were of life and death this
+matters most. Document this and reposition everything from this perspective. Better more fearful and with questions than making stupid
+decisions with confidence that have consequences.”</p>
+<p class="note">The owner, 2026-11-02, translated from Romanian. It replaces the rule of 2026-11-01, “ask as little as possible”
+(AGENTS.md, “What counts as an error”; DECISIONS.md).</p>
+</div>
+
+<h2 id="rq-metric">The metric, in plain words</h2>
+<div class="tw"><table>
+<thead><tr><th>Number</th><th>What it counts</th><th>Its place</th></tr></thead>
+<tbody>
+<tr><td><b>Precision of execution</b></td><td>Of everything the reader executes (requested actions and extras nobody asked for), the share done right.</td><td>The headline number of every reader.</td></tr>
+<tr><td>Requests done right</td><td>Of the actions that were requested, the share executed and right.</td><td>Reported at that precision.</td></tr>
+<tr><td>Requests done right at equal precision</td><td>The same share, with every reader held to the same precision (its risk-coverage curve).</td><td>How two readers are compared.</td></tr>
+<tr><td>AUROC of the confidence</td><td>How well the reader’s confidence tells its right readings from its wrong ones: 0.5 says nothing, 1 is perfect.</td><td>Reported beside.</td></tr>
+<tr><td>Not done / asked</td><td>Requests the reader asked about instead of executing.</td><td>Never an error: the price paid for precision. Reported.</td></tr>
+</tbody></table></div>
+<p>Each reader executes a request only when its own confidence clears a <b>threshold</b>. The threshold is chosen once, on held-out data, by a
+protocol written before the run, never on the set the result is reported on. Below it the reader asks, and says why: which words it did not
+understand, or which step was unsure (the cut, the world, a role, what “it” refers to). A reader without a confidence, the Rules, is measured
+the same way: what it executes, and how much of that is right.</p>
+<p class="note">An example of the arithmetic, not data: a reader that executes 50 of 100 requests and gets 49 of them right has a precision of
+98% and does 49% of the requests right. A reader that executes all 100 and gets 85 right has a precision of 85%. Which of the two is better is
+decided at equal precision: held to 98%, does the second still do more than 49% of the requests right?</p>
+
+<h2 id="rq-stakes">Why precision first</h2>
+<p>In a drawing a confident mistake costs one undo: it is annoying, and it has to be noticed first. A question costs one more message. If that
+were all, asking little would be the better trade, and on 2026-11-01 that was made the rule. But the drawing is the test bench of this project,
+not its goal. Where a wrong action has serious consequences (a dose, a safety setting, a payment), a reader that is confidently wrong is the
+failure that matters, and a reader that stops and asks is the one that can be used. A reader that is good in that sense shows it already in a
+drawing: by what it chooses to execute, and by how often that is right.</p>
+<p>So a request <b>done wrong</b> is the error, and a request <b>not done / asked</b> is the honest outcome: better more fearful and with
+questions than wrong with confidence.</p>
+
+<h2 id="rq-llm">Why approximators are not the answer</h2>
+<p>A large language model, or a fine-tuned transformer such as our SOP-BERT, produces a plausible reading of nearly every message. That is
+approximation; it is available and often good. Its output does not tell, by itself, which of its readings are reliable: a fluent answer looks
+the same whether it is right or not. Our own transformer shows this at small scale. Its tokenizer gives every word a meaning, so nothing is ever
+“unknown”: it leaves 2.8% of the sample’s requests undone and does 16.5% wrong (right / wrong / not done of requested actions, commit 1f3c806).
+Its probabilities do rank its readings, but run too high below 0.95 (RISK_COVERAGE.md); a threshold on them is part of the comparison.</p>
+<p>The research question is whether a reader can be built whose “I am not sure” is reliable and can be explained: which words, which step.
+That is what VSS is meant to show. Its reading is a chain of named steps (<a href="#help/chain-vs-one">One model or a chain</a>), and each step
+can say “not sure”.</p>
+
+<h2 id="rq-now">Where it stands (2026-11-02)</h2>
+<ul>
+  <li><b>Measured</b>: how well each reader’s confidence separates its right readings from its wrong ones. AUROC on the 1000-message sample: the
+  VSS margin 0.59 and SOP-BERT 0.72 (RISK_COVERAGE.md); a VSS confidence built from every step of its chain 0.81 (VSS_CONFIDENCE.md).
+  <a href="#help/knowing">Knowing what it does not know</a>.</li>
+  <li><b>Not in the demo yet</b>: no reader executes only above a threshold. VSS still executes readings with status <code>abstain</code>; its
+  context filler fills a gap whenever one candidate ranks first (the 2026-11-01 rule); SOP-BERT executes everything it reads. The confidence
+  gate for VSS and SOP-BERT is in progress (<a href="#help/planned">In progress</a>).</li>
+  <li><b>Planned</b>: a fresh test set that neither reader has seen. The sample is VSS training data and SOP-BERT never saw it
+  (<a href="#help/chain-vs-one/fairness">Is the comparison fair?</a>).</li>
+</ul>
+<div class="callout warn" id="precision-result">
+<p><b>Being measured.</b> The precision of execution of each reader at its threshold chosen on held-out data, the share of requests it does
+right at that precision, and the comparison at equal precision: <code>training/sketch/PRECISION.md</code>, being written. Until it is
+committed, the numbers on these pages are the earlier measure: right / wrong / not done in % of the requested actions, plus extras.</p>
+</div>
+`);
+
 /* ============================================================ why three */
 page('why-three', 'Three readers side by side',
-'The same message, read three different ways, on the same cut, with the same scoring: a fair test of hand-written rules, small vector-symbolic models and a fine-tuned transformer.', `
+'The same message, read three different ways, on the same cut, with the same scoring: a fair test of hand-written rules, small vector-symbolic models and a fine-tuned transformer, judged first by how much of what each executes is right.', `
 <p>Each reader has its own copy of the engine and its own drawing. When you send a message, all three read it and you see three lines in the
 reply and three drawings under the tabs. That makes their differences visible one message at a time, which totals in a table never do.</p>
 <p>Try a message with more than one request and some text that is not a request, then open <b>details</b> under the reply:</p>
@@ -26,8 +99,10 @@ ${says('Hi, I am sketching a workflow. Draw a red circle named Hub in the center
   Before this rule, a reader that cut badly lost requests no matter how well it read them, and the tabs mixed two questions into one.</li>
   <li><b>One legend, one cue list.</b> Rules and VSS use the same legend and the same cue words, and a word added for one is added for both,
   only from training data (AGENTS.md).</li>
-  <li><b>One measure.</b> Per requested action: right, wrong (done with the wrong action, shape or value) and not done (not understood, or asked
-  back), plus extra actions nobody asked for. Not per message: a message with 12 requests is almost never entirely right, and that says nothing.</li>
+  <li><b>One measure.</b> The headline is the <b>precision of execution</b>: of everything a reader executes, the share done right; readers
+  are compared by the share of requests they do right <b>at equal precision</b> (owner, 2026-11-02; <a href="#help/research-question">What this
+  project measures</a>). Under it, per requested action: right, wrong (done with the wrong action, shape or value) and not done (not understood,
+  or asked), plus extra actions nobody asked for. Not per message: a message with 12 requests is almost never entirely right, and that says nothing.</li>
 </ul>
 
 <h2 id="table">The three, in one table</h2>
@@ -36,16 +111,30 @@ ${says('Hi, I am sketching a workflow. Draw a red circle named Hub in the center
 <tbody>
 <tr><th>Learns from</th><td>nothing: written by hand</td><td>our annotated requests only</td><td>English text in general (pretraining), then our annotated requests</td></tr>
 <tr><th>Size</th><td>code</td><td>38.0 MB, seven worlds of 1.2–8.1 MB</td><td>68.5 MB, one DistilBERT in 8-bit form</td></tr>
-<tr><th>Long messages (sample)</th><td>73.6 / 11.9 / 14.5 (VSS cut)</td><td>77.2 / 11.4 / 11.4 (VSS cut)</td><td>80.8 / 16.5 / 2.8 (its own cut)</td></tr>
-<tr><th>Short commands (six sets)</th><td>97.5 / 0.5 / 1.9 (Rules cut)</td><td>61.1 / 11.1 / 27.7</td><td>—</td></tr>
-<tr><th>When unsure</th><td>says it did not understand</td><td>says what it did not understand, or asks which shape</td><td>rarely stops (2.8% not done): it reads something</td></tr>
+<tr><th>Confidence</th><td>none: it executes what its rules match</td><td>a margin per reading (weak); a confidence from every step of its chain, measured, not in the demo</td><td>a probability per head (ranks well, runs high)</td></tr>
+<tr><th>When unsure, today</th><td>says it did not understand</td><td>says what it did not understand, or asks which shape; executes readings it is unsure of (status <code>abstain</code>)</td><td>rarely stops (2.8% not done): it reads something</td></tr>
 </tbody></table></div>
-<p class="note">Right / wrong / not done, % of requested actions. Sources: CUT_SHARED.md (Rules, VSS), commit 1f3c806 (SOP-BERT),
-<code>du -sb</code> and <code>versions.json</code> for sizes. The sample is 1000 realistic messages with 4858 requests; the
-short sets are the demo’s 1140 one-line commands.</p>
-<p>No reader wins everywhere. The rules are nearly perfect on the short commands they were written for and lose on long, natural messages;
-VSS is careful on whole messages and weak on very short ones; SOP-BERT gets the most right on whole messages and also the most wrong, because
-it almost never stops. That last difference is the subject of <a href="#help/knowing">Knowing what it does not know</a>.</p>
+<p class="note">Sources: RISK_COVERAGE.md and VSS_CONFIDENCE.md (confidence), commit 1f3c806 (SOP-BERT), <code>du -sb</code> and
+<code>versions.json</code> (sizes).</p>
+
+<h2 id="numbers">The numbers</h2>
+<p>The main number, the precision of execution of each reader at its own threshold, is being measured
+(<a href="#help/research-question/precision-result">the placeholder</a>). The numbers measured so far are the earlier measure, every request
+executed:</p>
+<div class="tw"><table>
+<thead><tr><th>Reader</th><th class="num">Sample: right / wrong / not done</th><th class="num">Short sets: right / wrong / not done</th></tr></thead>
+<tbody>
+<tr><td>Rules</td><td class="num">73.6 / 11.9 / 14.5 (VSS cut)</td><td class="num">97.5 / 0.5 / 1.9 (Rules cut)</td></tr>
+<tr><td>VSS</td><td class="num">77.2 / 11.4 / 11.4 (VSS cut)</td><td class="num">61.1 / 11.1 / 27.7 (VSS cut)</td></tr>
+<tr><td>Neural (SOP-BERT)</td><td class="num">80.8 / 16.5 / 2.8 (its own cut)</td><td class="num">—</td></tr>
+</tbody></table></div>
+<p class="note">% of requested actions. Sources: CUT_SHARED.md (Rules, VSS), commit 1f3c806 (SOP-BERT). The sample is 1000 realistic
+messages with 4858 requests; the short sets are the demo’s 1140 one-line commands.</p>
+<p>On this earlier measure no reader wins everywhere: the rules are nearly perfect on the short commands they were written for and lose on
+long, natural messages; VSS does fewer wrong on whole messages and is weak on very short ones; SOP-BERT does the most right on whole messages
+and also the most wrong, because it almost never stops. The question that matters here is different: when each reader executes only what it
+is sure of, how much of what it executes is right, and how much does it still get done? The first answers, at an equal share of requests done
+wrong, are in <a href="#help/knowing">Knowing what it does not know</a>.</p>
 `);
 
 /* ============================================================ rules vs learned */
@@ -70,6 +159,9 @@ such messages the same rules, with their own cut, get <b>67.9%</b> right and <b>
 </ul>
 <p>Given the VSS reader’s cut, the same rules make a third fewer wrong actions (11.9%) and half the extras (406): much of their trouble was the cut,
 not the reading (CUT_SHARED.md).</p>
+<p>The rules have no confidence: they execute whatever their cue words match, and stop only where nothing matches. Under the main metric
+(<a href="#help/research-question">What this project measures</a>) they are measured like the other two: what they execute, and how much of
+that is right (AGENTS.md).</p>
 
 <h2 id="learned">What learning from data changes</h2>
 <p>VSS and SOP-BERT are not given word lists: every mapping from words to the legend (which verb means which action, which phrase means which
@@ -170,9 +262,15 @@ merged or split by measurement, one step at a time.</b></p>
 </ul>
 
 <h2 id="watch">What we watch</h2>
-<p>Per requested action: right, wrong, not done, and extra. <b>Wrong is worse than not done</b>: a request done with the wrong shape or value is a
-silent error, while “I didn’t understand” is honest and costs one more message. But questions back have a cost too, and in drawing a mistake
-costs one undo, so the context filler fills a gap whenever one candidate ranks first and <b>asks only when nothing fits</b> (owner, 2026-11-01).</p>
+<p>First, the <b>precision of execution</b>: of everything the worlds execute, the share done right; then how many of the requests they do
+right at that precision (owner, 2026-11-02; <a href="#help/research-question">What this project measures</a>). A request done with the wrong
+shape or value is a silent error; “I didn’t understand” or “Which circle?” is honest and costs one more message. Under it we still count, per
+requested action, right, wrong, not done and extra, and the cause of every miss.</p>
+<p>What changes for VSS: the rule of 2026-11-01 was to ask as little as possible, so the context filler fills a gap whenever one candidate
+ranks first and asks only when the learned “nobody” ranks first; that is still how the demo behaves. Now a reading, a filled “it” included, is
+to be executed only when the VSS confidence clears a threshold chosen on held-out data; below it, VSS asks and says which word or which step it
+is not sure of. The filler keeps ranking the candidates; it no longer decides alone. This gate is in progress
+(<a href="#help/planned">In progress</a>).</p>
 ${says('Make the green circle bigger')}
 `);
 
@@ -220,10 +318,10 @@ left unchanged), much like VSS worlds per family (<code>future-experiments.md</c
 
 /* ============================================================ knowing */
 page('knowing', 'Knowing what it does not know: VSS vs SOP-BERT',
-'In a drawing tool a wrong action is worse than an action not done, so a reader must know when it is unsure. We expected VSS to know this better. Measured: the VSS margin barely does, SOP-BERT’s probabilities do; a VSS confidence built from every step of its chain does best of the three. This page says how, and why.', `
-<h2 id="measured">The measured difference</h2>
+'The main number of this project is the precision of execution: a reader should execute only what it is sure of and ask about the rest, so it must know when it is unsure. We expected VSS to know this better. Measured: the VSS margin barely does, SOP-BERT’s probabilities do; a VSS confidence built from every step of its chain does best of the three. This page says how, and why.', `
+<h2 id="measured">Every request executed: the earlier measure</h2>
 <div class="tw"><table>
-<thead><tr><th>Fixed 1000-message sample, 4858 requests</th><th class="num">Right</th><th class="num">Wrong</th><th class="num">Not done</th><th class="num">Extra</th></tr></thead>
+<thead><tr><th>Fixed 1000-message sample, 4858 requests, no threshold</th><th class="num">Right</th><th class="num">Wrong</th><th class="num">Not done</th><th class="num">Extra</th></tr></thead>
 <tbody>
 <tr><th>VSS (7 worlds, VSS cut)</th><td class="num">77.2</td><td class="num"><b>11.4</b></td><td class="num">11.4</td><td class="num">334</td></tr>
 <tr><th>SOP-BERT (its own cut)</th><td class="num"><b>80.8</b></td><td class="num">16.5</td><td class="num">2.8</td><td class="num">348</td></tr>
@@ -231,9 +329,12 @@ page('knowing', 'Knowing what it does not know: VSS vs SOP-BERT',
 <p class="note">% of requested actions. Sources: CUT_SHARED.md (VSS), commit 1f3c806 (SOP-BERT).</p>
 <p>SOP-BERT does 3.6 more requests in a hundred right, and 5.1 more wrong. It leaves almost nothing undone: when it is unsure, it still reads
 <i>something</i>, and that something is executed. VSS leaves 11.4 in a hundred undone, and tells you which part it did not understand.</p>
-<p>Which matters more depends on what a mistake costs. A request <b>not done</b> is visible at once (“I didn’t understand …”) and costs one more
-message. A request <b>done wrong</b> is silent: the drawing changes in a way you did not ask for, and you have to notice it before you can undo
-it. That is why every decision in this project weighs “done wrong” first (AGENTS.md).</p>
+<p>These totals do not answer the question of this project. A request <b>not done</b> is visible at once (“I didn’t understand …”) and costs
+one more message. A request <b>done wrong</b> is silent: the drawing changes in a way you did not ask for, and you have to notice it before you
+can undo it; where actions have serious consequences, that is the failure that matters. So the comparison that counts is made after each reader
+has turned its unsure requests into questions: of what it then executes, how much is right (its <b>precision of execution</b>), and how many
+requests it still does right at the same precision (owner, 2026-11-02; <a href="#help/research-question">What this project measures</a>). For
+that a reader needs a confidence that knows when it is unsure; the rest of this page measures exactly that.</p>
 
 <h2 id="vss-knows">How VSS knows that it does not know</h2>
 <ul>
@@ -241,10 +342,12 @@ it. That is why every decision in this project weighs “done wrong” first (AG
   the request is reported: the details say <i>Ignored (not understood): “…”</i>, and the reply says “I didn’t understand …”.</li>
   <li><b>Every reading has a status.</b> <code>ok</code>; <code>abstain</code> (a margin under 0.05: uncertain, still executed today);
   <code>unknown-event</code> (no action word found); <code>no-sense</code> (more than half of the words could not be placed). A reading with an
-  unreadable status is not executed.</li>
+  unreadable status is not executed. That <code>abstain</code> is still executed is the opposite of the main metric; the confidence gate in
+  progress replaces it (<a href="#help/planned">In progress</a>).</li>
   <li><b>Every role has a margin and a threshold.</b> Whether a role is present is decided by a threshold fitted on training rows; below it the
-  role stays empty. An empty role the action needs goes to the context filler, which fills it only when one candidate ranks first, and otherwise
-  <b>asks</b> (“Which circle? Start or Done”).</li>
+  role stays empty. An empty role the action needs goes to the context filler, which today fills it whenever one candidate ranks first (margin
+  0, the 2026-11-01 rule) and otherwise <b>asks</b> (“Which circle? Start or Done”). Under the 2026-11-02 rule, whether such a filling is
+  executed is decided by the VSS confidence, not by the ranking alone.</li>
   <li><b>You can follow it word by word.</b> Under <b>details</b>, each request shows the words as the world normalised them, which words it could not
   place, the margins, the status and the <b>residual</b>: how much of the request the reading does not explain.</li>
 </ul>
@@ -254,8 +357,8 @@ ${says('Make Done red, then frobnicate Check', 'Snorkle Process')}
 Check” as not understood; the second it does not read at all and says so.</p>
 <p class="callout warn"><b>VSS is not immune.</b> The same run read “Frobnicate the green circle” as a resize and “Florp Start next to Done” as a
 move: when the rest of a request looks like a known action (a shape and a place), the event hint and the world’s roles supply an action the
-verb did not give. Unknown words stay unknown, but a request around them can still be guessed. The experiment below compares how often each
-reader is wrong when it is confident.</p>
+verb did not give. Unknown words stay unknown, but a request around them can still be guessed. Such a guess is exactly what the precision
+of execution counts against a reader. The experiment below compares how often each reader is wrong when it is confident.</p>
 <p class="callout warn"><b>What the measurement showed (below).</b> All of the above is true, and it is why VSS leaves more undone. But
 <i>among the requests VSS does execute</i>, its margin barely tells the right ones from the wrong ones. The margin compares the best reading with
 the runner-up <b>inside the world that was chosen</b>; it does not see whether the cut was right, whether the right world was chosen, or whether
@@ -284,13 +387,19 @@ wrong answer. Requests read by the links world are right only 54% of the time, a
   on is flagged.</li>
   <li><b>Several variants voting</b> (an ensemble, or dropout kept on at reading time): disagreement means uncertainty, at several times the cost.</li>
 </ul>
-<p>The first one, a threshold to ask, is enough to make SOP-BERT about as careful as VSS (measured below), with no training.</p>
+<p>The first one, a threshold to ask, is enough to make SOP-BERT about as careful as VSS (measured below), with no training. Under the main
+metric every reader gets such a threshold, SOP-BERT included; the comparison is then made at equal precision.</p>
 
 <h2 id="experiment">The experiment: better, or bolder?</h2>
 <p>A reader that executes more requests will get more right <i>and</i> more wrong. To compare two readers fairly, let each one sort its own
 requests by its own confidence, keep only its most confident share (the <b>coverage</b>), and count the wrong ones in that share (the <b>risk</b>).
 A curve of risk against coverage separates a reader that is <b>better</b> (fewer wrong at the same coverage) from one that is only <b>bolder</b>
-(it covers more, and pays for it in wrong actions).</p>
+(it covers more, and pays for it in wrong actions). This curve is how the main metric compares readers: pick one precision, read off how many
+requests each reader does right there.</p>
+<p class="note">Two ways of counting the risk. In the runs below (RISK_COVERAGE.md, VSS_CONFIDENCE.md) it is the wrong requests in % of
+<i>all</i> requested actions, extras counted apart. The main metric counts it among what was <i>executed</i>, extras included: precision of
+execution = right / (right + wrong + extra) of the executed. The same curves, a different denominator; the precision version is being measured
+(<a href="#help/research-question/precision-result">the placeholder</a>).</p>
 <figure>
 <div class="fig">
 <svg class="dg" viewBox="0 0 400 250" role="img" aria-labelledby="rc1">
@@ -321,7 +430,8 @@ The confidence of each reader was fixed before the run. For VSS it is the smalle
 <tr><td>Held-out, 585 messages</td><td>0.58</td><td>0.73</td></tr>
 <tr><td>Short commands, 299 held-out</td><td>0.57</td><td>0.82</td></tr>
 </table>
-<p>Both readers cut back to the same share of wrong requests, on the sample:</p>
+<p>Both readers cut back to the same share of wrong requests, on the sample (wrong and right in % of all requested actions, not yet
+precision):</p>
 <table>
 <tr><th>Wrong</th><th>VSS right</th><th>SOP-BERT right</th></tr>
 <tr><td>11.4%</td><td>77.2%</td><td>73.8%</td></tr>
@@ -333,7 +443,8 @@ The confidence of each reader was fixed before the run. For VSS it is the smalle
 requests it does execute, its margin barely separates right from wrong: its most confident readings are right 74% of the time, about as often
 as its middling ones. SOP-BERT's probabilities do separate them: 89% right when it is at least 0.99 sure, 42% under 0.5. So with one threshold
 on its own probabilities, and no training, SOP-BERT can ask instead of guessing: at 0.36 it goes from 80.8 / 16.5 / 2.8 (right / wrong / not
-done) to 79.6 / 14.3 / 6.1; at 0.6 to 75.1 / 12.0 / 12.9, close to VSS's 77.2 / 11.4 / 11.4. This threshold is not in the demo yet.</p>
+done) to 79.6 / 14.3 / 6.1; at 0.6 to 75.1 / 12.0 / 12.9, close to VSS's 77.2 / 11.4 / 11.4. This threshold is not in the demo yet; the
+confidence gate is in progress.</p>
 <p>What it means for VSS: its margin is not a good confidence, because it sees one step of a chain (above).</p>
 </div>
 <div class="callout" id="vc-result">
@@ -348,7 +459,7 @@ regression fitted <b>only on the held-out split</b>, then measured once on the s
 <tr><td>VSS, all steps combined</td><td><b>0.81</b></td><td><b>0.84</b></td></tr>
 <tr><td>SOP-BERT</td><td>0.72</td><td>0.82</td></tr>
 </table>
-<p>At equal wrong on the sample, VSS with the new confidence keeps far more right: at 4% wrong 60.9% right (old margin 38.5%, SOP-BERT
+<p>At an equal share of requests done wrong on the sample (% of all requested actions, not yet precision), VSS with the new confidence keeps far more right: at 4% wrong 60.9% right (old margin 38.5%, SOP-BERT
 45.9%); at 2% wrong 49.0% (old 10.1%, SOP-BERT 26.8%). On the short commands SOP-BERT stays ahead down to 6% wrong; VSS leads at 4% and 2%.</p>
 <p>Which numbers carry it, by weight: the residual (+1.26), how good the chosen world is in general (+1.26; links is right only 59% of the
 time), whether the world was the cutter’s first choice (+0.98), the share of words not understood (+0.85), the words left unplaced (+0.80).
@@ -358,19 +469,24 @@ The roles’ own margin, the whole of the old confidence, gets almost no weight 
 in the chain can catch them.</p>
 <p class="note"><b>Caveat on fairness:</b> VSS was trained on the sample’s messages and SOP-BERT never saw them (<a href="#help/chain-vs-one/fairness">One
 model or a chain</a>), so the two confidences are measured on different footing; the held-out split, where both saw similar text, gives the same
-order: 0.82 against 0.73. Not in the demo yet: the next step is to use it to decide when VSS asks instead of executing.</p>
+order: 0.82 against 0.73. A fresh test set neither reader has seen is planned. Not in the demo yet: using this confidence, with a
+threshold chosen on held-out data, to decide when VSS asks instead of executing is in progress.</p>
 </div>
 
 <h2 id="both">Why both readers stay in the demo</h2>
-<p><b>SOP-BERT</b> for how much it gets right and, measured, for a confidence that ranks its readings. <b>VSS</b> for being explainable: every
-reading can be followed word by word, when it errs we can say at which step, and a confidence built from those steps ranks its readings
-better than SOP-BERT’s (above; <a href="#help/chain-vs-one">One model or a chain</a>). Side by side, on the same cut, each reply shows
-what each approach does with the same words.</p>
+<p>Both are measured by the same rule: each executes only above its own threshold, and they are compared at equal precision.
+<b>SOP-BERT</b> is the approximator: it gets the most right when everything is executed, and its probabilities, measured, rank its readings.
+<b>VSS</b> is the subject of the research question: every reading can be followed word by word, when it errs we can say at which step, and a
+confidence built from those steps ranks its readings better than SOP-BERT’s (above; <a href="#help/chain-vs-one">One model or a chain</a>), so
+its “not sure” can say why. Side by side, on the same cut, each reply shows what each approach does with the same words.</p>
 `);
 
 /* ============================================================ chain vs one model */
-page('chain-vs-one', 'One model or a chain: why SOP-BERT reads more right',
-'VSS reads a message in a chain of separately trained steps; SOP-BERT does all of them in one model trained on the final result. That, and what a pretrained model already knows of English, explains most of the difference. The VSS core itself is the one of the paper.', `
+page('chain-vs-one', 'One model or a chain',
+'VSS reads a message in a chain of separately trained steps; SOP-BERT does all of them in one model trained on the final result. That, and what a pretrained model already knows of English, is why SOP-BERT executes more and gets more right when everything is executed. The chain is also why VSS can say at which step it is not sure, which is what the main metric asks for. The VSS core itself is the one of the paper.', `
+<p class="note">The question of this project is not which reader gets more right when everything is executed, but how much each gets right when
+it executes only what it is sure of (<a href="#help/research-question">What this project measures</a>). This page explains the difference on
+the earlier measure, and what the chain means for knowing when to ask.</p>
 <h2 id="steps">The VSS chain</h2>
 <ol>
   <li><b>Cut</b> the message into requests (the cutter of worlds).</li>
@@ -383,6 +499,10 @@ page('chain-vs-one', 'One model or a chain: why SOP-BERT reads more right',
 candidates. None learns to repair the step before it. Errors multiply along the chain: as an illustration, not a measurement, four steps that are
 each right 93% of the time give 0.93<sup>4</sup> ≈ 75% for the whole. No step looks weak, the total is. Which step loses most is being measured
 (the round-2 analysis per component, ROUND2.md).</p>
+<p>The same chain is what lets VSS say where it is not sure. Every step leaves a number behind (how sure the cut was, how clearly the world won,
+how much of the request the reading leaves unexplained, which words it did not know), and each number has a name. Combined, they rank right and
+wrong readings better than the probabilities of SOP-BERT (VSS_CONFIDENCE.md, <a href="#help/knowing/vc-result">the result</a>), and a
+question back can name its reason: “the words <i>…</i> were not understood”, or “this was read in the links world, which is often wrong”.</p>
 
 <h2 id="one">SOP-BERT: one model, trained on the result</h2>
 <ul>
@@ -401,8 +521,9 @@ folder with spans, the sample’s messages included. SOP-BERT never saw any mess
 train/held-out split (<code>training/neural/make_data.py</code>). So on the sample, SOP-BERT reads text it never saw and VSS reads text it was
 trained on.</p>
 <p>A consequence: on the sample’s two benchmark folders (ids h- and s-) SOP-BERT is wrong on 21% and 28% of the requests, VSS on 12.9% and
-14.3% (RISK_COVERAGE.md). That is <b>not</b> evidence that VSS generalises better: the VSS worlds were trained on those very messages. A fair
-measure of both needs a fresh set of messages neither has seen; it is planned (<a href="#help/planned">In progress</a>).</p>
+14.3% (RISK_COVERAGE.md). That is <b>not</b> evidence that VSS generalises better: the VSS worlds were trained on those very messages. The same
+holds for the confidences and for the precision of execution: on the sample VSS is judged on text it learned. A fair measure of both needs a
+fresh set of messages neither has seen; it is planned (<a href="#help/planned">In progress</a>).</p>
 
 <h2 id="core">Did we change the VSS core?</h2>
 <p>The reader comes from the paper’s repository (<code>vsa-semantic-space</code>), through <code>vss-demo</code>, copied here on 2026-10-30
@@ -433,7 +554,9 @@ ours, on the same data (UPSTREAM_AUDIT.md, running).</p>
 <ul>
   <li><b>A confidence that sees every step</b>: measured, it separates right from wrong better than SOP-BERT’s (0.81 against 0.72 on the
   sample, 0.82 against 0.73 held-out) and keeps its explanations: every weight has a name (<a href="#help/knowing/vc-result">the result</a>).
-  Next: use it in the demo to decide when VSS asks.</li>
+  In progress: a threshold on it, chosen on held-out data, decides in the demo when VSS executes and when it asks, saying why; then the
+  precision of execution is measured at that threshold (<a href="#help/research-question/precision-result">being measured</a>).</li>
+  <li><b>A fresh test set</b> neither VSS nor SOP-BERT has seen, so that precision is compared on equal footing (planned).</li>
   <li><b>Fewer separately trained steps</b>, if the per-component analysis shows that most is lost at the cut or the world choice: that is the
   lesson of SOP-BERT.</li>
 </ul>
@@ -442,13 +565,25 @@ ours, on the same data (UPSTREAM_AUDIT.md, running).</p>
 /* ============================================================ limits today */
 page('limits-today', 'Where it is weak today',
 'The known weak spots of the readers, with the numbers. The editor’s own limits (what it cannot draw) are in What it cannot do.', `
+<p class="note">Measured with the earlier measure unless said otherwise: right / wrong / not done in % of the requested actions, every
+request executed. The main number, precision of execution at a threshold, is being measured
+(<a href="#help/research-question/precision-result">the placeholder</a>).</p>
 <ul class="limits">
+  <li><b>No reader in the demo executes only what it is sure of.</b> The main metric asks each reader to execute a request only above a
+  confidence threshold chosen on held-out data, and to ask below it (owner, 2026-11-02). Today VSS executes readings with status
+  <code>abstain</code> and its context filler fills a gap whenever one candidate ranks first; SOP-BERT executes everything it reads; the Rules
+  have no confidence at all. The confidence gate for VSS and SOP-BERT is in progress (<a href="#help/planned">In progress</a>).</li>
+  <li><b>The VSS margin is a poor confidence.</b> It separates right from wrong readings barely better than chance (AUROC 0.59 on the sample,
+  RISK_COVERAGE.md): its most confident readings are right about as often as its middling ones. A confidence from every step of the chain does
+  much better (0.81, VSS_CONFIDENCE.md), and still leaves 29.5% of VSS’s wrong requests on the sample read confidently at every step: no number
+  in the chain catches them. See <a href="#help/knowing">Knowing what it does not know</a>.</li>
   <li><b>VSS on very short commands.</b> 61.1% right on the six short sets, against 77.2% on whole messages (SHORT2.md §6). The VSS cutter makes no
   unit for 96 of 1118 one-line commands (CUT_SHARED.md): a message like “Undo” or “Hub teal” can be missed whole. Round 2 reaches 62.5% (commit
   63274ae), not the default yet.
   ${says('Undo', 'Make Process bigger')}</li>
-  <li><b>SOP-BERT guesses.</b> 16.5% of the sample’s requests done wrong against 11.4% for VSS, and only 2.8% left undone (commit 1f3c806).
-  Descriptions in roles are its weakest part: 4 of 34 held-out (its README). See <a href="#help/knowing">Knowing what it does not know</a>.</li>
+  <li><b>SOP-BERT guesses.</b> With every request executed, 16.5% of the sample’s requests done wrong against 11.4% for VSS, and only 2.8% left
+  undone (commit 1f3c806). A threshold on its probabilities, chosen on held-out data, makes it ask instead (RISK_COVERAGE.md); it is not in the
+  demo yet. Descriptions in roles are its weakest part: 4 of 34 held-out (its README). See <a href="#help/knowing">Knowing what it does not know</a>.</li>
   <li><b>“Them” after a list.</b> After every request, all readers carry one shape forward as “it” (the shared context rule). “Draw A, B and C,
   then make them red” needs three; no reader that uses the rule can get it right. Listed as a task (<a href="#help/planned">In progress</a>).
   ${says('Add three small squares in a row below Process')}</li>
@@ -457,7 +592,8 @@ page('limits-today', 'Where it is weak today',
   <li><b>The rules on long messages.</b> 16.8% of requests done wrong with their own cut, 821 extra actions (CUT_SHARED.md); 11.9% and 406 with the
   VSS cut.</li>
   <li><b>Measured on data the worlds were trained on.</b> There is no hidden test set (owner, 2026-11-01): the sample is training data for the worlds,
-  and the goal is that they read such data well. The neural models are the exception: they never saw the sample.</li>
+  and the goal is that they read such data well. The neural models are the exception: they never saw the sample. So the two are not compared
+  on equal footing, for precision as for everything else; a fresh test set neither reader has seen is planned.</li>
 </ul>
 `);
 

@@ -72,3 +72,31 @@ for a cost the demo can carry.
 
 **Risk.** About 2-3x slower and 2x larger than DistilBERT in the browser for a gain that may be small on short commands; transformers.js
 support to be checked.
+
+## The same readers on a legend where a wrong action is costly: the real test of the main metric (2026-11-02: documented, not now)
+
+**Why.** The main metric (owner, 2026-11-02; AGENTS.md "What counts as an error") is the precision of execution: do only what you are
+sure of, ask about the rest. In the diagram editor a confident mistake costs one undo, so the editor can show whether a reader's
+confidence ranks its readings, but not whether a reader can be trusted where a wrong action is serious. The owner's argument for the
+metric is exactly that case ("if the decisions were of life and death this matters most"). Two things the diagram legend cannot test:
+- whether the confidence and the threshold hold up when the target precision is much higher than anything a drawing needs (the
+  threshold has to be chosen for a precision fixed beforehand, not for a trade-off with questions);
+- whether one threshold per reader is enough when wrong actions differ in cost (in a drawing every wrong value costs one undo; in a
+  dosing or payment legend a wrong unit or amount is worse than a wrong time of day).
+
+**The idea.** A second, small legend for a domain where a wrong action is serious, used only as a research bench, never as a tool:
+for example medication orders on a fixed list (drug, dose, unit, route, time) or transfers between fixed accounts (amount, currency,
+account, date). Realistic messages written by LLM agents in the style of real use (the same specs as the diagram data: whole messages,
+text that is not a request, self-corrections, typos), saved before annotation, annotated as spans. The same three kinds of reader: VSS
+worlds trained on its annotation, SOP-BERT fine-tuned on it, Rules written for its legend. No hand-written equivalences for the learned
+readers, as here.
+
+**How it would be measured.** Before the run, with the owner: the target precision, and which wrong actions count as serious. Then, per
+reader: the threshold chosen on held-out messages to reach the target precision; on a fresh set no reader has seen, the precision of
+execution reached, the share of requests done right at that precision, the AUROC of the confidence, and the serious wrong actions
+counted apart; the comparison at equal precision. Also: the threshold carried over from the diagram legend against the one chosen in
+the new domain (VSS_CONFIDENCE.md notes that a threshold may have to be chosen per domain).
+
+**Risk.** Writing and annotating realistic data for a new legend is the main cost (the diagram data took several batches and checks).
+LLM-written messages in such a domain may be cleaner than real ones. A new legend means new worlds and a new SOP-BERT: the owner's
+approval is needed before it starts. Nothing in it may be presented as usable for real orders or payments.

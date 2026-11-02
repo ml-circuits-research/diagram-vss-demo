@@ -191,7 +191,8 @@ function start(env) {
     <dt>VSS</dt><dd>Seven small models we trained on example messages written for this editor, one per family of actions. VSS stands for vector-symbolic: each word becomes a long list of numbers (a vector), and the model combines these vectors to find the action and its details. Not a transformer. ${vb ? vb[0].toUpperCase() + vb.slice(1) + ', loaded' : 'Loaded'} from this site when the page opens, and run in your browser.</dd>
     <dt>Neural</dt><dd>A transformer of the BERT family, the kind of model behind many language tools. <b>SOP-BERT</b> is one DistilBERT model we fine-tuned on the same example messages: it cuts a message into requests and reads each request’s action, values, names and descriptions (“the red circle”) itself, without the Rules reader.${now ? ` Loaded now: ${escH(now)}.` : ''} ${nb ? nb[0].toUpperCase() + nb.slice(1) + ', loaded' : 'Loaded'} from this site, kept in your browser’s cache after the first visit, and run in your browser.</dd>
   </dl>
-  <p class="note">Why three, and what each is good at: ${go('why-three', 'Three readers side by side')}; why a reader that says “I don’t know” matters: ${go('knowing', 'Knowing what it does not know')}.</p>
+  <p>What the experiment measures first is not how much each reader gets right, but how much of what it <i>does</i> is right: a reader should do only what it is sure of and ask about the rest, saying why. In a drawing a confident mistake costs one undo; where actions have serious consequences it is what matters most. ${go('research-question', 'What this project measures')}</p>
+  <p class="note">Why three, and what each is good at: ${go('why-three', 'Three readers side by side')}; how well each knows when it is unsure: ${go('knowing', 'Knowing what it does not know')}.</p>
 
   <h2 id="steps">How one message is read</h2>
   <ol class="steps">
@@ -210,7 +211,8 @@ function start(env) {
     <li><b>Different results</b>: here the Neural reader missed the name, so its star got an automatic name. Each reader changes only its own drawing.</li>
     <li><b>details</b> under a reply shows how the message was cut, what each reader wrote in SOP Lang, what the engine changed, and for questions the logic query it ran.</li>
     <li><b>Buttons under a reply</b> answer a question the reader asked, e.g. “Which circle? Start or Done”.</li>
-    <li><b>“I didn’t understand …”</b> is an honest refusal: the reader found no request it could read in that part. It still does every other part of your message. Try plainer words, with shapes and arrows: “connect Plankton to Krill” instead of “plankton feeds the krill”.</li>
+    <li><b>“I didn’t understand …”</b> is an honest refusal: the reader found no request it could read in that part. It still does every other part of your message. Try plainer words, with shapes and arrows: “connect Plankton to Krill” instead of “plankton feeds the krill”. A refusal or a question is never counted as an error; a change you did not ask for is.</li>
+    <li><b>When a reader is not sure.</b> The rule of this project: do only what you are sure of, ask about the rest, and say why. Today the readers follow it only in part. The Rules say “I didn’t understand” where none of their words match. VSS says which words it did not understand, and asks which shape you mean when no candidate fits “it” or a missing name, but it still carries out readings it is unsure of. SOP-BERT almost never stops: it carries out what it reads. A confidence threshold per reader, below which it asks instead of acting, is in progress. ${go('knowing', 'Knowing what it does not know')}</li>
     <li><b>A reason instead of a result</b> (“There is already a shape named Hub”, “I can't find a red square”) comes from the engine: the request was understood but could not be done as asked.</li>
   </ul>
 
@@ -231,6 +233,7 @@ function start(env) {
     <a class="card" href="#help/do"><b>Everything you can do</b><span>Every action, with examples</span></a>
     <a class="card" href="#help/ask"><b>Everything you can ask</b><span>Every question, with examples</span></a>
     <a class="card" href="#help/sop-lang"><b>SOP Lang</b><span>The language the readers write</span></a>
+    <a class="card" href="#help/research-question"><b>What this project measures</b><span>Do only what you are sure of, ask about the rest</span></a>
     <a class="card" href="#help/knowing"><b>Knowing what it does not know</b><span>VSS vs SOP-BERT: right, wrong, or “I don’t know”</span></a>
     <a class="card" href="#help/vss-worlds"><b>What a VSS world is</b><span>The idea behind the VSS reader</span></a>
     <a class="card" href="#help/architecture"><b>How it works inside</b><span>Every part, model and number</span></a>
@@ -402,7 +405,7 @@ function limits(env) {
     <li>Groups cannot be nested, and a shape is in one group at a time.</li>
     <li>English only. Words from other worlds (“the manager approves the budget”) are not translated into diagrams; say it with shapes and arrows. A part of a message it cannot map to a request gets “I didn’t understand …”, and the rest of the message is still done.</li>
     <li>No saving, export or sharing: the drawing lives in this page until you reload it.</li>
-    <li>The readers make mistakes, each in its own way. Undo fixes any change in one step. ${say('Undo')}</li>
+    <li>The readers make mistakes, each in its own way, and today they can still carry out a reading they are not sure of. Making each one act only above a confidence threshold, and ask below it, is in progress (${go('research-question', 'What this project measures')}). Undo fixes any change in one step. ${say('Undo')}</li>
   </ul>`;
 }
 

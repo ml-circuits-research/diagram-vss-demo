@@ -1,7 +1,27 @@
 # diagram-vss-demo
 
 **SOP Sketchpad**: a diagram editor you talk to in English, in the browser, with no server. Every message is formalized into SOP Lang
-wires by one of three readers, and the same engine and the same Datalog reasoner run the wires, whichever reader wrote them:
+wires by each of three readers (the table under "The readers"), and the same engine and the same Datalog reasoner run the wires,
+whichever reader wrote them.
+
+## Goal and metric
+
+The research question (owner, 2026-11-02): **a reader that says clearly where it is not sure, does only what it is sure of, and asks about
+the rest**, not one that approximates well; for approximation there are LLMs. In a drawing a confident mistake costs one undo; where a wrong
+action has serious consequences it is what matters most. The diagram editor is the test bench.
+
+- **Main metric: precision of execution.** Of everything a reader executes (requested actions and extras nobody asked for), the share done
+  right. It is reported with the share of requests done right at that precision; readers are compared by the share of requests done right
+  **at equal precision** (the risk-coverage curve), with the AUROC of their confidence beside it.
+- Each reader executes a request only when its confidence clears a threshold chosen on held-out data, and asks below it, saying why.
+  "Not done / asked" is never an error. The Rules, which have no confidence, are measured by what they execute.
+- Under it, per requested action: right / wrong / not done, plus extras (every number before 2026-11-02 is in this form, with every request
+  executed). Rules: `AGENTS.md` ("What counts as an error"); decision record: `DECISIONS.md`.
+- State on 2026-11-02: the confidences are measured (`training/sketch/RISK_COVERAGE.md`, `training/sketch/VSS_CONFIDENCE.md`); the
+  confidence gate in the demo and the precision of each reader (`training/sketch/PRECISION.md`) are in progress; a fresh test set neither
+  learned reader has seen is planned.
+
+## The readers
 
 | reader | what it is | model |
 |---|---|---|
