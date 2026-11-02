@@ -23,6 +23,9 @@ held-out requests through docs/js/neural.js makeReader (the demo's decoding code
 Reported besides the per-key counts: per filler kind (written / context / description), the share of gold name-roles whose kind the model
 reads right (and, for written, also on exactly its words), and the description accuracy: described roles read as a description with every
 key of the mention right (the mention the engine resolves).
+No held-out (make_roles.py --all, ALL_DATA.md): heldout.jsonl is empty, so there is nothing to early-stop on. The run then trains the FULL
+fixed schedule (--epochs, default 8 = the best epoch of the shipped run, whose learning-rate schedule also spanned 8 epochs), keeps the last
+epoch, and reports only the fit on the training data (eval_sample1000 is inside the training set then); the node check uses training rows.
 Run: python3 training/neural/finetune_roles.py --base distilbert-base-uncased --name sop-bert [--data DIR] [--work DIR] [--out DIR]
 """
 import argparse, collections, json, os, random, shutil, subprocess, sys, time
@@ -255,6 +258,8 @@ def main():
     train, held = read(os.path.join(a.data, "train.jsonl")), read(os.path.join(a.data, "heldout.jsonl"))
     evals = {f[5:-6]: read(os.path.join(a.data, f)) for f in sorted(os.listdir(a.data)) if f.startswith("eval_")}
     cut = {n: read(os.path.join(a.data, f"cut_{n}.jsonl")) for n in ("train", "heldout", "eval_sample1000") if os.path.exists(os.path.join(a.data, f"cut_{n}.jsonl"))}
+    fixed = not held   # no held-out: fixed number of epochs, last epoch kept, no early stop
+    if fixed: print(f"NO HELD-OUT: fixed {a.epochs} epochs, last epoch kept; numbers below on evaluation sets that are part of the training data are the FIT on the training data, not a test", flush=True)
     tok, model = build(a.base, train + cut.get("train", []), len(L.acts), L.class_sizes, len(L.tags)); model.to(dev)
     print(f"base {a.base}: {sum(p.numel() for p in model.parameters()) / 1e6:.1f}M parameters, device {dev}, fp16 {fp16}; train {len(train)} held-out {len(held)}; "
           f"acts {len(L.acts)}, class keys {len(L.classes)} ({sum(L.class_sizes)} classes), tags {len(L.tags)}", flush=True)
@@ -296,6 +301,11 @@ def main():
             opt.zero_grad(); scaler.scale(loss).backward(); scaler.unscale_(opt); torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             scaler.step(opt); scaler.update(); sch.step(); loss_sum += loss.item(); n += 1; step += 1
             if a.max_steps and step >= a.max_steps: done = True; break
+        if fixed:
+            print(f"epoch {ep}: loss {loss_sum / max(n, 1):.4f}  (no held-out)  ({time.time() - t0:.0f}s)", flush=True)
+            best, best_state = 0.0, {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+            if done: break
+            continue
         ev = evaluate(model, tok, held, L, maxlen, dev, fp16); ec = evaluate_cut(model, tok, cut.get("heldout"), L, dev, fp16)
         score = (ev["right"] + ec["f1"]) / 2 if ec else ev["right"]   # early stop on the mean of requests read right and the cut F1
         print(f"epoch {ep}: loss {loss_sum / max(n, 1):.4f}  held-out: requests read right {ev['right']:.4f}, act {ev['act']:.4f}"
@@ -305,22 +315,24 @@ def main():
         if done or bad >= a.patience: break
     model.load_state_dict(best_state); model.to(dev)
     torch.save(best_state, os.path.join(work, "best.pt"))
-    print(f"\nbest epoch: held-out score {best:.4f} (mean of requests read right and cut F1; requests read right = act right, every gold class key right, every gold role on exactly its words)")
-    print("per key: right/gold (+ produced where the gold has none)")
-    res = {"heldout": evaluate(model, tok, held, L, maxlen, dev, fp16)}; report("heldout", res["heldout"])
+    if fixed: print(f"\nlast epoch ({ep}) kept; there is no held-out score. Per key: right/gold (+ produced where the gold has none), on the sets below (eval_sample1000 is TRAINING data here)")
+    else: print(f"\nbest epoch: held-out score {best:.4f} (mean of requests read right and cut F1; requests read right = act right, every gold class key right, every gold role on exactly its words)")
+    if not fixed: print("per key: right/gold (+ produced where the gold has none)")
+    res = {"heldout": evaluate(model, tok, held, L, maxlen, dev, fp16)}
+    if not fixed: report("heldout", res["heldout"])
     for k, rows in evals.items(): res[k] = evaluate(model, tok, rows, L, maxlen, dev, fp16); report(k, res[k])
     for k, rows in cut.items():
         res["cut_" + k] = evaluate_cut(model, tok, rows, L, dev, fp16)
         if res["cut_" + k]: print("  cut " + k + ": " + ", ".join(f"{a} {v:.4f}" if isinstance(v, float) else f"{a} {v}" for a, v in res["cut_" + k].items()))
     json.dump(res, open(os.path.join(work, "eval.json"), "w"), indent=1)
     model.to("cpu"); dev = "cpu"
-    chk = held[:50]
+    chk = held[:50] if held else train[:50]   # no held-out: the node check runs on training rows (it compares node with torch, not accuracy)
     ref = os.path.join(work, "torch_ref.jsonl")
     with open(ref, "w") as f:
         for r, p in zip(chk, predict(model, tok, chk, L, maxlen, "cpu", False)):
             ids = tok([r["words"]], is_split_into_words=True, truncation=True, max_length=maxlen)["input_ids"][0]
             f.write(json.dumps({"text": r["text"], "words": r["words"], "ids": ids, **p}, ensure_ascii=False) + "\n")
-    cref = os.path.join(work, "torch_cut_ref.jsonl"); cchk = cut.get("heldout", [])[:20]
+    cref = os.path.join(work, "torch_cut_ref.jsonl"); cchk = (cut.get("heldout") or cut.get("train", []))[:20]
     with open(cref, "w") as f:
         for r, sp in zip(cchk, predict_cut(model, tok, cchk, L, "cpu", False)): f.write(json.dumps({"text": r["text"], "words": r["words"], "spans": sp}, ensure_ascii=False) + "\n")
     export(model, tok, L, R, out, work, maxlen, model.encoder.config)
@@ -331,6 +343,18 @@ def main():
                            capture_output=True, text=True); print(r.stdout.strip(), r.stderr.strip()[-800:])
         agree = json.loads(r.stdout.strip().splitlines()[-1]) if r.returncode == 0 and r.stdout.strip() else None
     ho = res["heldout"]; s1 = res.get("sample1000")
+    if fixed:
+        with open(os.path.join(out, "README.md"), "w") as f:
+            f.write(f"""# {a.name}: SOP-BERT fine-tuned on ALL the data (no held-out)
+
+Same architecture, heads and export as docs/model/neural/sop-bert (see its README). Differences: trained with make_roles.py --all
+(training/neural/ALL_DATA.md): the {len(train)} request spans of every message the shipped VSS chain trains on ({len(cut.get('train', []))} messages), nothing removed, no
+held-out, so no early stop: {a.epochs} epochs (the best epoch of the shipped run), lr {a.lr}, batch {a.bs}, fp16 on cuda, seed {a.seed}; the last epoch is kept.
+Fit on the TRAINING data only (not a test): sample1000 (inside the training set) act {s1['act'] if s1 else float('nan'):.4f}, requests read right {s1['right'] if s1 else float('nan'):.4f}.
+Size: onnx/model_quantized.onnx {q / 1e6:.1f} MB (q8). Node check vs torch on {len(chk)} training requests: {json.dumps(agree) if agree else "not run"}.
+Evaluation: on a fresh test set only (calibration part for confidences/thresholds, test part for the numbers).
+""")
+        print(f"\nwrote {out} ({q / 1e6:.1f} MB q8); README.md inside"); return
     with open(os.path.join(out, "README.md"), "w") as f:
         f.write(f"""# {"SOP-BERT" if a.name == "sop-bert" else a.name}: DistilBERT fine-tuned on our requests — cuts the message, reads the action, the values, the names and the descriptions
 

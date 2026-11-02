@@ -12,7 +12,8 @@ llm_bench/{sonnet,haiku}_spans messages that are not in the sample are not used 
 Output (default ~/vss-box/ft/data, outside the repo): train.jsonl, heldout.jsonl, eval_<set>.jsonl, acts.json, counts.json.
 Row: {"id": message id or set name + index, "text": span, "label": act}.
 The sample's ids are kept in training/neural/sample1000_ids.txt (the default of --sample-ids).
-Run: python3 training/neural/make_data.py [--out DIR] [--sample-ids FILE] [--seed 0]
+--all (ALL_DATA.md): every message of DIRS + SAMPLE_DIRS is training data (the shipped VSS chain's folders); no held-out.
+Run: python3 training/neural/make_data.py [--out DIR] [--sample-ids FILE] [--seed 0] [--all]
 """
 import argparse, collections, glob, json, os, random, re
 
@@ -59,12 +60,19 @@ def rows_of(m, ACTS, skipped):
     return rows
 
 
-def split_messages(sample_ids, seed):
+def split_messages(sample_ids, seed, all_data=False):
     """the message pools, shared with make_roles.py so both models see the same split:
-    (train_msgs sorted by id, held-out ids, sample messages, sample ids not found)"""
+    (train_msgs sorted by id, held-out ids, sample messages, sample ids not found)
+    all_data (--all, training/neural/ALL_DATA.md): no sample removal and no held-out. train_msgs = DIRS + SAMPLE_DIRS in full (the
+    folders the shipped VSS chain trains on); held-out is empty; sample_msgs are the sample's messages, now INSIDE train_msgs (they are
+    still exported as eval_sample1000, only to report the fit on the training data)."""
     sample = set(l.strip() for l in open(sample_ids) if l.strip()) if sample_ids else set()
     pool = messages(DIRS)
     ids = [m["id"] for m in pool]; assert len(ids) == len(set(ids)), "message ids are not unique across folders"
+    if all_data:
+        allm = pool + messages(SAMPLE_DIRS)
+        assert len({m["id"] for m in allm}) == len(allm), "message ids are not unique across DIRS + SAMPLE_DIRS"
+        return sorted(allm, key=lambda m: m["id"]), set(), [m for m in allm if m["id"] in sample], sample - {m["id"] for m in allm}
     in_sample = [m for m in pool if m["id"] in sample]
     sample_msgs = in_sample + [m for m in messages(SAMPLE_DIRS) if m["id"] in sample and m["id"] not in {x["id"] for x in in_sample}]
     missing = sample - {m["id"] for m in sample_msgs}
@@ -79,12 +87,13 @@ def main():
     ap.add_argument("--out", default=os.path.expanduser("~/vss-box/ft/data"))
     ap.add_argument("--sample-ids", default=os.path.join(HERE, "sample1000_ids.txt"), help="file with the ids of the fixed evaluation sample (one per line)")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--all", action="store_true", help="all data (ALL_DATA.md): no sample removed, no held-out; eval_sample1000 is then a fit-on-train check")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     ACTION, ASK = acts_from_neural_js(); ACTS = ACTION + ASK + ["fact", "rule"]
     sample = set(l.strip() for l in open(a.sample_ids) if l.strip()) if a.sample_ids else set()
     skipped = collections.Counter()
-    train_msgs, held, sample_msgs, missing = split_messages(a.sample_ids, a.seed)
+    train_msgs, held, sample_msgs, missing = split_messages(a.sample_ids, a.seed, a.all)
     out = {"train": [], "heldout": [], "eval_sample1000": []}
     for m in train_msgs: out["heldout" if m["id"] in held else "train"] += rows_of(m, ACTS, skipped)
     for m in sample_msgs: out["eval_sample1000"] += rows_of(m, ACTS, skipped)
@@ -107,7 +116,7 @@ def main():
     counts["skipped"] = dict(skipped)
     json.dump(counts, open(os.path.join(a.out, "counts.json"), "w"), indent=1)
     print(f"acts: {len(ACTS)}; messages train {counts['messages']['train']} heldout {counts['messages']['heldout']}; sample found {len(sample_msgs)} missing {len(missing)}")
-    assert not (held | {m['id'] for m in train_msgs}) & sample, "sample leaked into train/held-out"
+    assert a.all or not (held | {m['id'] for m in train_msgs}) & sample, "sample leaked into train/held-out"
     print(f"{'act':12}" + "".join(f"{k.replace('eval_', ''):>12}" for k in out))
     for ac in ACTS: print(f"{ac:12}" + "".join(f"{sum(r['label'] == ac for r in v):12}" for v in out.values()))
     print(f"{'TOTAL':12}" + "".join(f"{len(v):12}" for v in out.values()))
