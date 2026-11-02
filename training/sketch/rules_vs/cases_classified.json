@@ -1,0 +1,802 @@
+[
+ {
+  "i": 0,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "tell me the rules",
+  "cause": "ERR",
+  "why": "wrong act (rules read as list)"
+ },
+ {
+  "i": 1,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "add a teal box named Session under User",
+  "cause": "ERR",
+  "why": "'box' -> circle"
+ },
+ {
+  "i": 2,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "from now on squares are small",
+  "cause": "ERR",
+  "why": "rule read as fact"
+ },
+ {
+  "i": 3,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "change all the purple things to teal",
+  "cause": "ERR",
+  "why": "cutter made no unit"
+ },
+ {
+  "i": 4,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "which red shape is farthest from Ball",
+  "cause": "ERR",
+  "why": "value dropped (red)"
+ },
+ {
+  "i": 5,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "how large is the Lotus",
+  "cause": "ERR",
+  "why": "property read as fact"
+ },
+ {
+  "i": 6,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "add a gray ellipse at the top right",
+  "cause": "ERR",
+  "why": "value dropped (position)"
+ },
+ {
+  "i": 7,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "two-way link between Mid and Coach",
+  "cause": "ERR",
+  "why": "role confusion (to=pair)"
+ },
+ {
+  "i": 8,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "list the defaults in effect",
+  "cause": "ERR",
+  "why": "wrong act (rules read as list)"
+ },
+ {
+  "i": 9,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "is there a diamond that is not red",
+  "cause": "ERR",
+  "why": "notColor read as color"
+ },
+ {
+  "i": 10,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "set the last diamond to black",
+  "cause": "ERR",
+  "why": "description attribute dropped (last)"
+ },
+ {
+  "i": 11,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "what color is the newest triangle",
+  "cause": "ERR",
+  "why": "description attribute dropped (newest)"
+ },
+ {
+  "i": 12,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "discard the default rules you saved",
+  "cause": "DATA",
+  "why": "trigger 'discard' (forget): 5 training spans, 2 in the worlds' data"
+ },
+ {
+  "i": 13,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "connect Mix and Dough both ways",
+  "cause": "ERR",
+  "why": "role confusion (from/to=pair)"
+ },
+ {
+  "i": 14,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "what shape is nearest to Rover",
+  "cause": "ERR",
+  "why": "wrong act"
+ },
+ {
+  "i": 15,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "new hexagons should be large",
+  "cause": "ERR",
+  "why": "rule read as set"
+ },
+ {
+  "i": 16,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "arrange the whole thing in a column",
+  "cause": "ERR",
+  "why": "cutter made no unit"
+ },
+ {
+  "i": 17,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "connect Root to every triangle",
+  "cause": "ERR",
+  "why": "description attribute dropped (every)"
+ },
+ {
+  "i": 18,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "count all the boxes",
+  "cause": "ERR",
+  "why": "value dropped (shape)"
+ },
+ {
+  "i": 19,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "call the Dew Mist",
+  "cause": "ERR",
+  "why": "name and target swapped"
+ },
+ {
+  "i": 20,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "reachable from Peg, what's there?",
+  "cause": "ERR",
+  "why": "cutter made no unit"
+ },
+ {
+  "i": 21,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "how many hexagons are on the board?",
+  "cause": "ERR",
+  "why": "value dropped (shape)"
+ },
+ {
+  "i": 22,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "a navy link from Curtain to Stage labelled 'Act 2'",
+  "cause": "ERR",
+  "why": "value dropped (colour)"
+ },
+ {
+  "i": 23,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "hey, put a huge black rectangle in the bottom right named Depot",
+  "cause": "ERR",
+  "why": "value dropped (name)"
+ },
+ {
+  "i": 24,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "how many arrows are there in total",
+  "cause": "ERR",
+  "why": "value dropped (kind)"
+ },
+ {
+  "i": 25,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "is there a loop between rooms",
+  "cause": "ERR",
+  "why": "cutter made no unit"
+ },
+ {
+  "i": 26,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "put a tiny gold star between Dunes and Oasis",
+  "cause": "ERR",
+  "why": "anchor list cut to one"
+ },
+ {
+  "i": 27,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "what rules have been defined",
+  "cause": "ERR",
+  "why": "wrong act (rules read as list)"
+ },
+ {
+  "i": 28,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "add a lime hexagon to the right of Spruce",
+  "cause": "ERR",
+  "why": "create read as 'check' (region phrase)"
+ },
+ {
+  "i": 29,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "a box labeled 'Board' at the top",
+  "cause": "ERR",
+  "why": "'box' -> circle"
+ },
+ {
+  "i": 30,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "make a small green oval named Sprint at the center",
+  "cause": "ERR",
+  "why": "value wrong/dropped"
+ },
+ {
+  "i": 31,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "a large yellow oval at the bottom",
+  "cause": "ERR",
+  "why": "value wrong/dropped"
+ },
+ {
+  "i": 32,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "line up all the cyan shapes vertically",
+  "cause": "ERR",
+  "why": "description attribute wrong/dropped"
+ },
+ {
+  "i": 33,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "bring the newest hexagon to the front",
+  "cause": "ERR",
+  "why": "description attribute wrong/dropped"
+ },
+ {
+  "i": 34,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "turn the black squares white",
+  "cause": "ERR",
+  "why": "description attribute wrong/dropped"
+ },
+ {
+  "i": 35,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "arrange all the hexagons in a circle",
+  "cause": "ERR",
+  "why": "description attribute wrong/dropped"
+ },
+ {
+  "i": 36,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "make all the black diamonds white",
+  "cause": "ERR",
+  "why": "description attribute wrong/dropped"
+ },
+ {
+  "i": 37,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "make the last circle yellow",
+  "cause": "ERR",
+  "why": "description attribute wrong/dropped"
+ },
+ {
+  "i": 38,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "add a gray ellipse at the top right",
+  "cause": "ERR",
+  "why": "value wrong/dropped"
+ },
+ {
+  "i": 39,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "delete all stars that are not red",
+  "cause": "DATA",
+  "why": "delete + 'not <colour>': 4 training spans in all"
+ },
+ {
+  "i": 40,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "get rid of the red hexagons",
+  "cause": "ERR",
+  "why": "description attribute wrong/dropped"
+ },
+ {
+  "i": 41,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "draw a navy line from User to Ledger",
+  "cause": "ERR",
+  "why": "value wrong/dropped"
+ },
+ {
+  "i": 42,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "remove every red square",
+  "cause": "ERR",
+  "why": "description attribute wrong/dropped"
+ },
+ {
+  "i": 43,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "raise the newest square to the top layer",
+  "cause": "ERR",
+  "why": "description attribute wrong/dropped"
+ },
+ {
+  "i": 44,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "line, no arrow heads, Mic to Amp",
+  "cause": "ERR",
+  "why": "value wrong/dropped"
+ },
+ {
+  "i": 45,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "new squares should be small from now on",
+  "cause": "ASK",
+  "why": "read right; confidence under the threshold"
+ },
+ {
+  "i": 46,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "are Drum and Cymbal joined",
+  "cause": "ASK",
+  "why": "read right; confidence under the threshold"
+ },
+ {
+  "i": 47,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "disconnect Millet and Sorghum",
+  "cause": "ASK",
+  "why": "read right; confidence under the threshold"
+ },
+ {
+  "i": 48,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "step back, undo it",
+  "cause": "ASK",
+  "why": "read right; confidence under the threshold"
+ },
+ {
+  "i": 49,
+  "set": "llm_short",
+  "reader": "vss",
+  "text": "does this mind map loop",
+  "cause": "ASK",
+  "why": "read right; confidence under the threshold"
+ },
+ {
+  "i": 50,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "is there a navy circle",
+  "cause": "ASK",
+  "why": "read right; confidence under the threshold"
+ },
+ {
+  "i": 51,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "list the orange ones",
+  "cause": "ASK",
+  "why": "read right; confidence under the threshold"
+ },
+ {
+  "i": 52,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "any gray hexagons around?",
+  "cause": "ASK",
+  "why": "read right; confidence under the threshold"
+ },
+ {
+  "i": 53,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "remove the newest circle",
+  "cause": "ASK",
+  "why": "read right; confidence under the threshold"
+ },
+ {
+  "i": 54,
+  "set": "llm_short",
+  "reader": "sop",
+  "text": "arrange the circles in a row",
+  "cause": "ASK",
+  "why": "read right; confidence under the threshold"
+ },
+ {
+  "i": 55,
+  "set": "broad",
+  "reader": "vss",
+  "text": "erase the blue square",
+  "cause": "DATA",
+  "why": "trigger 'erase': 3 training spans, 1 in the worlds' data"
+ },
+ {
+  "i": 56,
+  "set": "broad",
+  "reader": "vss",
+  "text": "draw a purple square to the left of Start",
+  "cause": "ERR",
+  "why": "create read as 'check' (region phrase)"
+ },
+ {
+  "i": 57,
+  "set": "blind",
+  "reader": "vss",
+  "text": "Align all the circles vertically",
+  "cause": "ERR",
+  "why": "all circles filled with every name"
+ },
+ {
+  "i": 58,
+  "set": "blind",
+  "reader": "vss",
+  "text": "Detach Done from Check",
+  "cause": "DATA",
+  "why": "trigger 'detach': 2 training spans, none in the worlds' data"
+ },
+ {
+  "i": 59,
+  "set": "hand",
+  "reader": "vss",
+  "text": "Erase Done",
+  "cause": "DATA",
+  "why": "trigger 'erase': 3 training spans, 1 in the worlds' data"
+ },
+ {
+  "i": 60,
+  "set": "broad",
+  "reader": "vss",
+  "text": "Add a square named Log below Process and link Process to Log with a dashed arrow",
+  "cause": "ERR",
+  "why": "second request source wrong"
+ },
+ {
+  "i": 61,
+  "set": "blind",
+  "reader": "vss",
+  "text": "How large is Process?",
+  "cause": "ERR",
+  "why": "property read as fact"
+ },
+ {
+  "i": 62,
+  "set": "hand",
+  "reader": "vss",
+  "text": "Connect the circles in a chain",
+  "cause": "ERR",
+  "why": "all circles filled with every name"
+ },
+ {
+  "i": 63,
+  "set": "blind",
+  "reader": "vss",
+  "text": "Throw a big yellow star in the upper left corner",
+  "cause": "DATA",
+  "why": "'upper left corner': 'upper' occurs in 3 training spans (all 'top left' phrasing is covered)"
+ },
+ {
+  "i": 64,
+  "set": "broad",
+  "reader": "vss",
+  "text": "make the last circle green",
+  "cause": "ERR",
+  "why": "description attribute dropped (last)"
+ },
+ {
+  "i": 65,
+  "set": "broad",
+  "reader": "vss",
+  "text": "how many cricles are there?",
+  "cause": "DATA",
+  "why": "typo 'cricles' never seen (the demo's spell checker may fix it)"
+ },
+ {
+  "i": 66,
+  "set": "blind",
+  "reader": "vss",
+  "text": "Could you sketch me a tiny purple hexagon?",
+  "cause": "DATA",
+  "why": "'sketch me': 'sketch' occurs in 11 training spans, 3 in the worlds' data"
+ },
+ {
+  "i": 67,
+  "set": "broad",
+  "reader": "vss",
+  "text": "ok now get rid of Process",
+  "cause": "ERR",
+  "why": "cutter made no unit"
+ },
+ {
+  "i": 68,
+  "set": "broad",
+  "reader": "sop",
+  "text": "join Start and Done with a dotted line",
+  "cause": "ERR",
+  "why": "value wrong/dropped"
+ },
+ {
+  "i": 69,
+  "set": "broad",
+  "reader": "sop",
+  "text": "connect the red circle to Done",
+  "cause": "DATA",
+  "why": "a description as the source of connect: 4 of 3427 'from' fillers in the worlds' data are descriptions"
+ },
+ {
+  "i": 70,
+  "set": "broad",
+  "reader": "sop",
+  "text": "align all the squares horizontally",
+  "cause": "ERR",
+  "why": "description attribute wrong/dropped"
+ },
+ {
+  "i": 71,
+  "set": "broad",
+  "reader": "sop",
+  "text": "Draw a red circle named Hub and connect it to Start",
+  "cause": "ERR",
+  "why": "value wrong/dropped"
+ },
+ {
+  "i": 72,
+  "set": "hand",
+  "reader": "sop",
+  "text": "Remove the triangles that are not green",
+  "cause": "DATA",
+  "why": "delete + 'not <colour>': 4 training spans in all"
+ },
+ {
+  "i": 73,
+  "set": "broad",
+  "reader": "sop",
+  "text": "delete the stars that are not yellow",
+  "cause": "DATA",
+  "why": "delete + 'not <colour>': 4 training spans in all"
+ },
+ {
+  "i": 74,
+  "set": "blind",
+  "reader": "sop",
+  "text": "Throw a big yellow star in the upper left corner",
+  "cause": "DATA",
+  "why": "'upper left corner': 'upper' occurs in 3 training spans"
+ },
+ {
+  "i": 75,
+  "set": "broad",
+  "reader": "sop",
+  "text": "make Strat yelow",
+  "cause": "DATA",
+  "why": "typo 'Strat'/'yelow' never seen (the demo's spell checker may fix it)"
+ },
+ {
+  "i": 76,
+  "set": "blind",
+  "reader": "sop",
+  "text": "Wipe out the red ones",
+  "cause": "DATA",
+  "why": "'wipe out' as delete: 5 training spans, none in the worlds' data"
+ },
+ {
+  "i": 77,
+  "set": "blind",
+  "reader": "sop",
+  "text": "Join Process with Check using a dotted line",
+  "cause": "ERR",
+  "why": "value wrong/dropped"
+ },
+ {
+  "i": 78,
+  "set": "blind",
+  "reader": "sop",
+  "text": "Recolour all stars blue",
+  "cause": "ERR",
+  "why": "description attribute wrong/dropped"
+ },
+ {
+  "i": 79,
+  "set": "broad",
+  "reader": "sop",
+  "text": "what is Done?",
+  "cause": "ERR",
+  "why": "value wrong/dropped"
+ },
+ {
+  "i": 80,
+  "set": "help",
+  "reader": "vss",
+  "text": "Is there a red shape?",
+  "cause": "ERR",
+  "why": "value wrong/dropped"
+ },
+ {
+  "i": 81,
+  "set": "help",
+  "reader": "vss",
+  "text": "Distribute the shapes evenly",
+  "cause": "CONV",
+  "why": "no axis in the text: Rules default to horizontal; the training annotator chose per message"
+ },
+ {
+  "i": 82,
+  "set": "help",
+  "reader": "vss",
+  "text": "Give Process a red outline",
+  "cause": "DATA",
+  "why": "'outline': 0 training spans (key not in the training legend)"
+ },
+ {
+  "i": 83,
+  "set": "help",
+  "reader": "vss",
+  "text": "What does Process say?",
+  "cause": "DATA",
+  "why": "'what does X say': 'say' occurs in 5 question spans, none about a label"
+ },
+ {
+  "i": 84,
+  "set": "help",
+  "reader": "vss",
+  "text": "Done is connected to Start",
+  "cause": "DATA",
+  "why": "statement 'X is connected to Y' as a fact with 'linked': 0 training facts have it (training facts are colours/sizes)"
+ },
+ {
+  "i": 85,
+  "set": "help",
+  "reader": "vss",
+  "text": "Group Start and Process as Intake",
+  "cause": "DATA",
+  "why": "groups: 14 training spans mention groups, 0 annotate a group action or group count"
+ },
+ {
+  "i": 86,
+  "set": "help",
+  "reader": "vss",
+  "text": "Draw a gold star named Gem with a black outline in the top right",
+  "cause": "DATA",
+  "why": "'outline': 0 training spans (key not in the training legend)"
+ },
+ {
+  "i": 87,
+  "set": "help",
+  "reader": "vss",
+  "text": "Connect Start and Check with a two-way arrow",
+  "cause": "CONV",
+  "why": "training writes 'connect A and B ...' as from=A,B (61 of 78 spans); Rules write from=A to=B"
+ },
+ {
+  "i": 88,
+  "set": "help",
+  "reader": "vss",
+  "text": "How many groups are there?",
+  "cause": "DATA",
+  "why": "groups: 14 training spans mention groups, 0 annotate a group action or group count"
+ },
+ {
+  "i": 89,
+  "set": "help",
+  "reader": "vss",
+  "text": "Draw a circle named Hub at 400, 250",
+  "cause": "DATA",
+  "why": "'at x, y' coordinates: 0 training spans"
+ },
+ {
+  "i": 90,
+  "set": "help",
+  "reader": "sop",
+  "text": "Group Start and Process as Intake",
+  "cause": "DATA",
+  "why": "groups: 14 training spans mention groups, 0 annotate a group action or group count"
+ },
+ {
+  "i": 91,
+  "set": "help",
+  "reader": "sop",
+  "text": "What does Process say?",
+  "cause": "DATA",
+  "why": "'what does X say': 'say' occurs in 5 question spans, none about a label"
+ },
+ {
+  "i": 92,
+  "set": "help",
+  "reader": "sop",
+  "text": "Arrange everything in a grid",
+  "cause": "CONV",
+  "why": "'everything'/'the shapes' as a target: training leaves the target empty (0 of 60 'arrange ... everything' spans write all); Rules write mention(all)"
+ },
+ {
+  "i": 93,
+  "set": "help",
+  "reader": "sop",
+  "text": "Give Process a red outline",
+  "cause": "DATA",
+  "why": "'outline': 0 training spans (key not in the training legend)"
+ },
+ {
+  "i": 94,
+  "set": "help",
+  "reader": "sop",
+  "text": "Arrange everything in a circle",
+  "cause": "CONV",
+  "why": "'everything'/'the shapes' as a target: training leaves the target empty (0 of 60 'arrange ... everything' spans write all); Rules write mention(all)"
+ },
+ {
+  "i": 95,
+  "set": "help",
+  "reader": "sop",
+  "text": "Is the green circle below Check?",
+  "cause": "ERR",
+  "why": "description attribute wrong/dropped"
+ },
+ {
+  "i": 96,
+  "set": "help",
+  "reader": "sop",
+  "text": "Done is connected to Start",
+  "cause": "DATA",
+  "why": "statement 'X is connected to Y' as a fact with 'linked': 0 training facts have it (training facts are colours/sizes)"
+ },
+ {
+  "i": 97,
+  "set": "help",
+  "reader": "sop",
+  "text": "Distribute the shapes evenly",
+  "cause": "CONV",
+  "why": "'everything'/'the shapes' as a target: training leaves the target empty (0 of 60 'arrange ... everything' spans write all); Rules write mention(all)"
+ },
+ {
+  "i": 98,
+  "set": "help",
+  "reader": "sop",
+  "text": "Remove all connections",
+  "cause": "DATA",
+  "why": "'remove all connections': 0 disconnect spans with all/every/connections"
+ },
+ {
+  "i": 99,
+  "set": "help",
+  "reader": "sop",
+  "text": "How many groups are there?",
+  "cause": "DATA",
+  "why": "groups: 14 training spans mention groups, 0 annotate a group action or group count"
+ }
+]

@@ -1,0 +1,15 @@
+role fillers that are descriptions (mention(...)) in the 17 training folders (31746 requests):
+  set              target    231 of  5499 = 4.2%
+  connect          from        7 of  4709 = 0.1%
+  connect          to         22 of  3211 = 0.7%
+  move             target     52 of  4134 = 1.3%
+  move             anchor      4 of  2006 = 0.2%
+  create           anchor      0 of  1160 = 0.0%
+  delete           target    109 of   348 = 31.3%
+  resize           target     23 of   447 = 5.1%
+  question:check   target      7 of  1443 = 0.5%
+  arrange          target     48 of   571 = 8.4%
+  align            target     35 of   332 = 10.5%
+all four roles, all actions: 702 of 34587 = 2.0%
+short folders 219 of 2657 = 8.2%
+other folders 483 of 31930 = 1.5%
