@@ -24,13 +24,20 @@ function one(v, byId) {
 // align (:628 the first target is the base), toFront/toBack and move (sequential), the size comparison (:705 A bigger than B),
 // neighbors/degree (one shape). A command with position=between (move, create, duplicate) is symmetric only inside one grid cell
 // (logic.js:261 inCell(anchors[0])): not listed.
+//   questions with two relations (check, count, list, exists): { pairs: position/anchor <-> position2/anchor2 }  "is X below A and above B"
+//                       = "is X above B and below A": logic.js LOGIC_MAP position / position2 add literals to one conjunction, filterShapes
+//                       applies both filters. Not listed for commands (create / move / fact): when the two cannot both hold, the engine
+//                       keeps the first (placeMulti), so their order is read.
 // An entry: `swap` [k1,k2] = the two keys exchange values (both hold one name, or any number when `any`), so the smaller string comes
 // first; `list` k with `n` = the value of key k, when it holds exactly n names, is sorted. `when(args)` narrows the entry.
 const ORDER_FREE = {
   "command:disconnect": [{ swap: ["from", "to"], any: true }, { list: "target", n: 2 }],
   "question:connected": [{ swap: ["target", "anchor"] }, { list: "target", n: 2 }],
   "command:swap": [{ list: "target", n: 2 }],
-  "question:check": [{ list: "anchor", n: 2, when: (a) => a.position === "between" && a.comparison == null }]
+  "question:check": [{ list: "anchor", n: 2, when: (a) => a.position === "between" && a.comparison == null }, { pairs: [["position", "anchor"], ["position2", "anchor2"]] }],
+  "question:count": [{ pairs: [["position", "anchor"], ["position2", "anchor2"]] }],
+  "question:list": [{ pairs: [["position", "anchor"], ["position2", "anchor2"]] }],
+  "question:exists": [{ pairs: [["position", "anchor"], ["position2", "anchor2"]] }]
 };
 /** split "a,b" at commas outside parentheses (a mention is written "mention(k=v,k=v)") */
 const parts = (s) => { const out = []; let d = 0, cur = ""; for (const ch of String(s)) { if (ch === "(") d++; if (ch === ")") d--; if (ch === "," && d === 0) { out.push(cur); cur = ""; } else cur += ch; } out.push(cur); return out; };
@@ -39,6 +46,11 @@ function finish(type, el) {
   const act = el.action ? el.action.join(",") : el.ask ? el.ask.join(",") : "", flat = () => Object.fromEntries(Object.entries(el).map(([k, v]) => [k, v.join(",")]));
   for (const r of ORDER_FREE[`${type}:${act}`] || []) {
     if (r.when && !r.when(flat())) continue;
+    if (r.pairs) {   // two (key, key) pairs exchange values: the pair whose joined values sort first comes first
+      const [[p1, a1], [p2, a2]] = r.pairs, j = (p, a) => (el[p] || []).join(",") + "|" + (el[a] || []).join(",");
+      if (el[p1] && el[p2] && j(p1, a1) > j(p2, a2)) { const x = [el[p1], el[a1]]; el[p1] = el[p2]; el[a1] = el[a2]; el[p2] = x[0]; el[a2] = x[1]; for (const k of [a1, a2]) if (el[k] === undefined) delete el[k]; }
+      continue;
+    }
     if (r.swap) { const [k1, k2] = r.swap, x = el[k1], y = el[k2]; if (x && y && (r.any || (x.length === 1 && y.length === 1)) && x.join(",") > y.join(",")) { el[k1] = y; el[k2] = x; } }
     else if (el[r.list] && el[r.list].length === r.n) el[r.list] = el[r.list].slice().sort();
   }

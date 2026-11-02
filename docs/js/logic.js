@@ -63,7 +63,7 @@ function fmtScalar(v) {
   return /^[A-Za-z_][\w.+-]*$/.test(v) ? v : JSON.stringify(v);
 }
 const fmtValue = v => Array.isArray(v) ? v.map(fmtScalar).join(',') : fmtScalar(v);
-const KEY_ORDER = ['action', 'ask', 'quantifier', 'count', 'shape', 'kind', 'property', 'superlative', 'comparison', 'size', 'scale', 'color', 'outline', 'name', 'label', 'target', 'from', 'to', 'style', 'arrow', 'position', 'anchor', 'at', 'direction', 'distance', 'axis', 'layout', 'linked'];
+const KEY_ORDER = ['action', 'ask', 'quantifier', 'count', 'shape', 'kind', 'property', 'superlative', 'comparison', 'size', 'scale', 'color', 'outline', 'name', 'label', 'target', 'from', 'to', 'style', 'arrow', 'position', 'anchor', 'position2', 'anchor2', 'region', 'members', 'at', 'direction', 'distance', 'axis', 'layout', 'linked'];
 function serialize(n) {
   const keys = Object.keys(n.args).filter(k => { const v = n.args[k]; return v != null && !(Array.isArray(v) && !v.length); });
   keys.sort((a, b) => (KEY_ORDER.indexOf(a) + 1 || 99) - (KEY_ORDER.indexOf(b) + 1 || 99));
@@ -203,6 +203,7 @@ const SIZE_PX = { tiny: 30, small: 44, medium: 62, large: 88, huge: 118 };
 const COLOR_HEX = { red: '#E5484D', orange: '#F0803C', yellow: '#F2C94C', gold: '#D4A017', lime: '#9CCB3B', green: '#3E9B57', teal: '#159E93', cyan: '#3BB4D0', blue: '#3A6BDC', navy: '#22346B', indigo: '#4F46C8', purple: '#8B4FC4', magenta: '#C23FA6', pink: '#EC7FAE', brown: '#8B5A3C', gray: '#8C929B', black: '#24282E', white: '#F7F8F9' };
 const sizeName = px => Object.entries(SIZE_PX).reduce((b, [k, v]) => Math.abs(v - px) < Math.abs(SIZE_PX[b] - px) ? k : b, 'medium');
 function dims(s) {
+  if (s.box) return { w: s.box.w, h: s.box.h };   /* a group used as an anchor: the box around its members */
   const k = s.size;
   if (s.shape === 'rectangle') return { w: Math.round(k * 1.6), h: k };
   if (s.shape === 'ellipse') return { w: Math.round(k * 1.45), h: k };
@@ -210,7 +211,7 @@ function dims(s) {
 }
 
 class DiagramWorld {
-  constructor() { this.state = { shapes: [], edges: [], rules: [], seq: {}, edgeSeq: 0, ruleSeq: 0, order: 0, frame: { x: 0, y: 0 }, frames: [] }; this.undoStack = []; this.redoStack = []; this.listeners = []; }
+  constructor() { this.state = { shapes: [], edges: [], rules: [], seq: {}, edgeSeq: 0, ruleSeq: 0, order: 0, frame: { x: 0, y: 0 }, frames: [], groups: [] }; this.undoStack = []; this.redoStack = []; this.listeners = []; }
   snapshot() { return JSON.parse(JSON.stringify(this.state)); }
   restore(s) { this.state = JSON.parse(JSON.stringify(s)); }
   commit(before) { this.undoStack.push(before); if (this.undoStack.length > 100) this.undoStack.shift(); this.redoStack = []; }
@@ -225,15 +226,22 @@ class DiagramWorld {
     return S.frame;
   }
   find(name) { if (name == null) return null; const l = String(name).toLowerCase(); return this.state.shapes.find(s => s.name.toLowerCase() === l) || null; }
+  findGroup(name) { if (name == null) return null; const l = String(name).toLowerCase(); return (this.state.groups || []).find(g => g.name.toLowerCase() === l) || null; }
+  groupOf(shapeName) { return (this.state.groups || []).find(g => g.members.includes(shapeName)) || null; }
   nextName(shape) { let n; do { this.state.seq[shape] = (this.state.seq[shape] || 0) + 1; n = shape + this.state.seq[shape]; } while (this.find(n)); return n; }
   newEdge(from, to, o) { return Object.assign({ id: 'e' + (++this.state.edgeSeq), from, to, style: 'solid', arrow: 'forward', label: null, color: null }, o || {}); }
   apply(p) {
     const S = this.state;
     switch (p.op) {
       case 'add': S.shapes.push(Object.assign({}, p.shape, { order: ++S.order })); break;
-      case 'remove': S.shapes = S.shapes.filter(s => s.name !== p.name); break;
+      case 'remove': S.shapes = S.shapes.filter(s => s.name !== p.name); if (S.groups) S.groups = S.groups.map(g => Object.assign({}, g, { members: g.members.filter(m => m !== p.name) })).filter(g => g.members.length); break;
       case 'set': { const s = this.find(p.name); p.before = {}; for (const k of Object.keys(p.props)) p.before[k] = s[k]; Object.assign(s, p.props); break; }
-      case 'rename': { const s = this.find(p.from); s.name = p.to; for (const e of S.edges) { if (e.from === p.from) e.from = p.to; if (e.to === p.from) e.to = p.to; } break; }
+      case 'rename': { const s = this.find(p.from); s.name = p.to; for (const e of S.edges) { if (e.from === p.from) e.from = p.to; if (e.to === p.from) e.to = p.to; } for (const g of S.groups || []) g.members = g.members.map(m => m === p.from ? p.to : m); break; }
+      /* groups: a shape is in at most one group; `group` sets a group's members (taking them out of any other group, and dropping a group
+         left empty), `ungroup` removes the group and keeps its shapes, `renameGroup` renames it */
+      case 'group': { const m = p.group.members; S.groups = (S.groups || []).filter(g => g.name !== p.group.name).map(g => Object.assign({}, g, { members: g.members.filter(x => !m.includes(x)) })).filter(g => g.members.length).concat([{ name: p.group.name, members: m.slice() }]); break; }
+      case 'ungroup': p.group = (S.groups || []).find(g => g.name === p.name); S.groups = (S.groups || []).filter(g => g.name !== p.name); break;
+      case 'renameGroup': { const g = (S.groups || []).find(x => x.name === p.from); g.name = p.to; break; }
       case 'link': S.edges.push(p.edge); break;
       case 'unlink': p.edge = S.edges.find(e => e.id === p.id); S.edges = S.edges.filter(e => e.id !== p.id); break;
       case 'rule': S.rules.push(p.rule); break;
@@ -294,14 +302,90 @@ function relSpot0(W, w, h, pos, anchors, dist, ignore) {
 }
 function need(W, n) {
   const s = W.find(n);
+  if (!s && W.findGroup && W.findGroup(n)) { const g = W.findGroup(n); throw new SOPError(`${g.name} is a group (${listing(g.members)}), not a shape; name one of its shapes.`); }
   if (!s) { const all = W.state.shapes.map(x => x.name); throw new SOPError(`There is no shape named "${n}".` + (all.length ? ` Shapes on the canvas: ${all.join(', ')}.` : ' The canvas is empty.')); }
   return s;
 }
+/* ---------- groups: the box around the members; a group used as an anchor is that box ---------- */
+function groupBox(state, g) {
+  const ms = g.members.map(n => state.shapes.find(s => s.name === n)).filter(Boolean); if (!ms.length) return null;
+  const x1 = Math.min(...ms.map(s => s.x - dims(s).w / 2)), x2 = Math.max(...ms.map(s => s.x + dims(s).w / 2));
+  const y1 = Math.min(...ms.map(s => s.y - dims(s).h / 2)), y2 = Math.max(...ms.map(s => s.y + dims(s).h / 2));
+  return { x1, y1, x2, y2, x: (x1 + x2) / 2, y: (y1 + y2) / 2, w: x2 - x1, h: y2 - y1, members: ms };
+}
+function needAnchor(W, n) {
+  const s = W.find(n); if (s) return s;
+  const g = W.findGroup && W.findGroup(n), b = g && groupBox(W.state, g);
+  if (b) return { name: g.name, x: Math.round(b.x), y: Math.round(b.y), box: { w: Math.round(b.w), h: Math.round(b.h) }, shape: 'rectangle', group: g.members.slice() };
+  return need(W, n);
+}
+/** target names with every group name replaced by its members (in order, each once) */
+function expandGroups(W, ns) { const out = []; for (const n of ns) { const g = W.findGroup && !W.find(n) ? W.findGroup(n) : null; for (const m of g ? g.members : [n]) if (!out.includes(m)) out.push(m); } return out; }
+const targetsOf = (W, a, verb) => expandGroups(W, needTargets(a, verb));
+
+/* ---------- several constraints on one position: canvas region + up to two relations to shapes ----------
+   `position` (+`anchor`), `position2` (+`anchor2`) and `region`. A single position keeps the old placement (relSpot / spot); with more than
+   one constraint every candidate point of a grid over the drawing's cell is scored: first by how many constraints hold (the same tests the
+   questions use: relHolds, inSpot), ties broken in favour of the earlier ones (position, position2, region), then by the distance to the
+   point each constraint prefers; occupied points are skipped (the nearest free spot wins). Constraints that cannot hold are reported. */
+const REGION_RECT = { center: [267, 533, 0, 500], top: [0, 800, 0, 167], bottom: [0, 800, 333, 500], left: [0, 267, 0, 500], right: [533, 800, 0, 500], topLeft: [0, 267, 0, 167], topRight: [533, 800, 0, 167], bottomLeft: [0, 267, 333, 500], bottomRight: [533, 800, 333, 500] };
+const inSpot = (s, sp) => { const want = sp.replace(/([A-Z])/g, ' $1').toLowerCase().split(' '); const r = region(s); return r.includes(want[0]) && (want.length < 2 || r.includes(want[1])); };
+const isMulti = a => a.region != null || a.position2 != null;
+function constraintsOf(W, a) {
+  const cs = [], one = (key, pos, anc) => {
+    if (SPOTS[pos]) return { key, spot: pos };
+    const anchors = names(anc).map(n => needAnchor(W, n));
+    if (!anchors.length) throw new SOPError(`${key}=${pos} needs an anchor shape.`);
+    return { key, rel: pos, anchors };
+  };
+  if (a.position) cs.push(one('position', a.position, a.anchor));
+  if (a.position2) cs.push(one('position2', a.position2, a.anchor2));
+  if (a.region) { if (!SPOTS[a.region]) throw new SOPError(`region=${a.region} is not a place on the canvas.`); cs.push({ key: 'region', spot: a.region }); }
+  return cs;
+}
+const consText = c => c.spot ? `in the ${camelWords(c.spot)}` : `${POS_WORDS[c.rel]} ${c.rel === 'between' ? listing(c.anchors.map(x => x.name).slice(0, 2)) : listing(c.anchors.map(x => x.name))}`;
+const consHolds = (c, s) => c.spot ? inSpot(s, c.spot) : relHolds(s, c.rel, c.anchors) && !c.anchors.some(x => x.name === s.name || (x.group && x.group.includes(s.name)));
+function consCost(c, q, w, h) {
+  const d2 = (x, y) => (q.x - x) ** 2 + (q.y - y) ** 2;
+  if (c.spot) { const [x1, x2, y1, y2] = REGION_RECT[c.spot], X = q.x - FR.x, Y = q.y - FR.y; const dx = X < x1 ? x1 - X : X > x2 ? X - x2 : 0, dy = Y < y1 ? y1 - Y : Y > y2 ? Y - y2 : 0; const [sx, sy] = spot(c.spot); return dx * dx + dy * dy + 0.01 * d2(sx, sy); }
+  const a = c.anchors[0], ad = dims(a), gap = 56;
+  switch (c.rel) {
+    case 'leftOf': return d2(a.x - ad.w / 2 - gap - w / 2, a.y);
+    case 'rightOf': return d2(a.x + ad.w / 2 + gap + w / 2, a.y);
+    case 'above': return d2(a.x, a.y - ad.h / 2 - gap - 16 - h / 2);
+    case 'below': return d2(a.x, a.y + ad.h / 2 + gap + 16 + h / 2);
+    case 'between': { const b = c.anchors[1] || a; return d2((a.x + b.x) / 2, (a.y + b.y) / 2); }
+    default: return (Math.sqrt(d2(a.x, a.y)) - (Math.max(ad.w, ad.h) / 2 + gap + Math.max(w, h) / 2)) ** 2;   // near
+  }
+}
+function placeMulti(W, a, w, h, ignore) {
+  const cs = constraintsOf(W, a);
+  if (cs.some(c => c.anchors && c.anchors.some(x => ignore.includes(x.name)))) throw new SOPError(`A shape can't be placed relative to itself.`);
+  const first = cs.find(c => c.anchors);
+  const solve = () => {
+    const x1 = FR.x + w / 2 + 10, x2 = FR.x + CANVAS.W - w / 2 - 10, y1 = FR.y + h / 2 + 24, y2 = FR.y + CANVAS.H - h / 2 - 10;
+    let best = null;
+    for (let y = y1; y <= y2 + 0.01; y += 8) for (let x = x1; x <= x2 + 0.01; x += 8) {
+      const q = { x: Math.round(x), y: Math.round(y) };
+      if (hits(W, boxAt(q.x, q.y, w, h), ignore)) continue;
+      const sat = cs.map(c => consHolds(c, q)), score = sat.reduce((t, ok, i) => t + (ok ? 100 + cs.length - i : 0), 0);
+      const cost = cs.reduce((t, c) => t + consCost(c, q, w, h), 0);
+      if (!best || score > best.score || (score === best.score && cost < best.cost)) best = { q, score, cost, sat };
+    }
+    if (!best) { const p = nearFree(W, FR.x + 400, FR.y + 250, w, h, ignore); return Object.assign(p, { unmet: cs.filter(c => !consHolds(c, p)).map(consText) }); }
+    return Object.assign(best.q, { unmet: cs.filter((c, i) => !best.sat[i]).map(consText) });
+  };
+  return first ? inCell(first.anchors[0].x, first.anchors[0].y, solve) : solve();
+}
+/** the answer a command gives when some constraints of its position could not hold */
+const unmetText = (name, p) => p && p.unmet && p.unmet.length ? `I couldn't also put ${name} ${listing(p.unmet)}: no free spot satisfies every constraint, so I placed it where most of them hold.` : null;
+
 function placeFor(W, a, w, h, ignore) {
   if (a.at) { const [x, y] = [].concat(a.at).map(Number); return clampPt(x + FR.x, y + FR.y, w, h); }
+  if (isMulti(a)) return placeMulti(W, a, w, h, ignore);
   if (a.position) {
     if (SPOTS[a.position]) return nearFree(W, ...spot(a.position), w, h, ignore);
-    const anchors = names(a.anchor).map(n => need(W, n));
+    const anchors = names(a.anchor).map(n => needAnchor(W, n));
     if (!anchors.length) throw new SOPError(`position=${a.position} needs an anchor shape.`);
     if (anchors.some(x => ignore.includes(x.name))) throw new SOPError(`A shape can't be placed relative to itself.`);
     return relSpot(W, w, h, a.position, anchors, a.distance, ignore);
@@ -336,8 +420,12 @@ function filterShapes(W, a, base) {
   if (a.size) list = list.filter(s => sizeName(s.size) === a.size);
   if (a.outline) list = list.filter(s => (s.outline || 'none') === a.outline);
   if (a.notColor) list = list.filter(s => s.color !== a.notColor);
-  if (a.position && a.anchor && !SPOTS[a.position]) { const anc = names(a.anchor).map(n => need(W, n)); list = list.filter(s => !anc.some(x => x.name === s.name) && relHolds(s, a.position, anc)); }
-  if (a.position && SPOTS[a.position]) { const want = a.position.replace(/([A-Z])/g, ' $1').toLowerCase(); list = list.filter(s => region(s).includes(want.split(' ')[0]) && (want.split(' ').length < 2 || region(s).includes(want.split(' ')[1]))); }
+  const relFilter = (pos, ancNames) => { const anc = names(ancNames).map(n => needAnchor(W, n)); list = list.filter(s => !anc.some(x => x.name === s.name || (x.group && x.group.includes(s.name))) && relHolds(s, pos, anc)); };
+  if (a.position && a.anchor && !SPOTS[a.position]) relFilter(a.position, a.anchor);
+  if (a.position && SPOTS[a.position]) list = list.filter(s => inSpot(s, a.position));
+  if (a.position2 && a.anchor2 && !SPOTS[a.position2]) relFilter(a.position2, a.anchor2);
+  if (a.position2 && SPOTS[a.position2]) list = list.filter(s => inSpot(s, a.position2));
+  if (a.region && SPOTS[a.region]) list = list.filter(s => inSpot(s, a.region));
   if (a.linked) { const ln = names(a.linked).map(n => need(W, n).name); list = list.filter(s => !ln.includes(s.name) && ln.every(l => adjacent(W, s.name, l))); }
   return list;
 }
@@ -348,7 +436,9 @@ function phraseOf(a, n) {
   if (a.notColor) p += ` that ${n === 1 ? 'is' : 'are'} not ${a.notColor}`;
   if (a.position && a.anchor && POS_WORDS[a.position]) p += ` ${POS_WORDS[a.position]} ${listing(names(a.anchor))}`;
   if (a.linked) p += ` connected to ${listing(names(a.linked))}`;
+  if (a.position2 && a.anchor2 && POS_WORDS[a.position2]) p += ` and ${POS_WORDS[a.position2]} ${listing(names(a.anchor2))}`;
   if (a.position && SPOTS[a.position]) p += ` in the ${a.position.replace(/([A-Z])/g, ' $1').toLowerCase()}`;
+  if (a.region && SPOTS[a.region]) p += ` in the ${camelWords(a.region)}`;
   return p;
 }
 
@@ -453,6 +543,34 @@ const historyPlugin = {
 
 function needTargets(a, verb) { const t = names(a.target); if (!t.length) throw new SOPError(`Which shape should I ${verb}? Name it, e.g. "${verb} circle1".`); return t; }
 
+/* a group moves as one unit: its box is placed like one shape (the same placement rules), every member shifts by the same amount */
+function moveGroup(W, g, a, ctx) {
+  const b = groupBox(W.state, g); if (!b) throw new SOPError(`The group ${g.name} is empty.`);
+  const bw = Math.round(b.w), bh = Math.round(b.h); let p, answer = null;
+  if (a.direction) { const dist = a.distance != null ? +a.distance : 80; const v = { left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] }[a.direction]; p = inCell(b.x, b.y, () => clampPt(b.x + v[0] * dist, b.y + v[1] * dist, bw, bh)); }
+  else if (a.at || a.position || a.region) { p = placeFor(W, a, bw, bh, g.members); answer = unmetText(g.name, p); }
+  else throw new SOPError(`Where should ${g.name} go? Try "move ${g.name} below …" or "move ${g.name} left by 50".`);
+  const dx = Math.round(p.x - b.x), dy = Math.round(p.y - b.y);
+  for (const s of b.members) ctx.emit({ op: 'set', name: s.name, props: { x: s.x + dx, y: s.y + dy } });
+  return answer;
+}
+function freeGroupName(W, base) { let k = 1, n = base; while (W.find(n) || W.findGroup(n)) n = base.replace(/\d+$/, '') + (++k); return n; }
+/* a group is copied as one block: its shapes keep their layout, the links among them are copied too, and the copies form a new group */
+function dupGroup(W, g, a, ctx, i, after) {
+  const b = groupBox(W.state, g), ab = groupBox(W.state, after) || b; if (!b) throw new SOPError(`The group ${g.name} is empty.`);
+  const bw = Math.round(b.w), bh = Math.round(b.h);
+  const p = (a.position || a.region) && i === 0 ? placeFor(W, a, bw, bh, []) : relSpot(W, bw, bh, 'rightOf', [{ name: after.name, x: ab.x, y: ab.y, box: { w: Math.round(ab.w), h: Math.round(ab.h) } }], 40, []);
+  const dx = Math.round(p.x - b.x), dy = Math.round(p.y - b.y), map = new Map(), made = [];
+  for (const s of b.members) {
+    const name = W.nextName(s.shape); map.set(s.name, name); made.push(name);
+    ctx.emit({ op: 'add', shape: { name, shape: s.shape, size: s.size, color: a.color || s.color, outline: s.outline, label: s.label, x: s.x + dx, y: s.y + dy } });
+  }
+  for (const e of W.state.edges.filter(e => map.has(e.from) && map.has(e.to))) ctx.emit({ op: 'link', edge: W.newEdge(map.get(e.from), map.get(e.to), { style: e.style, arrow: e.arrow, label: e.label, color: e.color }) });
+  const gname = a.name != null && i === 0 && !W.find(String(a.name)) && !W.findGroup(String(a.name)) ? String(a.name) : freeGroupName(W, g.name + '2');
+  ctx.emit({ op: 'group', group: { name: gname, members: made } });
+  return { made, group: W.findGroup(gname) };
+}
+
 const shapesPlugin = {
   name: 'shapes', title: 'Shapes',
   description: 'Create, delete, move, restyle, rename, label, duplicate and swap shapes.',
@@ -479,24 +597,26 @@ const shapesPlugin = {
       const rp = ctx.engine.plugin('rules');
       if (rp && rp.enabled) for (const r of W.state.rules) { if (r.shape && r.shape !== shape) continue; for (const k of ['color', 'size', 'outline']) if (props[k] == null && r[k] != null) { props[k] = r[k]; notes.push(`rule ${r.id} filled in ${k}=${r[k]}`); } }
       const n = Math.max(1, Math.min(12, Math.round(+a.count || 1)));
-      const made = []; let prev = null;
+      const made = []; let prev = null, answer;
       for (let i = 0; i < n; i++) {
         const name = a.name != null ? String(a.name) + (i > 0 ? String(i + 1) : '') : W.nextName(shape);
         if (!/^[A-Za-z_][\w-]*$/.test(name)) throw new SOPError(`"${name}" can't be a name: use letters, digits, - or _ and start with a letter.`);
         if (W.find(name)) throw new SOPError(`There is already a shape named "${W.find(name).name}".`);
+        if (W.findGroup(name)) throw new SOPError(`"${W.findGroup(name).name}" is already the name of a group.`);
         const size = SIZE_PX[props.size || 'medium'], d = dims({ shape, size });
         let p;
         if (i > 0) { const chain = a.position === 'leftOf' ? 'leftOf' : a.position === 'above' ? 'above' : a.position === 'below' && !a.anchor ? 'rightOf' : 'rightOf'; p = relSpot(W, d.w, d.h, a.position === 'below' || a.position === 'above' ? 'rightOf' : chain, [prev], null, []); }
-        else p = placeFor(W, a, d.w, d.h, []);
+        else { p = placeFor(W, a, d.w, d.h, []); const u = unmetText(name, p); if (u) answer = u; }
         ctx.emit({ op: 'add', shape: { name, shape, size, color: props.color || 'white', outline: props.outline && props.outline !== 'none' ? props.outline : null, label: a.label != null ? String(a.label) : null, x: p.x, y: p.y } });
         made.push(name); prev = W.find(name);
         for (const l of names(a.linked)) { const t = need(W, l); ctx.emit({ op: 'link', edge: W.newEdge(t.name, name) }); }
       }
-      return { value: made, notes };
+      return { value: made, notes, answer };
     } },
     { type: 'command', when: { action: 'delete' }, run(a, ctx) {
-      const W = ctx.world;
-      for (const n of needTargets(a, 'delete')) {
+      const W = ctx.world, t = needTargets(a, 'delete'), all = expandGroups(W, t);
+      for (const n of t) { const g = !W.find(n) && W.findGroup(n); if (g) ctx.emit({ op: 'ungroup', name: g.name }); }   // a group goes with its shapes
+      for (const n of all) {
         const s = need(W, n);
         for (const e of W.state.edges.filter(e => e.from === s.name || e.to === s.name)) ctx.emit({ op: 'unlink', id: e.id });
         ctx.emit({ op: 'remove', name: s.name });
@@ -504,18 +624,20 @@ const shapesPlugin = {
       return { value: [] };
     } },
     { type: 'command', when: { action: 'move' }, run(a, ctx) {
-      const W = ctx.world, t = needTargets(a, 'move'); let prev = null;
+      const W = ctx.world, t = needTargets(a, 'move'); let prev = null, answer;
       for (const n of t) {
+        const g = !W.find(n) && W.findGroup(n);
+        if (g) { const r = moveGroup(W, g, a, ctx); if (r) answer = r; prev = null; continue; }   // a group moves as one unit
         const s = need(W, n), d = dims(s); let p;
         if (a.direction) { const dist = a.distance != null ? +a.distance : 80; const v = { left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] }[a.direction]; p = inCell(s.x, s.y, () => clampPt(s.x + v[0] * dist, s.y + v[1] * dist, d.w, d.h)); }
-        else if (a.at || a.position) p = prev && !a.at ? relSpot(W, d.w, d.h, 'rightOf', [prev], null, [s.name]) : placeFor(W, a, d.w, d.h, [s.name]);
+        else if (a.at || a.position || a.region) { p = prev && !a.at ? relSpot(W, d.w, d.h, 'rightOf', [prev], null, [s.name]) : placeFor(W, a, d.w, d.h, [s.name]); const u = unmetText(s.name, p); if (u) answer = u; }
         else throw new SOPError(`Where should ${s.name} go? Try "move ${s.name} below …" or "move ${s.name} left by 50".`);
         ctx.emit({ op: 'set', name: s.name, props: { x: p.x, y: p.y } }); prev = W.find(s.name);
       }
-      return { value: t };
+      return { value: t, answer };
     } },
     { type: 'command', when: { action: ['set', 'resize'] }, run(a, ctx) {
-      const W = ctx.world, t = needTargets(a, 'change'), base = {};
+      const W = ctx.world, t = targetsOf(W, a, 'change'), base = {};
       for (const k of ['color', 'shape', 'label']) if (a[k] != null && !(k === 'shape' && a[k] === 'any')) base[k] = String(a[k]);
       if (a.outline != null) base.outline = a.outline === 'none' ? null : a.outline;
       if (a.size) base.size = SIZE_PX[a.size];
@@ -533,20 +655,30 @@ const shapesPlugin = {
     { type: 'command', when: { action: 'rename' }, run(a, ctx) {
       const W = ctx.world, t = needTargets(a, 'rename');
       if (a.name == null) throw new SOPError(`What should ${t[0]} be called? Try "rename ${t[0]} to Start".`);
+      const g = !W.find(t[0]) && W.findGroup(t[0]);
+      if (g) {   // renaming a group
+        const nn = String(a.name);
+        if (!/^[A-Za-z_][\w-]*$/.test(nn)) throw new SOPError(`"${nn}" can't be a name: use letters, digits, - or _ and start with a letter.`);
+        if (W.find(nn) || (W.findGroup(nn) && W.findGroup(nn) !== g)) throw new SOPError(`"${nn}" is already taken.`);
+        const was = g.name; ctx.emit({ op: 'renameGroup', from: was, to: nn }); return { value: [nn], answer: `Renamed the group ${was} to ${nn}.` };
+      }
       const s = need(W, t[0]), nn = String(a.name);
       if (!/^[A-Za-z_][\w-]*$/.test(nn)) throw new SOPError(`"${nn}" can't be a name: use letters, digits, - or _ and start with a letter.`);
       const other = W.find(nn); if (other && other !== s) throw new SOPError(`"${other.name}" is already taken.`);
+      if (W.findGroup(nn)) throw new SOPError(`"${W.findGroup(nn).name}" is already the name of a group.`);
       ctx.emit({ op: 'rename', from: s.name, to: nn });
       return { value: [nn] };
     } },
     { type: 'command', when: { action: 'label' }, run(a, ctx) {
       const t = needTargets(a, 'label'); if (a.label == null) throw new SOPError('What should the label say? Put it in quotes, e.g. label A "Start".');
-      for (const n of t) ctx.emit({ op: 'set', name: need(ctx.world, n).name, props: { label: String(a.label) } });
+      for (const n of expandGroups(ctx.world, t)) ctx.emit({ op: 'set', name: need(ctx.world, n).name, props: { label: String(a.label) } });
       return { value: t };
     } },
     { type: 'command', when: { action: 'duplicate' }, run(a, ctx) {
       const W = ctx.world, made = [], k = Math.max(1, Math.min(12, Math.round(+a.count || 1)));
       for (const n of needTargets(a, 'duplicate')) {
+        const g = !W.find(n) && W.findGroup(n);
+        if (g) { let last = g; for (let i = 0; i < k; i++) { const r = dupGroup(W, g, a, ctx, i, last); made.push(...r.made); last = r.group; } continue; }   // a group is copied as one block
         const s = need(W, n); let prev = s;
         for (let i = 0; i < k; i++) {
           const name = a.name != null ? String(a.name) + (made.length ? String(made.length + 1) : '') : W.nextName(s.shape);
@@ -563,6 +695,72 @@ const shapesPlugin = {
       const [p, q] = t.map(n => need(ctx.world, n));
       const pp = { x: p.x, y: p.y }; ctx.emit({ op: 'set', name: p.name, props: { x: q.x, y: q.y } }); ctx.emit({ op: 'set', name: q.name, props: pp });
       return { value: t };
+    } }
+  ]
+};
+
+/* Groups: a named set of shapes that moves, copies, aligns, restacks and is deleted as one unit. A shape is in at most one group;
+   groups do not nest (grouping a group takes its shapes). */
+const groupsPlugin = {
+  name: 'groups', title: 'Groups',
+  description: 'Group shapes under a name and ungroup them; a group name then works as a target of move, delete, duplicate, align, distribute, arrange, set, resize, label and front/back, and as an anchor of positions.',
+  legend: {
+    action: { values: { group: ['group', 'put together', 'bundle'], ungroup: ['ungroup', 'split up', 'break up', 'dissolve'] } },
+    ask: { values: { members: ['what is in', 'what does … contain', 'members of'], groupOf: ['which group', 'what group', 'belongs to', 'part of'] } },
+    kind: { values: { group: ['groups'] } },
+    members: { ask: 'Which shapes does the group hold?', kind: 'names' }
+  },
+  handlers: [
+    { type: 'command', when: { action: 'group' }, run(a, ctx) {
+      const W = ctx.world, t = needTargets(a, 'group'), list = expandGroups(W, t).map(n => need(W, n).name);
+      if (list.length < 2) throw new SOPError('A group needs at least two shapes, e.g. "group Start, Process and Check as Pipeline".');
+      const old = a.name != null ? W.findGroup(String(a.name)) : null;
+      const name = a.name != null ? String(a.name) : freeGroupName(W, 'group1');
+      if (!/^[A-Za-z_][\w-]*$/.test(name)) throw new SOPError(`"${name}" can't be a name: use letters, digits, - or _ and start with a letter.`);
+      if (W.find(name)) throw new SOPError(`"${W.find(name).name}" is a shape; a group needs a name of its own.`);
+      const was = list.map(n => W.groupOf(n)).filter(g => g && g.name !== name).map(g => g.name);
+      ctx.emit({ op: 'group', group: { name: old ? old.name : name, members: list } });
+      const notes = [...new Set(was)].map(g => `the shapes left ${g} (a shape is in one group at a time)`);
+      return { value: [old ? old.name : name], notes, answer: `Grouped ${listing(list)} as ${old ? old.name : name}.` };
+    } },
+    { type: 'command', when: { action: 'ungroup' }, run(a, ctx) {
+      const W = ctx.world, t = needTargets(a, 'ungroup'), said = [];
+      for (const n of t) {
+        const g = W.findGroup(n);
+        if (g && !W.find(n)) { ctx.emit({ op: 'ungroup', name: g.name }); said.push(`${g.name} is ungrouped: ${listing(g.members)} are separate shapes again.`); continue; }
+        const s = need(W, n), h = W.groupOf(s.name);
+        if (!h) { said.push(`${s.name} is not in a group.`); continue; }
+        const rest = h.members.filter(m => m !== s.name);   // a shape taken out of its group; a group left with one shape is dissolved
+        ctx.emit(rest.length >= 2 ? { op: 'group', group: { name: h.name, members: rest } } : { op: 'ungroup', name: h.name });
+        said.push(rest.length >= 2 ? `${s.name} is out of ${h.name}.` : `${s.name} is out of ${h.name}, which is dissolved.`);
+      }
+      return { value: t, answer: said.join(' ') };
+    } },
+    { type: 'question', when: { ask: 'members' }, run(a, ctx) {
+      const W = ctx.world, G = W.state.groups || [], t = names(a.target);
+      if (!t.length) return { value: G.map(g => g.name), answer: G.length ? G.map(g => `${g.name} holds ${listing(g.members)}`).join('; ') + '.' : 'There are no groups.', highlight: { shapes: G.flatMap(g => g.members) } };
+      const parts = [], hl = [];
+      for (const n of t) {
+        const g = !W.find(n) && W.findGroup(n);
+        if (g) { parts.push(`${g.name} holds ${listing(g.members)}`); hl.push(...g.members); continue; }
+        const s = need(W, n), h = W.groupOf(s.name); parts.push(`${s.name} is a shape, not a group${h ? `; it is in ${h.name}` : ''}`); hl.push(s.name);
+      }
+      return { value: hl, answer: parts.join('; ') + '.', highlight: { shapes: hl } };
+    } },
+    { type: 'question', when: { ask: 'groupOf' }, run(a, ctx) {
+      const W = ctx.world, parts = [], val = [];
+      for (const n of needTargets(a, 'look up')) {
+        if (!W.find(n) && W.findGroup(n)) { parts.push(`${W.findGroup(n).name} is itself a group`); continue; }
+        const s = need(W, n), g = W.groupOf(s.name); val.push(g ? g.name : null);
+        parts.push(g ? `${s.name} is in ${g.name} (with ${listing(g.members.filter(m => m !== s.name))})` : `${s.name} is not in any group`);
+      }
+      return { value: val, answer: parts.join('; ') + '.', highlight: { shapes: needTargets(a, 'look up').filter(n => W.find(n)) } };
+    } },
+    { type: 'question', when: { ask: ['list', 'count', 'exists'], kind: 'group' }, run(a, ctx) {
+      const G = ctx.world.state.groups || [], n = G.length;
+      if (a.ask === 'count') return { value: n, answer: `There ${n === 1 ? 'is 1 group' : 'are ' + n + ' groups'}.` };
+      if (a.ask === 'exists') return { value: n > 0, answer: n ? `Yes: ${listing(G.map(g => g.name))}.` : 'No, there are no groups.' };
+      return { value: G.map(g => g.name), answer: n ? `${n} group${n === 1 ? '' : 's'}: ${G.map(g => `${g.name} (${listing(g.members)})`).join('; ')}.` : 'There are no groups.', highlight: { shapes: G.flatMap(g => g.members) } };
     } }
   ]
 };
@@ -627,7 +825,7 @@ const layoutPlugin = {
   },
   handlers: [
     { type: 'command', when: { action: 'distribute' }, run(a, ctx) {
-      const W = ctx.world, t = names(a.target), list = (t.length ? t.map(n => need(W, n)) : W.state.shapes.slice());
+      const W = ctx.world, t = expandGroups(W, names(a.target)), list = (t.length ? t.map(n => need(W, n)) : W.state.shapes.slice());
       if (list.length < 3) throw new SOPError('Spacing evenly needs at least three shapes.');
       const horiz = a.axis !== 'vertical', key = horiz ? 'x' : 'y', sorted = list.slice().sort((p, q) => p[key] - q[key]);
       const lo = sorted[0][key], hi = sorted[sorted.length - 1][key], step = (hi - lo) / (sorted.length - 1);
@@ -635,12 +833,12 @@ const layoutPlugin = {
       return { value: sorted.map(s => s.name), notes: [`spaced ${horiz ? 'horizontally' : 'vertically'}, ${Math.round(step)} px apart`] };
     } },
     { type: 'command', when: { action: ['toFront', 'toBack'] }, run(a, ctx) {
-      const W = ctx.world, t = needTargets(a, a.action === 'toFront' ? 'bring to the front' : 'send to the back');
+      const W = ctx.world, t = targetsOf(W, a, a.action === 'toFront' ? 'bring to the front' : 'send to the back');
       for (const n of t) ctx.emit({ op: 'reorder', name: need(W, n).name, to: a.action === 'toFront' ? 'front' : 'back' });
       return { value: t };
     } },
     { type: 'command', when: { action: 'align' }, run(a, ctx) {
-      const W = ctx.world, list = needTargets(a, 'align').map(n => need(W, n));
+      const W = ctx.world, list = targetsOf(W, a, 'align').map(n => need(W, n));
       if (list.length < 2) throw new SOPError('Align needs at least two shapes.');
       const horiz = a.axis !== 'vertical', base = list[0];
       const sorted = list.slice().sort((p, q) => horiz ? p.x - q.x : p.y - q.y); let edge = null;
@@ -653,7 +851,7 @@ const layoutPlugin = {
       return { value: list.map(s => s.name) };
     } },
     { type: 'command', when: { action: 'arrange' }, run(a, ctx) {
-      const W = ctx.world; const t = names(a.target);
+      const W = ctx.world; const t = expandGroups(W, names(a.target));
       const list = (t.length ? t.map(n => need(W, n)) : W.state.shapes.slice()).sort((p, q) => p.order - q.order);
       if (!list.length) throw new SOPError('There is nothing to arrange.');
       const n = list.length, lay = a.layout || (a.axis === 'vertical' ? 'column' : a.axis === 'horizontal' ? 'row' : 'grid');
@@ -718,11 +916,12 @@ const queriesPlugin = {
       if (a.shape && a.shape !== 'any') checks.push([s.shape === a.shape, `${s.name} is a ${s.shape}`]);
       if (a.size) checks.push([sizeName(s.size) === a.size, `${s.name} is ${sizeName(s.size)}`]);
       if (a.outline) checks.push([(s.outline || 'none') === a.outline, s.outline ? `${s.name} has a ${s.outline} outline` : `${s.name} has no outline`]);
-      if (a.position && a.anchor) { const anc = names(a.anchor).map(n => need(W, n)); const ok = relHolds(s, a.position, anc); checks.push([ok, `${s.name} is ${ok ? '' : 'not '}${POS_WORDS[a.position]} ${listing(anc.map(x => x.name))}`]); }
+      for (const [pk, ak] of [['position', 'anchor'], ['position2', 'anchor2']]) if (a[pk] && a[ak] && !SPOTS[a[pk]]) { const anc = names(a[ak]).map(n => needAnchor(W, n)); const ok = relHolds(s, a[pk], anc); checks.push([ok, `${s.name} is ${ok ? '' : 'not '}${POS_WORDS[a[pk]]} ${listing(anc.map(x => x.name))}`]); }
+      for (const sp of [a.position, a.position2, a.region]) if (sp && SPOTS[sp]) { const ok = inSpot(s, sp); checks.push([ok, `${s.name} is ${ok ? '' : 'not '}in the ${camelWords(sp)}`]); }
       if (a.comparison && a.anchor) { const o = need(W, names(a.anchor)[0]), A = dims(s).w * dims(s).h, B = dims(o).w * dims(o).h; const ok = a.comparison === 'bigger' ? A > B : A < B; checks.push([ok, `${s.name} covers ${A} px² and ${o.name} covers ${B} px²`]); }
       if (!checks.length) return { value: true, answer: describeShape(s) + '.', highlight: { shapes: [s.name] } };
       const ok = checks.every(c => c[0]);
-      return { value: ok, answer: `${ok ? 'Yes' : 'No'}: ${checks.map(c => c[1]).join('; ')}.`, highlight: { shapes: [s.name].concat(names(a.anchor)) } };
+      return { value: ok, answer: `${ok ? 'Yes' : 'No'}: ${checks.map(c => c[1]).join('; ')}.`, highlight: { shapes: [s.name].concat(names(a.anchor), names(a.anchor2)) } };
     } },
     { type: 'question', when: { ask: 'describe' }, run(a, ctx) {
       const W = ctx.world, t = names(a.target);
@@ -779,6 +978,7 @@ const queriesPlugin = {
 /* ---------- generic logic reasoner: world → facts, question wire → Datalog query ---------- */
 const SPOT_NAMES = ['center', 'top', 'bottom', 'left', 'right', 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'];
 const REL_NAMES = ['leftOf', 'rightOf', 'above', 'below', 'near'];
+const posLits = (v, anc) => SPOT_NAMES.includes(v) ? [['inspot', '?X', v]] : v === 'between' ? names(anc).length >= 2 ? [['between', '?X', names(anc)[0], names(anc)[1]]] : null : names(anc).map(n => ['rel', v, '?X', n]);
 /* How each legend question constrains the subject ?X. Adding a question = adding a line here. */
 const LOGIC_MAP = {
   shape: v => v === 'any' ? null : [['shape', '?X', v]],
@@ -787,7 +987,9 @@ const LOGIC_MAP = {
   outline: v => [['outline', '?X', v]],
   notColor: v => [['othercolor', '?X', v]],
   label: v => [['label', '?X', String(v)]],
-  position: (v, a) => SPOT_NAMES.includes(v) ? [['inspot', '?X', v]] : v === 'between' ? names(a.anchor).length >= 2 ? [['between', '?X', names(a.anchor)[0], names(a.anchor)[1]]] : null : names(a.anchor).map(n => ['rel', v, '?X', n]),
+  position: (v, a) => posLits(v, a.anchor),
+  position2: (v, a) => posLits(v, a.anchor2),
+  region: v => SPOT_NAMES.includes(v) ? [['inspot', '?X', v]] : null,
   linked: v => names(v).map(n => ['adjacent', '?X', n])
 };
 function worldFacts(W) {
@@ -800,6 +1002,11 @@ function worldFacts(W) {
   for (const sp of SPOT_NAMES) for (const s of filterShapes(W, { position: sp }, null)) f.push(['inspot', s.name, sp]);
   for (const a of S.shapes) for (const b of S.shapes) if (a !== b) {
     if (K_SAME_CELL(a, b)) for (const r of REL_NAMES) if (relHolds(a, r, [b])) f.push(['rel', r, a.name, b.name]);
+  }
+  for (const g of S.groups || []) {   // a group as an anchor: the box around its members (its own members are not related to it)
+    const b = needAnchor(W, g.name);
+    for (const a of S.shapes) if (!g.members.includes(a.name) && K_SAME_CELL(a, b)) for (const r of REL_NAMES) if (relHolds(a, r, [b])) f.push(['rel', r, a.name, g.name]);
+    for (const m of g.members) f.push(['member', m, g.name]);
   }
   for (const e of S.edges) {
     f.push(['link', e.from, e.to]);
@@ -816,12 +1023,12 @@ const LOGIC_RULES = [
 ];
 function betweenFacts(W, body) {
   const out = [];
-  for (const lit of body) if (lit[0] === 'between') { const a = need(W, lit[2]), b = need(W, lit[3]); for (const s of W.state.shapes) if (s !== a && s !== b && relHolds(s, 'between', [a, b])) out.push(['between', s.name, a.name, b.name]); }
+  for (const lit of body) if (lit[0] === 'between') { const a = needAnchor(W, lit[2]), b = needAnchor(W, lit[3]); for (const s of W.state.shapes) if (s.name !== a.name && s.name !== b.name && relHolds(s, 'between', [a, b])) out.push(['between', s.name, a.name, b.name]); }
   return out;
 }
 function conditions(a, skip) {
   const body = [];
-  for (const [k, fn] of Object.entries(LOGIC_MAP)) { if (a[k] == null || (skip || []).includes(k)) continue; if (k === 'position' && !SPOT_NAMES.includes(a.position) && a.anchor == null) continue; const lits = fn(a[k], a); if (lits) body.push(...lits); }
+  for (const [k, fn] of Object.entries(LOGIC_MAP)) { if (a[k] == null || (skip || []).includes(k)) continue; if (k === 'position' && !SPOT_NAMES.includes(a.position) && a.anchor == null) continue; if (k === 'position2' && !SPOT_NAMES.includes(a.position2) && a.anchor2 == null) continue; const lits = fn(a[k], a); if (lits) body.push(...lits); }
   return body;
 }
 function logicProgram(W, body, query) {
@@ -841,7 +1048,7 @@ const logicPlugin = {
   handlers: [
     { type: 'question', when: { ask: ['count', 'list', 'exists'] }, run(a, ctx) {
       const W = ctx.world;
-      if (a.kind === 'edge' || a.target != null) return ctx.engine.fallback('question', a, ctx, this);
+      if ((a.kind && a.kind !== 'shape') || a.target != null) return ctx.engine.fallback('question', a, ctx, this);
       const body = [['shape', '?X', '?K']].concat(conditions(a));
       const { db, text } = logicProgram(W, body);
       const xs = [...new Set(db.all(body).map(b => b['?X']))], n = xs.length;
@@ -875,7 +1082,7 @@ const logicPlugin = {
         if (p === 'label') return ok ? `${s.name} says “${l[2]}”` : `${s.name} ${s.label ? 'says “' + s.label + '”' : 'has no label'}`;
         return lit(l) + (ok ? ' holds' : ' does not hold');
       };
-      return { value: ok, answer: `${ok ? 'Yes' : 'No'}: ${each.map(say).join('; ')}.`, lowering: text(qtext(bound)) + `\n% ${ok ? 'true' : 'false'}`, highlight: { shapes: [t.name].concat(names(a.anchor), names(a.linked)) } };
+      return { value: ok, answer: `${ok ? 'Yes' : 'No'}: ${each.map(say).join('; ')}.`, lowering: text(qtext(bound)) + `\n% ${ok ? 'true' : 'false'}`, highlight: { shapes: [t.name].concat(names(a.anchor), names(a.anchor2), names(a.linked)) } };
     } },
     { type: 'question', when: { ask: ['neighbors', 'connected'] }, run(a, ctx) {
       const W = ctx.world, t = need(W, needTargets(a, 'inspect')[0]);
@@ -969,7 +1176,7 @@ const factsPlugin = {
   description: 'Statements like "A is above B" are treated as constraints: already true means no change; otherwise the world is adjusted until they hold.',
   handlers: [{
     type: 'fact', run(a, ctx) {
-      const W = ctx.world, notes = [];
+      const W = ctx.world, notes = []; let answer;
       for (const n of needTargets(a, 'describe')) {
         const s = need(W, n), p = {};
         if (a.color && s.color !== a.color) p.color = a.color;
@@ -977,8 +1184,12 @@ const factsPlugin = {
         if (a.size && sizeName(s.size) !== a.size) p.size = SIZE_PX[a.size];
         if (a.outline && (s.outline || 'none') !== a.outline) p.outline = a.outline === 'none' ? null : a.outline;
         if (a.label != null && s.label !== String(a.label)) p.label = String(a.label);
-        if (a.position && a.anchor) {
-          const anc = names(a.anchor).map(x => need(W, x));
+        if (isMulti(a)) {   // several constraints: already true, or placed where they hold
+          const cs = constraintsOf(W, a);
+          if (cs.every(c => consHolds(c, s))) notes.push(`${s.name} is already ${listing(cs.map(consText))}`);
+          else { const d = dims(Object.assign({}, s, p)), q = placeMulti(W, a, d.w, d.h, [s.name]); p.x = q.x; p.y = q.y; if (q.unmet.length) answer = unmetText(s.name, q); }
+        } else if (a.position && a.anchor) {
+          const anc = names(a.anchor).map(x => needAnchor(W, x));
           if (relHolds(s, a.position, anc)) notes.push(`${s.name} is already ${POS_WORDS[a.position]} ${listing(anc.map(x => x.name))}`);
           else { const d = dims(Object.assign({}, s, p)); Object.assign(p, relSpot(W, d.w, d.h, a.position, anc, null, [s.name])); }
         } else if (a.position && SPOTS[a.position]) { const d = dims(s); Object.assign(p, nearFree(W, ...spot(a.position), d.w, d.h, [s.name])); }
@@ -986,7 +1197,7 @@ const factsPlugin = {
         else if (!a.linked && !notes.length) notes.push('already true, nothing to change');
         for (const l of names(a.linked)) { const t = need(W, l); if (adjacent(W, s.name, t.name)) notes.push(`${s.name} and ${t.name} are already connected`); else ctx.emit({ op: 'link', edge: W.newEdge(s.name, t.name, { arrow: 'none' }) }); }
       }
-      return { value: names(a.target), notes };
+      return { value: names(a.target), notes, answer };
     }
   }]
 };
@@ -1038,7 +1249,11 @@ function makeFormalizer(engine) {
     const VERB_RE = new RegExp(`\\b(${alt(verbCues)})\\b`, 'i');
 
     const F = { nodes: [], notes: [], s: 0, m: 0, segments: [] };
-    const nameIndex = new Map((ctx.names || []).map(n => [n.toLowerCase(), n]));
+    // group names are names too (ctx.groups, or the groups of this formalizer's own world)
+    const groupNames = (ctx.groups || (engine.world && engine.world.state.groups || []).map(g => g.name)).map(String);
+    const groupSet = new Set(groupNames.map(g => g.toLowerCase()));
+    const nameIndex = new Map((ctx.names || []).concat(groupNames).map(n => [n.toLowerCase(), n]));
+    const groupAltRe = groupNames.slice().sort((a, b) => b.length - a.length).map(esc).join('|');
     let lastRef = null, lastGroup = null;
     if (ctx.last && ctx.last.length) { lastGroup = ctx.last.slice(); lastRef = ctx.last.length === 1 ? ctx.last[0] : null; }
 
@@ -1052,6 +1267,7 @@ function makeFormalizer(engine) {
       for (const n of nameIndex.values()) if (typeof n === 'string') addT(n, n);
       const nameList = [...nameIndex.values()].filter(n => typeof n === 'string');
       const introduced = new Set((input.match(/\b(?:named|called|name\s+it|rename\s+\S+\s+(?:to|as|into))\s+([A-Za-z_][\w-]*)/gi) || []).map(m => m.split(/\s+/).pop().toLowerCase()));
+      if (/\b(?:group|together|bundle)\b/i.test(input)) for (const m of input.match(/\b(?:as|into)\s+([A-Za-z_][\w-]*)/gi) || []) introduced.add(m.split(/\s+/).pop().toLowerCase());   /* "group A and B as Pipeline" */
       const fixWord = w => {
         if (/^[A-Z]/.test(w) && !nameList.length) return null;
         if (introduced.has(w.toLowerCase()) || (/^[A-Z0-9]+$/.test(w) && w.length <= 4)) return null;
@@ -1173,7 +1389,8 @@ function makeFormalizer(engine) {
           const rawAfter = t.slice(vm.index + vm[0].length), rawNext = (rawAfter.trim().match(/^[A-Za-z0-9_]+/) || [''])[0];
           const nameNotArticle = rawNext === 'A' && isKnown('A') && !ARTICLE_AHEAD.test(rawAfter.trim().slice(1));
           if (['make', 'put', 'place'].includes(verb)) {
-            if (/\b(copies|copy|duplicates?|clones?)\b/i.test(after)) action = 'duplicate';
+            if (verb === 'put' && /\btogether\b/i.test(after)) action = 'group';   /* "put Start and Process together (as Pipeline)" */
+            else if (/\b(copies|copy|duplicates?|clones?)\b/i.test(after)) action = 'duplicate';
             else if (articleNext && !nameNotArticle) action = 'create';
             else if (verb === 'make') action = /\b(bigger|larger|smaller|twice|double|half|times)\b/i.test(after) ? 'resize' : 'set';
             else action = 'move';
@@ -1183,16 +1400,26 @@ function makeFormalizer(engine) {
           if (action === 'delete' && new RegExp(`\\b(?:${EDGE_WORDS})\\b`, 'i').test(t)) action = 'disconnect';
           if (action === 'delete' && /\b(clear|wipe|reset)\b/i.test(verb) && !/⟦/.test(t)) { /* clear the canvas */ }
           if (verb === 'give' && !/\b(border|outline|stroke|label|colou?r)\b/i.test(after)) action = 'set';
+          if (groupAltRe) {   /* membership of an existing group: "add Done to Pipeline" -> group; "take Done out of Pipeline" -> ungroup */
+            const into = new RegExp(`(?<!\\b(?:next|close|closer)\\s)\\b(?:to|into|in)\\s+(?:the\\s+)?(?:group\\s+)?(${groupAltRe})(?:\\s+group)?\\s*$`, 'i'), outOf = new RegExp(`\\b(?:from|out\\s+of)\\s+(?:the\\s+)?(?:group\\s+)?(${groupAltRe})(?:\\s+group)?\\s*$`, 'i');
+            if (['create', 'move', 'put', 'set'].includes(action) && !articleNext && into.test(t)) { action = 'group'; C.args.name = nameIndex.get(t.match(into)[1].toLowerCase()); }
+            else if (['delete', 'move', 'set'].includes(action) && outOf.test(t)) { action = 'ungroup'; C.t = C.t.replace(outOf, ' '); }
+          }
         } else if (/^\s*(?:a|an|another|\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s/i.test(t)) action = 'create';
         else if (CONNECT_ONLY && CONNECT_ONLY.test(t)) action = 'connect';   /* "Ingress to Pod1 and Pod2", "Syn goes to SynAck" */
         else if (PLACE_ONLY && PLACE_ONLY.test(t)) action = 'move';   /* "Kitchen at the left", "Pit just below the Stage": a placement */
         else if (/^\s*start over\b/i.test(t)) action = 'delete';
+        else if (/^\s*(?:split|break)\b.*\b(?:up|apart)\b/i.test(t)) action = 'ungroup';
+        else if (groupAltRe && new RegExp(`\\b(?:out\\s+of|from)\\s+(?:the\\s+)?(?:group\\s+)?(?:${groupAltRe})(?:\\s+group)?\\s*$`, 'i').test(t)) {   /* "take Y out of Pair" */
+          action = 'ungroup'; C.t = C.t.replace(new RegExp(`\\b(?:out\\s+of|from)\\s+(?:the\\s+)?(?:group\\s+)?(?:${groupAltRe})(?:\\s+group)?\\s*$`, 'i'), ' ');
+        }   /* "split Pipeline up", "break the group apart" */
         else { F.notes.push(`I couldn't find an action in "${raw.trim()}".`); F.segments.push({ src: raw.trim().replace(/⟪(\d+)⟫/g, (m, n) => '"' + quotes[+n] + '"').replace(/\s+/g, ' '), id: null }); return; }
       }
       const isCmd = kind === 'command';
 
       // ---- rename's new name, declared names, labels ----
       if (action === 'rename') take(/\b(?:to|as|into)\s+(⟪\d+⟫|[A-Za-z_][\w-]*)\s*$/i, m => C.args.name = unq(m[1]));
+      if (action === 'group') { take(/\btogether\b/i); if (C.args.name == null) take(/\b(?:as|into)\s+(?:(?:a|an|one|the|new|single)\s+)*(?:group\s+)?(?:(?:called|named)\s+)?(⟪\d+⟫|[A-Za-z_][\w-]*)/i, m => { if (!/^(?:group|one|a)$/i.test(m[1])) C.args.name = unq(m[1]); }); }
       take(/\b(?:named|called|with\s+the\s+name|name\s+it)\s+(⟪\d+⟫|[A-Za-z_][\w-]*)/i, m => C.args.name = unq(m[1]));
       take(/\b(?:labell?ed|label(?:\s+it)?|with\s+(?:the\s+|a\s+)?(?:text|label|caption|title|word)|saying|that\s+says|which\s+says|titled|reading|text)\s+(⟪\d+⟫)/i, m => C.args.label = unq(m[1]));
       if (C.args.label == null && ['create', 'connect', 'label', 'set'].includes(action)) take(/⟪(\d+)⟫/, m => C.args.label = quotes[+m[1]]);
@@ -1256,7 +1483,10 @@ function makeFormalizer(engine) {
       let ask = null;
       if (kind === 'question') {
         const T = C.t.toLowerCase(), nref = refsIn(T).length;
+        const groupRefs = refsIn(T).filter(i => typeof C.marks[i] === 'string' && groupSet.has(C.marks[i].toLowerCase()));
         if (/\b(rules?|defaults?)\b/.test(T)) ask = 'rules';
+        else if (nref && /\b(?:which|what)\s+groups?\b|\bbelongs?\s+to\b|\bpart\s+of\s+(?:a|any|which|what)\b|\bin\s+(?:a|any)\s+group\b|\bgroup\s+(?:is|does)\b/.test(T)) ask = 'groupOf';   /* "which group is Check in?" */
+        else if (groupRefs.length && (/\b(?:in|inside|of)\s+⟦\d+⟧(?:\s+group)?\s*$/.test(T) || /\bcontains?\b|\bmembers?\b|\bholds?\b/.test(T))) ask = 'members';   /* "what is in Pipeline?" */
         else if (/\b(cycles?|loops?|circular)\b/.test(T)) ask = 'cycle';
         else if (/\b(path|route|reach(?:able|es|ed)?|get\s+from|get\s+to|go\s+from|leads?\s+to|flows?\s+to|indirectly|downstream|comes?\s+after)\b/.test(T)) ask = nref >= 2 ? 'path' : 'reachable';
         else if (/\bhow\s+many\s+(?:connections|links|edges|arrows|neighbou?rs|lines)\b/.test(T) && nref === 1 && /\b(does|has|have|do)\b/.test(T)) ask = 'degree';
@@ -1278,6 +1508,7 @@ function makeFormalizer(engine) {
         else ask = 'describe';
         C.args.ask = ask;
         if (['count', 'list'].includes(ask) && new RegExp(`\\b(?:${EDGE_WORDS})\\b`).test(T) && !/\bconnected\b/.test(T)) C.args.kind = 'edge';
+        if (['count', 'list', 'exists'].includes(ask) && !nref && /\bgroups?\b/.test(T)) C.args.kind = 'group';   /* "what groups are there?" */
       }
 
       // ---- roles that use prepositions ----
@@ -1310,7 +1541,22 @@ function makeFormalizer(engine) {
             ['below', `\\b(?:below|under|underneath|beneath)\\s+${listOf}`],
             ['near', `\\b(?:next\\s+to|near|beside|close\\s+to|by|alongside|around)\\s+${listOf}`]
           ];
-          for (const [p, re] of POS) { const v = grab(new RegExp(re, 'i')); if (v != null) { C.args.position = p; C.args.anchor = v; break; } }
+          // a position may combine up to two relations ("below A but above B") and a canvas region ("top left, right of Y"): the first
+          // relation in the text is position/anchor, the second position2/anchor2, the region `region`
+          const grabAt = re => { let v = null, at = -1; take(re, m => { v = markVals(refsIn(m[0])); at = m.index; }); return [v, at]; };
+          let at1 = -1;
+          for (const [p, re] of POS) { const [v, at] = grabAt(new RegExp(re, 'i')); if (v != null) { C.args.position = p; C.args.anchor = v; at1 = at; break; } }
+          if (C.args.position) for (const [p, re] of POS) {
+            const [v, at] = grabAt(new RegExp(re, 'i')); if (v == null) continue;
+            if (at < at1) { C.args.position2 = C.args.position; C.args.anchor2 = C.args.anchor; C.args.position = p; C.args.anchor = v; }
+            else { C.args.position2 = p; C.args.anchor2 = v; }
+            break;
+          }
+          if (C.args.position) {   /* a canvas region besides a relation: "in the top left", "near the top", bare "top left" */
+            const PRE = '(?:in|at|to|into|on|near|towards?|close\\s+to|along)', RG = [['topLeft', `\\b(?:${PRE}\\s+)?(?:the\\s+)?(?:top|upper)[\\s-]+left(?:\\s+corner)?\\b`], ['topRight', `\\b(?:${PRE}\\s+)?(?:the\\s+)?(?:top|upper)[\\s-]+right(?:\\s+corner)?\\b`], ['bottomLeft', `\\b(?:${PRE}\\s+)?(?:the\\s+)?(?:bottom|lower)[\\s-]+left(?:\\s+corner)?\\b`], ['bottomRight', `\\b(?:${PRE}\\s+)?(?:the\\s+)?(?:bottom|lower)[\\s-]+right(?:\\s+corner)?\\b`],
+              ['center', `\\b(?:${PRE}\\s+)?the\\s+(?:center|centre|middle)(?:\\s+of\\s+the\\s+(?:canvas|page|screen|diagram))?\\b`], ['top', `\\b${PRE}\\s+the\\s+top(?:\\s+(?:edge|side|row|half|part))?\\b`], ['bottom', `\\b${PRE}\\s+the\\s+bottom(?:\\s+(?:edge|side|row|half|part))?\\b`], ['left', `\\b${PRE}\\s+the\\s+left(?:\\s+(?:edge|side|half|part))?\\b`], ['right', `\\b${PRE}\\s+the\\s+right(?:\\s+(?:edge|side|half|part))?\\b`]];
+            for (const [p, re] of RG) if (take(new RegExp(re, 'i'))) { C.args.region = p; break; }
+          }
           if (!C.args.position && !(action === 'move' && /\bby\s+\d|\b(?:up|down)\b|\bto\s+the\s+(?:left|right)\s*$/i.test(C.t))) {
             const SP = [['topLeft', /\b(?:in|at|to|into|on)?\s*the\s+(?:top|upper)[\s-]+left(?:\s+corner)?\b/i], ['topRight', /\b(?:in|at|to|into|on)?\s*the\s+(?:top|upper)[\s-]+right(?:\s+corner)?\b/i], ['bottomLeft', /\b(?:in|at|to|into|on)?\s*the\s+(?:bottom|lower)[\s-]+left(?:\s+corner)?\b/i], ['bottomRight', /\b(?:in|at|to|into|on)?\s*the\s+(?:bottom|lower)[\s-]+right(?:\s+corner)?\b/i], ['center', /\b(?:in|at|to|into)?\s*the\s+(?:center|centre|middle)(?:\s+of\s+the\s+(?:canvas|page|screen|diagram))?\b/i], ['top', /\b(?:at|to|on|along|in)\s+the\s+top(?:\s+(?:edge|side|row))?\b/i], ['bottom', /\b(?:at|to|on|along|in)\s+the\s+bottom(?:\s+(?:edge|side|row))?\b/i], ['left', /\b(?:at|on|along|in)\s+the\s+left(?:\s+(?:edge|side))?\b/i], ['right', /\b(?:at|on|along|in)\s+the\s+right(?:\s+(?:edge|side))?\b/i]];
             for (const [p, re] of SP) if (take(re)) { C.args.position = p; break; }
@@ -1403,10 +1649,21 @@ function learnedCues() {   /* docs/js/learned-cues.js, generated from the traini
   if (typeof module !== 'undefined' && typeof require === 'function') { try { return require('./learned-cues.js'); } catch (e) { return null; } }
   return null;
 }
+/** the world written back as SOP wires (shapes, edges, rules, groups): what a backend receives after lowering; the World view shows it */
+function worldNodes(state) {
+  const S = state, out = [];
+  for (const s of S.shapes) out.push({ id: s.name, type: 'shape', args: Object.assign({ shape: s.shape, size: sizeName(s.size), color: s.color }, s.outline ? { outline: s.outline } : {}, s.label ? { label: s.label } : {}, { at: [s.x, s.y] }) });
+  for (const e of S.edges) out.push({ id: e.id, type: 'edge', args: Object.assign({ from: ref(e.from), to: ref(e.to), style: e.style, arrow: e.arrow }, e.color ? { color: e.color } : {}, e.label ? { label: e.label } : {}) });
+  for (const r of S.rules) { const a = {}; ['shape', 'size', 'color', 'outline'].forEach(k => { if (r[k]) a[k] = r[k]; }); out.push({ id: r.id, type: 'rule', args: a }); }
+  for (const g of S.groups || []) out.push({ id: g.name, type: 'group', args: { members: g.members.map(ref) } });
+  return out;
+}
+const worldSOP = state => worldNodes(state).map(serialize).join('\n');
+
 function createSystem(opts = {}) {
   const world = new DiagramWorld();
   const engine = new Engine(world);
-  [corePlugin, historyPlugin, shapesPlugin, connectionsPlugin, layoutPlugin, queriesPlugin, reasoningPlugin, logicPlugin, rulesPlugin, factsPlugin].forEach(p => engine.use(Object.assign({}, p)));
+  [corePlugin, historyPlugin, shapesPlugin, groupsPlugin, connectionsPlugin, layoutPlugin, queriesPlugin, reasoningPlugin, logicPlugin, rulesPlugin, factsPlugin].forEach(p => engine.use(Object.assign({}, p)));
   engine.legend.define('core', 'action', { ask: 'What should happen?', kind: 'enum' });
   const LC = opts.learned === false ? null : learnedCues();
   if (LC) for (const [key, vals] of Object.entries(LC)) {   /* merged, never replacing the hand-written cues */
@@ -1416,7 +1673,7 @@ function createSystem(opts = {}) {
   return { world, engine, formalize: makeFormalizer(engine) };
 }
 
-return { createSystem, CELL, cellOf, parse, serialize, fmtValue, isRef, names, SOPError, Clarify, CANVAS, COLOR_HEX, SIZE_PX, dims, sizeName, region, edgeText };
+return { createSystem, CELL, cellOf, parse, serialize, fmtValue, isRef, names, SOPError, Clarify, CANVAS, COLOR_HEX, SIZE_PX, dims, sizeName, region, edgeText, groupBox, worldNodes, worldSOP };
 })();
 if (typeof module !== 'undefined') module.exports = SOPKit;
 /*LOGIC-END*/

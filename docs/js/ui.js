@@ -89,6 +89,17 @@ function drawEdge(g, e, a, b, offset) {
   if (e.label) { const t = el('text', { class: 'elbl', x: (x1 + x2) / 2 - uy * 12, y: (y1 + y2) / 2 + ux * 12, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, grp); t.textContent = e.label; }
 }
 
+/* a group: a light dashed frame around its members with its name, drawn behind them and recomputed from the members on every render */
+function drawGroups(g, S) {
+  for (const gr of S.groups || []) {
+    const b = K.groupBox(S, gr); if (!b) continue;
+    const pad = 12, x = b.x1 - pad, y = b.y1 - pad - 14, w = b.w + 2 * pad, h = b.h + 2 * pad + 14;
+    const grp = el('g', { class: 'grp', 'data-group': gr.name }, g);
+    el('rect', { x, y, width: w, height: h, rx: 12, style: 'fill: var(--accent); fill-opacity: .045; stroke: var(--faint); stroke-width: 1.25; stroke-dasharray: 6 5; pointer-events: none' }, grp);
+    const t = el('text', { x: x + 10, y: y - 6, style: 'font-family: var(--font); font-size: 12px; font-weight: 600; fill: var(--faint); pointer-events: none' }, grp);
+    t.textContent = gr.name;
+  }
+}
 function cellsInUse() {
   const S = world.state, cells = new Map(), add = c => cells.set(c.x + ',' + c.y, c);
   S.shapes.forEach(s => add(K.cellOf(s.x, s.y)));
@@ -124,7 +135,8 @@ function renderCanvas() {
     if (f && f.title) { const t = el('text', { class: 'ftitle', x: c.x + 14, y: c.y - 9 }, framesG); t.textContent = f.title; }
   }
   if (!S.shapes.length) { const f = S.frame || { x: 0, y: 0 }, t = el('text', { class: 'empty-note', x: f.x + 400, y: f.y + 250, 'text-anchor': 'middle' }, layer); t.textContent = 'Nothing here yet. Write what to draw.'; }
-  const eg = el('g', {}, layer), sg = el('g', {}, layer);
+  const gg = el('g', {}, layer), eg = el('g', {}, layer), sg = el('g', {}, layer);
+  drawGroups(gg, S);
   for (const e of S.edges) {
     const a = by.get(e.from), b = by.get(e.to); if (!a || !b) continue;
     drawEdge(eg, e, a, b, S.edges.some(o => o !== e && o.from === e.to && o.to === e.from) ? 6 : 0);
