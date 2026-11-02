@@ -1,7 +1,7 @@
 {
- "about": "Default composer (2026-11-02, COMBINED.md): CandidateRouter on 7 worlds (cutter_worlds7), shapes7c (CREATE_COLOR.md) and the event cutter's hint H1 (EVENT_HINT.md). Sample of 1000 messages: 74.9 / 13.1 / 12.0 right / wrong / not done, extra 302. Previous default (G16, 2a8dc20): 67.7 / 12.7 / 19.7, extra 166.",
+ "about": "Default composer (2026-11-02): CandidateRouter on 7 worlds (cutter_worlds7s: the cutter trained also on 3000 short one-request commands, SHORT.md), shapes7c (CREATE_COLOR.md) and the event hint H1 (EVENT_HINT.md). 1000-message sample: 75.5 / 13.1 / 11.3 right / wrong / not done, extra 336; the demo's short sets 60.5 / 12.4 / 27.1 (was 51.0 / 11.0 / 38.1).",
  "router": "cutter",
- "cutter": "micro/cutter_worlds7.json",
+ "cutter": "micro/cutter_worlds7s.json",
  "context": "context/weights.json",
  "fallback": "kinds_p80_s0",
  "worlds": [
