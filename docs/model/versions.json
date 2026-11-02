@@ -20,23 +20,16 @@
   "micro/questions7r2": "fdb504913f",
   "micro/shapes7c": "8b1d6877da",
   "micro/shapes7r2": "6e096cb1cc",
-  "neural/act-distilbert": "e6397614dc",
-  "neural/qa-distilbert-squad": "cd43816c4a",
+  "neural/sop-bert": "bad2c5dd68",
   "spell/vocab.json": "60454f7d47"
  },
  "sizes": {
-  "neural/act-distilbert": {
-   "README.md": 1182,
-   "config.json": 1909,
-   "tokenizer.json": 711648,
+  "neural/sop-bert": {
+   "README.md": 2612,
+   "config.json": 8576,
+   "tokenizer.json": 711551,
    "tokenizer_config.json": 1227,
-   "onnx/model_quantized.onnx": 67585955
-  },
-  "neural/qa-distilbert-squad": {
-   "config.json": 569,
-   "tokenizer.json": 668923,
-   "tokenizer_config.json": 321,
-   "onnx/model_quantized.onnx": 65811627
+   "onnx/model_quantized.onnx": 67769917
   }
  }
 }

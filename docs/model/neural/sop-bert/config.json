@@ -1,0 +1,632 @@
+{
+ "vocab_size": 30522,
+ "max_position_embeddings": 512,
+ "sinusoidal_pos_embds": false,
+ "n_layers": 6,
+ "n_heads": 12,
+ "dim": 768,
+ "hidden_dim": 3072,
+ "dropout": 0.1,
+ "attention_dropout": 0.1,
+ "activation": "gelu",
+ "initializer_range": 0.02,
+ "qa_dropout": 0.1,
+ "seq_classif_dropout": 0.2,
+ "return_dict": true,
+ "output_hidden_states": false,
+ "torchscript": false,
+ "dtype": "float32",
+ "pruned_heads": {},
+ "tie_word_embeddings": true,
+ "chunk_size_feed_forward": 0,
+ "is_encoder_decoder": false,
+ "is_decoder": false,
+ "cross_attention_hidden_size": null,
+ "add_cross_attention": false,
+ "tie_encoder_decoder": false,
+ "architectures": [
+  "DistilBertModel"
+ ],
+ "finetuning_task": null,
+ "task_specific_params": null,
+ "problem_type": null,
+ "tokenizer_class": null,
+ "prefix": null,
+ "bos_token_id": null,
+ "pad_token_id": 0,
+ "eos_token_id": null,
+ "sep_token_id": null,
+ "decoder_start_token_id": null,
+ "max_length": 20,
+ "min_length": 0,
+ "do_sample": false,
+ "early_stopping": false,
+ "num_beams": 1,
+ "temperature": 1.0,
+ "top_k": 50,
+ "top_p": 1.0,
+ "typical_p": 1.0,
+ "repetition_penalty": 1.0,
+ "length_penalty": 1.0,
+ "no_repeat_ngram_size": 0,
+ "encoder_no_repeat_ngram_size": 0,
+ "bad_words_ids": null,
+ "num_return_sequences": 1,
+ "output_scores": false,
+ "return_dict_in_generate": false,
+ "forced_bos_token_id": null,
+ "forced_eos_token_id": null,
+ "remove_invalid_values": false,
+ "exponential_decay_length_penalty": null,
+ "suppress_tokens": null,
+ "begin_suppress_tokens": null,
+ "num_beam_groups": 1,
+ "diversity_penalty": 0.0,
+ "_name_or_path": "distilbert-base-uncased",
+ "transformers_version": "4.57.6",
+ "model_type": "distilbert",
+ "tie_weights_": true,
+ "tf_legacy_loss": false,
+ "use_bfloat16": false,
+ "output_attentions": false,
+ "reader": {
+  "cut": {
+   "tags": [
+    "O",
+    "B",
+    "I"
+   ],
+   "max_length": 512
+  },
+  "acts": [
+   "create",
+   "delete",
+   "move",
+   "set",
+   "resize",
+   "rename",
+   "label",
+   "duplicate",
+   "swap",
+   "connect",
+   "disconnect",
+   "align",
+   "distribute",
+   "toFront",
+   "toBack",
+   "arrange",
+   "undo",
+   "redo",
+   "forget",
+   "count",
+   "list",
+   "exists",
+   "property",
+   "check",
+   "describe",
+   "neighbors",
+   "connected",
+   "degree",
+   "nearest",
+   "extreme",
+   "path",
+   "reachable",
+   "cycle",
+   "rules",
+   "fact",
+   "rule"
+  ],
+  "tags": [
+   "O",
+   "B-anchor",
+   "I-anchor",
+   "B-count",
+   "I-count",
+   "B-distance",
+   "I-distance",
+   "B-from",
+   "I-from",
+   "B-label",
+   "I-label",
+   "B-name",
+   "I-name",
+   "B-target",
+   "I-target",
+   "B-to",
+   "I-to"
+  ],
+  "span_keys": [
+   "anchor",
+   "count",
+   "distance",
+   "from",
+   "label",
+   "name",
+   "target",
+   "to"
+  ],
+  "ref_keys": [
+   "anchor",
+   "from",
+   "target",
+   "to"
+  ],
+  "desc_keys": [
+   "color",
+   "notColor",
+   "quantifier",
+   "recency",
+   "shape"
+  ],
+  "classes": [
+   [
+    "arrow",
+    [
+     "none",
+     "both",
+     "none"
+    ]
+   ],
+   [
+    "axis",
+    [
+     "none",
+     "horizontal",
+     "vertical"
+    ]
+   ],
+   [
+    "color",
+    [
+     "none",
+     "black",
+     "blue",
+     "brown",
+     "cyan",
+     "gold",
+     "gray",
+     "green",
+     "indigo",
+     "lime",
+     "magenta",
+     "navy",
+     "orange",
+     "pink",
+     "purple",
+     "red",
+     "teal",
+     "white",
+     "yellow"
+    ]
+   ],
+   [
+    "comparison",
+    [
+     "none",
+     "bigger",
+     "smaller"
+    ]
+   ],
+   [
+    "direction",
+    [
+     "none",
+     "down",
+     "left",
+     "right",
+     "up"
+    ]
+   ],
+   [
+    "kind",
+    [
+     "none",
+     "edge"
+    ]
+   ],
+   [
+    "layout",
+    [
+     "none",
+     "circle",
+     "column",
+     "grid",
+     "row"
+    ]
+   ],
+   [
+    "notColor",
+    [
+     "none",
+     "black",
+     "blue",
+     "brown",
+     "cyan",
+     "gold",
+     "gray",
+     "green",
+     "indigo",
+     "lime",
+     "magenta",
+     "navy",
+     "orange",
+     "pink",
+     "purple",
+     "red",
+     "teal",
+     "white",
+     "yellow"
+    ]
+   ],
+   [
+    "pairing",
+    [
+     "none",
+     "all",
+     "chain",
+     "next"
+    ]
+   ],
+   [
+    "position",
+    [
+     "none",
+     "above",
+     "below",
+     "between",
+     "bottom",
+     "bottomLeft",
+     "bottomRight",
+     "center",
+     "left",
+     "leftOf",
+     "near",
+     "right",
+     "rightOf",
+     "top",
+     "topLeft",
+     "topRight"
+    ]
+   ],
+   [
+    "property",
+    [
+     "none",
+     "color",
+     "label",
+     "position",
+     "shape",
+     "size"
+    ]
+   ],
+   [
+    "shape",
+    [
+     "none",
+     "circle",
+     "diamond",
+     "ellipse",
+     "hexagon",
+     "rectangle",
+     "square",
+     "star",
+     "triangle"
+    ]
+   ],
+   [
+    "size",
+    [
+     "none",
+     "huge",
+     "large",
+     "medium",
+     "small",
+     "tiny"
+    ]
+   ],
+   [
+    "style",
+    [
+     "none",
+     "dashed",
+     "dotted"
+    ]
+   ],
+   [
+    "superlative",
+    [
+     "none",
+     "biggest",
+     "bottommost",
+     "closest",
+     "farthest",
+     "leastConnected",
+     "leftmost",
+     "mostConnected",
+     "rightmost",
+     "smallest",
+     "topmost"
+    ]
+   ],
+   [
+    "fill:anchor",
+    [
+     "none",
+     "written",
+     "context",
+     "description"
+    ]
+   ],
+   [
+    "fill:from",
+    [
+     "none",
+     "written",
+     "context",
+     "description"
+    ]
+   ],
+   [
+    "fill:target",
+    [
+     "none",
+     "written",
+     "context",
+     "description"
+    ]
+   ],
+   [
+    "fill:to",
+    [
+     "none",
+     "written",
+     "context",
+     "description"
+    ]
+   ],
+   [
+    "desc:color",
+    [
+     "none",
+     "black",
+     "blue",
+     "cyan",
+     "gold",
+     "gray",
+     "green",
+     "lime",
+     "orange",
+     "pink",
+     "purple",
+     "red",
+     "teal",
+     "white",
+     "yellow"
+    ]
+   ],
+   [
+    "desc:notColor",
+    [
+     "none",
+     "black",
+     "blue",
+     "brown",
+     "cyan",
+     "gold",
+     "gray",
+     "green",
+     "lime",
+     "orange",
+     "pink",
+     "purple",
+     "red",
+     "teal",
+     "white",
+     "yellow"
+    ]
+   ],
+   [
+    "desc:quantifier",
+    [
+     "none",
+     "all"
+    ]
+   ],
+   [
+    "desc:recency",
+    [
+     "none",
+     "newest",
+     "oldest"
+    ]
+   ],
+   [
+    "desc:shape",
+    [
+     "none",
+     "circle",
+     "diamond",
+     "ellipse",
+     "hexagon",
+     "rectangle",
+     "square",
+     "star",
+     "triangle"
+    ]
+   ]
+  ],
+  "act_keys": {
+   "create": [
+    "anchor",
+    "color",
+    "count",
+    "label",
+    "name",
+    "position",
+    "shape",
+    "size"
+   ],
+   "delete": [
+    "target"
+   ],
+   "move": [
+    "anchor",
+    "direction",
+    "distance",
+    "position",
+    "target"
+   ],
+   "set": [
+    "color",
+    "shape",
+    "size",
+    "target"
+   ],
+   "resize": [
+    "target"
+   ],
+   "rename": [
+    "name",
+    "target"
+   ],
+   "label": [
+    "label",
+    "target"
+   ],
+   "duplicate": [
+    "count",
+    "target"
+   ],
+   "swap": [
+    "target"
+   ],
+   "connect": [
+    "arrow",
+    "color",
+    "from",
+    "label",
+    "pairing",
+    "style",
+    "to"
+   ],
+   "disconnect": [
+    "from",
+    "to"
+   ],
+   "align": [
+    "axis",
+    "target"
+   ],
+   "distribute": [
+    "axis",
+    "target"
+   ],
+   "toFront": [
+    "target"
+   ],
+   "toBack": [
+    "target"
+   ],
+   "arrange": [
+    "layout",
+    "target"
+   ],
+   "undo": [],
+   "redo": [],
+   "forget": [],
+   "count": [
+    "anchor",
+    "color",
+    "kind",
+    "notColor",
+    "position",
+    "shape"
+   ],
+   "list": [
+    "anchor",
+    "color",
+    "notColor",
+    "position",
+    "shape"
+   ],
+   "exists": [
+    "anchor",
+    "color",
+    "notColor",
+    "position",
+    "shape"
+   ],
+   "property": [
+    "property",
+    "target"
+   ],
+   "check": [
+    "anchor",
+    "color",
+    "comparison",
+    "notColor",
+    "position",
+    "shape",
+    "size",
+    "target"
+   ],
+   "describe": [
+    "target"
+   ],
+   "neighbors": [
+    "target"
+   ],
+   "connected": [
+    "anchor",
+    "target"
+   ],
+   "degree": [
+    "target"
+   ],
+   "nearest": [
+    "anchor",
+    "color",
+    "shape",
+    "superlative"
+   ],
+   "extreme": [
+    "superlative"
+   ],
+   "path": [
+    "from",
+    "to"
+   ],
+   "reachable": [
+    "from"
+   ],
+   "cycle": [],
+   "rules": [],
+   "fact": [
+    "anchor",
+    "color",
+    "position",
+    "shape",
+    "size",
+    "target"
+   ],
+   "rule": [
+    "color",
+    "shape",
+    "size"
+   ]
+  },
+  "number_words": {
+   "three": "3",
+   "two": "2",
+   "twice": "2",
+   "four": "4",
+   "five": "5",
+   "ten": "10",
+   "day": "100",
+   "six": "6",
+   "90px": "90"
+  },
+  "word_re": "[\\p{L}\\p{N}]+|[^\\s\\p{L}\\p{N}]",
+  "max_length": 128
+ }
+}
