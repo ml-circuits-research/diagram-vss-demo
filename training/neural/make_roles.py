@@ -222,12 +222,13 @@ def main():
     ap.add_argument("--sample-ids", default=os.path.join(HERE, "sample1000_ids.txt"))
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--none-rows", action="store_true", help="comparison only: also the act \"none\" (segments of the rules' segmenter outside every span); the model cuts by itself now")
+    ap.add_argument("--all", action="store_true", help="all data (ALL_DATA.md): no sample removed, no held-out (heldout.jsonl empty); eval_sample1000 is then a fit-on-train check")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     LEG = legend()
     ACTION, ASK = MD.acts_from_neural_js(); ACTS = ACTION + ASK + ["fact", "rule"] + (["none"] if a.none_rows else [])
     skipped = collections.Counter()
-    train_msgs, held, sample_msgs, missing = MD.split_messages(a.sample_ids, a.seed)
+    train_msgs, held, sample_msgs, missing = MD.split_messages(a.sample_ids, a.seed, a.all)
     pools = {"train": [m for m in train_msgs if m["id"] not in held], "heldout": [m for m in train_msgs if m["id"] in held], "eval_sample1000": sample_msgs}
     sets = {n: requests(ms, ACTS, skipped) for n, ms in pools.items()}
     nreq = {n: len(r) for n, r in sets.items()}
