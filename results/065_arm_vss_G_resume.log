@@ -1,0 +1,39 @@
+[20:26:31 +0s] arm VSS-G, EXTRA_DIRS=llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_gen_1 llm_train/opus_gen_2
+name, memory.total [MiB], memory.used [MiB]
+NVIDIA GeForce RTX 3050 Ti Laptop GPU, 4096 MiB, 1604 MiB
+               total        used        free      shared  buff/cache   available
+Mem:              15           8           2           0           5           6
+Swap:             15           0          15
+6 extra folders: ['llm_train/opus_train_a', 'llm_train/opus_train_b', 'llm_train/opus_train_c', 'llm_train/opus_train_d', 'llm_train/opus_gen_1', 'llm_train/opus_gen_2']
+6440 messages for the worlds (DATA=spans + EXTRA_DIRS)
+shapes7c	create,set,resize,fact,rule	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary CREATE_COLOR=role
+position7	move,swap,arrange,align,distribute,toFront,toBack	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary
+questions7	count,list,extreme,nearest,describe,neighbors,degree,property	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary
+links7	connect,disconnect	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary
+graphq7	check,connected,path,reachable,cycle,exists	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary
+manage7	delete,duplicate,rename,label	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary
+history7	undo,redo,forget	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary
+[20:26:31 +0s] event cutter: already trained
+[20:26:31 +0s] world cutter: already trained
+[20:28:35 +124s] retrying 2 failed world(s) alone, VSA_MEM_FRACTION=0.85
+[20:44:28 +1077s] worlds done (0 failed); cutters done
+[20:44:28 +1077s] context filler start
+  empty several: 429 · top-1 282 (65.7%) · NULL on top 69
+  pron several: 20 · top-1 0 (0.0%) · NULL on top 20
+  vague one: 112 · top-1 77 (68.8%) · NULL on top 28
+wrote /home/claude/vss-box/diagram-vss-demo/docs/model/arms/G/context/weights.json
+[20:49:12 +1361s] context filler done
+600 messages (fresh2)
+fresh2 vss: 600 messages, 1909 gold · right 62.4 · wrong 17.9 · not done 19.7 · extra 182 (checked against tally)
+[20:49:37 +1386s] collectors done
+[20:49:37 +1386s] report written: results/065_arm_vss_G_resume/report.md
+# FRESH2 report (test part), written by training/sketch/fresh2/fit_report.mjs
+
+Records: results/065_arm_vss_G_resume/records. Messages: 600 in the data dirs (opus_a, opus_b, opus_c, opus_d); calibration 195 messages / 596 requested actions; test 405 messages / 1313 requested actions.
+Split: int(sha256(id), 16) % 3 == 0 is calibration. Thresholds and confidences are fitted on the calibration part only. MINEXEC 50; bootstrap 1000 resamples of the test messages, seed 1.
+Definitions (per requested action, PAIR=value as llm_score.mjs): confidently wrong % = (executed wrong + executed extras) / everything executed; done right % = executed right / requested actions; asked % = right or wrong requests below the threshold / requested; not read % = requested actions with n
+
+## Cost score: one confident mistake costs 10 right answers (the main measure, AGENTS.md 2026-11-02 19:09)
+
+43M	docs/model/arms/G
+948K	results/065_arm_vss_G_resume

@@ -1,0 +1,35 @@
+[20:26:31 +0s] arm VSS-G, EXTRA_DIRS=llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_gen_1 llm_train/opus_gen_2
+name, memory.total [MiB], memory.used [MiB]
+NVIDIA GeForce RTX 3050 Ti Laptop GPU, 4096 MiB, 1604 MiB
+               total        used        free      shared  buff/cache   available
+Mem:              15           8           2           0           5           6
+Swap:             15           0          15
+6440 messages for the worlds (DATA=spans + EXTRA_DIRS)
+shapes7c	create,set,resize,fact,rule	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary CREATE_COLOR=role
+position7	move,swap,arrange,align,distribute,toFront,toBack	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary
+questions7	count,list,extreme,nearest,describe,neighbors,degree,property	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary
+links7	connect,disconnect	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary
+graphq7	check,connected,path,reachable,cycle,exists	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary
+manage7	delete,duplicate,rename,label	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary
+history7	undo,redo,forget	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary
+[20:26:31 +0s] event cutter: already trained
+[20:26:31 +0s] world cutter: already trained
+[20:27:46] start shapes7c_g
+[20:27:55] skip position7 (already trained)
+[20:27:55] skip questions7 (already trained)
+[20:27:55] start links7_g
+[20:28:29] FAILED shapes7c_g (exit 1, results/065_arm_vss_G_resume/train_shapes7c.log)
+[20:28:31] skip graphq7 (already trained)
+[20:28:31] skip manage7 (already trained)
+[20:28:34] skip history7 (already trained)
+[20:28:35] FAILED links7_g (exit 1, results/065_arm_vss_G_resume/train_links7.log)
+[20:28:35 +124s] retrying 2 failed world(s) alone, VSA_MEM_FRACTION=0.85
+[20:28:35] start shapes7c_g
+[20:35:34] done shapes7c_g in 419 s
+[20:35:34] start links7_g
+[20:44:28] done links7_g in 534 s
+[20:44:28 +1077s] worlds done (0 failed); cutters done
+[20:44:28 +1077s] context filler start
+[20:49:12 +1361s] context filler done
+[20:49:37 +1386s] collectors done
+[20:49:37 +1386s] report written: results/065_arm_vss_G_resume/report.md

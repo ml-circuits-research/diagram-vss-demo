@@ -1,58 +1,39 @@
 [splits] written to /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_shapes7c_g_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 358, heldout_formulations 331, train 7358
 [schema] roles ['object', 'shape', 'color', 'size', 'name', 'text', 'relation', 'landmark', 'landmark2', 'region', 'quantity', 'members'] (core []), max depth 0, event negation False
-[guard] cuda allocator capped at 35% of 4 GB; watchdog: exit if MemAvailable < 1.5 GB or after 4.0 h
+[guard] cuda allocator capped at 85% of 4 GB; watchdog: exit if MemAvailable < 1.5 GB or after 4.0 h
 [train] seed 0: 7358 training rows x 10 epoch(s) -> 73580 steps' sentences; D=1024; kinds 59; vocab 4195; predicate lemma not found in 11340 targets
-[train] phase table: 3689 of 10720 rows reached by the training sentences, held and trained; the other 7031 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.90 GB (peak 0.99 GB) | torch alloc 0.09 GB reserved 0.10 GB | MemAvailable 7.4 GB
-/home/claude/vss-box/diagram-vss-demo/training/vss/tool/sop/train.py:600: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+[train] phase table: 3689 of 10720 rows reached by the training sentences, held and trained; the other 7031 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.90 GB (peak 0.99 GB) | torch alloc 0.09 GB reserved 0.10 GB | MemAvailable 8.8 GB
+/home/claude/vss-box/diagram-vss-demo/training/vss/tool/sop/train.py:651: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
 Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
   print(f"[trace] target |S_world| = {np.linalg.norm(target(0)):.2f} (sqrt(D) per unit term = {np.sqrt(a.D):.1f}); initial gates all {float(torch.sigmoid(m.logits[0])):.2f} (closed start)")
 [trace] text: n_bird is yellow
 [trace] tokens/kinds: n_bird/NAME is/VERB yellow/COLOR
 [trace] gold frame: {"event": "fact", "lemma": "is", "neg": false, "roles": {"color": ["word", "yellow"], "object": ["entity", "n_bird", null, null]}, "scope": null, "shape": "ok", "speakers": []}
 [trace] target |S_world| = 55.85 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
-[train seed 0] start: RSS 1.01 GB (peak 1.01 GB) | torch alloc 0.09 GB reserved 0.10 GB | MemAvailable 7.4 GB
-Traceback (most recent call last):
-  File "<frozen runpy>", line 203, in _run_module_as_main
-  File "<frozen runpy>", line 88, in _run_code
-  File "/home/claude/vss-box/diagram-vss-demo/training/vss/tool/sop/__main__.py", line 3, in <module>
-    sys.exit(main())
-             ~~~~^^
-  File "/home/claude/vss-box/diagram-vss-demo/training/vss/tool/sop/cli.py", line 180, in main
-    from .train import main as tmain; return tmain(argv[1:])
-                                             ~~~~~^^^^^^^^^^
-  File "/home/claude/vss-box/diagram-vss-demo/training/vss/tool/sop/train.py", line 1210, in main
-    rd, ex = train_one(a, legend, rows, splits, schema, seed, build, a.run_dir)
-             ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/claude/vss-box/diagram-vss-demo/training/vss/tool/sop/train.py", line 614, in train_one
-    trainer.train_loop(tm, params, None, None, None, None, a.batch, a.lr, log_every=a.log_every, ckpt=None if a.no_ckpt else os.path.join(run_dir, f"ckpt_seed{seed}.pt"),
-    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                       resume=a.resume, tag=f" seed {seed}", batch_fn=batch_fn, n=len(sents), stop_after=getattr(a, 'stop_after', 0), loss_every_step=getattr(a, 'loss_every_step', False))
-                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/claude/vss-box/diagram-vss-demo/training/vss/experiment/trainer.py", line 52, in train_loop
-    loss = -cos.mean(); opt.zero_grad(set_to_none=True); loss.backward(); opt.step(); last = loss.item()     # .item(): no graph survives
-                                                         ~~~~~~~~~~~~~^^
-  File "/home/claude/vss-box/venv/lib/python3.13/site-packages/torch/_tensor.py", line 623, in backward
-    torch.autograd.backward(
-    ~~~~~~~~~~~~~~~~~~~~~~~^
-        self, gradient, retain_graph, create_graph, inputs=inputs
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-  File "/home/claude/vss-box/venv/lib/python3.13/site-packages/torch/autograd/__init__.py", line 395, in backward
-    _engine_run_backward(
-    ~~~~~~~~~~~~~~~~~~~~^
-        tensors,
-        ^^^^^^^^
-    ...<5 lines>...
-        accumulate_grad=True,
-        ^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-  File "/home/claude/vss-box/venv/lib/python3.13/site-packages/torch/autograd/graph.py", line 1113, in _engine_run_backward
-    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        t_outputs, *args, **kwargs
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )  # Calls into the C++ engine to run the backward pass
-    ^
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 146.00 MiB. GPU 0 has a total capacity of 3.73 GiB of which 1.66 GiB is free. Including non-PyTorch memory, this process has 1.32 GiB memory in use. Process 43219 has 696.00 MiB memory in use. 1.31 GiB allowed; Of the allocated memory 1.15 GiB is allocated by PyTorch, and 58.98 MiB is reserved by PyTorch but unallocated. expandable_segments is enabled. If instead the process is running out of virtual address space (VSZ), expandable segments may be over-reserving VA (each segment reserves ~9/8 of device memory, times the number of streams); reduce it via PYTORCH_CUDA_ALLOC_CONF expandable_segments_reserve / expandable_segments_reserve_by_class.
+[train seed 0] start: RSS 1.01 GB (peak 1.01 GB) | torch alloc 0.09 GB reserved 0.10 GB | MemAvailable 8.7 GB
+[train seed 0] step 500 sent 4000/73580 loss -0.805 (17s) | RSS 1.71 GB (peak 1.71 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] step 1000 sent 8000/73580 loss -0.907 (30s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] step 1500 sent 12000/73580 loss -0.917 (43s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.1 GB
+[train seed 0] step 2000 sent 16000/73580 loss -0.850 (57s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] step 2500 sent 20000/73580 loss -0.913 (71s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] step 3000 sent 24000/73580 loss -0.914 (83s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] step 3500 sent 28000/73580 loss -0.950 (97s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] step 4000 sent 32000/73580 loss -0.930 (111s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] step 4500 sent 36000/73580 loss -0.880 (124s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] step 5000 sent 40000/73580 loss -0.885 (138s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] step 5500 sent 44000/73580 loss -0.899 (151s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] step 6000 sent 48000/73580 loss -0.924 (165s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] step 6500 sent 52000/73580 loss -0.912 (178s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] step 7000 sent 56000/73580 loss -0.862 (192s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] step 7500 sent 60000/73580 loss -0.925 (205s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] step 8000 sent 64000/73580 loss -0.927 (219s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.1 GB
+[train seed 0] step 8500 sent 68000/73580 loss -0.885 (232s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] step 9000 sent 72000/73580 loss -0.941 (245s) | RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 1.37 GB | MemAvailable 8.2 GB
+[train seed 0] end: RSS 1.72 GB (peak 1.72 GB) | torch alloc 0.18 GB reserved 0.20 GB | MemAvailable 8.1 GB (250s)
+[export] route book written | RSS 1.72 GB (peak 1.83 GB) | torch alloc 0.09 GB reserved 0.20 GB | MemAvailable 8.1 GB
+[export] numpy reader vs torch states: max relative difference 4.59e-08 (float32 phases in the route book)
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.740 | residual 0.200
+[eval] seed 0 train (sample): FULL catalog candidates 0.800 | residual 0.202
+[mem] after seed 0: RSS 2.09 GB (peak 2.27 GB) | torch alloc 0.00 GB reserved 0.20 GB | MemAvailable 7.7 GB
+[done] model written to /home/claude/vss-box/diagram-vss-demo/training/sketch/worlds_micro/shapes7c_g/model; REPORT.md and metrics.json there; run log /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_shapes7c_g_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)
