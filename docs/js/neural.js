@@ -306,7 +306,7 @@ function create(engine, rulesFormalize) {
   }
 
   async function formalize(input, ctx, opts) {
-    if (!st.models) throw new K.SOPError('The neural models are not loaded yet. Open the Neural tab and load them.');
+    if (!st.models) throw new K.SOPError('The neural models are not loaded yet. Open the SOP-BERT tab and load them.');
     if (st.strategy === 'finetuned' && st.models.read) return formalizeJoint(input, ctx || {}, opts);   // SOP-BERT: no Rules reader
     // the earlier pair (act classifier + extractive QA) and the baselines: the Rules reader's cut and references, until the pair is removed
     const t0 = Date.now(); st.calls = 0;

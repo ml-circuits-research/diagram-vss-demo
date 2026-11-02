@@ -122,7 +122,7 @@ ${says('Hi, I am sketching a workflow. Draw a red circle named Hub in the center
 
 <h2 id="table">The three, in one table</h2>
 <div class="tw"><table>
-<thead><tr><th></th><th>Rules</th><th>VSS</th><th>Neural</th></tr></thead>
+<thead><tr><th></th><th>Rules</th><th>VSS</th><th>SOP-BERT</th></tr></thead>
 <tbody>
 <tr><th>Learns from</th><td>nothing: written by hand</td><td>our annotated requests only</td><td>English text in general (pretraining), then our annotated requests</td></tr>
 <tr><th>Size</th><td>code</td><td>19.4 MB, seven worlds of 0.7–3.8 MB (word vectors generated in the browser)</td><td>68.5 MB, one DistilBERT in 8-bit form</td></tr>
@@ -141,7 +141,7 @@ executed:</p>
 <tbody>
 <tr><td>Rules</td><td class="num">73.6 / 11.9 / 14.5 (VSS cut)</td><td class="num">97.5 / 0.5 / 1.9 (Rules cut)</td></tr>
 <tr><td>VSS</td><td class="num">77.2 / 11.4 / 11.4 (VSS cut)</td><td class="num">61.1 / 11.1 / 27.7 (VSS cut)</td></tr>
-<tr><td>Neural (SOP-BERT)</td><td class="num">80.8 / 16.5 / 2.8 (its own cut)</td><td class="num">—</td></tr>
+<tr><td>SOP-BERT</td><td class="num">80.8 / 16.5 / 2.8 (its own cut)</td><td class="num">—</td></tr>
 </tbody></table></div>
 <p class="note">% of requested actions. Sources: CUT_SHARED.md (Rules, VSS), commit 1f3c806 (SOP-BERT). The sample is 1000 realistic
 messages with 4858 requests; the short sets are the demo’s 1140 one-line commands.</p>
@@ -357,7 +357,7 @@ circle”), and one tags the words that are names, labels and numbers. The wires
 
 <h2 id="history">How we got here</h2>
 <ol>
-  <li><b>Zero-shot.</b> The first Neural reader used ready-made models with no training on our data: a natural-language-inference model asked
+  <li><b>Zero-shot.</b> The first neural reader used ready-made models with no training on our data: a natural-language-inference model asked
   whether “The user wants to create a new shape” follows from the message (<code>training/laptop/zs_check.mjs</code>, <code>zs_eval.mjs</code>).
   Such a model is trained to judge statements against statements, not to recognise commands, and it read the kind of request badly; its scores
   are not in a committed result document, only the scripts that produce them are.</li>
@@ -420,7 +420,7 @@ that a reader needs a confidence that knows when it is unsure; the rest of this 
   <li><b>You can follow it word by word.</b> Under <b>details</b>, each request shows the words as the world normalised them, which words it could not
   place, the margins, the status and the <b>residual</b>: how much of the request the reading does not explain.</li>
 </ul>
-<p>Try a message with an invented verb, then compare the VSS and Neural lines of the reply, and open <b>details</b>:</p>
+<p>Try a message with an invented verb, then compare the VSS and SOP-BERT lines of the reply, and open <b>details</b>:</p>
 ${says('Make Done red, then frobnicate Check', 'Snorkle Process')}
 <p>Run through the VSS composer in node on the opening drawing (2026-11-02): in the first message VSS makes Done red and reports “then frobnicate
 Check” as not understood; the second it does not read at all and says so.</p>
@@ -716,6 +716,61 @@ data hurt is not measured yet: the list’s top needs were broad doubts, and the
   had more.</li>
   <li>Every number names its document; a negative result is reported as such (AGENTS.md).</li>
 </ul>
+`);
+
+/* ============================================================ two readers together (VSS-BERT) */
+page('two-readers', 'Two readers together',
+'The tab VSS-BERT is VSS and SOP-BERT reading the same requests. When both read a request the same way it is right about 95% of the time, so it acts on that; when they disagree, or only one found the request, it asks. On the calibration messages it makes about a third as many confident mistakes as SOP-BERT alone and gets almost as much done.', `
+<h2 id="tr-what">What it does</h2>
+<p>The owner’s aim (2026-11-02): a system that makes few mistakes and does a lot; three readers side by side are for measuring, not a goal.
+VSS-BERT is not a new model. For every message:</p>
+<ol>
+  <li><b>One cut, two readings.</b> VSS and SOP-BERT read the same requests, cut by the BERT cutter (with it this combination scored best:
+  46.3 against 31.9 with the VSS cutter, cost score on the calibration messages). When the message was already cut by the BERT cutter, the
+  two tabs’ readings are reused; otherwise VSS-BERT cuts and reads again (two calls of the SOP-BERT model).</li>
+  <li><b>Pairing.</b> Each SOP-BERT request is paired with the VSS request of the same action, the way the benchmark pairs a reading with
+  the right answer. They <i>agree</i> when every value is the same (colour, shape, names, position…).</li>
+  <li><b>One reading is executed.</b> When both readers have the request, SOP-BERT’s reading (the better reader alone); when only one has it,
+  that one.</li>
+  <li><b>A combined confidence</b> per request: the executing reader’s own numbers, whether the two agree (fully, or on a share of the
+  values) and VSS’s own confidence in its reading. Weights and threshold were fitted on data, not set by hand.</li>
+  <li><b>Act or ask.</b> Above the threshold the request is done; below it the reply says why (“the two readers disagree on the colour”,
+  “only one reader found this request”, and what the executing reader itself was unsure of) and offers <b>Do it anyway</b>.</li>
+</ol>
+${says('Add a small red square named Gate below Start and connect it to Process', 'Make Check orange')}
+
+<h2 id="tr-numbers">The numbers</h2>
+<p>New writer’s messages (fresh2, <a href="#help/fresh-writer">A new writer</a>). Everything was fitted and chosen on the 195 calibration
+messages, from out-of-fold scores. The cost score counts one confident mistake as 10 right answers (per 100 requested actions; asking scores 0).
+The test part (405 messages) had already been read for earlier studies, so its numbers are exploratory.</p>
+<div class="tw"><table>
+<thead><tr><th>Reader, at its safety threshold</th><th>Cost score</th><th>Done right</th><th>Confidently wrong (of executed)</th><th>Test part: cost score / done right / confidently wrong</th></tr></thead>
+<tbody>
+<tr><td><b>VSS-BERT</b></td><td class="num"><b>46.3</b></td><td class="num">56.4%</td><td class="num">1.8%</td><td class="num">40.6 / 52.8% / 2.3%</td></tr>
+<tr><td>SOP-BERT alone</td><td class="num">24.8</td><td class="num">63.4%</td><td class="num">5.7%</td><td class="num">14.4 / 60.1% / 7.1%</td></tr>
+<tr><td>VSS alone</td><td class="num">8.2</td><td class="num">18.3%</td><td class="num">5.2%</td><td class="num">12.9 / 15.9% / 1.9%</td></tr>
+</tbody></table></div>
+<p>VSS-BERT against SOP-BERT alone: +21.5 on the calibration messages (95% interval 7.2 to 37.9, so the bar written beforehand is met);
+against VSS alone +38.1 (27.1 to 49.0).</p>
+<p><b>At the same rate of confident mistakes it does more.</b> Allowed at most 2% confidently wrong, VSS-BERT does 56.4% of the requests
+right and SOP-BERT alone 6.4% (test part: 51.9% and 10.2%). Allowed SOP-BERT’s own rate, 5.7%: 64.8% against 63.4% (test part: 63.4% and
+48.1%). These are the best points of each reader’s curve, read the same way for both.</p>
+<p><b>Where the gain comes from.</b> Most requests both readers read the same way are right (95%), so they are done; the requests the
+readers disagree on are right only about half the time, and those SOP-BERT alone finds are right a third of the time: VSS-BERT asks about
+them. Requests only VSS finds are almost never right (1 in 55), so they are always asked.</p>
+
+<h2 id="tr-levels">How careful</h2>
+<p>VSS-BERT › Settings offers the safety threshold (the default: one confident mistake counts as 10 right answers), <b>bolder</b> (5),
+<b>more careful</b> (20) and execute all. Each threshold was chosen on the calibration messages the same way; the VSS and SOP-BERT tabs offer the same levels.</p>
+
+<h2 id="tr-limits">Limits</h2>
+<ul>
+  <li><b>Mistakes both readers share stay invisible.</b> They learned from the same annotated data; about 5% of the requests they agree on are still wrong.</li>
+  <li><b>Not confirmed on new text yet.</b> The calibration part chose the cut, the weights and the threshold; the test part had been read before.
+  The clean check is a fresh set of messages from a new writer (fresh3), read once with everything fixed: that is the next step.</li>
+  <li>The reused readings were made with the VSS and SOP-BERT drawings; when those differ from the VSS-BERT drawing, a name can be read differently.</li>
+</ul>
+<p class="note">Sources: <code>training/sketch/combine/COMBINED_READER.md</code>, <code>COMBINE.md</code>; model <code>docs/model/confidence/combined.json</code>.</p>
 `);
 
 /* ============================================================ limits today */

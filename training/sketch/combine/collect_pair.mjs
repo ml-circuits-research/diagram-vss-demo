@@ -2,7 +2,10 @@
 //   1. SOP-BERT (MODEL, default docs/model/neural/sop-bert = arm BERT-G) on its own cut (its span head): records sop_own.jsonl;
 //   2. VSS (the default registry docs/model/micro/registry.json = arm VSS-G, its context filler) on its own cut: records vss_own.jsonl;
 //   3. the same VSS reader on the units of the SOP-BERT cut (the demo's BERT-cut path, docs/js/vss-composer.js cutUnits "bert": the span
-//      head's units with c1 > c0, given to the composer as opts.units): records vss_bert.jsonl.
+//      head's units with c1 > c0, given to the composer as opts.units): records vss_bert.jsonl;
+//   4. (added for COMBINED_READER.md; passes 1-3 unchanged) SOP-BERT on the units of the VSS cut (the demo's VSS-cut path: cutUnits "vss" =
+//      the composer's cutVss, the units given to neural.formalize, the cut head run once more over the message for its cut signals at those
+//      units, as fresh2/collect_sop.mjs cut "vss"): records sop_vss.jsonl.
 // Copies: the SOP part is fresh2/collect_sop.mjs (signals, heads, outcomes, PAIR=value pairing unchanged; only the "own" cut); the VSS part is
 // fresh2/collect_vss.mjs (features, outcomes, the tally check unchanged). Additions:
 //   - every produced request also carries `got` (its canonical values, bench-canon.js canon: what the outcome is decided on), `span` (the
@@ -36,7 +39,7 @@ const origStep = Context.prototype.step;
 Context.prototype.step = function (raw, c0, c1, opts) { const r = origStep.apply(this, arguments); if (!(opts && opts.dry)) ST.push({ c0, c1, r }); return r; };
 const origF = Composer.prototype.formalizeCutter;
 Composer.prototype.formalizeCutter = function (text, ctx = {}, opts = {}) {
-  ST = [];
+  ST = []; globalThis.__comp = this;   // the composer (pass 4 cuts with its cutVss)
   if (globalThis.__units) opts = Object.assign({}, opts, { units: globalThis.__units });   // the units of the SOP-BERT cut (pass 3)
   const o = origF.call(this, text, ctx, opts), canvas = ctx.names || [];
   const [toks] = FRONT.tokenize(text, canvas), words = toks.map((x) => x[0]);
@@ -231,10 +234,10 @@ for (const d of dirs) {
     .filter((r) => Array.isArray(r.wires) && (!IDS || IDS.has(r.id)) && !seenIds.has(r.id)).slice(0, LIMIT);
   for (const r of rows) { seenIds.add(r.id); allRows.push(r); }
 }
-const OUT = { sop_own: `${outDir}/sop_own.jsonl`, vss_own: `${outDir}/vss_own.jsonl`, vss_bert: `${outDir}/vss_bert.jsonl` };
+const OUT = { sop_own: `${outDir}/sop_own.jsonl`, vss_own: `${outDir}/vss_own.jsonl`, vss_bert: `${outDir}/vss_bert.jsonl`, sop_vss: `${outDir}/sop_vss.jsonl` };
 for (const f of Object.values(OUT)) writeFileSync(f, "");
 const blank = () => ({ exact: 0, right: 0, wrongAligned: 0, missed: 0, acts: 0, extra: 0, gold: 0, mRight: 0, mHonest: 0, mWrong: 0, byAct: {} });
-const TOT = { vss_own: blank(), vss_bert: blank(), sop_own: blank() }, MINE = { vss_own: { right: 0, wrong: 0, extra: 0 }, vss_bert: { right: 0, wrong: 0, extra: 0 }, sop_own: { right: 0, wrong: 0, extra: 0 } };
+const TOT = { vss_own: blank(), vss_bert: blank(), sop_own: blank(), sop_vss: blank() }, MINE = { vss_own: { right: 0, wrong: 0, extra: 0 }, vss_bert: { right: 0, wrong: 0, extra: 0 }, sop_own: { right: 0, wrong: 0, extra: 0 }, sop_vss: { right: 0, wrong: 0, extra: 0 } };
 let done = 0, maxDiff = 0, nreq = 0; const t0 = Date.now();
 for (const r of allRows) {
   // 1. SOP-BERT, own cut (collect_sop.mjs "own")
@@ -275,6 +278,25 @@ for (const r of allRows) {
     tally(TOT[which], vn, r);
     appendFileSync(OUT[which], JSON.stringify(rec) + "\n");
   }
+  // 4. SOP-BERT on the units of the VSS cut (fresh2/collect_sop.mjs cut "vss"): the units given, the cut head run once more for its signals
+  { const ctx4 = { names: (r.names || []).slice(), last: [], spans: ctx2.spans };
+    const vssUnits = globalThis.__comp.cutVss(r.text, { names: ctx4.names, last: [] }).filter((u) => u.c1 > u.c0).map(({ c0, c1 }) => ({ c0, c1 }));
+    lastReads = null; lastRead = null; lastCut = null;
+    await m.cut(r.text);
+    const sr4 = await neural.formalize(r.text, ctx4, { update: nextContext, units: vssUnits }), src4 = new Map(sr4.analyses.map((a) => [a.id, a.src]));
+    for (const n of sr4.nodes) if (n.type !== "mention" && src4.has(n.id)) Object.defineProperty(n, "src", { value: src4.get(n.id), enumerable: false });
+    const msgCut4 = cutProbs(r.text), aIdx4 = new Map(sr4.analyses.map((a, i) => [a.id, i]));
+    const { mains, res, gi, gold } = outcomes(sr4.nodes, r);
+    const rec = { id: r.id, set, cut: "vss", gold: r.wires.length, goldActs: gold.map((g) => g.act), units: vssUnits.length, sop: [] };
+    mains.forEach((x, i) => {
+      const si = aIdx4.get(x.n.id), a = sr4.analyses[si], R = lastReads[si];
+      const c = confSop(a, R), { f, h, act } = sopFeatures(a, R, si, x.n, msgCut4, sr4.analyses.length);
+      maxDiff = Math.max(maxDiff, Math.abs(c - minHeads(h))); nreq++;
+      rec.sop.push({ o: res[i], c: +c.toFixed(6), act, pa: x.act, g: gi[i], f, got: x.got, span: [unitOf(x.n, r.text).c0, unitOf(x.n, r.text).c1], args0: args0(x.n) });
+      MINE.sop_vss[res[i]]++;
+    });
+    tally(TOT.sop_vss, sr4.nodes, r);
+    appendFileSync(OUT.sop_vss, JSON.stringify(rec) + "\n"); }
   if (++done % 25 === 0) console.error(`${done} / ${allRows.length} messages, ${((Date.now() - t0) / 1000).toFixed(0)} s`);
 }
 for (const k of Object.keys(TOT)) {

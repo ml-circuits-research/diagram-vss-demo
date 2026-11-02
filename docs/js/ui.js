@@ -5,9 +5,11 @@ const $ = s => document.querySelector(s);
 const NS = 'http://www.w3.org/2000/svg';
 const svg = $('#canvas'), layer = $('#layer'), framesG = $('#frames'), msgs = $('#msgs');
 const escH = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-// Three readers turn each message into SOP wires. Each has its own system (world, engine, undo/redo), changed only by its own readings;
-// the canvas shows the active tab's world. Every message goes to every reader that is loaded.
-const READERS = [['rules', 'Rules'], ['vss', 'VSS'], ['neural', 'Neural']].map(([id, label]) => Object.assign({ id, label, last: [], pending: null, focusCell: null, reads: 0, lastRead: null }, K.createSystem()));
+// Three readers turn each message into SOP wires, and a fourth tab combines two of them. Each has its own system (world, engine, undo/redo),
+// changed only by its own readings; the canvas shows the active tab's world. Every message goes to every reader that is loaded. The tab of the
+// neural reader is labelled SOP-BERT (its id stays 'neural'); VSS-BERT (id 'combined') is the combined reader of VSS and SOP-BERT (see the
+// "VSS-BERT" block below; training/sketch/combine/COMBINED_READER.md).
+const READERS = [['rules', 'Rules'], ['vss', 'VSS'], ['neural', 'SOP-BERT'], ['combined', 'VSS-BERT']].map(([id, label]) => Object.assign({ id, label, last: [], pending: null, focusCell: null, reads: 0, lastRead: null }, K.createSystem()));
 const RD = Object.fromEntries(READERS.map(r => [r.id, r]));
 const sys = RD.rules, engine = sys.engine;          // the legend, plugins and SOP rendering are the same in every reader; the Rules system serves them
 let cur = RD.rules, world = cur.world;               // the active tab
@@ -33,14 +35,20 @@ const clock = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute:
 // reaches them; execute all, never the default; a choice other than the default is kept in this browser when storage works). Neural: SOP-BERT's fitted confidence
 // (docs/model/confidence/sop-bert.json; the "Neural gate" block below sets GATES.neural); readWith, the reply, "Do it anyway" and the
 // details are the same code for both readers. The Rules have no confidence and execute everything.
-const GATE_KEY = 'sop.vss.gate', GATE_LEVELS = ['cost', '95', '97', '99', 'all'], GATE_DEFAULT = 'cost';
+// The cost levels (owner, 2026-11-02 22:12): besides the default (cost 10), "bolder" (one confident mistake counts as 5 right answers) and
+// "more careful" (as 20), each the cost-score optimum fitted the same way and stored in the reader's confidence file (vss.json, sop-bert.json,
+// combined.json); a file without one falls back to the default.
+const GATE_KEY = 'sop.vss.gate', GATE_LEVELS = ['cost5', 'cost', 'cost20', '95', '97', '99', 'all'], GATE_DEFAULT = 'cost';
+const COST_OF = { cost5: 5, cost: 10, cost20: 20 }, costWords = c => `one confident mistake counts as ${c} right answers`;
+/** what a reader does at a level, for the note when the setting changes */
+const gateDoes = l => l === 'all' ? 'executes every request it reads (no gate)' : COST_OF[l] ? `executes a request only when its confidence clears its ${gateLabel(l)} threshold (${costWords(COST_OF[l])}); below it, it asks` : `executes a request only at ${l}% precision; below it, it asks`;
 let vssGate = GATE_LEVELS.includes(store.get(GATE_KEY)) ? store.get(GATE_KEY) : GATE_DEFAULT;
 const GATES = { vss: v => window.VSSFormalizer && window.VSSFormalizer.gate ? window.VSSFormalizer.gate(v, vssGate) : null, neural: null };
-const gateLabel = l => l === 'all' ? 'execute all' : l === 'cost' ? 'safety threshold' : `${l}% precision`;
+const gateLabel = l => l === 'all' ? 'execute all' : l === 'cost' ? 'safety threshold' : l === 'cost5' ? 'bolder' : l === 'cost20' ? 'more careful' : `${l}% precision`;
 // Neural gate (GATES.neural): SOP-BERT's fitted confidence (docs/js/neural-confidence.js; model docs/model/confidence/sop-bert.json, versioned;
 // training/sketch/PRECISION_BERT.md), 24 numbers read from the head logits of the reader's own model calls (the act, the value heads, who
 // fills each role, the word tags, the cut head, the word pieces), the same value as the scripts (training/sketch/test_neural_confidence.mjs).
-// Level: Neural › Settings, default the file's "cost" level (its safety threshold), the other levels of the file, execute all; a level other
+// Level: SOP-BERT › Settings, default the file's "cost" level (its safety threshold), the other levels of the file, execute all; a level other
 // than the default is kept in this browser. The confidence was fitted on requests cut by the BERT cutter: with that cut the cut head's
 // output of the cutter's call is reused; with another cut (Rules, VSS) neural.js runs the cut head once more to read it at that cut's units.
 // Without the file every request is asked (the reason says so).
@@ -63,6 +71,125 @@ GATES.neural = async n => {
   let spec = null; try { spec = await neuralSpec(); } catch (e) { console.error(e); }
   return NC.gate(spec, n, neuralLevel(NC, spec));
 };
+// VSS-BERT (READERS id 'combined'; owner, 2026-11-02 21:57 and 22:08): the combined reader of VSS and SOP-BERT (docs/js/combined-confidence.js;
+// model docs/model/confidence/combined.json, versioned; training/sketch/combine/COMBINED_READER.md). Both readers read the units of the BERT
+// cutter (the cut whose combined confidence scored best on the fresh2 calibration part, the file's best_cut): when the message was cut by it,
+// the readings of the VSS and SOP-BERT tabs are reused (no model call); otherwise VSS-BERT cuts with the BERT cutter and both read those units
+// here, with its own drawing's names (two calls of the SOP-BERT model: the cut and the read; VSS has no model call). Without the BERT cutter
+// (no span head), it reads the shared cut with that cut's fit. The two readers' requests are paired; on a pair SOP-BERT's reading is
+// executed, otherwise the one that exists; each gets the combined confidence (SOP-BERT's or VSS's own signals, the agreement of the two, VSS's
+// own confidence of its paired reading), executed when it clears the file's threshold; below it the reply says why ("the two readers disagree
+// on the colour", "only one reader found this request", what the executing reader itself was unsure of) and offers "Do it anyway". Level:
+// VSS-BERT › Settings: safety threshold (default) or execute all, kept in this browser when it is not the default. Every number comes from the file.
+const CGATE_KEY = 'sop.combined.gate';
+let combGate = ['cost5', 'cost20', 'all'].includes(store.get(CGATE_KEY)) ? store.get(CGATE_KEY) : 'cost';
+let ccNow = null;
+const ccP = import(new URL('js/combined-confidence.js', document.baseURI).href).then(m => { ccNow = m; return m; }).catch(e => { console.error(e); return null; });
+const vcP = import(new URL('js/vss-confidence.js', document.baseURI).href).catch(e => { console.error(e); return null; });
+const cconf = { spec: null, error: null, url: null };
+/** the combined confidence file (loaded once; a failure is kept in cconf.error and tried again on the next message) */
+async function combinedSpec() {
+  const CC = await ccP; if (!CC) throw new Error('docs/js/combined-confidence.js could not be loaded');
+  if (cconf.spec) return cconf.spec;
+  try { cconf.url = await CC.urlUnder(new URL('model/', document.baseURI).href); cconf.spec = await CC.load(cconf.url); cconf.error = null; } catch (e) { cconf.error = e; throw e; }
+  return cconf.spec;
+}
+const CNAMES = { sop: 'SOP-BERT', vss: 'VSS' };
+/** VSS-BERT reads one message: the two readings on the BERT cut, paired, the combined confidence and the gate -> {nodes, notes, gate, ms, ...} */
+async function combinedRead(rd, text, rec, ctx) {
+  const t0 = performance.now(), CC = await ccP, NC = await ncP, VCm = await vcP;
+  let spec = null; try { spec = await combinedSpec(); } catch (e) { console.error(e); }
+  const want = spec ? spec.best_cut : 'bert', rv = rec.readers.vss, rn = rec.readers.neural, shared = rec.cut ? rec.cut.strategy : null;
+  let v, n, cut, how, readMs = 0;
+  if (shared === want && rv && rv.vss && rn && rn.neural) { v = rv.vss; n = rn.neural; cut = want; how = 'reused'; readMs = (rv.ms || 0) + (rn.ms || 0); }
+  else if (!cutWhyNot(want)) {
+    const units = await VF.cut(text, ctx, want, { rules: RD.rules, neural: NeuralKit });
+    n = await neural.formalize(text, ctx, { units, signals: true });
+    v = await window.VSSFormalizer.formalize(text, ctx, rd.formalize, Object.assign({}, VSS_OPTS, { units }));
+    cut = want; how = 'own';
+  } else {
+    if (!rv || !rv.vss || !rn || !rn.neural) throw new Error('VSS-BERT needs the readings of both VSS and SOP-BERT for this message');
+    v = rv.vss; n = rn.neural; cut = shared || 'vss'; how = 'shared'; readMs = (rv.ms || 0) + (rn.ms || 0);
+  }
+  const tc = performance.now();
+  let vssModel = null; try { vssModel = await window.VSSFormalizer.loadConfidence(); } catch (e) { console.error(e); }
+  let nspec = null; try { nspec = await neuralSpec(); } catch (e) { console.error(e); }
+  const pa = x => `${x.type}:${x.args.action || x.args.ask || ''}`;
+  const args0 = x => ({ action: x.args.action ?? null, name: typeof x.args.name === 'string' ? x.args.name : null, count: x.args.count ?? null });
+  const sop = n.nodes.filter(x => x.type !== 'mention' && x.unit).map(x => { const sig = NC ? NC.signals(n, n.analyses.indexOf(x.unit)) : null;
+    return { node: x, sig, f: sig ? sig.f : {}, act: sig ? sig.act : (x.args.action || x.args.ask || x.type), pa: pa(x), got: BenchCanon.canon(x, n.nodes), span: x.span || [0, 0], args0: args0(x) }; });
+  const vss = v.nodes.filter(x => x.type !== 'mention' && x.unit).map(x => ({ node: x, f: x.unit.signals || {}, world: x.unit.world, pa: pa(x), got: BenchCanon.canon(x, v.nodes), span: x.span || [x.unit.c0, x.unit.c1], args0: args0(x),
+    conf: vssModel && VCm ? (x.unit.signals ? VCm.confidence(vssModel, x.unit.signals, x.unit.world) : 0) : NaN }));
+  const msg = { text, cut, sop, vss, cutWords: n.joint ? n.joint.cut : null };
+  const ok = !!(spec && CC && vssModel && NC);
+  const res = ok ? CC.combine(spec, msg, combGate) : null;
+  const items = res ? res.items : sop.map((s, j) => ({ from: 'sop', j, partner: -1, conf: NaN, execute: combGate === 'all' })).concat(vss.map((s, j) => ({ from: 'vss', j, partner: -1, conf: NaN, execute: combGate === 'all' })));
+  // the readings to run, in message order, with fresh ids (the two readers number their wires independently); a VSS request that refers
+  // to a shape made by a paired request refers to SOP-BERT's reading of it (the one executed)
+  const R = { sop: { res: n, list: sop }, vss: { res: v, list: vss } };
+  items.forEach(it => { const q = R[it.from].list[it.j]; it.req = q; it.nodes0 = R[it.from].res.nodes.filter(x => x.unit === q.node.unit); });
+  items.sort((a, b) => (a.req.span[0] - b.req.span[0]) || (a.from === 'sop' ? -1 : 1));
+  const idOf = new Map(); let k = 0;
+  for (const it of items) for (const x of it.nodes0) idOf.set(it.from + ':' + x.id, (x.type === 'mention' ? 'm' : 'w') + (++k));
+  for (const it of items) if (it.from === 'sop' && it.partner >= 0) idOf.set('vss:' + vss[it.partner].node.id, idOf.get('sop:' + it.req.node.id));
+  const mapV = (from, val) => K.isRef(val) ? { ref: idOf.get(from + ':' + val.ref) || val.ref } : Array.isArray(val) ? val.map(y => mapV(from, y)) : val;
+  const units = items.map((it, index) => {
+    const nodes = it.nodes0.map(x => { const y = { id: idOf.get(it.from + ':' + x.id), type: x.type, args: Object.fromEntries(Object.entries(x.args).map(([a, b]) => [a, mapV(it.from, b)])) };
+      if (x.span) Object.defineProperty(y, 'span', { value: x.span, enumerable: false, configurable: true }); return y; });
+    const src = text.slice(it.req.span[0], it.req.span[1]).trim() || it.req.node.src || '';
+    return { index, item: it, from: it.from, src, conf: it.conf, execute: it.execute, nodes, reasons: [], dependsOn: [] };
+  });
+  const owner = new Map(); units.forEach(u => u.nodes.forEach(x => owner.set(x.id, u)));
+  const refsOf = val => K.isRef(val) ? [val.ref] : Array.isArray(val) ? val.flatMap(refsOf) : [];
+  for (const u of units) for (const x of u.nodes) for (const r of Object.values(x.args).flatMap(refsOf)) { const o = owner.get(r); if (o && o !== u && !u.dependsOn.includes(o)) u.dependsOn.push(o); }
+  for (const u of units) {   // message order: a request's dependencies come before it
+    const off = u.dependsOn.filter(d => !d.execute);
+    if (u.execute && off.length) { u.execute = false; u.reasons = off.map(d => ({ text: `it uses what “${d.src}” would have made, which was not done` })); continue; }
+    if (u.execute) continue;
+    if (!ok) { u.reasons = [{ text: !spec ? 'the combined confidence model could not be loaded' : !vssModel ? 'VSS’s confidence model could not be loaded' : 'the code of the combined confidence could not be loaded' }]; continue; }
+    u.reasons = CC.reasons(msg, u.item, CNAMES).map(x => ({ text: x.text }));
+    // what the executing reader itself was unsure of (its own confidence below its own safety threshold)
+    if (u.from === 'sop' && nspec && u.item.req.sig) { const c = NC.confidence(nspec, u.item.req.sig.f, u.item.req.sig.act); if (c < NC.threshold(nspec, 'cost')) { const w = NC.reasons(nspec, u.item.req.sig)[0]; if (w) u.reasons.push({ text: `SOP-BERT alone is not sure: ${w.text}` }); } }
+    if (u.from === 'vss' && VCm) { const q = u.item.req; if (q.conf < VCm.threshold(vssModel, 'cost')) { const w = VCm.reasons(vssModel, q.node.unit)[0]; if (w) u.reasons.push({ text: `VSS alone is not sure: ${w.text}` }); } }
+  }
+  const all = units.flatMap(u => u.nodes), run = new Set(units.filter(u => u.execute).flatMap(u => u.nodes));
+  const t = res ? res.threshold : combGate === 'all' ? -Infinity : Infinity;
+  const gate = { level: combGate, effective: combGate, threshold: t, units, executed: all.filter(x => run.has(x)), held: units.filter(u => !u.execute) };
+  const notes = [];
+  if (how === 'shared') notes.push(`The BERT cutter is not available, so VSS-BERT read the shared cut (${cutLabel(cut)})${res && !res.fitted ? '; its confidence was fitted on the BERT and VSS cuts, the BERT cut’s fit is used' : ''}.`);
+  const combineMs = performance.now() - tc;
+  return { nodes: all, notes, gate, cut, how, fitted: res ? res.fitted : null, fit: res ? res.cut : null, msg, items, units, readMs, combineMs, calls: how === 'own' ? n.calls + 1 : 0,   // + 1: the cut (neural.js counts the calls of one formalize)
+   
+    ms: how === 'own' ? performance.now() - t0 : readMs + combineMs };
+}
+GATES.combined = async c => c.gate;
+/** VSS-BERT in a message's details: where the readings came from, and how the two readings of each request compare */
+function combinedHTML(c) {
+  const from = c.how === 'reused' ? `the readings of the VSS and SOP-BERT tabs on the ${cutLabel(c.cut)}’s requests, reused (VSS and SOP-BERT ${fmtMs(c.readMs)}, combining ${fmtMs(c.combineMs)})`
+    : c.how === 'own' ? `read here on the ${cutLabel(c.cut)}’s requests (${c.calls} SOP-BERT model calls: the cut and the read; VSS on the same requests; combining ${fmtMs(c.combineMs)})`
+    : `the readings of the shared cut (${cutLabel(c.cut)}), reused`;
+  let h = `<div class="note">VSS-BERT: ${escH(from)}; combined confidence of the ${escH(c.fit ? cutLabel(c.fit) : '?')}${c.fitted === false ? ' (this cut was not fitted)' : ''}.</div>`;
+  h += `<ul class="units">${c.units.map(u => { const it = u.item, p = it.from === 'sop' && it.partner >= 0;
+    const what = it.from === 'vss' ? 'VSS’s reading (SOP-BERT has none of this action here)' : p ? `SOP-BERT’s reading; VSS ${it.agree ? 'reads it the same' : `agrees on ${Math.round(it.agree_share * 100)}% of the values`} (VSS’s own confidence ${Number.isFinite(it.other_conf) ? it.other_conf.toFixed(3) : '?'})` : 'SOP-BERT’s reading (VSS has none of this action here)';
+    return `<li><span class="src">“${escH(u.src)}”</span> → ${escH(what)}</li>`; }).join('')}</ul>`;
+  return h;
+}
+/** VSS-BERT › Settings: what it is, the level (safety threshold or execute all) and the file's numbers */
+function combinedSettingsHTML() {
+  const spec = cconf.spec;
+  if (!spec) { const again = () => { if (sub === 'settings' && cur.id === 'combined') renderSub(); }; if (!cconf.error) combinedSpec().then(again, again); }
+  const pc = v => (v * 100).toFixed(1) + '%', B = spec ? spec.cuts[spec.best_cut] : null, cal = B && B.calibration_oof, te = B && B.test_already_read_exploratory, alone = spec && spec.readers_alone;
+  const opt = (l, about) => `<label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:pointer"><input type="radio" name="comb-gate" value="${l}" ${l === combGate ? 'checked' : ''}> <span><b>${escH(gateLabel(l))}</b>${l === 'cost' ? ' (default)' : ''}: ${escH(about)}</span></label>`;
+  const costAbout = l => { const x = B && (B.levels || {})[l];
+    if (!x) return cconf.error ? `the model could not be loaded (${cconf.error.message || cconf.error}): every request is asked` : spec ? `not in the model file: the safety threshold is used` : 'loading the model…';
+    return `acts when its combined confidence is at least ${x.threshold.toFixed(4)}: the threshold that scores best when ${costWords(x.cost)}; on the calibration messages (out-of-fold scores) ${pc(x.heldout_oof_precision)} of what it executed was right, it did ${pc(x.heldout_oof_coverage)} of the requests right and asked about ${pc(x.heldout_oof_asked)}`; };
+  return `<h3 class="sub">VSS-BERT reader</h3>${readerFacts(RD.combined)}
+  <p class="intro">VSS-BERT is not a third model: it is VSS and SOP-BERT reading the same requests, and it does what they are sure of together. Both read the requests of the BERT cutter (the cut with which this combination scored best; when the message was cut by it, the readings of the two tabs are reused, otherwise VSS-BERT cuts and reads here, with two SOP-BERT model calls). The two readings of each request are paired: when both readers have it, SOP-BERT’s reading is the one executed; when only one has it, that one. Each request gets a combined confidence: the executing reader’s own numbers, whether the two readers agree (all the values, or a share of them) and VSS’s own confidence. When the two agree, a request is right about 95% of the time, so agreement raises the confidence; when they disagree, or only one reader found the request, it is lowered. Below the threshold it asks, says why, and offers <b>Do it anyway</b>.</p>
+  <p class="intro"><button type="button" class="btn" data-help="two-readers">Two readers together</button></p>
+  <h3 class="sub">When VSS-BERT acts</h3>
+  ${['cost5', 'cost', 'cost20'].map(l => opt(l, costAbout(l))).join('')}${opt('all', 'no gate: every request is executed (SOP-BERT’s reading on a pair, the one that exists otherwise)')}
+  ${B ? `<p class="note">Fitted on the calibration part of the fresh2 messages (195 messages), out of fold (training/sketch/combine/COMBINED_READER.md). Cost score on that part: VSS-BERT ${cal.score.toFixed(1)}, SOP-BERT alone ${alone.sop.calibration_oof_score.toFixed(1)}, VSS alone ${alone.vss.calibration_oof_score.toFixed(1)}. On the test part (already read before; exploratory): ${te.score.toFixed(1)}, ${pc(te.confidently_wrong)} of what it executed wrong, ${pc(te.done_right)} of the requests done right. The clean confirmation needs a fresh set of messages (fresh3). Model <code>confidence/combined.json</code>${cconf.url && /[?&]v=/.test(cconf.url) ? `, version <code>${escH(decodeURIComponent(cconf.url.split('v=').pop()))}</code>` : ''}.</p>` : ''}`;
+}
 // spelling (docs/js/spell.js): a VSA spell checker corrects typed messages before the readers read them; every reader reads the same
 // corrected text. Its vocabulary: docs/model/spell/vocab.json (the VSS worlds' words), the legend's values and cue words, and the names
 // on the active reader's canvas. The switch is in ⋮ › Settings (Spelling); it is kept in this browser when storage works.
@@ -270,11 +397,12 @@ function sysNote(text) { const d = document.createElement('div'); d.className = 
 function typing() { const d = document.createElement('div'); d.className = 'b bot'; d.innerHTML = '<div class="typing" aria-label="Thinking"><i></i><i></i><i></i></div>'; msgs.appendChild(d); scrollDown(); return d; }
 function setStatus(t) { $('#status').textContent = t; }
 const fmtMs = ms => ms < 10 ? ms.toFixed(1) + ' ms' : Math.round(ms) + ' ms';
-const isReady = rd => rd.id === 'rules' || (rd.id === 'vss' ? vssState === 'ready' : !!models && nState === 'ready');
+const isReady = rd => rd.id === 'rules' || (rd.id === 'vss' ? vssState === 'ready' : rd.id === 'neural' ? !!models && nState === 'ready' : isReady(RD.vss) && isReady(RD.neural));
 /** what a reader that is not loaded says instead of an answer */
 function offText(rd) {
+  if (rd.id === 'combined') { const wait = [RD.vss, RD.neural].filter(x => !isReady(x)); return `waits for ${listing(wait.map(x => x.label))} (it combines the readings of VSS and SOP-BERT)`; }
   if (rd.id === 'vss') return vssState === 'failed' ? 'not available (it could not be loaded)' : 'still loading, did not read this';
-  return { unpublished: 'not available (the neural model is not published yet)', failed: 'not available (loading failed; see Neural › Settings)' }[nState] || 'still loading, did not read this';
+  return { unpublished: 'not available (the neural model is not published yet)', failed: 'not available (loading failed; see SOP-BERT › Settings)' }[nState] || 'still loading, did not read this';
 }
 const idleStatus = () => 'reads with ' + listing(READERS.filter(isReady).map(r => r.label));
 msgs.addEventListener('click', ev => {
@@ -413,10 +541,11 @@ async function readWith(rd, text, rec, pk) {
     else if (rec.raw) r.nodes = K.parse(rec.sop);   // SOP: nothing to formalize, no time
     else if (rd.id === 'rules') { const f = rec.cut && rec.cut.strategy !== 'rules' ? rd.formalize(text, ctx, { units: rec.cut.units }) : rd.formalize(text, ctx); r.ms = performance.now() - t0; r.nodes = f.nodes; r.notes = f.notes; }
     else if (rd.id === 'vss') { const v = await window.VSSFormalizer.formalize(text, ctx, rd.formalize, Object.assign({}, VSS_OPTS, rec.cut ? { units: rec.cut.units } : {})); r.ms = performance.now() - t0; r.vss = v; r.nodes = v.nodes; r.notes = v.notes; }
+    else if (rd.id === 'combined') { const c = await combinedRead(rd, text, rec, ctx); r.ms = c.ms; r.combined = c; r.nodes = c.nodes; r.notes = c.notes; }
     else { const n = await neural.formalize(text, ctx, rec.cut ? { units: rec.cut.units, signals: true } : { signals: true }); r.ms = performance.now() - t0; r.neural = n; r.nodes = n.nodes; r.notes = n.notes.filter(x => !/couldn't find an action/.test(x)); }
-    if (rec.cut && !pk && !rec.raw) r.cutBy = rec.cut.strategy;
+    if (rec.cut && !pk && !rec.raw) r.cutBy = r.combined ? r.combined.cut : rec.cut.strategy;
     // the gate (see GATES): the requests this reader is not sure of are not executed; the reply lists them with "Do it anyway"
-    const gf = !pk && !rec.raw ? GATES[rd.id] : null, gsrc = rd.id === 'vss' ? r.vss : r.neural;
+    const gf = !pk && !rec.raw ? GATES[rd.id] : null, gsrc = rd.id === 'vss' ? r.vss : rd.id === 'combined' ? r.combined : r.neural;
     if (gf && gsrc) { const g = await gf(gsrc); if (g) { r.gate = g; r.allNodes = r.nodes; r.nodes = g.executed; } }
   } catch (e) { r.error = e; r.ms = performance.now() - t0; return { text: `The ${rd.label} reader failed: ${e.message}`, err: true, ms: r.ms }; }
   const ms = r.ms, nodes = r.nodes, notes = r.notes, world = rd.world, engine = rd.engine;
@@ -476,6 +605,7 @@ function turnHTML(r) {
     if (x.gate) h += gateHTML(x, rd);
     if (x.vss) h += vssHTML(x.vss);
     if (x.neural) h += neuralHTML(x.neural);
+    if (x.combined) h += combinedHTML(x.combined);
     if (x.result) h += x.result.steps.map(stepHTML).join('');
     for (const a of x.anyway || []) h += `<div class="note">Done anyway: “${escH(a.src)}”</div><pre class="sop">${a.nodes.map(hlNode).join('\n')}</pre>` + a.result.steps.map(stepHTML).join('');
     const err = x.error && x.error.message !== 'No wires.' ? x.error : x.result && !x.result.ok ? x.result.error : null;
@@ -737,7 +867,7 @@ function tabTitle(rd) {
 }
 function updateTabs() {
   renderSub();
-  rtabs.innerHTML = READERS.map(rd => `<button type="button" role="tab" class="rtab${isReady(rd) ? '' : ' off'}" data-rtab="${rd.id}" aria-selected="${rd === cur}" title="${escH(tabTitle(rd))}">${escH(rd.label)}${differs(rd) ? `<i class="dot" aria-label="differs from ${escH(cur.label)}"></i>` : ''}${!isReady(rd) && (rd.id === 'vss' ? vssState === 'loading' : nState === 'loading' || nState === 'checking') ? '<i class="spin" aria-hidden="true"></i>' : ''}</button>`).join('');
+  rtabs.innerHTML = READERS.map(rd => `<button type="button" role="tab" class="rtab${isReady(rd) ? '' : ' off'}" data-rtab="${rd.id}" aria-selected="${rd === cur}" title="${escH(tabTitle(rd))}">${escH(rd.label)}${differs(rd) ? `<i class="dot" aria-label="differs from ${escH(cur.label)}"></i>` : ''}${!isReady(rd) && ((rd.id !== 'neural' && vssState === 'loading') || (rd.id !== 'vss' && (nState === 'loading' || nState === 'checking'))) ? '<i class="spin" aria-hidden="true"></i>' : ''}</button>`).join('');
 }
 function setActive(id) {
   if (!RD[id] || drag) return;
@@ -763,7 +893,8 @@ function renderCard() {
   c.hidden = false;
   c.className = 'rcard' + (cur.id === 'neural' && nState === 'unpublished' ? ' small' : '');
   c.innerHTML = cur.id === 'vss' ? `<b>VSS reader</b>${vssState === 'failed' ? errHTML(vssError) : `<p>Loading the 7 micro-worlds from this site (about ${mb0(VSS_HINT)})…</p>`}`
-    : `<b>Neural reader</b>${neuralBoxHTML()}`;
+    : cur.id === 'combined' ? `<b>VSS-BERT reader</b><p>It ${escH(offText(cur))}; it starts when both are loaded.</p>`
+    : `<b>SOP-BERT reader</b>${neuralBoxHTML()}`;
 }
 
 /* ---------------- VSS: loads by itself when the page opens (same site) ---------------- */
@@ -784,7 +915,7 @@ async function ensureVSS(announce) {
     const fresh = !RD.vss.reads;
     if (announce !== false) sysNote((vssInfo.composer ? `VSS ready: ${vssInfo.worlds.length} micro-worlds, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
       : `VSS model ready: ${mb(vssInfo.bytes)}, D ${vssInfo.D}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`) + (fresh ? ' It starts from the Rules drawing.' : ''));
-    adoptRules(RD.vss);
+    adoptRules(RD.vss); if (isReady(RD.combined)) adoptRules(RD.combined);
   } catch (e) { vssState = 'failed'; vssError = e; sysNote('The VSS reader could not be loaded: ' + (e && e.message || e)); }
   refreshReaders(); return vssState === 'ready';
 }
@@ -837,12 +968,12 @@ async function loadModels(fromCache) {
     neural.setStrategy('finetuned'); neural.setModels(m); models = m; nState = 'ready'; neuralLoadMs = performance.now() - t0;
     if (!neuralBytes) neuralBytes = nBytesHint();
     const fresh = !RD.neural.reads;
-    sysNote(`Neural reader ready: ${neuralNames().join(' + ')} on the CPU, ${mb(neuralBytes)}${fromCache ? ' from the browser cache' : ''}, ${(neuralLoadMs / 1000).toFixed(1)} s.` + (fresh ? ' It starts from the Rules drawing.' : ''));
-    adoptRules(RD.neural);
+    sysNote(`SOP-BERT reader ready: ${neuralNames().join(' + ')} on the CPU, ${mb(neuralBytes)}${fromCache ? ' from the browser cache' : ''}, ${(neuralLoadMs / 1000).toFixed(1)} s.` + (fresh ? ' It starts from the Rules drawing.' : ''));
+    adoptRules(RD.neural); if (isReady(RD.combined)) adoptRules(RD.combined);
   } catch (e) {
     if (tok !== nToken) return;
     console.error(e); nState = e && e.unpublished ? 'unpublished' : 'failed'; nError = e;
-    if (nState === 'failed') sysNote('The neural model could not be loaded: ' + (e && e.message || e) + (e && e.files && e.files.length ? ` (while loading ${e.files.length === 1 ? e.files[0] : e.files.length + ' files; Neural › Settings lists them'})` : ''));
+    if (nState === 'failed') sysNote('The neural model could not be loaded: ' + (e && e.message || e) + (e && e.files && e.files.length ? ` (while loading ${e.files.length === 1 ? e.files[0] : e.files.length + ' files; SOP-BERT › Settings lists them'})` : ''));
   }
   refreshReaders();
 }
@@ -866,14 +997,20 @@ function renderSub() {
 }
 function setSub(k) { if (k === sub || !SUBS.some(x => x[0] === k)) return; sub = k; renderSub(); renderCard(); if (k === 'drawing') renderCanvas(); }
 subbar.addEventListener('click', ev => { const b = ev.target.closest('[data-sub]'); if (b) setSub(b.dataset.sub); });
-rpanel.addEventListener('change', ev => {   // Neural › Settings: the level of the neural gate (GATES.neural)
+rpanel.addEventListener('change', ev => {   // SOP-BERT › Settings: the level of the neural gate (GATES.neural)
   if (ev.target.name !== 'neural-gate' || !nconf.spec || !ncNow) return;
   const l = ev.target.value, def = ncNow.defaultLevel(nconf.spec); neuralGate = l === def ? null : l; store.set(NGATE_KEY, neuralGate);
-  sysNote(`Neural now ${l === 'all' ? 'executes every request it reads (no gate)' : l === 'cost' ? 'executes a request only when its confidence clears its safety threshold; below it, it asks' : `executes a request only at ${l}% precision; below it, it asks`}.`);
+  sysNote(`SOP-BERT now ${gateDoes(l)}.`);
+  if (sub === 'settings') renderSub();
+});
+rpanel.addEventListener('change', ev => {   // VSS-BERT › Settings: safety threshold or execute all
+  if (ev.target.name !== 'comb-gate') return;
+  combGate = ['cost5', 'cost20', 'all'].includes(ev.target.value) ? ev.target.value : 'cost'; store.set(CGATE_KEY, combGate === 'cost' ? null : combGate);
+  sysNote(`VSS-BERT now ${gateDoes(combGate)}.`);
   if (sub === 'settings') renderSub();
 });
 rpanel.addEventListener('change', ev => {
-  if (ev.target.name === 'vss-gate' && GATE_LEVELS.includes(ev.target.value)) { vssGate = ev.target.value; store.set(GATE_KEY, vssGate === GATE_DEFAULT ? null : vssGate); sysNote(`VSS now ${vssGate === 'all' ? 'executes every request it reads (no gate)' : vssGate === 'cost' ? 'executes a request only when its confidence clears its safety threshold; below it, it asks' : `executes a request only at ${vssGate}% precision; below it, it asks`}.`); if (sub === 'settings') renderSub(); }
+  if (ev.target.name === 'vss-gate' && GATE_LEVELS.includes(ev.target.value)) { vssGate = ev.target.value; store.set(GATE_KEY, vssGate === GATE_DEFAULT ? null : vssGate); sysNote(`VSS now ${gateDoes(vssGate)}.`); if (sub === 'settings') renderSub(); }
 });
 rpanel.addEventListener('click', ev => { const h = ev.target.closest('[data-help]'); if (h) { openHelp(h.dataset.help); return; } const b = ev.target.closest('[data-open]'); if (b) openSheet('settings', b.dataset.open); });
 function vssStatusHTML() {
@@ -886,23 +1023,24 @@ function gateSettingsHTML() {
   const pc = v => (v * 100).toFixed(1) + '%';
   // a level the model does not reach (no threshold gives it on the calibration messages) is shown, disabled, with the highest precision VSS reaches
   const acts = x => Number.isFinite(x.threshold) ? `acts when its confidence is at least ${x.threshold.toFixed(4)}` : x.kind === 'executes everything' ? 'acts on every request' : 'asks about every request';
-  const costAbout = x => `${acts(x)}: the threshold that scores best when one confident mistake costs as much as ${x.cost || 10} right answers; on the calibration messages (out-of-fold scores) ${x.precision != null ? `${pc(x.precision)} of what it executed was right, ` : ''}it did ${pc(x.coverage)} of the requests right and asked about ${pc(x.asked)}`;
+  const costAbout = x => `${acts(x)}: the threshold that scores best when ${costWords(x.cost || 10)}; on the calibration messages (out-of-fold scores) ${x.precision != null ? `${pc(x.precision)} of what it executed was right, ` : ''}it did ${pc(x.coverage)} of the requests right and asked about ${pc(x.asked)}`;
   const opt = l => { const x = L[l], off = !!info && l !== 'all' && !x, about = l === 'all' ? 'no gate: VSS executes every request it reads (as before 2026-11-02)'
-      : x && l === 'cost' ? costAbout(x)
+      : x && COST_OF[l] ? costAbout(x)
       : x ? `${acts(x)}; on the calibration messages (out-of-fold scores): ${pc(x.precision)} of what it executed was right, it did ${pc(x.coverage)} of the requests right and asked about ${pc(x.asked)}`
-      : off ? (l === 'cost' ? 'not offered: the confidence model has no safety threshold' : `not offered: no threshold reaches it on the calibration messages (the highest is ${info.best != null ? pc(info.best) : 'lower'} with at least 50 requests executed)`) : 'thresholds not loaded yet';
+      : off ? (COST_OF[l] ? `not offered: the confidence model has no threshold for ${costWords(COST_OF[l])}` : `not offered: no threshold reaches it on the calibration messages (the highest is ${info.best != null ? pc(info.best) : 'lower'} with at least 50 requests executed)`) : 'thresholds not loaded yet';
     return `<label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:${off ? 'default' : 'pointer'}${off ? ';opacity:.6' : ''}"><input type="radio" name="vss-gate" value="${l}" ${l === vssGate ? 'checked' : ''} ${off ? 'disabled' : ''}> <span><b>${escH(gateLabel(l))}</b>${l === GATE_DEFAULT ? ' (default)' : ''}: ${escH(about)}</span></label>`; };
   return `<h3 class="sub">When VSS acts</h3>
-  <p class="intro">VSS executes a request only when its confidence clears the threshold of the level chosen here (by default its safety threshold: the one that scores best when a confident mistake costs as much as 10 right answers); below it, it does not execute the request, says why it is not sure (words it did not understand, an uncertain cut, a world that is often wrong, a reference filled from context with a weak margin) and offers <b>Do it anyway</b>. The confidence combines 14 numbers from the whole chain (the cut, the world, the reading, the words, the context filler, the world's own accuracy); the confidence and the thresholds were fitted on the calibration part of the fresh2 messages, from out-of-fold scores (training/sketch/fresh2/fit_report.mjs, FEEDBACK_RESULT.md); on the test part the safety threshold gave a cost score of 12.9, 1.9% of what it executed wrong. A level other than the default is kept in this browser.</p>
+  <p class="intro">VSS executes a request only when its confidence clears the threshold of the level chosen here (by default its safety threshold: the one that scores best when a confident mistake costs as much as 10 right answers; “bolder” and “more careful” are the same rule with a mistake counted as 5 or as 20 right answers); below it, it does not execute the request, says why it is not sure (words it did not understand, an uncertain cut, a world that is often wrong, a reference filled from context with a weak margin) and offers <b>Do it anyway</b>. The confidence combines 14 numbers from the whole chain (the cut, the world, the reading, the words, the context filler, the world's own accuracy); the confidence and the thresholds were fitted on the calibration part of the fresh2 messages, from out-of-fold scores (training/sketch/fresh2/fit_report.mjs, FEEDBACK_RESULT.md); on the test part the safety threshold gave a cost score of 12.9, 1.9% of what it executed wrong. A level other than the default is kept in this browser.</p>
   ${GATE_LEVELS.map(opt).join('')}${info && info.version ? `<p class="note">Model <code>confidence/vss.json</code>, version <code>${escH(info.version)}</code>.</p>` : ''}`;
 }
 /** what every reader's Settings subtab starts with: its drawing and what it has read */
 function readerFacts(rd) {
   const S = rd.world.state, n = S.shapes.length, m = S.edges.length, u = rd.world.undoStack.length;
-  return `<table class="kv"><tr><td>State</td><td>${escH(isReady(rd) ? 'ready' : offText(rd).replace(/, did not read this$/, '').replace(/ \(see Neural › Settings\)$/, '').replace(/; see Neural › Settings\)$/, ')'))}</td></tr><tr><td>Messages read</td><td>${rd.reads}</td></tr><tr><td>Its drawing</td><td>${n} shape${n === 1 ? '' : 's'} · ${m} link${m === 1 ? '' : 's'} · ${u} step${u === 1 ? '' : 's'} to undo</td></tr><tr><td>Requests cut by</td><td>${escH(cutLabel(cutWanted()))} (the same for every reader; ⋮ › Settings)</td></tr></table>`;
+  return `<table class="kv"><tr><td>State</td><td>${escH(isReady(rd) ? 'ready' : offText(rd).replace(/, did not read this$/, '').replace(/ \(see SOP-BERT › Settings\)$/, '').replace(/; see SOP-BERT › Settings\)$/, ')'))}</td></tr><tr><td>Messages read</td><td>${rd.reads}</td></tr><tr><td>Its drawing</td><td>${n} shape${n === 1 ? '' : 's'} · ${m} link${m === 1 ? '' : 's'} · ${u} step${u === 1 ? '' : 's'} to undo</td></tr><tr><td>Requests cut by</td><td>${escH(cutLabel(cutWanted()))} (the same for every reader; ⋮ › Settings)</td></tr></table>`;
 }
 const sharedNote = `<p class="intro">SOP Lang (the commands every reader writes) and the engine’s capabilities are the same for all three readers. Help explains both: <button type="button" class="btn" data-help="sop-lang">SOP Lang</button> <button type="button" class="btn" data-help="capabilities">Capabilities</button> <button type="button" class="btn" data-help="architecture">How it works inside</button></p>`;
 function renderReaderSettings(rd) {
+  if (rd.id === 'combined') return combinedSettingsHTML() + sharedNote;
   if (rd.id === 'rules') return `<h3 class="sub">Rules reader</h3>${readerFacts(rd)}
   <p class="intro">Hand-written code (<code>docs/js/logic.js</code>, ${mb(rulesBytes())}): it cuts the message into requests, finds the action by its cue words and answers the SOP Lang questions from the words around it. Nothing to download and nothing to choose; it reads every message at once.</p>${sharedNote}`;
   if (rd.id === 'vss') {
@@ -917,7 +1055,7 @@ function renderReaderSettings(rd) {
   const size = id => { const b = NeuralKit.bytesOf(id); return b ? mb(b) : 'size not known yet'; };
   const facts = id => { const f = info[id] && info[id].facts; if (!f) return ''; const p = [f.base && `base model <code>${escH(f.base)}</code>`, f.spans && `${escH(f.spans)} annotated requests`, f.heldout && `held-out act accuracy ${(+f.heldout * 100).toFixed(1)}%`].filter(Boolean); return p.length ? ` (${p.join(', ')})` : ''; };
   const row = (label, id) => `<label>${label}</label><div>${escH(N[id] || id)} · ${size(id)}<div class="note">${escH(A[id] || '')}${facts(id)}.${info[id] ? `${info[id].readme ? ` <a href="${escH(info[id].readme)}" target="_blank" rel="noopener">README</a> ·` : ''} version <code>${escH(info[id].version)}</code>` : ''}</div></div>`;
-  return `<h3 class="sub">Neural reader</h3>${readerFacts(rd)}
+  return `<h3 class="sub">SOP-BERT reader</h3>${readerFacts(rd)}
   <p class="intro">SOP-BERT: one DistilBERT model of ours, fine-tuned on the same annotated requests as the VSS worlds, run in this browser. In two calls per message (the cut, then all its requests at once) it reads, for every request, the action, the value of each SOP Lang key, who fills each role (a name written in the request, “it”, or a description such as “the red circle”) and the words that are names, labels and numbers; the SOP Lang wires are then assembled by the legend. It does not use the Rules reader. It carries out a request only when its confidence clears the threshold chosen below, and asks about the rest. Its cut head is the BERT cutter (⋮ › Settings). The files come from this site, load by themselves when the page opens, and stay in this browser’s cache.</p>
   <p class="intro"><button type="button" class="btn" data-help="neural-reader">How SOP-BERT works</button> <button type="button" class="btn" data-help="bert">What we do with BERT</button></p>
   <div class="form">
@@ -927,27 +1065,27 @@ function renderReaderSettings(rd) {
   <div class="nbox" id="nm-box">${neuralBoxHTML()}</div>
   ${neuralGateSettingsHTML()}`;
 }
-/** Neural › Settings: the level of the neural gate (GATES.neural), with what each level gave on the calibration messages (sop-bert.json) */
+/** SOP-BERT › Settings: the level of the neural gate (GATES.neural), with what each level gave on the calibration messages (sop-bert.json) */
 function neuralGateSettingsHTML() {
   const spec = nconf.spec, NC = spec ? ncNow : null;
   if (!spec) {   // load it, then show this part again
     const again = () => { if (sub === 'settings' && cur.id === 'neural') renderSub(); };
     if (!nconf.error) neuralSpec().then(again, again);
-    return `<h3 class="sub">When Neural acts</h3><p class="intro">${nconf.error ? `The confidence model could not be loaded (${escH(nconf.error.message || nconf.error)}): Neural asks about every request.` : 'Loading the confidence model…'}</p>`;
+    return `<h3 class="sub">When SOP-BERT acts</h3><p class="intro">${nconf.error ? `The confidence model could not be loaded (${escH(nconf.error.message || nconf.error)}): SOP-BERT asks about every request.` : 'Loading the confidence model…'}</p>`;
   }
   const pc = v => (v * 100).toFixed(1) + '%', L = spec.levels_out_of_fold || {}, def = NC.defaultLevel(spec), chosen = neuralLevel(NC, spec);
   const stats = x => { const p = x.heldout_oof_precision ?? x.heldout_precision, c = x.heldout_oof_coverage ?? x.heldout_coverage, a = x.heldout_oof_asked ?? x.heldout_asked;
     return [p != null ? `${pc(p)} of what it executed was right` : '', c != null ? `it did ${pc(c)} of the requests right` : '', a != null ? `asked about ${pc(a)}` : ''].filter(Boolean).join(', '); };
   const opt = l => {
     const x = L[l], off = l !== 'all' && !NC.reached(spec, l), st = x ? stats(x) : '';
-    const about = l === 'all' ? 'no gate: Neural executes every request it reads (as before 2026-11-02)'
+    const about = l === 'all' ? 'no gate: SOP-BERT executes every request it reads (as before 2026-11-02)'
       : off ? 'not offered: no threshold reaches it on the calibration messages with at least 50 requests executed'
-      : `acts when its confidence is at least ${x.threshold.toFixed(4)}${l === 'cost' ? `: the threshold that scores best when one confident mistake costs as much as ${x.cost || 10} right answers` : ''}${st ? `; on the calibration messages (out-of-fold scores): ${st}` : ''}`;
+      : `acts when its confidence is at least ${x.threshold.toFixed(4)}${COST_OF[l] ? `: the threshold that scores best when ${costWords(x.cost || COST_OF[l])}` : ''}${st ? `; on the calibration messages (out-of-fold scores): ${st}` : ''}`;
     return `<label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:${off ? 'default' : 'pointer'}${off ? ';opacity:.6' : ''}"><input type="radio" name="neural-gate" value="${escH(l)}" ${l === chosen ? 'checked' : ''} ${off ? 'disabled' : ''}> <span><b>${escH(gateLabel(l))}</b>${l === def ? ' (default)' : ''}: ${escH(about)}</span></label>`;
   };
   const cost = L.cost && L.cost.test_score != null ? ` On the test part the safety threshold gave a cost score of ${L.cost.test_score.toFixed(1)}${L.cost.test_confidently_wrong != null ? `, ${pc(L.cost.test_confidently_wrong)} of what it executed wrong` : ''}.` : '';
-  return `<h3 class="sub">When Neural acts</h3>
-  <p class="intro">SOP-BERT executes a request only when its confidence clears the threshold of the level chosen here; below it, it does not execute the request, says why it is not sure (which action it is, which shape “it” means, where the request ends, words it reads badly) and offers <b>Do it anyway</b>. The confidence combines 24 numbers read from the model’s own outputs for that request (the action, the values, who fills each role, the word tags, the cut, the word pieces), fitted on calibration messages, the thresholds from out-of-fold scores (the method of training/sketch/PRECISION_BERT.md; this file: the calibration part of the fresh2 messages, training/sketch/fresh2/fit_report.mjs, FEEDBACK_RESULT.md).${cost} It was fitted on requests cut by the BERT cutter; with another cut the model’s cut head runs once more and is read at that cut’s requests. A level other than the default is kept in this browser.</p>
+  return `<h3 class="sub">When SOP-BERT acts</h3>
+  <p class="intro">SOP-BERT executes a request only when its confidence clears the threshold of the level chosen here (by default its safety threshold, the one that scores best when a confident mistake costs as much as 10 right answers; “bolder” and “more careful” count a mistake as 5 or 20 right answers); below it, it does not execute the request, says why it is not sure (which action it is, which shape “it” means, where the request ends, words it reads badly) and offers <b>Do it anyway</b>. The confidence combines 24 numbers read from the model’s own outputs for that request (the action, the values, who fills each role, the word tags, the cut, the word pieces), fitted on calibration messages, the thresholds from out-of-fold scores (the method of training/sketch/PRECISION_BERT.md; this file: the calibration part of the fresh2 messages, training/sketch/fresh2/fit_report.mjs, FEEDBACK_RESULT.md).${cost} It was fitted on requests cut by the BERT cutter; with another cut the model’s cut head runs once more and is read at that cut’s requests. A level other than the default is kept in this browser.</p>
   ${NC.levels(spec).map(opt).join('')}<p class="note">Model <code>confidence/sop-bert.json</code>${nconf.url && /[?&]v=/.test(nconf.url) ? `, version <code>${escH(decodeURIComponent(nconf.url.split('v=').pop()))}</code>` : ''}.</p>`;
 }
 sbody.addEventListener('click', async ev => {
@@ -984,13 +1122,13 @@ let benchStop = false, benchSets = null, benchLast = null, benchCut = null;
 async function benchIndex() { if (!benchSets) { const r = await fetch(new URL('bench/index.json', document.baseURI)); benchSets = (await r.json()).sets; } return benchSets; }
 function renderBench() {
   const sets = benchSets || [];
-  const fz = [['rules', 'Rules', true], ['vss', 'VSS', vssState !== 'failed'], ['neural', 'Neural', !!models]];
+  const fz = [['rules', 'Rules', true], ['vss', 'VSS', vssState !== 'failed'], ['neural', 'SOP-BERT', !!models]];
   return `<p class="intro">Every reader reads the same labelled sentences against the same gold wires, cut into requests by the ${escH(cutLabel(cutWanted()))} (⋮ › Settings). A message counts when its wire type and every labelled answer match (descriptions are compared by what they describe). Speed is measured here, in this browser, per message, after the model has loaded.</p>
   <h3 class="sub">Test sets</h3>
   ${sets.length ? sets.map(s => `<label class="ck" style="display:flex;margin:4px 0"><input type="checkbox" data-bset="${s.id}" ${['blind', 'broad', 'new_identities'].includes(s.id) ? 'checked' : ''}> ${escH(s.title)} <span class="status">&nbsp;· ${s.n}</span></label>`).join('') : '<p class="intro">Loading the test sets…</p>'}
   <div class="opts" style="margin-top:8px"><label for="bm-limit">Sentences per generated set</label><select id="bm-limit"><option value="50">50</option><option value="100" selected>100</option><option value="300">300</option></select></div>
   <h3 class="sub">Readers</h3>
-  ${fz.map(([k, l, ok]) => `<label class="ck" style="display:flex;margin:4px 0"><input type="checkbox" data-bfz="${k}" ${ok ? 'checked' : ''}> ${l}${k === 'neural' && !models ? ' <span class="status">&nbsp;(not loaded yet: see Neural › Settings)</span>' : ''}</label>`).join('')}
+  ${fz.map(([k, l, ok]) => `<label class="ck" style="display:flex;margin:4px 0"><input type="checkbox" data-bfz="${k}" ${ok ? 'checked' : ''}> ${l}${k === 'neural' && !models ? ' <span class="status">&nbsp;(not loaded yet: see SOP-BERT › Settings)</span>' : ''}</label>`).join('')}
   <div class="actions" style="margin-top:10px"><button type="button" class="btn solid" id="bm-run">Run benchmark</button><button type="button" class="btn" id="bm-stop">Stop</button><span class="status" id="bm-status"></span></div>
   <div id="bm-out">${benchLast || ''}</div>`;
 }
@@ -1032,7 +1170,7 @@ async function runBench(btn) {
   }
   const size = { rules: rulesBytes(), vss: vssInfo ? vssInfo.bytes : 0, neural: neuralBytes };
   const load = { rules: 0, vss: vssInfo ? vssInfo.loadMs : 0, neural: neuralLoadMs };
-  const label = { rules: 'Rules', vss: vssInfo && vssInfo.composer ? `VSS (${vssInfo.worlds.length} micro-worlds)` : `VSS (D ${vssInfo ? vssInfo.D : '?'})`, neural: models ? `Neural (${neuralNames().join(' + ')})` : 'Neural' };
+  const label = { rules: 'Rules', vss: vssInfo && vssInfo.composer ? `VSS (${vssInfo.worlds.length} micro-worlds)` : `VSS (D ${vssInfo ? vssInfo.D : '?'})`, neural: models ? `SOP-BERT (${neuralNames().join(' + ')})` : 'SOP-BERT' };
   const sets = setIds.filter(id => fzs.some(f => res[f].sets[id] && res[f].sets[id].n));
   const cell = S => S && S.n ? `<b>${(S.ok / S.n * 100).toFixed(0)}%</b> <span class="why">${S.ok}/${S.n} · answers ${(S.kok / Math.max(1, S.keys) * 100).toFixed(0)}%</span>` : '–';
   const html = `<h3 class="sub">Results</h3><p class="intro">Every reader read the requests cut by the ${escH(cutLabel(benchCut))} (⋮ › Settings); the times are the reading only.</p><div class="tbl"><table class="bench"><thead><tr><th>reader</th>${sets.map(id => `<th>${escH(benchSets.find(s => s.id === id).title.split(' (')[0])}</th>`).join('')}<th>model size</th><th>load</th><th>ms / message (median · p95)</th></tr></thead><tbody>
@@ -1066,7 +1204,7 @@ function cutHelpHTML() {
   const opt = s => { const why = cutWhyNot(s.id), off = s.id === 'bert' && why;   // VSS can be chosen while it loads (the Rules segmenter cuts until then)
     return `<label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:${off ? 'default' : 'pointer'}${off ? ';opacity:.6' : ''}"><input type="radio" name="cut-strategy" value="${escH(s.id)}" ${s.id === want ? 'checked' : ''} ${off ? 'disabled' : ''}> <span><b>${escH(s.label)}</b>${s.id === def ? ' (default)' : ''}${s.about ? `: ${escH(s.about)}` : ''}${why ? `<br><span class="note">Not available now: ${escH(why)}.</span>` : ''}</span></label>`; };
   return `<div class="help"><h3 class="sub">Cutting into requests</h3>
-  <p class="note">A message is cut into requests once, and Rules, VSS and Neural all read the same requests; the tabs differ only in how each reader reads a request. <b>details</b> under a reply lists the requests and the time the cut took.</p>
+  <p class="note">A message is cut into requests once, and Rules, VSS and SOP-BERT all read the same requests; the tabs differ only in how each reader reads a request. <b>details</b> under a reply lists the requests and the time the cut took.</p>
   ${cutStrategies().map(opt).join('')}</div>`;
 }
 /** the spell checker's switch, in ⋮ › Settings (it acts before every reader, so it is not one reader's setting) */
@@ -1086,7 +1224,7 @@ function renderWorld(rd) {
   for (const r of S.rules) { const a = {}; ['shape', 'size', 'color', 'outline'].forEach(k => { if (r[k]) a[k] = r[k]; }); lines.push(hlNode({ id: r.id, type: 'rule', args: a })); }
   for (const g of S.groups || []) lines.push(hlNode({ id: g.name, type: 'group', args: { members: g.members.map(m => ({ ref: m })) } }));
   if (!lines.length) lines.push('<span class="cm"># empty</span>');
-  return `${isReady(rd) ? '' : `<p class="intro">This reader is ${escH(offText(rd).replace(/, did not read this$/, '').replace(/ \(see Neural › Settings\)$/, ''))}; its Settings subtab shows how to load it.</p>`}<p class="intro">The ${escH(rd.label)} reader’s drawing, written back as SOP Lang wires. This is what a backend such as Datalog, Prolog or Z3 would receive after lowering. ${w.undoStack.length} step${w.undoStack.length === 1 ? '' : 's'} can be undone.</p><pre class="sop">${lines.join('\n')}</pre>`;
+  return `${isReady(rd) ? '' : `<p class="intro">This reader is ${escH(offText(rd).replace(/, did not read this$/, '').replace(/ \(see SOP-BERT › Settings\)$/, ''))}; its Settings subtab shows how to load it.</p>`}<p class="intro">The ${escH(rd.label)} reader’s drawing, written back as SOP Lang wires. This is what a backend such as Datalog, Prolog or Z3 would receive after lowering. ${w.undoStack.length} step${w.undoStack.length === 1 ? '' : 's'} can be undone.</p><pre class="sop">${lines.join('\n')}</pre>`;
 }
 
 /* ---------------- composer ---------------- */
@@ -1147,7 +1285,7 @@ window.addEventListener('resize', () => { if (!drag) renderCanvas(); });
 
 /* ---------------- start ---------------- */
 updateTabs(); renderCanvas(); setStatus(idleStatus());
-botBubble({ text: 'Hi! Tell me what to draw, change or connect, or ask me about the drawing. Three readers (Rules, VSS, Neural) read every message, each into its own drawing; the tabs above the canvas switch between them. Tap + for examples and whole scenarios, ? for help, ⋮ for settings.' });
+botBubble({ text: 'Hi! Tell me what to draw, change or connect, or ask me about the drawing. Three readers (Rules, VSS, SOP-BERT) read every message, each into its own drawing, and VSS-BERT does what VSS and SOP-BERT are sure of together; the tabs above the canvas switch between them. Tap + for examples and whole scenarios, ? for help, ⋮ for settings.' });
 const START = [
   'Draw a large blue circle named Start in the top left, then add a rectangle named Process to the right of it labeled "Validate". Connect Start to Process.',
   'Add a yellow diamond named Check right of Process labeled "ok?" and connect Process to it. Put a green circle named Done below Check and link Check to Done with a dashed arrow labeled "yes".',

@@ -4922,11 +4922,43 @@
      "test_done_right": 0.15917745620715917,
      "test_asked": 0.6306169078446306,
      "test_executed": 213
+    },
+    "cost5": {
+     "threshold": 0.8321526636578956,
+     "kind": "threshold",
+     "cost": 5,
+     "heldout_oof_score": 18.288590604026847,
+     "heldout_oof_precision": 0.9170506912442397,
+     "heldout_oof_coverage": 0.3338926174496644,
+     "heldout_oof_asked": 0.4714765100671141,
+     "heldout_oof_executed": 217,
+     "heldout_produced": 556,
+     "test_score": 19.345011424219344,
+     "test_confidently_wrong": 0.06341463414634146,
+     "test_done_right": 0.2924600152322925,
+     "test_asked": 0.4843869002284844,
+     "test_executed": 410
+    },
+    "cost20": {
+     "threshold": 0.9474106782623113,
+     "kind": "threshold",
+     "cost": 20,
+     "heldout_oof_score": 2.348993288590604,
+     "heldout_oof_precision": 1,
+     "heldout_oof_coverage": 0.02348993288590604,
+     "heldout_oof_asked": 0.802013422818792,
+     "heldout_oof_executed": 14,
+     "heldout_produced": 556,
+     "test_score": 2.5894897182025893,
+     "test_confidently_wrong": 0.01818181818181818,
+     "test_done_right": 0.04112718964204113,
+     "test_asked": 0.7501904036557502,
+     "test_executed": 55
     }
    },
    "threshold": 0.8964062640282224,
    "threshold_source": "out-of-fold: each calibration request scored by the model of the 5-fold cross-validation (folds by message) that did not see its fold; L2 1 chosen from {0.01, 0.1, 1, 10} by out-of-fold AUROC (0.776); the weights, intercept, tables and world prior are the final fit on all of the calibration part (556 produced requests). The \"cost\" level: the threshold that maximises the cost score (requests done right - 10 x (executed wrong + extras executed)) / requested actions x 100 on the out-of-fold confidences (a tie keeps the higher threshold); test part: score 12.9 [9.2, 16.5] (FEEDBACK_RESULT.md, fresh2/VERDICTS.md).",
-   "levels_note": "levels.cost is the default (the owner's decision 2026-11-02 21:24: execute only what it is sure of, at the cost-score threshold). levels[95|97|99] = null: no threshold reaches that precision of execution on the calibration part's out-of-fold confidences with at least 50 executed; the demo shows the level as not reachable. heldout_* fields: the calibration part (the name is kept from the earlier file); heldout_oof_*: out-of-fold precision / right share / asked share at the threshold; test_*: the test part of fresh2 at the cost threshold (reported, never used to choose).",
+   "levels_note": "levels.cost is the default (the owner's decision 2026-11-02 21:24: execute only what it is sure of, at the cost-score threshold). levels[95|97|99] = null: no threshold reaches that precision of execution on the calibration part's out-of-fold confidences with at least 50 executed; the demo shows the level as not reachable. heldout_* fields: the calibration part (the name is kept from the earlier file); heldout_oof_*: out-of-fold precision / right share / asked share at the threshold; test_*: the test part of fresh2 at the cost threshold (reported, never used to choose). Levels cost5 ('bolder': one confident mistake counts as 5 right answers) and cost20 ('more careful': as 20): the cost-score optimum at that cost on the same out-of-fold calibration confidences (added 2026-11-02 by training/sketch/combine/combined_report.mjs EXPORT=1; the weights are unchanged).",
    "best_reachable_heldout_oof_precision": 0.9478260869565217
   }
  }

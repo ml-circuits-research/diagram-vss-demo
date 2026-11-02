@@ -51,9 +51,9 @@ ${AH}
 <text x="200" y="283" text-anchor="middle">event hint</text>
 <text x="200" y="298" text-anchor="middle">context filler</text>
 <rect class="acc" x="272" y="216" width="120" height="96" rx="8"/>
-<text class="t" x="332" y="235" text-anchor="middle">Neural</text>
+<text class="t" x="332" y="235" text-anchor="middle">SOP-BERT</text>
 <text class="m" x="332" y="250" text-anchor="middle">neural.js</text>
-<text x="332" y="268" text-anchor="middle">SOP-BERT</text>
+<text x="332" y="268" text-anchor="middle">one DistilBERT</text>
 <text x="332" y="283" text-anchor="middle">one DistilBERT</text>
 <text x="332" y="298" text-anchor="middle">with small heads</text>
 <path class="ar" d="M68 312 V330 H160 V346"/>
@@ -78,7 +78,7 @@ ${AH}
 <text class="t" x="200" y="531" text-anchor="middle">VSS drawing</text>
 <text class="s" x="200" y="546" text-anchor="middle">own world, undo</text>
 <rect class="box" x="272" y="514" width="120" height="40" rx="8"/>
-<text class="t" x="332" y="531" text-anchor="middle">Neural drawing</text>
+<text class="t" x="332" y="531" text-anchor="middle">SOP-BERT drawing</text>
 <text class="s" x="332" y="546" text-anchor="middle">own world, undo</text>
 </svg>
 </div>
@@ -102,7 +102,7 @@ such a threshold yet: that is in progress. <a href="#help/measurement">Measureme
 <tr><td>Rules reader, SOP Lang, engine, plugins, Datalog</td><td><code>docs/js/logic.js</code></td><td>none</td><td class="num">—</td></tr>
 <tr><td>The shared cut</td><td><code>docs/js/vss-composer.js</code> (<code>cutUnits</code>, <code>CUT_STRATEGIES</code>, <code>DEFAULT_CUT</code>), <code>docs/js/vss-formalizer.js</code> (<code>cut</code>)</td><td>the cutter of the strategy chosen</td><td class="num">—</td></tr>
 <tr><td>VSS reader (composer)</td><td><code>docs/js/vss-formalizer.js</code>, <code>docs/js/vss-composer.js</code>, <code>docs/js/front.js</code>, <code>docs/js/vss.js</code> + <code>docs/js/vss/</code>, <code>docs/js/vss-context.js</code>, <code>docs/js/vss-adapter.js</code></td><td><code>docs/model/micro/registry.json</code> and what it names: 2 cutters, 7 worlds, <code>docs/model/context/weights.json</code></td><td class="num">19.4 MB</td></tr>
-<tr><td>Neural reader</td><td><code>docs/js/neural.js</code> (transformers.js 3.8.1 from jsDelivr)</td><td><code>docs/model/neural/sop-bert/</code> (one DistilBERT, 8-bit)</td><td class="num">68.5 MB</td></tr>
+<tr><td>SOP-BERT reader</td><td><code>docs/js/neural.js</code> (transformers.js 3.8.1 from jsDelivr)</td><td><code>docs/model/neural/sop-bert/</code> (one DistilBERT, 8-bit)</td><td class="num">68.5 MB</td></tr>
 <tr><td>Benchmark (scoring)</td><td><code>docs/js/bench-canon.js</code></td><td><code>docs/bench/</code> (6 sets)</td><td class="num">—</td></tr>
 </tbody></table></div>
 <p class="note">Sizes: <code>du -sb</code> and <code>versions.json</code> “sizes” on 2026-11-02, MB = 10<sup>6</sup> bytes. The VSS figure is the 7 world folders (35.6 MB), the two
@@ -113,7 +113,7 @@ cutters the registry names (2.4 MB), the context weights and the registry.</p>
 <li><a href="#help/engine">The engine and the legend</a>: wires, the legend, the plugins, Datalog.</li>
 <li><a href="#help/rules-reader">The Rules reader</a>: hand-written, and what it is good and bad at.</li>
 <li><a href="#help/vss-reader">The VSS reader</a>: the composer, its cutters, the 7 worlds, the context filler, the adapter.</li>
-<li><a href="#help/neural-reader">The Neural reader</a>: SOP-BERT, one fine-tuned DistilBERT with small heads.</li>
+<li><a href="#help/neural-reader">The SOP-BERT reader</a>: SOP-BERT, one fine-tuned DistilBERT with small heads.</li>
 <li><a href="#help/cutting">One cut for all readers</a>: the three cutters and what they cost each reader.</li>
 <li><a href="#help/spelling">The spell checker</a>, <a href="#help/models">Models and versions</a>, <a href="#help/data">Data</a>,
 <a href="#help/training">Training and the GPU runner</a>, <a href="#help/measurement">Measurement and current numbers</a>,
@@ -401,7 +401,7 @@ SHORT2.md §6).</p>
 `, 'A composer of seven small vector-symbolic models, two cutters, a context filler and an adapter to SOP Lang.');
 
 /* ============================================================ neural */
-page('neural-reader', 'The Neural reader', `
+page('neural-reader', 'The SOP-BERT reader', `
 <p>Code: <code>docs/js/neural.js</code> (<code>NeuralKit</code>, strategy <code>finetuned</code>), run by transformers.js 3.8.1 (loaded from
 jsDelivr) on the CPU through WebAssembly, with 8-bit files (<code>q8</code>, <code>onnx/model_quantized.onnx</code>). The models are served
 from this site and load by themselves when the page opens (from the browser cache after the first time). The demo has <b>one neural model</b>,
@@ -527,7 +527,7 @@ setting (Settings › Cutting into requests), so the tabs differ only in how eac
 <tbody>
 <tr><td><b>Rules segmenter</b></td><td>Hand-written: sentences, then a comma or “and” before a verb, coordinated names, one clause per created object.</td><td><code>docs/js/logic.js</code> (<code>rulesCut</code>)</td></tr>
 <tr><td><b>VSS cutter</b> (default)</td><td>A learned token tagger <code>B-&lt;world&gt;</code> / I / O trained on the annotated request spans; it also names each unit’s candidate worlds.</td><td><code>docs/model/micro/cutter_worlds7s.json</code></td></tr>
-<tr><td><b>BERT cutter</b></td><td>The cut head of SOP-BERT: B / I / O per word over the whole message. Available once the Neural reader has loaded.</td><td><code>NeuralKit.cut</code>, <code>training/neural/finetune_roles.py</code></td></tr>
+<tr><td><b>BERT cutter</b></td><td>The cut head of SOP-BERT: B / I / O per word over the whole message. Available once SOP-BERT has loaded.</td><td><code>NeuralKit.cut</code>, <code>training/neural/finetune_roles.py</code></td></tr>
 </tbody></table></div>
 <p><b>How.</b> <code>VSSFormalizer.cut(text, ctx, strategy, env)</code> returns <code>[{c0, c1, src}]</code> (character offsets); every reader
 reads exactly those units (<code>rules.formalize(t, ctx, {units})</code>, <code>VSSFormalizer.formalize(t, ctx, _, {units})</code>,
@@ -591,7 +591,7 @@ page('models', 'Models and versions', `
 <svg class="dg" viewBox="0 0 400 560" role="img" aria-labelledby="d4t">
 <title id="d4t">The docs/model folder: versions.json; micro with the two registries, four cutters, the seven worlds and their round-2 versions; context; spell; neural with sop-bert</title>
 <rect class="chipv" x="10" y="8" width="10" height="10" rx="2"/><text class="s" x="25" y="17">VSS loads</text>
-<rect class="chipn" x="98" y="8" width="10" height="10" rx="2"/><text class="s" x="113" y="17">Neural loads</text>
+<rect class="chipn" x="98" y="8" width="10" height="10" rx="2"/><text class="s" x="113" y="17">SOP-BERT loads</text>
 <rect class="chipo" x="196" y="8" width="10" height="10" rx="2"/><text class="s" x="211" y="17">spell, versions</text>
 <rect class="chipx" x="300" y="8" width="10" height="10" rx="2"/><text class="s" x="315" y="17">not loaded</text>
 <text class="m" x="10" y="46" style="font-weight:600">docs/model/</text><text class="m" x="392" y="46" text-anchor="end">149.9 MB</text>
@@ -625,7 +625,7 @@ page('models', 'Models and versions', `
 </svg>
 </div>
 <figcaption>Figure 4. The model folder the page loads from (<code>du -sb</code>, 2026-11-02). VSS loads only what <code>registry.json</code> names;
-the Neural reader loads <code>sop-bert/</code>; the size of each of its files is also in <code>versions.json</code> (“sizes”) and in Neural › Settings.</figcaption>
+SOP-BERT loads <code>sop-bert/</code>; the size of each of its files is also in <code>versions.json</code> (“sizes”) and in SOP-BERT › Settings.</figcaption>
 </figure>
 
 <h2 id="versions">Versions: the browser never uses a stale model</h2>
@@ -813,7 +813,7 @@ confidence for SOP-BERT, for a fair comparison, is being measured (<code>PRECISI
   E wrong event, F lost to another world, G1/G2 the filler asks, H1/H2 role values).</dd>
   <dt><code>training/sketch/error_analysis.mjs</code></dt><dd>Root causes of one world’s misses on perfectly cut requests: A action word not
   recognized, B wrong action, C reader refuses, D value not reachable, E name not reachable, F role missed, G role wrong.</dd>
-  <dt><code>training/laptop/neural_score.mjs</code></dt><dd>Rules, VSS and Neural on the same gold, with the scoring of <code>llm_score.mjs</code>,
+  <dt><code>training/laptop/neural_score.mjs</code></dt><dd>Rules, VSS and SOP-BERT on the same gold, with the scoring of <code>llm_score.mjs</code>,
   plus milliseconds per message.</dd>
   <dt><code>training/sketch/risk_coverage.mjs</code></dt><dd>Every produced request of VSS and SOP-BERT with its outcome and the reader’s
   confidence; the risk-coverage curves, AUROC, calibration and the thresholds chosen on held-out (RISK_COVERAGE.md).</dd>
@@ -873,7 +873,7 @@ page('repository', 'Repository map', `
 <thead><tr><th>Folder</th><th>What it holds</th></tr></thead>
 <tbody>
 <tr><td><code>docs/</code></td><td>The site published by GitHub Pages: <code>docs/index.html</code> (the demo), <code>docs/architecture.html</code> (these pages as one page).</td></tr>
-<tr><td><code>docs/js/</code></td><td>All the page’s code: engine and Rules (<code>logic.js</code>), VSS composer and its parts, Neural, spell checker, UI, help (<code>help.js</code>, <code>docs.js</code>, <code>docs-concepts.js</code>, <code>docs-arch.js</code>).</td></tr>
+<tr><td><code>docs/js/</code></td><td>All the page’s code: engine and Rules (<code>logic.js</code>), VSS composer and its parts, SOP-BERT (<code>neural.js</code>), the combined reader VSS-BERT (<code>combined-confidence.js</code>), spell checker, UI, help (<code>help.js</code>, <code>docs.js</code>, <code>docs-concepts.js</code>, <code>docs-arch.js</code>).</td></tr>
 <tr><td><code>docs/js/vss/</code></td><td>The VSS reader in the browser: <code>loader.js</code>, <code>stars.js</code>, <code>routebook.js</code>, <code>reader.js</code>, <code>soplang.js</code>.</td></tr>
 <tr><td><code>docs/model/</code></td><td>Every model the page loads, with <code>versions.json</code> (<a href="#help/models">Models and versions</a>).</td></tr>
 <tr><td><code>docs/bench/</code></td><td>The six short benchmark sets.</td></tr>

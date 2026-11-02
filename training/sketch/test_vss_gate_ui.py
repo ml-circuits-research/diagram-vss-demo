@@ -10,7 +10,7 @@ library are blocked (memory). On the VSS tab, after the page's own start message
   2. "Make Process green and connect Start to Done."  the first request executed, the second not (VSS not sure: read in the links
                                                      world, which is often wrong), one button;
   3. click "Do it anyway": the link Start -> Done appears in the VSS drawing, the button is disabled; "undo" takes exactly that back;
-  4. VSS › Settings shows the levels (safety threshold / 95 / 97 / 99 / execute all, the safety threshold checked; the precision levels
+  4. VSS › Settings shows the levels (bolder / safety threshold / more careful / 95 / 97 / 99 / execute all, the safety threshold checked; the precision levels
      vss.json does not reach are disabled); choosing another level is kept in localStorage, the default is not stored.
 Screenshots of each step go to the directory (default: a temporary folder). Exit code 0 when everything passes.
 """
@@ -42,7 +42,7 @@ base = f"http://127.0.0.1:{httpd.server_address[1]}/"
 # the last bot bubble's VSS line: its text, the requests not done (src, reason) and their buttons
 VSS_LINE = """() => {
   const bs = [...document.querySelectorAll('#msgs .b.bot')], b = bs[bs.length - 1]; if (!b) return null;
-  const rl = [...b.querySelectorAll('.rl')].find(x => /^VSS/.test((x.querySelector('b') || {}).textContent || ''));
+  const rl = [...b.querySelectorAll('.rl')].find(x => /^VSS(?!-BERT)/.test((x.querySelector('b') || {}).textContent || ''));
   if (!rl) return { text: b.textContent, held: [] };
   return { text: rl.querySelector('.t').textContent, held: [...rl.querySelectorAll('.held li')].map(li => ({ src: li.querySelector('.src').textContent, why: li.querySelector('.why').textContent, button: !!li.querySelector('button.anyway') })) };
 }"""
@@ -114,7 +114,14 @@ with sync_playwright() as p:
     pg.click("[data-sub=settings]"); pg.wait_for_timeout(300)
     levels = pg.evaluate("() => [...document.querySelectorAll('#rpanel input[name=vss-gate]')].map(x => [x.value, x.checked])")
     pg.screenshot(path=f"{OUT}/6_settings.png")
-    check("settings: safety threshold / 95 / 97 / 99 / all, the safety threshold checked", levels == [["cost", True], ["95", False], ["97", False], ["99", False], ["all", False]], str(levels))
+    check("settings: bolder / safety threshold / more careful / 95 / 97 / 99 / all, the safety threshold checked", levels == [["cost5", False], ["cost", True], ["cost20", False], ["95", False], ["97", False], ["99", False], ["all", False]], str(levels))
+    lab = pg.evaluate("() => [...document.querySelectorAll('#rpanel input[name=vss-gate]')].map(x => x.parentElement.textContent)")
+    t5, t20 = SPEC["levels"]["cost5"]["threshold"], SPEC["levels"]["cost20"]["threshold"]
+    check("settings: bolder and more careful in plain words, with the thresholds of vss.json", "bolder" in lab[0] and "one confident mistake counts as 5 right answers" in lab[0] and f"{t5:.4f}" in lab[0]
+          and "more careful" in lab[2] and "counts as 20 right answers" in lab[2] and f"{t20:.4f}" in lab[2], str(lab[:3]))
+    pg.check("#rpanel input[name=vss-gate][value='cost20']"); pg.wait_for_timeout(200)
+    kept20 = pg.evaluate("() => { try { return localStorage.getItem('sop.vss.gate'); } catch (e) { return 'no storage'; } }")
+    check("settings: more careful is kept in localStorage", kept20 == "cost20", str(kept20))
     off = pg.evaluate("() => [...document.querySelectorAll('#rpanel input[name=vss-gate]')].filter(x => x.disabled).map(x => x.value)")
     check(f"settings: the levels vss.json does not reach are disabled ({', '.join(NOT_REACHED) or 'none'})", off == NOT_REACHED, str(off))
     pg.check(f"#rpanel input[name=vss-gate][value='{OTHER}']"); pg.wait_for_timeout(200)

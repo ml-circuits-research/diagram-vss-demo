@@ -205,10 +205,10 @@ function start(env) {
 
   <h2 id="replies">Reading the replies</h2>
   <p>Every reply has one line per reader:</p>
-  <div class="hreply"><div class="rl"><b>Rules · 0.4 ms:</b> Drew Gem. Connected Check → Gem.</div><div class="rl"><b>VSS · 12 ms:</b> Drew Gem. Connected Check → Gem.</div><div class="rl"><b>Neural · 140 ms:</b> Drew star1. Connected Check → star1.</div><div class="meta"><span class="lnk">details</span></div></div>
+  <div class="hreply"><div class="rl"><b>Rules · 0.4 ms:</b> Drew Gem. Connected Check → Gem.</div><div class="rl"><b>VSS · 12 ms:</b> Drew Gem. Connected Check → Gem.</div><div class="rl"><b>SOP-BERT · 140 ms:</b> Drew star1. Connected Check → star1.</div><div class="rl"><b>VSS-BERT · 152 ms:</b> Drew Gem. Not sure about 1 of the 2 requests, so it was not done: “connect it to Check”: the two readers disagree on where the link ends.</div><div class="meta"><span class="lnk">details</span></div></div>
   <ul>
     <li><b>The time</b> is how long that reader took to turn your message into SOP Lang. Drawing is not counted. A reader that has not finished loading says so instead of answering.</li>
-    <li><b>Different results</b>: here the Neural reader missed the name, so its star got an automatic name. Each reader changes only its own drawing.</li>
+    <li><b>Different results</b>: here SOP-BERT missed the name, so its star got an automatic name; VSS-BERT, which executes only what it is sure of, did not connect a star the two readers read differently. Each reader changes only its own drawing.</li>
     <li><b>details</b> under a reply shows how the message was cut, what each reader wrote in SOP Lang, what the engine changed, and for questions the logic query it ran.</li>
     <li><b>Buttons under a reply</b> answer a question the reader asked, e.g. “Which circle? Start or Done”.</li>
     <li><b>“I didn’t understand …”</b> is an honest refusal: the reader found no request it could read in that part. It still does every other part of your message. Try plainer words, with shapes and arrows: “connect Plankton to Krill” instead of “plankton feeds the krill”. A refusal or a question is never counted as an error; a change you did not ask for is.</li>
@@ -218,7 +218,7 @@ function start(env) {
 
   <h2 id="screen">What is on the screen</h2>
   <ul class="screen">
-    <li><b>The tabs Rules, VSS, Neural</b> above the drawing show each reader’s own drawing. A dot on a tab means that drawing differs from the one on screen.</li>
+    <li><b>The tabs Rules, VSS, SOP-BERT, VSS-BERT</b> above the drawing show each reader’s own drawing. VSS-BERT is VSS and SOP-BERT together: it executes what they are sure of together (${go('two-readers', 'Two readers together')}). A dot on a tab means that drawing differs from the one on screen.</li>
     <li><b>Under each tab</b>: <i>Drawing</i>; <i>SOP Lang</i>, that drawing written as SOP Lang wires; and <i>Settings</i>, the reader’s models, sizes and state.</li>
     <li>${icon('copy')} <b>Copy</b> appears when the drawings differ. It copies the drawing on screen, with its undo history, to the other tabs, so every reader starts the next message from the same drawing.</li>
     <li>${icon('view')} <b>Whole canvas / zoom</b>, ${icon('undo')} <b>Undo</b>, ${icon('redo')} <b>Redo</b>, ${icon('clear')} <b>Clear</b> act on every reader’s drawing. ${icon('help')} opens this help.</li>
@@ -496,7 +496,7 @@ function sop(env) {
   }
   const other = [...engine.legend.questions.keys()].filter(k => !used.has(k));
   if (other.length) h += `<h3>Other</h3>${other.map(row).join('')}`;
-  h += `</div><p class="note">The words the Rules reader looks for are written by hand and extended with words found in the training messages. The VSS reader learns its own from those messages; the Neural reader uses none. How the engine is built from the legend and its plugins: ${go('engine', 'The engine and the legend')}.</p>`;
+  h += `</div><p class="note">The words the Rules reader looks for are written by hand and extended with words found in the training messages. The VSS reader learns its own from those messages; SOP-BERT uses none. How the engine is built from the legend and its plugins: ${go('engine', 'The engine and the legend')}.</p>`;
   return h;
 }
 
