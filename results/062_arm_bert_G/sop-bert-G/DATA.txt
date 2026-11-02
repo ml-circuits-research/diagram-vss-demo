@@ -1,0 +1,3 @@
+arm BERT-G
+EXTRA_DIRS=llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_gen_1 llm_train/opus_gen_2
+make_data.py --all / make_roles.py --all with this EXTRA_DIRS; finetune_roles.py --epochs 8 --lr 6e-5 --bs 32 (job 041 recipe)
