@@ -1,6 +1,6 @@
-// cut_node.mjs: the BERT cut of the joint model (training/neural/finetune_roles.py, span head) on its own, to measure it against the rules'
+// cut_node.mjs: the BERT cut of SOP-BERT, the joint model (training/neural/finetune_roles.py, span head) on its own, to measure it against the rules'
 // segmenter and the VSS cutter. Reads messages, prints the spans the model cuts, and scores them against the gold spans when the messages have them.
-// Usage: node training/neural/cut_node.mjs <parent dir of the model folder> <model folder name> <messages.jsonl|dir of .jsonl> [--out spans.jsonl] [--limit n] [--ids file]
+// Usage: node training/neural/cut_node.mjs <parent dir of the model folder> <model folder name, e.g. sop-bert> <messages.jsonl|dir of .jsonl> [--out spans.jsonl] [--limit n] [--ids file]
 //   Messages: one JSON per line with id, text and (to score) wires[].span, as training/sketch/llm_*/ . Output lines: {"id", "text", "units": [{"c0", "c1", "src"}]}
 //   (character offsets into text: the units that formalize(text, ctx, {units}) of docs/js/neural.js reads). Needs `cd training/laptop && npm install`.
 // Score (gold spans found in the text, first occurrence not overlapping an earlier one): exact-span precision / recall / F1; overlap recall (a gold span

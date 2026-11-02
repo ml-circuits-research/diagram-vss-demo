@@ -97,15 +97,23 @@ function cosine(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] 
 /* =====================================================================
    The neural formalizer. `models` is injected so the same code runs in
    the browser (Transformers.js) and in tests (mocks).
-   Strategy 'finetuned' (the demo's only one), with our joint model (training/neural/finetune_roles.py; makeReader below): ONE call per
-   request reads the act, the value of every legend key with values (a class head each) and a B / I / O role tag per word for the keys
-   whose answer is written in the request (names, a new name, a label, a number):
-     models.read(text)                 → {words, acts, classes, tags, spans}   (makeReader)
-     models.reader                     → the head layout (config.json "reader": acts, tags, classes, act_keys, number_words)
-   The kind follows from the act (an ACTION -> command, an ASK -> question, else fact or rule). The act "none" (top-1) means the unit is not
-   a request ("Thanks", "I run a small bakery"): no wire and no question come from it; it is listed in the notes as "Ignored (not a request)". The keys read for an act are the keys its
-   requests have in the training gold (reader.act_keys). A names key the request does not write ("it", "the red circle", a shape created
-   before) is taken from the rules' reading of the same request when the rules resolved it to a reference.
+   Strategy 'finetuned' (the demo's only one), with SOP-BERT, our joint model (training/neural/finetune_roles.py; makeReader below). It
+   does not call the Rules reader at all (owner, 2026-11-02): formalizeJoint below
+     1. cuts the message: the units given by the caller (opts.units: the demo's shared cut), else the model's own span head (models.cut);
+     2. reads all the units in ONE batched call: the act, the value of every legend key with values (a class head each), a B / I / O tag
+        per word for the keys whose answer is written (names, a new name, a label, a number), and per name-role (target, from, to,
+        anchor: reader.ref_keys) WHO fills it (head fill:<key>: none / written / context / description) and the description's own keys
+        (heads desc:<key>: quantifier, color, notColor, shape, recency):
+          models.read(text)  → {words, acts, classes, tags, spans}   (makeReader)
+          models.reader      → the head layout (config.json "reader": acts, tags, classes, act_keys, ref_keys, desc_keys, number_words)
+     3. assembles the wires by the legend (deterministic): the kind follows from the act (an ACTION -> command, an ASK -> question, else
+        fact or rule); the keys read for an act are the keys its requests have in the training gold (reader.act_keys); a name-role read as
+        "written" takes the tagged words (a name created earlier in the message -> a reference to that wire), "description" becomes a
+        `mention` wire with the desc:<key> values (resolved by the engine, as the Rules and VSS mentions), "context" takes the context;
+     4. applies the context rule every reader shares after each request (NEXT_CONTEXT, a copy of docs/js/vss-composer.js nextContext:
+        "it" = the last shape created or named; opts.update replaces it, e.g. by the scorer's rule).
+   The act "none" (top-1) means the unit is not a request ("Thanks", "I run a small bakery"): no wire and no question come from it; it is
+   listed in the notes as "Ignored (not a request)".
    Earlier pair (until the joint model is published): our act classifier (training/neural/finetune.py) + extractive QA for the roles:
      models.act(text)                  → [{label, score}, ...]  (every class, best first; text-classification)
      models.qa(question, context)      → {answer, score}
@@ -115,6 +123,15 @@ function cosine(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] 
    and answer the roles with extractive QA (models.qa).
    ===================================================================== */
 let ACTIVE = null;   // the models last given to setModels (NeuralKit.cut / canCut use them)
+/** the context carried from one request to the next, the rule every reader shares: a copy of docs/js/vss-composer.js nextContext (that file
+    is an ES module, this one a classic script); training/laptop/neural_score.mjs passes the original as opts.update */
+function NEXT_CONTEXT(c, main) {
+  if (!main || !main.args) return;
+  if (main.args.action === "create") { if (main.args.name != null && !main.args.count) c.refs.set(String(main.args.name).toLowerCase(), { ref: main.id }); c.last = [{ ref: main.id }]; }
+  else if (main.args.target != null && !Array.isArray(main.args.target)) c.last = [main.args.target];
+  else if (main.args.action === "connect" && main.args.to != null && !Array.isArray(main.args.to)) c.last = [main.args.to];
+  if (main.args.action === "rename" && main.args.name) c.names = c.names.concat([String(main.args.name)]);
+}
 const cutOf = async (m, text) => { if (!m || !m.cut) throw new Error('The loaded neural model has no span head (cut).'); return (await m.cut(text)).map(({ c0, c1 }) => ({ c0, c1 })); };
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 const KIND_OF = act => own(ACTION, act) ? 'command' : own(ASK, act) ? 'question' : act === 'fact' || act === 'rule' || act === 'none' ? act : null;
@@ -185,16 +202,9 @@ function create(engine, rulesFormalize) {
     return out;
   }
 
-  /** joint model: a names key the request does not write is taken from the rules' reading of the same request when the rules resolved it
-      to a reference (a mention, a shape created in this message) or to a name the request does not write ("it" -> Cart) */
-  function ruleReference(ruleNode, key, src) {
-    const v = ruleNode && ruleNode.args[key];
-    if (v == null) return null;
-    const written = x => typeof x === 'string' && wordsOf(src).some(w => w.w.toLowerCase() === x.toLowerCase());
-    return [].concat(v).every(x => K.isRef(x) || !written(x)) ? v : null;
-  }
-  /** joint model: the answer to one legend key from one read() -> {q, span, score, value, source} (the shape answer() returns) */
-  function role(key, act, R, src, ruleNode, names) {
+  /** joint model: the answer to one legend key from one read(), from its class head or its word tags -> {q, span, score, value, source}
+      (the shape answer() returns); names: lower-cased name -> the name, or the reference to the wire that created it in this message */
+  function role(key, act, R, names) {
     const q = (WORDING[act] && WORDING[act][key]) || WORDING._[key] || (L.get(key) && L.get(key).ask) || key + '?';
     const lq = L.get(key), kind = lq ? lq.kind : null;
     if (R.classes[key]) {   // a class head: none or a value of the key
@@ -208,7 +218,6 @@ function create(engine, rulesFormalize) {
       const found = [];
       for (const s of sp) { const hit = names.get(s.text.toLowerCase()); const v = hit != null ? hit : s.text; if (!found.some(f => f === v)) found.push(v); }
       if (found.length) out.value = found.length === 1 ? found[0] : found;
-      else { const r = ruleReference(ruleNode, key, src); if (r != null) { out.value = r; out.source = 'rules (reference)'; } }
     } else if (!sp.length) return out;
     else if (kind === 'name' || kind === 'text') out.value = sp[0].text;
     else if (kind === 'number') {
@@ -219,46 +228,97 @@ function create(engine, rulesFormalize) {
     return out;
   }
 
+  /** SOP-BERT, one name-role of one read() -> {q, span, score, value, source, fill} (the shape answer() returns). c: the context
+      ({names, last, refs}); mention(args) adds a mention wire and returns the reference to it */
+  function jointRole(key, act, R, c, mention) {
+    const q = (WORDING[act] && WORDING[act][key]) || WORDING._[key] || (L.get(key) && L.get(key).ask) || key + '?';
+    const f = R.classes['fill:' + key], fill = f ? f.value : null;
+    if (fill === 'context') {   // a pronoun or a vague reference: the shared context rule's last shape
+      const v = c.last.length === 1 ? c.last[0] : c.last.length ? c.last.slice() : null;
+      return { q, span: '', score: f.score, value: v, source: 'context (last shape created or named)', fill };
+    }
+    if (fill === 'description') {   // the description's own keys -> a mention wire
+      const a = {};
+      for (const k of st.models.reader.desc_keys || []) {
+        const d = R.classes['desc:' + k], lq = L.get(k);
+        if (d && d.value != null && (!lq || !lq.values || d.value in lq.values)) a[k] = d.value;
+      }
+      const sc = Math.min(f.score, ...Object.keys(a).map(k => R.classes['desc:' + k].score));
+      return { q, span: Object.entries(a).map(([k, v]) => `${k}=${v}`).join(', ') || '(any shape)', score: sc, value: mention(a), source: 'neural (description)', fill };
+    }
+    const names = new Map(c.names.map(n => [String(n).toLowerCase(), n]));
+    for (const [n, r] of c.refs) names.set(n, r);
+    return Object.assign(role(key, act, R, names), f ? { fill: fill || 'none' } : {});
+  }
+
+  /** SOP-BERT: the whole message, with no call to the Rules reader (see the head of this section) */
+  async function formalizeJoint(input, ctx, opts) {
+    const t0 = Date.now(); st.calls = 0;
+    const text = String(input), update = (opts && opts.update) || NEXT_CONTEXT;
+    const c = { names: (ctx.names || []).slice(), last: (ctx.last || []).slice(), refs: new Map() };
+    const given = opts && Array.isArray(opts.units) ? opts.units : null;
+    let units, cutBy;
+    if (given) { units = given; cutBy = 'given'; }
+    else if (st.models.cut) { units = await st.models.cut(text); st.calls++; cutBy = 'model'; }
+    else { units = [{ c0: 0, c1: text.length }]; cutBy = 'whole message'; }   // a joint model without a span head and no cut given
+    const segs = units.map(u => ({ c0: u.c0, c1: u.c1, src: text.slice(u.c0, u.c1).trim() })).filter(g => g.src);
+    const reads = segs.length ? (st.models.readMany ? await st.models.readMany(segs.map(g => g.src)) : await Promise.all(segs.map(g => st.models.read(g.src)))) : [];
+    if (segs.length) st.calls += st.models.readMany ? 1 : segs.length;
+    const nodes = [], analyses = [], notRequest = [], notes = []; let n = 0, m = 0;
+    segs.forEach((seg, si) => {
+      const R = reads[si], id = 'n' + (++n), a = { id, src: seg.src, rules: null, keys: {} };
+      const cl = actFrom(R.acts); a.kind = cl.kind; if (cl.act) a.act = cl.act;
+      const type = a.kind.value, act = a.act ? a.act.value : null, actKey = a.act ? (type === 'command' ? 'action' : 'ask') : null;
+      if (type === 'none') { notRequest.push(seg.src); analyses.push(a); return; }
+      const args = {}; if (actKey) args[actKey] = act;
+      const mentions = [], mention = ma => { const mid = 'm' + (++m); mentions.push({ id: mid, type: 'mention', args: ma }); return { ref: mid }; };
+      for (const k of st.models.reader.act_keys[act || type] || []) {
+        const r = jointRole(k, act || type, R, c, mention); a.keys[k] = r;
+        if (r.value != null) args[k] = r.value;
+      }
+      if (args.notColor && args.color === args.notColor) delete args.color;
+      if (args.position && !['center', 'top', 'bottom', 'left', 'right', 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'].includes(args.position) && args.anchor == null) delete args.position;
+      if (args.anchor != null && !args.position && !['nearest', 'connected', 'check'].includes(act)) delete args.anchor;
+      const used = new Set(); for (const v of Object.values(args)) [].concat(v).forEach(x => { if (K.isRef(x)) used.add(x.ref); });
+      const node = { id, type, args };
+      Object.defineProperty(node, 'span', { value: [seg.c0, seg.c1], enumerable: false, configurable: true });
+      nodes.push(...mentions.filter(x => used.has(x.id)), node); analyses.push(a);
+      update(c, node);
+    });
+    if (notRequest.length) notes.push('Ignored (not a request): ' + notRequest.map(z => `“${z}”`).join(', '));
+    return { nodes, notes, rulesNodes: [], analyses, cutBy, ms: Date.now() - t0, calls: st.calls };
+  }
+
   async function formalize(input, ctx, opts) {
     if (!st.models) throw new K.SOPError('The neural models are not loaded yet. Open the Neural tab and load them.');
+    if (st.strategy === 'finetuned' && st.models.read) return formalizeJoint(input, ctx || {}, opts);   // SOP-BERT: no Rules reader
+    // the earlier pair (act classifier + extractive QA) and the baselines: the Rules reader's cut and references, until the pair is removed
     const t0 = Date.now(); st.calls = 0;
     const rules = rulesFormalize(input, ctx);
     const names = new Map((ctx.names || []).map(n => [n.toLowerCase(), n]));
     const mentionById = new Map(rules.nodes.filter(n => n.type === 'mention').map(n => [n.id, n]));
     const nodes = [], analyses = [], used = new Set(), notRequest = [];
     const taken = new Set(rules.nodes.map(n => n.id)); let k = 0;
-    // the units to read: opts.units ([{c0, c1}] character offsets into input, given by the caller) when given, else the joint model's own cut
-    // (its span head, one call) when it has one, else the rules' segments. A unit the cut gives takes the rules' reading of the same words
-    // as its reference source (ruleNode: "it" -> Cart) when a rules segment shares most of its words.
+    // the units to read: opts.units ([{c0, c1}] character offsets into input, given by the caller) when given, else the rules' segments. A
+    // given unit takes the rules' reading of the same words as its reference source (ruleNode: "it" -> Cart) when a rules segment shares most of its words.
     let segs = rules.segments, cutBy = 'rules';
     const given = opts && Array.isArray(opts.units) ? opts.units : null;
-    const cuts = given || (st.strategy === 'finetuned' && st.models.cut ? await st.models.cut(input) : null);
-    if (cuts) {
-      if (!given) st.calls++;
-      cutBy = given ? 'given' : 'model';
+    if (given) {
+      cutBy = 'given';
       const toks = t => new Set(wordsOf(t).map(w => w.w.toLowerCase()).filter(w => /[\p{L}\p{N}]/u.test(w))), usedSeg = new Set();
-      segs = cuts.map(u => String(input).slice(u.c0, u.c1).trim()).filter(Boolean).map(src => {
+      segs = given.map(u => String(input).slice(u.c0, u.c1).trim()).filter(Boolean).map(src => {
         const ws = toks(src); let best = null, bs = 0;
         for (const sg of rules.segments) { if (!sg.id || usedSeg.has(sg)) continue; const ov = [...toks(sg.src)].filter(w => ws.has(w)).length / Math.max(ws.size, 1); if (ov > bs) { bs = ov; best = sg; } }
         if (best && bs >= 0.5) { usedSeg.add(best); return { src, id: best.id }; }
         return { src, id: null };
       });
     }
-    const reads = st.strategy === 'finetuned' && st.models.read
-      ? (st.models.readMany ? await st.models.readMany(segs.map(g => g.src)) : await Promise.all(segs.map(g => st.models.read(g.src)))) : null;   // the joint model: all the units in one batched call
-    if (reads) st.calls += st.models.readMany ? 1 : segs.length;
-    let si = -1;
     for (const seg of segs) {
-      si++;
       const rn = seg.id ? rules.nodes.find(n => n.id === seg.id) : { id: null, type: null, args: {}, src: seg.src };
       if (!rn.id) { do { rn.id = 'n' + (++k); } while (taken.has(rn.id)); taken.add(rn.id); }
       const a = { id: rn.id, src: seg.src, rules: seg.id ? rn : null, keys: {} };
-      let type, act = null, actKey = null, R = null;
-      if (st.strategy === 'finetuned' && st.models.read) {   // the joint model: act and roles in one call
-        R = reads[si];
-        const c = actFrom(R.acts); a.kind = c.kind; if (c.act) a.act = c.act;
-        type = a.kind.value; if (a.act) { act = a.act.value; actKey = type === 'command' ? 'action' : 'ask'; }
-      } else if (st.strategy === 'finetuned') {
+      let type, act = null, actKey = null;
+      if (st.strategy === 'finetuned') {
         const c = await classifyAct(seg.src); a.kind = c.kind; if (c.act) a.act = c.act;
         type = a.kind.value; if (a.act) { act = a.act.value; actKey = type === 'command' ? 'action' : 'ask'; }
       } else {
@@ -266,13 +326,10 @@ function create(engine, rulesFormalize) {
         if (type === 'command') { actKey = 'action'; a.act = await classify('action', seg.src, ACTION); act = a.act.value; }
         else if (type === 'question') { actKey = 'ask'; a.act = await classify('ask', seg.src, ASK); act = a.act.value; }
       }
-      if (type === 'none') {   // the joint model's top-1 act is "not a request": no wire, no question
-        notRequest.push(seg.src); analyses.push(a); continue;
-      }
-      const frame = R ? st.models.reader.act_keys[act || type] : type === 'command' ? FRAMES.command[act] : type === 'question' ? FRAMES.question[act] : FRAMES[type];
+      const frame = type === 'command' ? FRAMES.command[act] : type === 'question' ? FRAMES.question[act] : FRAMES[type];
       const args = {}; if (actKey) args[actKey] = act;
       for (const k of frame || []) {
-        const r = R ? role(k, act || type, R, seg.src, a.rules, names) : await answer(k, act || type, seg.src, a.rules, names); a.keys[k] = r;
+        const r = await answer(k, act || type, seg.src, a.rules, names); a.keys[k] = r;
         if (r.value != null) args[k] = r.value;
       }
       if (args.notColor && args.color === args.notColor) delete args.color;
@@ -439,11 +496,11 @@ function makeReader(T, tokenizer, model) {
    nothing to choose. If the folders are not published (not in versions.json, or config.json missing), the demo says so; it has no fallback. */
 const ACT_MODEL = 'act-distilbert';        // the act classifier the demo loads: 'act-distilbert' or 'act-deberta-xsmall' (set after the comparison)
 const QA_MODEL = 'qa-distilbert-squad';
-/* The joint model (act + roles, one call per request; training/neural/finetune_roles.py). When versions.json lists it, the demo loads it
-   alone; until then the pair above. */
-const READER_MODEL = 'reader-distilbert';
+/* SOP-BERT, the joint model (training/neural/finetune_roles.py --name sop-bert: the cut, then act, values, names and descriptions in one
+   batched call). When versions.json lists neural/sop-bert, the demo loads it alone; until then the pair above. */
+const READER_MODEL = 'sop-bert';
 /* model id (of the form <owner>/<name>, as transformers.js requires) -> folder under docs/model/neural/ */
-const OURS = { 'ours/reader-distilbert': 'reader-distilbert', 'ours/act-distilbert': 'act-distilbert', 'ours/act-deberta-xsmall': 'act-deberta-xsmall', 'ours/qa-distilbert-squad': 'qa-distilbert-squad' };
+const OURS = { 'ours/sop-bert': 'sop-bert', 'ours/act-distilbert': 'act-distilbert', 'ours/act-deberta-xsmall': 'act-deberta-xsmall', 'ours/qa-distilbert-squad': 'qa-distilbert-squad' };
 const MODELS = {
   reader: 'ours/' + READER_MODEL, act: 'ours/' + ACT_MODEL, qa: 'ours/' + QA_MODEL,
   /* baselines of the headless comparison (training/laptop: neural_score.mjs, zs_check.mjs, zs_eval.mjs); the demo never loads them */
@@ -452,12 +509,12 @@ const MODELS = {
   qaHF: 'Xenova/distilbert-base-cased-distilled-squad'
 };
 const NAMES = {
-  'ours/reader-distilbert': 'DistilBERT reader (act and roles)', 'ours/act-distilbert': 'DistilBERT act classifier', 'ours/act-deberta-xsmall': 'DeBERTa-v3 xsmall act classifier', 'ours/qa-distilbert-squad': 'DistilBERT SQuAD',
+  'ours/sop-bert': 'SOP-BERT', 'ours/act-distilbert': 'DistilBERT act classifier', 'ours/act-deberta-xsmall': 'DeBERTa-v3 xsmall act classifier', 'ours/qa-distilbert-squad': 'DistilBERT SQuAD',
   'Xenova/nli-deberta-v3-xsmall': 'DeBERTa-v3 xsmall (zero-shot NLI)', 'Xenova/distilbert-base-uncased-mnli': 'DistilBERT MNLI (zero-shot NLI)', 'Xenova/all-MiniLM-L6-v2': 'MiniLM-L6', 'Xenova/distilbert-base-cased-distilled-squad': 'DistilBERT SQuAD'
 };
 /* what each model of ours is, in words (the act models' base model, data and held-out accuracy are read from their README.md: status()) */
 const ABOUT = {
-  'ours/reader-distilbert': 'reads one request in one call: its act, the value of every SOP question with values (colour, shape, size, position, ...) and which words name the shapes, the new name, the label and the numbers; fine-tuned on our annotated requests',
+  'ours/sop-bert': 'DistilBERT fine-tuned on our requests — cuts the message, reads the action, the values, the names and the descriptions',
   'ours/act-distilbert': 'reads the act of one request (the action of a command, the ask of a question, or fact / rule); fine-tuned on our annotated requests',
   'ours/act-deberta-xsmall': 'reads the act of one request (the action of a command, the ask of a question, or fact / rule); fine-tuned on our annotated requests',
   'ours/qa-distilbert-squad': 'answers each question of the act’s frame with a span of the request; Xenova/distilbert-base-cased-distilled-squad (DistilBERT fine-tuned on SQuAD), hosted on this site'
@@ -638,7 +695,7 @@ async function load(onProgress) {
   }
 }
 
-return { cut: (text, ctx) => cutOf(ACTIVE, text), canCut: () => !!(ACTIVE && ACTIVE.cut), create, load, status, cached, modelsFor, urlsFor, bytesOf, revOf, dtypeOf, dtypeText, makeReader, wordsOf, KIND_OF, MODELS, OURS, NAMES, ABOUT, ACT_MODEL, QA_MODEL, READER_MODEL, DTYPE };
+return { NEXT_CONTEXT, cut: (text, ctx) => cutOf(ACTIVE, text), canCut: () => !!(ACTIVE && ACTIVE.cut), create, load, status, cached, modelsFor, urlsFor, bytesOf, revOf, dtypeOf, dtypeText, makeReader, wordsOf, KIND_OF, MODELS, OURS, NAMES, ABOUT, ACT_MODEL, QA_MODEL, READER_MODEL, DTYPE };
 })();
 if (typeof module !== 'undefined') module.exports = NeuralKit;
 /*NEURAL-END*/
