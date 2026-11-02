@@ -1,0 +1,10 @@
+# World `real`: built from 4640 training messages (22702 requests with a span)
+
+WORLD_EVENTS=create,fact,resize,rule,set: only the rows of these events; the legend lists only these events.
+
+FRONT_ROWS=world: the front end below is learned only from the 6342 requests of this world's events.
+
+Front end learned from the same messages: 88 value n-grams, 658 trigger rules, 0 segmenter weights; params {"seg_epochs": 8, "val_min_count": 5, "val_min_prec": 0.8, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}.
+2/2 files OK against legend(s) shapes7c_s1 sha256:023a518c407b…
+world shapes7c_s1 [create,set,resize,fact,rule] -> docs/model/micro/shapes7c_s1 (6334 rows); registry line:
+{"world": "shapes7c_s1", "events": ["create", "set", "resize", "fact", "rule"], "model": "micro/shapes7c_s1"}
