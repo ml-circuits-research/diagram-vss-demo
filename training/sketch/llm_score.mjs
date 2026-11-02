@@ -1,15 +1,15 @@
 // llm_score.mjs: Rules vs VSS on the LLM-written messages (llm_bench/<model>/batch_*.jsonl, gold written by the LLM, SPEC.md).
 // Per message: the readers' non-mention wires are aligned to the gold wires in order (longest common subsequence on type + action/ask),
 // then an aligned wire counts as correct when every gold key matches (bench-canon.js canonical form).
-// Reports: messages fully right, wires right (of gold wires), act right (type + action/ask), extra wires, and per action/ask.
-// Per message (line "per message"): right (every gold wire right, no extra wire) / honest (some request not done, nothing wrong) /
-// wrong (at least one wrong or extra wire).
+// Reports, per request (owner 2026-11-01): correct / not done / done wrong, extra, wires right (of gold wires), act found, per action/ask.
+// (The per-message score is computed for the library exports tally/outcome/msgLine, which training/laptop/neural_score.mjs uses; it is not printed here.)
+// With no folder argument: the fixed 1000-message sample, training/sketch/eval/sample1000/* (eval/make_sample.py builds it from the committed data).
 // SEG=composer: the composer (docs/js/vss-composer.js): the cutter, the registry of micro-worlds, the router.
-//   REGISTRY=<file> (default docs/model/micro/registry.json); no single model is loaded (MODEL there names an optional extra world, normally unset);
-// Every other SEG (gold, tagger, q1, default) reads ONE model folder and needs MODEL=<folder under docs/model/>, e.g. MODEL=micro/shapes7c SEG=gold.
+//   REGISTRY=<file> (default docs/model/micro/registry.json); no single model is loaded.
+// SEG=gold reads ONE model folder (MODEL=<folder under docs/model/>, e.g. MODEL=micro/shapes7c SEG=gold) on the annotated spans of the
+//   rows (the reading quality without the cut; per-event gold: training/sketch/eval/goldev/<event>). There is no other single-model mode
+//   (the tagger, q1 and centres cuts were removed 2026-11-02; docs/js/vss-centers.js and snorm.js stay for the tools that still import them).
 //   CUTTER=<file> (default the registry's "cutter"). Reported in addition: units per world, asked, ignored.
-// CUTTER=<file> with SEG=tagger: the units come from that file's `segmenter` (e.g. docs/model/micro/cutter.json) instead of the
-//   model's front.json (whose segmenter is empty unless FRONT_TAGGER=1 built it).
 // ROUTER=cutter with SEG=composer (ROUTER_V2.md; also when the registry says "router": "cutter"): the composer with the cutter's worlds as
 //   candidates, the fewest words not understood, ties and gaps to the context filler (vss-composer.js). The cutter is CUTTER, else the
 //   registry's "cutter" when the registry says "router": "cutter", else docs/model/micro/cutter_worlds.json; the filler's model is
@@ -25,9 +25,7 @@
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { load } from "../../docs/js/vss.js";
-import { compile, normalize } from "../../docs/js/snorm.js";
 import * as FRONT from "../../docs/js/front.js";
-import { vssCentres } from "../../docs/js/vss-centers.js";
 import { existsSync } from "node:fs";
 import { readingFromWires, toNodes } from "../../docs/js/vss-adapter.js";
 import { canon, canonWant } from "../../docs/js/bench-canon.js";
@@ -35,11 +33,14 @@ import { loadComposer } from "../../docs/js/vss-composer.js";
 const require = createRequire(import.meta.url);
 const K = require("../../docs/js/logic.js");
 const argv = process.argv.slice(2), verbose = argv.includes("-v"), dumpAt = argv.indexOf("--dump");
-const dirs = argv.filter((a, i) => !a.startsWith("-") && (dumpAt < 0 || i !== dumpAt + 1));
+const SAMPLE_DIR = new URL("eval/sample1000/", import.meta.url).pathname;
+let dirs = argv.filter((a, i) => !a.startsWith("-") && (dumpAt < 0 || i !== dumpAt + 1));
+if (!dirs.length && process.env.LLM_SCORE_LIB !== "1") { try { dirs = readdirSync(SAMPLE_DIR).sort().map((d) => SAMPLE_DIR + d); } catch (e) { /* none */ } if (!dirs.length) throw new Error("no folder given and training/sketch/eval/sample1000 is missing (run training/sketch/eval/make_sample.py)"); }
 const MODELS = new URL("../../docs/model/", import.meta.url), COMPOSER = process.env.SEG === "composer";
 const REG = COMPOSER ? JSON.parse(readFileSync(process.env.REGISTRY || new URL("micro/registry.json", MODELS), "utf8")) : null;
-const MODEL = COMPOSER ? process.env.MODEL || REG.fallback || null : process.env.MODEL || null;   // SEG=composer: MODEL names the fallback (optional); other modes read ONE model folder and need MODEL
-if (!COMPOSER && !MODEL) throw new Error("MODEL=<folder under docs/model/> is required without SEG=composer, e.g. MODEL=micro/shapes7c SEG=gold (SEG=composer reads the registry instead)");
+const MODEL = COMPOSER ? null : process.env.MODEL || null;   // SEG=gold reads ONE model folder; SEG=composer reads the registry
+if (!COMPOSER && process.env.SEG !== "gold") throw new Error(`SEG=${process.env.SEG || ""}: expected composer or gold (the tagger / q1 / centres modes were removed)`);
+if (!COMPOSER && !MODEL) throw new Error("MODEL=<folder under docs/model/> is required with SEG=gold, e.g. MODEL=micro/shapes7c SEG=gold (SEG=composer reads the registry instead)");
 const dir = MODEL ? new URL(`${MODEL}/`, MODELS) : null;
 const ROUTER = COMPOSER ? process.env.ROUTER || REG.router || "cutter" : null, V2 = ROUTER === "cutter";
 if (COMPOSER && !V2) throw new Error(`router ${ROUTER}: the composer has only the cutter router`);
@@ -50,10 +51,10 @@ if (process.env.PAIR && !["value", "order"].includes(process.env.PAIR)) throw ne
 const PAIRV = process.env.PAIR === "value" ? (await import("./layer_common.mjs")).pairValue : null;
 const readFile = async (n) => { const b = readFileSync(new URL(n, dir)); return n.endsWith(".json") ? b.toString("utf8") : b.buffer.slice(b.byteOffset, b.byteOffset + b.length); };
 if (process.env.EXCL === "1" || process.env.Q1B === "1") throw new Error("EXCL / Q1B were removed (they needed decode.json of a removed model; DECODE.md)");
-const vss = MODEL ? await load(null, { readFile, sentenceCandidates: true }) : null;   // null: the composer with no fallback
-const F = MODEL && existsSync(new URL("front.json", dir)) ? JSON.parse(await readFile("front.json")) : null;   // the learned front end (world real)
-const C = !MODEL || F ? null : compile(JSON.parse(await readFile("normalize.json")));
-const lex = new Set(Object.keys((vss && vss.model.lexicon) || {})), verbEvent = new Map();
+const vss = MODEL ? await load(null, { readFile, sentenceCandidates: true }) : null;
+const F = MODEL && existsSync(new URL("front.json", dir)) ? JSON.parse(await readFile("front.json")) : null;   // the learned front end of the world
+if (MODEL && !F) throw new Error(`${MODEL} has no front.json (the single-model mode needs a learned front end)`);
+const verbEvent = new Map();
 if (vss) for (const e of vss.model.legend.events) for (const v of e.verbs) verbEvent.set(v, e.id);
 const sys = K.createSystem();
 // the context carried from one request to the next in this scorer (names created earlier, `last`); SEG=composer uses the same rule
@@ -66,15 +67,15 @@ function scorerUpdate(c, main) {
 let comp = null; const CSTAT = { units: 0, byWorld: {}, ask: 0, ignored: 0, ignoredNoToken: 0, multi: 0 };
 const V2STAT = { decided: {}, ignoredWhy: {}, tieSize: {} }, HSTAT = { units: 0, applies: 0, reread: 0, unitsReread: 0, changed: 0, log: [] };
 if (COMPOSER) {
-  const cache = new Map(MODEL ? [[MODEL, { vss, F }]] : []);
+  const cache = new Map();
   const loadModel = async (name) => {
     if (cache.has(name)) return cache.get(name);
     const d = new URL(`${name}/`, MODELS), rf = async (n) => { const b = readFileSync(new URL(n, d)); return n.endsWith(".json") ? b.toString("utf8") : b.buffer.slice(b.byteOffset, b.byteOffset + b.length); };
     const m = { vss: await load(null, { readFile: rf, sentenceCandidates: true }), F: existsSync(new URL("front.json", d)) ? JSON.parse(await rf("front.json")) : null };
     cache.set(name, m); return m;
   };
-  comp = await loadComposer(REG, CUTF, loadModel, V2 ? Object.assign({ fallback: MODEL, router: "cutter", context: CTXM }, ECUT ? { eventCutter: ECUT } : {}) : { fallback: MODEL });
-  console.log(`composer: cutter ${CUT ? CUT.toString().replace(/^file:\/\//, "") : "-"} · fallback ${MODEL || "none"} · worlds ${comp.worlds.map((w) => `${w.id} [${[...w.events]}]`).join(", ") || "none"}`);
+  comp = await loadComposer(REG, CUTF, loadModel, V2 ? Object.assign({ router: "cutter", context: CTXM }, ECUT ? { eventCutter: ECUT } : {}) : {});
+  console.log(`composer: cutter ${CUT ? CUT.toString().replace(/^file:\/\//, "") : "-"} · worlds ${comp.worlds.map((w) => `${w.id} [${[...w.events]}]`).join(", ") || "none"}`);
   if (V2) console.log(`composer v2: router cutter (top ${comp.k} of ${CUTF.worlds.length} cutter worlds) · fewest words not understood · ties and gaps: context filler ${CTXF.toString().replace(/^file:\/\//, "")} margin ${CTXM.margin}`);
   if (ECUT) console.log(`event hint: mode ${comp.eventHint} · event cutter ${ECUTF.toString().replace(/^file:\/\//, "")}`);
 }
@@ -95,19 +96,15 @@ function composerFormalize(text, ctx) {
   return out.nodes;
 }
 
-const SEGQ1 = process.env.SEG === "q1";
 function vssFormalize(text, ctx) {
   if (COMPOSER) return composerFormalize(text, ctx);
-  // SEG=gold: the annotated spans (held-out TRAINING messages only: the test sets have none): the reading quality without the cut
-  const segs = process.env.SEG === "gold" && ctx.spans ? ctx.spans.map((src) => ({ src }))
-    : process.env.SEG === "tagger" && F ? FRONT.segment(text, ctx.names, CUTF || F).map((src) => ({ src }))        // the BIO cutter (CUTTER=<file>, else the model's front.json)
-    : SEGQ1 && F ? vssCentres(text, ctx.names, F, vss, { cut: "q1", confident: process.env.CONFIDENT === "1" }).map((src) => ({ src }))   // SEG=q1: the q1 cut (diagnosis_cut/CUT.md)
-    : F ? vssCentres(text, ctx.names, F, vss, { confident: process.env.CONFIDENT === "1" }).map((src) => ({ src }))   // default: the VSS reader's own cut
-    : sys.formalize(text, ctx).segments;
+  // SEG=gold: the annotated spans (the reading quality without the cut); rows without spans cannot be scored in this mode
+  if (!ctx.spans) throw new Error("SEG=gold needs rows whose wires all have a span");
+  const segs = ctx.spans.map((src) => ({ src }));
   const seq = { s: 0, m: 0 }, c = { names: ctx.names, last: [], refs: new Map() }, nodes = [];
   for (const seg of segs) {
     const nm = c.names.concat([...c.refs.keys()]);
-    const { tokens, info: ni } = F ? FRONT.normalize(seg.src, nm, F) : normalize(C, lex, seg.src, nm), r = vss.read(tokens.join(" "));
+    const { tokens, info: ni } = FRONT.normalize(seg.src, nm, F), r = vss.read(tokens.join(" "));
     const verb = tokens.find((t) => verbEvent.has(t)) || null;
     const reading = r.status === "unknown-event" || r.status === "no-sense" ? null : readingFromWires(r.wires, verb, tokens);
     const out = reading ? toNodes(reading, ni, c, seq) : { nodes: [] };
@@ -179,18 +176,17 @@ for (const d of dirs) {
     for (const f of ["rules", "vss"]) rec[f] = tally(tot[f], out[f], r).bad;
     dump.push(rec);
   }
-  const n = rows.length, line = (f) => { const T = tot[f]; return `${f.padEnd(5)} messages fully right ${(T.exact / n * 100).toFixed(1)}% · wires right ${(T.right / T.gold * 100).toFixed(1)}% (${T.right}/${T.gold}) · act found ${(T.acts / T.gold * 100).toFixed(1)}% · extra wires ${T.extra}`; };
+  const n = rows.length, line = (f) => { const T = tot[f]; return `${f.padEnd(5)} wires right ${(T.right / T.gold * 100).toFixed(1)}% (${T.right}/${T.gold}) · act found ${(T.acts / T.gold * 100).toFixed(1)}% · extra wires ${T.extra}`; };
   console.log(`\n${d}: ${n} messages, ${tot.rules.gold} gold wires`); console.log("  " + line("rules")); console.log("  " + line("vss"));
-  console.log("  " + msgLine("rules", tot.rules, n)); console.log("  " + msgLine("vss", tot.vss, n));
   for (const f of ["rules", "vss"]) { const T = tot[f], p = (x) => (x / T.gold * 100).toFixed(1) + "%"; console.log(`  ${f.padEnd(5)} per request: correct ${p(T.right)} · not done ${p(T.missed)} · done wrong ${p(T.wrongAligned)} · extra ${T.extra} (${p(T.extra)})`); }
   const acts = Object.keys(tot.rules.byAct).sort((a, b) => tot.rules.byAct[b][1] - tot.rules.byAct[a][1]);
   console.log("  per act (rules · vss · n): " + acts.map((a) => `${a.split(":").pop() || a} ${tot.rules.byAct[a][0]}·${(tot.vss.byAct[a] || [0])[0]}·${tot.rules.byAct[a][1]}`).join(", "));
   report[d] = { n, tot }; ALL.n += n; for (const f of ["rules", "vss"]) for (const k of ["exact", "right", "wrongAligned", "missed", "acts", "extra", "gold", "mRight", "mHonest", "mWrong"]) ALL[f][k] += tot[f][k]; if (verbose) dump.slice(0, 12).forEach((x) => console.log(`  ${x.id} ${x.text}\n     rules: ${x.rules.join(" | ") || "ok"}\n     vss:   ${x.vss.join(" | ") || "ok"}`));
   if (dumpAt >= 0) writeFileSync(argv[dumpAt + 1].replace(/(\.json)?$/, `_${d.split("/").filter(Boolean).pop()}.json`), JSON.stringify(dump, null, 1));
 }
-if (dirs.length > 1) { const n = ALL.n, pc = (x, T) => (x / T.gold * 100).toFixed(1) + "%", line = (f) => { const T = ALL[f]; return `${f.padEnd(5)} correct ${pc(T.right, T)} · not done ${pc(T.missed, T)} · done wrong ${pc(T.wrongAligned, T)} · plus ${T.extra} extra wires not asked for (${pc(T.extra, T)} of the gold count) · messages fully right ${(T.exact / n * 100).toFixed(1)}%`; };
+if (dirs.length > 1) { const n = ALL.n, pc = (x, T) => (x / T.gold * 100).toFixed(1) + "%", line = (f) => { const T = ALL[f]; return `${f.padEnd(5)} correct ${pc(T.right, T)} · not done ${pc(T.missed, T)} · done wrong ${pc(T.wrongAligned, T)} · plus ${T.extra} extra wires not asked for (${pc(T.extra, T)} of the gold count)`; };
   console.log(`\nALL (${dirs.join(" + ")}): ${n} messages, ${ALL.rules.gold} gold wires`); console.log("  " + line("rules")); console.log("  " + line("vss"));
-  console.log("  " + msgLine("rules", ALL.rules, n)); console.log("  " + msgLine("vss", ALL.vss, n)); }
+}
 if (V2) console.log(`\ncomposer v2: units read, decided by: ${Object.entries(V2STAT.decided).map(([k, n]) => `${k} ${n}`).join(", ")} · readings tied at the fewest words not understood: ${Object.entries(V2STAT.tieSize).sort((a, b) => a[0] - b[0]).map(([k, n]) => `${k}: ${n}`).join(", ")} · asked by the context filler (not executed) ${CSTAT.ask} · ignored: ${Object.entries(V2STAT.ignoredWhy).map(([k, n]) => `${k} ${n}`).join(", ") || "none"}`);
 if (PAIRV) console.log(`pairing: PAIR=value (layer_common.mjs pairValue)`);
 if (ECUT) {

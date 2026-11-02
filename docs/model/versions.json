@@ -1,7 +1,8 @@
 {
  "about": "Content versions of the model folders and files the demo loads (training/sketch/stamp_models.py). The loader appends ?v=<version>.",
  "files": {
-  "context/weights.json": "a946d13e1e",
+  "context/weights.json": "17808ca5c0",
+  "context/weights_r2.json": "3907acc62f",
   "micro/cutter_events.json": "08e2afb5e4",
   "micro/cutter_events_r2.json": "9e1b73d71c",
   "micro/cutter_worlds7r2.json": "2845fe1f39",
@@ -20,23 +21,16 @@
   "micro/questions7r2": "fdb504913f",
   "micro/shapes7c": "8b1d6877da",
   "micro/shapes7r2": "6e096cb1cc",
-  "neural/act-distilbert": "e6397614dc",
-  "neural/qa-distilbert-squad": "cd43816c4a",
-  "spell/vocab.json": "60454f7d47"
+  "neural/sop-bert": "bad2c5dd68",
+  "spell/vocab.json": "34accc6565"
  },
  "sizes": {
-  "neural/act-distilbert": {
-   "README.md": 1182,
-   "config.json": 1909,
-   "tokenizer.json": 711648,
+  "neural/sop-bert": {
+   "README.md": 2612,
+   "config.json": 8576,
+   "tokenizer.json": 711551,
    "tokenizer_config.json": 1227,
-   "onnx/model_quantized.onnx": 67585955
-  },
-  "neural/qa-distilbert-squad": {
-   "config.json": 569,
-   "tokenizer.json": 668923,
-   "tokenizer_config.json": 321,
-   "onnx/model_quantized.onnx": 65811627
+   "onnx/model_quantized.onnx": 67769917
   }
  }
 }

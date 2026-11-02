@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""make_goldev_ops.py: per-event gold folders for the new operations (ROUND2.md section 6.D), in the format of planB7/goldev/<event>/e.jsonl:
+"""make_goldev_ops.py: per-event gold folders for the new operations (ROUND2.md section 6.D), in the format of eval/goldev/<event>/e.jsonl (eval/make_sample.py builds the other events):
 the messages of the ops folders that contain a wire of that event, each message with ONLY the wires of that event (all other fields kept:
 id, domain, names, groups, text). Messages are read from llm_train/ops_groups and llm_train/ops_positions (msg_*.jsonl), in file order.
-  python3 training/sketch/make_goldev_ops.py OUT_DIR
+  python3 training/sketch/make_goldev_ops.py training/sketch/eval/goldev_ops [--by-event]      (OUT_DIR; eval/goldev_ops is git-ignored, rebuilt on demand)
 writes OUT_DIR/{group,ungroup,members,groupOf}/e.jsonl and OUT_DIR/doublepos/e.jsonl (wires of any event whose args carry position2, or a
 region together with a position: the "two relations" and "region + relation" requests; the gold of each of its parts is position, anchor,
 position2, anchor2, region). Score: MODEL=micro/<world>r2 SEG=gold node training/sketch/llm_score.mjs OUT_DIR/<event>

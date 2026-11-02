@@ -26,7 +26,7 @@ const { load } = await import("../../docs/js/vss.js");
 const { loadComposer, nextContext, cutUnits } = await import("../../docs/js/vss-composer.js");
 const require = createRequire(import.meta.url);
 const argv = process.argv.slice(2), arg = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
-const SAMPLE = arg("--sample", "/tmp/claude-0/-home-claude/8941735c-db18-5907-b7c8-a224e2065054/scratchpad/planA/sampleF");
+const SAMPLE = arg("--sample", new URL("eval/sample1000", import.meta.url).pathname)   // training/sketch/eval/sample1000 (make_sample.py);
 const OUT = arg("--out", null), LIMIT = process.env.LIMIT ? +process.env.LIMIT : Infinity;
 const SETS = (process.env.SETS || "sample,short").split(",");
 

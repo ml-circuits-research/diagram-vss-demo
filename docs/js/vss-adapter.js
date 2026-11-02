@@ -4,10 +4,10 @@
 
 const REL = { left_of: "leftOf", right_of: "rightOf", above: "above", below: "below", next_to: "near", between: "between" };
 const REGION = { center: "center", top: "top", bottom: "bottom", left_side: "left", right_side: "right", top_left: "topLeft", top_right: "topRight", bottom_left: "bottomLeft", bottom_right: "bottomRight" };
-const SHAPES = { circle: "circle", circles: "circle", square: "square", squares: "square", rectangle: "rectangle", rectangles: "rectangle", triangle: "triangle",
+export const SHAPES = { circle: "circle", circles: "circle", square: "square", squares: "square", rectangle: "rectangle", rectangles: "rectangle", triangle: "triangle",
   triangles: "triangle", diamond: "diamond", diamonds: "diamond", ellipse: "ellipse", ellipses: "ellipse", hexagon: "hexagon", hexagons: "hexagon", star: "star", stars: "star" };
 const PLURAL = new Set(["circles", "squares", "rectangles", "triangles", "diamonds", "ellipses", "hexagons", "stars", "shapes"]);
-const PROPERTY = { what_color: "color", where_is: "position", how_big: "size", what_shape: "shape", what_says: "label" };
+export const PROPERTY = { what_color: "color", where_is: "position", how_big: "size", what_shape: "shape", what_says: "label" };
 const COMMANDS = new Set(["create", "delete", "move", "set", "resize", "rename", "label", "duplicate", "swap", "connect", "disconnect", "align", "arrange", "distribute", "toFront", "toBack", "undo", "redo", "forget", "group", "ungroup"]);
 const QUESTIONS = new Set(["count", "exists", "list", "property", "describe", "neighbors", "path", "reachable", "cycle", "check", "extreme", "nearest", "connected", "degree", "members", "groupOf"]);
 const SUPER = { biggest: "biggest", smallest: "smallest", leftmost: "leftmost", rightmost: "rightmost", topmost: "topmost", bottommost: "bottommost", mostconnected: "mostConnected", leastconnected: "leastConnected", closest: "closest", farthest: "farthest" };

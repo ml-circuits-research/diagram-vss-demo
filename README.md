@@ -1,22 +1,42 @@
 # diagram-vss-demo
 
 **SOP Sketchpad**: a diagram editor you talk to in English, in the browser, with no server. Every message is formalized into SOP Lang
-wires by one of three readers, and the same engine and the same Datalog reasoner run the wires, whichever reader wrote them:
+wires by each of three readers (the table under "The readers"), and the same engine and the same Datalog reasoner run the wires,
+whichever reader wrote them.
+
+## Goal and metric
+
+The research question (owner, 2026-11-02): **a reader that says clearly where it is not sure, does only what it is sure of, and asks about
+the rest**, not one that approximates well; for approximation there are LLMs. In a drawing a confident mistake costs one undo; where a wrong
+action has serious consequences it is what matters most. The diagram editor is the test bench.
+
+- **Main metric: precision of execution.** Of everything a reader executes (requested actions and extras nobody asked for), the share done
+  right. It is reported with the share of requests done right at that precision; readers are compared by the share of requests done right
+  **at equal precision** (the risk-coverage curve), with the AUROC of their confidence beside it.
+- Each reader executes a request only when its confidence clears a threshold chosen on held-out data, and asks below it, saying why.
+  "Not done / asked" is never an error. The Rules, which have no confidence, are measured by what they execute.
+- Under it, per requested action: right / wrong / not done, plus extras (every number before 2026-11-02 is in this form, with every request
+  executed). Rules: `AGENTS.md` ("What counts as an error"); decision record: `DECISIONS.md`.
+- State on 2026-11-02: the confidences are measured (`training/sketch/RISK_COVERAGE.md`, `training/sketch/VSS_CONFIDENCE.md`); the
+  confidence gate in the demo is in progress; the precision of each reader is measured (`training/sketch/PRECISION.md`: at 97% only VSS with its combined confidence qualifies, doing about a third of the requests and asking about half); a fresh test set neither
+  learned reader has seen is planned.
+
+## The readers
 
 | reader | what it is | model |
 |---|---|---|
 | **Rules** | hand-written extractors keyed on the legend's cue words, with spelling correction and mention resolution | none (code) |
 | **VSS** | a composer of 7 small VSS worlds (VSA route book, no transformer) trained on this demo's legend with the `sop` tool of [vss-demo](https://github.com/ml-circuits-research/vss-demo): a cutter cuts the message into units, the worlds read them, a context filler fills references | `docs/model/micro/` (the worlds, the cutter, `registry.json`), `docs/model/context/` |
-| **Neural** | pretrained transformers through Transformers.js: zero-shot NLI for the act, extractive QA (DistilBERT SQuAD) for each legend question | downloaded from the Hugging Face hub on first use |
+| **Neural** | SOP-BERT: one DistilBERT fine-tuned on the annotated requests, run in the browser by Transformers.js; it cuts the message (the BERT cutter) and reads, per request, the act, the value of each legend key, who fills each role and the written names, labels and numbers, without the Rules reader. (Until 2026-11-02: an act classifier plus a ready-made QA model, removed.) | `docs/model/neural/sop-bert/` (hosted on this site, versioned) |
 
-The **Benchmark** tab (menu ⋮) runs the readers on the same labelled sentences in the browser and shows accuracy per test set, the model
+The **Benchmark** (menu ⋮ › Benchmark) runs the readers on the same labelled sentences in the browser and shows accuracy per test set, the model
 size, the load time and the time per message.
 
 Open it: `docs/` is the whole application (GitHub Pages from `/docs`, or `npx serve docs` locally; ES modules do not load from `file://`).
 
 Working rules for this repository (scope, data, fairness): `AGENTS.md`. The VSS reader's design: `training/sketch/VSS_READER_SPEC.md`.
 
-How it works inside (every component, model, data set, training run and measurement, with file paths and sizes): `docs/architecture.html` ([on the site](https://ml-circuits-research.github.io/diagram-vss-demo/architecture.html)).
+Help: the ? button above the drawing opens it full screen (deep links such as `index.html#help/sop-lang`). How it works inside (every component, model, data set, training run and measurement, with file paths and sizes): the Help pages under "How it works inside", also as one page, `docs/architecture.html` ([on the site](https://ml-circuits-research.github.io/diagram-vss-demo/architecture.html)).
 
 ## Layout
 

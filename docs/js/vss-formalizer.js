@@ -1,5 +1,5 @@
 // vss-formalizer.js: the VSS formalizer of the demo: formalize(text, ctx) -> the composer (vss-composer.js): the cutter, the
-// micro-worlds of ../model/micro/registry.json, the router and the fallback world when the registry names one (none by default since 2026-11-02); loaded on first use.
+// micro-worlds of ../model/micro/registry.json, and the router; loaded on first use.
 // Exposes window.VSSFormalizer = { formalize, loadComposerAt, composerInfo, cut, CUT_STRATEGIES, DEFAULT_CUT }. (The single-model path, ../model/real/ read with
 // ?vss=single, was removed on 2026-11-02; it is in git history.)
 import { load as loadVSS } from "./vss.js";
@@ -59,8 +59,7 @@ export async function loadComposerAt(root = new URL("../model/", import.meta.url
   return comp.loading;
 }
 
-/** a whole message -> the composer's reading: units of the cutter, routed to the micro-worlds (or the fallback, when the registry
- *  names one); each unit carries its world. The third argument (the rules' formalize) is not used; opts.composer may name another
+/** a whole message -> the composer's reading: units of the cutter, routed to the micro-worlds; each unit carries its world. The third argument (the rules' formalize) is not used; opts.composer may name another
  *  docs/model/ root (a string); opts.units: the units of the cut chosen in the settings ([{c0, c1}], see cut below), read instead of the
  *  cutter's own (vss-composer.js, "units of another cut"). */
 export async function formalize(text, ctx, _rulesFormalize, opts = {}) {
@@ -75,13 +74,12 @@ export async function cut(text, ctx = {}, strategy = DEFAULT_CUT, env = {}) {
   return cutUnits(text, ctx, strategy, Object.assign({}, env, composer ? { composer } : {}));
 }
 
-/** what the demo shows about the composer: its worlds (model folder, actions), router, event hint, fallback, bytes and load time */
+/** what the demo shows about the composer: its worlds (model folder, actions), router, event hint, bytes and load time */
 export function composerInfo() {
   const r = comp.registry; if (!comp.c || !r) return null;
   const size = (name) => { const a = comp.sizes.get(new URL(name.replace(/\/?$/, "/"), comp.root).href); return a ? a.bytes : 0; };
   const models = [...comp.sizes.values()].reduce((a, x) => a + x.bytes, 0);
   return { composer: true, bytes: comp.bytes + models, cutterBytes: comp.bytes, loadMs: comp.loadMs, about: r.about || "", router: r.router || "", hint: r.event_cutter ? (r.event_hint || "H1") : null,
-    fallback: r.fallback || null, fallbackBytes: r.fallback ? size(r.fallback) : 0,
     worlds: (r.worlds || []).map((w) => ({ world: w.world, model: w.model.replace(/^micro\//, ""), events: w.events || [], bytes: size(w.model) })) };
 }
 

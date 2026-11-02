@@ -2,7 +2,7 @@
  "about": "Round-2 composer (ROUND2.md, built by make_registry_r2.py): the 7 worlds retrained once with every fix (N_CAL, CREATE_COLOR, VAL_SUB, VAL_PREC, SHORT, OPS, DIAGRAM_OPS), the groups events, cutters cutter_worlds7r2 / cutter_events_r2, no fallback. Measures: ROUND2.md section 6.",
  "router": "cutter",
  "cutter": "micro/cutter_worlds7r2.json",
- "context": "context/weights.json",
+ "context": "context/weights_r2.json",
  "worlds": [
   {
    "world": "shapes",
@@ -97,5 +97,5 @@
  "event_hint": "H1",
  "cutter_version": "2845fe1f39",
  "event_cutter_version": "9e1b73d71c",
- "context_version": "a946d13e1e"
+ "context_version": "3907acc62f"
 }
