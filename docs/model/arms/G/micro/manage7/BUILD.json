@@ -1,0 +1,3 @@
+{"world": "manage7_g", "events": "delete,duplicate,rename,label", "command": "training/sketch/train_micro.sh manage7_g delete,duplicate,rename,label", "DATA": "spans", "FRAC": "1.0", "QCOLOR": "1",
+ "MARKER": "0", "ROW_SHAPE": "", "FRONT_ROWS": "world", "KINDMAP": "diagnosis_kinds/kinds_comb1.json", "CAL_FALLBACK": "train", "D": 1024, "EPOCHS": 10, "SEED": 0, "N_EVAL": 150, "EVAL_MODES": "primary", "DEVICE": "cuda", "HOLDOUT": "", "CREATE_COLOR": "", "N_CAL": "", "VAL_PREC": "", "VAL_SUB": "", "SHORT": "", "OPS": "", "DIAGRAM_OPS": "", "EXTRA_DIRS": "llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_gen_1 llm_train/opus_gen_2", "rows": 1295,
+ "run_log": "training/sketch/runs/micro_manage7_g_D1024_e10_s0.log"}

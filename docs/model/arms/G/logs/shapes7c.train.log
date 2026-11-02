@@ -1,0 +1,10 @@
+[splits] written to /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_shapes7c_g_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 358, heldout_formulations 331, train 7358
+[schema] roles ['object', 'shape', 'color', 'size', 'name', 'text', 'relation', 'landmark', 'landmark2', 'region', 'quantity', 'members'] (core []), max depth 0, event negation False
+[guard] cuda allocator capped at 35% of 4 GB; watchdog: exit if MemAvailable < 1.5 GB or after 4.0 h
+[train] seed 0: 7358 training rows x 10 epoch(s) -> 73580 steps' sentences; D=1024; kinds 59; vocab 4195; predicate lemma not found in 11340 targets
+[train] phase table: 3689 of 10720 rows reached by the training sentences, held and trained; the other 7031 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.90 GB (peak 0.99 GB) | torch alloc 0.09 GB reserved 0.10 GB | MemAvailable 7.4 GB
+[trace] text: n_bird is yellow
+[trace] tokens/kinds: n_bird/NAME is/VERB yellow/COLOR
+[trace] gold frame: {"event": "fact", "lemma": "is", "neg": false, "roles": {"color": ["word", "yellow"], "object": ["entity", "n_bird", null, null]}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 55.85 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[train seed 0] start: RSS 1.01 GB (peak 1.01 GB) | torch alloc 0.09 GB reserved 0.10 GB | MemAvailable 7.4 GB
