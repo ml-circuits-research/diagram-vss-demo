@@ -7,6 +7,9 @@ const svg = $('#canvas'), layer = $('#layer'), framesG = $('#frames'), msgs = $(
 const escH = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const neural = NeuralKit.create(engine, sys.formalize);
 let mode = 'rules', models = null, loading = false, queue = Promise.resolve();
+// the VSS formalizer reads through the composer (docs/model/micro/registry.json: 7 micro-worlds, CandidateRouter, event hint;
+// training/sketch/COMBINED.md). ?vss=single in the URL reads with the single VSS model instead.
+const VSS_OPTS = new URLSearchParams(location.search).get('vss') === 'single' ? {} : { composer: true };
 let view = 'auto', focusCell = null;
 let last = [], pending = null, hl = { shapes: new Set(), edges: new Set() }, hlTimer = null, drag = null;
 const history = []; let turnSeq = 0;
@@ -232,7 +235,7 @@ async function run(text) {
       if (mode !== 'rules') {
         wait = typing(); setStatus('typing…');
         if ((mode === 'vss' || mode === 'compare') && await ensureVSS()) {
-          try { vOut = await window.VSSFormalizer.formalize(text, ctx, sys.formalize); } catch (e) { notes = notes.concat(['The VSS formalizer failed: ' + e.message]); }
+          try { vOut = await window.VSSFormalizer.formalize(text, ctx, sys.formalize, VSS_OPTS); } catch (e) { notes = notes.concat(['The VSS formalizer failed: ' + e.message]); }
           if (vOut && mode === 'vss') { nodes = vOut.nodes; notes = vOut.notes; ran = 'vss'; }
         }
         if ((mode === 'neural' || mode === 'compare') && models) {
@@ -305,7 +308,7 @@ function turnHTML(r) {
 function renderHistory(focus) {
   if (!history.length) return '<p class="intro">Nothing yet.</p>';
   return `<p class="intro">Every message, as the system saw it: the SOP wires the formalizer wrote, the plugin that interpreted each wire, the patches applied to the drawing, Datalog programs for graph questions, and the neural model’s answers when it is on.</p>` +
-    history.slice().reverse().map(r => `<details class="turn" id="turn-${r.id}"${r.id === focus ? ' open' : ''}><summary><time>${escH(r.time)}</time><span>${escH(r.text)}</span><em>${escH(r.ran === 'neural' ? 'neural' : r.neural ? 'compare' : r.raw ? 'SOP' : 'rules')}</em></summary><div class="tb">${turnHTML(r)}</div></details>`).join('');
+    history.slice().reverse().map(r => `<details class="turn" id="turn-${r.id}"${r.id === focus ? ' open' : ''}><summary><time>${escH(r.time)}</time><span>${escH(r.text)}</span><em>${escH(r.ran === 'neural' ? 'neural' : r.ran === 'vss' ? 'VSS' : r.neural || (r.vss && r.ran === 'rules') ? 'compare' : r.raw ? 'SOP' : 'rules')}</em></summary><div class="tb">${turnHTML(r)}</div></details>`).join('');
 }
 
 /* ---------------- SOP rendering for History ---------------- */
@@ -354,7 +357,9 @@ function stepHTML(st) {
 const fmtV = v => v == null ? '' : K.fmtValue(v);
 function vssHTML(v, ran) {
   let h = ran === 'vss' ? `<div class="minihead">Formalized by the VSS reader <span>${v.ms.toFixed(1)} ms</span></div>` : `<div class="minihead">VSS reader, for comparison <span>${v.ms.toFixed(1)} ms</span></div><pre class="sop">${v.nodes.map(hlNode).join('\n') || '<span class="cm"># no wires</span>'}</pre>`;
+  if (v.units) h += `<div class="note">Requests found by the cutter:</div><ul class="units">${v.units.map(u => `<li><span class="src">“${escH(u.src || '')}”</span> → ${u.zone === 'ignored' ? 'not read' + (u.reason ? ' (' + escH(u.reason) + ')' : '') : `world <code>${escH(((vssInfo && vssInfo.worlds || []).find(w => w.world === u.world) || { model: u.world || '' }).model)}</code>, ${escH(u.event || '?')}${u.zone === 'ask' ? ', asked which shape' : ''}${u.tie > 1 ? `, ${u.tie} worlds read it, decided by ${escH(u.decidedBy || '?')}` : ''}${u.reread ? ', action from the event hint' : ''}`}</li>`).join('')}</ul>`;
   for (const c of v.clauses) {
+    if (!c.vss) continue;
     const m = c.vss.margins || {}, ms = Object.entries(m).filter(([, x]) => typeof x === 'number').map(([k, x]) => `${k} ${x.toFixed(2)}`).slice(0, 8).join(' · ');
     h += `<details class="cmp"><summary>clause <span class="src">${escH(c.src)}</span></summary><div class="tb" style="padding:6px 0 0">
       <div class="note">normalized: <code>${escH(c.normalized)}</code> · status <b>${escH(c.vss.status)}</b> · residual ${(+c.vss.residual).toFixed(3)}${c.vss.unplaced && c.vss.unplaced.length ? ' · unplaced: ' + escH(c.vss.unplaced.join(' ')) : ''}</div>
@@ -502,23 +507,29 @@ async function ensureVSS(announce) {
   vssState = 'loading'; refreshFormalizer();
   try {
     if (!window.VSSFormalizer) await import(new URL('js/vss-formalizer.js', document.baseURI).href);
-    vssInfo = await window.VSSFormalizer.load(); vssState = 'ready'; vssError = null;
-    if (announce !== false) sysNote(`VSS model ready: ${mb(vssInfo.bytes)}, D ${vssInfo.D}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s`);
+    if (VSS_OPTS.composer) { await window.VSSFormalizer.loadComposerAt(); vssInfo = window.VSSFormalizer.composerInfo(); }
+    else vssInfo = await window.VSSFormalizer.load();
+    vssState = 'ready'; vssError = null;
+    if (announce !== false) sysNote(vssInfo.composer ? `VSS ready: ${vssInfo.worlds.length} micro-worlds, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s`
+      : `VSS model ready: ${mb(vssInfo.bytes)}, D ${vssInfo.D}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s`);
   } catch (e) { vssState = 'failed'; vssError = e; sysNote('The VSS model could not be loaded: ' + (e && e.message || e)); }
   refreshFormalizer(); return vssState === 'ready';
 }
 function refreshFormalizer() { if (sheetKind === 'settings' && sheetTab === 'formalizer' && !sheet.hidden) { sbody.innerHTML = renderFormalizer(); syncFormalizer(); } }
 function renderFormalizer() {
   const nst = models ? `Ready on ${models.device.toUpperCase()}: ${models.enumModel} + ${models.qaModel}, ${mb(neuralBytes)} downloaded.` : neuralLoading ? 'Loading…' : 'Not loaded (about 100–200 MB on first use, then cached).';
-  const vst = vssState === 'ready' ? `Ready: D ${vssInfo.D}, ${vssInfo.bits || 8}-bit route book, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.` : vssState === 'loading' ? 'Loading…' : vssState === 'failed' ? 'Failed: ' + (vssError && vssError.message || vssError) : 'Not loaded yet (loads on first use).';
+  const vst = vssState === 'ready' ? (vssInfo.composer ? `Ready: ${vssInfo.worlds.length} micro-worlds and the fallback, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
+    : `Ready: D ${vssInfo.D}, ${vssInfo.bits || 8}-bit route book, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`) : vssState === 'loading' ? 'Loading…' : vssState === 'failed' ? 'Failed: ' + (vssError && vssError.message || vssError) : 'Not loaded yet (loads on first use).';
   return `<h3 class="sub">Who reads your messages</h3>
   <div class="seg" role="radiogroup" aria-label="Formalizer">
     ${['rules', 'vss', 'neural', 'compare'].map(m => `<button type="button" role="radio" data-mode="${m}" aria-checked="${mode === m}">${{ rules: 'Rules', vss: 'VSS', neural: 'Neural', compare: 'Compare' }[m]}</button>`).join('')}
   </div>
-  <p class="intro" style="margin-top:8px">Every reader writes the same SOP wires, and the same engine and Datalog reasoner run them. <b>Rules</b> use the legend’s cue words. <b>VSS</b> is a small reader trained on this demo’s legend (a VSA route book, no transformer). <b>Neural</b> asks pretrained transformers the legend questions. <b>Compare</b> runs the rules and records what the other readers wrote in History. Picking a reader loads its model.</p>
-  <h3 class="sub">VSS model</h3>
-  <p class="intro">Trained on the sketch world generated from this legend (training/sketch). A sentence is normalized, read into an event with its roles in a few milliseconds, and turned into the demo’s wires. The rules segmenter cuts messages into clauses first, for every reader.</p>
-  <div class="actions"><button type="button" class="btn${vssState === 'ready' ? '' : ' solid'}" id="vss-load"${vssState === 'loading' || vssState === 'ready' ? ' disabled' : ''}>${vssState === 'ready' ? 'Loaded' : 'Load VSS model'}</button><span class="status">${escH(vst)}</span></div>
+  <p class="intro" style="margin-top:8px">Every reader writes the same SOP wires, and the same engine and Datalog reasoner run them. <b>Rules</b> use the legend’s cue words. <b>VSS</b> is a set of small readers trained on this demo’s legend (VSA route books, no transformer). <b>Neural</b> asks pretrained transformers the legend questions. <b>Compare</b> runs the rules and records what the other readers wrote in History. Picking a reader loads its model.</p>
+  <h3 class="sub">VSS</h3>
+  ${VSS_OPTS.composer ? `<p class="intro">Seven small VSS readers (micro-worlds), each trained on a few actions of this legend. A cutter splits the message into requests and names the worlds that could read each one; each of those worlds reads it, and the reading that fits the drawing and the conversation best is kept. In a world with several actions, a request without a verb (“Hub teal”) gets its action from a second cutter (the event hint). A request no world can read goes to a general fallback reader. Add <code>?vss=single</code> to the address to use the earlier single model.</p>
+  ${vssState === 'ready' && vssInfo.composer ? `<table class="kv">${vssInfo.worlds.map(w => `<tr><td><code>${escH(w.model)}</code></td><td>${escH(w.events.join(', '))}</td></tr>`).join('')}<tr><td><code>${escH(vssInfo.fallback || '')}</code></td><td>fallback: every action</td></tr></table>` : ''}`
+    : `<p class="intro">One VSS model trained on the sketch world generated from this legend (training/sketch). A sentence is normalized, read into an event with its roles in a few milliseconds, and turned into the demo’s wires.</p>`}
+  <div class="actions"><button type="button" class="btn${vssState === 'ready' ? '' : ' solid'}" id="vss-load"${vssState === 'loading' || vssState === 'ready' ? ' disabled' : ''}>${vssState === 'ready' ? 'Loaded' : 'Load VSS'}</button><span class="status">${escH(vst)}</span></div>
   <h3 class="sub">Neural models</h3>
   <p class="intro">The model classifies the kind of message and the action, then answers each legend question in that action’s frame with extractive question answering (“Where does the connection start?”).</p>
   <div class="form">
@@ -632,7 +643,7 @@ async function runBench(btn) {
         const t0 = performance.now(); let nodes = [];
         try {
           if (f === 'rules') nodes = sys.formalize(r.text, ctx).nodes;
-          else if (f === 'vss') nodes = (await window.VSSFormalizer.formalize(r.text, ctx, sys.formalize)).nodes;
+          else if (f === 'vss') nodes = (await window.VSSFormalizer.formalize(r.text, ctx, sys.formalize, VSS_OPTS)).nodes;
           else nodes = (await neural.formalize(r.text, ctx)).nodes;
         } catch (e) { nodes = []; }
         const dt = performance.now() - t0; res[f].times.push(dt);

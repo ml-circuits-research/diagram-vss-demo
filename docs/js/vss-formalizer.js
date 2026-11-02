@@ -41,7 +41,7 @@ export async function load(base = new URL("../model/real/", import.meta.url).hre
 }
 
 // ---- the composer (option `composer` of formalize): every model folder of the registry, loaded with the same fetch code
-const comp = { c: null, loading: null, bytes: 0, loadMs: 0 };
+const comp = { c: null, loading: null, bytes: 0, loadMs: 0, registry: null };
 async function modelAt(base) {
   const cache = new Map();
   const readFile = async (name) => { if (!cache.has(name)) cache.set(name, name.endsWith(".bin") ? await fetchBin(base, name, comp) : await fetchSize(new URL(name, base), comp)); const b = cache.get(name); return name.endsWith(".json") ? new TextDecoder().decode(b) : b; };
@@ -54,7 +54,7 @@ export async function loadComposerAt(root = new URL("../model/", import.meta.url
   if (comp.c) return comp.c;
   if (!comp.loading) comp.loading = (async () => {
     const t0 = performance.now(), json = async (u) => JSON.parse(new TextDecoder().decode(await fetchSize(new URL(u, root), comp)));
-    const registry = await json("micro/registry.json"), cutter = await json(registry.cutter);
+    const registry = await json("micro/registry.json"), cutter = await json(registry.cutter); comp.registry = registry;
     const context = registry.router === "cutter" ? await json(registry.context || "context/weights.json") : undefined;   // CandidateRouter needs the context filler
     const eventCutter = registry.event_cutter ? await json(registry.event_cutter) : undefined;   // the event hint (vss-composer.js, EVENT_HINT.md)
     comp.c = await loadComposer(registry, cutter, (name) => modelAt(new URL(name.replace(/\/?$/, "/"), root).href), { context, eventCutter });
@@ -110,10 +110,17 @@ export async function formalize(text, ctx, rulesFormalize, opts = {}) {
   return { nodes, notes: cut.corrections ? cut.corrections.concat(notes) : notes, clauses, ignored, ms: performance.now() - t0 };
 }
 
+/** what the demo shows about the composer: its worlds (model folder, actions), router, event hint, fallback, bytes and load time */
+export function composerInfo() {
+  const r = comp.registry; if (!comp.c || !r) return null;
+  return { composer: true, bytes: comp.bytes, loadMs: comp.loadMs, about: r.about || "", router: r.router || "", hint: r.event_cutter ? (r.event_hint || "H1") : null,
+    fallback: r.fallback || null, worlds: (r.worlds || []).map((w) => ({ world: w.world, model: w.model.replace(/^micro\//, ""), events: w.events || [] })) };
+}
+
 export function goldNodes(row, ctx) {
   const { tokens, info: ninfo } = normalize(state.table, state.lexicon, row.text, row.names || []);
   return toNodes(readingFromGold(row, tokens, state.verbs), ninfo, ctx, { s: 0, m: 0 }).nodes;
 }
 
 export function ready() { return !!state.vss; }
-window.VSSFormalizer = { load, formalize, readClause, info, goldNodes, ready, loadComposerAt };
+window.VSSFormalizer = { load, formalize, readClause, info, goldNodes, ready, loadComposerAt, composerInfo };
