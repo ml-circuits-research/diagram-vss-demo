@@ -4,9 +4,9 @@
 // Reports: messages fully right, wires right (of gold wires), act right (type + action/ask), extra wires, and per action/ask.
 // Per message (line "per message"): right (every gold wire right, no extra wire) / honest (some request not done, nothing wrong) /
 // wrong (at least one wrong or extra wire).
-// SEG=composer: the composer (docs/js/vss-composer.js): the cutter, the registry of micro-worlds, the router, the fallback world.
-//   REGISTRY=<file> (default docs/model/micro/registry.json); the fallback is MODEL when set, else the registry's "fallback", else none
-//   (router cutter only; no single model is loaded then);
+// SEG=composer: the composer (docs/js/vss-composer.js): the cutter, the registry of micro-worlds, the router.
+//   REGISTRY=<file> (default docs/model/micro/registry.json); no single model is loaded (MODEL there names an optional extra world, normally unset);
+// Every other SEG (gold, tagger, q1, default) reads ONE model folder and needs MODEL=<folder under docs/model/>, e.g. MODEL=micro/shapes7c SEG=gold.
 //   CUTTER=<file> (default the registry's "cutter"). Reported in addition: units per world, asked, ignored.
 // CUTTER=<file> with SEG=tagger: the units come from that file's `segmenter` (e.g. docs/model/micro/cutter.json) instead of the
 //   model's front.json (whose segmenter is empty unless FRONT_TAGGER=1 built it).
@@ -38,19 +38,19 @@ const argv = process.argv.slice(2), verbose = argv.includes("-v"), dumpAt = argv
 const dirs = argv.filter((a, i) => !a.startsWith("-") && (dumpAt < 0 || i !== dumpAt + 1));
 const MODELS = new URL("../../docs/model/", import.meta.url), COMPOSER = process.env.SEG === "composer";
 const REG = COMPOSER ? JSON.parse(readFileSync(process.env.REGISTRY || new URL("micro/registry.json", MODELS), "utf8")) : null;
-const MODEL = COMPOSER ? process.env.MODEL || REG.fallback || null : process.env.MODEL || "sketch";   // SEG=composer: MODEL names the fallback (optional)
+const MODEL = COMPOSER ? process.env.MODEL || REG.fallback || null : process.env.MODEL || null;   // SEG=composer: MODEL names the fallback (optional); other modes read ONE model folder and need MODEL
+if (!COMPOSER && !MODEL) throw new Error("MODEL=<folder under docs/model/> is required without SEG=composer, e.g. MODEL=micro/shapes7c SEG=gold (SEG=composer reads the registry instead)");
 const dir = MODEL ? new URL(`${MODEL}/`, MODELS) : null;
-const ROUTER = COMPOSER ? process.env.ROUTER || REG.router || "token" : null, V2 = ROUTER === "cutter";
-const CUT = process.env.CUTTER || (V2 ? new URL(REG.router === "cutter" ? REG.cutter : "micro/cutter_worlds.json", MODELS) : COMPOSER && REG.cutter ? new URL(REG.cutter, MODELS) : null), CUTF = CUT ? JSON.parse(readFileSync(CUT, "utf8")) : null;
+const ROUTER = COMPOSER ? process.env.ROUTER || REG.router || "cutter" : null, V2 = ROUTER === "cutter";
+if (COMPOSER && !V2) throw new Error(`router ${ROUTER}: the composer has only the cutter router`);
+const CUT = process.env.CUTTER || (V2 ? new URL(REG.cutter, MODELS) : null), CUTF = CUT ? JSON.parse(readFileSync(CUT, "utf8")) : null;
 const ECUTF = V2 && REG.event_cutter ? new URL(REG.event_cutter, MODELS) : null, ECUT = ECUTF ? JSON.parse(readFileSync(ECUTF, "utf8")) : null;
 const CTXF = V2 ? process.env.CONTEXT || new URL(REG.context || "context/weights.json", MODELS) : null, CTXM = CTXF ? JSON.parse(readFileSync(CTXF, "utf8")) : null;
 if (process.env.PAIR && !["value", "order"].includes(process.env.PAIR)) throw new Error(`PAIR=${process.env.PAIR}: expected value or order`);
 const PAIRV = process.env.PAIR === "value" ? (await import("./layer_common.mjs")).pairValue : null;
 const readFile = async (n) => { const b = readFileSync(new URL(n, dir)); return n.endsWith(".json") ? b.toString("utf8") : b.buffer.slice(b.byteOffset, b.byteOffset + b.length); };
-// EXCL=1 / Q1B=1 (DECODE.md): the decode data learned from the training frames, decode.json in the model folder (tool/sop/decode_stats.py)
-const DEC = process.env.EXCL === "1" || process.env.Q1B === "1" ? JSON.parse(readFileSync(new URL("decode.json", dir), "utf8")) : null;
-if (process.env.Q1B === "1" && process.env.SEG !== "q1") throw new Error("Q1B=1 is a switch of the q1 cut: use it with SEG=q1");
-const vss = MODEL ? await load(null, Object.assign({ readFile, sentenceCandidates: true }, process.env.EXCL === "1" ? { excl: DEC.excl_pairs } : {})) : null;   // null: the composer with no fallback
+if (process.env.EXCL === "1" || process.env.Q1B === "1") throw new Error("EXCL / Q1B were removed (they needed decode.json of a removed model; DECODE.md)");
+const vss = MODEL ? await load(null, { readFile, sentenceCandidates: true }) : null;   // null: the composer with no fallback
 const F = MODEL && existsSync(new URL("front.json", dir)) ? JSON.parse(await readFile("front.json")) : null;   // the learned front end (world real)
 const C = !MODEL || F ? null : compile(JSON.parse(await readFile("normalize.json")));
 const lex = new Set(Object.keys((vss && vss.model.lexicon) || {})), verbEvent = new Map();
@@ -95,36 +95,13 @@ function composerFormalize(text, ctx) {
   return out.nodes;
 }
 
-// SEG=centres-model: the message is read by a CENTRE model (legend reader.centres; research/attention/port/NOTES.md): one normalization
-// of the whole message (front.js normalizeMessage), one reading (vss.readMessage): every accepted centre whose reading is ok / abstain is
-// a request, in text order; the model cuts by itself (no annotated span, no hard-centre search). The ignored token spans are counted.
-const IGN = { spans: 0, tokens: 0, msgs: 0 };
-function vssCentresModel(text, ctx) {
-  const { tokens, src, info } = FRONT.normalizeMessage(text, ctx.names, F), r = vss.readMessage(tokens.join(" "));
-  const seq = { s: 0, m: 0 }, c = { names: ctx.names, last: [], refs: new Map() }, nodes = [];
-  IGN.msgs++; IGN.spans += r.ignored.length; IGN.tokens += r.ignored.reduce((a, [x, y]) => a + y - x, 0);
-  for (const k of r.centres) {
-    if (!k.accepted || k.status === "unknown-event" || k.status === "no-sense") continue;
-    const reading = readingFromWires(k.wires, k.token, k.tokens), out = reading ? toNodes(reading, info, c, seq) : { nodes: [] };
-    const srcText = text.slice(Math.min(...k.members.map((i) => src[i][0])), Math.max(...k.members.map((i) => src[i][1])));
-    out.nodes.forEach((n) => { if (n.type !== "mention") Object.defineProperty(n, "src", { value: srcText, enumerable: false }); }); nodes.push(...out.nodes);
-    const main = out.nodes[out.nodes.length - 1];
-    if (main && main.args) {
-      if (main.args.action === "create") { if (main.args.name && !main.args.count) c.refs.set(String(main.args.name).toLowerCase(), { ref: main.id }); c.last = [{ ref: main.id }]; }
-      else if (main.args.target != null && !Array.isArray(main.args.target)) c.last = [main.args.target];
-    }
-  }
-  return nodes;
-}
-
 const SEGQ1 = process.env.SEG === "q1";
 function vssFormalize(text, ctx) {
-  if (process.env.SEG === "centres-model") return vssCentresModel(text, ctx);
   if (COMPOSER) return composerFormalize(text, ctx);
   // SEG=gold: the annotated spans (held-out TRAINING messages only: the test sets have none): the reading quality without the cut
   const segs = process.env.SEG === "gold" && ctx.spans ? ctx.spans.map((src) => ({ src }))
     : process.env.SEG === "tagger" && F ? FRONT.segment(text, ctx.names, CUTF || F).map((src) => ({ src }))        // the BIO cutter (CUTTER=<file>, else the model's front.json)
-    : SEGQ1 && F ? vssCentres(text, ctx.names, F, vss, Object.assign({ cut: "q1", confident: process.env.CONFIDENT === "1" }, process.env.Q1B === "1" ? { roleless: DEC.roleless_ok } : {})).map((src) => ({ src }))   // SEG=q1: the q1 cut (diagnosis_cut/CUT.md)
+    : SEGQ1 && F ? vssCentres(text, ctx.names, F, vss, { cut: "q1", confident: process.env.CONFIDENT === "1" }).map((src) => ({ src }))   // SEG=q1: the q1 cut (diagnosis_cut/CUT.md)
     : F ? vssCentres(text, ctx.names, F, vss, { confident: process.env.CONFIDENT === "1" }).map((src) => ({ src }))   // default: the VSS reader's own cut
     : sys.formalize(text, ctx).segments;
   const seq = { s: 0, m: 0 }, c = { names: ctx.names, last: [], refs: new Map() }, nodes = [];
@@ -211,7 +188,6 @@ for (const d of dirs) {
   report[d] = { n, tot }; ALL.n += n; for (const f of ["rules", "vss"]) for (const k of ["exact", "right", "wrongAligned", "missed", "acts", "extra", "gold", "mRight", "mHonest", "mWrong"]) ALL[f][k] += tot[f][k]; if (verbose) dump.slice(0, 12).forEach((x) => console.log(`  ${x.id} ${x.text}\n     rules: ${x.rules.join(" | ") || "ok"}\n     vss:   ${x.vss.join(" | ") || "ok"}`));
   if (dumpAt >= 0) writeFileSync(argv[dumpAt + 1].replace(/(\.json)?$/, `_${d.split("/").filter(Boolean).pop()}.json`), JSON.stringify(dump, null, 1));
 }
-if (process.env.SEG === "centres-model") console.log(`\ncentres-model: ignored text (tokens taken by no accepted centre read ok / abstain): ${IGN.spans} spans, ${IGN.tokens} tokens in ${IGN.msgs} messages`);
 if (dirs.length > 1) { const n = ALL.n, pc = (x, T) => (x / T.gold * 100).toFixed(1) + "%", line = (f) => { const T = ALL[f]; return `${f.padEnd(5)} correct ${pc(T.right, T)} · not done ${pc(T.missed, T)} · done wrong ${pc(T.wrongAligned, T)} · plus ${T.extra} extra wires not asked for (${pc(T.extra, T)} of the gold count) · messages fully right ${(T.exact / n * 100).toFixed(1)}%`; };
   console.log(`\nALL (${dirs.join(" + ")}): ${n} messages, ${ALL.rules.gold} gold wires`); console.log("  " + line("rules")); console.log("  " + line("vss"));
   console.log("  " + msgLine("rules", ALL.rules, n)); console.log("  " + msgLine("vss", ALL.vss, n)); }

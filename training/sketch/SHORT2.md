@@ -155,7 +155,7 @@ The fallback model kinds_p80_s0 read 0 of 4643 requests on the sample and 0 of 8
 - vss-composer.js: the registry's "fallback" is optional with router "cutter" (router "token" still needs one); no check of the worlds'
   events against a fallback legend (a new event of a new world needs no fallback); a cutter candidate "fallback" is skipped and keeps its
   place in the top 3 (the other candidates are those of before); the event cutter's check no longer looks up a fallback legend.
-- docs/model/micro/registry.json and registry_short.json: "fallback" and "fallback_version" removed.
+- docs/model/micro/registry.json (and registry_short.json, since deleted): "fallback" and "fallback_version" removed.
 - training/sketch/llm_score.mjs: with SEG=composer and no MODEL / registry fallback, no single model is loaded ("fallback none").
 - docs/js/vss-formalizer.js: loadComposerAt already loads only what the registry names (comments updated, the versioned loading untouched);
   short_bench.mjs loads through loadComposer and needed no change.

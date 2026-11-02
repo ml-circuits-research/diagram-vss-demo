@@ -178,16 +178,14 @@ switches are in front.py, llm_to_world.py, msg_to_world.py, train_micro.sh).
    `SHORT=1 OPS=1 DIAGRAM_OPS=1 python3 training/sketch/train_cutter.py --worlds training/sketch/worlds_micro/GROUPS_7.json --out docs/model/micro/cutter_worlds7r2.json`
    and the same with `GROUPS_EVENTS.json` -> `cutter_events_r2.json` (train_cutter.py is not changed by this round; its owner adds
    the switch).
-3. The fallback: vss-composer.js refuses a world whose events are not in the fallback legend, so kinds_p80_s0 must be retrained with
-   the new events: the build of kinds_p80_s0 (run_curve.sh on worlds/real, DATA=all, KINDMAP=diagnosis_kinds/kinds_data2.json,
-   share 0.8, 2 epochs; diagnosis_kinds/KINDS.md) plus `DIAGRAM_OPS=1 OPS=1` (and SHORT=1 if the worlds have it), PREFIX=kindsr2 ->
-   docs/model/kindsr2_p80_s0. run_curve.sh trains on cpu only (`--device cpu` is written in it). The exact switches of kinds_p80_s0
-   (QCOLOR, MARKER, CAL_FALLBACK) should be read from its run log before the run; they are not recorded in a BUILD.json.
+3. No fallback: the fallback model (kinds_p80_s0) was removed from the composer and the registry on 2026-11-02 (it read 0 requests), so
+   there is nothing to retrain here and the composer no longer checks the worlds' events against a fallback legend (run_curve.sh, which
+   built single models, was deleted).
 4. `docs/model/micro/registry_r2.json` = registry.json with the 7 r2 models, the r2 events of manage and questions, the r2 cutters
-   and the r2 fallback; then `stamp_models.py` for the versions.
+   and no fallback (make_registry_r2.py); then `stamp_models.py` for the versions.
 
-If the ops data or the fallback are not ready, the 7 worlds can still be trained and measured per event (SEG=gold needs neither the
-cutter nor the fallback), but not in the composer.
+If the ops data are not ready, the 7 worlds can still be trained and measured per event (SEG=gold needs neither the
+cutter nor the registry), but not in the composer.
 
 ## 6. Measures and thresholds (fixed now)
 
