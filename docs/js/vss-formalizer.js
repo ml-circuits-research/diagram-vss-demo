@@ -1,9 +1,10 @@
 // vss-formalizer.js: the VSS formalizer of the demo: formalize(text, ctx) -> the composer (vss-composer.js): the cutter, the
 // micro-worlds of ../model/micro/registry.json, the router and the fallback world when the registry names one (none by default since 2026-11-02); loaded on first use.
-// Exposes window.VSSFormalizer = { formalize, loadComposerAt, composerInfo }. (The single-model path, ../model/real/ read with
+// Exposes window.VSSFormalizer = { formalize, loadComposerAt, composerInfo, cut, CUT_STRATEGIES, DEFAULT_CUT }. (The single-model path, ../model/real/ read with
 // ?vss=single, was removed on 2026-11-02; it is in git history.)
 import { load as loadVSS } from "./vss.js";
-import { loadComposer } from "./vss-composer.js";
+import { loadComposer, cutUnits, CUT_STRATEGIES, DEFAULT_CUT } from "./vss-composer.js";
+export { CUT_STRATEGIES, DEFAULT_CUT };
 
 // ---- model versions (owner's rule 2026-11-02: never use an older model after a new one is published). versions.json (written by
 // training/sketch/stamp_models.py) maps every model folder / file under docs/model/ to a content version; every model URL gets
@@ -60,10 +61,18 @@ export async function loadComposerAt(root = new URL("../model/", import.meta.url
 
 /** a whole message -> the composer's reading: units of the cutter, routed to the micro-worlds (or the fallback, when the registry
  *  names one); each unit carries its world. The third argument (the rules' formalize) is not used; opts.composer may name another
- *  docs/model/ root (a string). */
+ *  docs/model/ root (a string); opts.units: the units of the cut chosen in the settings ([{c0, c1}], see cut below), read instead of the
+ *  cutter's own (vss-composer.js, "units of another cut"). */
 export async function formalize(text, ctx, _rulesFormalize, opts = {}) {
   const c = await loadComposerAt(typeof opts.composer === "string" ? opts.composer : undefined);
-  return c.formalize(text, ctx);
+  return Array.isArray(opts.units) ? c.formalize(text, ctx, { units: opts.units }) : c.formalize(text, ctx);
+}
+
+/** the cut every reader reads (the demo's setting): cut(text, ctx, strategy, env) -> Promise<[{c0, c1, src}]>. strategy "rules" | "vss" |
+ *  "bert" (vss-composer.js cutUnits); "vss" loads the composer (its cutter) first. env: {rules: a logic.js system, neural: NeuralKit}. */
+export async function cut(text, ctx = {}, strategy = DEFAULT_CUT, env = {}) {
+  const composer = strategy === "vss" ? await loadComposerAt() : null;
+  return cutUnits(text, ctx, strategy, Object.assign({}, env, composer ? { composer } : {}));
 }
 
 /** what the demo shows about the composer: its worlds (model folder, actions), router, event hint, fallback, bytes and load time */
@@ -76,4 +85,4 @@ export function composerInfo() {
     worlds: (r.worlds || []).map((w) => ({ world: w.world, model: w.model.replace(/^micro\//, ""), events: w.events || [], bytes: size(w.model) })) };
 }
 
-window.VSSFormalizer = { formalize, loadComposerAt, composerInfo };
+if (typeof window !== "undefined") window.VSSFormalizer = { formalize, loadComposerAt, composerInfo, cut, CUT_STRATEGIES, DEFAULT_CUT };

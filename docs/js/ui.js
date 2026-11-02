@@ -30,6 +30,36 @@ const SPELL_OFF = 'sop.spell.off';
 let spellEnabled = store.get(SPELL_OFF) !== '1', speller = null;
 const spellP = (window.SpellKit ? SpellKit.load(new URL('model/', document.baseURI).href, engine.legend) : Promise.resolve(null)).then(s => { speller = s; return s; });
 const canvasNames = rd => rd.world.state.shapes.map(s => s.name).concat((rd.world.state.groups || []).map(g => g.name));
+// cutting (owner's decision 2026-11-02): the three readers read the SAME requests. Each message is cut once, by the strategy chosen in
+// ⋮ › Help › Cutting (Rules segmenter, VSS cutter, BERT cutter; vss-composer.js CUT_STRATEGIES, cutUnits), and every reader reads those
+// units; the tabs differ only in how each reads a request. The default is vss-composer.js DEFAULT_CUT (the best measured, training/sketch/
+// cut_bench.mjs); the choice is kept in this browser when storage works. A strategy that is not available yet (VSS not loaded, no neural
+// span head) is replaced by the Rules segmenter for that message, and the details say so. The cut reads the canvas of the reader it
+// comes from (Rules, VSS or Neural), as that reader did when it cut for itself.
+const CUT_KEY = 'sop.cut';
+let cutPick = store.get(CUT_KEY), VF = null;
+const vfP = import(new URL('js/vss-formalizer.js', document.baseURI).href).then(m => { VF = m; return m; }).catch(e => { console.error(e); return null; });
+const CUT_OWNER = { rules: 'rules', vss: 'vss', bert: 'neural' };
+const cutStrategies = () => VF ? VF.CUT_STRATEGIES : [{ id: 'rules', label: 'Rules segmenter' }, { id: 'vss', label: 'VSS cutter' }, { id: 'bert', label: 'BERT cutter' }];
+const cutLabel = id => (cutStrategies().find(x => x.id === id) || { label: id }).label;
+const cutWanted = () => cutPick || (VF ? VF.DEFAULT_CUT : 'vss');
+const bertCut = () => nState === 'ready' && !!models && NeuralKit.canCut();
+/** why a strategy cannot cut now (null: it can) */
+function cutWhyNot(id) {
+  if (id === 'rules') return null;
+  if (id === 'vss') return vssState === 'ready' && VF ? null : vssState === 'failed' ? 'the VSS reader could not be loaded' : 'the VSS reader is still loading';
+  if (id === 'bert') return bertCut() ? null : nState === 'ready' || nState === 'unpublished' ? 'the neural model with a span head (the BERT cutter) is not published yet' : 'the neural reader is not loaded';
+  return 'unknown strategy';
+}
+/** cut one message once: -> {strategy, wanted, why (the wanted one could not cut), units [{c0, c1, src}], ms} */
+async function cutMessage(text) {
+  await vfP;
+  const wanted = cutWanted(); let why = cutWhyNot(wanted), strategy = why ? 'rules' : wanted;
+  const go = st => { const rd = RD[CUT_OWNER[st]]; return VF ? VF.cut(text, { names: canvasNames(rd), last: rd.last }, st, { rules: RD.rules, neural: NeuralKit }) : RD.rules.cut(text, { names: canvasNames(rd), last: rd.last }); };
+  const t0 = performance.now(); let units;
+  try { units = await go(strategy); } catch (e) { why = e.message; strategy = 'rules'; units = await go('rules'); }
+  return { strategy, wanted, why, units, ms: performance.now() - t0 };
+}
 
 /* ---------------- canvas ---------------- */
 /* ---------------- canvas ---------------- */
@@ -269,6 +299,7 @@ async function run(text, sop) {
   const picks = new Map(live.map(rd => [rd, rd.pending && rd.pending.candidates.find(c => c.toLowerCase() === want)]));
   const anyPick = [...picks.values()].some(Boolean);
   const wait = live.length > 1 ? typing() : null; if (wait) setStatus('typing…');
+  if (!rec.raw && !anyPick && live.length) rec.cut = await cutMessage(text);   // one cut, read by every reader
   const parts = [];
   for (const rd of READERS) {
     if (!live.includes(rd)) { rec.off[rd.id] = offText(rd); parts.push({ rd, off: rec.off[rd.id] }); continue; }
@@ -292,9 +323,10 @@ async function readWith(rd, text, rec, pk) {
   try {
     if (pk) { r.nodes = pk.pend.nodes; overrides = Object.assign({}, pk.pend.overrides, { [pk.pend.wire]: [pk.pick] }); }
     else if (rec.raw) r.nodes = K.parse(rec.sop);   // SOP: nothing to formalize, no time
-    else if (rd.id === 'rules') { const f = rd.formalize(text, ctx); r.ms = performance.now() - t0; r.nodes = f.nodes; r.notes = f.notes; }
-    else if (rd.id === 'vss') { const v = await window.VSSFormalizer.formalize(text, ctx, rd.formalize, VSS_OPTS); r.ms = performance.now() - t0; r.vss = v; r.nodes = v.nodes; r.notes = v.notes; }
-    else { const n = await neural.formalize(text, ctx); r.ms = performance.now() - t0; r.neural = n; r.nodes = n.nodes; r.notes = n.notes.filter(x => !/couldn't find an action/.test(x)); }
+    else if (rd.id === 'rules') { const f = rec.cut && rec.cut.strategy !== 'rules' ? rd.formalize(text, ctx, { units: rec.cut.units }) : rd.formalize(text, ctx); r.ms = performance.now() - t0; r.nodes = f.nodes; r.notes = f.notes; }
+    else if (rd.id === 'vss') { const v = await window.VSSFormalizer.formalize(text, ctx, rd.formalize, Object.assign({}, VSS_OPTS, rec.cut ? { units: rec.cut.units } : {})); r.ms = performance.now() - t0; r.vss = v; r.nodes = v.nodes; r.notes = v.notes; }
+    else { const n = await neural.formalize(text, ctx, rec.cut ? { units: rec.cut.units } : undefined); r.ms = performance.now() - t0; r.neural = n; r.nodes = n.nodes; r.notes = n.notes.filter(x => !/couldn't find an action/.test(x)); }
+    if (rec.cut && !pk && !rec.raw) r.cutBy = rec.cut.strategy;
   } catch (e) { r.error = e; r.ms = performance.now() - t0; return { text: `The ${rd.label} reader failed: ${e.message}`, err: true, ms: r.ms }; }
   const ms = r.ms, nodes = r.nodes, notes = r.notes, world = rd.world, engine = rd.engine;
   rd.reads++; rd.lastRead = { turn: rec.id, nodes };
@@ -344,7 +376,7 @@ function turnHTML(r) {
   return READERS.map(rd => {
     const x = r.readers[rd.id];
     if (!x) return `<section class="rdsec"><div class="minihead">${escH(rd.label)} <span>${escH(r.off[rd.id] || 'did not read this')}</span></div></section>`;
-    let h = `<div class="minihead">${escH(rd.label)} <span>${x.ms != null ? 'formalized in ' + fmtMs(x.ms) : r.raw ? 'SOP, nothing to formalize' : 'your choice from the question'}${x.neural ? ` · ${x.neural.calls} model calls` : ''}</span></div>`;
+    let h = `<div class="minihead">${escH(rd.label)} <span>${x.ms != null ? 'formalized in ' + fmtMs(x.ms) : r.raw ? 'SOP, nothing to formalize' : 'your choice from the question'}${x.neural ? ` · ${x.neural.calls} model calls` : ''}${x.cutBy ? ` · cut by: ${escH(cutLabel(x.cutBy))}` : ''}</span></div>`;
     if (x.nodes && x.nodes.length) h += `<pre class="sop">${r.raw ? `<span class="cm"># ${r.button ? 'toolbar button, sent as SOP' : 'typed as SOP'}</span>\n` : ''}${x.nodes.map(hlNode).join('\n')}</pre>`;
     (x.notes || []).forEach(n => { h += `<div class="note">${escH(n)}</div>`; });
     if (x.vss) h += vssHTML(x.vss);
@@ -364,7 +396,8 @@ function renderTurn(id) {
   const sp = r.spell, fixes = sp && sp.fixes.length ? sp.fixes.map(f => `${f.from} → ${f.to} (similarity ${f.sim.toFixed(2)}, next ${f.second.toFixed(2)})`).join(', ') : '';
   const spell = fixes ? `<div class="note">Spelling, in ${fmtMs(sp.ms)}: ${escH(fixes)}. Every reader read the corrected text:</div><div class="q">${escH(r.text)}</div>`
     : sp ? `<div class="note">Spelling: nothing corrected (${fmtMs(sp.ms)}).</div>` : r.spellOff ? '<div class="note">Spelling check was off (⋮ › Help).</div>' : '';
-  return `<div class="msghead"><div class="q">${escH(r.typed || r.text)}</div>${spell}<div class="note">${escH(r.time)} · read by ${escH(ranLabel(r))}</div></div>
+  const c = r.cut, cut = c ? `<div class="note">Cut into ${c.units.length} request${c.units.length === 1 ? '' : 's'} by the ${escH(cutLabel(c.strategy))} in ${fmtMs(c.ms)}${c.why ? ` (the ${escH(cutLabel(c.wanted))} was chosen, but ${escH(c.why)})` : ''}; every reader read these:</div><ul class="units">${c.units.map(u => `<li><span class="src">“${escH(u.src)}”</span></li>`).join('')}</ul>` : '';
+  return `<div class="msghead"><div class="q">${escH(r.typed || r.text)}</div>${spell}${cut}<div class="note">${escH(r.time)} · read by ${escH(ranLabel(r))}</div></div>
   <p class="intro">What each reader wrote for this message: the SOP wires and how long writing them took, the plugin that ran each wire and the changes it made to that reader’s drawing, the VSS cutter’s requests and the neural model’s evidence.</p>${turnHTML(r)}`;
 }
 
@@ -413,7 +446,7 @@ function stepHTML(st) {
 const fmtV = v => v == null ? '' : K.fmtValue(v);
 function vssHTML(v) {
   let h = '';
-  if (v.units) h += `<div class="note">Requests found by the cutter:</div><ul class="units">${v.units.map(u => `<li><span class="src">“${escH(u.src || '')}”</span> → ${u.zone === 'ignored' ? 'not read' + (u.reason ? ' (' + escH(u.reason) + ')' : '') : `world <code>${escH(((vssInfo && vssInfo.worlds || []).find(w => w.world === u.world) || { model: u.world || '' }).model)}</code>, ${escH(u.event || '?')}${u.zone === 'ask' ? ', asked which shape' : ''}${u.tie > 1 ? `, ${u.tie} worlds read it, decided by ${escH(u.decidedBy || '?')}` : ''}${u.reread ? ', action from the event hint' : ''}`}</li>`).join('')}</ul>`;
+  if (v.units) h += `<div class="note">The requests and the world that read each:</div><ul class="units">${v.units.map(u => `<li><span class="src">“${escH(u.src || '')}”</span> → ${u.zone === 'ignored' ? 'not read' + (u.reason ? ' (' + escH(u.reason) + ')' : '') : `world <code>${escH(((vssInfo && vssInfo.worlds || []).find(w => w.world === u.world) || { model: u.world || '' }).model)}</code>, ${escH(u.event || '?')}${u.zone === 'ask' ? ', asked which shape' : ''}${u.tie > 1 ? `, ${u.tie} worlds read it, decided by ${escH(u.decidedBy || '?')}` : ''}${u.reread ? ', action from the event hint' : ''}`}${u.noWorldSignal ? ' (the VSS cutter named no world here: every world read it)' : ''}</li>`).join('')}</ul>`;
   for (const c of v.clauses) {
     if (!c.vss) continue;
     const m = c.vss.margins || {}, ms = Object.entries(m).filter(([, x]) => typeof x === 'number').map(([k, x]) => `${k} ${x.toFixed(2)}`).slice(0, 8).join(' · ');
@@ -722,7 +755,7 @@ function vssStatusHTML() {
 /** what every reader's Settings subtab starts with: its drawing and what it has read */
 function readerFacts(rd) {
   const S = rd.world.state, n = S.shapes.length, m = S.edges.length, u = rd.world.undoStack.length;
-  return `<table class="kv"><tr><td>State</td><td>${escH(isReady(rd) ? 'ready' : offText(rd).replace(/, did not read this$/, '').replace(/ \(see Neural › Settings\)$/, '').replace(/; see Neural › Settings\)$/, ')'))}</td></tr><tr><td>Messages read</td><td>${rd.reads}</td></tr><tr><td>Its drawing</td><td>${n} shape${n === 1 ? '' : 's'} · ${m} link${m === 1 ? '' : 's'} · ${u} step${u === 1 ? '' : 's'} to undo</td></tr></table>`;
+  return `<table class="kv"><tr><td>State</td><td>${escH(isReady(rd) ? 'ready' : offText(rd).replace(/, did not read this$/, '').replace(/ \(see Neural › Settings\)$/, '').replace(/; see Neural › Settings\)$/, ')'))}</td></tr><tr><td>Messages read</td><td>${rd.reads}</td></tr><tr><td>Its drawing</td><td>${n} shape${n === 1 ? '' : 's'} · ${m} link${m === 1 ? '' : 's'} · ${u} step${u === 1 ? '' : 's'} to undo</td></tr><tr><td>Requests cut by</td><td>${escH(cutLabel(cutWanted()))} (the same for every reader; ⋮ › Help › Cutting)</td></tr></table>`;
 }
 const sharedNote = `<p class="intro">The SOP language (the commands every reader writes) and the engine’s capabilities are the same for all three readers. They are in the ⋮ menu: <button type="button" class="btn" data-open="sop">SOP language</button> <button type="button" class="btn" data-open="plugins">Capabilities</button></p>`;
 function renderReaderSettings(rd) {
@@ -763,6 +796,7 @@ sbody.addEventListener('click', async ev => {
   const fx = ev.target.closest('[data-fails]'); if (fx) { const d = document.getElementById('fails-' + fx.dataset.fails); if (d) d.hidden = !d.hidden; }
 });
 sbody.addEventListener('change', ev => {
+  if (ev.target.name === 'cut-strategy') { const id = ev.target.value, def = VF ? VF.DEFAULT_CUT : null; cutPick = id === def ? null : id; store.set(CUT_KEY, cutPick); sysNote(`Requests are now cut by the ${cutLabel(id)}${cutWhyNot(id) ? ` (until it is available, by the Rules segmenter: ${cutWhyNot(id)})` : ''}; every reader reads them.`); if (sub === 'settings') renderSub(); return; }
   if (ev.target.id === 'spell-on') { spellEnabled = ev.target.checked; store.set(SPELL_OFF, spellEnabled ? null : '1'); sysNote(`Spelling check ${spellEnabled ? 'on' : 'off'}.`); return; }
   if (ev.target.id === 'sc-file' && ev.target.files[0]) {
     const f = ev.target.files[0], rd = new FileReader();
@@ -775,12 +809,12 @@ sbody.addEventListener('change', ev => {
 });
 
 /* ---------------- benchmark: every reader on the same labelled sentences ---------------- */
-let benchStop = false, benchSets = null, benchLast = null;
+let benchStop = false, benchSets = null, benchLast = null, benchCut = null;
 async function benchIndex() { if (!benchSets) { const r = await fetch(new URL('bench/index.json', document.baseURI)); benchSets = (await r.json()).sets; } return benchSets; }
 function renderBench() {
   const sets = benchSets || [];
   const fz = [['rules', 'Rules', true], ['vss', 'VSS', vssState !== 'failed'], ['neural', 'Neural', !!models]];
-  return `<p class="intro">Every reader reads the same labelled sentences against the same gold wires. A message counts when its wire type and every labelled answer match (descriptions are compared by what they describe). Speed is measured here, in this browser, per message, after the model has loaded.</p>
+  return `<p class="intro">Every reader reads the same labelled sentences against the same gold wires, cut into requests by the ${escH(cutLabel(cutWanted()))} (⋮ › Help › Cutting). A message counts when its wire type and every labelled answer match (descriptions are compared by what they describe). Speed is measured here, in this browser, per message, after the model has loaded.</p>
   <h3 class="sub">Test sets</h3>
   ${sets.length ? sets.map(s => `<label class="ck" style="display:flex;margin:4px 0"><input type="checkbox" data-bset="${s.id}" ${['blind', 'broad', 'new_identities'].includes(s.id) ? 'checked' : ''}> ${escH(s.title)} <span class="status">&nbsp;· ${s.n}</span></label>`).join('') : '<p class="intro">Loading the test sets…</p>'}
   <div class="opts" style="margin-top:8px"><label for="bm-limit">Sentences per generated set</label><select id="bm-limit"><option value="50">50</option><option value="100" selected>100</option><option value="300">300</option></select></div>
@@ -799,6 +833,8 @@ async function runBench(btn) {
   if (fzs.includes('vss') && !(await ensureVSS(false))) fzs.splice(fzs.indexOf('vss'), 1);
   if (fzs.includes('neural') && !models) fzs.splice(fzs.indexOf('neural'), 1);
   const res = {}; for (const f of fzs) res[f] = { sets: {}, times: [], fails: [] };
+  await vfP; const cst = cutWhyNot(cutWanted()) ? 'rules' : cutWanted();   // every reader reads the units of one cut per sentence (the setting)
+  benchCut = cst;
   for (const id of setIds) {
     const meta = benchSets.find(s => s.id === id);
     let rows = await (await fetch(new URL(`bench/${id}.json`, document.baseURI))).json();
@@ -806,12 +842,13 @@ async function runBench(btn) {
     for (const f of fzs) res[f].sets[id] = { ok: 0, n: 0, keys: 0, kok: 0 };
     for (let i = 0; i < rows.length && !benchStop; i++) {
       const r = rows[i], ctx = { names: r.names, last: [] };
+      let units = null; try { units = VF ? await VF.cut(r.text, ctx, cst, { rules: sys, neural: NeuralKit }) : sys.cut(r.text, ctx); } catch (e) { units = sys.cut(r.text, ctx); }
       for (const f of fzs) {
         const t0 = performance.now(); let nodes = [];
         try {
-          if (f === 'rules') nodes = sys.formalize(r.text, ctx).nodes;
-          else if (f === 'vss') nodes = (await window.VSSFormalizer.formalize(r.text, ctx, sys.formalize, VSS_OPTS)).nodes;
-          else nodes = (await neural.formalize(r.text, ctx)).nodes;
+          if (f === 'rules') nodes = (cst === 'rules' ? sys.formalize(r.text, ctx) : sys.formalize(r.text, ctx, { units })).nodes;
+          else if (f === 'vss') nodes = (await window.VSSFormalizer.formalize(r.text, ctx, sys.formalize, Object.assign({}, VSS_OPTS, { units }))).nodes;
+          else nodes = (await neural.formalize(r.text, ctx, { units })).nodes;
         } catch (e) { nodes = []; }
         const dt = performance.now() - t0; res[f].times.push(dt);
         const sc = BenchCanon.score(nodes, r), S = res[f].sets[id]; S.n++; if (sc.ok) S.ok++;
@@ -827,7 +864,7 @@ async function runBench(btn) {
   const label = { rules: 'Rules', vss: vssInfo && vssInfo.composer ? `VSS (${vssInfo.worlds.length} micro-worlds)` : `VSS (D ${vssInfo ? vssInfo.D : '?'})`, neural: models ? `Neural (${models.enumModel.split('/')[1]} + ${models.qaModel.split('/')[1]})` : 'Neural' };
   const sets = setIds.filter(id => fzs.some(f => res[f].sets[id] && res[f].sets[id].n));
   const cell = S => S && S.n ? `<b>${(S.ok / S.n * 100).toFixed(0)}%</b> <span class="why">${S.ok}/${S.n} · answers ${(S.kok / Math.max(1, S.keys) * 100).toFixed(0)}%</span>` : '–';
-  const html = `<h3 class="sub">Results</h3><div class="tbl"><table class="bench"><thead><tr><th>reader</th>${sets.map(id => `<th>${escH(benchSets.find(s => s.id === id).title.split(' (')[0])}</th>`).join('')}<th>model size</th><th>load</th><th>ms / message (median · p95)</th></tr></thead><tbody>
+  const html = `<h3 class="sub">Results</h3><p class="intro">Every reader read the requests cut by the ${escH(cutLabel(benchCut))} (⋮ › Help › Cutting); the times are the reading only.</p><div class="tbl"><table class="bench"><thead><tr><th>reader</th>${sets.map(id => `<th>${escH(benchSets.find(s => s.id === id).title.split(' (')[0])}</th>`).join('')}<th>model size</th><th>load</th><th>ms / message (median · p95)</th></tr></thead><tbody>
     ${fzs.map(f => `<tr><td><b>${escH(label[f])}</b></td>${sets.map(id => `<td>${cell(res[f].sets[id])}</td>`).join('')}<td>${f === 'rules' ? mb(size[f]) + ' <span class="why">code</span>' : mb(size[f])}</td><td>${f === 'rules' ? '–' : (load[f] / 1000).toFixed(1) + ' s'}</td><td>${pctl(res[f].times, 0.5).toFixed(1)} · ${pctl(res[f].times, 0.95).toFixed(1)}</td></tr>`).join('')}
   </tbody></table></div>
   <p class="intro" style="margin-top:8px">The generated sets come from the same templates the VSS model was trained on (new names, held-out template × prefix pairs), and the rules were written by the same author as the templates, so they favour both. The blind paraphrases and the broad set were written before any reader was run on them and no reader was tuned on them afterwards; their author also wrote the rules, which favours the rules.</p>
@@ -842,7 +879,16 @@ function helpEnv() {
   let nb = neuralBytes; try { if (!nb) nb = nBytesHint(); } catch (e) { }
   return { K, engine, drawShape, drawEdge, drawGroups, startMessages: START, vssBytes: vssInfo && vssInfo.bytes ? vssInfo.bytes : VSS_HINT, neuralBytes: nb };
 }
-const renderHelp = () => spellHelpHTML() + HelpKit.help(helpEnv());
+const renderHelp = () => spellHelpHTML() + cutHelpHTML() + HelpKit.help(helpEnv());
+/** the cut setting, at the top of ⋮ › Help (it acts before every reader, so it is not one reader's setting) */
+function cutHelpHTML() {
+  const want = cutWanted(), def = VF ? VF.DEFAULT_CUT : null;
+  const opt = s => { const why = cutWhyNot(s.id), off = s.id === 'bert' && why;   // VSS can be chosen while it loads (the Rules segmenter cuts until then)
+    return `<label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:${off ? 'default' : 'pointer'}${off ? ';opacity:.6' : ''}"><input type="radio" name="cut-strategy" value="${escH(s.id)}" ${s.id === want ? 'checked' : ''} ${off ? 'disabled' : ''}> <span><b>${escH(s.label)}</b>${s.id === def ? ' (default)' : ''}${s.about ? `: ${escH(s.about)}` : ''}${why ? `<br><span class="note">Not available now: ${escH(why)}.</span>` : ''}</span></label>`; };
+  return `<div class="help"><h3 class="sub">Cutting into requests</h3>
+  <p class="note">A message is cut into requests once, and Rules, VSS and Neural all read the same requests; the tabs differ only in how each reader reads a request. <b>details</b> under a reply lists the requests and the time the cut took.</p>
+  ${cutStrategies().map(opt).join('')}</div>`;
+}
 /** the spell checker's switch, at the top of ⋮ › Help (it acts before every reader, so it is not one reader's setting) */
 function spellHelpHTML() {
   const P = speller && speller.params;

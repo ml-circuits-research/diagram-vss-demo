@@ -1236,7 +1236,14 @@ const STOP = new Set(['a', 'an', 'the', 'and', 'or', 'to', 'of', 'in', 'on', 'at
 
 function makeFormalizer(engine) {
   const L = engine.legend;
-  return function formalize(input, ctx) {
+  /** formalize(input, ctx[, opts]). opts.units ([{c0, c1}], character offsets into input, in order): read these units instead of cutting the
+   *  message itself (the cut chosen in the demo's settings, docs/js/vss-composer.js cutUnits): each unit is read as ONE clause by the same
+   *  clause reader, with the same context carried from clause to clause (names created earlier, `last`, the verb of an ellipsis); the
+   *  rules' own cutting steps (sentences, verb and coordination splits, merging a verbless piece into the next, one clause per created
+   *  object, the chain merge of consecutive connections) do not run. Each wire read from a unit gets span = [c0, c1] (not enumerable).
+   *  Without opts.units nothing changes. */
+  return function formalize(input, ctx, opts) {
+    const given = opts && Array.isArray(opts.units) ? opts.units : null, original = input;
     const lx = k => L.lexicon(k);
     const SHAPE = lx('shape'), COLOR = lx('color'), SIZE = lx('size'), ACTION = lx('action');
     const generic = new Set(SHAPE_VALUES.any.concat('any'));
@@ -1259,6 +1266,7 @@ function makeFormalizer(engine) {
 
     // ---- spelling: map near-misses onto legend cue words and shape names ----
     const corrections = [];
+    let fixText = null;
     {
       const targets = new Map();
       const addT = (w, canon) => { const k = w.toLowerCase(); if (k.length >= 3 && !targets.has(k)) targets.set(k, canon); };
@@ -1284,15 +1292,17 @@ function makeFormalizer(engine) {
           if (Math.abs(k.length - lw.length) > max) continue; const d = osa(lw, k); if (d < bd) { bd = d; best = canon; tie = false; } else if (d === bd && canon !== best) tie = true; }
         return bd <= max && !tie ? best : null;
       };
-      input = input.replace(/"[^"]*"|“[^”]*”|[A-Za-z][\w'-]*/g, w => {
+      fixText = s => s.replace(/"[^"]*"|“[^”]*”|[A-Za-z][\w'-]*/g, w => {
         if (w[0] === '"' || w[0] === '“') return w;
         const f = fixWord(w); if (!f) return w;
         corrections.push(`I read “${w}” as “${f}”.`); return f;
       });
+      if (!given) input = fixText(input);
     }
     const quotes = [];
+    const quoteOut = s => s.replace(/"([^"]*)"|“([^”]*)”|(^|\s)'([^']+)'(?=[\s.,!?;]|$)/g, (m, a, b, pre, c) => { quotes.push(a != null ? a : b != null ? b : c); return (pre || '') + ' ⟪' + (quotes.length - 1) + '⟫ '; });
     let text = ' ' + input.trim() + ' ';
-    text = text.replace(/"([^"]*)"|“([^”]*)”|(^|\s)'([^']+)'(?=[\s.,!?;]|$)/g, (m, a, b, pre, c) => { quotes.push(a != null ? a : b != null ? b : c); return (pre || '') + ' ⟪' + (quotes.length - 1) + '⟫ '; });
+    if (!given) text = quoteOut(text);
     const unq = tok => { const m = /^⟪(\d+)⟫$/.exec(tok); return m ? quotes[+m[1]] : tok; };
 
     const sentences = text.split(/(?<=[.!?;])\s+/).map(s => s.trim()).filter(Boolean);
@@ -1322,6 +1332,21 @@ function makeFormalizer(engine) {
     const PLACE_ONLY = nameAltRe ? new RegExp(`^\\s*(?:the\\s+)?(?:${nameAltRe})\\s+(?:(?:is|goes|sits|stays|should\\s+be|just|right|way|then)\\s+)*(?:(?:at|in|on|to)\\s+the\\s+(?:top|bottom|left|right|center|centre|middle|upper|lower)|(?:top|bottom|upper|lower)(?:[\\s-]+(?:left|right))?\\s*$|on\\s+top\\s*$|(?:in\\s+the\\s+)?(?:center|centre|middle)\\s*$|(?:above|below|under|over|beneath|underneath|left\\s+of|right\\s+of|next\\s+to|near|beside|between|on\\s+top\\s+of)\\b)`, 'i') : null;
     const CONNECT_ONLY = nameAltRe ? new RegExp(`^\\s*(?:the\\s+)?(?:${nameAltRe})(?:\\s*(?:,|and)\\s*(?:the\\s+)?(?:${nameAltRe}))*\\s+(?:(?:both\\s+|each\\s+|all\\s+)?(?:goes|go|leads?|flows?|feeds?|sends?|files|points?|runs?|passes|connects?)\\s+(?:in)?to|to)\\s+(?:the\\s+)?(?:${nameAltRe}|the\\s+next)\\b`, 'i') : null;
     const FACT_LIST = nameAltRe ? new RegExp(`\\s*,\\s*(?:and\\s+)?(?=(?:the\\s+)?(?:${nameAltRe})\\s+(?:is|are)\\s)|\\s*,\\s*(?:and\\s+)?(?=(?:the\\s+)?(?:${nameAltRe})\\s+(?:(?:at|in|on)\\s+the|top|bottom|upper|lower|center|centre|middle|on\\s+top|(?:goes\\s+)?to\\s+(?:the\\s+)?(?:${nameAltRe}))\\b|(?:the\\s+)?(?:${nameAltRe})\\s+(?:above|below|under|over|left\\s+of|right\\s+of|next\\s+to|near|beside)\\b)`, 'i') : null;
+    if (given) {   // the units of another cut (see opts.units above): one clause per unit, the context carried as in the loop below
+      for (const u of given) {
+        const tail = original.slice(Math.max(u.c0, u.c1 - 1)), end = /[.!?;]/.exec(tail.replace(/^[\s,]+/, ''));
+        const isQ = !!end && end[0] === '?';   // a question when the sentence the unit ends in ends with "?"
+        let p = quoteOut(' ' + fixText(original.slice(u.c0, u.c1)).trim() + ' ').trim().replace(/[.!?;]+\s*$/, '');
+        if (!p.trim()) continue;
+        const pv = p.match(VERB_RE);
+        if (pv) prevVerb = pv[1];
+        else if (prevVerb && !isQ && ELLIPSIS && ELLIPSIS.test(p) && !/^\s*(?:the\s+)?\S+\s+(?:is|are|was|were|should|would|will|has|have)\b/i.test(p)) p = prevVerb + ' ' + p.replace(/^\s*(?:(?:and|then|also|plus|now)\s+)*/i, '');
+        const n0 = F.nodes.length;
+        clause(p, isQ);
+        for (const n of F.nodes.slice(n0)) if (n.type !== 'mention') Object.defineProperty(n, 'span', { value: [u.c0, u.c1], enumerable: false, configurable: true });
+      }
+      return { nodes: F.nodes, notes: corrections.concat(F.notes), segments: F.segments, corrections };
+    }
     for (const sen of sentences) {
       const isQ = /\?\s*$/.test(sen);
       const body = sen.replace(/[.!?;]+\s*$/, '');
@@ -1338,6 +1363,7 @@ function makeFormalizer(engine) {
         else clause(p, isQ);
       }
     }
+    const pieces = F.segments.slice();   // the segmenter's pieces, before the chain merge below (rulesCut)
     // "connect A to B and B to C": consecutive connections that continue each other are one chain
     for (let i = F.nodes.length - 1; i > 0; i--) {
       const b = F.nodes[i], a = F.nodes.slice(0, i).reverse().find(n => n.type !== 'mention');
@@ -1353,7 +1379,7 @@ function makeFormalizer(engine) {
       a.args = { action: 'connect', from: aList.concat(b.args.to), pairing: 'chain' };
       F.nodes.splice(F.nodes.indexOf(b), 1); F.segments = F.segments.filter(sg => sg.id !== b.id);
     }
-    return { nodes: F.nodes, notes: corrections.concat(F.notes), segments: F.segments, corrections };
+    return { nodes: F.nodes, notes: corrections.concat(F.notes), segments: F.segments, corrections, pieces };
 
     function clause(raw, isQ) {
       let t = ' ' + raw.trim().replace(/[,\s]+$/, '') + ' ';
@@ -1650,6 +1676,60 @@ function makeFormalizer(engine) {
   };
 }
 
+/** THE RULES' CUT as character offsets (the demo's cut setting, docs/js/vss-composer.js cutUnits): the pieces the rules' segmenter makes
+ *  (formalize(...).pieces: sentences, verb and coordination splits, a verbless piece merged into the next, one clause per created object;
+ *  before the chain merge) located in the original text. A piece is made of contiguous stretches of ONE sentence: the part itself, or the
+ *  next part followed by a verbless part that stood before it, sometimes with a verb added in front (an ellipsis, one clause per created
+ *  object); spelling corrections and restored quotes change some words, and the words between parts ("then", "and") are dropped. So each
+ *  piece is located by a scan: from a start word, the unit grows word by word while the next word is needed, or a needed word follows
+ *  within 3 words, never across the end of a sentence; it stops when the only word still needed is the piece's first one (an added
+ *  verb). A word is needed while the piece has an unused copy of it (case-insensitive, or the word the rules corrected into it). The
+ *  start is the first word after the cursor (the word after the previous unit) whose scan takes 60% of the piece's words (not counting
+ *  its first), else the start whose scan takes the most, within the next 40 words. A piece with no needed word there gives no unit.
+ *  -> [{c0, c1, src}] (src = text.slice(c0, c1)). Reading is not affected: the rules reader never uses these offsets. */
+function rulesCut(formalize, input, ctx) {
+  const r = formalize(input, ctx || {});
+  const WORD = /[A-Za-z0-9]+(?:['’][A-Za-z]+)*/g, words = s => [...String(s).matchAll(WORD)].map(m => ({ w: m[0].toLowerCase().replace(/’/g, "'"), s: m.index, e: m.index + m[0].length }));
+  const fixed = new Map();   // corrected word -> the typed words it replaced
+  for (const c of r.corrections || []) { const m = /^I read “(.*)” as “(.*)”\.$/.exec(c); if (m) { const k = m[2].toLowerCase(); if (!fixed.has(k)) fixed.set(k, new Set()); fixed.get(k).add(m[1].toLowerCase()); } }
+  const T = words(input), out = [];
+  const eq = (p, t) => t.w === p.w || (fixed.has(p.w) && fixed.get(p.w).has(t.w));
+  const ends = k => k + 1 < T.length && /[.!?;]\s/.test(input.slice(T[k].e, T[k + 1].s) + ' ');   // a sentence ends after word k
+  // the scan from start word a -> {a, b, n (words taken)}
+  const scan = (P, a) => {
+    const left = P.map(() => true), need = k => P.findIndex((p, i) => left[i] && eq(p, T[k]));
+    const take = k => { const i = need(k); if (i < 0) return false; left[i] = false; return true; };
+    if (!take(a)) return null;
+    let b = a, n = 1;
+    for (;;) {
+      const rest = left.map((x, i) => x ? i : -1).filter(i => i >= 0);
+      if (!rest.length || (rest.length === 1 && rest[0] === 0)) break;
+      let next = -1;
+      for (let k = b + 1; k < Math.min(T.length, b + 5); k++) { if (ends(k - 1)) break; if (need(k) >= 0) { next = k; break; } }
+      if (next < 0) break;
+      take(next); b = next; n++;
+    }
+    return { a, b, n };
+  };
+  let cursor = 0;
+  for (const pc of r.pieces || r.segments || []) {
+    const P = words(pc.src); if (!P.length) continue;
+    // the start: the first word after the cursor from which the scan takes most of the piece (all but an added verb), else the start
+    // whose scan takes the most words (the earliest of equals), among the next 40 words
+    const enough = Math.max(1, Math.ceil(0.6 * (P.length - 1)));
+    let best = null;
+    for (let k = cursor; k < Math.min(T.length, cursor + 40); k++) {
+      const x = scan(P, k); if (!x) continue;
+      if (x.n >= enough) { best = x; break; }
+      if (!best || x.n > best.n) best = x;
+    }
+    if (!best) continue;
+    out.push({ c0: T[best.a].s, c1: T[best.b].e, src: input.slice(T[best.a].s, T[best.b].e) });
+    cursor = best.b + 1;
+  }
+  return out;
+}
+
 /* =====================================================================
    7. Assembly
    ===================================================================== */
@@ -1679,7 +1759,9 @@ function createSystem(opts = {}) {
     const q = engine.legend.get(key); if (!q || !q.values) continue;
     for (const [v, cues] of Object.entries(vals)) if (q.values[v]) q.values[v] = q.values[v].concat(cues.filter(c => !q.values[v].includes(c)));
   }
-  return { world, engine, formalize: makeFormalizer(engine) };
+  const formalize = makeFormalizer(engine);
+  /** cut(input, ctx): the rules' cut as character offsets [{c0, c1, src}] (rulesCut) */
+  return { world, engine, formalize, cut: (input, ctx) => rulesCut(formalize, input, ctx) };
 }
 
 return { createSystem, CELL, cellOf, parse, serialize, fmtValue, isRef, names, SOPError, Clarify, CANVAS, COLOR_HEX, SIZE_PX, dims, sizeName, region, edgeText, groupBox, worldNodes, worldSOP };
