@@ -1,0 +1,8 @@
+213 rows (hand, blind, broad; one request each)
+nli2 nli-deberta-v3-xsmall         act right 7/213 (3.3%) · 40 ms/row · most common wrong: create->fact 29, connect->fact 19, delete->fact 15, set->fact 14
+nli1 nli-deberta-v3-xsmall         act right 51/213 (23.9%) · 260 ms/row · most common wrong: create->arrange 11, delete->disconnect 7, set->arrange 6, create->set 5
+nli2 distilbert-base-uncased-mnli  act right 7/213 (3.3%) · 43 ms/row · most common wrong: create->fact 24, set->fact 12, delete->fact 11, connect->fact 11
+nli1 distilbert-base-uncased-mnli  act right 16/213 (7.5%) · 217 ms/row · most common wrong: create->duplicate 18, connect->duplicate 9, set->duplicate 7, move->toFront 5
+emb all-MiniLM-L6-v2               act right 125/213 (58.7%) · 3 ms/row · most common wrong: connect->disconnect 6, create->fact 5, create->rule 4, check->fact 4
+emb bge-small-en-v1.5              act right 138/213 (64.8%) · 6 ms/row · most common wrong: connect->disconnect 4, create->rule 3, check->fact 3, move->fact 2
+emb gte-small                      act right 113/213 (53.1%) · 5 ms/row · most common wrong: create->rule 5, property->delete 4, connect->disconnect 3, connect->align 3
