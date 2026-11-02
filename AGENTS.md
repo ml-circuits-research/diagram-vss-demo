@@ -79,8 +79,10 @@ See `training/sketch/VSS_READER_SPEC.md`. In short:
   well: for approximations there are LLMs. In drawing a confident mistake costs one undo and is merely annoying; in a domain where
   decisions have serious consequences (medicine, safety, money) it is what matters most. Better fearful and asking than confident
   and wrong.
-  - The headline number of every reader is its **precision of execution**: of everything it executes (requested actions and extras),
-    the share done right. It is reported together with the **share of requests done right** at that precision, and the comparison
+  - The headline number of every reader is **how often it is confidently wrong** (owner, 2026-11-02 18:10: "the most important
+    measure is how many times it is confident and wrong; of course it must be reasonable on how much it does right too, but that is
+    how we compare value"): of everything it executes (requested actions and extras), the share done wrong, i.e. 1 − its **precision
+    of execution**. It is reported together with the **share of requests done right** at that precision, and the comparison
     between readers is the share of requests done right at the same precision (the risk-coverage curve, RISK_COVERAGE.md); the
     discrimination of the confidence (AUROC) is reported beside it.
   - Every reader executes a request only when its own confidence clears a threshold, chosen on held-out data by the protocol written
