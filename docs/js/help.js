@@ -172,6 +172,7 @@ function help(env) {
     <dt>Neural</dt><dd>Transformer models of the BERT family, the kind of model behind many language tools. One, fine-tuned by us on the same example messages, recognises the kind of request (draw, connect, how many…). A second, ready-made one answers each question SOP asks (“which colour?”, “where does the arrow start?”) by pointing at words in your sentence. ${nb ? `About ${nb} MB, loaded` : 'Loaded'} from this site, kept in your browser’s cache, and run in your browser.</dd>
   </dl>
   <p>Nothing you type leaves your browser. The drawings are not saved: reloading the page starts again from the example drawing.</p>`;
+  h += `<p class="note">How it works inside: <a href="architecture.html" target="_blank" rel="noopener">architecture</a></p>`;
 
   /* ---- what you can draw ---- */
   const kinds = valuesOf(engine, 'shape').filter(v => v !== 'any');

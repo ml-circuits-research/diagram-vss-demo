@@ -16,6 +16,8 @@ Open it: `docs/` is the whole application (GitHub Pages from `/docs`, or `npx se
 
 Working rules for this repository (scope, data, fairness): `AGENTS.md`. The VSS reader's design: `training/sketch/VSS_READER_SPEC.md`.
 
+How it works inside (every component, model, data set, training run and measurement, with file paths and sizes): `docs/architecture.html` ([on the site](https://ml-circuits-research.github.io/diagram-vss-demo/architecture.html)).
+
 ## Layout
 
 | path | content |
