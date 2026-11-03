@@ -1,0 +1,63 @@
+[splits] written to /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_shapes8_r3_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 660, heldout_formulations 647, train 15082
+[schema] roles ['object', 'shape', 'color', 'size', 'name', 'text', 'relation', 'landmark', 'landmark2', 'relation2', 'landmark3', 'region', 'amount', 'quantity', 'layout', 'source', 'target', 'style', 'arrow', 'notcolor', 'template', 'items', 'items2', 'parents', 'title', 'scheme', 'width', 'height', 'fill', 'layer', 'kind', 'quantifier', 'outline', 'x', 'y', 'linked', 'members'] (core []), max depth 0, event negation False
+[guard] cuda allocator capped at 35% of 4 GB; watchdog: exit if MemAvailable < 1.5 GB or after 4.0 h
+[train] seed 0: 15082 training rows x 10 epoch(s) -> 150820 steps' sentences; D=1024; kinds 68; vocab 5807; predicate lemma not found in 15330 targets
+[train] phase table: 5545 of 14185 rows reached by the training sentences, held and trained; the other 8640 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.97 GB (peak 1.12 GB) | torch alloc 0.13 GB reserved 0.14 GB | MemAvailable 5.2 GB
+/home/claude/vss-box/diagram-vss-demo/training/vss/tool/sop/train.py:733: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  print(f"[trace] target |S_world| = {np.linalg.norm(target(0)):.2f} (sqrt(D) per unit term = {np.sqrt(a.D):.1f}); initial gates all {float(torch.sigmoid(m.logits[0])):.2f} (closed start)")
+[trace] text: text draw text t_legend bottom_right right
+[trace] tokens/kinds: text/SHAPE draw/VERB text/SHAPE t_legend/TEXT bottom_right/POS right/DIR
+[trace] gold frame: {"event": "create", "lemma": "draw", "neg": false, "roles": {"object": ["entity", "text", null, null], "region": ["word", "bottom_right"], "text": ["word", "t_legend"]}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 64.06 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[fast] FAST=1: training loop with the rows encoded once (15082 rows, targets 236 MB on cuda), chain pieces packed (V8.states_packed), held rows per batch computed before training, the loss read only at the log lines
+[fast] FAST_MEM_MB=256: a batch whose chain terms would need more is computed in micro-batches of rows of similar length (fast_micro_groups; the gradients summed: equal up to float order on those steps only)
+[train seed 0] start: RSS 1.30 GB (peak 1.42 GB) | torch alloc 0.41 GB reserved 0.41 GB | MemAvailable 4.8 GB
+[train seed 0] step 500 sent 4000/150820 loss -0.783 (18s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 4.8 GB
+[train seed 0] step 1000 sent 8000/150820 loss -0.842 (36s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 4.9 GB
+[train seed 0] step 1500 sent 12000/150820 loss -0.806 (53s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 4.9 GB
+[train seed 0] step 2000 sent 16000/150820 loss -0.828 (70s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 4.9 GB
+[train seed 0] step 2500 sent 20000/150820 loss -0.873 (87s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 5.0 GB
+[train seed 0] step 3000 sent 24000/150820 loss -0.893 (103s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 5.0 GB
+[train seed 0] step 3500 sent 28000/150820 loss -0.887 (120s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 5.0 GB
+[train seed 0] step 4000 sent 32000/150820 loss -0.845 (136s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 5.0 GB
+[train seed 0] step 4500 sent 36000/150820 loss -0.901 (153s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 5.0 GB
+[train seed 0] step 5000 sent 40000/150820 loss -0.832 (169s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 5.1 GB
+[train seed 0] step 5500 sent 44000/150820 loss -0.891 (186s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 5.1 GB
+[train seed 0] step 6000 sent 48000/150820 loss -0.889 (203s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 5.1 GB
+[train seed 0] step 6500 sent 52000/150820 loss -0.867 (220s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 5.0 GB
+[train seed 0] step 7000 sent 56000/150820 loss -0.866 (231s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 3.8 GB
+[train seed 0] step 7500 sent 60000/150820 loss -0.857 (242s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 4.2 GB
+[train seed 0] step 8000 sent 64000/150820 loss -0.886 (253s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 3.4 GB
+[train seed 0] step 8500 sent 68000/150820 loss -0.818 (265s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 5.1 GB
+[train seed 0] step 9000 sent 72000/150820 loss -0.925 (275s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 6.1 GB
+[train seed 0] step 9500 sent 76000/150820 loss -0.910 (286s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 6.5 GB
+[train seed 0] step 10000 sent 80000/150820 loss -0.886 (296s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 6.5 GB
+[train seed 0] step 10500 sent 84000/150820 loss -0.871 (305s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 6.5 GB
+[train seed 0] step 11000 sent 88000/150820 loss -0.914 (315s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 6.5 GB
+[train seed 0] step 11500 sent 92000/150820 loss -0.886 (324s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 6.5 GB
+[train seed 0] step 12000 sent 96000/150820 loss -0.920 (334s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 6.5 GB
+[train seed 0] step 12500 sent 100000/150820 loss -0.896 (344s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 6.5 GB
+[train seed 0] step 13000 sent 104000/150820 loss -0.855 (353s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 6.5 GB
+[train seed 0] step 13500 sent 108000/150820 loss -0.834 (363s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 6.6 GB
+[train seed 0] step 14000 sent 112000/150820 loss -0.892 (373s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 5.4 GB
+[train seed 0] step 14500 sent 116000/150820 loss -0.936 (390s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 5.4 GB
+[train seed 0] step 15000 sent 120000/150820 loss -0.898 (407s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 5.5 GB
+[train seed 0] step 15500 sent 124000/150820 loss -0.937 (424s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 5.5 GB
+[train seed 0] step 16000 sent 128000/150820 loss -0.930 (440s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 6.3 GB
+[train seed 0] step 16500 sent 132000/150820 loss -0.868 (457s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 6.4 GB
+[train seed 0] step 17000 sent 136000/150820 loss -0.922 (473s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 6.2 GB
+[train seed 0] step 17500 sent 140000/150820 loss -0.937 (490s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 6.2 GB
+[train seed 0] step 18000 sent 144000/150820 loss -0.908 (507s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 6.2 GB
+[train seed 0] step 18500 sent 148000/150820 loss -0.866 (518s) | RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.80 GB | MemAvailable 5.9 GB
+[train seed 0] end: RSS 1.84 GB (peak 1.84 GB) | torch alloc 0.53 GB reserved 0.55 GB | MemAvailable 7.4 GB (525s)
+[fast] FAST_MEM_MB: 974 of 18853 steps computed in micro-batches
+[export] route book written | RSS 1.84 GB (peak 1.98 GB) | torch alloc 0.41 GB reserved 0.55 GB | MemAvailable 6.9 GB
+[export] numpy reader vs torch states: max relative difference 6.24e-08 (float32 phases in the route book)
+[fast] FAST=1: calibration reads in 2 processes, each row read once, cleanups shared by its two reads
+[fast] calibration: 2384 rows read, 400 background rows formalized in 132.7s
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.713 | residual 0.187
+[eval] seed 0 train (sample): FULL catalog candidates 0.767 | residual 0.165
+[mem] after seed 0: RSS 1.75 GB (peak 4.29 GB) | torch alloc 0.00 GB reserved 0.55 GB | MemAvailable 7.1 GB
+[done] model written to /home/claude/vss-box/diagram-vss-demo/training/sketch/worlds_micro/shapes8_r3/model; REPORT.md and metrics.json there; run log /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_shapes8_r3_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)

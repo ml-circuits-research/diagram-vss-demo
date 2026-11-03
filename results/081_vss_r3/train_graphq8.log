@@ -1,0 +1,10 @@
+# World `real`: built from 22631 training messages (52539 requests with a span)
+
+WORLD_EVENTS=check,connected,cycle,exists,path,reachable: only the rows of these events; the legend lists only these events.
+
+FRONT_ROWS=world: the front end below is learned only from the 5032 requests of this world's events.
+
+Front end learned from the same messages: 120 value n-grams, 726 trigger rules, 0 segmenter weights; params {"seg_epochs": 8, "val_min_count": 5, "val_min_prec": 0.8, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}.
+2/2 files OK against legend(s) graphq8_r3 sha256:1d7dfbdc9724…
+world graphq8_r3 [check,connected,path,reachable,cycle,exists] -> docs/model/micro/graphq8_r3 (4965 rows); registry line:
+{"world": "graphq8_r3", "events": ["check", "connected", "path", "reachable", "cycle", "exists"], "model": "micro/graphq8_r3"}

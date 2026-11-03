@@ -1,0 +1,41 @@
+{
+ "format": "vss-web-3",
+ "legend_sha256": "sha256:b90297216c2b0ad246ab7b8d6673ba1b9ba4fe6a20a1e5f36bfd8295f3d9471e",
+ "training_code_commit": "8563a9e",
+ "bits": 8,
+ "star_version": 2,
+ "D": 1024,
+ "n_stars": 881,
+ "sparse": {
+  "rule": "zero",
+  "stored_rows": {
+   "bg": 203,
+   "A": 373,
+   "L": 373
+  },
+  "rows": {
+   "bg": 4489,
+   "A": 4489,
+   "L": 4489
+  }
+ },
+ "stars": {
+  "source": "generated",
+  "file": "stars.json",
+  "bits": 8
+ },
+ "files": {
+  "model.json": {
+   "sha256": "2c44187277901de4a374d36e007cc3b37c396d7718b8dd19f2a93615c51ab64c",
+   "bytes": 51656
+  },
+  "routebook.bin": {
+   "sha256": "4f7c439ea6919a26c20daeae525746b5d3764b837101bc6e03c2a7eb4af5877e",
+   "bytes": 1114700
+  },
+  "stars.json": {
+   "sha256": "f2e7af964f9a3effa1ad9c9cecbfcba26092dd3b98176c990ad8c1019b22aed6",
+   "bytes": 11541
+  }
+ }
+}

@@ -1,0 +1,27 @@
+[splits] written to /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_layout8_r3_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 19, heldout_formulations 21, train 466
+[schema] roles ['object', 'landmark', 'region', 'amount', 'axis', 'layout', 'superlative', 'comparison', 'property', 'members'] (core []), max depth 0, event negation False
+[guard] cuda allocator capped at 35% of 4 GB; watchdog: exit if MemAvailable < 1.5 GB or after 4.0 h
+[train] seed 0: 466 training rows x 10 epoch(s) -> 4660 steps' sentences; D=1024; kinds 67; vocab 818; predicate lemma not found in 650 targets
+[train] phase table: 1001 of 13776 rows reached by the training sentences, held and trained; the other 12775 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.77 GB (peak 0.81 GB) | torch alloc 0.02 GB reserved 0.04 GB | MemAvailable 8.7 GB
+/home/claude/vss-box/diagram-vss-demo/training/vss/tool/sop/train.py:733: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:820.)
+  print(f"[trace] target |S_world| = {np.linalg.norm(target(0)):.2f} (sqrt(D) per unit term = {np.sqrt(a.D):.1f}); initial gates all {float(torch.sigmoid(m.logits[0])):.2f} (closed start)")
+[trace] text: improve up all the all
+[trace] tokens/kinds: improve/VERB up/DIR all/QUANT the/the all/QUANT
+[trace] gold frame: {"event": "improve", "lemma": "improve", "neg": false, "roles": {"object": ["entity", "all", null, "all"]}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 55.18 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[fast] FAST=1: training loop with the rows encoded once (466 rows, targets 7 MB on cuda), chain pieces packed (V8.states_packed), held rows per batch computed before training, the loss read only at the log lines
+[fast] FAST_MEM_MB=256: a batch whose chain terms would need more is computed in micro-batches of rows of similar length (fast_micro_groups; the gradients summed: equal up to float order on those steps only)
+[train seed 0] start: RSS 0.92 GB (peak 0.92 GB) | torch alloc 0.03 GB reserved 0.04 GB | MemAvailable 8.6 GB
+[train seed 0] step 500 sent 4000/4660 loss -0.916 (5s) | RSS 1.61 GB (peak 1.61 GB) | torch alloc 0.05 GB reserved 0.18 GB | MemAvailable 8.0 GB
+[train seed 0] end: RSS 1.61 GB (peak 1.61 GB) | torch alloc 0.05 GB reserved 0.06 GB | MemAvailable 8.0 GB (5s)
+[fast] FAST_MEM_MB: 0 of 583 steps computed in micro-batches
+[export] route book written | RSS 1.61 GB (peak 1.72 GB) | torch alloc 0.03 GB reserved 0.06 GB | MemAvailable 8.0 GB
+[export] numpy reader vs torch states: max relative difference 6.26e-08 (float32 phases in the route book)
+[fast] FAST=1: calibration reads in 2 processes, each row read once, cleanups shared by its two reads
+[fast] calibration: 421 rows read, 400 background rows formalized in 1.5s
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.762 | residual 0.227
+[eval] seed 0 train (sample): FULL catalog candidates 0.813 | residual 0.248
+[mem] after seed 0: RSS 1.70 GB (peak 1.72 GB) | torch alloc 0.00 GB reserved 0.06 GB | MemAvailable 7.9 GB
+[done] model written to /home/claude/vss-box/diagram-vss-demo/training/sketch/worlds_micro/layout8_r3/model; REPORT.md and metrics.json there; run log /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_layout8_r3_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)

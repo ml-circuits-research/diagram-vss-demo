@@ -1,0 +1,34 @@
+convert_check: learning the fronts of 9 worlds (DATA=spans, EXTRA_DIRS: 15 folders)
+  front shapes: 504 value n-grams (35 -> all), 1683 trigger rules
+  front links: 108 value n-grams (4 -> all), 924 trigger rules
+  front position: 242 value n-grams (48 -> all), 1337 trigger rules
+  front layout: 45 value n-grams (17 -> all), 228 trigger rules
+  front graphq: 120 value n-grams (0 -> all), 726 trigger rules
+  front questions: 151 value n-grams (0 -> all), 1326 trigger rules
+  front manage: 127 value n-grams (22 -> all), 497 trigger rules
+  front history: 0 value n-grams (0 -> all), 125 trigger rules
+  front help: 98 value n-grams (0 -> all), 234 trigger rules
+
+convert_check (LEGEND_EXT=1 DIAGRAM_OPS=1 VAL_PICK=specific NEW_DISTINCT=1; groups GROUPS_8ops.json): share of the requests whose world row ...
+| folder | requests | round trip | every shape | no world | no event token | differs | no node / no span | keys that differ most |
+|---|---|---|---|---|---|---|---|---|
+| base (DATA=spans: 9 folders) | 22702 | 82.7% | 0.4% | 0.0% | 5.9% | 11.1% | 0.0% | target 1014 position 345 anchor 339 from 319 to 193 label 153 |
+| llm_train/opus_train_a | 994 | 74.6% | 0.2% | 0.0% | 11.9% | 13.3% | 0.0% | target 72 anchor 11 to 10 position 9 shape 6 from 6 |
+| llm_train/opus_train_b | 891 | 71.8% | 0.3% | 0.0% | 7.5% | 20.3% | 0.0% | target 108 position 22 from 14 anchor 12 to 10 shape 10 |
+| llm_train/opus_train_c | 1059 | 73.7% | 0.2% | 0.0% | 11.0% | 15.2% | 0.0% | target 93 from 21 to 13 position 11 anchor 10 color 9 |
+| llm_train/opus_train_d | 1015 | 71.4% | 0.5% | 0.0% | 6.2% | 21.9% | 0.0% | target 156 anchor 24 shape 16 from 16 position 13 to 6 |
+| llm_train/opus_gen_1 | 991 | 76.2% | 0.5% | 0.0% | 8.8% | 14.5% | 0.0% | target 89 anchor 15 position 13 to 9 from 7 shape 7 |
+| llm_train/opus_gen_2 | 1094 | 77.9% | 0.3% | 0.0% | 8.3% | 13.5% | 0.0% | target 79 position 17 from 11 anchor 11 shape 9 color 8 |
+| llm_train/synth_rules | 11707 | 79.8% | 0.0% | 0.0% | 5.1% | 15.1% | 0.0% | target 692 anchor 264 position 191 axis 157 size 104 shape 99 |
+| llm_train/synth_rules_ops | 1470 | 76.5% | 0.0% | 0.0% | 5.2% | 18.3% | 0.0% | anchor2 53 position 51 position2 50 anchor 40 label 35 region 28 |
+| llm_train/synth_rules_ext | 3664 | 82.4% | 0.0% | 0.0% | 1.4% | 16.1% | 0.0% | template 161 about 131 topic 81 aspect 78 target 35 scheme 30 |
+| llm_train/ops_formulations | 733 | 63.6% | 0.3% | 0.0% | 18.7% | 17.5% | 0.0% | target 35 direction 29 layout 25 comparison 20 kind 11 property 9 |
+| llm_train/opus_ext_1 | 743 | 49.4% | 0.1% | 0.0% | 6.9% | 43.6% | 0.0% | topic 83 items 50 aspect 42 from 41 target 37 to 34 |
+| llm_train/synth_combo | 4521 | 79.5% | 0.1% | 0.0% | 3.3% | 17.1% | 0.0% | target 453 position 85 anchor 77 ask 34 from 29 axis 27 |
+| llm_train/scenes_r3 | 714 | 62.6% | 0.6% | 0.0% | 8.8% | 28.0% | 0.0% | target 81 position 37 anchor 32 count 19 shape 18 distance 17 |
+| llm_train/scenes_r3b | 94 | 72.3% | 0.0% | 0.0% | 5.3% | 22.3% | 0.0% | name 9 distance 6 target 2 fill 2 count 2 position 2 |
+| llm_train/opus_r3_gaps | 147 | 57.1% | 0.0% | 0.0% | 2.7% | 40.1% | 0.0% | target 34 label 12 from 5 layout 4 count 3 position 1 |
+| llm_bench/scenes_test | 163 | 65.6% | 0.6% | 0.0% | 9.2% | 24.5% | 0.0% | target 15 position 8 anchor 5 color 5 count 5 fill 4 |
+| llm_bench/short3 (no pending) | 644 | 61.2% | 0.0% | 0.0% | 15.2% | 23.6% | 0.0% | target 28 shape 19 label 15 position 14 count 12 from 11 |
+| llm_bench/fresh2 (opus_a..d) | 1909 | 74.4% | 0.3% | 0.0% | 9.8% | 15.5% | 0.0% | target 157 anchor 49 position 39 shape 29 to 21 from 19 |
+gate passed: every trained folder has an 'every shape' share of at most 1.0%
