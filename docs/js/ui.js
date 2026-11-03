@@ -13,7 +13,7 @@ const escH = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;
 // readers voting) was removed then: VSS-BERT measured better (test part cost score 34.8 against 31.8, confidently wrong 1.8% against 2.6%).
 // READERS is the order of the tabs, of the lines of a reply and of the details; READ_ORDER is the order in which they read a message
 // (VSS-BERT reuses the readings of VSS and SOP-BERT, so it reads last).
-const READERS = [['combined', 'VSS-BERT'], ['rules', 'Rules'], ['vss', 'VSS'], ['neural', 'SOP-BERT']].map(([id, label]) => Object.assign({ id, label, last: [], pending: null, focusCell: null, reads: 0, lastRead: null }, K.createSystem()));
+const READERS = [['combined', 'VSS-BERT'], ['rules', 'Rules'], ['vss', 'VSS'], ['neural', 'SOP-BERT']].map(([id, label]) => Object.assign({ id, label, last: [], pending: null, held: [], focusCell: null, reads: 0, lastRead: null }, K.createSystem()));
 const RD = Object.fromEntries(READERS.map(r => [r.id, r]));
 const READ_ORDER = ['rules', 'vss', 'neural', 'combined'].map(id => RD[id]);
 const sys = RD.rules, engine = sys.engine;          // the legend, plugins and SOP rendering are the same in every reader; the Rules system serves them
@@ -161,13 +161,14 @@ async function combinedRead(rd, text, rec, ctx) {
   for (const u of units) for (const x of u.nodes) for (const r of Object.values(x.args).flatMap(refsOf)) { const o = owner.get(r); if (o && o !== u && !u.dependsOn.includes(o)) u.dependsOn.push(o); }
   for (const u of units) {   // message order: a request's dependencies come before it
     const off = u.dependsOn.filter(d => !d.execute);
-    if (u.execute && off.length) { u.execute = false; u.reasons = off.map(d => ({ text: `it uses what “${d.src}” would have made, which was not done` })); continue; }
+    if (u.execute && off.length) { u.execute = false; u.reasons = off.map(d => ({ group: 'depends', text: `it uses what “${d.src}” would have made, which was not done` })); continue; }
     if (u.execute) continue;
-    if (!ok) { u.reasons = [{ text: !spec ? 'the combined confidence model could not be loaded' : !vssModel ? 'VSS’s confidence model could not be loaded' : 'the code of the combined confidence could not be loaded' }]; continue; }
-    u.reasons = CC.reasons(msg, u.item, CNAMES).map(x => ({ text: x.text }));
-    // what the executing reader itself was unsure of (its own confidence below its own safety threshold)
-    if (u.from === 'sop' && nspec && u.item.req.sig) { const c = NC.confidence(nspec, u.item.req.sig.f, u.item.req.sig.act); if (c < NC.threshold(nspec, 'cost')) { const w = NC.reasons(nspec, u.item.req.sig)[0]; if (w) u.reasons.push({ text: `SOP-BERT alone is not sure: ${w.text}` }); } }
-    if (u.from === 'vss' && VCm) { const q = u.item.req; if (q.conf < VCm.threshold(vssModel, 'cost')) { const w = VCm.reasons(vssModel, q.node.unit)[0]; if (w) u.reasons.push({ text: `VSS alone is not sure: ${w.text}` }); } }
+    if (!ok) { u.reasons = [{ group: 'model', text: !spec ? 'the combined confidence model could not be loaded' : !vssModel ? 'VSS’s confidence model could not be loaded' : 'the code of the combined confidence could not be loaded' }]; continue; }
+    u.reasons = CC.reasons(msg, u.item, CNAMES).map(x => ({ group: x.group, text: x.text }));
+    // what the executing reader itself was unsure of (its own confidence below its own safety threshold); `own` keeps the sentence without
+    // the reader's name for the chat (clarifyInput)
+    if (u.from === 'sop' && nspec && u.item.req.sig) { const c = NC.confidence(nspec, u.item.req.sig.f, u.item.req.sig.act); if (c < NC.threshold(nspec, 'cost')) { const w = NC.reasons(nspec, u.item.req.sig)[0]; if (w) u.reasons.push({ group: w.group, own: w.text, text: `SOP-BERT alone is not sure: ${w.text}` }); } }
+    if (u.from === 'vss' && VCm) { const q = u.item.req; if (q.conf < VCm.threshold(vssModel, 'cost')) { const w = VCm.reasons(vssModel, q.node.unit)[0]; if (w) u.reasons.push({ group: w.group, own: w.text, text: `VSS alone is not sure: ${w.text}` }); } }
   }
   const all = units.flatMap(u => u.nodes), run = new Set(units.filter(u => u.execute).flatMap(u => u.nodes));
   const t = res ? res.threshold : combGate === 'all' ? -Infinity : Infinity;
@@ -290,7 +291,7 @@ function columnGate(base, items, list, level, levels, whyOf) {
   }
   for (const g of base.units) {   // message order: a request's dependencies come before it
     const off = g.dependsOn.map(o => gu.get(o)).filter(d => d && !d.execute);
-    if (g.execute && off.length) { g.execute = false; g.reasons = off.map(d => ({ text: `it uses what “${d.src}” would have made, which was not done` })); }
+    if (g.execute && off.length) { g.execute = false; g.reasons = off.map(d => ({ group: 'depends', text: `it uses what “${d.src}” would have made, which was not done` })); }
   }
   const run = new Set(base.units.filter(g => g.execute).flatMap(g => g.nodes));
   const thresholds = { command: VT.thresholdOf(levels, level, 'command:'), question: VT.thresholdOf(levels, level, 'question:') };
@@ -300,7 +301,7 @@ function columnGate(base, items, list, level, levels, whyOf) {
  *  under the column's weights, the sentences of vss-confidence.js / neural-confidence.js) */
 function columnWhy(self, mine, others, names, own) {
   const VT = vtNow, out = [{ text: VT.agreementWords(self, mine, others, names, 'engine') }];
-  for (const w of (own || []).slice(0, 2)) out.push({ text: `${self} itself: ${w.text}` });
+  for (const w of (own || []).slice(0, 2)) out.push({ group: w.group, own: w.text, text: `${self} itself: ${w.text}` });
   return out;
 }
 /** why a reader's gate has no votes for this message, in plain words: the other learned reader still loading, not available, or ready but
@@ -318,7 +319,7 @@ function noVoteWhy(votes, other, otherRd) {
 function aloneReasons(g, why, self) {
   if (!g) return g;
   for (const u of g.units || []) if (!u.execute && u.sure === false)
-    u.reasons = [{ text: `${why}, so ${self} decided alone and is not sure${u.reasons.length ? ': ' + u.reasons.map(r => r.text).join('; ') : ''}` }];
+    u.ownReasons = u.reasons.slice(), u.reasons = [{ text: `${why}, so ${self} decided alone and is not sure${u.reasons.length ? ': ' + u.reasons.map(r => r.text).join('; ') : ''}` }];
   return g;
 }
 /** VSS's gate (GATES.vss): columnVss when SOP-BERT and the Rules have read the message, else VSS's own confidence alone (vss.json) */
@@ -330,9 +331,10 @@ GATES.vss = async (v, rec, r) => {
   if (why) { const g = aloneReasons(await window.VSSFormalizer.gate(v, vssGate), why, 'VSS'); if (g) g.fallback = `${why}, so VSS used its own confidence alone (confidence/vss.json)`; return g; }
   const VCm = await vcP, C = spec.columns.vss, m = voteMsg(votes, RD.vss), items = VT.columnVss(spec, m, vssGate, VOTE_OPTS);
   const own = VCm ? VT.ownSpec(C.model) : null;
-  return columnGate(await window.VSSFormalizer.gate(v, 'all'), items, m.vss, vssGate, C.levels, held => held.length ? columnWhy('VSS', m.vss[held[0].j], [
+  return Object.assign(columnGate(await window.VSSFormalizer.gate(v, 'all'), items, m.vss, vssGate, C.levels, held => held.length ? columnWhy('VSS', m.vss[held[0].j], [
     { label: 'SOP-BERT', agree: held[0].agree_sop, reading: held[0].partner_sop >= 0 ? m.sop[held[0].partner_sop] : VT.otherAct(m.text, m.sop, m.vss[held[0].j]) },
-    { label: 'the Rules', agree: held[0].agree_rules, reading: held[0].partner_rules >= 0 ? m.rules[held[0].partner_rules] : VT.otherAct(m.text, m.rules, m.vss[held[0].j]) }], m.names, own ? VCm.reasons(own, m.vss[held[0].j].node.unit) : []) : []);
+    { label: 'the Rules', agree: held[0].agree_rules, reading: held[0].partner_rules >= 0 ? m.rules[held[0].partner_rules] : VT.otherAct(m.text, m.rules, m.vss[held[0].j]) }], m.names, own ? VCm.reasons(own, m.vss[held[0].j].node.unit) : []) : []),
+    { pairing: { text: m.text, self: m.vss, other: m.sop, partner: 'partner_sop', agree: 'agree_sop' } });
 };
 /** SOP-BERT's gate (GATES.neural): columnSop when VSS and the Rules have read the message, else its own confidence alone (sop-bert.json) */
 GATES.neural = async (n, rec, r) => {
@@ -343,13 +345,13 @@ GATES.neural = async (n, rec, r) => {
   if (why) { const g = aloneReasons(await neuralOwnGate(n), why, 'SOP-BERT'); if (g) g.fallback = `${why}, so SOP-BERT used its own confidence alone (confidence/sop-bert.json)`; return g; }
   const level = neuralGate || 'cost', C = spec.columns.sop, m = voteMsg(votes, RD.neural), items = VT.columnSop(spec, m, level, VOTE_OPTS), own = VT.ownSpec(C.model);
   for (const it of items) { const s = m.sop[it.j]; if (level !== 'all' && (!s.sig || s.sig.detail.noCut)) { it.conf = NaN; it.execute = false; it.noSignals = true; } }
-  return columnGate(NC.gate(null, n, 'all'), items, m.sop, level, C.levels, held => {
+  return Object.assign(columnGate(NC.gate(null, n, 'all'), items, m.sop, level, C.levels, held => {
     if (!held.length) return [];
     const it = held[0], s = m.sop[it.j];
     if (it.noSignals) return [{ text: !s.sig ? 'the model’s head outputs were not available, so its confidence is not known' : 'the cut head’s output was not available, so its confidence is not known' }];
     return columnWhy('SOP-BERT', s, [{ label: 'VSS', agree: it.agree_vss, reading: it.partner_vss >= 0 ? m.vss[it.partner_vss] : VT.otherAct(m.text, m.vss, s) },
       { label: 'the Rules', agree: it.agree_rules, reading: it.partner_rules >= 0 ? m.rules[it.partner_rules] : VT.otherAct(m.text, m.rules, s) }], m.names, NC.reasons(own, s.sig));
-  });
+  }), { pairing: { text: m.text, self: m.sop, other: m.vss, partner: 'partner_vss', agree: 'agree_vss' } });
 };
 // spelling (docs/js/spell.js): a VSA spell checker corrects typed messages before the readers read them; every reader reads the same
 // corrected text. Its vocabulary: docs/model/spell/vocab.json (the VSS worlds' words), the legend's values and cue words, and the names
@@ -609,6 +611,9 @@ msgs.addEventListener('click', ev => {
   const p = ev.target.closest('[data-pick]'); if (p) { submit(p.dataset.pick); return; }
   const a = ev.target.closest('[data-anyway]');
   if (a) { const [rid, turn, idx] = a.dataset.anyway.split(':'); a.disabled = true; queue = queue.then(() => doAnyway(rid, +turn, +idx)).catch(e => { console.error(e); botBubble({ text: 'Something went wrong: ' + e.message, err: true }); }); return; }
+  // Edit: the clearer command into the message box, not sent; the first ‹placeholder› is selected, so typing replaces it
+  const ed = ev.target.closest('[data-edit]');
+  if (ed) { ta.value = ed.dataset.text || ''; grow(); ta.focus({ preventScroll: true }); const i = ta.value.indexOf('‹'), j = i < 0 ? -1 : ta.value.indexOf('›', i); if (j > i) ta.setSelectionRange(i, j + 1); else ta.setSelectionRange(ta.value.length, ta.value.length); return; }
   const t = ev.target.closest('[data-turn]'); if (t) openSheet('turn', null, +t.dataset.turn);
 });
 
@@ -680,11 +685,11 @@ async function run(text, sop) {
     const pend = rd.pending; rd.pending = null;
     if (anyPick && !picks.get(rd)) { plan.push({ rd, ran: true, line: { text: 'No question was open here; nothing to choose.' } }); continue; }
     const pk = picks.get(rd) ? { pend, pick: picks.get(rd) } : null;
-    plan.push({ rd, ran: true, pk, line: await readPart(rd, text, rec, pk) });
+    plan.push({ rd, ran: true, pk, pend, line: await readPart(rd, text, rec, pk) });
   }
   const parts = [];
   for (const x of plan) {
-    const p = x.line || await doPart(x.rd, text, rec, x.pk);
+    const p = x.line || await doPart(x.rd, text, rec, x.pk, x.pend);
     if (x.ran) rec.ran.push(x.rd.id);
     parts.push(Object.assign(p, { rd: x.rd }));
   }
@@ -710,7 +715,8 @@ function pendingOf(er, nodes, result, overrides) {
  *  that was not done would have made is not run (the reply says which to do first). */
 async function doAnyway(rid, turn, idx) {
   const rec = history.find(x => x.id === turn), rd = RD[rid], r = rec && rec.readers[rid], h = r && r.gate && r.gate.units.find(u => u.index === idx);
-  const mark = () => document.querySelectorAll(`[data-anyway="${rid}:${turn}:${idx}"]`).forEach(b => { b.disabled = true; b.textContent = 'Done anyway'; });
+  const key = `${rid}:${turn}:${idx}`, mark = () => markHeld(key, 'done anyway'), pend = (rd.held || []).find(p => p.turn === turn && p.index === idx);
+  if (pend && pend.state === 'superseded') { markHeld(key, 'superseded'); return; }
   if (!h || h.doneAnyway) { mark(); return; }
   const env = r.env || (r.env = Object.assign({}, r.result ? r.result.env : {}));
   const own = new Set(h.nodes.map(n => n.id)), refsOf = v => K.isRef(v) ? [v.ref] : Array.isArray(v) ? v.flatMap(refsOf) : [];
@@ -725,7 +731,8 @@ async function doAnyway(rid, turn, idx) {
   const list = (r.allNodes || []).filter(n => need.includes(n.id)).concat(h.nodes);
   const result = rd.engine.run(list, { overrides });
   Object.assign(env, result.env); h.doneAnyway = true; (r.anyway || (r.anyway = [])).push({ index: idx, src: h.src, nodes: list, result });
-  mark();
+  mark(); if (pend) pend.state = 'done anyway';
+  supersedeHeld(rd, doneOf(result, list));
   const clarE = (result.errors || []).find(er => er.error instanceof K.Clarify);
   if (clarE) rd.pending = pendingOf(clarE, list, result, overrides);
   const problems = (result.errors || []).filter(er => !(er.error instanceof K.Clarify)).map(er => er.error.message);
@@ -733,14 +740,161 @@ async function doAnyway(rid, turn, idx) {
   const touched = [];
   result.steps.forEach(st => st.patches.forEach(p => { if (p.op === 'add') touched.push(p.shape.name); else if (p.op === 'set') touched.push(p.name); else if (p.op === 'rename') touched.push(p.to); }));
   const alive = [...new Set(touched)].filter(n => rd.world.find(n)); if (alive.length) rd.last = alive;
-  const text = `Did “${h.src}” anyway: ` + [done ? summarize(result) : '', clarE ? clarE.error.message.replace(/ Reply with a name\.$/, '') : '', problems.join(' ')].filter(Boolean).join(' ');
-  botBubble({ lines: [{ rd, text: text.replace(/: $/, ': nothing changed.'), err: !done && !clarE }], chips: clarE ? clarE.error.candidates : [], turn, tag: 'Do it anyway' });
+  // the reply spells out what it ran: the reading written as an explicit command (clarify.js), else the words of the request
+  const ran = h.clar && h.clar.view && h.clar.view.anyway;
+  const body = [done ? summarize(result) : '', clarE ? clarE.error.message.replace(/ Reply with a name\.$/, '') : '', problems.join(' ')].filter(Boolean).join(' ');
+  const text = ran ? `Did it anyway: “${ran}” ${body || 'Nothing changed.'}` : `Did “${h.src}” anyway: ${body || 'nothing changed.'}`;
+  botBubble({ lines: [{ rd, text, err: !done && !clarE }], chips: clarE ? clarE.error.candidates : [], turn, tag: 'Do it anyway' });
   if (rd === cur) { if (alive.length) flash({ shapes: alive, edges: [] }); else renderCanvas(); }
   updateTabs(); renderSopBar();
 }
-/** the requests a reader did not do because it was not sure (see GATES): the reason of each and its "Do it anyway" button */
+// The reply about the requests a reader did not do (owner, 2026-11-03: explicit and clear rather than fluent; training/sketch/CLARIFY_DESIGN.md
+// design B, docs/js/clarify.js). No questions: per held request, at most 3 plain reasons and the request written as a clearer command (a
+// ‹a or b?› placeholder where the two readers read different values, the name instead of "it", the two commands when they read different
+// actions, "do the request it depends on first"), with the buttons Do it anyway and Edit (the clearer command into the message box, not sent).
+// No numbers and no reader names in the chat: the confidence, the threshold and who read what are in the details. A held request stays held:
+// nothing written later is merged into it and no later message is read as an answer to it (the learned readers cannot read a bare answer:
+// CLARIFY_DESIGN.md part 2). It becomes "superseded" when a later executed request has the same action on the same shapes (clarify.js
+// supersedes; its buttons are disabled, so it cannot run twice), or "done anyway" when its button is used. A message in which nothing is
+// read while requests are held gets clarify.js nothingReadText. Every gated tab (VSS-BERT, VSS, SOP-BERT) replies the same way.
+let CL = null;
+const clP = import(new URL('js/clarify.js', document.baseURI).href).then(m => { CL = m; return m; }).catch(e => { console.error(e); return null; });
+const lc = x => String(x).toLowerCase();
+const mainOf = nodes => (nodes || []).filter(x => x.type !== 'mention');
+const strNames = v => typeof v === 'string' ? v.split(',').map(x => x.trim()).filter(Boolean) : Array.isArray(v) ? v.flatMap(strNames) : [];
+const refsIn = v => K.isRef(v) ? [v.ref] : Array.isArray(v) ? v.flatMap(refsIn) : [];
+const NAME_ROLES = ['target', 'from', 'to', 'anchor'];
+/** the name rule (CLARIFY_DESIGN.md 4.1; VSS_BERT_FAILURES.md fix 3; measured on the readings by training/sketch/combine/failures_vss_bert.mjs
+ *  DEP=names, the same rule): while a create of the message is held, a request that names a shape which is not in the drawing and which no
+ *  executed create of the message makes can only mean a shape that a held create would have made (the two readers do not always read the
+ *  create's name the same), so it is held too, with the reason "it needs “<that create>” first"; a request that refers to the wires of a
+ *  request held so is held as well (the gates' rule for references). Applied to every gate (VSS-BERT, VSS, SOP-BERT). g: a gate (see GATES),
+ *  drawing: the names on the reader's canvas. -> g, changed in place */
+function holdNamed(g, drawing) {
+  if (!g || !g.units || !g.units.length) return g;
+  const have = new Set((drawing || []).map(lc)), U = g.units, owner = new Map(), off = new Set();
+  U.forEach(u => u.nodes.forEach(x => owner.set(x.id, u)));
+  const creates = u => mainOf(u.nodes).filter(x => x.args && x.args.action === 'create');
+  const makes = u => creates(u).flatMap(x => strNames(x.args.name)).map(lc);
+  const named = u => mainOf(u.nodes).flatMap(x => NAME_ROLES.flatMap(k => strNames(x.args[k]))).map(lc);
+  const words = t => lc(t).split(/[^\p{L}\p{N}_]+/u);
+  for (let changed = true; changed;) {
+    changed = false;
+    const heldC = U.filter(u => !u.execute && creates(u).length);
+    if (!heldC.length) break;
+    const made = new Set(U.filter(u => u.execute).flatMap(makes));
+    U.forEach((u, i) => {
+      if (!u.execute) return;
+      const own = makes(u), miss = named(u).filter(n => !have.has(n) && !made.has(n) && !own.includes(n));
+      if (miss.length) {   // the create it needs: the one that names the shape, else the nearest one before it
+        const need = heldC.find(c => makes(c).some(n => miss.includes(n)) || words(c.src).some(w => miss.includes(w))) || heldC.filter(c => U.indexOf(c) < i).pop() || heldC[0];
+        u.execute = false; u.needs = [need]; u.reasons = [{ group: 'depends', text: `it needs “${need.src}” first` }]; off.add(u); changed = true; return;
+      }
+      const dep = mainOf(u.nodes).flatMap(x => Object.values(x.args).flatMap(refsIn)).map(id => owner.get(id)).find(o => o && o !== u && off.has(o));
+      if (dep) { u.execute = false; u.reasons = [{ group: 'depends', text: `it uses what “${dep.src}” would have made, which was not done` }]; off.add(u); changed = true; }
+    });
+  }
+  if (!off.size) return g;
+  const drop = new Set([...off].flatMap(u => u.nodes));
+  g.executed = g.executed.filter(n => !drop.has(n)); g.held = U.filter(u => !u.execute); g.byName = off.size;
+  return g;
+}
+/** a reason of the reader's own confidence as the chat says it: no numbers (they stay in the details), no stage names */
+function plainReason(x) {
+  let t = String(x.text || '');
+  const cut = t.match(/^the cut of this request was uncertain \((where it (?:starts|ends))\)/); if (cut) return `not sure ${cut[1]}`;
+  if (x.group === 'world' && /world/.test(t)) return 'not sure what kind of request this is';
+  t = t.replace(/\s*\([^()]*\d[^()]*\)/g, '').replace(/\ba (?=[aeiou])/g, 'an ');
+  return /\d/.test(t.replace(/‘[^’]*’|“[^”]*”/g, '')) ? null : t;
+}
+const actOfPa = pa => { const [type, act] = String(pa || '').split(':'); return act || type || null; };
+/** the input of clarify.js heldReply for one held request of a gate (CLARIFY_DESIGN.md 4.6): the executing reading and the other learned
+ *  reader's reading of the same request (VSS-BERT: its pair; the VSS and SOP-BERT tabs: the votes' pairing), the values they read differently,
+ *  the other action when the other reader read another action here, what the executing reader itself was unsure of (the context fill as
+ *  the word and the name it was filled with), and the held requests of the message it needs */
+function clarifyInput(r, u) {
+  const g = r.gate, names = r.names || [], all = r.allNodes || r.nodes, main = mainOf(u.nodes)[0];
+  const nm = v => names.find(x => lc(x) === lc(v)) || v;
+  const input = { src: u.src || '', type: main ? main.type : 'command', reading: null, other: null, otherAct: null, differ: [], signals: [], dependsOn: [] };
+  const diffOf = (a, b) => [...new Set([...Object.keys(a), ...Object.keys(b)])].filter(k => k !== 'action' && k !== 'ask' && (a[k] ?? '∅') !== (b[k] ?? '∅')).map(k => ({ key: k, sop: a[k] ?? '∅', vss: b[k] ?? '∅' }));
+  const otherAct = (text, list, me) => vtNow && list ? vtNow.otherAct(text, list, me) : null;
+  let mine = null, partner = null, over = null;
+  if (r.combined && u.item) {
+    const it = u.item, M = r.combined.msg; mine = it.req; input.reading = mine.got;
+    if (it.from === 'sop' && it.partner >= 0) { partner = M.vss[it.partner]; input.differ = it.agree ? [] : (it.differ || []); }
+    else over = otherAct(M.text, it.from === 'sop' ? M.vss : M.sop, mine);
+  } else if (g.pairing && u.items && u.items.length) {
+    const P = g.pairing, it = u.items[0], k = it[P.partner]; mine = P.self[it.j]; input.reading = mine.got;
+    if (k >= 0) { partner = P.other[k]; input.differ = it[P.agree] ? [] : diffOf(mine.got, partner.got); }
+    else over = otherAct(P.text, P.other, mine);
+  } else {   // no second reading to compare with (the other learned reader did not read this message): not "only one reader found it"
+    input.reading = main ? BenchCanon.canon(main, all) : null; input.other = input.reading;
+    if (g.fallback) input.signals.push({ group: 'alone', text: 'the second reader has not read this message, so this reading could not be checked against another' });
+  }
+  if (partner) input.other = partner.got;
+  if (over) { input.other = over.got; input.otherAct = actOfPa(over.pa); }
+  // the context fill of the executing reading: the word ("it") and the name it was taken to mean
+  const gapsOf = x => (x && x.node && x.node.unit && x.node.unit.gaps) || [];
+  // (SOP-BERT without a pairing: its signals of this request, neural-confidence.js signals)
+  let sig = mine ? mine.sig : null;
+  if (!mine && r.neural && ncNow && u.unit && r.neural.analyses && r.neural.analyses.includes(u.unit)) try { sig = ncNow.signals(r.neural, r.neural.analyses.indexOf(u.unit)); } catch (e) { console.error(e); }
+  const fills = sig ? ((sig.detail && sig.detail.ctx) || []).map(c => ({ key: c.key, word: ((gapsOf(partner).find(gp => gp.decision === 'fill' && gp.key === c.key) || {}).word) }))
+    : (mine ? gapsOf(mine) : main && main.unit && main.unit.gaps ? main.unit.gaps : []).filter(gp => gp.decision === 'fill').map(gp => ({ key: gp.key, word: gp.word }));
+  for (const f of fills) {
+    const v = input.reading && input.reading[f.key]; if (!v || /^mention\(|\$/.test(String(v))) continue;
+    const filled = listing(strNames(v).map(nm)), word = f.word ? String(f.word).replace(/^@/, '') : null;
+    input.signals.push(word ? { group: 'context', key: f.key, word, filled } : { group: 'context', key: f.key, text: `${filled} was taken from the conversation; the name was not written` });
+  }
+  // what the executing reader itself was unsure of (its own sentences; the sentences about the two readers are clarify.js's own)
+  const own = u.ownReasons || (u.reasons || []).filter(x => x.own != null).map(x => ({ group: x.group, text: x.own }));
+  const ownList = own.length ? own : !r.combined && !g.pairing ? (u.reasons || []).filter(x => x.group) : [];
+  for (const x of ownList) {
+    if (x.group === 'depends' || ((x.group === 'context' || x.group === 'fill') && fills.length)) continue;
+    const t = plainReason(x); if (t) input.signals.push({ group: x.group, text: t });
+  }
+  // the held requests it needs: a held create whose shape it names (holdNamed), or a held request whose wires it refers to
+  const owner = new Map(g.units.flatMap(x => x.nodes.map(n => [n.id, x]))), deps = new Set(u.needs || []);
+  for (const n of mainOf(u.nodes)) for (const id of Object.values(n.args).flatMap(refsIn)) { const o = owner.get(id); if (o && o !== u && !o.execute) deps.add(o); }
+  input.dependsOn = [...deps].map(d => d.src);
+  return input;
+}
+/** the names clarify.js writes a command with: the drawing's names as written, and the names the message's creates make ("$new") */
+const clarifyOpts = r => ({ names: r.names || [], created: r.gate ? r.gate.units.flatMap(u => mainOf(u.nodes).filter(x => x.args && x.args.action === 'create').flatMap(x => strNames(x.args.name))) : [] });
+/** the held requests of a reader's reply (see above): the line above them, then per request its words, reasons, clearer command and buttons */
 function heldHTML(held) {
-  return `<ul class="held">${held.map(h => `<li><span class="src">“${escH(h.src || '')}”</span> <span class="why">${Number.isFinite(h.conf) ? `confidence ${h.conf.toFixed(2)}, it acts from ${h.t.toFixed(2)}: ` : ''}${escH(h.reasons.join('; ') || 'not sure')}.</span> <button type="button" class="anyway" data-anyway="${escH(h.reader)}:${h.turn}:${h.index}" title="Run exactly this reading now (undo takes it back)">Do it anyway</button></li>`).join('')}</ul>`;
+  const head = CL ? CL.heldHeader(held.length) : 'Not done, because I am not sure what you meant:';
+  return `<div class="hhead">${escH(head)}</div><ul class="held">${held.map(h => { const v = h.view, key = escH(`${h.reader}:${h.turn}:${h.index}`);
+    return `<li data-held="${key}"><span class="src">“${escH(v.src || '')}”</span><div class="why">${v.reasons.map(x => `<div class="r">${escH(x)}</div>`).join('')}</div>`
+      + (v.line ? `<div class="how">${escH(v.line)}</div>` : '') + (v.runs ? `<div class="runs">${escH(v.runs)}</div>` : '')
+      + `<div class="acts">${v.canAnyway ? `<button type="button" class="anyway" data-anyway="${key}" title="${escH(v.anyway ? `Run “${v.anyway}” now (undo takes it back)` : 'Run exactly this reading now (undo takes it back)')}">Do it anyway</button>` : ''}`
+      + `${v.edit ? `<button type="button" class="edit" data-edit="${key}" data-text="${escH(v.edit)}" title="Put the clearer command in the message box, to complete or correct it before you send it">Edit</button>` : ''}<span class="state"></span></div></li>`; }).join('')}</ul>`;
+}
+/** a held request changed state: its buttons are disabled and a short note says why ("superseded" | "done anyway") */
+function markHeld(key, state) {
+  document.querySelectorAll(`[data-held="${key}"]`).forEach(li => {
+    li.classList.add(state === 'superseded' ? 'superseded' : 'doneanyway');
+    li.querySelectorAll('button').forEach(b => { b.disabled = true; });
+    const a = li.querySelector('button.anyway'); if (a && state !== 'superseded') a.textContent = 'Done anyway';
+    const st = li.querySelector('.state'); if (st) st.textContent = state === 'superseded' ? 'replaced by your later command' : '';
+  });
+}
+/** the held requests of earlier messages after this reader executed `done` (canonical readings): the ones the same action on the same shapes
+ *  replaces become "superseded" (clarify.js updatePending) */
+function supersedeHeld(rd, done) {
+  if (!CL || !rd.held || !rd.held.length || !done.length) return;
+  const before = rd.held; rd.held = CL.updatePending(before, done);
+  rd.held.forEach((p, i) => { if (p.state === before[i].state) return;
+    const x = history.find(t => t.id === p.turn), u = x && x.readers[rd.id] && x.readers[rd.id].gate && x.readers[rd.id].gate.units.find(y => y.index === p.index);
+    if (u) u.superseded = true; markHeld(`${rd.id}:${p.turn}:${p.index}`, p.state); });
+}
+/** the canonical readings of the wires a run executed (no error, not skipped) */
+const doneOf = (result, nodes) => result ? result.steps.filter(st => st.node.type !== 'mention' && !st.error && !st.skipped).map(st => { try { return BenchCanon.canon(st.node, nodes); } catch (e) { return null; } }).filter(Boolean) : [];
+/** after a reader's part of a message: its executed readings supersede the held requests of earlier messages, and its own held requests
+ *  are added to its list (rd.held: [{turn, index, reading, input, opts, state}]) */
+function trackHeld(rd, rec, r) {
+  if (!r || !CL) return;
+  supersedeHeld(rd, doneOf(r.result, r.allNodes || r.nodes));
+  if (r.gate) for (const h of r.gate.held) if (h.clar) (rd.held || (rd.held = [])).push({ turn: rec.id, index: h.index, reading: h.clar.input.reading, input: h.clar.input, opts: h.clar.opts, state: 'held' });
 }
 /** one reader reads (formalizes) one message, nothing is executed yet: fills rec.readers[rd.id]; returns null, or the reply's line when it failed */
 async function readPart(rd, text, rec, pk) {
@@ -760,30 +914,50 @@ async function readPart(rd, text, rec, pk) {
   } catch (e) { r.error = e; r.ms = performance.now() - t0; return { text: `The ${rd.label} reader failed: ${e.message}`, err: true, ms: r.ms }; }
   return null;
 }
-/** the reader's gate and engine on what it read (readPart); returns its line of the reply ({text, sub, err, chips, ms, highlight, held}) */
-async function doPart(rd, text, rec, pk) {
+/** the reader's gate and engine on what it read (readPart); returns its line of the reply ({text, sub, err, chips, ms, highlight, held}).
+ *  pend: the engine's question that was open before this message (null: none) */
+async function doPart(rd, text, rec, pk, pend) {
+  const line = await doPart0(rd, text, rec, pk, pend);
+  trackHeld(rd, rec, rec.readers[rd.id]);
+  return line;
+}
+async function doPart0(rd, text, rec, pk, pend) {
   const r = rec.readers[rd.id], overrides = r.overrides;
+  const CLm = await clP;
   try {
-    // the gate (see GATES): the requests this reader is not sure of are not executed; the reply lists them with "Do it anyway"
+    // the gate (see GATES): the requests this reader is not sure of are not executed; the reply lists them with Do it anyway and Edit;
+    // then the name rule (holdNamed)
     const gf = !pk && !rec.raw ? GATES[rd.id] : null, gsrc = rd.id === 'vss' ? r.vss : rd.id === 'combined' ? r.combined : r.neural;
-    if (gf && gsrc) { const g = await gf(gsrc, rec, r); if (g) { r.gate = g; r.allNodes = r.nodes; r.nodes = g.executed; } }
+    if (gf && gsrc) { const g = await gf(gsrc, rec, r); if (g) { holdNamed(g, r.names); r.gate = g; r.allNodes = r.nodes; r.nodes = g.executed; } }
   } catch (e) { r.error = e; return { text: `The ${rd.label} reader failed: ${e.message}`, err: true, ms: r.ms }; }
   const ms = r.ms, nodes = r.nodes, notes = r.notes, world = rd.world, engine = rd.engine;
   rd.reads++; rd.lastRead = { turn: rec.id, nodes };
   // the parts no reading took: the Rules reader's "couldn't find an action in …" and the VSS reader's "Ignored (not understood): “…”, “…”"
   const unread = notes.filter(n => /couldn't find an action/.test(n)).map(n => (n.match(/in "(.*)"\.?$/) || [])[1]).filter(Boolean)
     .concat(notes.filter(n => /^Ignored \(not understood\):/.test(n)).flatMap(n => [...n.matchAll(/“([^”]*)”/g)].map(m => m[1])).filter(u => u.trim().split(/\s+/).length > 1));   // a one-word unit ("and") stays in the details only
-  const held = r.gate ? r.gate.held.map(h => ({ reader: rd.id, turn: rec.id, index: h.index, src: h.src, conf: h.conf, t: Number.isFinite(h.t) ? h.t : r.gate.threshold, reasons: h.reasons.map(x => x.text) })) : [];
-  const nReq = r.gate ? r.gate.units.length : 0;
-  // the reply's line with the requests not executed (their reasons and buttons are rendered under the line, botBubble)
-  const withHeld = o => held.length ? Object.assign(o, { held, text: (o.text && o.text !== 'Done.' ? o.text + ' ' : '') + `Not sure about ${held.length === nReq ? (nReq === 1 ? 'the request' : `any of the ${nReq} requests`) : `${held.length} of the ${nReq} requests`}, so ${held.length === 1 ? 'it was' : 'they were'} not done:` }) : o;
+  // the requests not executed, as the chat says them (clarify.js; see heldHTML); the numbers stay in the details (gateHTML)
+  const opts = clarifyOpts(r);
+  const held = r.gate ? r.gate.held.map(h => {
+    const input = clarifyInput(r, h), view = CLm ? CLm.heldView(input, opts) : { src: h.src, reasons: h.reasons.map(x => x.text), line: null, runs: null, anyway: null, canAnyway: true, edit: null };
+    h.clar = { input, opts, view };
+    return { reader: rd.id, turn: rec.id, index: h.index, view };
+  }) : [];
+  // the reply's line: what was done; the requests not executed are rendered under it (botBubble, heldHTML)
+  const withHeld = o => held.length ? Object.assign(o, { held, text: o.text && o.text !== 'Done.' ? o.text : '' }) : o;
   if (!nodes.length && held.length) {
     const sub = unread.length ? unread.map(u => `I didn’t understand “${u}”.`).join(' ') : null;
     return withHeld({ text: '', sub, ms });
   }
   if (!nodes.length) {
     r.error = new K.SOPError('No wires.');
-    return { text: unread.length ? 'I didn’t get what to do there. Try something like “draw a red circle next to Start” or “what is connected to Start?”.' : 'I couldn’t turn that into anything I can do.', err: true, ms };
+    // the engine's question stays open when nothing was read (CLARIFY_DESIGN.md 4.5): a name still answers it
+    const ask = pend && !pk ? ` Write one of the names to answer the question: ${listing(pend.candidates)}.` : '';
+    if (pend && !pk) rd.pending = pend;
+    // nothing read while requests of earlier messages are held: say so, without pretending the message answered them (no word list decides
+    // this: it is the case "nothing was read" + "something is held")
+    const open = (rd.held || []).filter(p => p.state === 'held');
+    if (open.length && CLm) return { text: CLm.nothingReadText(open.map(p => p.input), open[open.length - 1].opts) + ask, ms };
+    return { text: (unread.length ? 'I didn’t get what to do there. Try something like “draw a red circle next to Start” or “what is connected to Start?”.' : 'I couldn’t turn that into anything I can do.') + ask, err: !ask, ms };
   }
   const result = engine.run(nodes, { overrides }); r.result = result;
   // do what was understood; ask about the rest (a question never blocks the other wires of the message)
@@ -900,7 +1074,7 @@ function gateHTML(x, rd) {
   const lab = g.label || gateLabel(g.effective || g.level);
   let h = `<div class="note">${escH(rd.label)} gate: ${escH(lab)}${!g.label && g.effective && g.effective !== g.level ? ` (${escH(gateLabel(g.level))} is not reached)` : ''}${escH(tt)}; executed ${ex} of ${g.units.length} request${g.units.length === 1 ? '' : 's'}${g.held.length ? `, not sure about ${g.held.length}` : ''}.</div>`;
   if (g.fallback) h += `<div class="note">${escH(g.fallback.charAt(0).toUpperCase() + g.fallback.slice(1))}.</div>`;
-  if (g.units.length) h += `<ul class="units">${g.units.map(u => `<li><span class="src">“${escH(u.src || '')}”</span> → ${Number.isFinite(u.conf) ? `confidence ${u.conf.toFixed(3)}, ` : ''}${u.execute ? 'executed' : `<b>not executed</b>: ${escH(u.reasons.map(r => r.text).join('; ') || 'not sure')}${u.doneAnyway ? ' (then done anyway)' : ''}`}</li>`).join('')}</ul>`;
+  if (g.units.length) h += `<ul class="units">${g.units.map(u => `<li><span class="src">“${escH(u.src || '')}”</span> → ${Number.isFinite(u.conf) ? `confidence ${u.conf.toFixed(3)}, ` : ''}${u.execute ? 'executed' : `<b>not executed</b>: ${escH(u.reasons.map(r => r.text).join('; ') || 'not sure')}${u.doneAnyway ? ' (then done anyway)' : u.superseded ? ' (then replaced by a later command)' : ''}`}</li>`).join('')}</ul>`;
   const heldNodes = g.held.flatMap(u => u.nodes);
   if (heldNodes.length) h += `<pre class="sop"><span class="cm"># not executed (not sure)</span>\n${heldNodes.map(hlNode).join('\n')}</pre>`;
   return h;
@@ -1065,7 +1239,7 @@ const mb0 = b => Math.round(b / 1e6) + ' MB';
 function copyDrawing(src, dst) {
   const c = x => JSON.parse(JSON.stringify(x));
   dst.world.restore(src.world.state); dst.world.undoStack = c(src.world.undoStack); dst.world.redoStack = c(src.world.redoStack);
-  dst.last = src.last.slice(); dst.focusCell = src.focusCell && Object.assign({}, src.focusCell); dst.pending = null;
+  dst.last = src.last.slice(); dst.focusCell = src.focusCell && Object.assign({}, src.focusCell); dst.pending = null; dst.held = [];
 }
 function adoptRules(rd) { queue = queue.then(() => { if (!rd.reads) { copyDrawing(RD.rules, rd); if (rd === cur) renderCanvas(); } updateTabs(); renderSopBar(); }); return queue; }
 function alignDrawings() {
@@ -1519,7 +1693,7 @@ window.addEventListener('resize', () => { if (!drag) renderCanvas(); activeTabIn
 /* ---------------- start ---------------- */
 updateTabs(); renderCanvas(); setStatus(idleStatus());
 { const ids = READERS.map(r => r.id).filter(i => chatTabs.has(i)), def = ids.join(',') === CHAT_DEFAULT.join(',');
-  botBubble({ text: 'Hi! Tell me what to draw, change or connect, or ask me about the drawing. I do what I am sure of and ask about the rest. ' + (def
+  botBubble({ text: 'Hi! Tell me what to draw, change or connect, or ask me about the drawing. I do what I am sure of; for the rest I say why I am not sure and show a clearer way to write it. ' + (def
     ? 'The replies here are VSS-BERT’s: VSS and SOP-BERT reading together. Rules, VSS and SOP-BERT also read every message, each into its own drawing: the tabs above the canvas switch between them, and ⋮ › Settings can show their replies here too.'
     : `The replies here are those of ${listing(ids.map(i => RD[i].label))} (⋮ › Settings › Replies in the chat); every tab reads every message into its own drawing, and the tabs above the canvas switch between them.`) + ' Tap + for examples and whole scenarios, ? for help.' }); }
 /* the opening drawing (docs/js/start-diagram.js): a background, two zones, the items and their texts, as SOP Lang wires run by every

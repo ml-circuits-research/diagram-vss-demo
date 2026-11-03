@@ -11,14 +11,15 @@ library are blocked (memory). The chat is set to show VSS's replies (localStorag
 tab, after the page's own start messages:
   1. "Move Done below Start."                          one request the confidence clears at the default level: executed, no "Do it anyway";
   2. "Make Process green and connect Start to Done."  the first request executed, the second not (VSS not sure: read in the links
-                                                     world, which is often wrong), one button;
+                                                     world, which is often wrong): the reply lists it with plain reasons (no
+                                                     numbers, no reader names), a clearer command, Do it anyway and Edit;
   3. click "Do it anyway": the link Start -> Done appears in the VSS drawing, the button is disabled; "undo" takes exactly that back;
   4. VSS › Settings shows the levels as a table (boldest / very bold / bolder / safety threshold / more careful / execute all, the safety
      threshold checked, each with the thresholds of vote3.json for commands and questions and its numbers on the calibration part);
      choosing another level is kept in localStorage, the default is not stored.
 Screenshots of each step go to the directory (default: a temporary folder). Exit code 0 when everything passes.
 """
-import functools, http.server, json, os, socketserver, sys, tempfile, threading
+import functools, http.server, json, os, re, socketserver, sys, tempfile, threading
 
 os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", "/opt/pw-browsers")
 from playwright.sync_api import sync_playwright  # noqa: E402
@@ -49,7 +50,7 @@ VSS_LINE = """() => {
   const bs = [...document.querySelectorAll('#msgs .b.bot')], b = bs[bs.length - 1]; if (!b) return null;
   const rl = b.querySelector('.rl[data-reader=vss]');
   if (!rl) return { text: b.textContent, held: [] };
-  return { text: rl.querySelector('.t').textContent, held: [...rl.querySelectorAll('.held li')].map(li => ({ src: li.querySelector('.src').textContent, why: li.querySelector('.why').textContent, button: !!li.querySelector('button.anyway') })) };
+  return { text: rl.querySelector('.t').textContent, head: (rl.querySelector('.hhead') || {}).textContent || null, all: rl.textContent, held: [...rl.querySelectorAll('.held > li')].map(li => ({ src: li.querySelector('.src').textContent, why: li.querySelector('.why').textContent, how: (li.querySelector('.how') || {}).textContent || '', button: !!li.querySelector('button.anyway'), edit: !!li.querySelector('button.edit') })) };
 }"""
 VSS_DONE = """() => { const S = window.__vssState; return S; }"""
 
@@ -82,9 +83,10 @@ with sync_playwright() as p:
 
     r2 = send(pg, "Make Process green and connect Start to Done.")
     pg.screenshot(path=f"{OUT}/2_asked.png")
-    ok2 = r2 is not None and len(r2["held"]) == 1 and r2["held"][0]["button"] and "connect Start to Done" in r2["held"][0]["src"] and "Not sure about 1 of the 2 requests" in r2["text"]
+    ok2 = r2 is not None and len(r2["held"]) == 1 and r2["held"][0]["button"] and "connect Start to Done" in r2["held"][0]["src"] and r2["head"] == "Not done, because I am not sure what you meant:"
     check("2. one request executed, the other not done with a reason and a button", ok2, str(r2))
-    check("2. the reason is in plain words", bool(r2 and r2["held"] and any(w in r2["held"][0]["why"] for w in ("filled from context", "cut of this request", "world", "not understood", "unexplained"))), str(r2))
+    check("2. the reason is in plain words (CLARIFY_DESIGN.md design B: no numbers, no reader names in the chat)", bool(r2 and r2["held"] and any(w in r2["held"][0]["why"] for w in ("was taken to mean", "taken from the conversation", "not sure where", "not sure what kind", "not understood", "unexplained", "fit no part", "could not be checked", "often read wrong", "often wrong"))) and not re.search(r"\b\d", r2["all"]) and not re.search(r"SOP-BERT|VSS|Rules", r2["all"]), str(r2))
+    check("2. the held request has a clearer command and an Edit button", bool(r2 and r2["held"] and r2["held"][0]["how"] and r2["held"][0]["edit"]), str(r2))
 
     # the VSS drawing before / after "Do it anyway"
     size_of = """() => +(((document.querySelector('#readout') || {}).textContent || '').match(/(\\d+) links?/) || [0, -1])[1]"""   # links in the VSS drawing

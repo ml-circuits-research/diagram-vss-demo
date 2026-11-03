@@ -16,10 +16,11 @@
 //     dependsOn: ["add Fail below Check"]    held requests whose shapes this one uses (it is held because of them) }
 // names: the drawing's names as written (["Start", "Process"]) so the clearer command writes them as the user sees them.
 //
-// Output (heldReply): { src, reasons: [string], clearer: string | null, alternatives: [string], placeholders: [key], anyway: string | null }
+// Output (heldReply): { src, reasons: [string], clearer: string | null, alternatives: [string], placeholders: [key], shown: [key], anyway: string | null }
 //   reasons      at most MAX_REASONS short sentences: what was unclear, in the user's words where possible;
 //   clearer      the request written explicitly, with the reading's values; a value the readers disagree on is a placeholder ‹what colour?›;
 //   alternatives when the two readers read different actions: one explicit command per reading (the user writes the one they meant);
+//   shown        the open keys whose placeholder the clearer command actually shows (the ones the reply asks to state);
 //   anyway       what "Do it anyway" would run, written explicitly (the reading itself, no placeholders), or null when it cannot run.
 // replyText: the whole reply as plain lines (the chat renders the same content with buttons).
 
@@ -42,7 +43,7 @@ const SLOT = { color: "which colour?", outline: "which colour?", shape: "which s
   scale: "bigger or smaller?", property: "which property?", superlative: "which extreme?" };
 const slotOf = (k, choices) => {   // choices: the two readers' values of the key, shown in the placeholder when both read one ("‹below or above?›")
   const c = choices && choices[k];
-  if (c && c.length > 1 && c.every((x) => x != null && x !== "∅" && !/[($]/.test(x))) return `‹${c.join(" or ")}?›`;
+  if (c && c.length > 1 && c.every((x) => x != null && x !== "∅" && !/[($]/.test(x) && String(x).split(/, | and /).length <= 3)) return `‹${c.join(" or ")}?›`;
   return `‹${SLOT[k] || keyWord(k) + "?"}›`;
 };
 
@@ -250,8 +251,10 @@ export function commandText(r, opts = {}) {
 /** the reasons of one held request, in plain words, most important first -> [string] (at most MAX_REASONS) */
 export function reasonsOf(h, opts = {}) {
   const out = [], names = opts.names || [], created = opts.created || [];
-  const v = (k, x) => (x == null || x === "∅" ? "nothing" : ["target", "from", "to", "anchor", "name"].includes(k) ? who(x, names, created) : String(x));
-  for (const d of h.dependsOn || []) out.push(`it uses what ${quoteText(d)} would have made, and that was not done`);
+  // a long list of names (an align of the whole drawing) is shortened: the reason says which part differs, the details have the lists
+  const short = (t) => { const xs = String(t).split(/, | and /); return xs.length > 3 ? listing(xs.slice(0, 3).concat("others")) : t; };
+  const v = (k, x) => (x == null || x === "∅" ? "nothing" : ["target", "from", "to", "anchor", "name"].includes(k) ? short(who(x, names, created)) : String(x));
+  for (const d of h.dependsOn || []) out.push(`it needs ${quoteText(d)} first, and that was not done`);
   if (h.otherAct) out.push(`the words could mean two different things: ${actWord(h.reading)} or ${h.otherAct}`);
   else if (!h.other && h.type !== "fact" && h.type !== "rule") out.push("only one of the two readers found a request here");
   const differ = (h.differ || []).filter((d) => d.key !== "action" && d.key !== "ask");
@@ -281,7 +284,7 @@ export function heldReply(h, opts = {}) {
   const o = { names: opts.names || [], created: opts.created || [] };
   const open = openKeys(h);
   const anyway = (h.dependsOn || []).length ? null : commandText(h.reading, o);
-  let clearer = null, alternatives = [];
+  let clearer = null, alternatives = [], shown = [];
   if (h.otherAct && h.other) {
     alternatives = [commandText(h.reading, o), commandText(h.other, o)].filter(Boolean);
     alternatives = [...new Set(alternatives)];
@@ -290,9 +293,30 @@ export function heldReply(h, opts = {}) {
     const fillKeys = new Set((h.signals || []).filter((s) => s.group === "context" && s.key).map((s) => s.key));
     const nm = (k, x) => (["target", "from", "to", "anchor", "name"].includes(k) ? who(x, o.names, o.created) : String(x));
     const choices = Object.fromEntries((h.differ || []).map((d) => [d.key, [d.sop, d.vss].map((x) => (x == null || x === "∅" ? x : nm(d.key, x)))]));
-    clearer = commandText(h.reading, Object.assign({}, o, { open: open.filter((k) => !fillKeys.has(k)), choices }));
+    const keys = open.filter((k) => !fillKeys.has(k));
+    clearer = commandText(h.reading, Object.assign({}, o, { open: keys, choices }));
+    // the keys whose placeholder the command form shows (an align has no direction): the ones the reply asks to state
+    const plain = commandText(h.reading, o);
+    shown = keys.filter((k) => commandText(h.reading, Object.assign({}, o, { open: [k], choices })) !== plain);
   }
-  return { src: h.src, reasons: reasonsOf(h, o), clearer, alternatives, placeholders: open, anyway };
+  return { src: h.src, reasons: reasonsOf(h, o), clearer, alternatives, placeholders: open, shown, anyway };
+}
+
+/** one held request as the chat shows it (the same content as its block of replyText, with what the two buttons do):
+ *  -> {src, reasons, line (the clearer command, alternatives or "do the other first", in a sentence; null when there is none),
+ *      runs (the line "Do it anyway would run: …", only when the line has placeholders or two alternatives), anyway (the reading written
+ *      explicitly: what Do it anyway runs; null when it has no explicit command), canAnyway (false when it depends on a held request),
+ *      edit (what the Edit button puts in the message box: the clearer command, or the first alternative; null when there is none)} */
+export function heldView(h, opts = {}) {
+  const r = heldReply(h, opts), open = !!(r.clearer && /‹/.test(r.clearer)), deps = (h.dependsOn || []).length > 0;
+  let line = null;
+  if (deps && r.clearer) line = `Do the request it depends on first; then write: ${quoteText(r.clearer)}`;
+  else if (r.alternatives.length > 1) line = `Write the one you meant: ${r.alternatives.map(quoteText).join(" or ")}`;
+  else if (open) line = `Write it with ${listing((r.shown.length ? r.shown : r.placeholders).map(keyWord))} stated, like this: ${quoteText(r.clearer)}`;
+  else if (r.clearer && r.placeholders.length) line = `Write it with the name instead of the word, like this: ${quoteText(r.clearer)}, or press Do it anyway.`;
+  else if (r.clearer) line = `If you meant ${quoteText(r.clearer)}, write it like that, or press Do it anyway.`;
+  const runs = r.anyway && (r.alternatives.length > 1 || open) ? `Do it anyway would run: ${quoteText(r.anyway)}` : null;
+  return { src: r.src, reasons: r.reasons, line, runs, anyway: r.anyway, canAnyway: !deps, edit: r.clearer || r.alternatives[0] || null };
 }
 
 /** the whole reply of a message as plain lines: what was done, then one block per held request.
@@ -301,21 +325,18 @@ export function replyText(done, held, opts = {}) {
   const lines = [];
   if (done) lines.push(done);
   if (!held.length) return lines.length ? lines : ["Nothing was done."];
-  lines.push(held.length === 1 ? "Not done, because I am not sure what you meant:" : `Not done (${held.length}), because I am not sure what you meant:`);
+  lines.push(heldHeader(held.length));
   for (const h of held) {
-    const r = heldReply(h, opts);
-    lines.push(`• ${quoteText(r.src)}`);
-    for (const why of r.reasons) lines.push(`  – ${why}`);
-    const open = r.clearer && /‹/.test(r.clearer);
-    if (!r.anyway && r.clearer) lines.push(`  Do the request it depends on first; then write: ${quoteText(r.clearer)}`);
-    else if (r.alternatives.length > 1) lines.push(`  Write the one you meant: ${r.alternatives.map(quoteText).join(" or ")}`);
-    else if (open) lines.push(`  Write it with ${listing(r.placeholders.map(keyWord))} stated, like this: ${quoteText(r.clearer)}`);
-    else if (r.clearer && r.placeholders.length) lines.push(`  Write it with the name instead of the word, like this: ${quoteText(r.clearer)}, or press Do it anyway.`);
-    else if (r.clearer) lines.push(`  If you meant ${quoteText(r.clearer)}, write it like that, or press Do it anyway.`);
-    if (r.anyway && (r.alternatives.length > 1 || open)) lines.push(`  Do it anyway would run: ${quoteText(r.anyway)}`);
+    const v = heldView(h, opts);
+    lines.push(`• ${quoteText(v.src)}`);
+    for (const why of v.reasons) lines.push(`  – ${why}`);
+    if (v.line) lines.push(`  ${v.line}`);
+    if (v.runs) lines.push(`  ${v.runs}`);
   }
   return lines;
 }
+/** the line above the held requests of one reply (no count: the chat has no numbers, the list shows how many) */
+export const heldHeader = () => "Not done, because I am not sure what you meant:";
 
 /** a message that produced no request at all, while requests of earlier turns are still held: the reply (no word list, no guessing what a
  *  short answer means) */
@@ -326,19 +347,24 @@ export function nothingReadText(pending, opts = {}) {
 }
 
 /* ---------------------------------------------------------------- what happens to a held request afterwards */
-const NAME_ROLES = ["target", "from", "to", "anchor"];
-const namesIn = (r) => new Set(NAME_ROLES.flatMap((k) => (r && r[k] && !mentionOf(r[k]) ? String(r[k]).split(",") : [])).map((x) => x.trim().toLowerCase()).filter((x) => x && !x.startsWith("$new")));
-/** does an executed request of a later message do what a held request was about? Same action (or question), and the same shapes named in
- *  the roles target / from / to / anchor (a held request whose shape came from a context fill counts its filled name). The held request is
- *  then "superseded": its Do it anyway button is disabled with the words "replaced by your new command", so it cannot run twice. */
+// the shapes a request is about: a create's name; otherwise the shapes it acts on (target, from, to), a description as written; when it names
+// none of those, the shape it is placed against (anchor). "$new" (a shape made earlier in the same message) is left out.
+const valuesIn = (r, roles) => new Set(roles.flatMap((k) => (r && r[k] != null && r[k] !== "∅" && r[k] !== "" ? (mentionOf(r[k]) ? [String(r[k])] : String(r[k]).split(",")) : []))
+  .map((x) => x.trim().toLowerCase()).filter((x) => x && !x.startsWith("$new")));
+const shapesOf = (r, act) => { const main = valuesIn(r, act === "create" ? ["name"] : ["target", "from", "to"]); return main.size ? main : valuesIn(r, ["anchor"]); };
+/** does an executed request of a later message do what a held request was about? The same action (or question), and every shape the held
+ *  request is about (a create: its name; otherwise target, from, to, or the anchor when it names none of those; a context fill counts with
+ *  the name it was filled with) is among the shapes of the executed one. Two requests that name no shape at all (undo, improve the layout)
+ *  are the same; two creates without a name are not. The held request is then "superseded": its buttons are disabled with the words
+ *  "replaced by your later command", so it cannot run twice. */
 export function supersedes(executed, held) {
   if (!executed || !held) return false;
   const a = String(executed.action || "ask:" + executed.ask).toLowerCase(), b = String(held.action || "ask:" + held.ask).toLowerCase();
   if (a !== b) return false;
-  const x = namesIn(executed), y = namesIn(held);
-  if (!x.size && !y.size) return true;   // e.g. undo, improve the layout
-  for (const n of y) if (x.has(n)) return true;
-  return false;
+  const x = shapesOf(executed, a), y = shapesOf(held, b);
+  if (!y.size) return !x.size && b !== "create";
+  for (const n of y) if (!x.has(n)) return false;
+  return true;
 }
 /** the held requests of earlier turns after a new message: [{turn, index, reading, state}] with state "held" | "done anyway" | "superseded";
  *  executedNow: the readings executed by the new message. Only the held ones can change, to "superseded". */

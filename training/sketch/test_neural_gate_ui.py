@@ -12,8 +12,9 @@ It serves docs/ on a free local port and loads the neural model (docs/model/neur
 `npm install` in training/laptop). The cut is set to the BERT cutter (localStorage sop.cut) and the chat to SOP-BERT's replies (localStorage
 sop.chat.tabs; the default is VSS-BERT's only) before the page loads. On the SOP-BERT tab:
   1. "Move Done below Start."                       one request the confidence clears: executed, no "Do it anyway";
-  2. "Make Process green and connect it to Done."  the first request executed, the second not ("not sure which shape 'it' means"),
-                                                   with its confidence, the threshold and one button;
+  2. "Make Process green and connect it to Done."  the first request executed, the second not: "“it” was taken to mean Process", the
+                                                   clearer command "Connect Process to Done.", Do it anyway and Edit; no numbers in the
+                                                   chat (the confidence and the threshold are in the details);
   3. click "Do it anyway": the link Process -> Done appears in the SOP-BERT drawing, the button is disabled; "undo" takes exactly that back;
   4. the details of message 2: "SOP-BERT gate: safety threshold (it acts from confidence <the file's cost threshold>)", the confidences;
   5. SOP-BERT > Settings: a table of the levels boldest = cost1, very bold = cost2, bolder = cost5, cost (checked), more careful = cost20,
@@ -22,7 +23,7 @@ sop.chat.tabs; the default is VSS-BERT's only) before the page loads. On the SOP
   6. with the Rules segmenter as the cut (other cut than the BERT cutter): the gate still works; the details say the cut head ran once more.
 Screenshots of each step go to the directory (default: a temporary folder). Exit code 0 when everything passes.
 """
-import functools, http.server, json, mimetypes, os, socketserver, sys, tempfile, threading
+import functools, http.server, json, mimetypes, os, re, socketserver, sys, tempfile, threading
 
 os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", "/opt/pw-browsers")
 from playwright.sync_api import sync_playwright  # noqa: E402
@@ -66,7 +67,7 @@ LINE = """() => {
   const bs = [...document.querySelectorAll('#msgs .b.bot')], b = bs[bs.length - 1]; if (!b) return null;
   const rl = b.querySelector('.rl[data-reader=neural]');
   if (!rl) return { text: b.textContent, held: [] };
-  return { text: rl.querySelector('.t').textContent, held: [...rl.querySelectorAll('.held li')].map(li => ({ src: li.querySelector('.src').textContent, why: li.querySelector('.why').textContent, button: !!li.querySelector('button.anyway') })) };
+  return { text: rl.querySelector('.t').textContent, head: (rl.querySelector('.hhead') || {}).textContent || null, all: rl.textContent, held: [...rl.querySelectorAll('.held > li')].map(li => ({ src: li.querySelector('.src').textContent, why: li.querySelector('.why').textContent, how: (li.querySelector('.how') || {}).textContent || '', button: !!li.querySelector('button.anyway'), edit: !!li.querySelector('button.edit') })) };
 }"""
 LINKS = """() => +(((document.querySelector('#readout') || {}).textContent || '').match(/(\\d+) links?/) || [0, -1])[1]"""
 
@@ -105,11 +106,13 @@ with sync_playwright() as p:
 
     r2 = send(pg, "Make Process green and connect it to Done.")
     pg.screenshot(path=f"{OUT}/2_asked.png")
-    ok2 = r2 is not None and len(r2["held"]) == 1 and r2["held"][0]["button"] and "connect it to Done" in r2["held"][0]["src"] and "Not sure about 1 of the 2 requests" in r2["text"]
+    ok2 = r2 is not None and len(r2["held"]) == 1 and r2["held"][0]["button"] and "connect it to Done" in r2["held"][0]["src"] and r2["head"] == "Not done, because I am not sure what you meant:"
     check("2. one request executed, the other not done with a reason and a button", ok2, str(r2))
     why = r2["held"][0]["why"] if r2 and r2["held"] else ""
-    check("2. the reason is in plain words (which shape 'it' means)", "not sure which shape ‘it’ means" in why, why)
-    check(f"2. the reason shows the confidence and the threshold ({T_COST:.2f})", f"it acts from {T_COST:.2f}" in why and "confidence 0." in why, why)
+    check("2. the reason is in plain words (the shape 'it' was taken to mean, the name not written)", bool(re.search(r"“it” was taken to mean \w+; the name was not written|was taken from the conversation; the name was not written", why)), why)
+    all2 = r2["all"] if r2 else ""
+    check("2. no numbers and no reader names in the chat (they are in the details)", not re.search(r"\b\d", all2) and not re.search(r"SOP-BERT|VSS|Rules", all2), all2)
+    check("2. the clearer command writes the name instead of 'it', with an Edit button", bool(r2 and r2["held"] and re.search(r"Connect Process to Done\.", r2["held"][0]["how"]) and r2["held"][0]["edit"]), str(r2))
 
     w0 = pg.evaluate(LINKS)
     n0 = pg.evaluate("() => document.querySelectorAll('#msgs .b.bot').length")
@@ -166,7 +169,7 @@ with sync_playwright() as p:
     pg.keyboard.press("Escape"); pg.wait_for_timeout(300)
     r6 = send(pg, "Make Check orange and move it a bit.")
     pg.screenshot(path=f"{OUT}/7_rules_cut.png")
-    check("6. with the Rules cut: one executed, one not done with its reason", r6 is not None and len(r6["held"]) == 1 and r6["held"][0]["button"] and "Not sure about 1 of the 2 requests" in r6["text"], str(r6))
+    check("6. with the Rules cut: one executed, one not done with its reason", r6 is not None and len(r6["held"]) == 1 and r6["held"][0]["button"] and r6["head"] == "Not done, because I am not sure what you meant:", str(r6))
     det6 = details(pg, 1)
     check("6. the details say the cut head ran once more for the confidence", "run once more over the message" in det6 and "cut by: Rules segmenter" in det6, det6[:600])
     pg.screenshot(path=f"{OUT}/8_rules_cut_details.png")

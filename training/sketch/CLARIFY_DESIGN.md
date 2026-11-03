@@ -204,3 +204,26 @@ today. Anything else is read as a new message; the reply adds "Write one of the 
   training/sketch/llm_bench/short3`; then for D in A, B: a temporary copy of `combine/collect_pair.mjs` with `last: []` replaced by
   `last: (r.last || []).slice()` (sed, deleted after the run), `THREADS=2 node <copy> <dir>/rec_D clar <dir>/D` (A 18 s, B 51 s), and
   `node training/sketch/combine/failures_vss_bert.mjs <dir>/rec_D <dir>/D_rows.json <dir>/D`; then `clarify_experiment.mjs score <dir>`.
+
+## 6. Integrated into the demo (2026-11-03)
+
+`docs/js/ui.js` renders `clarify.js heldView` for every held request of every gated tab (VSS-BERT, and VSS / SOP-BERT when they are shown
+in the chat), with the buttons Do it anyway and Edit; keeps per tab the held requests (`rd.held`) and calls `updatePending` with the readings
+each later message (or Do it anyway) executed; uses `nothingReadText` when nothing is read while something is held; keeps the engine's
+question open when nothing is read (4.5). Changes to 4.1–4.4 made while integrating:
+- **The name rule (4.1)** is wider than "names a held create's name": SOP-BERT often reads the create without its name (s3-0261 "add Fail
+  below Check": SOP-BERT reads no name, VSS reads Fail), so the rule is: while a create of the message is held, a request that names a shape
+  which is not in the drawing and which no executed create of the message makes is held, reason "it needs “<the create>” first"
+  (`ui.js holdNamed`, applied after every gate). Measured on the test part with the 2026-11-03 refit records (`combine/failures_vss_bert.mjs`,
+  `DEP=names`): cost score 34.8 → 35.9, confidently wrong 1.84% → 1.58% (14 → 12 of 761 → 758 executed), done right 42.8% → 42.8% (747 → 746;
+  s3-0088 "connect Done to Plan" is held although right); calibration part 40.3 → 42.8 (2 → 0 confidently wrong, nothing right lost). The
+  narrow form (the held create's own name) held nothing on these records.
+- The reason of a request that depends on a held one reads "it needs “…” first, and that was not done".
+- The line above the held requests has no count ("Not done, because I am not sure what you meant:"): the chat has no numbers.
+- `supersedes` compares the shapes the request is about (a create: its name; otherwise target, from, to; the anchor only when none of those
+  is named) and needs all of the held request's shapes in the executed one: "move Start left of Check" does not replace "move Done below Check".
+- "Write it with <keys> stated" names only the keys whose placeholder the command form shows (an align has no direction); a list of more than
+  three names is shortened in the reasons ("Backdrop, Check, Done and others") and is never a placeholder choice.
+- The executing reader's own reasons are said without numbers and stage names (`ui.js plainReason`).
+Test: `training/sketch/test_clarify_ui.py` (browser).
+

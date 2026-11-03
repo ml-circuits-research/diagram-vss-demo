@@ -15,8 +15,9 @@ is blocked except huggingface.co (never used). Checks:
   2. with the default cut (VSS cutter) VSS-BERT reads the BERT cutter's requests itself (details: "read here", 2 SOP-BERT model calls);
      with the BERT cutter as the shared cut it reuses the two tabs' readings (details: "reused");
   3. a message with a request the two readers read the same is executed; a request below the combined threshold is not done, its reason
-     is one of the combined reader's plain sentences (the readers disagree / only one reader found it / ...), with its confidence, the
-     file's threshold and a "Do it anyway" button; clicking it runs that reading in the VSS-BERT drawing; undo takes it back;
+     is one of the plain sentences of docs/js/clarify.js (the readers read a value differently / only one reader found it / ...), with no
+     numbers and no reader names in the chat, and a "Do it anyway" button; clicking it runs that reading in the VSS-BERT drawing; undo
+     takes it back (test_clarify_ui.py checks the rest of the reply: the clearer command, Edit, superseding);
   4. the details show "VSS-BERT gate: safety threshold (it acts from confidence <the file's threshold of the BERT cut>)";
   5. Settings: a table of the levels boldest (cost 1) / very bold (cost 2) / bolder (cost 5) / safety threshold / more careful (cost 20) /
      execute all (safety threshold checked), with the file's thresholds and each level's numbers on the calibration part (done right,
@@ -43,7 +44,8 @@ SPEC = json.load(open(os.path.join(DOCS, "model", "confidence", "combined.json")
 CUT = SPEC["best_cut"]
 LV = SPEC["cuts"][CUT]["levels"]
 T_COST = LV["cost"]["threshold"]
-REASONS = re.compile(r"the two readers disagree on|only one reader found this request|the two readers read different actions here|both readers read it the same way|it uses what")
+# the reasons of a held request as the chat says them (docs/js/clarify.js reasonsOf; CLARIFY_DESIGN.md design B)
+REASONS = re.compile(r"the two readers read .* differently|only one of the two readers found a request here|the words could mean two different things|the reading is right most of the time|it needs “|was taken to mean|was taken from the conversation|not sure")
 fails = []
 def check(name, ok, detail=""):
     print(("ok   " if ok else "FAIL ") + name + ("" if ok or not detail else f"\n     {detail}"))
@@ -73,7 +75,7 @@ LINE = """() => {
   const rl = b.querySelector('.rl[data-reader=combined]'), readers = [...b.querySelectorAll('.rl')].map(x => x.dataset.reader), who = (b.querySelector('.meta .who') || {}).textContent || null;
   const prefixes = [...b.querySelectorAll('.rl')].map(x => (x.querySelector(':scope > b') || {}).textContent || null);
   if (!rl) return { prefix: null, who, readers, prefixes, text: b.textContent, held: [] };
-  return { prefix: (rl.querySelector(':scope > b') || {}).textContent || null, who, readers, prefixes, text: rl.querySelector('.t').textContent, held: [...rl.querySelectorAll('.held li')].map(li => ({ src: li.querySelector('.src').textContent, why: li.querySelector('.why').textContent, button: !!li.querySelector('button.anyway') })) };
+  return { prefix: (rl.querySelector(':scope > b') || {}).textContent || null, who, readers, prefixes, text: rl.querySelector('.t').textContent, all: rl.textContent, held: [...rl.querySelectorAll('.held > li')].map(li => ({ src: li.querySelector('.src').textContent, why: li.querySelector('.why').textContent, button: !!li.querySelector('button.anyway') })) };
 }"""
 COUNTS = """() => { const m = (((document.querySelector('#readout') || {}).textContent || '').match(/(\\d+) shapes? · (\\d+) links?/) || [0, -1, -1]); return [+m[1], +m[2]]; }"""
 
@@ -145,8 +147,8 @@ with sync_playwright() as p:
     check("3. a request below the combined threshold is not done, with a reason and a button", held is not None and held[1]["held"][0]["button"], str(held))
     if held:
         why = held[1]["held"][0]["why"]
-        check("3. its reason is one of the combined reader's plain sentences", bool(REASONS.search(why)), why)
-        check(f"3. the reason shows the confidence and the file's threshold ({T_COST:.2f})", f"it acts from {T_COST:.2f}" in why and "confidence " in why, why)
+        check("3. its reason is one of the plain sentences of docs/js/clarify.js", bool(REASONS.search(why)), why)
+        check("3. no numbers and no reader names in the chat (the confidence and the threshold are in the details)", not re.search(r"\b\d", held[1]["all"]) and not re.search(r"SOP-BERT|VSS|Rules", held[1]["all"]), held[1]["all"])
         c0 = pg.evaluate(COUNTS)
         n0 = pg.evaluate("() => document.querySelectorAll('#msgs .b.bot').length")
         pg.locator('#msgs button.anyway[data-anyway^="combined:"]').last.click()

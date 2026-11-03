@@ -270,36 +270,92 @@ and SOP-BERT alone 31.1% (<code>combine/COMBINED_READER.md</code>).</p>
 `);
 
 /* ============================================================ 5. asking */
+// the reply about held requests as docs/js/clarify.js writes it and docs/js/ui.js shows it (training/sketch/CLARIFY_DESIGN.md, design B);
+// the worked example is the conversation test_clarify_ui.py plays on the opening drawing
+const HELD_EX = `<div class="hyou"><b>You:</b> Make Check red and put Done below it</div>
+<div class="hreply"><div class="rl">Check is now red.<div class="hh">Not done, because I am not sure what you meant:</div>
+<div class="hheld"><div>“put Done below it”</div><div class="hw">– “it” was taken to mean Check; the name was not written</div>
+<div>Write it with the name instead of the word, like this: “Move Done below Check.”, or press Do it anyway.</div>
+<div><span class="lnk">Do it anyway</span> · <span class="lnk">Edit</span></div></div></div></div>
+<div class="hyou"><b>You:</b> yes</div>
+<div class="hreply"><div class="rl">I found no request in this message, and I did not ask a question. The request I was not sure of is still not done: press Do it anyway under it, or write it again in full, e.g. “Move Done below Check.”</div></div>
+<div class="hyou"><b>You</b> (Edit, then send): Move Done below Check.</div>
+<div class="hreply"><div class="rl">Moved Done.</div></div>
+<p class="note">After the last message the held request in the first reply shows “replaced by your later command”, and its two buttons are
+disabled: pressing Do it anyway now would move Done a second time.</p>`;
 page('asking', 'When it is not sure, it asks',
-'The consequence of doing only what it is sure of: VSS-BERT holds back the requests it is not sure of, says why, and lets you rephrase or do it anyway.', `
+'VSS-BERT does what it is sure of. For each request it is not sure of, it lists why and shows the clearer command to write. It asks no questions, and it never takes a bare answer such as “yes” as understood.', `
 <h2 id="a-what">What you see</h2>
-<p>A message can hold several requests. VSS-BERT does the ones it is sure of, and the reply lists the others: “Not sure about 1 of the 2
-requests, so it was not done”, with the words of each request and the reason, for example:</p>
+<p>A message can hold several requests. VSS-BERT does the ones it is sure of and says what it did. Under that comes
+“Not done, because I am not sure what you meant:”, and for each request it held back:</p>
 <ul>
-  <li><b>the two readers disagree</b> on a value: “the two readers disagree on where the link ends”, “… on the colour”;</li>
-  <li><b>only one reader found this request</b>: the other read no request there;</li>
-  <li>what the executing reader itself was unsure of: a value, which shape “it” is, where the request starts or ends.</li>
+  <li><b>its words</b>, as you wrote them;</li>
+  <li><b>up to three plain reasons</b>: it needs another request that was not done; the words could mean two different things; only one of
+  the two readers found a request there; the two readers read a value differently (both values are given); what the reader itself was unsure of,
+  for example which shape “it” means;</li>
+  <li><b>the clearer command</b>, the request written the way the readers read best, in one of these forms:
+    <ul>
+      <li>a value the two readers read differently is left for you to fill: “Add a red shape named Fail ‹below or above?› Check.”;</li>
+      <li>a word such as “it” is replaced by the name it was taken to mean: “Move Done below Check.”;</li>
+      <li>when the two readers read different actions, both commands: “Write the one you meant: “Connect Coach2 to Seniors.” or “Rename Coach2 to Seniors.””;</li>
+      <li>when it needs another held request: “Do the request it depends on first; then write: …”;</li>
+      <li>when both readers read it the same way but not surely enough: “If you meant “…”, write it like that, or press Do it anyway.”</li>
+    </ul></li>
+  <li>when the clearer command has a gap or two choices, <b>what Do it anyway would run</b>, written out;</li>
+  <li>the buttons <b>Do it anyway</b> and <b>Edit</b>.</li>
 </ul>
-<div class="hreply"><div class="rl"><b>VSS-BERT · 152 ms:</b> Drew Gem. Not sure about 1 of the 2 requests, so it was not done: “connect it to Check”: the two readers disagree on where the link ends. <span class="lnk">Do it anyway</span></div></div>
-<p>Try a message with a plain request and a vague one:</p>
-${says('Make Check orange', 'Draw a red circle named Hub in the center, then make it bigger')}
+<p>The chat has no numbers and no reader names. The confidence of each request, the threshold it was compared with and what each reader read are
+under <b>details</b>.</p>
+
+<h2 id="a-example">An example</h2>
+${HELD_EX}
+${says('Make Check red and put Done below it')}
 
 <h2 id="a-do">What you can do</h2>
 <ul>
-  <li><b>Say it more plainly.</b> Name the shapes, say the value: “connect Gem to Check” instead of “connect it there”. A request both readers read
-  the same way is done.</li>
-  <li><b>Do it anyway.</b> The button under a held request does that one reading now, as one step you can undo.</li>
+  <li><b>Edit.</b> Puts the clearer command into the message box without sending it. The first ‹gap› is selected, so what you type replaces it;
+  correct anything else and send it. It is then read like any message and goes through the same check.</li>
+  <li><b>Write it yourself, explicitly.</b> Name the shapes and say the values: “connect Gem to Check” instead of “connect it there”.</li>
+  <li><b>Do it anyway.</b> Does that one reading now, as one step you can undo. The reply says exactly what it ran (“Did it anyway: “Move Done
+  below Check.” Moved Done.”). It is not offered for a request that needs another held request: do that one first.</li>
   <li><b>Choose how bold it is.</b> VSS-BERT › Settings offers levels besides the default safety threshold (one confident mistake = 10 right
   answers): bolder ones do more and are wrong more often, more careful ones the reverse, and “execute all” does everything. Every level is a
   threshold chosen the same way on the calibration messages.</li>
 </ul>
 
-<h2 id="a-why">Why asking is not counted as an error</h2>
+<h2 id="a-after">What happens to a held request afterwards</h2>
+<ul>
+  <li><b>It stays held.</b> Nothing you write later is merged into it, and no later message is read as an answer to it.</li>
+  <li><b>Replaced.</b> When a later message does the same action on the same shapes (you wrote it again, explicitly), the held request shows
+  “replaced by your later command” and its buttons are disabled, so it cannot run a second time.</li>
+  <li><b>Done anyway.</b> After its button is used, the button reads “Done anyway” and is disabled.</li>
+  <li><b>A message in which nothing is read</b> (“yes”, “ok, do it”) while a request is held gets one fixed reply: “I found no request in this
+  message, and I did not ask a question. The request I was not sure of is still not done: press Do it anyway under it, or write it again in
+  full, e.g. …”. No list of words decides this: it is the case “nothing was read, and something is held”.</li>
+  <li><b>The engine’s own question</b> is different: “Which circle? Start (middle left) and Done (bottom center).” comes with the names as
+  buttons, and a name answers it.</li>
+</ul>
+
+<h2 id="a-depends">A request that needs another one</h2>
+<p>In “add Fail below Check in red and connect Check to Fail”, the second request uses the shape the first one makes. When the first is held,
+the second is held too, with the reason “it needs “add Fail below Check in red” first”. The rule: while a request that adds shapes is held, a
+request of the same message that names a shape which is not in the drawing, and which nothing done in that message makes, is held. It is a rule
+on the readings, the same for every tab, not a new model.</p>
+<p class="note">Measured on ${TEST}, with the records of the 2026-11-03 refit (<code>combine/failures_vss_bert.mjs</code>, <code>DEP=names</code>):
+cost score 34.8 → 35.9, confidently wrong 1.8% → 1.6% of what it did (14 → 12 of 761 → 758), requests done right 42.8% → 42.8% (747 → 746);
+on the calibration part 40.3 → 42.8 (both of its confident mistakes removed, nothing right lost).</p>
+
+<h2 id="a-why">Why no questions</h2>
+<p>A question promises that the answer will be understood. Measured on the 876 requests VSS-BERT held on the test part, the readers did 0.2% of
+them right when given only the answer (“teal”, “below Kitchen”): they were trained on commands, not answers. Putting the answer into the held
+request by code would be a hand-written rule, and the result would run with no reader’s confidence (12.9% done wrong). When the request was
+written again in the explicit form the reply shows, 66.6% were done right and 2.2% wrong, through the same check as any message
+(<code>CLARIFY_DESIGN.md</code>).</p>
+
+<h2 id="a-error">Why holding back is not counted as an error</h2>
 <p>A held request is visible at once and costs one more message. A wrong request is silent: the drawing changes in a way you did not ask for,
 and you have to notice it before you can undo it. So “not done / asked” scores 0, and a confident mistake −10
 (<a href="#help/research-question/rq-metric">How it is counted</a>).</p>
-<p class="note">How the questions themselves can get better (asking about the one value in doubt instead of holding the whole request) is being
-studied from VSS-BERT’s failures (<a href="#help/planned">In progress</a>).</p>
 `);
 
 /* ============================================================ 6. the Rules */
@@ -354,7 +410,7 @@ clears its own threshold; below it, it asks, as VSS-BERT does.</p>
 <tr><th>What it is</th><td>9 small vector-symbolic models, one per family of actions, with two cutters and a context filler (<a href="#help/vss-worlds">What a VSS world is</a>)</td><td>one fine-tuned DistilBERT with small heads (<a href="#help/bert">SOP-BERT</a>)</td></tr>
 <tr><th>Size</th><td>31.4 MB</td><td>68.7 MB</td></tr>
 <tr><th>Its part in VSS-BERT</th><td>the second reading, to agree or disagree</td><td>the cut, and the reading that is executed</td></tr>
-<tr><th>When unsure</th><td colspan="2">does not do the request; says why (which step, which words) and offers Do it anyway</td></tr>
+<tr><th>When unsure</th><td colspan="2">does not do the request; says why, shows the clearer command to write, and offers Do it anyway and Edit</td></tr>
 </tbody></table></div>
 
 <h2 id="pa-numbers">Alone, on the same messages</h2>

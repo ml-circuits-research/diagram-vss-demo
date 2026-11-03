@@ -918,8 +918,9 @@ commit to restore them.</p>
 page('planned', 'In progress', `
 <p class="callout warn">Everything on this page is work in progress or a plan. None of it is used by the published demo today.</p>
 <ul>
-  <li><b>Better questions back.</b> VSS-BERT holds a whole request when it is unsure of one value; a question about that one value (“which
-  colour: orange or red?”) would let you answer in one word. Its failures and the clarification dialogue are being studied.</li>
+  <li><b>Rewrites written by people.</b> A held request now comes with the clearer command to write, not a question (decided 2026-11-03,
+  <a href="#help/asking">When it is not sure, it asks</a>): written in that form, 66.6% of the held requests were done right, but those rewrites
+  were generated from the annotation; how people actually rewrite them is still to be measured.</li>
   <li><b>A fresh test set</b> (fresh3, planned): the test part of fresh2 + short3 had been read for earlier studies, so the numbers of 2026-11-03
   are exploratory; the clean confirmation of VSS-BERT and its confidence needs messages written after the models.</li>
   <li><b>Short commands</b>: every learned reader is still close to asking about everything on short3 alone (SOP-BERT 4.2 [−1.4, 8.5]).</li>

@@ -7,6 +7,11 @@
 // with (extras), each with: set (fresh2 / short3), part (cal / test), kind (done_right, executed_wrong, extra_executed, held_right, held_wrong,
 // extra_held, missed), the executing reading and the gold, keys that differ, the unit and gold spans, the pairing situation (agree,
 // disagree, sop_only, vss_only), the confidence, the threshold, the largest pulls of the 'sop' part, and VSS's reading of the same request.
+// DEP=names (CLARIFY_DESIGN.md 4.1, VSS_BERT_FAILURES.md fix 3; the same rule as docs/js/ui.js holdNamed in the demo): after the combined
+// gate, while a create of the message is held, a request that names (target, from, to, anchor) a shape that is not in the drawing and that
+// no executed create of the message makes is held too (it can only mean what a held create would have made); repeated until nothing
+// changes. The rows of such requests get held_by_dep: true. The summary line then gives the test part's cost score, confidently wrong
+// and done right with the rule.
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { pairValue } from "../layer_common.mjs";
@@ -47,6 +52,29 @@ const alnum = /[A-Za-z0-9]/;
 const ov = (text, a0, a1, b0, b1) => { let k = 0; for (let i = Math.max(a0, b0); i < Math.min(a1, b1); i++) if (alnum.test(text[i])) k++; return k; };
 const nal = (text, a0, a1) => ov(text, a0, a1, a0, a1);
 
+const DEP = process.env.DEP === "names";
+const NAME_ROLES = ["target", "from", "to", "anchor"];
+const namesOf = (v) => (v == null || v === "∅" || /^mention\(|\$/.test(String(v)) ? [] : String(v).split(",").map((x) => x.trim().toLowerCase()).filter(Boolean));
+/** the name rule on one message's combined items (it: {execute}, prods[i].got the executing reading): while a create of the message is
+ *  held, a request that names a shape which is not in the drawing and which no executed create of the message makes can only mean a
+ *  shape that a held create would have made (the readers do not always agree on the create's name: in s3-0261 SOP-BERT reads "add Fail
+ *  below Check" without the name). -> the indexes it holds */
+function holdNamed(items, prods, drawing) {
+  const have = new Set((drawing || []).map((x) => String(x).toLowerCase())), held = new Set();
+  for (let changed = true; changed;) {
+    changed = false;
+    const creates = items.map((it, i) => i).filter((i) => prods[i].got.action === "create");
+    if (!creates.some((i) => !items[i].execute)) break;
+    const made = new Set(creates.filter((i) => items[i].execute).flatMap((i) => namesOf(prods[i].got.name)));
+    items.forEach((it, i) => {
+      if (!it.execute) return;
+      const own = prods[i].got.action === "create" ? namesOf(prods[i].got.name) : [];
+      if (!NAME_ROLES.some((k) => namesOf(prods[i].got[k]).some((n) => !have.has(n) && !made.has(n) && !own.includes(n)))) return;
+      it.execute = false; held.add(i); changed = true;
+    });
+  }
+  return held;
+}
 const rows = [];
 let check = { exec: 0, bad: 0, right: 0, G: 0 };
 for (let mi = 0; mi < SOP.length; mi++) {
@@ -58,6 +86,7 @@ for (let mi = 0; mi < SOP.length; mi++) {
   const res = CC.combine(COMB, { text, cut: "bert", sop: S, vss: V });
   // the combined reader's produced requests, paired with the gold at once (collect_pair.mjs outcomes)
   const prods = res.items.map((it) => (it.from === "sop" ? S[it.j] : V[it.j]));
+  const byDep = DEP ? holdNamed(res.items, prods, row.names) : new Set();
   const pairs = pairValue({ text, gold: G, units: prods.map((p) => ({ c0: p.span[0], c1: p.span[1] })), prods: prods.map((p, i) => ({ act: p.pa, u: i, rawC: p.got })) });
   const goldOfProd = new Map(pairs.map(([i, j]) => [i, j])), prodOfGold = new Map(pairs.map(([i, j]) => [j, i]));
   const units = (UNITS.get(rs.id) || {}).bert || [];
@@ -90,17 +119,19 @@ for (let mi = 0; mi < SOP.length; mi++) {
       unit_spill: 1 - ov(text, p.span[0], p.span[1], g.s, g.e) / Math.max(1, nal(text, p.span[0], p.span[1])),
       agree_share: +it.agree_share.toFixed(3), other_conf: +it.other_conf.toFixed(3), sop_differ: it.differ, vss_got: vPartner ? vPartner.got : null,
       vss_right: vPartner ? Object.entries(g.want).every(([k, v]) => (vPartner.got[k] ?? "∅") === v) : null,
-      ctx_fill: p.f && p.f.ctx_fill, pulls: it.from === "sop" ? sopPulls(Object.assign({}, p.f, { agree: it.agree, agree_share: it.agree_share, other_conf: it.other_conf })) : null });
+      held_by_dep: byDep.has(i) || undefined, ctx_fill: p.f && p.f.ctx_fill, pulls: it.from === "sop" ? sopPulls(Object.assign({}, p.f, { agree: it.agree, agree_share: it.agree_share, other_conf: it.other_conf })) : null });
   });
   res.items.forEach((it, i) => {
     if (goldOfProd.has(i)) return;
     const p = prods[i];
     if (part === "test" && it.execute) { check.exec++; check.bad++; }
     const overGold = G.filter((g) => ov(text, p.span[0], p.span[1], g.s, g.e) > 0).map((g) => ({ act: g.act, want: g.want, span: g.span, taken: prodOfGold.has(G.indexOf(g)) }));
-    rows.push({ ...base, kind: it.execute ? "extra_executed" : "extra_held", from: it.from, situation: situation(it), conf: +it.conf.toFixed(4), threshold: +T.toFixed(4), got: p.got, act: p.pa,
+    rows.push({ ...base, kind: it.execute ? "extra_executed" : "extra_held", held_by_dep: byDep.has(i) || undefined, from: it.from, situation: situation(it), conf: +it.conf.toFixed(4), threshold: +T.toFixed(4), got: p.got, act: p.pa,
       unit_span: text.slice(p.span[0], p.span[1]), gold_over_unit: overGold, pulls: it.from === "sop" ? sopPulls(Object.assign({}, p.f, { agree: it.agree, agree_share: it.agree_share, other_conf: it.other_conf })) : null });
   });
 }
+console.error(`test part${DEP ? " (DEP=names)" : ""}: cost score ${((100 * (check.right - 10 * check.bad)) / check.G).toFixed(1)}, confidently wrong ${(100 * check.bad / check.exec).toFixed(1)}% of executed, `
+  + `done right ${(100 * check.right / check.G).toFixed(1)}%; held by the name rule: ${rows.filter((r) => r.part === "test" && r.held_by_dep).map((r) => `${r.id} ${r.kind} “${r.unit_span}”`).join("; ") || "none"}`);
 console.error(`test part: ${check.G} gold, executed ${check.exec} (${check.right} right, ${check.bad} wrong or extra), done right ${(100 * check.right / check.G).toFixed(1)}% (combined.json test: executed ${C.levels.cost.test_executed}, done right ${(100 * C.levels.cost.test_done_right).toFixed(1)}%)`);
 writeFileSync(OUT, JSON.stringify(rows));
 const tally = {}; for (const r of rows) { const k = `${r.part}/${r.set}/${r.kind}`; tally[k] = (tally[k] || 0) + 1; }
