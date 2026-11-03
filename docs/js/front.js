@@ -4,7 +4,40 @@ const SLUG = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$
 const TOK = /"([^"]*)"|“([^”]*)”|(?<![A-Za-z0-9])'([^']+)'(?![A-Za-z0-9])|([A-Za-z0-9_][A-Za-z0-9_'’-]*)|([.,!?;:])/g;
 const ENDS = new Set([".", "!", "?"]), PUNCT = new Set([".", ",", "!", "?", ";", ":"]);
 
-export function tokenize(text, names = []) {
+// Two mechanical steps behind switches (training/sketch/front.py, PREPROCESS_FIXES.md: the same rules, the same tables). OFF unless the
+// applied front.json / cutter json records them in "mechanical" ({name_digit: 1, number_words: 1}); a model without the field reads as before.
+//   name_digit   a capitalised word holding a digit ("Buoy1", "Chair2") is a NAME token also at the start of a sentence / span;
+//   number_words a number word becomes its digit token: two .. twenty, thirty .. ninety, hundred; "forty five" / "forty-five" -> 45,
+//                "two hundred" -> 200 ("one" is not in the table: it is the pronoun).
+export const NUM_UNITS = { two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14,
+  fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19 };
+export const NUM_TENS = { twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90 };
+const NUM_DIGIT = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9 };   // after a tens word only ("forty one")
+/** the mechanical switches a learned front end / cutter was built with (its "mechanical" field; absent: none) */
+export const mechOf = (F) => Object.assign({}, (F && F.mechanical) || {});
+/** a single word -> its number ("forty-five" -> 45), else null */
+export function numberWord(low) {
+  if (Object.hasOwn(NUM_UNITS, low)) return NUM_UNITS[low];
+  if (Object.hasOwn(NUM_TENS, low)) return NUM_TENS[low];
+  if (low === "hundred") return 100;
+  const m = /^([a-z]+)-([a-z]+)$/.exec(low);
+  if (m && Object.hasOwn(NUM_TENS, m[1]) && Object.hasOwn(NUM_DIGIT, m[2])) return NUM_TENS[m[1]] + NUM_DIGIT[m[2]];
+  return null;
+}
+function mergeNumberWords(out) {
+  const res = []; let i = 0;
+  while (i < out.length) {
+    const [t, s] = out[i]; let e = out[i][2], n = numberWord(t);
+    if (n === null) { res.push(out[i]); i++; continue; }
+    if (Object.hasOwn(NUM_TENS, t) && i + 1 < out.length && Object.hasOwn(NUM_DIGIT, out[i + 1][0])) { n += NUM_DIGIT[out[i + 1][0]]; e = out[i + 1][2]; i++; }
+    else if (n < 10 && i + 1 < out.length && out[i + 1][0] === "hundred") { n *= 100; e = out[i + 1][2]; i++; }
+    res.push([String(n), s, e]); i++;
+  }
+  return res;
+}
+/** mech: the model's mechanical switches (mechOf(F)); omitted = none (the browser never reads the environment) */
+export function tokenize(text, names = [], mech = {}) {
+  const nd = !!(mech && mech.name_digit);
   const known = new Map(); for (const n of names) if (!known.has(String(n).toLowerCase())) known.set(String(n).toLowerCase(), String(n));
   const info = { texts: {}, names: {} }, out = [];
   for (const m of text.matchAll(TOK)) {
@@ -18,12 +51,13 @@ export function tokenize(text, names = []) {
     const start = !out.length || ENDS.has(out[out.length - 1][0]);
     const base = raw.toLowerCase().endsWith("'s") ? raw.slice(0, -2) : null;
     const up = (w) => w.length > 0 && w[0] >= "A" && w[0] <= "Z";
-    if (base && (known.has(base.toLowerCase()) || (up(base) && !start))) raw = base;
+    const cap = (w) => up(w) && (!start || (nd && /\d/.test(w) && /[A-Za-z]/.test(w)));
+    if (base && (known.has(base.toLowerCase()) || cap(base))) raw = base;
     const low = raw.toLowerCase();
-    if (known.has(low) || (up(raw) && !start && raw !== "I" && raw !== "A")) { const t = "n_" + SLUG(low); if (!(t in info.names)) info.names[t] = known.get(low) || raw; out.push([t, s, e]); }
+    if (known.has(low) || (cap(raw) && raw !== "I" && raw !== "A")) { const t = "n_" + SLUG(low); if (!(t in info.names)) info.names[t] = known.get(low) || raw; out.push([t, s, e]); }
     else out.push([low, s, e]);
   }
-  return [out, info];
+  return [mech && mech.number_words ? mergeNumberWords(out) : out, info];
 }
 const ctx = (t) => (t == null ? "B" : t.startsWith("n_") ? "NAME" : t.startsWith("t_") ? "TEXT" : /^\d+$/.test(t) ? "NUM" : t);
 const isWord = (t) => !(t.startsWith("n_") || t.startsWith("t_") || /^\d+$/.test(t) || PUNCT.has(t));
@@ -58,7 +92,7 @@ export function applyTriggers(toks, T) {
   return toks;
 }
 export function normalize(text, names, F) {
-  const [toks, info] = tokenize(text, names);
+  const [toks, info] = tokenize(text, names, mechOf(F));
   const t = applyTriggers(applyValues(toks.map((x) => x[0]), F.values), F.triggers);
   info.numbers = Object.fromEntries(t.filter((x) => /^\d+$/.test(x)).map((x) => [x, +x]));
   return { tokens: t, info };
@@ -66,8 +100,8 @@ export function normalize(text, names, F) {
 /** a WHOLE message for the centre reader (the twin of front.py normalize_message): names found anywhere are names everywhere; every
  *  trigger rule that fires is applied, left to right, contexts read on the value-normalized tokens. -> {tokens, src, info} */
 export function normalizeMessage(text, names, F) {
-  const [toks0, info0] = tokenize(text, names);
-  const [toks, info] = tokenize(text, names.concat(Object.values(info0.names)));
+  const [toks0, info0] = tokenize(text, names, mechOf(F));
+  const [toks, info] = tokenize(text, names.concat(Object.values(info0.names)), mechOf(F));
   const V = F.values, vals = [], src = []; let i = 0;
   while (i < toks.length) {
     let hit = false;
@@ -130,7 +164,7 @@ export function segDecodeLabels(toks, W, LB) {
  *  order): -> [{c0, c1, worlds: [{world, score}, ...]}]. A unit starts at a B-<world> label (or an I after O, as in segmentSpans). Twin of
  *  front.py segment_worlds. segmentSpans (the cutter without worlds) is unchanged. */
 export function segmentWorlds(text, names, C) {
-  const [toks] = tokenize(text, names), { labels, scores } = segDecodeLabels(toks.map((x) => x[0]), C.segmenter, C.labels), out = []; let cur = null;
+  const [toks] = tokenize(text, names, mechOf(C)), { labels, scores } = segDecodeLabels(toks.map((x) => x[0]), C.segmenter, C.labels), out = []; let cur = null;
   toks.forEach(([, s, e], k) => {
     const L = labels[k];
     if (L.startsWith("B") || (L === "I" && cur === null)) {
@@ -145,7 +179,7 @@ export function segmentWorlds(text, names, C) {
  *  words_not_understood.mjs trace): -> {tokens, info, surface (tokenize output), surf (per token: indices into surface)}. The tokens are
  *  those of normalize(); a trigger token stands for its phrase (a pattern rule "ins": the phrase without its names, which stay tokens). */
 export function normalizeTrace(text, names, F) {
-  const [tk, info] = tokenize(text, names);
+  const [tk, info] = tokenize(text, names, mechOf(F));
   let toks = tk.map((x, i) => ({ t: x[0], surf: [i] })), out = [], i = 0;
   while (i < toks.length) {
     let hit = false;
@@ -177,7 +211,7 @@ export function normalizeTrace(text, names, F) {
 export function segment(text, names, F) { return segmentSpans(text, names, F).map(([s, e]) => text.slice(s, e)); }
 /** the same units as character ranges [start, end) of `text` (the composer, vss-composer.js, needs the offsets) */
 export function segmentSpans(text, names, F) {
-  const [toks] = tokenize(text, names), labels = segDecode(toks.map((x) => x[0]), F.segmenter), spans = []; let cur = null;
+  const [toks] = tokenize(text, names, mechOf(F)), labels = segDecode(toks.map((x) => x[0]), F.segmenter), spans = []; let cur = null;
   toks.forEach(([, s, e], k) => {
     const L = labels[k];
     if (L === "B" || (L === "I" && cur === null)) { cur = [s, e]; spans.push(cur); }

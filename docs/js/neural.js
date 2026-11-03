@@ -107,6 +107,23 @@ function cueFind(span, values) {
 }
 const NUMW = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, twice: 2, couple: 2, pair: 2 };
 function numFind(span) { const m = String(span).match(/\d+(?:\.\d+)?/); if (m) return +m[0]; for (const w of clean(span).trim().split(' ')) if (w in NUMW) return NUMW[w]; return null; }
+/* the mechanical number-word table (the same as docs/js/front.js NUM_UNITS / NUM_TENS and training/sketch/front.py; test_number_words.mjs
+   checks they are equal): used to decode a SOP-BERT model whose config reader.number_words_from is "table" (make_roles.py NUM_WORDS=table) */
+const NUM_UNITS_T = { two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14,
+  fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19 };
+const NUM_TENS_T = { twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90 };
+const NUM_DIGIT_T = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9 };
+/** the words of a tagged span -> the number they write by the table ("forty", "forty five", "forty-five", "two hundred"), else null */
+function tableNumber(text) {
+  const ws = String(text).toLowerCase().match(/[a-z]+/g) || [], has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+  for (let i = 0; i < ws.length; i++) {
+    const w = ws[i];
+    if (has(NUM_TENS_T, w)) return NUM_TENS_T[w] + (i + 1 < ws.length && has(NUM_DIGIT_T, ws[i + 1]) ? NUM_DIGIT_T[ws[i + 1]] : 0);
+    if (has(NUM_UNITS_T, w)) return NUM_UNITS_T[w] * (NUM_UNITS_T[w] < 10 && ws[i + 1] === 'hundred' ? 100 : 1);
+    if (w === 'hundred') return 100;
+  }
+  return null;
+}
 const ARTICLES = new Set(['a', 'an', 'the', 'it', 'its', 'and', 'to', 'of', 'with', 'named', 'called', 'new', 'shape']);
 
 function cosine(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] * b[i]; return s; }
@@ -247,11 +264,22 @@ function create(engine, rulesFormalize) {
     else if (kind === 'name' || kind === 'text') out.value = sp[0].text;
     else if (kind === 'texts') out.value = sp.map(s => s.text).join(',');   // items / items2 / parents of a template: one span per item, in order
     else if (kind === 'point') {   // at: one span per coordinate ("x=230 y=90", "(120, 220)") -> "230,90"
-      const xs = sp.map(s => (s.text.match(/-?\d+(?:\.\d+)?/) || [])[0]).filter(x => x != null);
-      if (xs.length === 2) out.value = xs.join(',');
+      /* every number inside the tagged spans, with its place in the request (a span "360,130" holds two). Two -> the point. More than two
+         (a model without width / height tags tags "150 by 90 at 700,300" as four `at` spans; PREPROCESS_FIXES.md, ROOT_CAUSES.md P5): the
+         two adjacent numbers joined by a comma ("700,300", "700, 300") when exactly one such pair is there. Otherwise the value is not
+         dropped silently: out.incomplete says what was read, and the gates hold the request (neural-confidence.js, combined-confidence.js). */
+      const xs = sp.flatMap(s => [...s.text.matchAll(/-?\d+(?:\.\d+)?/g)].map(m => ({ n: m[0], a: s.start + m.index, b: s.start + m.index + m[0].length })));
+      if (xs.length === 2) out.value = xs.map(x => x.n).join(',');
+      else if (xs.length > 2 && typeof R.text === 'string') {
+        const pairs = []; for (let i = 0; i + 1 < xs.length; i++) if (/^\s*,\s*$/.test(R.text.slice(xs[i].b, xs[i + 1].a))) pairs.push(i);
+        if (pairs.length === 1) { const i = pairs[0]; out.value = xs[i].n + ',' + xs[i + 1].n; out.recovered = `${xs.length} numbers tagged as the position; the pair joined by a comma was taken`; }
+      }
+      if (out.value == null && xs.length) out.incomplete = xs.length === 1 ? `only one number of the position was read (${xs[0].n})` : `the position could not be told apart from the other numbers (${xs.map(x => x.n).join(', ')})`;
     }
     else if (kind === 'number') {
-      const t = sp[0].text, d = t.match(/\d+(?:\.\d+)?/), w = (st.models.reader.number_words || {})[t.toLowerCase()];
+      const RD = st.models.reader, t = sp[0].text, d = t.match(/\d+(?:\.\d+)?/);
+      // a model built with make_roles.py NUM_WORDS=table reads number words by the mechanical table (several words: "forty five"); before: its learned map
+      const w = (RD.number_words_from === 'table' ? tableNumber(t) : null) ?? (RD.number_words || {})[t.toLowerCase()];
       const n = d ? +d[0] : w != null ? +w : null;
       if (n != null && (key !== 'count' || n > 1)) out.value = n;
     }
@@ -309,9 +337,11 @@ function create(engine, rulesFormalize) {
       if (type === 'none') { notRequest.push(seg.src); analyses.push(a); return; }
       const args = {}; if (actKey) args[actKey] = act;
       const mentions = [], mention = ma => { const mid = 'm' + (++m); mentions.push({ id: mid, type: 'mention', args: ma }); return { ref: mid }; };
+      const incomplete = [];   // values the request writes that were read only in part (role(): out.incomplete): never dropped silently
       for (const k of st.models.reader.act_keys[act || type] || []) {
         const r = jointRole(k, act || type, R, c, mention, mentions.length); a.keys[k] = r;
         if (r.value != null) args[k] = r.value;
+        else if (r.incomplete) incomplete.push({ key: k, text: r.incomplete });
       }
       if (args.notColor && args.color === args.notColor) delete args.color;
       if (args.position && !['center', 'top', 'bottom', 'left', 'right', 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'].includes(args.position) && args.anchor == null) delete args.position;
@@ -319,6 +349,7 @@ function create(engine, rulesFormalize) {
       const used = new Set(); for (const v of Object.values(args)) [].concat(v).forEach(x => { if (K.isRef(x)) used.add(x.ref); });
       const node = { id, type, args };
       Object.defineProperty(node, 'span', { value: [seg.c0, seg.c1], enumerable: false, configurable: true });
+      if (incomplete.length) { Object.defineProperty(node, 'incomplete', { value: incomplete, enumerable: false, configurable: true }); notes.push(`In “${seg.src}”, not sure: ` + incomplete.map(x => x.text).join('; ')); }
       const mine = mentions.filter(x => used.has(x.id));
       // the request (analysis) each wire comes from, as the VSS composer's n.unit: the gate groups the wires by it
       for (const x of mine.concat([node])) Object.defineProperty(x, 'unit', { value: a, enumerable: false, configurable: true });
@@ -510,6 +541,7 @@ function makeReader(T, tokenizer, model) {
     });
     for (const k of Object.keys(spans)) spans[k] = spans[k].map(s => ({ text: String(text).slice(ws[s.i].start, ws[s.j - 1].end), start: ws[s.i].start, end: ws[s.j - 1].end, score: s.p }));
     const res = { words: ws.map(w => w.w), ids, acts, classes, tags, spans };
+    Object.defineProperty(res, 'text', { value: String(text), enumerable: false });   // the request read (role(): the text between two tagged numbers)
     /* the head logits of this call, for the fitted confidence (docs/js/neural-confidence.js; training/sketch/precision_bert_collect.mjs
        reads the same numbers): seq = the request's row of seq_logits (act, then the class heads), tok[i] = the token_logits of word i's
        first word piece (null: the word is beyond the truncation), pieces[i] = the word pieces of word i. Not enumerable: no copy, no JSON. */

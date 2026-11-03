@@ -136,9 +136,19 @@ export function combine(model, msg, level = DEFAULT_LEVEL) {
     if (key === "bert") { const e = v.bert_edges || bertEdges(msg.cutWords, v.span[0], v.span[1]); f = Object.assign({}, v.f, { cut_start: e.cut_start, cut_end: e.cut_end }); }
     items.push({ from: "vss", j, partner: -1, agree: 0, agree_share: 0, other_conf: 0, differ: [], conf: partConfidence(C.vss, "vss", f, v.world) });
   });
-  for (const it of items) it.execute = t === -Infinity || it.conf >= t;
+  // a value one of the two readings has only in part (the field "incomplete" of its wire: vss-adapter.js toNodes, neural.js formalizeJoint;
+  // PREPROCESS_FIXES.md): the request is held at every level but "all", and reasons() says which value and which reader
+  for (const it of items) {
+    const own = it.from === "sop" ? S[it.j] : V[it.j], other = it.from === "sop" && it.partner >= 0 ? V[it.partner] : null;
+    const inc = incompleteOf(own, it.from).concat(other ? incompleteOf(other, "vss") : []);
+    if (inc.length) it.incomplete = inc;
+    it.execute = t === -Infinity || (it.conf >= t && !inc.length);
+  }
   return { cut: key, fitted, threshold: t, items };
 }
+
+/** the values a reading has only in part: msg.sop[i] / msg.vss[j] carry them as `incomplete`, or their wire (`node`) does -> [{key, text, reader}] */
+export function incompleteOf(r, reader) { return ((r && (r.incomplete || (r.node && r.node.incomplete))) || []).map((x) => ({ key: x.key, text: x.text, reader })); }
 
 /* ---------------------------------------------------------------- reasons (why a request is below the threshold), in plain words */
 const KEYW = { color: "the colour", shape: "the shape", size: "the size", target: "which shape it is about", from: "where the link starts", to: "where the link ends",
@@ -151,6 +161,7 @@ const actWord = (pa) => String(pa).split(":").pop() || String(pa).split(":")[0];
  *  the caller adds what the executing reader itself was unsure of. names: {sop, vss} (the tab names, default Neural and VSS) */
 export function reasons(msg, item, names = { sop: "Neural", vss: "VSS" }) {
   const S = msg.sop || [], V = msg.vss || [], out = [];
+  for (const x of item.incomplete || []) out.push({ group: "incomplete", text: `${names[x.reader] || x.reader} read a value only in part: ${x.text}` });
   if (item.from === "sop" && item.partner >= 0) {
     if (!item.agree) {
       const d = item.differ.slice(0, 3), vals = d.map((x) => [plain(x.sop), plain(x.vss)]);

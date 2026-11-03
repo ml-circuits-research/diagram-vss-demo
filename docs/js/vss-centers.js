@@ -38,7 +38,7 @@ export function vssCentres(text, names, F, vss, opts = {}) {
   if (opts.cut === "q1") return vssCentresQ1(text, names, F, vss, opts);
   const verbs = opts.verbs || new Set(vss.model.legend.events.flatMap((e) => e.verbs || []));
   const vk = new Set(Object.entries(vss.model.lexicon || {}).filter(([w, e]) => /^[A-Z]+$/.test(e.kind) && e.kind !== "VERB").map(([w]) => w));   // legend value tokens (kinds in capitals)
-  const [toks] = FRONT.tokenize(text, names), sents = []; let cur = [];
+  const [toks] = FRONT.tokenize(text, names, FRONT.mechOf(F)), sents = []; let cur = [];
   toks.forEach((t, k) => { cur.push(k); if (ENDS.has(t[0])) { sents.push(cur); cur = []; } });
   if (cur.length) sents.push(cur);
   const out = [], cache = new Map();
@@ -137,7 +137,7 @@ export function vssCentresQ1(text, names, F, vss, opts = {}) {
   const rolelessOk = opts.roleless ? new Set(opts.roleless) : null;
   const mayBeRoleless = (ev) => (rolelessOk ? rolelessOk.has(ev) : (evRoles.get(ev) || 0) === 0);
   const content = (t) => t.startsWith("n_") || t.startsWith("t_") || /^\d+$/.test(t) || verbs.has(t) || vk.has(t);
-  const [toks] = FRONT.tokenize(text, names), sents = []; let cur = [];
+  const [toks] = FRONT.tokenize(text, names, FRONT.mechOf(F)), sents = []; let cur = [];
   toks.forEach((t, k) => { cur.push(k); if (ENDS.has(t[0])) { sents.push(cur); cur = []; } });
   if (cur.length) sents.push(cur);
   const out = [], cache = new Map();

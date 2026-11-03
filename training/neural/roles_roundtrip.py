@@ -215,6 +215,9 @@ def main():
         return by
     trained = load_rows(os.path.join(rows_dir, "train.jsonl"))
     folders = [(d, True) for d in MD.DIRS + MD.SAMPLE_DIRS] + [(d, False) for d in ALSO]
+    # ONLY_ALSO=1 (off by default; training/sketch/checks/form_audit.py): decode only the folders that are not trained on (the layout is still
+    # built from the training rows), so a new folder is audited in a minute instead of decoding every training message
+    if os.environ.get("ONLY_ALSO") == "1": folders = [(d, False) for d in ALSO]
     msgs_out, meta = [], {}
     for d, is_train in folders:
         by = trained if is_train else load_rows(os.path.join(rows_dir, "also_" + d.replace("/", "__") + ".jsonl"))
@@ -241,6 +244,7 @@ def main():
 
     T = collections.OrderedDict()
     causes = collections.Counter(); cause_ex = collections.defaultdict(list); key_causes = collections.Counter()
+    fcauses = collections.defaultdict(collections.Counter)   # per folder (training/sketch/checks/form_audit.py reads roundtrip.json "causes_by_folder")
     sil_reasons = collections.Counter(); sil_ex = collections.defaultdict(list)
     for l in open(outp, encoding="utf8"):
         o = json.loads(l); d, is_train, wires, mrows, dropped = meta[o["id"]]
@@ -261,7 +265,7 @@ def main():
                 c, k = next(((cc, kk) for cc, kk in cs if cc != "class decoded differently"), cs[0])
                 if all(cc.startswith(NOT_LABEL) or (cc == "class decoded differently" and len(cs) > 1) for cc, _ in cs): t["right_or_ref"] += 1
                 elif all(cc.startswith(NOT_LABEL + ASKED) or (cc == "class decoded differently" and len(cs) > 1) for cc, _ in cs): t["asked"] += 1
-            grp = group_of(c, k, act); t["c:" + grp] += 1; causes[(grp, c)] += 1
+            grp = group_of(c, k, act); t["c:" + grp] += 1; causes[(grp, c)] += 1; fcauses[d][f"{grp} / {c}"] += 1
             if len(cause_ex[(grp, c)]) < a.examples: cause_ex[(grp, c)].append(f'{o["id"]} "{w.get("span")}" {json.dumps(w.get("args"))} -> {g.get("miss") or g["o"]}')
         t["extra"] += len(o["extra"])
         for r in mrows:
@@ -301,7 +305,8 @@ def main():
     for k, ex in sil_ex.items(): sl += [f"    - e.g. {e}" for e in ex[:2]]
     print("\n".join(sl))
     res = {"table": {d: dict(t) for d, t in T.items()}, "causes": {f"{g} / {c}": n for (g, c), n in causes.items()},
-           "keys": {f"{k} / {c}": n for (k, c), n in key_causes.items()}, "silent": {f"{w} / {k}": n for (w, k), n in sil_reasons.items()}}
+           "keys": {f"{k} / {c}": n for (k, c), n in key_causes.items()}, "silent": {f"{w} / {k}": n for (w, k), n in sil_reasons.items()},
+           "causes_by_folder": {d: dict(c.most_common()) for d, c in fcauses.items()}}
     json.dump(res, open(os.path.join(a.work, "roundtrip.json"), "w"), indent=1)
     if a.md:
         with open(a.md + ".table", "w", encoding="utf8") as f: f.write(table + "\n\n### Causes\n\n" + "\n".join(cl) + "\n\n### Silent wrong labels\n\n" + "\n".join(sl) + "\n")

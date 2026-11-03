@@ -151,6 +151,32 @@ def num(s):
     except ValueError: return None
 
 
+# NUM_WORDS=table (off by default; PREPROCESS_FIXES.md, scenes_r3/ROOT_CAUSES.md P6; owner 2026-11-03 16:44): a number written as a word is
+# aligned by the MECHANICAL table of training/sketch/front.py (two .. twenty, thirty .. ninety, hundred; "forty five", "forty - five",
+# "two hundred"), only for the keys of legend kind number, instead of the co-occurrence map (which learned "lights" -> 2, "circles" -> 2,
+# "duplicate" -> 2 and missed "forty px"). reader.json then carries number_words = that table and number_words_from = "table", and
+# docs/js/neural.js decodes a tagged number span with the same table (several words included). Unset: exactly as before.
+NUM_TABLE = os.environ.get("NUM_WORDS") == "table"
+
+
+def table_number(ws, i):
+    """the mechanical table at word i of ws -> (number, how many words), else None ("forty five" 2 words, "forty - five" 3, "two hundred" 2)"""
+    sys.path.insert(0, os.path.join(REPO, "training", "sketch")); import front as FRT
+    low = [w[0].lower() for w in ws]; n = FRT.number_word(low[i])
+    if n is None: return None
+    if low[i] in FRT.NUM_TENS:
+        if i + 1 < len(low) and low[i + 1] in FRT.NUM_DIGIT: return n + FRT.NUM_DIGIT[low[i + 1]], 2
+        if i + 2 < len(low) and low[i + 1] == "-" and low[i + 2] in FRT.NUM_DIGIT: return n + FRT.NUM_DIGIT[low[i + 2]], 3
+    if n < 10 and i + 1 < len(low) and low[i + 1] == "hundred": return n * 100, 2
+    return n, 1
+
+
+def table_words():
+    """the single words of the mechanical table (reader.json number_words when NUM_WORDS=table)"""
+    sys.path.insert(0, os.path.join(REPO, "training", "sketch")); import front as FRT
+    return dict(**{w: str(v) for w, v in FRT.NUM_UNITS.items()}, **{w: str(v) for w, v in FRT.NUM_TENS.items()}, hundred="100")
+
+
 NUM_UNIT = re.compile(r"(\d+(?:\.\d+)?)[^\W\d_]*")   # a number with a unit glued to it ("50px"): docs/js/neural.js reads its first digit run
 
 
@@ -347,7 +373,11 @@ def main():
                 else: exact, how = [w[0] for w in words(p)], "written"
                 seq = [w.lower() for w in exact]
                 i = find_part(ws, exact, taken, after)
-                if i is None and LEG[k]["kind"] == "number":
+                if i is None and LEG[k]["kind"] == "number" and NUM_TABLE:   # the mechanical table: the first free run of words that reads as p
+                    hit = next(((j, tn[1]) for j in range(len(ws)) for tn in [table_number(ws, j)] if tn and num(str(tn[0])) == num(p)
+                                and not any(q in taken for q in range(j, j + tn[1]))), None)
+                    if hit is not None: i = hit[0]; seq, how = [w[0].lower() for w in ws[i:i + hit[1]]], "number word (table)"
+                if i is None and LEG[k]["kind"] == "number":   # with the table: only what the table does not read ("halve" -> 0.5, "twice" -> 2)
                     i = co.align(ws, k, p, numvals[k], taken)
                     if i is not None: seq, how = [ws[i][0].lower()], "number word (co-occurrence)"; numword[ws[i][0].lower()][p] += 1
                 if i is None and LEG[k]["kind"] == "number":   # a number with its unit glued on ("50px"): the decoder reads its digits
@@ -406,9 +436,11 @@ def main():
             ccov[k] = {"values": n, "one word expresses it (co-occurrence, both directions)": al, "top word->value": [f"{w}->{v} {c}" for (w, v), c in pairs.most_common(8)]}
         coverage[name] = {"span keys": {k: dict(v) for k, v in cov.items()}, "class keys": ccov, "rows": len(out), "fillers": fillers(rows, out)}
     number_words = {w: c.most_common(1)[0][0] for w, c in numword.items()}
+    if NUM_TABLE: number_words = dict({w: v for w, v in number_words.items() if w not in table_words()}, **table_words())   # the table wins for its words
     reader = {"cut": {"tags": ["O", "B", "I"], "max_length": 512}, "acts": ACTS, "tags": tags, "span_keys": span_keys, "ref_keys": ref_keys, "desc_keys": desc_keys, "desc2_keys": desc2_keys,
               "classes": [[k, ["none"] + values[k]] for k in class_keys] + fill_classes,
-              "act_keys": act_keys, "number_words": number_words, "word_re": "[\\p{L}\\p{N}]+|[^\\s\\p{L}\\p{N}]", "max_length": 128}
+              "act_keys": act_keys, "number_words": number_words, **({"number_words_from": "table"} if NUM_TABLE else {}),
+              "word_re": "[\\p{L}\\p{N}]+|[^\\s\\p{L}\\p{N}]", "max_length": 128}
     json.dump(reader, open(os.path.join(a.out, "reader.json"), "w"), indent=1)
     cutn = {}
     for n, ms in pools.items():

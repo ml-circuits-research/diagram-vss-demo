@@ -55,7 +55,8 @@ export async function loadRegistry(regFile = registryFile(), ctxFile = process.e
   };
   const comp = await loadComposer(REG, J(REG.cutter), loadModel, Object.assign({ context: JSON.parse(readFileSync(ctxPath, "utf8")) }, REG.event_cutter ? { eventCutter: J(REG.event_cutter) } : {}));
   const meta = { registry: regFile.replace(/^.*\/docs\//, "docs/"), cutter: REG.cutter, event_cutter: REG.event_cutter || null, event_hint: comp.eventHint, ties_context: ctxPath.replace(/^.*\/docs\//, "docs/"),
-    worlds: comp.worlds.map((w) => `${w.id} ${(REG.worlds.find((e) => e.world === w.id) || {}).model}`), entity: comp.entity };
+    worlds: comp.worlds.map((w) => `${w.id} ${(REG.worlds.find((e) => e.world === w.id) || {}).model}`), entity: comp.entity,
+    mechanical: Object.assign({}, J(REG.cutter).mechanical || {}) };   // the tokenizer switches of the cutter (front.js mechOf; the context filler uses the same)
   return { comp, REG, meta };
 }
 

@@ -107,6 +107,7 @@ def main():
                **({"left_out_no_legend_event": dict(noev.most_common()), "LEGEND_EXT": 1} if noev or G.LEGEND_EXT else {}),
                "requests_per_world": dict(nb.most_common()), "segmenter": dict(sorted(S.items()))}
         print("requests per world label: " + ", ".join(f"{w} {n}" for w, n in nb.most_common()))
+    if FR.mech_env(): out["mechanical"] = FR.mech_env()   # FRONT_NAMEDIGIT / FRONT_NUMWORDS (front.py tokenize): applied with the cutter (front.js mechOf)
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     json.dump(out, open(a.out, "w"))
     print(f"{len(msgs)} messages, {ntok} tokens, {len(S)} weights -> {os.path.abspath(a.out)}")

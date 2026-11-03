@@ -84,7 +84,8 @@ export class Composer {
     this.cutter = cutter; this.worlds = worlds; this.router = router; this.k = k;
     // the entity roles and keys of this registry (vss-context.js entitySpec: from the worlds' schemas and the adapter, no hand list); the
     // context filler reads them from its model
-    this.entity = entitySpec(worlds); this.contextModel = context ? Object.assign({}, context, { entity: this.entity }) : context;
+    // mechanical: the tokenizer switches of the cutter (front.js mechOf; PREPROCESS_FIXES.md), so the context filler finds the same names
+    this.entity = entitySpec(worlds); this.contextModel = context ? Object.assign({}, context, { entity: this.entity, mechanical: FRONT.mechOf(cutter) }) : context;
     this.eventCutter = eventCutter || null; this.eventHint = eventCutter ? eventHint || "H1" : null;
     for (const w of worlds) {
       const lev = new Set(w.vss.model.legend.events.map((e) => e.id));
@@ -198,7 +199,7 @@ export class Composer {
 
   /** the event hint of every unit start: the event cutter decoded over the message -> (c0) => event | null (see the head of the file) */
   eventHints(text, canvas) {
-    const E = this.eventCutter, [toks] = FRONT.tokenize(text, canvas), { scores } = FRONT.segDecodeLabels(toks.map((x) => x[0]), E.segmenter, E.labels);
+    const E = this.eventCutter, [toks] = FRONT.tokenize(text, canvas, FRONT.mechOf(E)), { scores } = FRONT.segDecodeLabels(toks.map((x) => x[0]), E.segmenter, E.labels);
     const at = new Map(toks.map(([, s], k) => [s, k])), B = E.labels.filter((L) => L.startsWith("B-"));
     // c1 given (units of another cut): the first token that starts inside [c0, c1) when no token starts exactly at c0
     return (c0, c1) => {
@@ -213,7 +214,7 @@ export class Composer {
   /** the cutters' scores over the whole message, for the signals (see the head of the file): the same tokens and decode as segmentWorlds
    *  and eventHints -> {toks, cs (world cutter scores per token), es (event cutter scores per token, or null)} */
   signalScores(text, canvas) {
-    const [toks] = FRONT.tokenize(text, canvas), words = toks.map((x) => x[0]), C = this.cutter, E = this.eventCutter;
+    const C = this.cutter, E = this.eventCutter, [toks] = FRONT.tokenize(text, canvas, FRONT.mechOf(C)), words = toks.map((x) => x[0]);
     return { toks, cs: FRONT.segDecodeLabels(words, C.segmenter, C.labels).scores, es: E ? FRONT.segDecodeLabels(words, E.segmenter, E.labels).scores : null };
   }
 
@@ -260,7 +261,7 @@ export class Composer {
   /** units of another cut ([{c0, c1}]) -> the same shape as segmentWorlds ([{c0, c1, worlds, k}]): the candidate worlds of each unit from
    *  the cutter's own unit starts inside it (see the head of the file; k = how many candidates the unit gets) */
   worldsFor(text, canvas, units) {
-    const C = this.cutter, starts = FRONT.segmentWorlds(text, canvas, C), [toks] = FRONT.tokenize(text, canvas);
+    const C = this.cutter, starts = FRONT.segmentWorlds(text, canvas, C), [toks] = FRONT.tokenize(text, canvas, FRONT.mechOf(C));
     const idx = new Map(C.worlds.map((w, i) => [w, i]));
     let first = null;      // the cutter's B-<world> scores at every token (only for units with no start inside)
     return units.map((u) => {
@@ -333,6 +334,9 @@ export class Composer {
         const out = R.raw.nodes.filter((n) => n.type === "mention").concat([st.main]);
         for (const n of out) { n.world = u.world; if (n.type !== "mention") Object.defineProperty(n, "src", { value: src, enumerable: false, configurable: true }); Object.defineProperty(n, "unit", { value: u, enumerable: false, configurable: true }); }
         Object.defineProperty(st.main, "span", { value: [c0, c1], enumerable: false, configurable: true });
+        // a value the request writes but the reading has only in part (vss-adapter.js toNodes "incomplete"): kept on the request so the
+        // gate holds it and says why (PREPROCESS_FIXES.md)
+        if (R.raw.main && R.raw.main.incomplete) { Object.defineProperty(st.main, "incomplete", { value: R.raw.main.incomplete, enumerable: false, configurable: true }); u.incomplete = R.raw.main.incomplete; notes.push(`In “${src}”, not sure: ` + u.incomplete.map((x) => x.text).join("; ")); }
         u.signals = this.unitSignals(u, sig || (sig = this.signalScores(text, canvas)), st);   // the confidence's input (see the head of the file)
         nodes.push(...out);
       }

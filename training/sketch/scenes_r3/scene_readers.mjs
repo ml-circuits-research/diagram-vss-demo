@@ -195,7 +195,9 @@ if (process.env.SCENARIOS) {
 }
 for (const f of files) { const rows = readFileSync(f, "utf8").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l)); scenes.push({ id: basename(dirname(f)) + "/" + basename(f), steps: rows }); }
 
-const READERS = ["rules", "vss", "sop", "vb_all", "vb_gate"];
+// GATES=1 (off by default; PREPROCESS_FIXES.md): two more readers, VSS at its own gate (vss-confidence.js gate, level cost, with
+// docs/model/confidence/vss.json) and SOP-BERT at its own gate (neural-confidence.js gate, level cost): what each executes alone
+const READERS = ["rules", "vss", "sop", "vb_all", "vb_gate"].concat(process.env.GATES === "1" ? ["vss_gate", "sop_gate"] : []);
 const STEPS = `${outDir}/steps.jsonl`; writeFileSync(STEPS, "");
 const FINAL = [];
 const t0 = Date.now(); let nsteps = 0;
@@ -219,6 +221,7 @@ for (const sc of scenes) {
     const vb = comp.formalize(row.text, ctx(), { units: bertUnits });
     const cAll = combined(row.text, nn, vb, "all"), cGate = combined(row.text, nn, vb, "cost");
     const NODES = { rules: rr.nodes, vss: vv.nodes, sop: nn.nodes, vb_all: cAll.executed, vb_gate: cGate.executed };
+    if (process.env.GATES === "1") { NODES.vss_gate = VC.gate(vssModel, vv, "cost").executed; NODES.sop_gate = NC.gate(nspec, nn, "cost").executed; }
     // the gold of this step: the wires (scenes) or the Rules' reading (a demo scenario)
     if (sc.pseudo) row.wires = rr.nodes.filter((x) => x.type !== "mention").map((x) => ({ type: x.type, act: actOf(x.type, x.args), want: canon(x, rr.nodes), span: x.src || "", args: x.args }));
     const rec = { id: row.id, scene: sc.id, text: row.text, names: names.length, last: lastG, gold: row.wires.map((w) => ({ act: w.act || actOf(w.type, w.args), want: w.want || canonWant(w.type, w.args), span: w.span })), r: {} };

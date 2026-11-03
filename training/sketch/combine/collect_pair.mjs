@@ -43,7 +43,7 @@ Composer.prototype.formalizeCutter = function (text, ctx = {}, opts = {}) {
   ST = []; globalThis.__comp = this;   // the composer (pass 4 cuts with its cutVss)
   if (globalThis.__units) opts = Object.assign({}, opts, { units: globalThis.__units });   // the units of the SOP-BERT cut (pass 3)
   const o = origF.call(this, text, ctx, opts), canvas = ctx.names || [];
-  const [toks] = FRONT.tokenize(text, canvas), words = toks.map((x) => x[0]);
+  const [toks] = FRONT.tokenize(text, canvas, FRONT.mechOf(this.cutter)), words = toks.map((x) => x[0]);   // the cutter's own tokenizer switches (PREPROCESS_FIXES.md)
   const C = this.cutter, cs = FRONT.segDecodeLabels(words, C.segmenter, C.labels).scores;
   const E = this.eventCutter, es = E ? FRONT.segDecodeLabels(words, E.segmenter, E.labels).scores : null;
   globalThis.__obs = { units: o.units, toks, cs, es, C, E, ST: ST.slice() };

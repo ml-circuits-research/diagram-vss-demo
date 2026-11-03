@@ -53,7 +53,7 @@ function collect(msgs, model) {
   }
   return inst;
 }
-const model0 = { weights: {}, margin: 0, needs, entity: ENTITY };
+const model0 = { weights: {}, margin: 0, needs, entity: ENTITY, mechanical: C.meta.mechanical || {} };   // the cutter's tokenizer switches, as the composer gives them at use
 const TR = collect(train, model0), TE = collect(test, model0);
 console.log(`gap instances: train ${TR.length}, test ${TE.length}`);
 

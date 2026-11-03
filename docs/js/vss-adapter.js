@@ -231,7 +231,15 @@ export function toNodes(reading, info, ctx, seq) {
   // token, or no_outline = "none"), at = x,y (two number roles), linked (a shape), the count of undo / redo (role quantity)
   if (R.outline != null) args.outline = R.outline === "no_outline" ? "none" : String(R.outline);
   else if (args.color === "no_outline") { args.outline = "none"; delete args.color; }   // a value placed by what it IS (as region / relation above): no_outline is never a colour
+  // a value the request writes but the reader read only in part is never dropped silently (PREPROCESS_FIXES.md, 2026-11-03; the house:
+  // "at 400, 300" with x read and y not): `at` is left out as before, and the request is marked incomplete (a non-enumerable field of the
+  // node, [{key, text}]); the gates (vss-confidence.js, neural-confidence.js, combined-confidence.js) hold such a request and say why.
+  const incomplete = [];
   if (R.x != null && R.y != null && /^\d+$/.test(String(R.x)) && /^\d+$/.test(String(R.y))) args.at = `${R.x},${R.y}`;
+  else if (R.x != null || R.y != null) {
+    const v = (r) => (r == null ? null : typeof r === "object" ? r.head : r), x = v(R.x), y = v(R.y);
+    incomplete.push({ key: "at", text: x != null && y != null ? `the position (${x}, ${y}) was not read as two numbers` : x != null ? `only the x of the position was read (x = ${x}; y was not)` : `only the y of the position was read (y = ${y}; x was not)` });
+  }
   if (R.linked != null) args.linked = ref(R.linked);
   if ((ev === "undo" || ev === "redo") && R.quantity != null && /^\d+$/.test(String(R.quantity))) args.count = +R.quantity;
   // the one-to-one rule on the request (2026-11-03, training/sketch/combine/VSS_FROM_TO.md): a name word of the request fills one argument.
@@ -254,6 +262,8 @@ export function toNodes(reading, info, ctx, seq) {
     }
   }
   for (const k of Object.keys(args)) if (args[k] === undefined) delete args[k];
-  nodes.push({ id: (type === "rule" ? "r" : "s") + (++seq.s), type, args });
+  const node = { id: (type === "rule" ? "r" : "s") + (++seq.s), type, args };
+  if (incomplete.length) { Object.defineProperty(node, "incomplete", { value: incomplete, enumerable: false, configurable: true }); notes.push(...incomplete.map((x) => `not sure: ${x.text}`)); }
+  nodes.push(node);
   return { nodes, notes };
 }

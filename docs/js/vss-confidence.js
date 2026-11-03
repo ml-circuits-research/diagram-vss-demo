@@ -132,6 +132,12 @@ export function reasons(model, u) {
   return order.filter(([, v], i) => i === 0 || (i < REASON_MAX && v >= REASON_MIN)).map(([g, v]) => ({ group: g, pull: v, text: sentence(g, u, model, parts.get(g)) }));
 }
 
+/** the values a reader read only in part, over the nodes of one request (the non-enumerable field "incomplete" that vss-adapter.js toNodes
+ *  and neural.js formalizeJoint set: [{key, text}]) -> [{key, text}]; and their reasons (group "incomplete"). combined-confidence.js and
+ *  neural-confidence.js have the same two functions. */
+export const incompleteOf = (nodes) => (nodes || []).flatMap((n) => (n && n.incomplete) || []);
+export const incompleteReasons = (inc) => inc.map((x) => ({ group: "incomplete", pull: 0, text: `a value was read only in part: ${x.text}` }));
+
 /** the gate over one composer result (vss-composer.js formalize): every unit that gave a request gets its confidence; a unit executes when
  *  its confidence >= the level's threshold, and also only when every request of the message it refers to ({ref} to a node of another unit)
  *  executes (a request that uses a shape an unexecuted request would have made is not executed either; its reason says so).
@@ -147,8 +153,11 @@ export function gate(model, result, level = DEFAULT_LEVEL) {
   const refsOf = (v) => (v && typeof v === "object" && !Array.isArray(v) && typeof v.ref === "string" ? [v.ref] : Array.isArray(v) ? v.flatMap(refsOf) : []);
   const G = [], gu = new Map();
   for (const [u, nodes] of byUnit) {
-    const conf = model ? (u.signals ? confidence(model, u.signals, u.world) : 0) : NaN, sure = t === -Infinity || conf >= t;
-    const why = sure ? [] : model ? reasons(model, u) : [{ group: "model", pull: 0, text: "the confidence model could not be loaded" }];
+    const inc = incompleteOf(nodes), conf = model ? (u.signals ? confidence(model, u.signals, u.world) : 0) : NaN;
+    // a value the request writes but the reading has only in part (vss-adapter.js "incomplete"; PREPROCESS_FIXES.md) is held at every level
+    // but "all", whatever the confidence, and the reason says which value
+    const sure = t === -Infinity || (conf >= t && !inc.length);
+    const why = sure ? [] : inc.length ? incompleteReasons(inc) : model ? reasons(model, u) : [{ group: "model", pull: 0, text: "the confidence model could not be loaded" }];
     const g = { index: (result.units || []).indexOf(u), unit: u, src: u.src, world: u.world, event: u.event, conf, sure, execute: sure, nodes, reasons: why, dependsOn: [] };
     for (const n of nodes) for (const r of Object.values(n.args || {}).flatMap(refsOf)) { const o = owner.get(r); if (o && o !== u && !g.dependsOn.includes(o)) g.dependsOn.push(o); }
     G.push(g); gu.set(u, g);

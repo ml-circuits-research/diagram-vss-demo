@@ -56,7 +56,7 @@ if (process.env.SPELL === "1") {
 function cutsOf(text, canvas) {
   const cuts = FRONT.segmentWorlds(text, canvas, comp.cutter);
   if (cuts.length || process.env.BEST !== "1") return cuts;
-  const C = comp.cutter, [toks] = FRONT.tokenize(text, canvas); if (!toks.length) return cuts;
+  const C = comp.cutter, [toks] = FRONT.tokenize(text, canvas, FRONT.mechOf(C)); if (!toks.length) return cuts;
   const { scores } = FRONT.segDecodeLabels(toks.map((x) => x[0]), C.segmenter, C.labels), B = C.labels.filter((l) => l.startsWith("B-"));
   let k = 0, best = -Infinity; scores.forEach((sc, i) => { const m = Math.max(...B.map((l) => sc[l])); if (m > best) { best = m; k = i; } });
   const ws = C.worlds.map((w, i) => ({ world: w, score: scores[k]["B-" + w], i })).sort((a, b) => (b.score - a.score) || (a.i - b.i)).map(({ world, score }) => ({ world, score }));

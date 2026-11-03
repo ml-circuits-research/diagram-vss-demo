@@ -109,9 +109,63 @@ def slug(s): return re.sub(r"[^a-z0-9]+", "_", s.lower()).strip("_") or "x"
 TOK = re.compile(r"\"([^\"]*)\"|“([^”]*)”|(?<![A-Za-z0-9])'([^']+)'(?![A-Za-z0-9])|([A-Za-z0-9_][A-Za-z0-9_'’-]*)|([.,!?;:])")
 ENDS = {".", "!", "?"}
 
+# Two mechanical steps behind switches (PREPROCESS_FIXES.md, scenes_r3/ROOT_CAUSES.md P3 / P6; owner 2026-11-03 16:44). Both are OFF unless
+# the front.json / cutter json that is applied records them in its field "mechanical" (a model learned without them reads exactly as
+# before); while LEARNING (tokenize called without `mech`), the environment decides: FRONT_NAMEDIGIT=1, FRONT_NUMWORDS=1, and learn() /
+# train_cutter.py record them in "mechanical" so the model is applied the way it was learned. The JS twin is docs/js/front.js (same rules).
+#   name_digit   (P3) a capitalised word that holds a digit ("Buoy1", "Chair2", "B2") is a NAME token also at the start of a sentence / span
+#                ("Buoy1: a tiny red circle ...", "Chair2, another ..."): before, only a capitalised word NOT at the start was a name.
+#                Measured on every annotated folder: such a word at a sentence start is a gold name 876 times of 883 (99%). The form
+#                "Tank: ..." (a capitalised word without a digit before a colon) is NOT included: a gold name 83 times of 131 (63%).
+#   number_words (P6) a number word becomes its digit token: two .. twenty, thirty .. ninety, hundred; "forty five" / "forty-five" -> 45,
+#                "two hundred" -> 200 ("forty px" -> 40 px, "three circles" -> 3 circles). "one" is NOT in the table: in the training spans
+#                it occurs 1848 times and never stands for a number value (0 of 1841 spans with "one" have count / distance / width /
+#                height = 1); it is the pronoun ("the red one").
+NUM_UNITS = {"two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12,
+             "thirteen": 13, "fourteen": 14, "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19}
+NUM_TENS = {"twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90}
+NUM_DIGIT = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9}   # after a tens word only ("forty one")
+MECH_ENV = {"name_digit": "FRONT_NAMEDIGIT", "number_words": "FRONT_NUMWORDS"}
 
-def tokenize(text, names=()):
-    """-> list of [token, start, end] and info {texts, names}"""
+
+def mech_env():
+    """the mechanical switches of the environment (used while learning): {name: 1} for each one set to 1"""
+    return {k: 1 for k, e in MECH_ENV.items() if os.environ.get(e) == "1"}
+
+
+def mech_of(F):
+    """the mechanical switches a learned front end / cutter was built with (its "mechanical" field; absent: none, as before)"""
+    return dict((F or {}).get("mechanical") or {})
+
+
+def number_word(low):
+    """a single word -> its number (the table above; "forty-five" -> 45), else None"""
+    if low in NUM_UNITS: return NUM_UNITS[low]
+    if low in NUM_TENS: return NUM_TENS[low]
+    if low == "hundred": return 100
+    m = re.fullmatch(r"([a-z]+)-([a-z]+)", low)
+    if m and m.group(1) in NUM_TENS and m.group(2) in NUM_DIGIT: return NUM_TENS[m.group(1)] + NUM_DIGIT[m.group(2)]
+    return None
+
+
+def merge_number_words(out):
+    """number_words: the word tokens of a number become ONE digit token (its [start, end) spans the words): "forty five" -> 45,
+    "two hundred" -> 200, "a hundred" -> a 100. Digits written as digits are left as they are."""
+    res, i = [], 0
+    while i < len(out):
+        t, s, e = out[i]; n = number_word(t)
+        if n is None: res.append(out[i]); i += 1; continue
+        if t in NUM_TENS and i + 1 < len(out) and out[i + 1][0] in NUM_DIGIT: n += NUM_DIGIT[out[i + 1][0]]; e = out[i + 1][2]; i += 1
+        elif n < 10 and i + 1 < len(out) and out[i + 1][0] == "hundred": n *= 100; e = out[i + 1][2]; i += 1
+        res.append([str(n), s, e]); i += 1
+    return res
+
+
+def tokenize(text, names=(), mech=None):
+    """-> list of [token, start, end] and info {texts, names}. mech: the mechanical switches ({"name_digit": 1, "number_words": 1}); None =
+    the environment's (learning, mech_env); a front end applied passes its own (mech_of(F))."""
+    mech = mech_env() if mech is None else mech
+    nd = bool(mech.get("name_digit"))
     known = {}
     for n in names: known.setdefault(str(n).lower(), str(n))
     info = {"texts": {}, "names": {}}; out = []
@@ -125,13 +179,15 @@ def tokenize(text, names=()):
         if mm: out += [[mm.group(1), s, s + len(mm.group(1))], [mm.group(2).lower(), s + len(mm.group(1)), e]]; continue
         if raw.isdigit(): out.append([raw, s, e]); continue
         start = not out or out[-1][0] in ENDS
+        cap = lambda w: w[:1].isupper() and (not start or (nd and re.search(r"\d", w) is not None and re.search(r"[A-Za-z]", w) is not None))
         base = raw[:-2] if raw.lower().endswith("'s") else None
-        if base and (base.lower() in known or (base[:1].isupper() and not start)): raw = base
+        if base and (base.lower() in known or cap(base)): raw = base
         low = raw.lower()
-        is_name = low in known or (raw[:1].isupper() and not start and raw != "I" and raw != "A")
+        is_name = low in known or (cap(raw) and raw != "I" and raw != "A")
         if is_name:
             t = "n_" + slug(low); info["names"].setdefault(t, known.get(low, raw)); out.append([t, s, e])
         else: out.append([low, s, e])
+    if mech.get("number_words"): out = merge_number_words(out)
     return out, info
 
 
@@ -174,7 +230,7 @@ def apply_triggers(toks, T):
 
 
 def normalize(text, names, F):
-    toks, info = tokenize(text, names)
+    toks, info = tokenize(text, names, mech_of(F))
     t = apply_values([x[0] for x in toks], F["values"])
     t = apply_triggers(t, F["triggers"])
     info["numbers"] = {x: int(x) for x in t if x.isdigit()}
@@ -188,8 +244,8 @@ def normalize_message(text, names, F):
     to right: at each position the first rule (in the learned order) whose phrase and context match there fires, the phrase is replaced by
     the event token (and its kept value tokens) and the scan goes on after it; contexts are read on the value-normalized tokens. Linear in
     the tokens (rules indexed by their first word). The JS twin is docs/js/front.js normalizeMessage."""
-    toks0, info0 = tokenize(text, names)
-    toks, info = tokenize(text, list(names) + [info0["names"][t] for t in info0["names"]])
+    toks0, info0 = tokenize(text, names, mech_of(F))
+    toks, info = tokenize(text, list(names) + [info0["names"][t] for t in info0["names"]], mech_of(F))
     V = F["values"]; vals, src, i = [], [], 0
     while i < len(toks):
         for n in (3, 2, 1):
@@ -257,7 +313,7 @@ def segment_worlds(text, names, C):
     """the units of the cutter with worlds (C = cutter_worlds.json: {labels, worlds, segmenter}) with, per unit, the worlds ranked by the
     score of their B-<world> label at the unit's first token: -> [(start, end, [(world, score), ...])]. A unit starts at a B-<world>
     label (or at an I after O, as in segment). The JS twin is front.js segmentWorlds."""
-    toks, _ = tokenize(text, names)
+    toks, _ = tokenize(text, names, mech_of(C))
     labels, scores = seg_decode_labels([x[0] for x in toks], C["segmenter"], C["labels"]); spans, cur = [], None
     for k, ((t, s, e), L) in enumerate(zip(toks, labels)):
         if L.startswith("B") or (L == "I" and cur is None):
@@ -270,7 +326,7 @@ def segment_worlds(text, names, C):
 
 def segment(text, names, F):
     """-> the request spans of a message, as substrings of the text"""
-    toks, _ = tokenize(text, names)
+    toks, _ = tokenize(text, names, mech_of(F))
     labels = seg_decode([x[0] for x in toks], F["segmenter"]); spans, cur = [], None
     for (t, s, e), L in zip(toks, labels):
         if L == "B" or (L == "I" and cur is None): cur = [s, e]; spans.append(cur)
@@ -699,7 +755,8 @@ def learn(msgs, params=None, keep=None, neg=None):
             **({"value_learning": {k: os.environ[k] for k in ("VAL_PREC", "VAL_SUB", "VAL_PICK", "VAL_SHADOW") if os.environ.get(k)}}
                if any(os.environ.get(k) for k in ("VAL_PREC", "VAL_SUB", "VAL_PICK", "VAL_SHADOW")) else {}),
             **({"round2": {k: os.environ[k] for k in ("FRONT_NEG", "VAL_GUARD") if os.environ.get(k)}, **({"negative_requests": len(negr)} if negr is not None else {})}
-               if any(os.environ.get(k) for k in ("FRONT_NEG", "VAL_GUARD")) else {})}
+               if any(os.environ.get(k) for k in ("FRONT_NEG", "VAL_GUARD")) else {}),
+            **({"mechanical": mech_env()} if mech_env() else {})}   # FRONT_NAMEDIGIT / FRONT_NUMWORDS: applied with the model (tokenize mech)
 
 
 # The training folders, in one place. DATA=old (or unset): the first two (exactly the original behaviour); DATA=all: all five.

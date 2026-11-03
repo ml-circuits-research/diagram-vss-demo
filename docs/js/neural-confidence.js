@@ -243,6 +243,10 @@ export function reasons(spec, sig) {
 }
 
 /* ---------------------------------------------------------------- the gate */
+/** the values the reader read only in part (neural.js formalizeJoint sets the non-enumerable field "incomplete" [{key, text}] on a wire; the
+ *  same two functions as vss-confidence.js) */
+export const incompleteOf = (nodes) => (nodes || []).flatMap((n) => (n && n.incomplete) || []);
+export const incompleteReasons = (inc) => inc.map((x) => ({ group: "incomplete", pull: 0, text: `a value was read only in part: ${x.text}` }));
 /** the gate over one neural.js formalizeJoint result, the shape of vss-confidence.js gate (docs/js/ui.js GATES): every request that gave
  *  wires gets its confidence; it executes when the confidence >= the level's threshold, and only when every request of the message it
  *  refers to ({ref} to a wire of another request) executes. spec null (the file could not be loaded): every request is asked (level "all":
@@ -261,8 +265,8 @@ export function gate(spec, result, level) {
   for (const [u, nodes] of byUnit) {
     const index = (result.analyses || []).indexOf(u), sig = signals(result, index);
     const conf = spec && sig && !sig.detail.noCut ? confidence(spec, sig.f, sig.act) : NaN;
-    const sure = t === -Infinity || conf >= t;
-    const why = sure ? [] : !spec ? [{ group: "model", pull: 0, text: "the confidence model could not be loaded" }]
+    const inc = incompleteOf(nodes), sure = t === -Infinity || (conf >= t && !inc.length);   // a value read only in part is held (vss-confidence.js gate)
+    const why = sure ? [] : inc.length ? incompleteReasons(inc) : !spec ? [{ group: "model", pull: 0, text: "the confidence model could not be loaded" }]
       : !sig ? [{ group: "signals", pull: 0, text: "the model's head outputs were not available, so its confidence is not known" }]
       : sig.detail.noCut ? [{ group: "cut", pull: 0, text: "the cut head's output was not available, so its confidence is not known" }]
       : reasons(spec, sig);

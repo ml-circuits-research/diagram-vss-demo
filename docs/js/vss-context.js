@@ -158,7 +158,7 @@ export class Context {
     this.groups = new Map();    // key -> {key, members: [keys], last, role, action, count}
     this.t = 0; this.prevMain = null; this.createdOrder = [];
     for (const n of canvas) this.ent(low(n), { name: String(n), canvas: true });
-    const [toks, info] = tokenize(text, canvas); this.textNames = toks.filter(([t]) => t.startsWith("n_")).map(([t, s, e]) => [t.slice(2), s, e]);
+    const [toks, info] = tokenize(text, canvas, model.mechanical || {}); this.textNames = toks.filter(([t]) => t.startsWith("n_")).map(([t, s, e]) => [t.slice(2), s, e]);
     // names written in the text (the tokenizer's capital-letter rule; "I'm", "I'd" ... are the pronoun I, a tokenization artefact)
     for (const [, raw] of Object.entries(info.names || {})) if (!this.ents.has(low(raw)) && !/^i['’]/i.test(raw)) this.ent(low(raw), { name: String(raw) });
     this.textNames = this.textNames.filter(([n]) => !/^i_/.test(n) || this.ents.has(n));
