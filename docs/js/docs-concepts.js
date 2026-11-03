@@ -38,6 +38,12 @@ is sure, do only what it is sure of, and ask about the rest, saying why?</b></p>
 <p>In a drawing a confident mistake costs one undo, once you have noticed it. Where a wrong action has serious consequences (a dose, a safety
 setting, a payment) it is the failure that matters most. The drawing is the test bench: a reader that is good in this sense shows it already
 here, by what it chooses to do and by how often that is right.</p>
+<p id="rq-value"><b>Why it matters.</b> A reader that knows when it does not know is valuable wherever mistakes are very expensive: in highly
+regulated industries, and in research, where it can filter material and bring people less work, more reliably and more trustworthily than an
+LLM, which tends to answer confidently even when it is wrong. The value is caution by design: do what it is sure of, hand the rest to a person
+with the reasons, and leave the execution to a symbolic layer that carries out only known actions. VSS-BERT does that here: confidently wrong in
+1.8% of what it does, with the reasons for everything it holds back. VSS alone brings the same property from its side: its confidence is built
+from its own named steps.</p>
 
 <h2 id="rq-metric">How it is counted</h2>
 <div class="tw"><table>
@@ -96,8 +102,9 @@ numbers. The wires are then assembled by the legend. <a href="#help/neural-reade
 
 <h2 id="reads-well">It reads well</h2>
 <p>It knows English words that never occur in our data, reads every action with one model, and reads “it” and “the red circle” itself. Doing
-everything, on 600 messages by a writer whose style it never saw (fresh2), the SOP-BERT of 2026-11-02 did 70.8% of the requested actions right,
-more than VSS (58.6%) or the Rules (55.5%) (<code>FRESH2_RESULT.md</code>).</p>
+everything, on 600 messages by a writer whose style it never saw (fresh2), the SOP-BERT of 2026-11-02 did 70.8% of the requested actions right;
+on the same run VSS did 58.6% and the Rules 55.5% (<code>FRESH2_RESULT.md</code>). VSS learns only from our annotated data, and its drop on
+this writer follows the writer’s style, which that data lacked, not the length of the messages (<code>FRESH2_CAUSES.md</code>).</p>
 
 <h2 id="too-bold">Alone, it is too bold</h2>
 <p>The same run did 24.2% of the requested actions <b>wrong</b>. A transformer’s tokenizer gives every word a meaning, so nothing is ever
@@ -191,9 +198,10 @@ kinds:</p>
   (fresh2), every reader got worse; VSS missed about 34% of the requests at every message length, against 18–24% on the training writers’
   messages: the loss follows the writer’s style, not the length (${doc('training/sketch/FRESH2_CAUSES.md')}).</li>
   <li><b>Frames.</b> The generated commands are built from a fixed set of sentence frames. A model learns those frames well and learns
-  nothing from them about other ways of saying the same thing: adding 8404 generated commands gave VSS no measurable gain on the new
-  writer’s messages, −0.8 [−3.9, 2.4] (${doc('training/sketch/synth/VSS_SYNTH_DIAGNOSIS.md')}; the largest cause found there was the
-  conversion into world rows, fixed since, ${doc('training/sketch/synth/CONVERT_FIX.md')}).</li>
+  nothing from them about other ways of saying the same thing. When 8404 generated commands were first added, VSS showed no measurable
+  change on the new writer’s messages, −0.8 [−3.9, 2.4]; the diagnosis found that 31% of them never reached the worlds in a learnable form,
+  a loss in the conversion into world rows (${doc('training/sketch/synth/VSS_SYNTH_DIAGNOSIS.md')}), fixed since
+  (${doc('training/sketch/synth/CONVERT_FIX.md')}).</li>
   <li><b>Thin coverage of short real commands.</b> People with a problem fall back to short, literal commands, and few of the training
   messages are short commands as people write them. On short3 (short commands written the way a user would), 35% of the requests were out
   of reach of any VSS training row under the conversion of the day (${doc('training/sketch/synth/VSS_SYNTH_DIAGNOSIS.md')}), and every
@@ -445,7 +453,7 @@ clears its own threshold; below it, it asks, as VSS-BERT does.</p>
 <tbody>
 <tr><th>What it is</th><td>9 small vector-symbolic models, one per family of actions, with two cutters and a context filler (<a href="#help/vss-worlds">What a VSS world is</a>)</td><td>one fine-tuned DistilBERT with small heads (<a href="#help/bert">SOP-BERT</a>)</td></tr>
 <tr><th>Size</th><td>31.4 MB</td><td>68.7 MB</td></tr>
-<tr><th>Its part in VSS-BERT</th><td>the second reading, to agree or disagree</td><td>the cut, and the reading that is executed</td></tr>
+<tr><th>Its part in VSS-BERT</th><td>the second reading, to agree or disagree, and its own confidence, built from its named steps</td><td>the cut, and the reading that is executed</td></tr>
 <tr><th>When unsure</th><td colspan="2">does not do the request; says why, shows the clearer command to write, and offers Do it anyway and Edit</td></tr>
 </tbody></table></div>
 
@@ -461,15 +469,17 @@ VSS-BERT is in the last column for comparison:</p>
 </tbody></table></div>
 <p>Before → after (readers of 2026-11-02 → 2026-11-03, commit 220295a): the VSS tab’s cost score 20.7 → 22.9, the SOP-BERT tab’s 31.5 → 33.4.
 Neither difference is shown either way by its interval.</p>
-<p class="note">VSS with only its own confidence (while SOP-BERT is still loading) is very careful: it asks about almost everything (5.3% done
-right on the test part, cost score 4.8). Its own numbers rank its readings less well (AUROC 0.779) than they do once the other reader’s
-agreement is added (0.911).</p>
+<p class="note">VSS with only its own confidence (while SOP-BERT is still loading) is very careful: rather than guess, it holds back almost
+everything (5.3% done right on the test part, cost score 4.8). Its own step numbers rank its readings at AUROC 0.779; with the other readers’
+agreement added, at 0.911.</p>
 
 <h2 id="pa-why-vss">Why VSS, and not a second transformer</h2>
 <p>A second reader is useful when it is wrong in other places than the first. VSS reads a message in a chain of named steps (cut, choose a
 world, read, fill “it” from the context), and every step leaves a number with a name behind (how sure the cut was, how clearly the world won,
 which words it did not know). So when it is unsure it can say where, and when it disagrees with SOP-BERT the disagreement can be named (“the two
-readers disagree on the colour”). Alone it gets less right than SOP-BERT; as the second opinion it is what makes VSS-BERT careful.</p>
+readers disagree on the colour”). It is our own model, small (31.4 MB for all nine worlds, against 68.7 MB for SOP-BERT), and each world
+trains in about ten minutes on a laptop GPU. Its job in VSS-BERT is to be the different reader: as the second reading it is what makes VSS-BERT
+careful (1.8% confidently wrong, against 3.0% for SOP-BERT alone, at the same amount done).</p>
 `);
 
 /* ============================================================ VSS worlds */
@@ -563,7 +573,7 @@ actions that use the same roles per world, read better than 16 one-action worlds
 Intelligence</i> by Jeff Hawkins (foreword by Richard Dawkins). In the book, the neocortex is made of many similar units that each learn
 models of the world, and they reach one perception by voting. VSS echoes that idea on a small scale: instead of one large model, many small
 worlds each model one part of the language (a family of actions), several of them read the same request, and one combined reading comes out.</p>
-<p>The analogy is modest, and it has limits:</p>
+<p>Where the analogy holds, and where it stops:</p>
 <ul>
   <li>The worlds do not vote by majority. Up to three candidate worlds, named by the cutter, read a request; the reading that leaves the
   fewest words not understood is kept, and a tie goes to the context filler, then to the cutter’s order
@@ -588,8 +598,9 @@ page('limits-today', 'Where it is weak today',
   agreement cannot catch these.</li>
   <li><b>Short commands.</b> On the short commands of short3 alone, SOP-BERT with the earlier confidence recipe scored 4.2 [−1.4, 8.5]: still
   close to asking about everything (<code>results/072_measure/COMPARE.md</code>).</li>
-  <li><b>Help questions.</b> VSS’s help world often loses the topic (“what kinds of templates can I use?”) and does not read <code>about</code>;
-  SOP-BERT’s topic head knows 109 of the 217 topics. Their confidences hold most of these back, so plain ones (“how do I undo?”) are answered
+  <li><b>Help questions.</b> VSS’s help world is new (2026-11-03, 847 training rows); its learned front end turns the words of the question
+  form into aspect tokens and sometimes takes the topic with them (“what kinds of templates can I use?”), and <code>about</code> (“can I add
+  <i>images</i>?”) is outside the legend by definition, so it is not a VSS role. SOP-BERT’s topic head knows 109 of the 217 topics. Their confidences hold most of these back, so plain ones (“how do I undo?”) are answered
   and the rest asked.
   ${says('how do I undo?', 'what kinds of templates can I use?')}</li>
   <li><b>New forms with few examples.</b> Templates, titles and arrow labels were learned from little data: “make a timeline of Q1, Q2, Q3” is read
@@ -633,16 +644,20 @@ fitted on all rows (<code>BETWEEN.md</code>), the event hint. The large differen
 reads one isolated sentence of a known world.</p>
 
 <h2 id="h-confidence">Which reader knows when it does not know</h2>
-<p>The expectation was that VSS would know better when it is unsure. Measured on the sample (AUROC: how well a confidence separates right from
-wrong, 0.5 = not at all): the VSS margin 0.59, SOP-BERT’s smallest probability 0.72 (<code>RISK_COVERAGE.md</code>). The margin sees one step of
-the VSS chain; a confidence built from every step reached 0.81 (<code>VSS_CONFIDENCE.md</code>), and the precision of each reader at a fixed
-threshold was measured in <code>PRECISION.md</code>.</p>
+<p>VSS reads in named steps, so it was expected to know better when it is unsure. Measured on the sample (AUROC: how well a confidence
+separates right from wrong, 0.5 = not at all): the first VSS confidence, its margin, sees only one step of the chain and scored 0.59, against
+0.72 for SOP-BERT’s smallest probability (<code>RISK_COVERAGE.md</code>). A confidence built from every step of the VSS chain reached 0.81, above
+SOP-BERT’s 0.72 on the same sample; at 4% wrong it did 60.9% of the requests right, against 45.9% for SOP-BERT (<code>VSS_CONFIDENCE.md</code>).
+The precision of each reader at a fixed threshold was measured in <code>PRECISION.md</code>.</p>
 
 <h2 id="h-fresh">A new writer: the honest test</h2>
 <p>The earlier data was written by the same two models that wrote the training data. On 600 messages by a third writer, blind (fresh2), every
-reader was worse, and VSS’s confidence did not carry over (confidently wrong 3.4% on the old data, 7.3% on the new writer; SOP-BERT 3.0% and 3.5%;
-<code>FRESH2_RESULT.md</code>). Training data written from VSS’s own list of what it lacked made VSS worse, −4.3 [−8.4, −0.4]
-(<code>feedback/DATA_NEEDS.md</code>, <code>FEEDBACK_RESULT.md</code>): a negative result, reported as such. More varied writers helped.</p>
+reader scored lower, and VSS’s confidence, fitted on the earlier writers’ messages, was confidently wrong more often on the new one (3.4% on the
+old data, 7.3% on the new writer; SOP-BERT 3.0% and 3.5%; <code>FRESH2_RESULT.md</code>). The causes were traced to the data: VSS learns only from
+our annotated messages, its misses followed the new writer’s style (terse and verb-less requests) and not the length of the messages, and its
+cutter had been trained on text of mostly one style (<code>FRESH2_CAUSES.md</code>). Training data written from VSS’s own list of what it lacked
+lowered its score, −4.3 [−8.4, −0.4] (<code>feedback/DATA_NEEDS.md</code>, <code>FEEDBACK_RESULT.md</code>): a negative result about that data,
+reported as such. More varied writers helped.</p>
 
 <h2 id="h-pair">Two readers, then three</h2>
 <p>A request VSS and SOP-BERT read the same way was right 95% of the time (<code>combine/COMBINE.md</code>), the strongest confidence either

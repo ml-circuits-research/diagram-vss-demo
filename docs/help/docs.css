@@ -62,6 +62,12 @@
 .doc .doc-pn a:hover { border-color: var(--accent); }
 .doc .doc-pn a span { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 2px; }
 .doc .doc-pn .next { text-align: right; }
+/* body paragraphs justified with hyphenation (lang="en" on <html>); not tables, lists, code, captions or the kicker; left-aligned at phone width */
+@media (min-width: 421px) {
+  .doc p:not(.doc-kicker), .doc dl.readers dd { text-align: justify; -webkit-hyphens: auto; hyphens: auto; }
+  .doc td p, .doc th p, .doc figure p, .doc .doc-pn p { text-align: left; -webkit-hyphens: manual; hyphens: manual; }
+  .doc p code, .doc dl.readers dd code { -webkit-hyphens: manual; hyphens: manual; }
+}
 @media (max-width: 560px) {
   .doc { font-size: 16px; }
   .doc h1 { font-size: 25px; }

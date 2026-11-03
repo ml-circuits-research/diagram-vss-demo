@@ -219,7 +219,10 @@ this way: <a href="#help/vss-worlds">What a VSS world is</a>.</p>
 models, each learning part of the world, vote on one perception. Here many small worlds each model part of the language, and one combined reading
 comes out. In the code that is not a majority vote: the candidate worlds of a unit each read it, and the reading with the fewest words not
 understood is kept (<a href="#help/vss-reader/decide">How a unit is decided</a>); the agreement that decides what is done is VSS-BERT’s, between
-VSS and SOP-BERT (<a href="#help/vss-worlds/thousand-brains">the analogy and its limits</a>).</p>
+VSS and SOP-BERT (<a href="#help/vss-worlds/thousand-brains">the analogy, in detail</a>).</p>
+<p>What it brings: it runs in the browser (31.4 MB for all nine worlds and the cutters); it reads in named steps, and the numbers of those steps
+make its confidence and the reasons it gives; all nine worlds trained in about 45 minutes on a laptop GPU, two at a time (job 070); and it is
+the second reader of VSS-BERT (<a href="#help/two-readers">VSS-BERT</a>).</p>
 
 <figure>
 <div class="fig">
@@ -318,8 +321,8 @@ event, from the world’s verb lemmas) and the role fillers (target, colour, lan
 <code>no-sense</code> (more than half of the tokens could not be placed). The status is one input of the confidence; whether a reading is done is
 decided by the confidence against a threshold. In VSS-BERT that confidence is the combined one (<a href="#help/two-readers">VSS-BERT</a>); the
 VSS tab alone uses a confidence from every step of the chain plus whether SOP-BERT and the Rules read the request the same way
-(<a href="#help/parts-alone">The VSS and SOP-BERT tabs</a>). The margin behind <code>abstain</code> alone is a poor confidence (AUROC 0.59 on the
-sample, <code>RISK_COVERAGE.md</code>).</p>
+(<a href="#help/parts-alone">The VSS and SOP-BERT tabs</a>). The margin behind <code>abstain</code> is the number of one step: alone it ranks readings at
+AUROC 0.59 on the sample (<code>RISK_COVERAGE.md</code>); the confidence built from every step reached 0.81 (<code>VSS_CONFIDENCE.md</code>).</p>
 <p>Before the model, the world’s own <b>front end</b> <code>front.json</code> normalizes the tokens: learned value n-grams (“bottom right” →
 <code>bottom_right</code>) and trigger rules, learned from the annotated rows of that world’s events only (<code>FRONT_ROWS=world</code>;
 thresholds <code>val_min_count</code> 5, <code>val_min_prec</code> 0.8, <code>trig_min_count</code> 2, <code>trig_share</code> 0.75, <code>trig_min_prec</code> 0.6).
@@ -354,10 +357,11 @@ size”): they are confused with set / resize and among themselves more than wit
 answers instead of drawing: “how do I …”, “can I …”, “what kinds of …” are told apart from every other world by the question form; the
 engine’s help plugin writes the answer from the legend, as for the Rules’ help wire.</p>
 <p class="note">Known gaps of these worlds (TRAIN_PLAN_1103.md §6): the <code>about</code> of a help question (“can I add <i>images</i>?”) is not
-read by VSS (its words are outside the legend; SOP-BERT reads it); a help question’s topic is sometimes lost to the aspect words; most
+a VSS role (its words are outside the legend by definition; SOP-BERT reads it); the help world’s learned front end sometimes turns a help
+question’s topic into aspect tokens; most
 <code>arrange template=</code> values are too rare for the value thresholds (144 of 200 lost), so an arrange with a template is read without it;
-an item of several words (“Build MVP”) has no single VSS token, so a template’s item list can come out short. The confidence is meant to hold
-such readings back.</p>
+an item of several words (“Build MVP”) has no single VSS token, so a template’s item list can come out short. In VSS-BERT the two readers then
+disagree, and the request is held back.</p>
 
 <h2 id="event-hint">(c) The event cutter and the event hint H1</h2>
 <p><code>docs/model/micro/cutter_events8.json</code> (2.58 MB): the same tagger and trainer, with one label per legend event
@@ -846,8 +850,8 @@ two days are within their intervals (commit 220295a: none shown either way); the
 fixed confidence recipe, 14.4 → 35.9, +21.6 [9.7, 33.2] (<code>results/072_measure/COMPARE.md</code>,
 <a href="#help/reliability/r-result">More and better data</a>).</p>
 <p class="note">The SOP-BERT and VSS tabs’ confidences also use whether the other readers read the request the same way (<code>vote3.json</code>);
-SOP-BERT with only its own numbers scores 29.3 [23.8, 35.2], 3.0% confidently wrong; VSS with only its own numbers 4.8, asking about almost
-everything. VSS-BERT uses <code>combined.json</code>, the variant without the act prior (against the plain recipe +2.2 [−1.3, 6.0], not shown
+SOP-BERT with only its own numbers scores 29.3 [23.8, 35.2], 3.0% confidently wrong; VSS with only its own numbers 4.8: rather than guess, it
+holds back almost everything. VSS-BERT uses <code>combined.json</code>, the variant without the act prior (against the plain recipe +2.2 [−1.3, 6.0], not shown
 either way). The 3-readers vote (31.8, 2.6% confidently wrong; against VSS-BERT −0.8 [−5.1, 3.4]) was removed
 (<a href="#help/rules-vs-learned/rv-vote">why</a>).</p>
 
@@ -911,12 +915,12 @@ page('repository', 'Repository map', `
 <tr><td><code>COST_SCORE.md</code></td><td>The cost score (one confident mistake = 10 right answers) and how each threshold is chosen.</td></tr>
 <tr><td><code>TRAIN_PLAN_1103.md</code></td><td>2026-11-03: the GPU jobs 070 (VSS), 071 (SOP-BERT), 072 (measure) that trained both learned readers on all the data; their models are the demo’s.</td></tr>
 <tr><td><code>training/neural/ROLES_ROUNDTRIP.md</code></td><td>SOP-BERT’s training labels decoded back through the demo’s code: silent wrong labels 2.8% → 0.1%, round trip 92.7% → 95.3%.</td></tr>
-<tr><td><code>synth/VSS_SYNTH_DIAGNOSIS.md</code>, <code>synth/CONVERT_FIX.md</code></td><td>Why the generated commands gave VSS no gain (31% never reached the worlds in a learnable form) and the fix (synth_rules round trip 65.9% → 79.3%).</td></tr>
+<tr><td><code>synth/VSS_SYNTH_DIAGNOSIS.md</code>, <code>synth/CONVERT_FIX.md</code></td><td>Why the generated commands could not help VSS at first (31% never reached the worlds in a learnable form: a conversion loss) and the fix (synth_rules round trip 65.9% → 79.3%).</td></tr>
 <tr><td><code>confidence3/NEW_FORMS_AUDIT.md</code></td><td>Agreement and scoring checked against what the engine does: false disagreements 3634 → 211, false agreements 205 → 3.</td></tr>
 <tr><td><code>results/072_measure/COMPARE.md</code> (<code>gpu-runs</code>)</td><td>The readers of 2026-11-02 against those of 2026-11-03 with one fixed confidence recipe: SOP-BERT on fresh2 +21.6 [9.7, 33.2].</td></tr>
 <tr><td><code>FRESH2_CAUSES.md</code>, <code>llm_train/OPUS_DATA.md</code>, <code>llm_train/synth_rules/README.md</code></td><td>The data: why the readers lose on a new writer (its style, not message length); the messages written by Opus; the short commands generated from the Rules (<a href="#help/reliability/r-synthetic">The data is synthetic</a>).</td></tr>
-<tr><td><code>FRESH2_RESULT.md</code>, <code>FEEDBACK_RESULT.md</code>, <code>feedback/DATA_NEEDS.md</code></td><td>The new writer (fresh2): every reader worse on it; data written from VSS’s own needs made VSS worse.</td></tr>
-<tr><td><code>RISK_COVERAGE.md</code>, <code>VSS_CONFIDENCE.md</code>, <code>PRECISION.md</code></td><td>The first confidence studies (2026-11-02): VSS margin AUROC 0.59, SOP-BERT 0.72, VSS from every step of its chain 0.81.</td></tr>
+<tr><td><code>FRESH2_RESULT.md</code>, <code>FEEDBACK_RESULT.md</code>, <code>feedback/DATA_NEEDS.md</code></td><td>The new writer (fresh2): every reader scored lower on its style; a data set written from VSS’s own list of needs lowered its score (−4.3), a negative result about that data.</td></tr>
+<tr><td><code>RISK_COVERAGE.md</code>, <code>VSS_CONFIDENCE.md</code>, <code>PRECISION.md</code></td><td>The first confidence studies (2026-11-02): VSS from every step of its chain AUROC 0.81, above SOP-BERT’s 0.72; the VSS margin alone 0.59.</td></tr>
 <tr><td><code>CUT_SHARED.md</code></td><td>One cut for all readers: the VSS cut is better on whole messages, the Rules segmenter on one-line commands.</td></tr>
 <tr><td><code>PLAN_A.md</code>, <code>PLAN_B.md</code>, <code>EVENT_HINT.md</code>, <code>CREATE_COLOR.md</code>, <code>SHORT.md</code>, <code>SHORT2.md</code>, <code>BETWEEN.md</code>, <code>HOLDOUT_PURPLE.md</code></td><td>How the VSS worlds were grouped and fixed (<a href="#help/history/h-vss">How we got here</a>).</td></tr>
 <tr><td><code>DIAGRAM_OPS.md</code>, <code>legend_ext/LEGEND_EXT.md</code></td><td>Groups, double positions and the forms of 2026-11-02 (templates, free text, help questions, layout operations, arrow labels).</td></tr>
@@ -937,8 +941,9 @@ page('planned', 'In progress', `
   <li><b>A fresh test set</b> (fresh3, planned): the test part of fresh2 + short3 had been read for earlier studies, so the numbers of 2026-11-03
   are exploratory; the clean confirmation of VSS-BERT and its confidence needs messages written after the models.</li>
   <li><b>Short commands</b>: every learned reader is still close to asking about everything on short3 alone (SOP-BERT 4.2 [−1.4, 8.5]).</li>
-  <li><b>The VSS help world</b>: the topic of a help question is often lost to the aspect words, and <code>about</code> is not read
-  (<code>TRAIN_PLAN_1103.md</code> §6); data or a front-end fix where the cause is.</li>
+  <li><b>The VSS help world</b>: its learned front end sometimes turns the topic of a help question into aspect tokens, and <code>about</code>,
+  outside the legend by definition, is not a VSS role (<code>TRAIN_PLAN_1103.md</code> §6); the fix goes where the cause is, in the front end or
+  the data.</li>
   <li><b>Data for descriptions in roles</b> (<code>SHORT2.md</code> §3): annotated messages where descriptions (“the red circle”, “every gray
   square”) fill the entity roles, which today they almost never do (0–3.5% per role).</li>
   <li><b>The shared context rule holds one shape</b>: “them” after a list of names cannot be filled by any reader that uses it.</li>
