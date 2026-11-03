@@ -1,5 +1,5 @@
-# AFTER: 076_vss_round2_resume 074_bert_round2
-# PATHS: results/077_measure_round2 docs/model/arms/R2/confidence
+# AFTER: 078_vss_round2_resume2 074_bert_round2
+# PATHS: results/079_measure_round2 docs/model/arms/R2/confidence
 # TRAIN_PLAN_R2.md, arm R2, the measurement (CPU only): the round-2 readers (VSS: docs/model/arms/R2/registry_R2.json, job 073; SOP-BERT:
 # docs/model/arms/R2/neural/sop-bert-R2, job 074) against the SHIPPED readers (arm ALL since 220295a: docs/model/micro/registry.json,
 # docs/model/neural/sop-bert, docs/model/confidence), on
@@ -23,7 +23,7 @@
 #      on the test part [95% CI], the paired differences R2 - shipped [95% CI], and the conversion ceilings.
 # Expected time on the GPU machine's CPU: as job 072 (~20-25 min) + the shipped VSS-BERT records (~3 min): ~25-30 min.
 set -uo pipefail
-ARM=R2; JOB=077_measure_round2
+ARM=R2; JOB=079_measure_round2
 export PATH="$HOME/vss-box/venv/bin:$PATH" TOKENIZERS_PARALLELISM=false
 if ! command -v node >/dev/null || [ "$(node -p 'process.versions.node.split(".")[0]')" -lt 20 ]; then export PATH="$HOME/vss-box/node/bin:$PATH"; fi
 ROOT=$PWD; A=docs/model/arms/$ARM; R=results/$JOB; F=training/sketch/fresh2; SK=training/sketch
