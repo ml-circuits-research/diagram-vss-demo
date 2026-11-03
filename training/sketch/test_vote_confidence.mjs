@@ -86,6 +86,51 @@ for (const [col, run] of Object.entries(runs)) {
     VT.engineNorm(every.got, every.pa, all).target === "*all*" && VT.engineNorm(groups.got, groups.pa, all).target === "*all*" && VT.engineNorm(four.got, four.pa, all).target === "check,done,process,start"
     && align.got.target === "intake" && zones.got.target === "intakezone,reviewzone", JSON.stringify([every, groups, four, align, zones]));
 }
+// the forms of 2026-11-02 (confidence3/NEW_FORMS_AUDIT.md): two readings of one request, written the ways logic.js does the same thing,
+// agree; written the ways it does different things, do not. The readings go through bench-canon.js canon as the collectors' and the page's do.
+{
+  const BC = await import(pathToFileURL(path.join(ROOT, "docs/js/bench-canon.js")).href);
+  const N = ["Start", "Process", "Check", "Done"];
+  const rd = (type, args, mentions = {}) => { const nodes = Object.entries(mentions).map(([id, a]) => ({ id, type: "mention", args: a })), w = { id: "w", type, args };
+    return { pa: `${type}:${args.action || args.ask || ""}`, got: BC.canon(w, nodes.concat([w])), span: [0, 10], args0: { action: args.action ?? null, name: null, count: null } }; };
+  const ag = (x, y) => VT.agreementOf("0123456789", [x], [y], N, "engine")[0].agree;
+  const C = (args, m) => rd("command", args, m), Q = (args) => rd("question", args);
+  const yes = [
+    ["help: aspect overview = no aspect", Q({ ask: "help", topic: "color", aspect: "overview" }), Q({ ask: "help", topic: "color" })],
+    ["help: topic general = no topic", Q({ ask: "help", topic: "general", aspect: "can" }), Q({ ask: "help", aspect: "can" })],
+    ["help: about=undefined = no about", Q({ ask: "help", topic: "connect", aspect: "how", about: undefined }), Q({ ask: "help", topic: "connect", aspect: "how" })],
+    ["help: about beside a topic is not read", Q({ ask: "help", topic: "text", aspect: "can", about: "images" }), Q({ ask: "help", topic: "text", aspect: "can" })],
+    ["improve: no target = mention(quantifier=all)", C({ action: "improve" }), C({ action: "improve", target: { ref: "m1" } }, { m1: { quantifier: "all" } })],
+    ["improve: no target = every canvas name", C({ action: "improve" }), C({ action: "improve", target: ["Done", "Check", "Process", "Start"] })],
+    ["groupBy / equalize / sort: target list in any order", C({ action: "sort", property: "name", target: ["Check", "Start"] }), C({ action: "sort", property: "name", target: ["Start", "Check"] })],
+    ["set kind=edge: quantifier=all is not read", C({ action: "set", kind: "edge", quantifier: "all", style: "dashed" }), C({ action: "set", kind: "edge", style: "dashed" })],
+    ["reverse by its ends: a target is not read", C({ action: "reverse", from: "Start", to: "Check" }), C({ action: "reverse", from: "Start", to: "Check", target: "Start" })],
+    ["label by its ends: a target is not read", C({ action: "label", from: "Start", to: "Check", label: "yes" }), C({ action: "label", from: "Start", to: "Check", label: "yes", target: "Done" })],
+    ["template items: a list = the same texts as one string", C({ action: "create", template: "timeline", items: ["Q1", "Q2"], title: "Plan" }), C({ action: "create", template: "timeline", items: "Q1,Q2", title: "Plan" })],
+    ["connect a list: pairing chain = no pairing", C({ action: "connect", from: ["Start", "Process", "Check"], pairing: "chain" }), C({ action: "connect", from: ["Start", "Process", "Check"] })]
+  ];
+  const no = [
+    ["label \"\" (remove) != label null (asks)", C({ action: "label", from: "Start", to: "Check", label: "" }), C({ action: "label", from: "Start", to: "Check", label: null })],
+    ["template items in another order", C({ action: "create", template: "cycle", items: ["A", "B", "C"] }), C({ action: "create", template: "cycle", items: ["C", "B", "A"] })],
+    ["arrange with a template: target order is read", C({ action: "arrange", template: "timeline", target: ["Start", "Done"] }), C({ action: "arrange", template: "timeline", target: ["Done", "Start"] })],
+    ["set from/to swapped (the stated direction is tried first)", C({ action: "set", from: "Start", to: "Check", style: "dashed" }), C({ action: "set", from: "Check", to: "Start", style: "dashed" })],
+    ["improve: one shape != the whole drawing", C({ action: "improve" }), C({ action: "improve", target: "Start" })],
+    ["help: another topic", Q({ ask: "help", topic: "connect", aspect: "how" }), Q({ ask: "help", topic: "delete", aspect: "how" })],
+    ["help: about without a topic is read", Q({ ask: "help", aspect: "can", about: "images" }), Q({ ask: "help", aspect: "can" })],
+    ["template: one item less", C({ action: "create", template: "timeline", items: ["Q1", "Q2", "Q3"] }), C({ action: "create", template: "timeline", items: ["Q1", "Q2"] })],
+    ["label kind=edge without quantifier=all (asks which arrow) != every arrow", C({ action: "label", kind: "edge", label: "" }), C({ action: "label", kind: "edge", label: "", target: { ref: "m1" } }, { m1: { quantifier: "all" } })],
+    ["align without a direction: the first target is the base", C({ action: "align", axis: "horizontal", target: ["Start", "Done"] }), C({ action: "align", axis: "horizontal", target: ["Done", "Start"] })]
+  ];
+  const badY = yes.filter(([, x, y]) => ag(x, y) !== 1 || ag(y, x) !== 1), badN = no.filter(([, x, y]) => ag(x, y) !== 0 || ag(y, x) !== 0);
+  check(`new forms: ${yes.length - badY.length} of ${yes.length} engine-equal pairs agree`, !badY.length, badY.map(([n, x, y]) => `${n}: ${JSON.stringify(x.got)} vs ${JSON.stringify(y.got)}`).join("\n     "));
+  check(`new forms: ${no.length - badN.length} of ${no.length} pairs the engine does differently disagree`, !badN.length, badN.map(([n, x, y]) => `${n}: ${JSON.stringify(x.got)} vs ${JSON.stringify(y.got)}`).join("\n     "));
+  // the scorer of the collectors: every gold key equal; the gold is the annotation's form (bench-canon.js canonWant)
+  const right = (x, type, gold) => Object.entries(BC.canonWant(type, gold)).every(([k, v]) => (x.got[k] ?? "∅") === v);
+  check("scorer: \"tidy up\" (gold: no target) read with one shape is not right; read with mention(quantifier=all) is right",
+    !right(C({ action: "improve", target: "Start" }), "command", { action: "improve" }) && right(C({ action: "improve", target: { ref: "m1" } }, { m1: { quantifier: "all" } }), "command", { action: "improve" }));
+  check("scorer: help gold aspect=overview read without an aspect is right; gold about=images without a topic read without about is not",
+    right(Q({ ask: "help", topic: "color" }), "question", { ask: "help", topic: "color", aspect: "overview" }) && !right(Q({ ask: "help", aspect: "can" }), "question", { ask: "help", aspect: "can", about: "images" }));
+}
 // the reasons in plain words
 {
   const N = ["Start", "Check", "Done"];
@@ -99,6 +144,11 @@ for (const [col, run] of Object.entries(runs)) {
   const w5 = VT.agreementWords("VSS", R("command:align", { target: "start" }), [{ label: "SOP-BERT", agree: 0, reading: R("command:distribute", { target: "start" }) }, { label: "the Rules", agree: 1, reading: R("command:align", { target: "start" }) }], N);
   const w6 = VT.agreementWords("SOP-BERT", R("command:arrange", { action: "arrange", target: "check,done,start" }), [{ label: "VSS", agree: 0, reading: R("command:arrange", { action: "arrange" }) }, { label: "the Rules", agree: 0, reading: R("command:arrange", { action: "arrange", target: "mention(quantifier=all)" }) }], N.concat("Title"));
   check("agreementWords: the other two agree with each other, not with this reader", w6 === "VSS and the Rules both read target ‘every shape’ instead of target ‘check, done, start’", w6);
+  // a reader with no reading of the same act over the same words: what it read there instead (otherAct), not "did not find this request"
+  { const text = "label the arrow from Start to Check ok", mine = { pa: "command:connect", got: { action: "connect", from: "start", to: "check", label: "ok" }, span: [0, 38] };
+    const rules = [{ pa: "command:label", got: { action: "label", from: "start", to: "check", label: "ok" }, span: [0, 38] }, { pa: "command:delete", got: { action: "delete" }, span: [40, 45] }];
+    const o = VT.otherAct(text, rules, mine), w = VT.agreementWords("SOP-BERT", mine, [{ label: "the Rules", agree: 0, reading: o }, { label: "VSS", agree: 1, reading: mine }], N);
+    check("otherAct: the Rules' reading of another act over the same words is said (not \"did not find\")", o === rules[0] && w === "VSS and SOP-BERT agree, the Rules read it as ‘label’ instead of ‘connect’" && VT.otherAct(text, rules.slice(1), mine) === null, w); }
   check("agreementWords: only one found it / all three agree / another action", w3 === "only SOP-BERT found this request" && w4 === "all three readers read it the same" && w5 === "the Rules and VSS agree, SOP-BERT reads it as ‘distribute’ instead of ‘align’", JSON.stringify([w3, w4, w5]));
   // the reader's own reasons under the column's weights: the sentence code of vss-confidence.js / neural-confidence.js on ownSpec
   const NCm = await import(pathToFileURL(path.join(ROOT, "docs/js/neural-confidence.js")).href);

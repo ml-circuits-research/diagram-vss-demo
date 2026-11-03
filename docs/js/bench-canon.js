@@ -29,8 +29,16 @@ function one(v, byId) {
 //                       applies both filters. Not listed for commands (create / move / fact): when the two cannot both hold, the engine
 //                       keeps the first (placeMulti), so their order is read.
 // An entry: `swap` [k1,k2] = the two keys exchange values (both hold one name, or any number when `any`), so the smaller string comes
-// first; `list` k with `n` = the value of key k, when it holds exactly n names, is sorted. `when(args)` narrows the entry.
+// first; `list` k with `n` = the value of key k, when it holds exactly n names (n = 0: any number), is sorted. `when(args)` narrows the entry.
+//   (2026-11-03, training/sketch/confidence3/NEW_FORMS_AUDIT.md) the whole-drawing operations of HIGH_LEVEL_OPS.md (improve, respace, snap,
+//   fit, flip, sort, groupBy, equalize, straighten, untangle; align with a direction) and distribute: logic.js alRun takes the targets as a
+//   set (auto-layout.js context(): `movable` is a Set, the shapes are taken in canvas / reading order, equalize and distribute sort them
+//   themselves), so their target list is compared in any order (`list` with n = 0: any length). arrange is not listed (a template, or a tree /
+//   radial of shapes without links, uses "the order given", logic.js arrange's catch).
+const WHOLE_OPS = ["improve", "respace", "snap", "fit", "flip", "sort", "groupBy", "equalize", "straighten", "untangle", "distribute"];
 const ORDER_FREE = {
+  ...Object.fromEntries(WHOLE_OPS.map((a) => [`command:${a}`, [{ list: "target", n: 0 }]])),
+  "command:align": [{ list: "target", n: 0, when: (a) => a.direction != null }],
   "command:disconnect": [{ swap: ["from", "to"], any: true }, { list: "target", n: 2 }],
   "question:connected": [{ swap: ["target", "anchor"] }, { list: "target", n: 2 }],
   "command:swap": [{ list: "target", n: 2 }],
@@ -41,9 +49,49 @@ const ORDER_FREE = {
 };
 /** split "a,b" at commas outside parentheses (a mention is written "mention(k=v,k=v)") */
 const parts = (s) => { const out = []; let d = 0, cur = ""; for (const ch of String(s)) { if (ch === "(") d++; if (ch === ")") d--; if (ch === "," && d === 0) { out.push(cur); cur = ""; } else cur += ch; } out.push(cur); return out; };
+// SAME: values the engine treats as the same request, written one way (2026-11-03, training/sketch/confidence3/NEW_FORMS_AUDIT.md; each is
+// what docs/js/logic.js does, checked by training/sketch/confidence3/audit_new_forms.mjs, which runs both forms on two drawings):
+//   question help      aspect=overview = no aspect (help-answers.js answer(): the default aspect); topic=general = no topic (the same branch);
+//                      `about` beside a topic other than general is not used (answer() reads about only without a topic, or for a topic
+//                      that has no sense in the legend, which a legend topic always has) -> dropped
+//   command connect    from= a list of 2+ shapes, no to=: pairing chain = next = no pairing (logic.js connect: `a.pairing || (!to.length &&
+//                      from.length > 1)` -> the chain unless pairing=all) -> pairing dropped
+//   whole-drawing ops  (WHOLE_OPS above, align with a direction): no target = every shape (alRun: `!t.length` and target=mention(quantifier=all)
+//                      are the same set, `whole`) -> written mention(quantifier=all), so "tidy up" without a target and "tidy up everything"
+//                      compare equal and a reading that names fewer shapes than the gold's whole drawing is not right by silence
+//   arrow restyle      set / resize with from= or to= or kind=edge, and reverse (logic.js edgesOf / restyleEdges): quantifier is never read ->
+//                      dropped; with from= / to= the target is not read -> dropped; without them no target = every arrow -> mention(quantifier=all)
+//   arrow label        label with from= / to= (no kind=edge): target and quantifier are not read -> dropped; kind=edge with quantifier=all: no
+//                      target = every arrow -> mention(quantifier=all)
+//   Not made the same: label="" (removes the label) and no label / label=null (asks what it should say); from / to of an arrow restyle,
+//   reverse or label swapped (edgesNamed tries the stated direction first and the other only when it finds none: the same arrow only when
+//   the drawing has one direction); label kind=edge without quantifier=all (asks which arrow when there are several); items in another
+//   order (templates.js: item i gets place i and colour i).
+const ALL_SHAPES = ["mention(quantifier=all)"];
+function same(type, act, el) {
+  if (type === "question" && act === "help") {
+    if (el.aspect && el.aspect.join(",") === "overview") delete el.aspect;
+    if (el.topic && el.topic.join(",") === "general") delete el.topic;
+    if (el.topic && el.about) delete el.about;
+    return;
+  }
+  if (type !== "command") return;
+  if (act === "connect" && el.from && el.from.length >= 2 && !el.to && el.pairing && ["chain", "next"].includes(el.pairing.join(","))) { delete el.pairing; return; }
+  if (WHOLE_OPS.includes(act) || (act === "align" && el.direction)) { if (!el.target) el.target = ALL_SHAPES.slice(); return; }
+  const edgeKind = el.kind && el.kind.join(",") === "edge";
+  if (act === "reverse" || ((act === "set" || act === "resize") && (el.from || el.to || edgeKind))) {
+    delete el.quantifier;
+    if (el.from || el.to) delete el.target; else if (!el.target) el.target = ALL_SHAPES.slice();
+    return;
+  }
+  // label of an arrow (logic.js labelEdge): by its ends, target and quantifier are not read; kind=edge with quantifier=all: no target = every arrow
+  if (act === "label" && !edgeKind && (el.from || el.to)) { delete el.target; delete el.quantifier; return; }
+  if (act === "label" && edgeKind && el.quantifier && el.quantifier.join(",") === "all" && !el.target) el.target = ALL_SHAPES.slice();
+}
 /** el: key -> array of lower-case name strings; returns key -> string, with the order-free arguments put in one canonical order */
 function finish(type, el) {
   const act = el.action ? el.action.join(",") : el.ask ? el.ask.join(",") : "", flat = () => Object.fromEntries(Object.entries(el).map(([k, v]) => [k, v.join(",")]));
+  same(type, act, el);
   for (const r of ORDER_FREE[`${type}:${act}`] || []) {
     if (r.when && !r.when(flat())) continue;
     if (r.pairs) {   // two (key, key) pairs exchange values: the pair whose joined values sort first comes first
@@ -52,14 +100,14 @@ function finish(type, el) {
       continue;
     }
     if (r.swap) { const [k1, k2] = r.swap, x = el[k1], y = el[k2]; if (x && y && (r.any || (x.length === 1 && y.length === 1)) && x.join(",") > y.join(",")) { el[k1] = y; el[k2] = x; } }
-    else if (el[r.list] && el[r.list].length === r.n) el[r.list] = el[r.list].slice().sort();
+    else if (el[r.list] && (r.n === 0 ? el[r.list].length >= 2 : el[r.list].length === r.n)) el[r.list] = el[r.list].slice().sort();   // n = 0: any length
   }
   return flat();
 }
 export function canon(main, nodes) {
   const byId = new Map((nodes || []).map((n) => [n.id, n])), el = {};
   for (const [k, v] of Object.entries(main.args || {})) {
-    if (SKIP.has(k)) continue;
+    if (SKIP.has(k) || v === undefined || v === null || (Array.isArray(v) && !v.length)) continue;   // a key without a value (or an empty list) is no key (logic.js reads `a.k != null`, names([]) = none); before 2026-11-03 it was "?" (or "")
     el[k] = Array.isArray(v) ? v.map((x) => one(x, byId)) : [one(v, byId)];
   }
   return finish(main.type, el);
@@ -70,7 +118,7 @@ const sortMention = (x) => { const m = /^mention\((.*)\)$/.exec(x); return m ? "
 /** the gold side of the same form: the args of a gold wire (values string or array) -> key -> string, same order-free rule as canon */
 export function canonWant(type, args) {
   const el = {};
-  for (const [k, v] of Object.entries(args || {})) { if (SKIP.has(k)) continue; el[k] = (Array.isArray(v) ? v : parts(v)).map((x) => sortMention(String(x).toLowerCase())); }   // the gold skips what canon skips (scale)
+  for (const [k, v] of Object.entries(args || {})) { if (SKIP.has(k) || v === undefined || v === null) continue; el[k] = (Array.isArray(v) ? v : parts(v)).map((x) => sortMention(String(x).toLowerCase())); }   // the gold skips what canon skips (scale)
   return finish(type, el);
 }
 /** score one formalizer output against a row (a row, or a wire of a `wires` row, holds its gold arguments in `gold` or `args`): { ok, per: {key: {got, want, ok}} }. A row with `wires` (a message of several clauses)

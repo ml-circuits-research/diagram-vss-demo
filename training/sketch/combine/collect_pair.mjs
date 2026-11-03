@@ -165,7 +165,7 @@ const confSop = (a, R) => {
   for (const [k, r] of Object.entries(a.keys)) { if (r.value == null) continue; c = Math.min(c, r.score); if (r.fill === "written" && R.classes["fill:" + k]) c = Math.min(c, R.classes["fill:" + k].score); }
   return c;
 };
-function sopFeatures(a, R, si, node, msgCut, nUnits) {   // collect_sop.mjs features(), unchanged
+function sopFeatures(a, R, si, node, msgCut, nUnits) {   // collect_sop.mjs features(), unchanged (2026-11-03: with its desc2 heads, a description's second slot, as collect_sop.mjs and neural-confidence.js)
   const b = si, seq = lastRead.seq_logits, K2 = seq.dims[1], row = Array.from(seq.data.slice(b * K2, (b + 1) * K2));
   const nTok = lastRead.token_logits.dims[1], tl = lastRead.token_logits.data;
   const headOf = (key) => row.slice(offs[clsIdx[key]], offs[clsIdx[key]] + RD.classes[clsIdx[key]][1].length);
@@ -196,7 +196,7 @@ function sopFeatures(a, R, si, node, msgCut, nUnits) {   // collect_sop.mjs feat
     else if (r.fill === "context") { h.push(["fill", fl.map(r3), argmax(fl)]); ctx++; }
     else if (r.fill === "description") {
       h.push(["fill", fl.map(r3), argmax(fl)]);
-      for (const k2 of RD.desc_keys) { const dl = headOf("desc:" + k2), pr = softmax(dl), bi = argmax(pr); if (bi !== 0 && r.span.includes(k2 + "=")) { h.push(["desc", dl.map(r3), bi]); dp.push(pr[bi]); const [x1, x2] = top2(pr); dm.push(x1 - x2); } }
+      for (const k2 of (r.descPre === "desc2:" ? RD.desc2_keys : RD.desc_keys) || []) { const dl = headOf((r.descPre || "desc:") + k2), pr = softmax(dl), bi = argmax(pr); if (bi !== 0 && r.span.includes(k2 + "=")) { h.push(["desc", dl.map(r3), bi]); dp.push(pr[bi]); const [x1, x2] = top2(pr); dm.push(x1 - x2); } }
     } else {
       const spans = R.spans[k] || [];
       for (const s of spans) for (const i of wordsOfSpan(s)) if (tagP[i]) { const bi = argmax(tagP[i]), [x1, x2] = top2(tagP[i]); h.push(["tag", tagL[i].map(r3), bi]); tp.push(tagP[i][bi]); tm.push(x1 - x2); }

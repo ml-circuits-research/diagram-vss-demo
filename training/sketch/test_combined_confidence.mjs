@@ -62,5 +62,19 @@ for (const [cut, F] of Object.entries(FX.cuts)) {
   check("bertEdges: start = P(B) of the first word, end = 1 − P(I) of the next word, 1 at the end, null without the cut head",
     a.cut_start === 0.9 && Math.abs(a.cut_end - 0.8) < 1e-15 && b.cut_start === 0.7 && b.cut_end === 1 && c.cut_start === null && c.cut_end === null, JSON.stringify([a, b, c]));
 }
+// the forms of 2026-11-02 (confidence3/NEW_FORMS_AUDIT.md): the agreement of VSS-BERT compares bench-canon.js canon values, which write the
+// engine-true equivalences one way (help defaults, about=undefined, "every shape" of a whole-drawing operation, quantifier of a restyle)
+{
+  const BC = await import(pathToFileURL(path.join(ROOT, "docs/js/bench-canon.js")).href);
+  const rd = (type, args, span) => { const w = { id: "w", type, args }; return { pa: `${type}:${args.action || args.ask || ""}`, got: BC.canon(w, [w]), span, args0: { action: args.action ?? null, name: null, count: null } }; };
+  const text = "how do I add text? tidy up. make all arrows dashed";
+  const S = [rd("question", { ask: "help", topic: "text", aspect: "how", about: undefined }, [0, 17]), rd("command", { action: "improve" }, [19, 26]), rd("command", { action: "set", kind: "edge", quantifier: "all", style: "dashed" }, [28, 50])];
+  const V = [rd("question", { ask: "help", topic: "text", aspect: "how" }, [0, 17]), rd("command", { action: "improve", target: [] }, [19, 26]), rd("command", { action: "set", kind: "edge", style: "dashed" }, [28, 50])];
+  const a = CC.agreement(text, S, V);
+  check("new forms: help with about=undefined, improve with an empty target list, a restyle without quantifier pair and agree", a.every((x, i) => x.partner === i && x.agree === 1), JSON.stringify(a));
+  const V2 = [rd("question", { ask: "help", topic: "delete", aspect: "how" }, [0, 17]), rd("command", { action: "improve", target: "Start" }, [19, 26]), rd("command", { action: "set", kind: "edge", style: "dotted" }, [28, 50])];
+  const b = CC.agreement(text, S, V2);
+  check("new forms: another help topic, one shape instead of the whole drawing, another style pair and disagree", b.every((x, i) => x.partner === i && x.agree === 0), JSON.stringify(b));
+}
 console.log(fails ? `\n${fails} failed` : "\nall passed");
 process.exit(fails ? 1 : 0);
