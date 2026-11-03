@@ -1,0 +1,22 @@
+[12:38:29 +0s] arm BERT-R2, EXTRA_DIRS=llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_gen_1 llm_train/opus_gen_2 llm_train/synth_rules_dd llm_train/synth_rules_ops_dd llm_train/synth_rules_ext_dd llm_train/ops_formulations llm_train/opus_ext_1 llm_train/synth_combo_dd llm_train/synth_short_r2 llm_train/opus_short_r2
+               total        used        free      shared  buff/cache   available
+Mem:              15           7           0           1           8           7
+Swap:             15           0          15
+rows: train 55029, heldout 0, eval_sample1000 4858, eval_hand 40, eval_blind 60, eval_broad 118, eval_seen 300, eval_new_identities 300, eval_heldout_formulations 300
+class keys (25): arrow(3), aspect(5), axis(2), color(18), comparison(2), direction(4), fill(1), kind(2), layer(2), layout(8), notColor(18), outline(19), pairing(3), position(15), position2(4), property(7), quantifier(1), region(6), scheme(12), shape(9), size(5), style(3), superlative(10), template(24), topic(109)
+span keys (17): about, anchor, anchor2, at, count, distance, from, items, items2, label, linked, name, parents, scale, target, title, to; tags 35; number words learned: {'three': '3', 'duplicate': '2', 'twice': '2', 'four': '4', 'two': '2', 'five': '5', 'ten': '10', 'lights': '2', '100px': '100', 'bit': '1.25', 'halve': '0.5', 'increase': '1.25', 'lot': '2', 'less': '0.5', '20px': '20', '2x': '2',
+span keys, training rows: gold values aligned to words
+class keys, training rows (evidence only; the class head needs no alignment): one word expresses the value
+acts 52, class keys 41, span keys ['about', 'anchor', 'anchor2', 'at', 'count', 'distance', 'from', 'items', 'items2', 'label', 'linked', 'name', 'parents', 'scale', 'target', 'title', 'to']; missing: none
+| llm_train/synth_rules_dd | yes | 10468 | 98.6% | 99.8% | 0.0% | 1.4% | 0.0% | 0 | 10468 | 0.2% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.2% | 0.0% | 0.0% | 1.2% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/synth_rules_ops_dd | yes | 1057 | 87.6% | 89.4% | 10.5% | 12.4% | 0.0% | 0 | 1057 | 0.0% | 10.5% | 0.0% | 9.3% | 0.0% | 0.0% | 0.0% | 1.2% | 0.0% | 1.9% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/synth_rules_ext_dd | yes | 3451 | 99.5% | 99.9% | 0.0% | 0.5% | 0.0% | 0 | 3451 | 0.1% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.1% | 0.0% | 0.0% | 0.4% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/synth_combo_dd | yes | 4489 | 99.7% | 99.7% | 0.0% | 0.3% | 0.0% | 0 | 4489 | 0.3% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.3% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/synth_short_r2 | yes | 1997 | 96.0% | 96.0% | 4.0% | 4.0% | 0.0% | 0 | 1997 | 0.0% | 4.0% | 0.0% | 4.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| ALL trained folders | yes | 55029 | 95.4% | 99.5% | 0.4% | 4.6% | 0.0% | 0 | 55029 | 0.1% | 0.4% | 0.0% | 0.3% | 0.0% | 0.0% | 0.1% | 0.0% | 0.0% | 4.1% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| ALL | yes | 57588 | 95.2% | 99.5% | 0.4% | 4.7% | 0.0% | 0 | 57588 | 0.1% | 0.4% | 0.0% | 0.3% | 0.0% | 0.0% | 0.1% | 0.0% | 0.0% | 4.2% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+gate passed: every trained folder round-trips (right, reference only or asked) >= 95.0% with <= 1.0% silent wrong labels
+[12:38:56 +27s] rows done
+[12:38:56 +27s] GPU is ours
+[13:03:05 +1476s] fine-tuning exit 0
+[13:03:06 +1477s] done

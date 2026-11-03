@@ -1,0 +1,76 @@
+cut rows (whole messages, B/I/O per word): train 25267 messages 55024 spans, heldout 0 messages 0 spans, eval_sample1000 1000 messages 4856 spans
+rows: train 55029, heldout 0, eval_sample1000 4858, eval_hand 40, eval_blind 60, eval_broad 118, eval_seen 300, eval_new_identities 300, eval_heldout_formulations 300
+none rows (segments of the rules' segmenter that overlap no gold span): train 0/55029 = 0.0%, heldout 0/0 = 0.0%, eval_sample1000 0/4858 = 0.0%
+class keys (25): arrow(3), aspect(5), axis(2), color(18), comparison(2), direction(4), fill(1), kind(2), layer(2), layout(8), notColor(18), outline(19), pairing(3), position(15), position2(4), property(7), quantifier(1), region(6), scheme(12), shape(9), size(5), style(3), superlative(10), template(24), topic(109)
+span keys (17): about, anchor, anchor2, at, count, distance, from, items, items2, label, linked, name, parents, scale, target, title, to; tags 35; number words learned: {'three': '3', 'duplicate': '2', 'twice': '2', 'four': '4', 'two': '2', 'five': '5', 'ten': '10', 'lights': '2', '100px': '100', 'bit': '1.25', 'halve': '0.5', 'increase': '1.25', 'lot': '2', 'less': '0.5', '20px': '20', '2x': '2', '25px': '25', '30px': '30', 'six': '6', 'twelve': '12', '250px': '250', 'seven': '7', 'nine': '9', 'eight': '8', 'couple': '2', 'eleven': '11', 'pair': '2', '150px': '150', '60px': '60', '5px': '5', '75px': '75', '50px': '50', '200px': '200', '10px': '10', 'circles': '2', '120px': '120', '90px': '90'}
+
+span keys, training rows: gold values aligned to words
+  about       114/  114 = 100.0%  aligned: written 114
+  anchor     8511/ 9486 =  89.7%  aligned: $new: name written 31 · aligned: written 8480 · not written in the request 487 · reference $new (no name written) 30 · reference mention(...) 458
+  anchor2      88/   88 = 100.0%  aligned: written 88
+  at          310/  310 = 100.0%  aligned: written 310
+  count      1358/ 1359 =  99.9%  aligned: number word (co-occurrence) 662 · aligned: written 696 · not written in the request 1
+  distance    592/  595 =  99.5%  aligned: number with a unit 2 · aligned: number word (co-occurrence) 36 · aligned: written 554 · not written in the request 3
+  from      12037/13368 =  90.0%  aligned: $new: name written 126 · aligned: written 11911 · not written in the request 1019 · reference $new (no name written) 83 · reference mention(...) 229
+  items      4773/ 4773 = 100.0%  aligned: written 4773
+  items2       35/   35 = 100.0%  aligned: written 35
+  label      2441/ 2442 = 100.0%  aligned: written 2441 · not written in the request 1
+  linked       32/   33 =  97.0%  aligned: written 32 · not written in the request 1
+  name       2158/ 2158 = 100.0%  aligned: written 2158
+  parents       6/   12 =  50.0%  aligned: written 6 · already tagged for another key 6
+  scale         9/   10 =  90.0%  aligned: number word (co-occurrence) 9 · not written in the request 1
+  target    24353/35043 =  69.5%  aligned: $new: name written 189 · aligned: written 24164 · already tagged for another key 15 · not written in the request 3442 · reference $new (no name written) 263 · reference mention(...) 6970
+  title       273/  273 = 100.0%  aligned: written 273
+  to         6862/ 7615 =  90.1%  aligned: $new: name written 98 · aligned: written 6764 · not written in the request 485 · reference $new (no name written) 90 · reference mention(...) 178
+
+class keys, training rows (evidence only; the class head needs no alignment): one word expresses the value
+  arrow        1334/ 1339 =  99.6%   e.g. line->none 688, with->none 249, way->both 156, lines->none 49, to->none 41
+  aspect        702/  715 =  98.2%   e.g. can->can 143, i->how 125, possible->can 119, use->how 88, example->example 56
+  axis         1300/ 1392 =  93.4%   e.g. horizontally->horizontal 399, vertically->vertical 321, vertical->vertical 157, horizontal->horizontal 119, align->horizontal 98
+  color       11775/11839 =  99.5%   e.g. red->red 1274, green->green 1058, blue->blue 1004, gray->gray 755, orange->orange 753
+  comparison    686/  687 =  99.9%   e.g. than->bigger 459, smaller->smaller 155, more->bigger 16, compact->smaller 9, squeeze->smaller 6
+  direction    1085/ 1175 =  92.3%   e.g. left->left 222, up->up 217, right->right 214, down->down 194, pixels->right 85
+  fill            4/    4 = 100.0%   e.g. zone->light 2, background->light 1, light->light 1
+  kind          466/  466 = 100.0%   e.g. connections->edge 184, arrows->edge 94, count->edge 71, many->edge 51, lines->edge 27
+  layer           3/    3 = 100.0%   e.g. zone->zone 2, background->background 1
+  layout       1391/ 1516 =  91.8%   e.g. row->row 406, grid->grid 278, column->column 233, ring->circle 90, circle->circle 75
+  notColor      319/  407 =  78.4%   e.g. not->red 40, gray->gray 39, white->white 27, brown->brown 20, yellow->yellow 18
+  outline        28/  242 =  11.6%   e.g. outline->none 12, border->brown 9, blue->blue 1, thin->red 1, armed->magenta 1
+  pairing      1799/ 1807 =  99.6%   e.g. chain->chain 436, connect->chain 412, and->chain 409, next->next 200, to->chain 116
+  position     7695/ 9706 =  79.3%   e.g. between->between 980, right->rightOf 957, left->leftOf 839, below->below 761, above->above 759
+  position2      71/   88 =  80.7%   e.g. above->above 20, below->below 16, but->above 5, also->leftOf 5, rack3->below 3
+  property     1165/ 1175 =  99.1%   e.g. color->color 287, size->size 130, shape->shape 116, colour->color 106, label->label 80
+  quantifier    135/  135 = 100.0%   e.g. arrows->all 41, connections->all 27, lines->all 25, links->all 23, every->all 10
+  region         51/   62 =  82.3%   e.g. bottom->bottomLeft 3, process->bottom 2, intro->top 2, c2->bottomRight 2, bathroom->topLeft 1
+  scheme        216/  228 =  94.7%   e.g. rainbow->rainbow 22, classic->classic 18, sunset->sunset 11, warm->warm 9, dusk->sunset 9
+  shape        9845/10028 =  98.2%   e.g. circle->circle 1132, star->star 1051, square->square 937, hexagon->hexagon 804, triangle->triangle 705
+  size         4492/ 4563 =  98.4%   e.g. small->small 932, huge->huge 792, large->large 709, tiny->tiny 573, big->large 514
+  style        1067/ 1076 =  99.2%   e.g. dotted->dotted 497, dashed->dashed 495, with->dashed 28, solid->solid 27, dash->dashed 8
+  superlative  2714/ 2738 =  99.1%   e.g. most->mostConnected 345, closest->closest 345, leftmost->leftmost 273, farthest->farthest 249, rightmost->rightmost 235
+  template     1690/ 1711 =  98.8%   e.g. funnel->funnel 74, heart->heart 64, pyramid->pyramid 60, cycle->cycle 56, list->list 55
+  topic         427/  608 =  70.2%   e.g. templates->template 9, group->group 8, venn->venn 8, reverse->reverse 8, use->gold 8
+
+who fills the name-roles (REF keys ['anchor', 'anchor2', 'from', 'linked', 'target', 'to']; desc keys ['color', 'notColor', 'quantifier', 'recency', 'shape', 'size']): written / context / description of the gold fillers
+  train:
+    anchor    8483 fillers: written 7597 (89.6%) · context 428 (5.0%) · description 458 (5.4%)
+    anchor2     88 fillers: written 88 (100.0%) · context 0 (0.0%) · description 0 (0.0%)
+    from      8533 fillers: written 7763 (91.0%) · context 541 (6.3%) · description 229 (2.7%)
+    linked      33 fillers: written 32 (97.0%) · context 1 (3.0%) · description 0 (0.0%)
+    target   29967 fillers: written 20638 (68.9%) · context 2359 (7.9%) · description 6970 (23.3%)
+    to        6359 fillers: written 5796 (91.1%) · context 385 (6.1%) · description 178 (2.8%)
+    all      53463 fillers: written 41914 (78.4%) · context 3714 (6.9%) · description 7835 (14.7%)
+    requests with 2+ described roles 133 · with 2+ context roles 210 · context fillers that are a list (several names) 1216 {'target': 733, 'from': 269, 'anchor': 94, 'to': 120}
+    context fillers the shared rule (nextContext, gold earlier requests) gives right: 1422/3714 = 38.3%  {'target wrong': 1328, 'anchor right': 142, 'target right': 1031, 'from wrong': 408, 'anchor wrong': 286, 'to right': 116, 'from right': 133, 'to wrong': 269, 'linked wrong': 1}
+  heldout:
+    all          0 fillers: written 0 (0.0%) · context 0 (0.0%) · description 0 (0.0%)
+    requests with 2+ described roles 0 · with 2+ context roles 0 · context fillers that are a list (several names) 0 {}
+    context fillers the shared rule (nextContext, gold earlier requests) gives right: 0/0 = 0.0%  {}
+  eval_sample1000:
+    anchor     915 fillers: written 850 (92.9%) · context 65 (7.1%) · description 0 (0.0%)
+    from       944 fillers: written 873 (92.5%) · context 70 (7.4%) · description 1 (0.1%)
+    target    2805 fillers: written 2481 (88.4%) · context 226 (8.1%) · description 98 (3.5%)
+    to         660 fillers: written 605 (91.7%) · context 53 (8.0%) · description 2 (0.3%)
+    all       5324 fillers: written 4809 (90.3%) · context 414 (7.8%) · description 101 (1.9%)
+    requests with 2+ described roles 0 · with 2+ context roles 25 · context fillers that are a list (several names) 174 {'target': 94, 'to': 23, 'from': 41, 'anchor': 16}
+    context fillers the shared rule (nextContext, gold earlier requests) gives right: 120/414 = 29.0%  {'from right': 12, 'anchor wrong': 44, 'from wrong': 58, 'to wrong': 34, 'target wrong': 158, 'target right': 68, 'anchor right': 21, 'to right': 19}
+skipped: {'bench broad: multi-request message without spans': 10}

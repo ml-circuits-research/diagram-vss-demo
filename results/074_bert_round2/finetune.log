@@ -1,0 +1,50 @@
+NO HELD-OUT: fixed 8 epochs, last epoch kept; numbers below on evaluation sets that are part of the training data are the FIT on the training data, not a test
+base distilbert-base-uncased: 67.4M parameters, device cuda, fp16 True; train 55029 held-out 0; acts 52, class keys 41 (431 classes), tags 35
+cut: 25267 train messages; word pieces per message: median 14, max 287; 0 of 25267 exceed 512 (the words beyond are read as outside every request)
+act none: 0/55029 train rows = 0.0%; weight 1 (not above 40%)
+  scaler.step(opt); scaler.update(); sch.step(); loss_sum += loss.item(); n += 1; step += 1
+epoch 1: loss 1.7137  (no held-out)  (167s)
+epoch 2: loss 0.2493  (no held-out)  (345s)
+epoch 3: loss 0.1541  (no held-out)  (525s)
+epoch 4: loss 0.1100  (no held-out)  (706s)
+epoch 5: loss 0.0736  (no held-out)  (885s)
+epoch 6: loss 0.0528  (no held-out)  (1059s)
+epoch 7: loss 0.0378  (no held-out)  (1232s)
+epoch 8: loss 0.0274  (no held-out)  (1404s)
+  torch.onnx.export(model, (x["input_ids"], x["attention_mask"]), os.path.join(ox, "model.onnx"), dynamo=False, opset_version=14,
+  mask, torch.tensor(torch.finfo(scores.dtype).min)
+WARNING:root:Please consider to run pre-processing before quantization. Refer to example: https://github.com/microsoft/onnxruntime-inference-examples/blob/main/quantization/image_classification/cpu/ReadMe.md 
+
+last epoch (8) kept; there is no held-out score. Per key: right/gold (+ produced where the gold has none), on the sets below (eval_sample1000 is TRAINING data here)
+  blind                  n=   60  requests read right 0.9167  act 1.0000
+      anchor 8/8 · arrow 2/2 · axis 1/1 · color 10/10 · comparison 1/1 · count 1/1 · desc:color 1/1 · desc:notColor 1/1 · desc:quantifier 6/7 +1 · desc:shape 5/5 · direction 2/2 · distance 1/1 · fill:anchor 8/8 · fill:from 7/9 · fill:target 30/30 +1 · fill:to 6/6 · from 7/7 · label 2/2 · layout 1/1 · name 2/2 · pairing 1/2 · position 5/8 · property 3/3 · shape 12/12 · size 4/4 · style 1/1 · superlative 1/1 +1 · target 25/25 · to 6/6
+      name-roles per filler kind (kind read right / value read right / gold): description 5/5/7 (71.4%) · written 46/46/46 (100.0%)  ->  description accuracy 5/7
+  broad                  n=  118  requests read right 0.8644  act 0.9831
+      anchor 15/15 · arrow 2/2 · axis 2/2 · color 29/29 · comparison 1/1 · count 3/3 · desc:color 2/3 · desc:notColor 0/1 · desc:quantifier 8/9 · desc:recency 2/2 · desc:shape 13/13 · direction 3/3 · distance 2/2 · fill:anchor 15/15 · fill:from 16/17 · fill:target 52/54 +1 · fill:to 14/14 · from 14/14 · kind 1/1 · label 4/4 · layout 2/2 · name 5/5 · notColor 1/1 · pairing 1/2 · position 11/17 · property 6/6 · shape 32/33 · size 8/8 · style 2/2 · superlative 2/3 · target 43/43 +1 · to 14/14
+      name-roles per filler kind (kind read right / value read right / gold): context 0/0/1 (0.0%) · description 12/10/13 (76.9%) · written 85/85/86 (98.8%)  ->  description accuracy 10/13
+  hand                   n=   40  requests read right 0.9000  act 1.0000
+      anchor 5/5 · axis 2/2 · color 10/10 · count 1/1 · desc:notColor 0/1 · desc:quantifier 3/4 +2 · desc:shape 4/4 · direction 1/1 · distance 1/1 · fill:anchor 5/5 · fill:from 5/7 · fill:target 19/19 +1 · fill:to 4/4 · from 5/5 · label 1/1 · layout 1/1 · name 2/2 · notColor 1/1 · pairing 1/2 · position 3/4 +1 · property 2/2 · shape 7/7 · size 3/3 · style 1/1 · superlative 2/2 · target 17/17 · to 4/4
+      name-roles per filler kind (kind read right / value read right / gold): description 2/1/4 (25.0%) · written 31/31/31 (100.0%)  ->  description accuracy 1/4
+  heldout_formulations   n=  300  requests read right 0.6933  act 1.0000
+      anchor 37/37 · arrow 10/10 +1 · axis 9/9 +1 · color 98/98 · count 14/14 · desc2:color 0/9 · desc2:recency 1/2 +1 · desc2:shape 0/13 · desc:color 10/46 +2 · desc:notColor 4/19 · desc:quantifier 36/42 · desc:recency 3/3 +2 · desc:shape 87/97 · fill:anchor 53/53 · fill:from 78/85 +3 · fill:target 104/104 +1 · fill:to 76/77 +4 · from 50/50 · label 26/26 · name 27/28 · notColor 1/1 · pairing 3/11 · position 52/81 +1 · shape 92/94 · size 23/24 · style 23/24 · target 62/63 · to 54/54
+      name-roles per filler kind (kind read right / value read right / gold): description 108/45/115 (39.1%) · written 203/202/204 (99.0%)  ->  description accuracy 45/115
+  new_identities         n=  300  requests read right 0.7367  act 0.9900
+      anchor 23/24 +1 · arrow 8/8 · axis 5/5 · color 74/75 · count 3/3 · desc2:color 0/2 · desc2:shape 0/3 · desc:color 10/37 +1 · desc:notColor 0/5 · desc:quantifier 36/47 · desc:recency 3/3 · desc:shape 75/82 · direction 6/6 · distance 4/4 · fill:anchor 38/39 · fill:from 52/65 +1 · fill:target 135/143 +9 · fill:to 39/40 · from 37/40 · label 16/16 · layout 11/11 · name 24/25 · notColor 0/1 · pairing 3/16 · position 36/58 · property 9/9 · shape 67/70 · size 23/23 · style 13/13 · target 99/99 +5 · to 31/31
+      name-roles per filler kind (kind read right / value read right / gold): description 73/37/93 (39.8%) · written 191/190/194 (97.9%)  ->  description accuracy 37/93
+  sample1000             n= 4858  requests read right 0.9774  act 0.9996
+      anchor 850/850 · arrow 154/158 · axis 68/72 · color 1195/1199 · comparison 79/79 · count 54/54 · desc:color 12/18 +1 · desc:notColor 1/13 · desc:quantifier 47/52 +2 · desc:recency 34/36 +1 · desc:shape 53/62 +3 · direction 34/34 +2 · distance 34/34 · fill:anchor 909/915 +1 · fill:from 936/944 · fill:target 2782/2805 +1 · fill:to 655/660 · from 878/878 · kind 36/36 · label 110/110 · layout 101/102 · name 198/198 · notColor 44/54 · pairing 251/252 · position 896/914 · property 49/49 · shape 720/723 · size 502/506 · style 136/139 · superlative 359/359 · target 2484/2484 · to 605/605
+      name-roles per filler kind (kind read right / value read right / gold): context 390/390/414 (94.2%) · description 86/62/101 (61.4%) · written 4806/4806/4809 (99.9%)  ->  description accuracy 62/101
+  seen                   n=  300  requests read right 0.8067  act 0.9967
+      anchor 32/33 · arrow 5/5 · axis 5/5 · color 71/74 · count 9/9 · desc2:color 0/2 · desc2:shape 0/3 · desc:color 12/34 · desc:notColor 0/2 · desc:quantifier 17/28 · desc:recency 3/3 · desc:shape 60/63 · direction 10/10 · distance 9/9 · fill:anchor 40/41 · fill:from 43/47 +3 · fill:target 165/170 +11 · fill:to 34/35 +1 · from 32/33 · label 15/15 · layout 7/7 · name 22/22 · notColor 0/1 · pairing 5/8 · position 35/55 · property 8/8 · shape 59/61 · size 15/16 · style 7/7 · target 127/129 +1 · to 26/26
+      name-roles per filler kind (kind read right / value read right / gold): description 63/34/72 (47.2%) · written 219/216/221 (97.7%)  ->  description accuracy 34/72
+  cut train: n 25267, spans gold 55024, spans predicted 55161, exact 54618, precision 0.9902, recall 0.9926, f1 0.9914, word accuracy 0.9985
+  cut eval_sample1000: n 1000, spans gold 4856, spans predicted 4871, exact 4817, precision 0.9889, recall 0.9920, f1 0.9904, word accuracy 0.9983
+onnx fp32 vs torch: max |diff| token 1.24e-05, seq 1.34e-05, cut 1.51e-05
+node makeReader q8 vs torch on 50 requests: word pieces 50/50, act 50/50, classes 50/50, tags 50/50 (35 tags, 41 class keys)
+node cut() vs torch on 20 whole messages: spans identical 20/20
+{"ids":"50/50","act":"50/50","classes":"50/50","tags":"50/50","cut":"20/20"} 
+
+wrote docs/model/arms/R2/neural/sop-bert-R2 (68.0 MB q8); README.md inside
+node makeReader q8 vs torch on 50 requests: word pieces 50/50, act 50/50, classes 50/50, tags 50/50 (35 tags, 41 class keys)
+node cut() vs torch on 20 whole messages: spans identical 20/20
+{"ids":"50/50","act":"50/50","classes":"50/50","tags":"50/50","cut":"20/20"}
