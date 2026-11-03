@@ -557,6 +557,15 @@ const base = () => { const S = K.createSystem(); run(S, `@a command action=creat
   eq("(a) an ungroup that removes a group: held below the threshold", [U[0].execute, U[0].destructive.question], [false, "Ungroup Intake?"]);
   U = unitsOf("@s command action=set color=red target=Start", 0.1); K.holdDestructive(S.engine, U, { safe: 0.9 });
   eq("a request that removes nothing is not affected", [U[0].execute, !!U[0].destructive], [true, false]);
+  // "Clear the canvas" / "delete everything": an explicit clear is not a description (owner, 2026-11-03); (a) still applies
+  U = unitsOf("@m mention quantifier=all\n@d command action=delete target=$m", NaN); K.holdDestructive(S.engine, U, { gated: false });
+  eq("'Clear the canvas' (the Rules): not held by (b), everything is listed", [U[0].execute, U[0].destructive.everything, U[0].destructive.count], [true, true, n0]);
+  U = unitsOf("@m mention quantifier=all\n@d command action=delete target=$m", 0.5); K.holdDestructive(S.engine, U, { safe: 0.9 });
+  eq("'Clear the canvas' below the safety threshold: held by (a)", [U[0].execute, U[0].reasons[0].text], [false, "a deleting request needs the safety threshold"]);
+  U = unitsOf("@m mention quantifier=all\n@d command action=delete target=$m", 0.95); K.holdDestructive(S.engine, U, { safe: 0.9 });
+  eq("'Clear the canvas' at or above it: executed", U[0].execute, true);
+  { const C = open(); C.engine.run(P("@m mention quantifier=all\n@d command action=delete target=$m")); const after = C.world.state.shapes.length; C.engine.run(P("@u command action=undo"));
+    eq("'Clear the canvas' then 'undo': empty, then everything is back", [after, C.world.state.shapes.length], [0, n0]); }
   // a request that uses a held one is held too
   U = unitsOf("@m mention quantifier=all shape=circle\n@d command action=delete target=$m\n@c command action=create shape=star position=below anchor=$m", NaN); K.holdDestructive(S.engine, U, { gated: false });
   eq("a later request that uses the held description's wires is held too", [U[0].execute, U[1].execute], [false, false]);

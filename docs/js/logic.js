@@ -3130,7 +3130,8 @@ function rulesCut(formalize, input, ctx) {
          held with the reason "a deleting request needs the safety threshold";
      (b) a destructive request whose target is a description (a mention: "the circles", "the background boxes"), not names, and that would
          remove more than one item is held at every level and in every tab (the Rules too), and the reply lists the items: "Delete Start and
-         Done? Write their names, or press Do it anyway.";
+         Done? Write their names, or press Do it anyway."; "everything" ("Clear the canvas", a mention whose only filter is quantifier=all)
+         is not such a description: it says exactly what goes (owner, 2026-11-03), so only (a) applies to it;
      (c) the reply of every held destructive request says exactly what Do it anyway would remove (a dry run of the request on a copy of the
          drawing: the shapes, the links that go with them, the groups, the rules).
    Pure engine-side code (no DOM): ui.js calls holdDestructive on each gate; test_diagram_ops.mjs checks it. */
@@ -3165,7 +3166,12 @@ function destructiveCheck(engine, nodes, before, opts) {
   const mentions = new Set(nodes.filter(n => n.type === 'mention').map(n => n.id));
   const a = main[0].args, action = a.action === 'clear' ? 'delete' : a.action;
   const roleIds = ['target', 'from', 'to'].flatMap(k => refIds(a[k]));
-  const described = roleIds.some(id => mentions.has(id) || (before || []).some(b => b.id === id && b.type === 'mention'));
+  const mentionOf = id => nodes.find(n => n.id === id && n.type === 'mention') || (before || []).find(b => b.id === id && b.type === 'mention');
+  const described = roleIds.some(id => mentions.has(id) || !!mentionOf(id));
+  // "Clear the canvas", "delete everything": a mention with no filter but quantifier=all names its scope exactly (every item on the
+  // drawing), so it is not a description that may match more than the person meant (owner, 2026-11-03: an explicit clear is allowed;
+  // it is one step that Undo brings back). Rule (a), the safety threshold, still applies to it.
+  const everything = described && roleIds.every(id => { const m = mentionOf(id); return m && m.args && m.args.quantifier === 'all' && Object.keys(m.args).every(k => k === 'quantifier'); });
   const gs = groups.filter(g => !shapes.length || action === 'ungroup');   // a group that goes with its shapes is not listed apart
   const count = action === 'delete' ? shapes.length : action === 'disconnect' ? edges.length : action === 'ungroup' ? gs.length : action === 'forget' ? rules : shapes.length + edges.length;
   const linkWords = es => `the link${es.length === 1 ? '' : 's'} ${listing(es)}`;
@@ -3176,7 +3182,7 @@ function destructiveCheck(engine, nodes, before, opts) {
   if (rules) parts.push(`${rules === 1 ? 'the rule' : `all ${rules} rules`}`);
   const removes = parts.length > 1 ? parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1] : parts[0];
   const question = action === 'delete' ? `Delete ${listing(shapes)}?` : action === 'disconnect' ? `Remove ${linkWords(edges)}?` : action === 'ungroup' ? `Ungroup ${listing(gs)}?` : action === 'forget' ? `Forget ${rules === 1 ? 'the rule' : `all ${rules} rules`}?` : `Remove ${removes}?`;
-  return { action, described, count, shapes, edges, groups: gs, rules, question, removes, verb: action === 'ungroup' ? 'ungroup' : action === 'forget' ? 'forget' : action === 'disconnect' ? 'remove' : 'delete' };
+  return { action, described, everything, count, shapes, edges, groups: gs, rules, question, removes, verb: action === 'ungroup' ? 'ungroup' : action === 'forget' ? 'forget' : action === 'disconnect' ? 'remove' : 'delete' };
 }
 const DESTRUCTIVE_REASON = 'a deleting request needs the safety threshold';
 /** the policy above on a gate (ui.js GATES; vss-confidence.js gate): units [{nodes, conf, execute, reasons, dependsOn?}] in message order.
@@ -3195,7 +3201,7 @@ function holdDestructive(engine, units, opts) {
     let chk = null; try { chk = destructiveCheck(engine, u.nodes, before, { overrides: opts.overrides }); } catch (e) { chk = null; }
     if (chk) u.destructive = chk;
     if (u.execute && chk) {
-      const low = gated && !(u.conf >= opts.safe), many = chk.described && chk.count > 1;
+      const low = gated && !(u.conf >= opts.safe), many = chk.described && !chk.everything && chk.count > 1;
       if (low || many) {
         u.execute = false; off.add(u); n++;
         u.reasons = [{ group: 'destructive', text: low ? DESTRUCTIVE_REASON : `it would ${chk.verb} ${chk.count} items that the request describes but does not name` }].concat(low && many ? [{ group: 'destructive', text: `it would ${chk.verb} ${chk.count} items that the request describes but does not name` }] : []);
