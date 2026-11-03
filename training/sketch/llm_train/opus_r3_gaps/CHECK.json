@@ -1,0 +1,30 @@
+{
+ "folder": "training/sketch/llm_train/opus_r3_gaps",
+ "batches": {
+  "01": {
+   "texts": 78,
+   "excluded": {
+    "or3g-0056": "no legend value for a triangle arrangement (proposed: layout=triangle, SESSION_1_ANALYSIS.md); no wire is certain",
+    "or3g-0062": "no legend value for a star arrangement (no star layout or template); no wire is certain"
+   },
+   "kept": 76,
+   "requests": 85,
+   "removed": {},
+   "paraphrases": 79,
+   "paraphrases_read_as_gold": 78,
+   "paraphrase_mismatches": {
+    "or3g-0057#121": "command:arrange: layout: gold row, rules organic"
+   }
+  },
+  "02": {
+   "texts": 60,
+   "excluded": {},
+   "kept": 60,
+   "requests": 62,
+   "removed": {},
+   "paraphrases": 26,
+   "paraphrases_read_as_gold": 26,
+   "paraphrase_mismatches": {}
+  }
+ }
+}

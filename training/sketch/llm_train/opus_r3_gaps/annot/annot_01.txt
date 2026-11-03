@@ -1,0 +1,164 @@
+# annotation of texts/texts_01.jsonl. One line per request: span | trigger | c|q|r|f <action/ask> key=value; key=value | paraphrase the Rules read (or -)
+@or3g-0001
+make me a square | make | c create shape=square | draw a square
+@or3g-0002
+Make me a red circle please | Make | c create shape=circle; color=red | draw a red circle
+@or3g-0003
+make me two triangles | make | c create shape=triangle; count=2 | draw 2 triangles
+@or3g-0004
+make me a big green hexagon | make | c create shape=hexagon; color=green; size=large | draw a big green hexagon
+@or3g-0005
+make me 3 blue squares in a row | make | c create shape=square; count=3; color=blue; layout=row | draw 3 blue squares in a row
+@or3g-0006
+make me a small oval next to the Sink | make | c create shape=ellipse; size=small; position=near; anchor=Sink | draw a small oval next to Sink
+@or3g-0007
+make me a star called Vpn below Firewall | make | c create shape=star; name=Vpn; position=below; anchor=Firewall | draw a star called Vpn below Firewall
+@or3g-0008
+Make me a purple diamond and name it Gem | Make | c create shape=diamond; color=purple; name=Gem | draw a purple diamond named Gem
+@or3g-0009
+make me one orange rectangle | make | c create shape=rectangle; color=orange | draw an orange rectangle
+@or3g-0010
+make me a circle named Music under Gym | make | c create shape=circle; name=Music; position=below; anchor=Gym | draw a circle named Music below Gym
+@or3g-0011
+make me a square | make | c create shape=square | draw a square
+a circle | circle | c create shape=circle | draw a circle
+@or3g-0012
+make me a pink star next to Florist | make | c create shape=star; color=pink; position=near; anchor=Florist | draw a pink star next to Florist
+@or3g-0013
+make me a yellow triangle | make | c create shape=triangle; color=yellow | draw a yellow triangle
+put it left of Start | put | c move target=$new; position=leftOf; anchor=Start | -
+@or3g-0014
+Make Start a square | Make | c set target=Start; shape=square | make Start a square
+@or3g-0015
+make Done a triangle | make | c set target=Done; shape=triangle | make Done a triangle
+make me a new triangle too | make | c create shape=triangle | draw a triangle
+@or3g-0016
+make me four small circles above Router | make | c create shape=circle; count=4; size=small; position=above; anchor=Router | draw 4 small circles above Router
+@or3g-0017
+Make me a huge gray rectangle in the center | Make | c create shape=rectangle; color=gray; size=huge; position=center | draw a huge gray rectangle in the center
+@or3g-0018
+make me a hexagon, teal, near the Stove | make | c create shape=hexagon; color=teal; position=near; anchor=Stove | draw a teal hexagon near Stove
+@or3g-0019
+make me a tiny black dot on the top right | make | c create shape=circle; color=black; size=tiny; position=topRight | draw a tiny black circle in the top right
+@or3g-0020
+make me a diamond between Start and Check | make | c create shape=diamond; position=between; anchor=Start,Check | draw a diamond between Start and Check
+@or3g-0021
+make me two more squares | make | c create shape=square; count=2 | draw 2 squares
+@or3g-0022
+make me an ellipse | make | c create shape=ellipse | draw an ellipse
+@or3g-0023
+do me a blue square | do | c create shape=square; color=blue | draw a blue square
+@or3g-0024
+do me a red star above Done please | do | c create shape=star; color=red; position=above; anchor=Done | draw a red star above Done
+@or3g-0025
+a yellow triangle | triangle | c create shape=triangle; color=yellow | draw a yellow triangle
+linked with a line to Check | linked | c connect from=$new; to=Check; arrow=none | -
+@or3g-0026
+a red circle | circle | c create shape=circle; color=red | draw a red circle
+connected to Done | connected | c connect from=$new; to=Done | -
+@or3g-0027
+add a text element that says Welcome | add | c create shape=text; label=Welcome | add a text "Welcome"
+@or3g-0028
+add a text item saying Draft v2 at the bottom | add | c create shape=text; label=Draft v2; position=bottom | add a text "Draft v2" at the bottom
+@or3g-0029
+put a text box that says Hello World in the middle | put | c create shape=text; label=Hello World; position=center | add a text "Hello World" in the center
+@or3g-0030
+add a text that says Phase 1 above the Island | add | c create shape=text; label=Phase 1; position=above; anchor=Island | add a text "Phase 1" above Island
+@or3g-0031
+add a red text element that says Do not touch below Db | add | c create shape=text; color=red; label=Do not touch; position=below; anchor=Db | add a red text "Do not touch" below Db
+@or3g-0032
+write a text item with the words Save the date at the top | write | c create shape=text; label=Save the date; position=top | add a text "Save the date" at the top
+@or3g-0033
+add a small text that reads Lunch is at 12 next to Lunch | add | c create shape=text; size=small; label=Lunch is at 12; position=near; anchor=Lunch | add a small text "Lunch is at 12" next to Lunch
+@or3g-0034
+add a big text element saying Order process | add | c create shape=text; size=large; label=Order process | add a big text "Order process"
+@or3g-0035
+I need a text element that says Level 1, top left | need | c create shape=text; label=Level 1; position=topLeft | add a text "Level 1" in the top left
+@or3g-0036
+add a text box with Hello | add | c create shape=text; label=Hello | add a text "Hello"
+@or3g-0037
+add a text element hello world | add | c create shape=text; label=hello world | add a text "hello world"
+@or3g-0038
+add a text item "Version 3" in the bottom right | add | c create shape=text; label=Version 3; position=bottomRight | add a text "Version 3" in the bottom right
+@or3g-0039
+Add a blue text that says Internet above Router | Add | c create shape=text; color=blue; label=Internet; position=above; anchor=Router | add a blue text "Internet" above Router
+@or3g-0040
+add a text element saying Thank you! under Budget | add | c create shape=text; label=Thank you!; position=below; anchor=Budget | add a text "Thank you!" below Budget
+@or3g-0041
+make a text element that says Approved next to Check | make | c create shape=text; label=Approved; position=near; anchor=Check | add a text "Approved" next to Check
+@or3g-0042
+add a text box saying Fridge goes here | add | c create shape=text; label=Fridge goes here | add a text "Fridge goes here"
+put it below Fridge | put | c move target=$new; position=below; anchor=Fridge | -
+@or3g-0043
+add two text items, one that says Morning | add | c create shape=text; label=Morning | add a text "Morning"
+one that says Afternoon | one | c create shape=text; label=Afternoon | add a text "Afternoon"
+@or3g-0044
+text element that says Notes, huge, in the center | text | c create shape=text; label=Notes; size=huge; position=center | add a huge text "Notes" in the center
+@or3g-0045
+place all the shapes in the form of a circle | place | c arrange target=mention(quantifier=all); layout=circle | arrange everything in a circle
+@or3g-0046
+arrange all the elements in the shape of a circle | arrange | c arrange target=mention(quantifier=all); layout=circle | arrange everything in a circle
+@or3g-0047
+put all the elements in a circle | put | c arrange target=mention(quantifier=all); layout=circle | arrange everything in a circle
+@or3g-0048
+place all the items in the form of a row | place | c arrange target=mention(quantifier=all); layout=row | arrange everything in a row
+@or3g-0049
+arrange all the elements in the form of a column | arrange | c arrange target=mention(quantifier=all); layout=column | arrange everything in a column
+@or3g-0050
+place everything in the form of a grid | place | c arrange target=mention(quantifier=all); layout=grid | arrange everything in a grid
+@or3g-0051
+place all elements in the shape of a ring | place | c arrange target=mention(quantifier=all); layout=circle | arrange everything in a circle
+@or3g-0052
+place Venue, Caterer and Florist in the form of a circle | place | c arrange target=Venue,Caterer,Florist; layout=circle | arrange Venue, Caterer and Florist in a circle
+@or3g-0053
+arrange all the elements so they form a circle | arrange | c arrange target=mention(quantifier=all); layout=circle | arrange everything in a circle
+@or3g-0054
+place all the elements in the form of a tree | place | c arrange target=mention(quantifier=all); layout=tree | arrange everything as a tree
+@or3g-0055
+place all the elements to form a heart | place | c arrange target=mention(quantifier=all); template=heart | arrange everything as a heart
+@or3g-0056 EXCLUDE no legend value for a triangle arrangement (proposed: layout=triangle, SESSION_1_ANALYSIS.md); no wire is certain
+@or3g-0057
+put Math, Physics and Gym in the form of a row | put | c arrange target=Math,Physics,Gym; layout=row | arrange Math, Physics and Gym in a row
+@or3g-0058
+place all the shapes in a circle shape | place | c arrange target=mention(quantifier=all); layout=circle | arrange everything in a circle
+@or3g-0059
+arrange all the circles in the form of a column | arrange | c arrange target=mention(quantifier=all,shape=circle); layout=column | arrange all the circles in a column
+@or3g-0060
+lay out all the elements in the form of a grid | lay | c arrange target=mention(quantifier=all); layout=grid | arrange everything in a grid
+@or3g-0061
+place all the elements in the form of a circle | place | c arrange target=mention(quantifier=all); layout=circle | arrange everything in a circle
+connect them | connect | c connect from=mention(quantifier=all) | connect all
+@or3g-0062 EXCLUDE no legend value for a star arrangement (no star layout or template); no wire is certain
+@or3g-0063
+place all the elements in the form of a row | place | c arrange target=mention(quantifier=all); layout=row | arrange everything in a row
+@or3g-0064
+connect all the elements | connect | c connect from=mention(quantifier=all) | connect all
+@or3g-0065
+connect all the shapes | connect | c connect from=mention(quantifier=all) | connect all
+@or3g-0066
+connect everything | connect | c connect from=mention(quantifier=all) | connect everything
+@or3g-0067
+connect all the circles | connect | c connect from=mention(quantifier=all,shape=circle) | connect all the circles
+@or3g-0068
+connect all of them to each other | connect | c connect from=mention(quantifier=all); pairing=all | -
+@or3g-0069
+connect all the elements in a chain | connect | c connect from=mention(quantifier=all); pairing=chain | connect everything in a chain
+@or3g-0070
+connect all the items one after the other | connect | c connect from=mention(quantifier=all); pairing=chain | connect everything in a chain
+@or3g-0071
+connect all the squares with dashed lines | connect | c connect from=mention(quantifier=all,shape=square); style=dashed; arrow=none | connect all the squares with dashed lines
+@or3g-0072
+connect all elements to Done | connect | c connect from=mention(quantifier=all); to=Done | connect everything to Done
+@or3g-0073
+connect Router to everything | connect | c connect from=Router; to=mention(quantifier=all) | connect Router to everything
+@or3g-0074
+connect all the shapes with arrows | connect | c connect from=mention(quantifier=all) | connect all
+@or3g-0075
+make lines between all the elements | lines | c connect from=mention(quantifier=all); arrow=none | connect everything with lines
+@or3g-0076
+link all the items together | link | c connect from=mention(quantifier=all) | connect all
+@or3g-0077
+connect every element to the next one | connect | c connect from=mention(quantifier=all); pairing=next | -
+@or3g-0078
+connect all the shapes | connect | c connect from=mention(quantifier=all) | connect all
+then arrange them in a circle | arrange | c arrange target=mention(quantifier=all); layout=circle | arrange everything in a circle
