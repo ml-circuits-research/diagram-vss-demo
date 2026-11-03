@@ -128,7 +128,7 @@ with sync_playwright() as p:
     pg.screenshot(path=f"{OUT}/5_details.png")
     check("4. details show the SOP-BERT gate, its level and threshold", f"SOP-BERT gate: safety threshold (it acts from confidence {T_COST:.4f})" in det and "executed 1 of 2 requests" in det and "not executed" in det, det[:600])
     check("4. the cut head was not run again with the BERT cutter", "run once more" not in det, "")
-    check("4. the details say SOP-BERT used its own confidence alone (VSS did not read the message)", "VSS did not read this message, so SOP-BERT used its own confidence alone (confidence/sop-bert.json)" in det, det[det.find("SOP-BERT gate"):][:400])
+    check("4. the details say SOP-BERT used its own confidence alone because VSS is not available, and a held request's reason says so first", "VSS is not available, so SOP-BERT used its own confidence alone (confidence/sop-bert.json)" in det and "not executed: VSS is not available, so SOP-BERT decided alone and is not sure" in det, det[det.find("SOP-BERT gate"):][:400])
     pg.keyboard.press("Escape"); pg.wait_for_timeout(300)
 
     pg.click("[data-sub=settings]"); pg.wait_for_timeout(300)

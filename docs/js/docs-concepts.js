@@ -96,8 +96,9 @@ right while asking about the rest. The Rules, executing everything, do 57.8% rig
 the one it replaced; the differences on this test part are within their intervals, except SOP-BERT measured with the previous confidence
 recipe on fresh2 alone: 14.4 → 35.9, +21.6 [9.7, 33.2].</p>
 <p class="note">The tabs: VSS and SOP-BERT run the chosen recipes; VSS-BERT runs the recipe kept in <code>confidence/combined.json</code>
-(32.6; the chosen variant, 34.8, is not exported); 3 readers acts by default only when all three agree (26.8), its “bolder” level is the
-fitted vote (31.8).</p>
+since 2026-11-03 the chosen variant without the act prior (34.8; the plain recipe scored 32.6); 3 readers acts by default only when all three
+agree (26.8), its “fitted vote” level is the fitted vote (31.8: it does less, 43.3% of the requests right instead of 47.4%, and is
+confidently wrong less often, 2.6% instead of 4.2%).</p>
 <p class="note">Cautions: the test part had been read for earlier studies (exploratory); the recipe of each reader was chosen among 16–22
 variants on 195–368 calibration messages, so the calibration scores are optimistic and the test part is the check
 (<code>results/072_measure/refit/records/confidence3_report.md</code>, branch <code>gpu-runs</code>).</p>
@@ -811,7 +812,8 @@ target and the list of every shape counted as the same. The tab <b>3 readers</b>
   <li><b>All three agree</b> (the default): the request is done.</li>
   <li><b>Not all three</b>: it is not done; the reply says who agrees and what the other one reads, e.g. “the Rules and VSS agree, SOP-BERT reads
   layout ‘circle’ instead of no layout”, and offers <b>Do it anyway</b>.</li>
-  <li><b>Bolder</b> (3 readers › Settings): a fitted vote, a confidence from the reader’s own numbers and who agrees with whom, at its safety threshold.</li>
+  <li><b>Fitted vote</b> (3 readers › Settings): a confidence from the reader’s own numbers and who agrees with whom, at its safety threshold.
+  On the messages it was fitted and tested on it does less than “all three agree” and is confidently wrong less often (below).</li>
 </ul>
 ${says('arrange all in a circle', 'distribute all vertically')}
 
@@ -844,10 +846,10 @@ world prior, commands and questions with their own threshold; SOP-BERT with comm
 its act prior shrunk more (k = 50) and two thresholds. Each at its safety threshold: cost score · done right · confidently wrong (of what it
 executed).</p>
 <div class="tw"><table>
-<thead><tr><th>Situation</th><th>VSS tab</th><th>SOP-BERT tab</th><th>VSS-BERT tab</th><th>3 readers, all agree</th><th>3 readers, bolder</th></tr></thead>
+<thead><tr><th>Situation</th><th>VSS tab</th><th>SOP-BERT tab</th><th>VSS-BERT tab</th><th>3 readers, all agree</th><th>3 readers, fitted vote</th></tr></thead>
 <tbody>
-<tr><td>Calibration (out of fold)</td><td class="num">23.0 · 36.6% · 3.6%</td><td class="num">39.4 · 44.3% · 1.1%</td><td class="num">38.1 · 41.8% · 0.9%</td><td class="num">31.3 · 47.4% · 3.3%</td><td class="num">39.9 · 43.6% · 0.8%</td></tr>
-<tr><td>Test part</td><td class="num">22.9 · 37.8% · 3.8%</td><td class="num">33.4 · 44.8% · 2.5%</td><td class="num">32.6 · 42.3% · 2.2%</td><td class="num">26.8 · 47.4% · 4.2%</td><td class="num">31.8 · 43.3% · 2.6%</td></tr>
+<tr><td>Calibration (out of fold)</td><td class="num">23.0 · 36.6% · 3.6%</td><td class="num">39.4 · 44.3% · 1.1%</td><td class="num">39.9 · 42.3% · 0.6%</td><td class="num">31.3 · 47.4% · 3.3%</td><td class="num">39.9 · 43.6% · 0.8%</td></tr>
+<tr><td>Test part</td><td class="num">22.9 · 37.8% · 3.8%</td><td class="num">33.4 · 44.8% · 2.5%</td><td class="num">34.8 · 42.8% · 1.8%</td><td class="num">26.8 · 47.4% · 4.2%</td><td class="num">31.8 · 43.3% · 2.6%</td></tr>
 </tbody></table></div>
 
 <h2 id="tv-verdicts">The verdicts</h2>
@@ -858,11 +860,18 @@ interval). “Better” only when the whole interval is above 0.</p>
 <tbody>
 <tr><td>VSS, with the votes</td><td class="num">22.9 vs 4.8</td><td class="num">+18.2 [11.9, 24.7]</td><td><b>better</b></td></tr>
 <tr><td>SOP-BERT, with the votes</td><td class="num">33.4 vs 29.3</td><td class="num">+4.0 [−2.4, 9.8]</td><td>not shown</td></tr>
-<tr><td>VSS-BERT, without its act prior</td><td class="num">34.8 vs 32.6</td><td class="num">+2.2 [−1.3, 6.0]</td><td>not shown (the tab keeps the plain one)</td></tr>
+<tr><td>VSS-BERT, without its act prior</td><td class="num">34.8 vs 32.6</td><td class="num">+2.2 [−1.3, 6.0]</td><td>not shown; chosen on the calibration part (39.9 vs 38.1), the tab uses it since 2026-11-03</td></tr>
 <tr><td>3 readers (fitted) vs VSS-BERT</td><td class="num">31.8 vs 32.6</td><td class="num">−0.8 [−5.1, 3.4]</td><td>not shown</td></tr>
 </tbody></table></div>
-<p>So the VSS and SOP-BERT tabs use the confidence with the votes (chosen on the calibration messages by the rule written before); VSS-BERT
-keeps its own.</p>
+<p>So the VSS and SOP-BERT tabs use the confidence with the votes, and VSS-BERT its confidence without the act prior (each chosen on the
+calibration messages by the rule written before).</p>
+<h2 id="tv-default">Why “all three agree” stays the default</h2>
+<p>The rule: execute only what you are sure of. On the messages it was fitted and tested on (requests of the BERT cutter), the fitted vote is
+confidently wrong less often than “all three agree”: on the test part 20 of 775 executed requests (2.6%) against 36 of 863 (4.2%), 1.6
+points fewer [0.5, 2.7]; on the short commands of the test part alone 4.4% against 5.5% (not shown either way, [−2.5, 5.1]). It also does less
+(43.3% of the requests right instead of 47.4%). It is not the default because the page cuts requests with the VSS cutter by default, on
+which the fitted vote was not fitted, and there it holds requests all three read the same, such as “arrange all in a circle” (confidence
+0.92, threshold 0.95). It is one click away in 3 readers › Settings.</p>
 
 <h2 id="tv-limits">Limits</h2>
 <ul>

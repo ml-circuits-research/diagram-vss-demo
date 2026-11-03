@@ -102,6 +102,9 @@ async function combinedSpec() {
   return cconf.spec;
 }
 const CNAMES = { sop: 'SOP-BERT', vss: 'VSS' };
+/** the request's text as written on a wire rebuilt from a reader's wire (VSS-BERT, 3 readers): the help world answers from its words
+ *  ("how do I label an arrow?"; logic.js help plugin reads node.src, else node.unit.src) */
+const keepSrc = (x, y) => { const src = x.src || (x.unit && x.unit.src); if (src) Object.defineProperty(y, 'src', { value: src, enumerable: false, configurable: true }); };
 /** VSS-BERT reads one message: the two readings on the BERT cut, paired, the combined confidence and the gate -> {nodes, notes, gate, ms, ...} */
 async function combinedRead(rd, text, rec, ctx) {
   const t0 = performance.now(), CC = await ccP, NC = await ncP, VCm = await vcP;
@@ -142,7 +145,7 @@ async function combinedRead(rd, text, rec, ctx) {
   const mapV = (from, val) => K.isRef(val) ? { ref: idOf.get(from + ':' + val.ref) || val.ref } : Array.isArray(val) ? val.map(y => mapV(from, y)) : val;
   const units = items.map((it, index) => {
     const nodes = it.nodes0.map(x => { const y = { id: idOf.get(it.from + ':' + x.id), type: x.type, args: Object.fromEntries(Object.entries(x.args).map(([a, b]) => [a, mapV(it.from, b)])) };
-      if (x.span) Object.defineProperty(y, 'span', { value: x.span, enumerable: false, configurable: true }); return y; });
+      if (x.span) Object.defineProperty(y, 'span', { value: x.span, enumerable: false, configurable: true }); keepSrc(x, y); return y; });
     const src = text.slice(it.req.span[0], it.req.span[1]).trim() || it.req.node.src || '';
     return { index, item: it, from: it.from, src, conf: it.conf, execute: it.execute, nodes, reasons: [], dependsOn: [] };
   });
@@ -195,7 +198,7 @@ function combinedSettingsHTML() {
   <p class="intro"><button type="button" class="btn" data-help="two-readers">Two readers together</button></p>
   <h3 class="sub">When VSS-BERT acts</h3>
   ${['cost5', 'cost', 'cost20'].map(l => opt(l, costAbout(l))).join('')}${opt('all', 'no gate: every request is executed (SOP-BERT’s reading on a pair, the one that exists otherwise)')}
-  ${B ? `<p class="note">Fitted on the calibration part of the fresh2 and short3 messages (368 messages), out of fold (training/sketch/combine/COMBINED_READER.md, refitted for the readers of 2026-11-03). Cost score on that part: VSS-BERT ${cal.score.toFixed(1)}, SOP-BERT alone ${alone.sop.calibration_oof_score.toFixed(1)}, VSS alone ${alone.vss.calibration_oof_score.toFixed(1)}. On the test part (already read before; exploratory): ${te.score.toFixed(1)}, ${pc(te.confidently_wrong)} of what it executed wrong, ${pc(te.done_right)} of the requests done right. The clean confirmation needs a fresh set of messages (fresh3). Model <code>confidence/combined.json</code>${cconf.url && /[?&]v=/.test(cconf.url) ? `, version <code>${escH(decodeURIComponent(cconf.url.split('v=').pop()))}</code>` : ''}.</p>` : ''}`;
+  ${B ? `<p class="note">Fitted on the calibration part of the fresh2 and short3 messages (368 messages), out of fold (training/sketch/combine/COMBINED_READER.md, refitted for the readers of 2026-11-03${spec.variant && spec.variant !== '(a)' ? `; variant ${escH(spec.variant)}: the combined confidence reads neither how often SOP-BERT’s action nor how often VSS’s world is read right, the variant chosen on the calibration part by the rule of training/sketch/confidence3/PLAN.md` : ''}). Cost score on that part: VSS-BERT ${cal.score.toFixed(1)}, SOP-BERT alone ${alone.sop.calibration_oof_score.toFixed(1)}, VSS alone ${alone.vss.calibration_oof_score.toFixed(1)}. On the test part (already read before; exploratory): ${te.score.toFixed(1)}, ${pc(te.confidently_wrong)} of what it executed wrong, ${pc(te.done_right)} of the requests done right. The clean confirmation needs a fresh set of messages (fresh3). Model <code>confidence/combined.json</code>${cconf.url && /[?&]v=/.test(cconf.url) ? `, version <code>${escH(decodeURIComponent(cconf.url.split('v=').pop()))}</code>` : ''}.</p>` : ''}`;
 }
 // Three readers voting (owner, 2026-11-02 evening; training/sketch/confidence3/PLAN.md, RESULT.md; docs/js/vote-confidence.js, model
 // docs/model/confidence/vote3.json, versioned, written by training/sketch/confidence3/export3.mjs). The Rules, VSS and SOP-BERT read the same
@@ -206,8 +209,10 @@ function combinedSettingsHTML() {
 //  - VSS tab: columnVss (VSS's own signals, no world prior, + whether SOP-BERT and the Rules read it the same), method (c) of RESULT.md;
 //  - SOP-BERT tab: columnSop (its own signals and act prior + the votes of VSS and the Rules), method (c);
 //  - "3 readers" tab (id vote3): by default a request is executed only when all three read it the same (no fitted weight: on the
-//    calibration messages such a request was right 98.4% of the time, on the test part 97.2%); "bolder": the fitted vote (vote3.json
-//    columns.vote3) at its cost-score threshold; execute all. "2 of 3 agree" is not offered: measured, it is not safe (RESULT.md section 2).
+//    calibration messages such a request was right 96.7% of the time, on the test part 95.8%); "fitted vote": the fitted vote (vote3.json
+//    columns.vote3) at its cost-score threshold (it executes less than "all three agree" and is confidently wrong less often on the BERT
+//    cut it was fitted on; the page cuts with the VSS cutter by default, see voteSettingsHTML); execute all. "2 of 3 agree" is not offered:
+//    measured, it is not safe (RESULT.md section 2).
 // Every vote reuses the readings the three tabs made of this message (rec.readers): nothing is read twice. Thresholds per type (commands,
 // questions) and weights are the file's. The fitted columns were fitted on the BERT cut (SOP-BERT, 3 readers) and the VSS cut (VSS).
 const VOTE_OPTS = { agreement: 'engine' };
@@ -222,8 +227,8 @@ async function voteSpec() {
   return vconf.spec;
 }
 const VKEY = 'sop.vote3.gate';
-let voteGate = ['fitted', 'all'].includes(store.get(VKEY)) ? store.get(VKEY) : 'agree3';   // 'agree3' (default) | 'fitted' (bolder) | 'all'
-const voteLabel = l => l === 'agree3' ? 'all three agree' : l === 'fitted' ? 'bolder' : 'execute all';
+let voteGate = ['fitted', 'all'].includes(store.get(VKEY)) ? store.get(VKEY) : 'agree3';   // 'agree3' (default) | 'fitted' (the fitted vote) | 'all'
+const voteLabel = l => l === 'agree3' ? 'all three agree' : l === 'fitted' ? 'fitted vote' : 'execute all';
 const unitOfNode = (n, text) => { if (n.span) return [n.span[0], n.span[1]]; const k = n.src ? text.indexOf(n.src) : -1; return k < 0 ? [0, 0] : [k, k + n.src.length]; };
 const paOf = x => `${x.type}:${x.args.action || x.args.ask || ''}`;
 const args0Of = x => ({ action: x.args.action ?? null, name: typeof x.args.name === 'string' ? x.args.name : null, count: x.args.count ?? null });
@@ -284,13 +289,31 @@ function columnWhy(self, mine, others, names, own) {
   for (const w of (own || []).slice(0, 2)) out.push({ text: `${self} itself: ${w.text}` });
   return out;
 }
+/** why a reader's gate has no votes for this message, in plain words: the other learned reader still loading, not available, or ready but
+ *  without a reading of it; the Rules did not read it */
+function noVoteWhy(votes, other, otherRd) {
+  votes = votes || {};
+  if (!votes[other === 'SOP-BERT' ? 'sop' : 'vss']) {
+    const st = other === 'SOP-BERT' ? nState : vssState;
+    return isReady(otherRd) ? `${other} did not read this message` : ['checking', 'loading', 'idle'].includes(st) ? `${other} is still loading` : `${other} is not available`;
+  }
+  return !votes.rules ? 'the Rules did not read this message' : null;
+}
+/** a gate without the votes (noVoteWhy): the reason of every request held by the reader's own confidence starts with why there were no votes,
+ *  "SOP-BERT is still loading, so VSS decided alone and is not sure: …" (a request held because it uses one not done keeps its reason) */
+function aloneReasons(g, why, self) {
+  if (!g) return g;
+  for (const u of g.units || []) if (!u.execute && u.sure === false)
+    u.reasons = [{ text: `${why}, so ${self} decided alone and is not sure${u.reasons.length ? ': ' + u.reasons.map(r => r.text).join('; ') : ''}` }];
+  return g;
+}
 /** VSS's gate (GATES.vss): columnVss when SOP-BERT and the Rules have read the message, else VSS's own confidence alone (vss.json) */
 GATES.vss = async (v, rec, r) => {
   if (!window.VSSFormalizer || !window.VSSFormalizer.gate) return null;
   const VT = await vtP; let spec = null; try { spec = await voteSpec(); } catch (e) { console.error(e); }
   const votes = rec ? await votesOf(rec) : null;
-  const why = !VT || !spec ? 'the model of the votes (confidence/vote3.json) could not be loaded' : !votes.sop ? 'SOP-BERT did not read this message' : !votes.rules ? 'the Rules did not read this message' : null;
-  if (why) { const g = await window.VSSFormalizer.gate(v, vssGate); if (g) g.fallback = `${why}, so VSS used its own confidence alone (confidence/vss.json)`; return g; }
+  const why = !VT || !spec ? 'the model of the votes (confidence/vote3.json) could not be loaded' : noVoteWhy(votes, 'SOP-BERT', RD.neural);
+  if (why) { const g = aloneReasons(await window.VSSFormalizer.gate(v, vssGate), why, 'VSS'); if (g) g.fallback = `${why}, so VSS used its own confidence alone (confidence/vss.json)`; return g; }
   const VCm = await vcP, C = spec.columns.vss, m = voteMsg(votes, RD.vss), items = VT.columnVss(spec, m, vssGate, VOTE_OPTS);
   const own = VCm ? VT.ownSpec(C.model) : null;
   return columnGate(await window.VSSFormalizer.gate(v, 'all'), items, m.vss, vssGate, C.levels, held => held.length ? columnWhy('VSS', m.vss[held[0].j], [
@@ -302,8 +325,8 @@ GATES.neural = async (n, rec, r) => {
   const NC = await ncP; if (!NC || !n || !n.joint) return null;
   const VT = await vtP; let spec = null; try { spec = await voteSpec(); } catch (e) { console.error(e); }
   const votes = rec ? await votesOf(rec) : null;
-  const why = !VT || !spec ? 'the model of the votes (confidence/vote3.json) could not be loaded' : !votes.vss ? 'VSS did not read this message' : !votes.rules ? 'the Rules did not read this message' : null;
-  if (why) { const g = await neuralOwnGate(n); if (g) g.fallback = `${why}, so SOP-BERT used its own confidence alone (confidence/sop-bert.json)`; return g; }
+  const why = !VT || !spec ? 'the model of the votes (confidence/vote3.json) could not be loaded' : noVoteWhy(votes, 'VSS', RD.vss);
+  if (why) { const g = aloneReasons(await neuralOwnGate(n), why, 'SOP-BERT'); if (g) g.fallback = `${why}, so SOP-BERT used its own confidence alone (confidence/sop-bert.json)`; return g; }
   const level = neuralGate || 'cost', C = spec.columns.sop, m = voteMsg(votes, RD.neural), items = VT.columnSop(spec, m, level, VOTE_OPTS), own = VT.ownSpec(C.model);
   for (const it of items) { const s = m.sop[it.j]; if (level !== 'all' && (!s.sig || s.sig.detail.noCut)) { it.conf = NaN; it.execute = false; it.noSignals = true; } }
   return columnGate(NC.gate(null, n, 'all'), items, m.sop, level, C.levels, held => {
@@ -347,7 +370,7 @@ async function voteRead(rd, text, rec, ctx) {
   };
   const units = G.map((g, index) => {
     const nodes = g.nodes0.map(x => { const y = { id: idOf.get(g.from + ':' + x.id), type: x.type, args: Object.fromEntries(Object.entries(x.args).map(([a, b]) => [a, mapV(g.from, b)])) };
-      if (x.span) Object.defineProperty(y, 'span', { value: x.span, enumerable: false, configurable: true }); return y; });
+      if (x.span) Object.defineProperty(y, 'span', { value: x.span, enumerable: false, configurable: true }); keepSrc(x, y); return y; });
     const src = text.slice(g.req.span[0], g.req.span[1]).trim() || g.req.node.src || '';
     const execute = g.items.every(i => i.execute), held = g.items.filter(i => !i.execute);
     const conf = rule ? NaN : Math.min(...g.items.map(i => i.conf)), t = rule ? NaN : Math.max(...g.items.map(i => i.threshold));
@@ -380,7 +403,7 @@ function voteSettingsHTML() {
   const pc = v => (v * 100).toFixed(1) + '%', C = spec && spec.columns.vote3, L = C && C.levels.cost;
   const opt = (l, about) => `<label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:pointer"><input type="radio" name="vote-gate" value="${l}" ${l === voteGate ? 'checked' : ''}> <span><b>${escH(voteLabel(l))}</b>${l === 'agree3' ? ' (default)' : ''}: ${escH(about)}</span></label>`;
   const fitted = !spec ? (vconf.error ? `the model could not be loaded (${vconf.error.message || vconf.error}): every request is asked` : 'loading the model…')
-    : `the fitted vote: a confidence from SOP-BERT’s or VSS’s own numbers and who agrees with whom; it acts when the confidence is at least ${L.command.toFixed(4)} for commands and ${L.question.toFixed(4)} for questions, the thresholds that score best when ${costWords(10)}; on the calibration messages (out-of-fold scores) ${pc(C.calibration_oof.done_right)} of the requests done right, ${pc(C.calibration_oof.confidently_wrong)} of what it executed wrong; on the test part ${pc(C.test.done_right)} and ${pc(C.test.confidently_wrong)}. It was fitted on long messages only and does worse on short commands`;
+    : `the fitted vote: a confidence from SOP-BERT’s or VSS’s own numbers and who agrees with whom; it acts when the confidence is at least ${L.command.toFixed(4)} for commands and ${L.question.toFixed(4)} for questions, the thresholds that score best when ${costWords(10)}; on the calibration messages (out-of-fold scores) ${pc(C.calibration_oof.done_right)} of the requests done right, ${pc(C.calibration_oof.confidently_wrong)} of what it executed wrong; on the test part ${pc(C.test.done_right)} and ${pc(C.test.confidently_wrong)} (all three agree: 47.4% and 4.2%): it does less and is wrong less often. It was fitted on requests of the BERT cutter; with the VSS cutter (the default cut) it is used as is, and it then holds requests all three read the same, such as “arrange all in a circle”, which is why it is not the default`;
   return `<h3 class="sub">3 readers</h3>${readerFacts(RD.vote3)}
   <p class="intro">3 readers is not a new model: it is the Rules, VSS and SOP-BERT reading the same requests (the readings of their tabs, reused) and voting. Two readings agree when they would make the editor do the same thing (an arrange or distribute list in any order; “all” = no target = every shape). By default a request is executed only when <b>all three</b> read it the same: on the calibration messages such requests were right 96.7% of the time, on the test part 95.9%. When only two agree, a request is right 34–89% of the time (calibration and test part), depending on which two: too often wrong, so it asks, says who reads it differently, and offers <b>Do it anyway</b>. “2 of 3 agree” is not a level: executing it scored −23.6 (calibration) and −22.9 (test part) against +31.3 and +26.8 for “all three agree” (cost score; the refit of 2026-11-03, results/072_measure/refit/records/confidence3_report.md on branch gpu-runs).</p>
   <p class="intro"><button type="button" class="btn" data-help="three-readers">Three readers voting</button> <button type="button" class="btn" data-help="two-readers">Two readers together</button></p>
@@ -1264,7 +1287,7 @@ rpanel.addEventListener('change', ev => {   // VSS-BERT › Settings: safety thr
   sysNote(`VSS-BERT now ${gateDoes(combGate)}.`);
   if (sub === 'settings') renderSub();
 });
-rpanel.addEventListener('change', ev => {   // 3 readers › Settings: all three agree (default), bolder (the fitted vote) or execute all
+rpanel.addEventListener('change', ev => {   // 3 readers › Settings: all three agree (default), the fitted vote or execute all
   if (ev.target.name !== 'vote-gate') return;
   voteGate = ['fitted', 'all'].includes(ev.target.value) ? ev.target.value : 'agree3'; store.set(VKEY, voteGate === 'agree3' ? null : voteGate);
   sysNote(`3 readers now ${voteGate === 'agree3' ? 'executes a request only when the Rules, VSS and SOP-BERT read it the same' : voteGate === 'fitted' ? `executes a request when the fitted vote’s confidence clears its threshold (${costWords(10)})` : 'executes every request (no gate)'}.`);

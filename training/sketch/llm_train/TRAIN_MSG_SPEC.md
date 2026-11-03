@@ -136,7 +136,8 @@ section 7 (free text, templates, help), the coordinator's decisions of 2026-11-0
 - **Several to one**: "connect A and B to C" -> one connect from "A,B", to "C". "connect A and B" (no to) -> from "A", to "B" (the Rules'
   reading, kept). "undo twice" -> `count=2` (the Rules' reading, kept).
 - **Free text** -> `create shape=text label=… [size] [color] [position] [anchor]`: a quoted text with nothing to be written on ("add a
-  title "Q3" at the top", "write "Draft" in the corner", "title the diagram "X""). A text placed next to a shape is a free text ("write "START
+  title "Q3" at the top", "write "Draft" in the corner", "title the diagram "X""), or the words after a text noun without quotes ("add a big
+  title Roadmap" -> label Roadmap, size large; "add a note saying check later"). A text placed next to a shape is a free text ("write "START
   HERE" above Room1" -> position above, anchor Room1); "write "X" on Done" is a label of Done.
 - **Templates** -> `create template=… items=…` (items comma-joined as written, without quotes; a courtesy word at the end is not an item),
   `title`, `scheme`, `color`, `size`, `position`, `axis`, `count` ("a 5-step process" -> count 5, no items), `items2` (second list),

@@ -619,8 +619,10 @@ at least <code>threshold</code> and at least <code>margin</code> above the secon
   named / called / titled / labeled, and capitalised words inside a sentence (names: corrected only toward a name on the canvas, “Strat” → “Start”).</dd>
 </dl>
 <p class="note"><code>vocab.json</code> names its sources: the 7 worlds of the previous registry (arm VSS-G: lexicon, catalog, value and trigger
-phrases). It was not rebuilt with the 9 worlds of 2026-11-03; their new words (“untangle”, “straighten”, “title”) are still targets through the
-legend’s cue words that the page adds at run time.</p>
+phrases). It was rebuilt once from the 9 worlds of 2026-11-03 and set aside: those worlds were trained on data with misspelled commands, and
+some misspellings became words of their lexicons (at least 33: “cerate”, “conected”, “biger”, “yelow”, …), so the checker took them as known
+words and corrected typos into them (“conenct” → “conect”); its selection run was also worse (492 right, 49 wrong, 498 left against 560, 54,
+457). The new words (“untangle”, “straighten”, “title”) are targets through the legend’s cue words that the page adds at run time.</p>
 `, 'A VSA spell checker over character n-grams corrects near misses before any reader sees the message.');
 
 /* ============================================================ models */
@@ -894,9 +896,9 @@ that scored best there; cost score = right − 10 × (executed wrong + extras ex
 <tr><td>Recipe chosen on the calibration part</td><td>votes as inputs, no world prior, a threshold for commands and one for questions</td><td>votes as inputs, a threshold for commands and one for questions</td><td>its own confidence, no act prior</td><td>votes as inputs, act prior shrunk with k = 50, two thresholds</td></tr>
 </tbody></table></div>
 <p>What the tabs run: VSS and SOP-BERT use the chosen recipes (<code>vote3.json</code>, columns <code>vss</code> and <code>sop</code>); VSS-BERT
-uses <code>combined.json</code>, which holds the recipe without the variants (its act prior kept: 32.6 on the test part; the chosen variant
-without the prior scored 34.8 and is not exported); 3 readers acts by default only when all three read a request the same (no fitted weight:
-26.8), and its “bolder” level is the fitted vote (31.8).</p>
+uses <code>combined.json</code>, since 2026-11-03 the chosen variant without the act prior (34.8 on the test part; the plain recipe scored
+32.6); 3 readers acts by default only when all three read a request the same (no fitted weight: 26.8), and its “fitted vote” level is the
+fitted vote (31.8; confidently wrong 2.6% instead of 4.2%, done right 43.3% instead of 47.4%).</p>
 <p>With the confidence recipe of the previous release, on fresh2 alone (405 test messages; <code>results/072_measure/COMPARE.md</code>, paired
 bootstrap, 1000 resamples): SOP-BERT 14.4 → <b>35.9</b>, +21.6 [9.7, 33.2], a gain the interval shows; VSS 12.1 → 10.1, −2.0 [−8.9, 4.9],
 not shown either way. On short3 alone: SOP-BERT 0.2 → 4.2, +3.9 [−4.8, 13.8]; VSS 6.2 → 0.0 (with its own confidence alone it asks

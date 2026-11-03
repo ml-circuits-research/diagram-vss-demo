@@ -502,8 +502,8 @@ function normalize(T, p) {
   if (!items.length) { const n = clamp(Math.round(+p.count || T.def), T.min, T.max); items = Array.from({ length: n }, (_, i) => `${T.word} ${i + 1}`); }
   if (T.name === 'matrix') while (items.length < 4) items.push(`${T.word} ${items.length + 1}`);
   const notes = [];
-  if (items.length > T.max) { notes.push(`a ${T.t.toLowerCase()} takes at most ${T.max} items; I used the first ${T.max}`); items = items.slice(0, T.max); }
-  if (items.length < T.min) { notes.push(`a ${T.t.toLowerCase()} needs at least ${T.min} items; I added placeholders`); while (items.length < T.min) items.push(`${T.word} ${items.length + 1}`); }
+  if (items.length > T.max) { notes.push(`a ${T.t.toLowerCase()} takes at most ${T.max} item${T.max === 1 ? '' : 's'}; I used the first ${T.max}`); items = items.slice(0, T.max); }
+  if (items.length < T.min) { notes.push(`a ${T.t.toLowerCase()} needs at least ${T.min} item${T.min === 1 ? '' : 's'}; I added placeholders`); while (items.length < T.min) items.push(`${T.word} ${items.length + 1}`); }
   return { P: { items, items2: items2.slice(0, T.uses2 ? (T.max2 || T.max) : 0), title: p.title != null && String(p.title).trim() ? String(p.title).trim() : null, parents: list(p.parents), scheme: SCHEMES[p.scheme] ? p.scheme : null, color: p.color || null, axis: p.axis === 'vertical' ? 'vertical' : 'horizontal' }, notes };
 }
 const boxOf = e => ({ x1: e.x - e.w / 2, y1: e.y - e.h / 2, x2: e.x + e.w / 2, y2: e.y + e.h / 2 });

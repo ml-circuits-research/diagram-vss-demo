@@ -17,11 +17,13 @@
 #   1. combine/collect_pair.mjs   records of SOP-BERT and VSS on both cuts (+ units.jsonl)                 -> $REC
 #   2. confidence3/collect_rules3.mjs   records of the Rules on their own cut and on both cuts' units     -> $REC
 #   3. fresh2/fit_report.mjs (ARM) + fresh2/export_confidence.mjs   -> docs/model/confidence/vss.json, sop-bert.json
-#   4. combine/combined_report.mjs EXPORT=1                         -> docs/model/confidence/combined.json (+ cost5 / cost20 levels in
+#   4. combine/combined_report.mjs EXPORT=1 VARIANT=d2              -> docs/model/confidence/combined.json (+ cost5 / cost20 levels in
 #                                                                      vss.json and sop-bert.json), combine/combined_parity.json
 #   5. confidence3/fit3.mjs EXPORT=1                                -> docs/model/confidence/vote3.json, confidence3/vote3_parity.json,
 #                                                                      the report $REC/confidence3_report.md (variants, selection, test part)
 #   6. the parity tests of the browser code against the fits; then training/sketch/stamp_models.py (STAMP=0 skips it).
+# VSS-BERT's variant: d2 (no prior input), the one fit3.mjs's selection rule chose in the refit of 2026-11-03; COMB_VARIANT=a exports the
+# plain recipe. When fit3.mjs's report chooses another VSS-BERT variant after a refit, change the default here.
 # Reports: $REC/fresh2_report.md, $REC/combined_report.md, $REC/confidence3_report.md. Wall time on this machine: ~4 min (2 CPU).
 set -euo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd); cd "$ROOT"
@@ -49,7 +51,7 @@ ln -sf "$(realpath "$REC/vss_own.jsonl")" "$REC/vss_arm.jsonl"; ln -sf "$(realpa
 ARM=refit EXPORT="$REC/fit" node $SK/fresh2/fit_report.mjs "$REC" "$REC/fresh2_report.md" $DATA > "$REC/log_fit_report.txt" 2>&1 || { tail -20 "$REC/log_fit_report.txt"; exit 1; }
 node $SK/fresh2/export_confidence.mjs --vss "$REC/fit/vss_arm.json" --bert "$REC/fit/sop_arm_own.json" --arm-vss refit --arm-bert refit
 echo "[$(date +%T)] 4. VSS-BERT (combined_report)"
-EXPORT=1 node $SK/combine/combined_report.mjs "$REC" "$REC/combined_report.md" $DATA
+EXPORT=1 VARIANT=${COMB_VARIANT:-d2} node $SK/combine/combined_report.mjs "$REC" "$REC/combined_report.md" $DATA
 echo "[$(date +%T)] 5. three readers (fit3)"
 EXPORT=1 node $SK/confidence3/fit3.mjs "$REC" "$REC/confidence3_report.md" $DATA
 echo "[$(date +%T)] 6. parity tests"

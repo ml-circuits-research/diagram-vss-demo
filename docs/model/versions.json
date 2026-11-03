@@ -1,7 +1,7 @@
 {
  "about": "Content versions of the model folders and files the demo loads (training/sketch/stamp_models.py). The loader appends ?v=<version>.",
  "files": {
-  "confidence/combined.json": "f713151dfd",
+  "confidence/combined.json": "cde5858555",
   "confidence/sop-bert.json": "5cf55e09dd",
   "confidence/vote3.json": "481030b1eb",
   "confidence/vss.json": "a04a20d678",

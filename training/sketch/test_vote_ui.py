@@ -14,7 +14,7 @@ transformers.js 3.8.1 from training/laptop/node_modules in place of cdn.jsdelivr
      ("… agree, SOP-BERT reads … instead", "only … found this request", …), with a "Do it anyway" button that runs it; undo takes it back;
   4. the VSS and SOP-BERT tabs use the confidence with the votes: their details show the thresholds of vote3.json per type ("for commands and
      … for questions, with the votes of the other two readers");
-  5. Settings of 3 readers: all three agree (checked) / bolder (the fitted vote, with vote3.json's thresholds) / execute all; "bolder" is kept
+  5. Settings of 3 readers: all three agree (checked) / fitted vote (with vote3.json's thresholds) / execute all; "fitted vote" is kept
      in localStorage and is still chosen after a reload of the page; the default removes it. VSS and SOP-BERT › Settings: bolder / safety
      threshold / more careful / execute all, with the thresholds of vote3.json;
   6. no page error.
@@ -197,15 +197,15 @@ with sync_playwright() as p:
     levels = pg.evaluate("() => [...document.querySelectorAll('#rpanel input[name=vote-gate]')].map(x => [x.value, x.checked])")
     lab = pg.evaluate("() => [...document.querySelectorAll('#rpanel input[name=vote-gate]')].map(x => x.parentElement.textContent)")
     pg.screenshot(path=f"{OUT}/6_settings.png", full_page=True)
-    check("5. settings: all three agree / bolder / execute all, all three agree checked", levels == [["agree3", True], ["fitted", False], ["all", False]], str(levels))
-    check("5. bolder shows the fitted vote's thresholds from vote3.json", f"{T3['command']:.4f}" in lab[1] and f"{T3['question']:.4f}" in lab[1] and "bolder" in lab[1], lab[1])
+    check("5. settings: all three agree / fitted vote / execute all, all three agree checked", levels == [["agree3", True], ["fitted", False], ["all", False]], str(levels))
+    check("5. the fitted vote shows its thresholds from vote3.json", f"{T3['command']:.4f}" in lab[1] and f"{T3['question']:.4f}" in lab[1] and "fitted vote" in lab[1], lab[1])
     check("5. the page says plainly that 2 of 3 is not used", "“2 of 3 agree” is not a level" in pg.evaluate("() => document.querySelector('#rpanel').textContent"), "")
     pg.check("#rpanel input[name=vote-gate][value='fitted']"); pg.wait_for_timeout(200)
     kept = pg.evaluate("() => { try { return localStorage.getItem('sop.vote3.gate'); } catch (e) { return 'no storage'; } }")
-    check("5. bolder is kept in localStorage", kept == "fitted", str(kept))
+    check("5. the fitted vote is kept in localStorage", kept == "fitted", str(kept))
     r6 = send(pg, "Make Check orange.")
     det6 = details(pg, 1)
-    check("5. with bolder the 3 readers gate uses the fitted vote's thresholds", f"3 readers gate: bolder (it acts from confidence {T3['command']:.4f} for commands and {T3['question']:.4f} for questions)" in det6, section(det6, "3 readers", None)[:300])
+    check("5. with the fitted vote the 3 readers gate uses its thresholds", f"3 readers gate: fitted vote (it acts from confidence {T3['command']:.4f} for commands and {T3['question']:.4f} for questions)" in det6, section(det6, "3 readers", None)[:300])
     pg.keyboard.press("Escape"); pg.wait_for_timeout(300)
     # VSS and SOP-BERT settings: the cost levels with vote3.json's thresholds
     for tab, name, col in (("vss", "vss-gate", "vss"), ("neural", "neural-gate", "sop")):
@@ -224,7 +224,7 @@ with sync_playwright() as p:
     pg.click("[data-sub=settings]"); pg.wait_for_timeout(300)
     pg.wait_for_function("() => document.querySelectorAll('#rpanel input[name=vote-gate]').length === 3", timeout=60000)
     after = pg.evaluate("() => [...document.querySelectorAll('#rpanel input[name=vote-gate]')].map(x => [x.value, x.checked])")
-    check("5. after a reload bolder is still chosen", after == [["agree3", False], ["fitted", True], ["all", False]], str(after))
+    check("5. after a reload the fitted vote is still chosen", after == [["agree3", False], ["fitted", True], ["all", False]], str(after))
     pg.check("#rpanel input[name=vote-gate][value='agree3']"); pg.wait_for_timeout(200)
     kept = pg.evaluate("() => { try { return localStorage.getItem('sop.vote3.gate'); } catch (e) { return 'no storage'; } }")
     check("5. back to the default, nothing stored", kept is None, str(kept))

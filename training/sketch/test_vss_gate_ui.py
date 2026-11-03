@@ -110,7 +110,7 @@ with sync_playwright() as p:
     det = pg.evaluate("() => (document.querySelector('#sbody') || {}).textContent || ''")
     pg.screenshot(path=f"{OUT}/5_details.png")
     check("details show the gate: executed and not executed requests with confidences", f"VSS gate: safety threshold (it acts from confidence {T_COST:.4f})" in det and "not executed" in det and "confidence" in det, det[:300])
-    check("details say VSS used its own confidence alone (SOP-BERT did not read the message)", "SOP-BERT did not read this message, so VSS used its own confidence alone (confidence/vss.json)" in det, det[det.find("VSS gate"):][:400])
+    check("details say VSS used its own confidence alone because SOP-BERT is not available, and a held request's reason says so first", "SOP-BERT is not available, so VSS used its own confidence alone (confidence/vss.json)" in det and "not executed: SOP-BERT is not available, so VSS decided alone and is not sure" in det, det[det.find("VSS gate"):][:400])
     pg.keyboard.press("Escape"); pg.wait_for_timeout(300)
 
     # settings: the precision level control
