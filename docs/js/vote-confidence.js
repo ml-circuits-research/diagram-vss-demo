@@ -18,27 +18,37 @@ import { pairValue, percentile, bertEdges } from "./combined-confidence.js";
 export const FILE = "confidence/vote3.json";
 export const LEVELS = ["cost5", "cost", "cost20"], DEFAULT_LEVEL = "cost";
 
-const LIST_FREE = new Set(["command:arrange", "command:distribute"]);
-/** d1, engine-true equivalence of a canonical reading (key -> lower-case string) for the agreement of two readers. logic.js: arrange sorts
- *  its shapes by creation order and distribute by coordinate before using them, so for these two actions the order of a target list does not
- *  change what is done; and no target = every shape on the canvas, so "no target", the unfiltered mention(quantifier=all) and the list of
- *  every canvas name are the same request. Nothing else is made equivalent (align uses its first target as the base). -> a new object */
+/** the requests whose target list logic.js takes as a set of shapes, where no target = every shape (alRun): arrange (not with a template:
+ *  a template, and a tree / radial of shapes without links, uses the order given), distribute, align with a direction, and the whole-drawing
+ *  operations of HIGH_LEVEL_OPS.md (training/sketch/confidence3/NEW_FORMS_AUDIT.md: improve ... untangle were missing until 2026-11-03, so two
+ *  readings of "tidy up" that wrote "every shape" two ways disagreed) */
+const LIST_FREE = new Set(["command:arrange", "command:distribute", ...["improve", "respace", "snap", "fit", "flip", "sort", "groupBy", "equalize", "straighten", "untangle"].map((a) => "command:" + a)]);
+const listFree = (pa, got) => (LIST_FREE.has(pa) && !(pa === "command:arrange" && got.template != null)) || (pa === "command:align" && got.direction != null);
+/** the arrow restyles, reverse and the labels of every arrow (kind=edge quantifier=all) that name no arrow by its ends (logic.js edgesOf,
+ *  labelEdge): the arrows at the target shapes; no target = every arrow */
+const edgeAll = (pa, got) => (pa === "command:reverse" || ((pa === "command:set" || pa === "command:resize") && got.kind === "edge") || (pa === "command:label" && got.kind === "edge" && got.quantifier === "all")) && got.from == null && got.to == null;
+/** d1, engine-true equivalence of a canonical reading (key -> lower-case string) for the agreement of two readers. logic.js: for the requests
+ *  of listFree the order of a target list does not change what is done (arrange sorts its shapes by reading order, distribute by coordinate,
+ *  the others take them as a set); and no target = every shape on the canvas, so "no target", the unfiltered mention(quantifier=all) and the
+ *  list of every canvas name are the same request. The same for the arrows of edgeAll (the arrows at every shape = every arrow). Nothing else
+ *  is made equivalent here (align without a direction uses its first target as the base); bench-canon.js canon writes the other engine-true
+ *  equivalences one way. -> a new object */
 export function engineNorm(got, pa, names) {
-  if (!LIST_FREE.has(pa)) return got;
+  if (!listFree(pa, got) && !edgeAll(pa, got)) return got;
   const g = { ...got }, t = g.target;
   const all = (names || []).map((n) => String(n).toLowerCase()).sort().join(",");
   if (t == null || t === "mention(quantifier=all)") g.target = "*all*";
   else if (!t.includes("mention(") && !t.includes("$new")) { const s = t.split(",").sort().join(","); g.target = all && s === all ? "*all*" : s; }
   return g;
 }
-/** a reading {pa, got} with its arrange / distribute target list as the engine takes it on a drawing (docs/js/ui.js engineView: logic.js
- *  alRun / itemsOnly / expandGroups): a group name stands for its members, the background and zone panels are not moved (a list of panels
- *  only is kept as it is, as itemsOnly does). view = {groups: Map(lower-case group name -> lower-case member names), panels: Set(lower-case
- *  names)}. engineNorm then compares the list as a set and with every shape. On the messages the votes were fitted on (no groups, no
- *  panels) it changes nothing. -> a new reading (or the same one) */
+/** a reading {pa, got} with its target list (listFree: arrange, distribute, the whole-drawing operations) as the engine takes it on a drawing
+ *  (docs/js/ui.js engineView: logic.js alRun / itemsOnly / expandGroups): a group name stands for its members, the background and zone panels
+ *  are not moved (a list of panels only is kept as it is, as itemsOnly does). view = {groups: Map(lower-case group name -> lower-case member
+ *  names), panels: Set(lower-case names)}. engineNorm then compares the list as a set and with every shape. On the messages the votes were
+ *  fitted on (no groups, no panels) it changes nothing. -> a new reading (or the same one) */
 export function engineTargets(x, view) {
   const t = x.got && x.got.target;
-  if (!LIST_FREE.has(x.pa) || t == null || t.includes("mention(") || t.includes("$new")) return x;
+  if (!listFree(x.pa, x.got) || t == null || t.includes("mention(") || t.includes("$new")) return x;
   const all = [...new Set(t.split(",").flatMap((n) => (view.groups && view.groups.get(n)) || [n]))], kept = all.filter((n) => !(view.panels && view.panels.has(n)));
   return Object.assign({}, x, { got: Object.assign({}, x.got, { target: (kept.length ? kept : all).sort().join(",") }) });
 }
@@ -151,6 +161,14 @@ export function readsInstead(label, x, ref, names, mode = "engine") {
   return `${label} ${verb(label)} ${keys.slice(0, 3).map((k) => one(k, gx)).join(", ")} instead of ${keys.slice(0, 3).map((k) => one(k, gr)).join(", ")}`;
 }
 const listing = (a) => (a.length <= 1 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1]);
+/** what another reader read over the same words when it has no reading of the same act to pair with (the pairing pairs one act only, so
+ *  "the Rules did not find this request" would be said of a request the Rules read as another action, e.g. label instead of connect): the
+ *  first reading of `list` whose unit shares a letter or digit of `mine`'s unit and whose act differs, else null. list, mine: [{pa, span}] */
+export function otherAct(text, list, mine) {
+  if (!list || !mine || !mine.span) return null;
+  const al = /[A-Za-z0-9]/, ov = (a, b) => { for (let i = Math.max(a[0], b[0]); i < Math.min(a[1], b[1]); i++) if (al.test(String(text)[i])) return true; return false; };
+  return list.find((x) => x && x.span && x.pa !== mine.pa && ov(x.span, mine.span)) || null;
+}
 /** who reads a request the same way as the reading `mine` of reader `self`, in one plain sentence. others: [{label, agree (0/1), reading
  *  ({pa, got}) or null (that reader found no such request)}]. -> "the Rules and VSS agree, SOP-BERT reads layout ‘circle’ instead of no layout" */
 export function agreementWords(self, mine, others, names, mode = "engine") {

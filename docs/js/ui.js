@@ -200,7 +200,7 @@ function combinedSettingsHTML() {
 // Three readers voting (owner, 2026-11-02 evening; training/sketch/confidence3/PLAN.md, RESULT.md; docs/js/vote-confidence.js, model
 // docs/model/confidence/vote3.json, versioned, written by training/sketch/confidence3/export3.mjs). The Rules, VSS and SOP-BERT read the same
 // requests (the shared cut); their readings of a request are paired, and two readings agree when every canonical value (bench-canon.js) is
-// equal after engineNorm (d1: what logic.js does with them: an arrange / distribute list in any order, "no target" = "all" = every name on
+// equal after engineNorm (d1: what logic.js does with them: an arrange / distribute / whole-drawing operation's list in any order, "no target" = "all" = every name on
 // the canvas). The Rules are edited often: comparing after engineNorm keeps a change in how they write the same request from counting as a
 // disagreement. Uses:
 //  - VSS tab: columnVss (VSS's own signals, no world prior, + whether SOP-BERT and the Rules read it the same), method (c) of RESULT.md;
@@ -294,8 +294,8 @@ GATES.vss = async (v, rec, r) => {
   const VCm = await vcP, C = spec.columns.vss, m = voteMsg(votes, RD.vss), items = VT.columnVss(spec, m, vssGate, VOTE_OPTS);
   const own = VCm ? VT.ownSpec(C.model) : null;
   return columnGate(await window.VSSFormalizer.gate(v, 'all'), items, m.vss, vssGate, C.levels, held => held.length ? columnWhy('VSS', m.vss[held[0].j], [
-    { label: 'SOP-BERT', agree: held[0].agree_sop, reading: held[0].partner_sop >= 0 ? m.sop[held[0].partner_sop] : null },
-    { label: 'the Rules', agree: held[0].agree_rules, reading: held[0].partner_rules >= 0 ? m.rules[held[0].partner_rules] : null }], m.names, own ? VCm.reasons(own, m.vss[held[0].j].node.unit) : []) : []);
+    { label: 'SOP-BERT', agree: held[0].agree_sop, reading: held[0].partner_sop >= 0 ? m.sop[held[0].partner_sop] : VT.otherAct(m.text, m.sop, m.vss[held[0].j]) },
+    { label: 'the Rules', agree: held[0].agree_rules, reading: held[0].partner_rules >= 0 ? m.rules[held[0].partner_rules] : VT.otherAct(m.text, m.rules, m.vss[held[0].j]) }], m.names, own ? VCm.reasons(own, m.vss[held[0].j].node.unit) : []) : []);
 };
 /** SOP-BERT's gate (GATES.neural): columnSop when VSS and the Rules have read the message, else its own confidence alone (sop-bert.json) */
 GATES.neural = async (n, rec, r) => {
@@ -310,8 +310,8 @@ GATES.neural = async (n, rec, r) => {
     if (!held.length) return [];
     const it = held[0], s = m.sop[it.j];
     if (it.noSignals) return [{ text: !s.sig ? 'the model’s head outputs were not available, so its confidence is not known' : 'the cut head’s output was not available, so its confidence is not known' }];
-    return columnWhy('SOP-BERT', s, [{ label: 'VSS', agree: it.agree_vss, reading: it.partner_vss >= 0 ? m.vss[it.partner_vss] : null },
-      { label: 'the Rules', agree: it.agree_rules, reading: it.partner_rules >= 0 ? m.rules[it.partner_rules] : null }], m.names, NC.reasons(own, s.sig));
+    return columnWhy('SOP-BERT', s, [{ label: 'VSS', agree: it.agree_vss, reading: it.partner_vss >= 0 ? m.vss[it.partner_vss] : VT.otherAct(m.text, m.vss, s) },
+      { label: 'the Rules', agree: it.agree_rules, reading: it.partner_rules >= 0 ? m.rules[it.partner_rules] : VT.otherAct(m.text, m.rules, s) }], m.names, NC.reasons(own, s.sig));
   });
 };
 /** the "3 readers" tab reads one message: the three tabs' readings, paired, voted on, gated -> {nodes, notes, gate, units, ms, ...} */
@@ -342,8 +342,8 @@ async function voteRead(rd, text, rec, ctx) {
     if (!ok) return [{ text: !VT ? 'the code of the votes could not be loaded' : 'the model of the votes (confidence/vote3.json) could not be loaded' }];
     const has = c => it.pattern.includes(c);
     if (it.pattern === 'R+V+S') return [{ text: 'all three readers read it the same, but the fitted vote’s confidence is below its threshold' }];
-    if (it.from === 'vss') return [{ text: VT.agreementWords('VSS', m.vss[it.j], [{ label: 'the Rules', agree: has('R'), reading: it.rules >= 0 ? m.rules[it.rules] : null }, { label: 'SOP-BERT', agree: 0, reading: it.sop >= 0 ? m.sop[it.sop] : null }], names, 'engine') }];
-    return [{ text: VT.agreementWords('SOP-BERT', m.sop[it.j], [{ label: 'the Rules', agree: has('R'), reading: it.rules >= 0 ? m.rules[it.rules] : null }, { label: 'VSS', agree: has('V'), reading: it.vss >= 0 ? m.vss[it.vss] : null }], names, 'engine') }];
+    if (it.from === 'vss') return [{ text: VT.agreementWords('VSS', m.vss[it.j], [{ label: 'the Rules', agree: has('R'), reading: it.rules >= 0 ? m.rules[it.rules] : VT.otherAct(m.text, m.rules, m.vss[it.j]) }, { label: 'SOP-BERT', agree: 0, reading: it.sop >= 0 ? m.sop[it.sop] : VT.otherAct(m.text, m.sop, m.vss[it.j]) }], names, 'engine') }];
+    return [{ text: VT.agreementWords('SOP-BERT', m.sop[it.j], [{ label: 'the Rules', agree: has('R'), reading: it.rules >= 0 ? m.rules[it.rules] : VT.otherAct(m.text, m.rules, m.sop[it.j]) }, { label: 'VSS', agree: has('V'), reading: it.vss >= 0 ? m.vss[it.vss] : VT.otherAct(m.text, m.vss, m.sop[it.j]) }], names, 'engine') }];
   };
   const units = G.map((g, index) => {
     const nodes = g.nodes0.map(x => { const y = { id: idOf.get(g.from + ':' + x.id), type: x.type, args: Object.fromEntries(Object.entries(x.args).map(([a, b]) => [a, mapV(g.from, b)])) };

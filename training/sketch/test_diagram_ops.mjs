@@ -318,7 +318,8 @@ const base = () => { const S = K.createSystem(); run(S, `@a command action=creat
 }
 // ---------- the Rules readings fixed after the synthetic data's rejects (training/sketch/synth/rejects.jsonl, class R), one per cause ----------
 {
-  const { canon } = await import("../../docs/js/bench-canon.js");
+  const { canon } = await import("../../docs/js/bench-canon.js");   // the canonical form the benchmark compares: since 2026-11-03 it writes engine-true
+  // equivalences one way (confidence3/NEW_FORMS_AUDIT.md): a chain of 2+ shapes without pairing=chain, "every shape" of a whole-drawing operation
   const S0 = K.createSystem();
   const read = (t, names) => { const f = S0.formalize(t, { names: names || [], last: [] }); return f.nodes.filter((x) => x.type !== "mention").map((x) => `${x.type} ${Object.entries(canon(x, f.nodes)).map(([k, v]) => `${k}=${v}`).join(" ")}`).join(" ; "); };
   const ALL = "target=mention(quantifier=all)";
@@ -339,12 +340,12 @@ const base = () => { const S = K.createSystem(); run(S, `@a command action=creat
     ["remove all connections", [], "command action=disconnect quantifier=all"],
     ["make the circles red and arrange them all in a row", [], "command action=set color=red target=mention(quantifier=all,shape=circle) ; command action=arrange layout=row target=mention(quantifier=all,shape=circle)"],
     // 2. "A to B and B to C" with every connect verb
-    ["tie Db to Billing and Billing to Queue", ["Db", "Billing", "Queue"], "command action=connect from=db,billing,queue pairing=chain"],
-    ["attach Jupiter to Pluto, Pluto to Comet", ["Jupiter", "Pluto", "Comet"], "command action=connect from=jupiter,pluto,comet pairing=chain"],
+    ["tie Db to Billing and Billing to Queue", ["Db", "Billing", "Queue"], "command action=connect from=db,billing,queue"],
+    ["attach Jupiter to Pluto, Pluto to Comet", ["Jupiter", "Pluto", "Comet"], "command action=connect from=jupiter,pluto,comet"],
     // 3. several to one; "connect A and B" stays from A to B (convention kept)
     ["hook Hr and Coo to Ceo", ["Hr", "Coo", "Ceo"], "command action=connect from=hr,coo to=ceo"],
     ["connect Api and Db", ["Api", "Db"], "command action=connect from=api to=db"],
-    ["wire Web to Api, then Api to Cache and Api to Db", ["Web", "Api", "Cache", "Db"], "command action=connect from=web,api,cache pairing=chain ; command action=connect from=api to=db"],   // A to B, B to C: one chain (the existing chain merge)
+    ["wire Web to Api, then Api to Cache and Api to Db", ["Web", "Api", "Cache", "Db"], "command action=connect from=web,api,cache ; command action=connect from=api to=db"],   // A to B, B to C: one chain (the existing chain merge)
     // 4. a valid word is not corrected into a cue
     ["what does the ellipse point to?", [], "question ask=neighbors target=mention(shape=ellipse)"],
     ["is Kafka part of any group?", ["Kafka"], "question ask=groupof target=kafka"],
@@ -370,14 +371,14 @@ const base = () => { const S = K.createSystem(); run(S, `@a command action=creat
     ["paint Ab, Bc and Cd red", ["Ab", "Bc", "Cd"], "command action=set color=red target=ab,bc,cd"],
     ["change the shape of S3 and Bucket to a triangle", ["S3", "Bucket"], "command action=set shape=triangle target=s3,bucket"],
     // label removals and arrow labels are never shape deletions or renames (opus_ext_1 README: destructive readings)
-    ["remove all the labels on the arrows", [], "command action=label kind=edge label= quantifier=all"],
+    ["remove all the labels on the arrows", [], "command action=label kind=edge label= quantifier=all target=mention(quantifier=all)"],
     ["The labels on Gate→Ramp and Ramp→Runway: remove them both", ["Gate", "Ramp", "Runway"], "command action=label from=gate,ramp label= to=ramp,runway"],
     ["what does the arrow between Icu and Ward say? and can you delete that label", ["Icu", "Ward"], "question ask=property from=icu property=label to=ward ; command action=label from=icu label= to=ward"],
     ["what's the arrow between Spark and Lake say? rename it to \"parquet\"", ["Spark", "Lake"], "question ask=property from=spark property=label to=lake ; command action=label from=spark label=parquet to=lake"],
     ["connect Plan to Work and label it \"approved\"", ["Plan", "Work"], "command action=connect from=plan label=approved to=work"],
     ["connect Plan to Work and make it red", ["Plan", "Work"], "command action=connect from=plan to=work ; command action=set color=red target=work"],
-    ["clean up please", [], "command action=improve"],
-    ["tighten it up", [], "command action=respace comparison=smaller"],
+    ["clean up please", [], "command action=improve target=mention(quantifier=all)"],
+    ["tighten it up", [], "command action=respace comparison=smaller target=mention(quantifier=all)"],
     ["write \"Decisions\" in big bold letters", [], "command action=create label=decisions shape=text size=large"],
     ["write \"START HERE\" above Room1", ["Room1"], "command action=create anchor=room1 label=start here position=above shape=text"],
     ["write \"x\" on Room1", ["Room1"], "command action=label label=x target=room1"],

@@ -7,6 +7,8 @@
 #     wire with a "pending" key (17, no SOP Lang form yet) is left out whole: its other wires stay unscored rather than turn a reading of the
 #     pending span into an "extra". The filtered copy is written to $R/data/short3/batch_01.jsonl.
 # Steps:
+#   -. a guard: the scorer (docs/js/bench-canon.js) and the vote (vote-confidence.js) hold the 2026-11-03 fixes of confidence3/NEW_FORMS_AUDIT.md;
+#      then confidence3/audit_new_forms.mjs (gold vs gold and engine-checked variants of the new forms) -> $R/audit_new_forms.md;
 #   0. the conversion ceiling (training/sketch/convert_check.py --registry, CONVERT_FIX.md; CPU, ~1 min each): for the shipped worlds and the new
 #      ones, the share of the short3 / fresh2 requests whose world row (each world's own front.json and BUILD.json settings) reproduces the gold
 #      through the browser adapter: what a perfect reading of each world could reach. Tables in $R/ceiling_{G,ALL}.log;
@@ -33,6 +35,13 @@ stamp() { echo "[$(date +%T) +$(( $(date +%s) - T0 ))s] $*" | tee -a "$TL"; }
 fail() { stamp "FAILED: $*"; exit 1; }
 for f in "$REG_NEW" "$CTX_NEW" "$BERT_NEW/config.json" "$BERT_OLD/config.json" docs/model/micro/registry.json; do [ -f "$f" ] || fail "missing $f (jobs 070 / 071)"; done
 (cd training/laptop && npm install --no-audit --no-fund >/dev/null)
+# the scorer and the vote with the engine-true equivalences of the new forms (training/sketch/confidence3/NEW_FORMS_AUDIT.md, 2026-11-03): without
+# them help (aspect overview / topic general / about), whole-drawing operations ("every shape" two ways, target order), chains (pairing=chain) and
+# arrow restyles (quantifier) are scored wrong, and the readers disagree, where logic.js does the same thing. Then the audit itself (~40 s, CPU).
+grep -q "^function same(type, act, el)" docs/js/bench-canon.js && grep -q "^const listFree" docs/js/vote-confidence.js \
+  || fail "docs/js/bench-canon.js / vote-confidence.js predate NEW_FORMS_AUDIT.md: merge main into gpu-runs first"
+node $SK/confidence3/audit_new_forms.mjs > "$R/audit_new_forms.md" 2>&1 || fail "audit_new_forms.mjs"
+grep "^In all" "$R/audit_new_forms.md" | tee -a "$TL"
 
 # ---- data: fresh2 as is; short3 without the messages that still hold a pending wire
 F2="$SK/llm_bench/fresh2/opus_a $SK/llm_bench/fresh2/opus_b $SK/llm_bench/fresh2/opus_c $SK/llm_bench/fresh2/opus_d"
