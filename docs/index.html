@@ -30,7 +30,7 @@
   --link: #027EB5;
   --pill: #FFFFFF;
   --err: #C1392B;
-  --warn-soft: #FFF3D6;
+  --warn-soft: #FFF3D6; --amber-ink: #8A5300; --amber-line: #E8B64C;
   --canvas: #FFFFFF;
   --grid: #E1E5E8;
   --frame: #C8D0D6;
@@ -49,14 +49,14 @@
   :root:not([data-theme="light"]) {
     --app: #0C1317; --head: #202C33; --chat: #0B141A; --dots: rgba(233, 237, 239, .035); --bubble: #202C33; --mine: #005C4B;
     --ink: #E9EDEF; --muted: #8696A0; --faint: #667781; --line: #2A3942; --accent: #00A884; --accent-ink: #0B141A; --link: #53BDEB; --pill: #182229;
-    --err: #F1786B; --warn-soft: #3A3018; --canvas: #111B21; --grid: #1E2A31; --frame: #2E3D46; --edge: #AEBAC1; --shape-edge: rgba(233, 237, 239, .4);
+    --err: #F1786B; --warn-soft: #3A3018; --amber-ink: #F3C46B; --amber-line: #7A5A1E; --canvas: #111B21; --grid: #1E2A31; --frame: #2E3D46; --edge: #AEBAC1; --shape-edge: rgba(233, 237, 239, .4);
     --hl: #53BDEB; --sheet: #111B21; --code-bg: #0B141A; --wid: #8EA5FF; --rf: #F0A06A; --str: #6CD4A0; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --app: #0C1317; --head: #202C33; --chat: #0B141A; --dots: rgba(233, 237, 239, .035); --bubble: #202C33; --mine: #005C4B;
   --ink: #E9EDEF; --muted: #8696A0; --faint: #667781; --line: #2A3942; --accent: #00A884; --accent-ink: #0B141A; --link: #53BDEB; --pill: #182229;
-  --err: #F1786B; --warn-soft: #3A3018; --canvas: #111B21; --grid: #1E2A31; --frame: #2E3D46; --edge: #AEBAC1; --shape-edge: rgba(233, 237, 239, .4);
+  --err: #F1786B; --warn-soft: #3A3018; --amber-ink: #F3C46B; --amber-line: #7A5A1E; --canvas: #111B21; --grid: #1E2A31; --frame: #2E3D46; --edge: #AEBAC1; --shape-edge: rgba(233, 237, 239, .4);
   --hl: #53BDEB; --sheet: #111B21; --code-bg: #0B141A; --wid: #8EA5FF; --rf: #F0A06A; --str: #6CD4A0; color-scheme: dark;
 }
 [hidden] { display: none !important; }
@@ -75,6 +75,12 @@ svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-widt
 .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-family: var(--mono); font-weight: 600; font-size: 19px; flex: none; }
 .who { flex: 1; min-width: 0; }
 .who b { display: block; font-weight: 600; font-size: 16px; }
+/* a tab that is not at its safety threshold (ui.js renderGateBadges): an amber badge per tab, which opens its Settings, and one button back */
+.gbadges { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 4px 6px; max-width: 58%; }
+.gbadge { border: 1px solid var(--amber-line); background: var(--warn-soft); color: var(--amber-ink); border-radius: 999px; padding: 2px 9px; font: 600 12px/1.5 var(--font); cursor: pointer; white-space: nowrap; }
+.gbadge:hover { filter: brightness(.97); }
+.gback { border: 0; background: none; color: var(--link); font: 500 12px/1.5 var(--font); cursor: pointer; padding: 2px 4px; white-space: nowrap; text-decoration: underline; text-underline-offset: 2px; }
+@media (max-width: 560px) { .gbadges { max-width: 62%; } .gbadge { padding: 1px 7px; font-size: 11.5px; } .gback { font-size: 11.5px; } }
 .who span { display: block; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ib { width: 40px; height: 40px; border-radius: 50%; border: 0; background: transparent; display: grid; place-items: center; cursor: pointer; color: var(--muted); flex: none; }
 .ib:hover { background: rgba(127, 127, 127, .14); color: var(--ink); }
@@ -104,6 +110,13 @@ svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-widt
 .rpanel { position: absolute; inset: 0; z-index: 3; overflow-y: auto; overflow-x: hidden; background: var(--canvas); padding: 12px 16px 20px; font-size: 14px; overscroll-behavior: contain; }
 .rpanel .sop { max-width: 100%; }
 .rpanel h3.sub:first-child { margin-top: 2px; }
+/* the Settings and SOP Lang subtabs: the explanations flow over the panel's width (up to a readable line), justified and hyphenated from
+   421 px up as on the help pages (docs/help/docs.css), left-aligned on phones; the panel is the only scroll box (owner, 2026-11-03) */
+.rpanel .intro, .rpanel p.note, .rpanel .note { max-width: 96ch; white-space: normal; overflow: visible; max-height: none; }
+@media (min-width: 421px) { .rpanel .intro, .rpanel p.note { text-align: justify; -webkit-hyphens: auto; hyphens: auto; } .rpanel .intro code, .rpanel p.note code { -webkit-hyphens: manual; hyphens: manual; } }
+.rpanel table.kv td:first-child { white-space: nowrap; width: 1%; padding-right: 14px; }
+.rpanel table.kv td:last-child { white-space: normal; overflow-wrap: anywhere; }
+@media (max-width: 420px) { .rpanel table.kv td:last-child { text-align: left; } }
 /* scoped to the board: a bare #canvas also matched <h2 id="canvas"> of the help page "Where things go" and laid it over the help sidebar (2026-11-02) */
 .board > #canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab; }
 .board > #canvas.panning { cursor: grabbing; }
@@ -175,6 +188,13 @@ svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-widt
 .edge .hd { fill: var(--pc-arrow); }
 .edge.hl .ln { stroke: var(--hl) !important; stroke-width: 3; }
 .edge.hl .hd { fill: var(--hl) !important; }
+/* direct editing (ui.js "Direct editing"): the selected item, and the inline editor over a text */
+.shp .selbox { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: 4 3; pointer-events: none; }
+.edge.sel .ln { stroke: var(--accent) !important; stroke-width: 3.2; }
+.edge.sel .hd { fill: var(--accent) !important; }
+.edge { cursor: pointer; }
+.inl-edit { position: absolute; z-index: 6; height: 30px; padding: 0 8px; border: 1.5px solid var(--accent); border-radius: 6px; background: var(--pill); color: var(--ink);
+  font: 500 14px/28px var(--font); box-shadow: 0 2px 10px rgba(0,0,0,.15); outline: none; }
 .edge .elbl { font-family: var(--font); font-size: 12px; fill: var(--ink); paint-order: stroke; stroke: var(--canvas); stroke-width: 4px; stroke-linejoin: round; }
 .frame { fill: none; stroke: var(--frame); stroke-dasharray: 6 6; }
 .ftitle { font-family: var(--font); font-size: 13px; fill: var(--faint); font-weight: 600; }
@@ -509,6 +529,7 @@ html.docs-open, html.docs-open body { overflow: hidden; }
   <header class="head">
     <div class="avatar" aria-hidden="true">@</div>
     <div class="who"><b>Sketchpad</b><span id="status">draws what you write</span></div>
+    <div class="gbadges" id="gate-badges" hidden></div>
     <button class="ib" type="button" id="open-settings" aria-label="Settings: replies, collected requests, spelling, capabilities" title="Settings: replies, collected requests, spelling, capabilities">
       <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/></svg>
     </button>

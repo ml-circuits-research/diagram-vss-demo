@@ -40,9 +40,9 @@ eq("1. primary and English", [V.primary("ro-RO"), V.isEnglish("en-GB"), V.isEngl
 const mem = () => { const m = new Map(); return { getItem: k => m.has(k) ? m.get(k) : null, setItem: (k, v) => m.set(k, String(v)), m }; };
 {
   const s = mem();
-  eq("2. defaults", V.loadPrefs(s), { lang: "ro-RO", autoSend: false, pauseMs: 2000, tts: false, online: false, micOn: false });
-  V.savePrefs({ lang: "fr-FR", autoSend: true, pauseMs: 2000, tts: true, online: false, micOn: true }, s);
-  eq("2. kept", V.loadPrefs(s), { lang: "fr-FR", autoSend: true, pauseMs: 2000, tts: true, online: false, micOn: true });
+  eq("2. defaults", V.loadPrefs(s), { lang: "ro-RO", autoSend: false, pauseMs: 2000, tts: false, online: false, micOn: false, speakEnglish: false });
+  V.savePrefs({ lang: "fr-FR", autoSend: true, pauseMs: 2000, tts: true, online: false, micOn: true, speakEnglish: true }, s);
+  eq("2. kept (\"I speak English\" included)", V.loadPrefs(s), { lang: "fr-FR", autoSend: true, pauseMs: 2000, tts: true, online: false, micOn: true, speakEnglish: true });
   s.setItem(V.PREFS_KEY, JSON.stringify({ lang: "??", autoSend: "yes", online: 1, pauseMs: 5, micOn: "on" }));
   eq("2. bad values ignored", V.loadPrefs(s), V.DEFAULT_PREFS);
   s.setItem(V.PREFS_KEY, "{broken");
@@ -190,6 +190,29 @@ const run = async () => {
   check("6. no translation: an error note that says to write the English in the message box", nt && nt.kind === "err" && /^No translation on this device for French → English: write the English in the message box/.test(nt.text), JSON.stringify(nt));
   eq("6. English needs no translation: no note", V.dockNote({ lang: "en-US", noTranslation: true }), null);
   check("6. the microphone's error, as a status, wins over 'no translation'", V.dockNote({ lang: "fr-FR", noTranslation: true, status: { kind: "err", text: V.recognitionError("not-allowed") } }).text.startsWith("The browser did not allow the microphone"));
+
+  // 7. translation with the domain context (owner's session 2026-11-03): "Într-un editor de diagrame: " before the text, its translation
+  //    taken off the output; the plain translation when the output does not start with it; no context for the reply read aloud
+  {
+    const P = V.CONTEXT.ro, log = [];
+    const dict = { [P.trim()]: "In a diagram editor:", [P + "schimbă așezarea"]: "In a diagram editor: change the layout", "schimbă așezarea": "change the settlement",
+      [P + "șterge Order flow"]: "In a diagram editor, delete Order flow", [P + "ceva"]: "Something else entirely", "ceva": "something" };
+    const T = V.createTranslation({ global: { Translator: mockTranslator({ "ro>en": "available", "en>ro": "available" }, dict, log) } });
+    eq("7. with the context: the prefix's translation is taken off", await T.translate("schimbă așezarea", "ro-RO", "en", { context: true }), { text: "change the layout", by: "builtin", state: "available", context: true });
+    eq("7. ... the prefix was translated once and cached", log.filter(x => x === `translate ${P.trim()}`).length, 1);
+    await T.translate("schimbă așezarea", "ro-RO", "en", { context: true });
+    eq("7. ... still once after a second message", log.filter(x => x === `translate ${P.trim()}`).length, 1);
+    eq("7. a comma instead of the colon is taken off too", (await T.translate("șterge Order flow", "ro-RO", "en", { context: true })).text, "delete Order flow");
+    eq("7. the output does not start with the prefix: the plain translation", await T.translate("ceva", "ro-RO", "en", { context: true }), { text: "something", by: "builtin", state: "available" });
+    eq("7. without the option: plain (the reply read aloud)", (await T.translate("schimbă așezarea", "ro-RO", "en")).text, "change the settlement");
+    const log2 = [], T2 = V.createTranslation({ global: { Translator: mockTranslator({ "ja>en": "available" }, { "x": "y" }, log2) } });
+    eq("7. a language without a context sentence: plain", await T2.translate("x", "ja-JP", "en", { context: true }), { text: "y", by: "builtin", state: "available" });
+    const T3 = V.createTranslation({ global: { Translator: { availability: async () => "available", create: async () => ({ translate: async t => { if (t.startsWith(P)) throw new Error("boom"); return "EN " + t; } }) } } });
+    eq("7. the context translation fails: plain", (await T3.translate("salut", "ro-RO", "en", { context: true })).text, "EN salut");
+    const T4 = V.createTranslation({ global: { Translator: { availability: async () => "available", create: async () => ({ translate: async x => ({ salut: "hello" })[x] || x }) } } });
+    eq("7. the prefix comes back untranslated (no context possible): plain", (await T4.translate("salut", "ro-RO", "en", { context: true })).text, "hello");
+        check("7. a context sentence for every common European language", ["ro", "fr", "de", "es", "it", "pt"].every(k => typeof V.CONTEXT[k] === "string" && /: ?$/.test(V.CONTEXT[k])));
+  }
 
   console.log(`\n${n - fails}/${n} passed`);
   process.exit(fails ? 1 : 0);

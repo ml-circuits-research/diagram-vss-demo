@@ -730,7 +730,9 @@ function align(shapes, links, opts) {
   else { const base = o.base != null ? list.find(n => n.name === String(o.base)) || list[0] : list[0]; if (axis === 'vertical') list.forEach(n => { n.x = base.x; }); else list.forEach(n => { n.y = base.y; }); }
   const nodes = list.concat(ctx.obstacles), movable = nodes.map((_, i) => i < list.length), lock = axis === 'vertical' ? 'y' : 'x';
   if (o.clear != null) separateNodes(list.slice(), list.map(() => true), { lock, bounds: ctx.inner, clear: o.clear });   // opts.clear: the gap between the aligned shapes (not the obstacles)
-  const left = separateNodes(nodes, movable, { lock, bounds: ctx.inner });
+  /* an edge alignment (left / right / tops / bottoms) only moves along its own axis: obstacles are not pushed out of the way sideways
+     (2026-11-03, scenes_r3 engine finding 5: aligning the bottoms of two bars moved one of them 200 px to the right) */
+  const left = dir ? 0 : separateNodes(nodes, movable, { lock, bounds: ctx.inner });
   return result(ctx, 'align', left > 0);
 }
 

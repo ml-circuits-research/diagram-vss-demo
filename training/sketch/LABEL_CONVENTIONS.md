@@ -36,7 +36,13 @@ Values:
 - color: red, orange, yellow, gold, lime, green, teal, cyan, blue, navy, indigo, purple, magenta, pink, brown, gray, black, white
 - size: tiny, small, medium, large, huge
 - position: leftOf, rightOf, above, below, near, between (anchor = "A,B"), and canvas places center, top, bottom, left, right, topLeft,
-  topRight, bottomLeft, bottomRight
+  topRight, bottomLeft, bottomRight; since 2026-11-03 also `inside` ("two eyes inside Head", "a circle in Head" on a create: placed within
+  the anchor and sized relative to it) and `onTop` ("a roof on House", "onto House" on a create: touching the anchor's top edge). "on top of X"
+  stays `above` (the form of the existing gold); "into X" on a move is `inside` only with "inside" / "within".
+- object (what a new shape depicts, 2026-11-03): sun, moon, cloud, sky, ground, grass, water, sea, lake, river, pond, tree, trunk, leaf, roof,
+  house, wall, walls, door, window, head, face, eye, nose, mouth, flower, fire, snow, apple — only on a create whose object is that noun
+  ("draw a sun" -> `create object=sun`); the engine fills in what is not stated (docs/js/logic.js COMMON_SENSE: a sun is a large gold circle
+  in the top right, the sky a light-blue background band at the top). A stated shape, colour, size or place is written as usual beside it.
 - direction: left, right, up, down; distance: a number of pixels
 - style: dashed, dotted; arrow: none (a plain line, no arrowhead), both (two-way); a plain arrow needs no arrow key
 - layout: row, column, grid, circle; axis: horizontal, vertical; pairing: chain, next, all

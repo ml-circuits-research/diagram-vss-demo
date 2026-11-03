@@ -42,7 +42,7 @@
     'el-GR', 'uk-UA', 'ru-RU', 'tr-TR', 'sv-SE', 'da-DK', 'fi-FI', 'nb-NO', 'hr-HR', 'sr-RS', 'sl-SI', 'lt-LT', 'lv-LV', 'et-EE', 'ca-ES',
     'ar-SA', 'he-IL', 'hi-IN', 'bn-IN', 'ja-JP', 'ko-KR', 'zh-CN', 'zh-TW', 'id-ID', 'ms-MY', 'vi-VN', 'th-TH', 'fil-PH'];
   // autoSend: send after a pause in speech (off by default); micOn: the mic was on when the page was left (a one-tap resume after a reload)
-  const DEFAULT_PREFS = { lang: 'ro-RO', autoSend: false, pauseMs: 2000, tts: false, online: false, micOn: false };
+  const DEFAULT_PREFS = { lang: 'ro-RO', autoSend: false, pauseMs: 2000, tts: false, online: false, micOn: false, speakEnglish: false };
   const ONLINE = { name: 'MyMemory', host: 'api.mymemory.translated.net', max: 480 };
 
   /* ---------------- languages ---------------- */
@@ -82,7 +82,7 @@
     try { const s = storage || (typeof localStorage !== 'undefined' ? localStorage : null); const raw = s && s.getItem(PREFS_KEY); if (raw) p = JSON.parse(raw) || {}; } catch (e) { p = {}; }
     const out = Object.assign({}, DEFAULT_PREFS);
     if (normTag(p.lang)) out.lang = normTag(p.lang);
-    for (const k of ['autoSend', 'tts', 'online', 'micOn']) if (typeof p[k] === 'boolean') out[k] = p[k];
+    for (const k of ['autoSend', 'tts', 'online', 'micOn', 'speakEnglish']) if (typeof p[k] === 'boolean') out[k] = p[k];
     if (typeof p.pauseMs === 'number' && p.pauseMs >= 800 && p.pauseMs <= 10000) out.pauseMs = p.pauseMs;
     return out;
   }
@@ -130,6 +130,10 @@
    * by: 'not-needed' (English), 'builtin' (on this device), 'online' (MyMemory, only when opted in), 'none' (the text is returned as it is).
    * Instances are cached per pair; a failed create is not cached (the next try may work, e.g. after a click).
    */
+  /** "In a diagram editor: " in the source language (the domain context of the dock's translation; createTranslation translate o.context) */
+  const CONTEXT = { ro: 'Într-un editor de diagrame: ', fr: 'Dans un éditeur de diagrammes : ', de: 'In einem Diagramm-Editor: ', es: 'En un editor de diagramas: ',
+    it: 'In un editor di diagrammi: ', pt: 'Num editor de diagramas: ', nl: 'In een diagrameditor: ', pl: 'W edytorze diagramów: ', ru: 'В редакторе диаграмм: ',
+    uk: 'У редакторі діаграм: ', hu: 'Egy diagramszerkesztőben: ', cs: 'V editoru diagramů: ', tr: 'Bir diyagram düzenleyicide: ', el: 'Σε έναν επεξεργαστή διαγραμμάτων: ' };
   function createTranslation(env) {
     env = env || {};
     const api = builtinTranslator(env.global);
@@ -158,6 +162,26 @@
       if (!out || (j.responseStatus && +j.responseStatus !== 200)) throw new Error(`${ONLINE.name}: ${(j && j.responseDetails) || 'no translation'}`);
       return String(out);
     }
+    /* Domain context (owner's session 2026-11-03: "așezarea" -> "the settlement", "auto" -> "car", "de rombul" -> "of rhombus"): with
+       o.context, the on-device translator gets the text after "In a diagram editor: " written in the source language (CONTEXT), and the
+       translation of that prefix is taken off the output. The prefix's own translation is asked once per pair and cached; when the output
+       does not start with it (nor with the English "In a diagram editor:"), the text is translated again without the prefix. */
+    const ctxOut = new Map();
+    const fold = x => String(x).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+    const EN_CTX = /^\s*["“”']?\s*(?:in|within|inside)\s+(?:a|an|the)\s+(?:diagram|diagrams|chart|charting|drawing)(?:[\s-]+(?:editor|editing\s+tool|tool))\s*["“”']?\s*[:,.;\-–—]*\s*/i;
+    async function withContext(t, text, from) {
+      const pre = CONTEXT[primary(from)]; if (!pre) return null;
+      const k = primary(from);
+      if (!ctxOut.has(k)) ctxOut.set(k, String(await t.translate(pre.trim())).trim());
+      if (fold(ctxOut.get(k)).replace(/[\s:]+$/, '') === fold(pre).replace(/[\s:]+$/, '')) return null;   // the prefix came back untranslated: no context
+      const out = String(await t.translate(pre + text)), head = ctxOut.get(k).replace(/[\s:,.;\-–—]+$/, '');
+      let rest = null;
+      if (head && fold(out.trimStart()).startsWith(fold(head))) rest = out.trimStart().slice(head.length).replace(/^\s*["“”']?\s*[:,.;\-–—]*\s*/, '');
+      else if (EN_CTX.test(out)) rest = out.replace(EN_CTX, '');
+      if (rest == null || !rest.trim()) return null;
+      if (/^\p{Lu}/u.test(String(text).trim()) && /^\p{Ll}/u.test(rest)) rest = rest[0].toUpperCase() + rest.slice(1);
+      return rest.trim();
+    }
     async function translate(text, from, to, o) {
       o = o || {};
       text = String(text || '');
@@ -169,6 +193,7 @@
         try {
           if (o.onState) o.onState(c.state);
           const t = await ready(from, to, o.onProgress);
+          if (o.context && primary(to) === 'en') { let c = null; try { c = await withContext(t, text, from); } catch (e) { c = null; } if (c != null) return { text: c, by: 'builtin', state: 'available', context: true }; }
           const out = await t.translate(text);
           return { text: String(out), by: 'builtin', state: 'available' };
         } catch (e) { err = String(e && e.message || e); }
@@ -322,11 +347,13 @@
     el.classList.add('vd');
     el.innerHTML = `<button type="button" class="vd-mic" data-vd="mic" aria-pressed="false">${MIC}</button>
 <div class="vd-row"><button type="button" class="vd-lang" data-vd="lang" aria-haspopup="dialog" aria-expanded="false" aria-controls="vd-pop"><span class="vd-code"></span>${CARET}</button><input class="vd-src" id="vd-src" type="text" autocomplete="off" spellcheck="false" enterkeyhint="send"><span class="vd-st" role="status" aria-live="polite"></span></div>
+<div class="vd-names" role="group" aria-label="Names on the drawing: tap one to add it to what you said" hidden></div>
 <div class="vd-aside"><button type="button" class="vd-resume" data-vd="resume" hidden>${MIC}<span>Resume listening</span></button><button type="button" class="vd-resume" data-vd="download" hidden><span>Download</span></button><span class="vd-toast" role="status" aria-live="polite"></span></div>
 <div class="vd-pop" id="vd-pop" role="dialog" aria-label="Dictation settings" hidden>
   <div class="vd-pl"><label for="vd-lang">Language</label><select id="vd-lang"></select></div>
   <input id="vd-tag" type="text" placeholder="BCP-47 tag, e.g. pt-BR" aria-label="Language tag (BCP-47)" autocomplete="off" spellcheck="false" hidden>
   <div class="vd-tagerr" role="alert" hidden></div>
+  <label class="vd-ck"><input type="checkbox" data-pref="speakEnglish"> <span>I speak English: dictate in English (en-US), no translation</span></label>
   <label class="vd-ck"><input type="checkbox" data-pref="autoSend"> <span>Send after a pause of 2 seconds</span></label>
   <label class="vd-ck"><input type="checkbox" data-pref="tts"> <span>Read replies aloud (listening pauses meanwhile)</span></label>
   <label class="vd-ck"><input type="checkbox" data-pref="online"> <span>Online translation (${ONLINE.name}) when this browser has none: your text is then sent to ${ONLINE.host}</span></label>
@@ -338,7 +365,9 @@
     const micBtn = $('[data-vd="mic"]'), langBtn = $('[data-vd="lang"]'), src = $('#vd-src'), noteEl = $('.vd-st'), pop = $('#vd-pop');
     const sel = $('#vd-lang'), tagIn = $('#vd-tag'), toastEl = $('.vd-toast'), resumeBtn = $('[data-vd="resume"]'), downloadBtn = $('[data-vd="download"]');
 
-    const lang = () => prefs.lang;
+    /* "I speak English" (owner's session 2026-11-03: English spoken into the ro-RO recognizer twice): the recognizer listens in en-US and
+       nothing is translated; the chosen language stays for when it is turned off */
+    const lang = () => prefs.speakEnglish ? 'en-US' : prefs.lang;
     const english = () => isEnglish(lang());
     // what the recognition gathered: base (the text before this session) + finals (this session's final results) + interim (not final yet)
     let base = '', finals = '', interim = '', heard = false;
@@ -395,7 +424,7 @@
       }
       if (c.state === 'downloadable' || c.state === 'downloading') setStatus({ kind: 'busy', text: 'Downloading the language model…' });
       else if (!lastTr) setStatus({ kind: 'busy', text: 'Translating…' });
-      const r = await tr.translate(text, lang(), 'en', { onProgress: p => { if (seq === trSeq && p != null) setStatus({ kind: 'busy', text: `Downloading the language model… ${Math.round(p * 100)}%` }); } });
+      const r = await tr.translate(text, lang(), 'en', { context: true, onProgress: p => { if (seq === trSeq && p != null) setStatus({ kind: 'busy', text: `Downloading the language model… ${Math.round(p * 100)}%` }); } });
       const res = r.by === 'none' ? { src: text, text: '', by: 'none', error: r.error } : { src: text, text: r.text, by: r.by };
       if (seq !== trSeq) return res;   // a newer text is being translated: this one is still the right answer for its own text
       lastTr = res; status = null;
@@ -555,7 +584,7 @@
 
     /* ---- the settings popover ---- */
     function fillSelect() {
-      const L = list(), cur = lang();
+      const L = list(), cur = prefs.lang; sel.disabled = !!prefs.speakEnglish; sel.title = prefs.speakEnglish ? 'Dictating in English: turn off “I speak English” to use this language' : '';
       if (!L.some(x => x.tag.toLowerCase() === cur.toLowerCase())) L.splice(2, 0, { tag: cur, name: langName(cur) });
       sel.innerHTML = L.map(x => `<option value="${escH(x.tag)}">${escH(x.name)} (${escH(x.tag)})</option>`).join('') + '<option value="other">Other: type a BCP-47 tag…</option>';
       sel.value = L.find(x => x.tag.toLowerCase() === cur.toLowerCase()).tag;
@@ -589,7 +618,7 @@
       err.hidden = true; tagIn.hidden = true; setLang(t);
     }
     function setLang(t) {
-      prefs.lang = t; save(); lastTr = null; status = null;
+      prefs.lang = t; save(); lastTr = null; status = null; t = lang();
       $('.vd-code').textContent = code(t); langBtn.title = `${langName(t)}: dictation settings`; langBtn.setAttribute('aria-label', langBtn.title);
       popContent(); micUI(); showOut();
       if (rec) { const r = rec; rec = null; try { r.abort ? r.abort() : r.stop(); } catch (e) { /* ended */ } if (wantOn) { clearTimeout(restartT); restartT = setTimeout(startSession, 150); } }
@@ -598,6 +627,7 @@
     pop.addEventListener('change', ev => {
       const c = ev.target.closest('[data-pref]'); if (!c) return;
       prefs[c.dataset.pref] = c.checked; save();
+      if (c.dataset.pref === 'speakEnglish') { setLang(prefs.lang); return; }
       if (c.dataset.pref === 'online' && gathered(false).trim()) translateSoon(0);
       if (c.dataset.pref === 'tts' && c.checked && !english()) tr.check('en', lang()).then(x => { if (x.state === 'available' || x.state === 'downloadable') tr.ready('en', lang()).catch(() => {}); });   // inside the click
     });
@@ -650,14 +680,33 @@
       } catch (e) { paused = false; micUI(); return null; }
     }
 
+    /* ---- the names on the drawing as chips (owner, 2026-11-03: the recognizer mangles English names: "Diamond One", "orderflow"): one
+       scrollable line under the row; a tap puts the name into what was said, at the cursor or at the end, and it is translated with the rest */
+    const namesEl = $('.vd-names'); let namesKey = '';
+    function setNames(list) {
+      const ns = [...new Set((list || []).map(String).filter(Boolean))], k = ns.join('\u0000'); if (k === namesKey) return; namesKey = k;
+      namesEl.innerHTML = ns.map(n => `<button type="button" class="vd-name" data-name="${escH(n)}" title="Add “${escH(n)}” to what you said">${escH(n)}</button>`).join('');
+      namesEl.hidden = !ns.length; el.classList.toggle('has-names', !!ns.length);
+    }
+    function insertName(n) {
+      const v = src.value, focused = doc.activeElement === src, a = focused ? src.selectionStart : v.length, b = focused ? src.selectionEnd : v.length;
+      const pre = v.slice(0, a), post = v.slice(b), sep1 = pre && !/\s$/.test(pre) ? ' ' : '', sep2 = post && !/^\s/.test(post) ? ' ' : '';
+      src.value = pre + sep1 + n + sep2 + post; const at = (pre + sep1 + n).length;
+      try { src.setSelectionRange(at, at); } catch (e) { /* not focused */ }
+      src.dispatchEvent(new Event('input'));
+    }
+    namesEl.addEventListener('pointerdown', ev => { if (ev.target.closest('[data-name]')) ev.preventDefault(); });   // keep the cursor where it is
+    namesEl.addEventListener('click', ev => { const b = ev.target.closest('[data-name]'); if (b) insertName(b.dataset.name); });
+    if (opts.names) setNames(opts.names());
+
     // start: the language code, the row, the one-tap resume when the mic was on before a reload (the browser needs a click to listen)
     $('.vd-code').textContent = code(lang()); langBtn.title = `${langName(lang())}: dictation settings`; langBtn.setAttribute('aria-label', langBtn.title);
     render(); showOut(); micUI();
-    return { consume, onReply, setMic, command, prefs, el, translation: tr,
+    return { consume, onReply, setMic, command, prefs, el, translation: tr, setNames, insertName,
       state: () => ({ on: wantOn, paused, session: !!rec, text: gathered(true), english: lastTr ? lastTr.text : '', note: noteEl.textContent, fails }) };
   }
 
-  return { PREFS_KEY, FIRST, COMMON, DEFAULT_PREFS, ONLINE, normTag, primary, isEnglish, langName, shortName, languageList, loadPrefs, savePrefs,
+  return { PREFS_KEY, FIRST, COMMON, DEFAULT_PREFS, ONLINE, CONTEXT, normTag, primary, isEnglish, langName, shortName, languageList, loadPrefs, savePrefs,
     builtinTranslator, normState, createTranslation, recognitionCtor, recognitionError, voicesFor, pickVoice, supportLines, noTranslationText, dockNote,
     COMMANDS, COMMAND_KEYS, parseCommand, commandHelp, FATAL, restartDelay, mount };
 });
