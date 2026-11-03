@@ -1,0 +1,10 @@
+# World `real`: built from 21698 training messages (51584 requests with a span)
+
+WORLD_EVENTS=equalize,fit,flip,groupBy,improve,respace,snap,sort,straighten,untangle: only the rows of these events; the legend lists only these events.
+
+FRONT_ROWS=world: the front end below is learned only from the 564 requests of this world's events.
+
+Front end learned from the same messages: 45 value n-grams, 224 trigger rules, 0 segmenter weights; params {"seg_epochs": 8, "val_min_count": 5, "val_min_prec": 0.8, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}.
+2/2 files OK against legend(s) layout8_all sha256:b90297216c2b…
+world layout8_all [improve,respace,snap,fit,flip,sort,groupBy,equalize,straighten,untangle] -> docs/model/micro/layout8_all (501 rows); registry line:
+{"world": "layout8_all", "events": ["improve", "respace", "snap", "fit", "flip", "sort", "groupBy", "equalize", "straighten", "untangle"], "model": "micro/layout8_all"}

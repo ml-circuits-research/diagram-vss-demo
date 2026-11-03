@@ -1,0 +1,254 @@
+built llm_train/sonnet_msg: 600 messages
+built llm_train/haiku_msg: 600 messages
+built llm_train/sonnet_msg2: 600 messages
+built llm_train/haiku_msg2: 600 messages
+built llm_train/sonnet_long: 240 messages
+built fresh1/sonnet: 500 messages
+built fresh1/haiku: 500 messages
+built llm_bench/sonnet_spans: 500 messages
+built llm_bench/haiku_spans: 500 messages
+built llm_train/opus_train_a: 300 messages
+built llm_train/opus_train_b: 300 messages
+built llm_train/opus_train_c: 300 messages
+built llm_train/opus_train_d: 300 messages
+built llm_train/opus_gen_1: 300 messages
+built llm_train/opus_gen_2: 300 messages
+built llm_train/synth_rules: 8404 messages
+built llm_train/synth_rules_ops: 1374 messages
+built llm_train/synth_rules_ext: 2783 messages
+built llm_train/ops_formulations: 700 messages
+built llm_train/opus_ext_1: 500 messages
+built llm_train/synth_combo: 1497 messages
+composer: docs/model/arms/ALL/registry_ALL.json · worlds shapes arms/ALL/micro/shapes8, links arms/ALL/micro/links8, position arms/ALL/micro/position8, layout arms/ALL/micro/layout8, graphq arms/ALL/micro/graphq8, questions arms/ALL/micro/questions8, manage arms/ALL/micro/manage8, history arms/ALL/micro/history8, help arms/ALL/micro/help8 · entity keys target, anchor, anchor2, from, to, linked (roles object, landmark, landmark2, landmark3, source, target, edge, items, items2, parents, linked, members, targets)
+messages: train 17368, test 4330
+gap instances: train 4824, test 1200
+step 200: train loss 0.5546 · test loss 0.5997
+step 400: train loss 0.5542 · test loss 0.5994
+step 600: train loss 0.5542 · test loss 0.5994
+
+margin trade-off (teacher-forced context): fills right / wrong / asked
+| margin | train fills | train right | train wrong | train asked | test fills | test right | test wrong | test asked |
+|---|---|---|---|---|---|---|---|---|
+| 0 (written) | 2092 | 1599 (76.4%) | 493 | 2732 | 526 | 390 (74.1%) | 136 | 674 |
+| 0.25 | 1866 | 1519 (81.4%) | 347 | 2958 | 473 | 368 (77.8%) | 105 | 727 |
+| 0.5 | 1753 | 1453 (82.9%) | 300 | 3071 | 437 | 352 (80.5%) | 85 | 763 |
+| 0.75 | 1494 | 1292 (86.5%) | 202 | 3330 | 365 | 316 (86.6%) | 49 | 835 |
+| 1 | 1157 | 1009 (87.2%) | 148 | 3667 | 282 | 248 (87.9%) | 34 | 918 |
+| 1.25 | 1003 | 894 (89.1%) | 109 | 3821 | 248 | 221 (89.1%) | 27 | 952 |
+| 1.5 | 912 | 824 (90.4%) | 88 | 3912 | 230 | 205 (89.1%) | 25 | 970 |
+| 1.75 | 828 | 757 (91.4%) | 71 | 3996 | 211 | 190 (90.0%) | 21 | 989 |
+| 2 | 768 | 711 (92.6%) | 57 | 4056 | 199 | 182 (91.5%) | 17 | 1001 |
+| 2.25 | 600 | 562 (93.7%) | 38 | 4224 | 154 | 142 (92.2%) | 12 | 1046 |
+| 2.5 | 539 | 509 (94.4%) | 30 | 4285 | 136 | 127 (93.4%) | 9 | 1064 |
+| 2.75 (95% rule) | 516 | 491 (95.2%) | 25 | 4308 | 129 | 123 (95.3%) | 6 | 1071 |
+| 3 | 448 | 432 (96.4%) | 16 | 4376 | 114 | 109 (95.6%) | 5 | 1086 |
+| 3.25 | 373 | 363 (97.3%) | 10 | 4451 | 101 | 98 (97.0%) | 3 | 1099 |
+| 3.5 | 352 | 342 (97.2%) | 10 | 4472 | 94 | 91 (96.8%) | 3 | 1106 |
+| 3.75 | 338 | 329 (97.3%) | 9 | 4486 | 91 | 88 (96.7%) | 3 | 1109 |
+| 4 | 310 | 305 (98.4%) | 5 | 4514 | 82 | 81 (98.8%) | 1 | 1118 |
+| 4.25 | 265 | 264 (99.6%) | 1 | 4559 | 67 | 66 (98.5%) | 1 | 1133 |
+| 4.5 | 203 | 202 (99.5%) | 1 | 4621 | 44 | 44 (100.0%) | 0 | 1156 |
+| 4.75 | 23 | 23 (100.0%) | 0 | 4801 | 9 | 9 (100.0%) | 0 | 1191 |
+| 5 | 22 | 22 (100.0%) | 0 | 4802 | 8 | 8 (100.0%) | 0 | 1192 |
+
+train split (teacher-forced context), at the chosen margin
+| key / gap kind | gaps | gold has the key | gold among candidates (recall) | fills | right fills | wrong fills | asked |
+|---|---|---|---|---|---|---|---|
+| all | 4824 | 2561 | 2251 (87.9%) | 2092 | 1599 (76.4%) | 493 | 2732 (56.6%) |
+| target | 3200 | 1441 | 1306 (90.6%) | 1347 | 1057 (78.5%) | 290 | 1853 (57.9%) |
+| kind empty | 1888 | 1376 | 1215 (88.3%) | 1037 | 717 (69.1%) | 320 | 851 (45.1%) |
+| kind pron | 1414 | 1059 | 946 (89.3%) | 974 | 827 (84.9%) | 147 | 440 (31.1%) |
+| kind desc | 1227 | 35 | 1 (2.9%) | 0 | 0 (-) | 0 | 1227 (100.0%) |
+| from | 768 | 631 | 569 (90.2%) | 466 | 339 (72.7%) | 127 | 302 (39.3%) |
+| anchor | 480 | 203 | 175 (86.2%) | 118 | 84 (71.2%) | 34 | 362 (75.4%) |
+| to | 376 | 286 | 201 (70.3%) | 161 | 119 (73.9%) | 42 | 215 (57.2%) |
+| kind vague | 295 | 91 | 89 (97.8%) | 81 | 55 (67.9%) | 26 | 214 (72.5%) |
+
+TEST split (teacher-forced context), at the chosen margin
+| key / gap kind | gaps | gold has the key | gold among candidates (recall) | fills | right fills | wrong fills | asked |
+|---|---|---|---|---|---|---|---|
+| all | 1200 | 671 | 578 (86.1%) | 526 | 390 (74.1%) | 136 | 674 (56.2%) |
+| target | 798 | 388 | 343 (88.4%) | 353 | 265 (75.1%) | 88 | 445 (55.8%) |
+| kind empty | 434 | 335 | 286 (85.4%) | 240 | 156 (65.0%) | 84 | 194 (44.7%) |
+| kind pron | 378 | 290 | 260 (89.7%) | 266 | 220 (82.7%) | 46 | 112 (29.6%) |
+| kind desc | 320 | 17 | 3 (17.6%) | 0 | 0 (-) | 0 | 320 (100.0%) |
+| from | 177 | 151 | 136 (90.1%) | 106 | 79 (74.5%) | 27 | 71 (40.1%) |
+| anchor | 129 | 60 | 53 (88.3%) | 29 | 22 (75.9%) | 7 | 100 (77.5%) |
+| to | 96 | 72 | 46 (63.9%) | 38 | 24 (63.2%) | 14 | 58 (60.4%) |
+| kind vague | 68 | 29 | 29 (100.0%) | 20 | 14 (70.0%) | 6 | 48 (70.6%) |
+
+learned weights (higher = preferred; NULL = 'nobody in the context', i.e. ask):
+  in_unit         1.956
+  null            1.947
+  pron:text_last  1.654
+  empty:in_unit   1.515
+  g_stem          1.493
+  empty:g_stem    1.493
+  empty:group_plist  1.311
+  pron:text_named  1.080
+  pron:created    1.019
+  prev_main       1.002
+  text_last       0.974
+  empty:group     0.971
+  created         0.960
+  pron:prev_main  0.783
+  vague:prev_main  0.773
+  text_named      0.771
+  same_role       0.753
+  pron:same_role  0.671
+  null_empty      0.659
+  group_plist     0.651
+  empty:canvas    0.613
+  g_list          0.531
+  pron:role_created  0.522
+  null_vague      0.521
+  empty:log_count  0.453
+  null_pron       0.441
+  role_created    0.430
+  empty:g_canvas  0.421
+  g_run           0.416
+  canvas          0.377
+  g_text2         0.364
+  pron:g_list     0.355
+  pron:g_text2    0.331
+  null_desc       0.326
+  group           0.275
+  empty:g_run     0.243
+  pron:in_unit    0.230
+  empty:role_to   0.216
+  empty:created   0.216
+  vague:in_unit   0.213
+  vague:same_role  0.213
+  vague:role_target  0.209
+  empty:role_created  0.187
+  empty:g_list    0.177
+  pron:g_run      0.173
+  empty:d1        0.151
+  pron:g_all      0.131
+  empty:role_anchor  0.131
+  g_canvas        0.125
+  pron:canvas     0.123
+  pron:role_member  0.121
+  pron:g_last2    0.119
+  vague:same_action  0.112
+  empty:same_action  0.111
+  vague:d1        0.107
+  pron:d3p        0.079
+  pron:dnone      0.061
+  role_linked     0.034
+  empty:role_linked  0.034
+  empty:g_text2   0.033
+  vague:created   0.012
+  vague:role_created  0.008
+  empty:text_named  0.006
+  role_anchor2    0.000
+  desc:dnone      0.000
+  pron:role_anchor2  0.000
+  empty:role_anchor2  0.000
+  vague:role_anchor2  0.000
+  desc:role_anchor2  0.000
+  desc:role_from  0.000
+  desc:role_to    0.000
+  pron:role_linked  0.000
+  vague:role_linked  0.000
+  desc:role_linked  0.000
+  desc:in_unit    0.000
+  vague:group     0.000
+  desc:group      0.000
+  vague:group_plist  0.000
+  desc:group_plist  0.000
+  pron:confirmed  0.000
+  empty:confirmed  0.000
+  vague:confirmed  0.000
+  vague:g_list    0.000
+  desc:g_list     0.000
+  vague:g_last2   0.000
+  desc:g_last2    0.000
+  vague:g_created  0.000
+  desc:g_created  0.000
+  vague:g_run     0.000
+  desc:g_run      0.000
+  vague:g_all     0.000
+  desc:g_all      0.000
+  vague:g_canvas  0.000
+  desc:g_canvas   0.000
+  pron:g_stem     0.000
+  vague:g_stem    0.000
+  desc:g_stem     0.000
+  vague:g_text2   0.000
+  desc:g_text2    0.000
+  desc:role_anchor -0.002
+  desc:d3p       -0.002
+  pron:log_count -0.004
+  desc:role_member -0.008
+  desc:same_action -0.011
+  desc:same_role -0.015
+  desc:role_target -0.029
+  desc:d2        -0.031
+  desc:canvas    -0.039
+  pron:role_target -0.043
+  pron:g_created -0.047
+  vague:role_to  -0.053
+  vague:role_from -0.062
+  g_all          -0.078
+  vague:role_anchor -0.083
+  same_action    -0.086
+  role_target    -0.102
+  empty:same_role -0.116
+  vague:text_named -0.118
+  desc:text_last -0.125
+  empty:g_created -0.143
+  vague:d2       -0.160
+  pron:d2        -0.179
+  g_created      -0.190
+  desc:text_named -0.196
+  empty:d3p      -0.204
+  vague:d3p      -0.205
+  vague:text_last -0.207
+  empty:g_all    -0.209
+  empty:d2       -0.213
+  desc:log_count -0.227
+  role_to        -0.236
+  empty:role_target -0.239
+  pron:role_from -0.251
+  empty:role_member -0.258
+  vague:dnone    -0.263
+  desc:prev_main -0.274
+  vague:role_member -0.277
+  empty:prev_main -0.280
+  desc:role_created -0.287
+  desc:created   -0.287
+  desc:d1        -0.293
+  pron:g_canvas  -0.296
+  pron:same_action -0.298
+  vague:canvas   -0.319
+  g_last2        -0.328
+  d3p            -0.333
+  empty:role_from -0.337
+  empty:text_last -0.348
+  log_count      -0.364
+  empty:dnone    -0.393
+  confirmed      -0.395
+  desc:confirmed -0.395
+  pron:role_to   -0.398
+  pron:d1        -0.401
+  role_anchor    -0.407
+  role_member    -0.421
+  d1             -0.435
+  empty:g_last2  -0.448
+  pron:role_anchor -0.453
+  d2             -0.584
+  vague:log_count -0.586
+  dnone          -0.595
+  role_from      -0.650
+  pron:group_plist -0.660
+  pron:group     -0.696
+margin written 0 (owner's choice) · margin of the 95% rule 2.75
+train, gaps with the gold among the candidates: best = gold (top-1) / best = NULL, by gap kind and gold arity
+  pron one: 922 · top-1 827 (89.7%) · NULL on top 14
+  empty one: 902 · top-1 589 (65.3%) · NULL on top 217
+  empty several: 313 · top-1 128 (40.9%) · NULL on top 121
+  pron several: 24 · top-1 0 (0.0%) · NULL on top 24
+  vague one: 89 · top-1 55 (61.8%) · NULL on top 30
+  desc one: 1 · top-1 0 (0.0%) · NULL on top 1
+wrote /home/claude/vss-box/diagram-vss-demo/docs/model/arms/ALL/context/weights.json

@@ -1,0 +1,34 @@
+[splits] written to /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_graphq8_all_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 244, heldout_formulations 216, train 4445
+[schema] roles ['object', 'shape', 'color', 'size', 'relation', 'landmark', 'landmark2', 'relation2', 'landmark3', 'region', 'source', 'target', 'notcolor', 'comparison'] (core []), max depth 0, event negation False
+[guard] cuda allocator capped at 35% of 4 GB; watchdog: exit if MemAvailable < 1.5 GB or after 4.0 h
+[train] seed 0: 4445 training rows x 10 epoch(s) -> 44450 steps' sentences; D=1024; kinds 66; vocab 3635; predicate lemma not found in 2980 targets
+[train] phase table: 2531 of 13373 rows reached by the training sentences, held and trained; the other 10842 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.85 GB (peak 0.92 GB) | torch alloc 0.07 GB reserved 0.08 GB | MemAvailable 10.1 GB
+[trace] text: is n_summit connected_q n_lift1
+[trace] tokens/kinds: is/VERB n_summit/NAME connected_q/VERB n_lift1/NAME
+[trace] gold frame: {"event": "connected", "lemma": "connected_q", "neg": false, "roles": {"landmark": ["entity", "n_lift1", null, null], "object": ["entity", "n_summit", null, null]}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 55.33 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[fast] FAST=1: training loop with the rows encoded once (4445 rows, targets 69 MB on cuda), chain pieces packed (V8.states_packed), held rows per batch computed before training, the loss read only at the log lines
+[fast] FAST_MEM_MB=256: a batch whose chain terms would need more is computed in micro-batches of rows of similar length (fast_micro_groups; the gradients summed: equal up to float order on those steps only)
+[train seed 0] start: RSS 1.02 GB (peak 1.02 GB) | torch alloc 0.15 GB reserved 0.16 GB | MemAvailable 9.9 GB
+[train seed 0] step 500 sent 4000/44450 loss -0.829 (8s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.21 GB reserved 0.40 GB | MemAvailable 9.4 GB
+[train seed 0] step 1000 sent 8000/44450 loss -0.829 (15s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.21 GB reserved 0.40 GB | MemAvailable 9.4 GB
+[train seed 0] step 1500 sent 12000/44450 loss -0.866 (22s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.21 GB reserved 0.40 GB | MemAvailable 9.4 GB
+[train seed 0] step 2000 sent 16000/44450 loss -0.887 (29s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.21 GB reserved 0.40 GB | MemAvailable 9.5 GB
+[train seed 0] step 2500 sent 20000/44450 loss -0.754 (37s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.21 GB reserved 0.40 GB | MemAvailable 9.5 GB
+[train seed 0] step 3000 sent 24000/44450 loss -0.859 (44s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.21 GB reserved 0.40 GB | MemAvailable 9.5 GB
+[train seed 0] step 3500 sent 28000/44450 loss -0.888 (51s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.21 GB reserved 0.40 GB | MemAvailable 9.5 GB
+[train seed 0] step 4000 sent 32000/44450 loss -0.903 (58s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.21 GB reserved 0.40 GB | MemAvailable 9.5 GB
+[train seed 0] step 4500 sent 36000/44450 loss -0.843 (65s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.21 GB reserved 0.40 GB | MemAvailable 9.5 GB
+[train seed 0] step 5000 sent 40000/44450 loss -0.797 (73s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.21 GB reserved 0.40 GB | MemAvailable 9.5 GB
+[train seed 0] step 5500 sent 44000/44450 loss -0.814 (80s) | RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.21 GB reserved 0.40 GB | MemAvailable 9.5 GB
+[train seed 0] end: RSS 1.69 GB (peak 1.69 GB) | torch alloc 0.21 GB reserved 0.22 GB | MemAvailable 9.5 GB (81s)
+[fast] FAST_MEM_MB: 0 of 5557 steps computed in micro-batches
+[export] route book written | RSS 1.69 GB (peak 1.80 GB) | torch alloc 0.15 GB reserved 0.22 GB | MemAvailable 9.4 GB
+[export] numpy reader vs torch states: max relative difference 7.92e-08 (float32 phases in the route book)
+[fast] FAST=1: calibration reads in 8 processes, each row read once, cleanups shared by its two reads
+[fast] calibration: 749 rows read, 400 background rows formalized in 18.4s
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.833 | residual 0.102
+[eval] seed 0 train (sample): FULL catalog candidates 0.840 | residual 0.107
+[mem] after seed 0: RSS 2.01 GB (peak 2.01 GB) | torch alloc 0.00 GB reserved 0.22 GB | MemAvailable 9.0 GB
+[done] model written to /home/claude/vss-box/diagram-vss-demo/training/sketch/worlds_micro/graphq8_all/model; REPORT.md and metrics.json there; run log /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_graphq8_all_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)

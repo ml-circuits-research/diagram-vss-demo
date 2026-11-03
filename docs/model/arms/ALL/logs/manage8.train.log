@@ -1,0 +1,31 @@
+[splits] written to /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_manage8_all_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 168, heldout_formulations 161, train 3580
+[schema] roles ['object', 'name', 'text', 'quantity', 'source', 'target', 'notcolor', 'quantifier', 'members'] (core []), max depth 0, event negation False
+[guard] cuda allocator capped at 35% of 4 GB; watchdog: exit if MemAvailable < 1.5 GB or after 4.0 h
+[train] seed 0: 3580 training rows x 10 epoch(s) -> 35800 steps' sentences; D=1024; kinds 68; vocab 2694; predicate lemma not found in 890 targets
+[train] phase table: 2078 of 14185 rows reached by the training sentences, held and trained; the other 12107 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.83 GB (peak 0.88 GB) | torch alloc 0.06 GB reserved 0.06 GB | MemAvailable 10.2 GB
+[trace] text: group n_comet to n_intake
+[trace] tokens/kinds: group/VERB n_comet/NAME to/to n_intake/NAME
+[trace] gold frame: {"event": "group", "lemma": "group", "neg": false, "roles": {"members": ["set", ["entity", "n_comet", null, null], ["entity", "n_intake", null, null]], "name": ["word", "n_intake"]}, "scope": null, "shape": "ok", "speakers": []}
+[trace] target |S_world| = 63.69 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
+[fast] FAST=1: training loop with the rows encoded once (3580 rows, targets 56 MB on cuda), chain pieces packed (V8.states_packed), held rows per batch computed before training, the loss read only at the log lines
+[fast] FAST_MEM_MB=256: a batch whose chain terms would need more is computed in micro-batches of rows of similar length (fast_micro_groups; the gradients summed: equal up to float order on those steps only)
+[train seed 0] start: RSS 0.98 GB (peak 0.98 GB) | torch alloc 0.12 GB reserved 0.12 GB | MemAvailable 10.1 GB
+[train seed 0] step 500 sent 4000/35800 loss -0.829 (7s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.17 GB reserved 0.36 GB | MemAvailable 9.5 GB
+[train seed 0] step 1000 sent 8000/35800 loss -0.867 (14s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.17 GB reserved 0.36 GB | MemAvailable 9.6 GB
+[train seed 0] step 1500 sent 12000/35800 loss -0.945 (21s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.17 GB reserved 0.36 GB | MemAvailable 9.6 GB
+[train seed 0] step 2000 sent 16000/35800 loss -0.900 (28s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.17 GB reserved 0.36 GB | MemAvailable 9.6 GB
+[train seed 0] step 2500 sent 20000/35800 loss -0.939 (35s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.17 GB reserved 0.36 GB | MemAvailable 9.6 GB
+[train seed 0] step 3000 sent 24000/35800 loss -0.972 (41s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.17 GB reserved 0.36 GB | MemAvailable 9.6 GB
+[train seed 0] step 3500 sent 28000/35800 loss -0.955 (48s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.17 GB reserved 0.36 GB | MemAvailable 9.6 GB
+[train seed 0] step 4000 sent 32000/35800 loss -0.879 (55s) | RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.17 GB reserved 0.36 GB | MemAvailable 9.6 GB
+[train seed 0] end: RSS 1.65 GB (peak 1.65 GB) | torch alloc 0.17 GB reserved 0.18 GB | MemAvailable 9.6 GB (61s)
+[fast] FAST_MEM_MB: 0 of 4475 steps computed in micro-batches
+[export] route book written | RSS 1.65 GB (peak 1.76 GB) | torch alloc 0.12 GB reserved 0.18 GB | MemAvailable 9.4 GB
+[export] numpy reader vs torch states: max relative difference 6.69e-08 (float32 phases in the route book)
+[fast] FAST=1: calibration reads in 8 processes, each row read once, cleanups shared by its two reads
+[fast] calibration: 568 rows read, 400 background rows formalized in 19.8s
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.827 | residual 0.128
+[eval] seed 0 train (sample): FULL catalog candidates 0.867 | residual 0.130
+[mem] after seed 0: RSS 1.91 GB (peak 1.91 GB) | torch alloc 0.00 GB reserved 0.18 GB | MemAvailable 8.5 GB
+[done] model written to /home/claude/vss-box/diagram-vss-demo/training/sketch/worlds_micro/manage8_all/model; REPORT.md and metrics.json there; run log /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_manage8_all_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)

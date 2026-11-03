@@ -1,0 +1,54 @@
+[05:55:39 +0s] arm VSS-ALL, LEGEND_EXT=1 VAL_PICK=specific DIAGRAM_OPS=1, worlds_micro/GROUPS_8ops.json, EXTRA_DIRS=llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_gen_1 llm_train/opus_gen_2 llm_train/synth_rules llm_train/synth_rules_ops llm_train/synth_rules_ext llm_train/ops_formulations llm_train/opus_ext_1 llm_train/synth_combo
+name, memory.total [MiB], memory.used [MiB]
+NVIDIA GeForce RTX 3050 Ti Laptop GPU, 4096 MiB, 61 MiB
+               total        used        free      shared  buff/cache   available
+Mem:              15           4           7           0           5          11
+Swap:             15           0          15
+12 extra folders: ['llm_train/opus_train_a', 'llm_train/opus_train_b', 'llm_train/opus_train_c', 'llm_train/opus_train_d', 'llm_train/opus_gen_1', 'llm_train/opus_gen_2', 'llm_train/synth_rules', 'llm_train/synth_rules_ops', 'llm_train/synth_rules_ext', 'llm_train/ops_formulations', 'llm_train/opus_ext_1', 'llm_train/synth_combo']
+21698 messages for the worlds (DATA=spans + EXTRA_DIRS)
+51 legend events, 46 roles
+shapes	shapes8	create,set,resize,fact,rule	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary CREATE_COLOR=role FAST=1 FAST_MEM_MB=256 LEGEND_EXT=1 VAL_PICK=specific DIAGRAM_OPS=1
+position	position8	move,swap,arrange,align,distribute,toFront,toBack	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary FAST=1 FAST_MEM_MB=256 LEGEND_EXT=1 VAL_PICK=specific DIAGRAM_OPS=1
+questions	questions8	count,list,extreme,nearest,describe,neighbors,degree,property,members,groupOf	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary FAST=1 FAST_MEM_MB=256 LEGEND_EXT=1 VAL_PICK=specific DIAGRAM_OPS=1
+links	links8	connect,disconnect,reverse	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary FAST=1 FAST_MEM_MB=256 LEGEND_EXT=1 VAL_PICK=specific DIAGRAM_OPS=1
+graphq	graphq8	check,connected,path,reachable,cycle,exists	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary FAST=1 FAST_MEM_MB=256 LEGEND_EXT=1 VAL_PICK=specific DIAGRAM_OPS=1
+manage	manage8	delete,duplicate,rename,label,group,ungroup	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary FAST=1 FAST_MEM_MB=256 LEGEND_EXT=1 VAL_PICK=specific DIAGRAM_OPS=1
+history	history8	undo,redo,forget	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary FAST=1 FAST_MEM_MB=256 LEGEND_EXT=1 VAL_PICK=specific DIAGRAM_OPS=1
+help	help8	help	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary FAST=1 FAST_MEM_MB=256 LEGEND_EXT=1 VAL_PICK=specific DIAGRAM_OPS=1
+layout	layout8	improve,respace,snap,fit,flip,sort,groupBy,equalize,straighten,untangle	DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary FAST=1 FAST_MEM_MB=256 LEGEND_EXT=1 VAL_PICK=specific DIAGRAM_OPS=1
+| folder | requests | round trip | every shape | no world | no event token | differs | no node / no span | keys that differ most |
+|---|---|---|---|---|---|---|---|---|
+| base (DATA=spans: 9 folders) | 22702 | 80.3% | 0.0% | 0.0% | 5.8% | 13.9% | 0.0% | target 1015 pairing 581 position 345 anchor 339 from 319 to 193 |
+| llm_train/opus_train_a | 994 | 73.2% | 0.0% | 0.0% | 11.4% | 15.4% | 0.0% | target 73 pairing 19 anchor 11 to 10 position 9 shape 6 |
+| llm_train/opus_train_b | 891 | 69.9% | 0.0% | 0.0% | 7.5% | 22.6% | 0.0% | target 108 position 22 pairing 17 from 14 anchor 12 to 10 |
+| llm_train/opus_train_c | 1059 | 71.7% | 0.0% | 0.0% | 11.0% | 17.4% | 0.0% | target 93 pairing 21 from 21 to 13 position 11 anchor 10 |
+| llm_train/opus_train_d | 1015 | 70.0% | 0.0% | 0.0% | 6.1% | 23.8% | 0.0% | target 156 anchor 24 shape 16 pairing 16 from 16 position 13 |
+| llm_train/opus_gen_1 | 991 | 73.9% | 0.0% | 0.0% | 8.7% | 17.5% | 0.0% | target 89 pairing 25 anchor 15 position 13 to 9 from 7 |
+| llm_train/opus_gen_2 | 1094 | 76.1% | 0.0% | 0.0% | 8.2% | 15.6% | 0.0% | target 79 pairing 21 position 17 from 11 anchor 11 shape 9 |
+| llm_train/synth_rules | 11707 | 79.3% | 0.0% | 0.0% | 5.2% | 15.4% | 0.0% | target 711 anchor 264 position 191 axis 157 pairing 100 shape 99 |
+| llm_train/synth_rules_ops | 1470 | 76.5% | 0.0% | 0.0% | 5.2% | 18.3% | 0.0% | anchor2 53 position 51 position2 50 anchor 40 label 35 region 28 |
+| llm_train/synth_rules_ext | 3664 | 82.2% | 0.0% | 0.0% | 1.5% | 16.3% | 0.0% | template 161 about 131 topic 81 aspect 78 target 36 scheme 30 |
+| llm_train/ops_formulations | 733 | 62.1% | 0.0% | 0.0% | 18.4% | 19.5% | 0.0% | target 29 direction 29 layout 25 comparison 20 kind 11 property 9 |
+| llm_train/opus_ext_1 | 743 | 47.1% | 0.0% | 0.0% | 6.2% | 46.7% | 0.0% | topic 83 aspect 58 items 50 from 41 target 35 to 34 |
+| llm_train/synth_combo | 4521 | 79.0% | 0.0% | 0.0% | 3.5% | 17.6% | 0.0% | target 455 position 85 anchor 75 pairing 36 ask 34 from 29 |
+| llm_bench/short3 (no pending) | 644 | 60.6% | 0.0% | 0.0% | 15.4% | 24.1% | 0.0% | target 28 shape 19 label 15 position 14 aspect 12 count 12 |
+| llm_bench/fresh2 (opus_a..d) | 1909 | 72.0% | 0.0% | 0.0% | 9.9% | 18.1% | 0.0% | target 157 anchor 49 pairing 45 position 39 shape 29 to 21 |
+gate passed: every trained folder has an 'every shape' share of at most 1.0%
+[05:56:23 +44s] world cutter start
+[05:56:23 +44s] event cutter start
+[06:34:20 +2321s] retrying 1 failed world(s) alone, VSA_MEM_FRACTION=0.85
+[06:41:34 +2755s] worlds done (0 failed); cutters done
+requests per world label: set 6481, create 5527, connect 5317, move 5105, check 1745, extreme 1582, arrange 1503, fact 1248, count 1158, delete 1098, list 999, label 989, property 861, help 857, resize 833, path 784, connected 782, duplicate 733, nearest 722, rename 721, align 691, distribute 625, exists 589, disconnect 556, toFront 515, rule 485, describe 460, neighbors 441, swap 436, toBack 434,
+requests per world label: shapes 15286, position 9861, questions 7320, links 6163, graphq 5038, manage 4051, history 1069, help 857, layout 564
+registry: ['shapes', 'links', 'position', 'layout', 'graphq', 'questions', 'manage', 'history', 'help']
+[06:41:34 +2755s] context filler start
+  pron several: 24 · top-1 0 (0.0%) · NULL on top 24
+  vague one: 89 · top-1 55 (61.8%) · NULL on top 30
+  desc one: 1 · top-1 0 (0.0%) · NULL on top 1
+wrote /home/claude/vss-box/diagram-vss-demo/docs/model/arms/ALL/context/weights.json
+[06:50:10 +3271s] context filler done
+event hint: mode H1 · event cutter /home/claude/vss-box/diagram-vss-demo/docs/model/arms/ALL/cutter_events8.json
+smoke vss: 10 messages, 10 gold · right 70.0 · wrong 10.0 · not done 20.0 · extra 1 (checked against tally)
+[06:50:12 +3273s] done
+96M	docs/model/arms/ALL
+104K	results/070_vss_all

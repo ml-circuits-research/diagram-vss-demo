@@ -1,0 +1,120 @@
+{
+ "about": "Arm VSS-ALL of TRAIN_PLAN_1103.md: the VSS chain (9 worlds of worlds_micro/GROUPS_8ops.json with LEGEND_EXT=1 VAL_PICK=specific DIAGRAM_OPS=1 (CONVERT_FIX.md): the 7 shipped worlds, reverse in links, group / ungroup in manage, members / groupOf in questions, the new worlds layout and help; cutter_worlds8s, cutter_events8 with the event hint H1, the context filler) retrained on base + EXTRA_DIRS = llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_gen_1 llm_train/opus_gen_2 llm_train/synth_rules llm_train/synth_rules_ops llm_train/synth_rules_ext llm_train/ops_formulations llm_train/opus_ext_1 llm_train/synth_combo (all learned parts).",
+ "router": "cutter",
+ "cutter": "arms/ALL/cutter_worlds8s.json",
+ "context": "arms/ALL/context/weights.json",
+ "event_cutter": "arms/ALL/cutter_events8.json",
+ "event_hint": "H1",
+ "EXTRA_DIRS": "llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_gen_1 llm_train/opus_gen_2 llm_train/synth_rules llm_train/synth_rules_ops llm_train/synth_rules_ext llm_train/ops_formulations llm_train/opus_ext_1 llm_train/synth_combo",
+ "LEGEND_EXT": 1,
+ "VAL_PICK": "specific",
+ "DIAGRAM_OPS": 1,
+ "grouping": "worlds_micro/GROUPS_8ops.json",
+ "worlds": [
+  {
+   "world": "shapes",
+   "events": [
+    "create",
+    "set",
+    "resize",
+    "fact",
+    "rule"
+   ],
+   "model": "arms/ALL/micro/shapes8"
+  },
+  {
+   "world": "links",
+   "events": [
+    "connect",
+    "disconnect",
+    "reverse"
+   ],
+   "model": "arms/ALL/micro/links8"
+  },
+  {
+   "world": "position",
+   "events": [
+    "move",
+    "swap",
+    "arrange",
+    "align",
+    "distribute",
+    "toFront",
+    "toBack"
+   ],
+   "model": "arms/ALL/micro/position8"
+  },
+  {
+   "world": "layout",
+   "events": [
+    "improve",
+    "respace",
+    "snap",
+    "fit",
+    "flip",
+    "sort",
+    "groupBy",
+    "equalize",
+    "straighten",
+    "untangle"
+   ],
+   "model": "arms/ALL/micro/layout8"
+  },
+  {
+   "world": "graphq",
+   "events": [
+    "check",
+    "connected",
+    "path",
+    "reachable",
+    "cycle",
+    "exists"
+   ],
+   "model": "arms/ALL/micro/graphq8"
+  },
+  {
+   "world": "questions",
+   "events": [
+    "count",
+    "list",
+    "extreme",
+    "nearest",
+    "describe",
+    "neighbors",
+    "degree",
+    "property",
+    "members",
+    "groupOf"
+   ],
+   "model": "arms/ALL/micro/questions8"
+  },
+  {
+   "world": "manage",
+   "events": [
+    "delete",
+    "duplicate",
+    "rename",
+    "label",
+    "group",
+    "ungroup"
+   ],
+   "model": "arms/ALL/micro/manage8"
+  },
+  {
+   "world": "history",
+   "events": [
+    "undo",
+    "redo",
+    "forget"
+   ],
+   "model": "arms/ALL/micro/history8"
+  },
+  {
+   "world": "help",
+   "events": [
+    "help"
+   ],
+   "model": "arms/ALL/micro/help8"
+  }
+ ]
+}
