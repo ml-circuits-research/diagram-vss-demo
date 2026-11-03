@@ -27,6 +27,10 @@ reader meets that kind pair). A row is "trained" when its stored value differs f
 flat row numbers i * K + j that are stored) and the table itself (header "rows": "<name>.rows", "absent": "zero", "shape" the FULL shape)
 holding only those rows in that order. Reading rule for an absent row: it contributes nothing (the bigram term of that token is left out;
 a chain term over that A or L pair is left out). path and bg0 stay dense.
+Correction (VSA_CORR=phase, train.py fit_corr; off by default): a model folder with corr.npz gets one more phase array "corr" (shape [D],
+always 8 bits: its values are on that grid) in routebook.bin, and its manifest the key "corr" and the format "vss-web-4" (whatever it
+would be otherwise; the other keys say sparse / generated stars as before). The reader multiplies the normalized chart by exp(i corr)
+before every cleanup. Without corr.npz nothing changes: the files are byte for byte those of before.
 Bits 1, 2, 4 and 6 pack the values as one little-endian bit stream (value i holds stream bits i*bits .. i*bits+bits-1; bits 4 is the
 low nibble first, as before).
 Usage: sop export-web --model <model dir> --out <dir> [--bits 8|6|4|2|1|32] [--sparse] [--stars bin|generated]
@@ -42,6 +46,9 @@ MAGIC = b"VSSBIN1\n"
 PHASE_ARRAYS = ("path", "bg0", "bg", "A", "L", "rel", "pos", "pc", "vo", "cthR", "cthL", "cthC", "cbgL", "cbgR")
 SPARSE_TABLES = ("bg", "A", "L")       # the K x K x D tables a sparse export stores row by row
 FLOAT_ARRAYS = ("logits", "rel_mask", "taker_mask", "verb_mask", "cue_mask", "cA", "cDist", "cbeta", "cN")   # c*: the centre reader
+CORR_BITS = 8          # VSA_CORR=phase: the correction array is always stored in 8 bits (train.py CORR_BITS: its values are on that grid)
+CORR_MANIFEST = {"array": "corr", "kind": "phase", "bits": CORR_BITS, "switch": "VSA_CORR=phase",
+                 "rule": "the reader multiplies the normalized chart by exp(i corr) before every cleanup (reader.js read, infer.Reader.read)"}
 DECODER_OPS = ("pred", "says.scope", "says.speaker", "not", "attr", "det", "wide", "q", "quantity", "must", "may", "if.condition",
                "if.consequence", "and.next")
 
@@ -129,7 +136,7 @@ def routebook_from_bin(path):
     rb.pos_max = header.get("pos_max"); rb.vo_nmax = header.get("vo_nmax")
     rb.centre_kinds = header.get("centre_kinds"); rb.centre_tokens = header.get("centre_tokens")
     if rb.vo is not None and rb.cue_mask is None: rb.cue_mask = np.zeros(len(rb.cats))
-    rb.D = header["D"]
+    rb.D = header["D"]; rb.corr = arr.get("corr")          # VSA_CORR=phase: the correction phases (None: no correction)
     return rb
 
 
@@ -223,6 +230,9 @@ def export(model_dir, out_dir, bits=8, sparse=False, stars_mode="bin"):
         v = getattr(rb, name, None)
         if v is None: continue
         blobs.append(({"name": name, "kind": "float", "bits": 32, "shape": list(v.shape)}, np.asarray(v, dtype="<f4").tobytes()))
+    corr = getattr(rb, "corr", None)
+    if corr is not None:     # VSA_CORR=phase (train.py fit_corr): the world's correction phases, already on the 8-bit grid: stored in 8 bits, exactly
+        blobs.append(({"name": "corr", "kind": "phase", "bits": CORR_BITS, "shape": [rb.D]}, quantize(np.asarray(corr, dtype=float), CORR_BITS)))
     hdr = {"cats": rb.cats, "codes": rb.codes, "pos_max": rb.pos_max, "vo_nmax": rb.vo_nmax, "D": rb.D, "bits": bits}
     if rb.centre_kinds is not None: hdr["centre_kinds"] = rb.centre_kinds          # the centre reader (legend reader.centres)
     if getattr(rb, "centre_tokens", None) is not None: hdr["centre_tokens"] = rb.centre_tokens   # run 2: phase rows keyed by the centre's token
@@ -255,6 +265,7 @@ def export(model_dir, out_dir, bits=8, sparse=False, stars_mode="bin"):
     man = {"format": "vss-web-2" if sparse else "vss-web-1", "legend_sha256": L.sha, "training_code_commit": rd.cfg.get("training_code_commit"),
            "bits": bits, "star_version": rd.cfg.get("star_version", 1), "D": rd.D, "n_stars": len(keys)}
     if untrained is not None: man["sparse"] = sparse_summary(untrained)
+    if corr is not None: man["corr"] = CORR_MANIFEST
     if stars_mode == "generated": man["format"] = "vss-web-3"; man["stars"] = {"source": "generated", "file": "stars.json", "bits": 8 if bits == 32 else bits}
     return write_manifest(out_dir, man)
 
@@ -264,6 +275,7 @@ def sparse_summary(untrained):
 
 
 def write_manifest(out_dir, man):
+    if man.get("corr"): man = dict(man, format="vss-web-4")     # a route book with the correction array (VSA_CORR=phase); absent: unchanged
     files = ["model.json", "routebook.bin", man.get("stars", {}).get("file", "stars.json") if man.get("stars") else "stars.bin"]
     man = dict(man, files={fn: {"sha256": hashlib.sha256(open(os.path.join(out_dir, fn), "rb").read()).hexdigest(), "bytes": os.path.getsize(os.path.join(out_dir, fn))} for fn in files})
     with open(os.path.join(out_dir, "manifest.json"), "w") as f: json.dump(man, f, indent=1)

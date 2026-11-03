@@ -14,6 +14,11 @@ export class Routebook {
     this.rel = g("rel"); this.relMask = g("rel_mask"); this.takerMask = g("taker_mask"); this.pos = g("pos"); this.pc = g("pc");
     this.vo = g("vo"); this.verbMask = g("verb_mask"); this.cueMask = g("cue_mask"); this.voNmax = header.vo_nmax === undefined || header.vo_nmax === null ? null : header.vo_nmax;
     this.C = this.cats.length;
+    // VSA_CORR=phase (manifest format vss-web-4; tool/sop/train.py fit_corr): the world's correction, a phase array "corr" [D]; corr =
+    // exp(i phase) as {re, im}, applied by reader.js read to the normalized chart before every cleanup. Absent: null, no correction
+    const cph = g("corr");
+    this.corr = null;
+    if (cph) { const ph = cph.data, re = new Float64Array(this.D), im = new Float64Array(this.D); for (let i = 0; i < this.D; i++) { re[i] = Math.cos(ph[i]); im[i] = Math.sin(ph[i]); } this.corr = { re, im }; }
     // the centre reader (legend reader.centres; infer.Routebook.centre_addresses): phases cthR, cthL, cthC, cbgL, cbgR; floats cA, cDist, cbeta, cN
     this.centreKinds = header.centre_kinds || null;
     this.centreTokens = header.centre_tokens || null;     // run 2 (sop train --centre_key event): phase rows keyed by the centre's token, last row '*' shared

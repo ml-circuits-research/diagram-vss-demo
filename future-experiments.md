@@ -147,6 +147,16 @@ losing values and structure. The idea is to use what the Rules know inside VSS's
    the Rules' own phrasings, where they are reliable). Related: resonator networks for factorising bound representations, and cleanup
    memories. Measure: decoding accuracy per role on the scenes and short3 (oracle cut), and whether the margin becomes a better
    confidence.
+   **Implemented (2026-11-03), off by default: `VSA_CORR=phase`** (training/sketch/TRAIN_PLAN_R3.md). One phase vector per world, fitted after
+   the route book with it frozen, in closed form on the trainer's own loss (c_d = -arg sum_r S_rd conj(T_rd) / (|S_r| |T_r|) over the
+   training rows: the cosine to the gold-encoded state), on the 8-bit grid. The reader decodes exp(i c) * S / |S| (one element-wise
+   rotation per read, Python `infer.Reader.read` and browser `docs/js/vss/reader.js`); the presence thresholds are calibrated through it.
+   Stored as `corr.npz` in the model folder and as the array `corr` of routebook.bin (manifest `vss-web-4`). Run:
+   `VSA_CORR=phase bash training/sketch/train_micro.sh <world> <events>` (recorded in BUILD.json); round-3 job
+   `training/laptop/jobs_draft/080_vss_corr.sh` (arm R2 + the switch, to docs/model/arms/R3C/), compared with arm R2 like job 079.
+   CPU smoke (layout, EPOCHS=2): training cosine 0.7175 -> 0.7222, held out 0.7390 -> 0.7433; role decoding unchanged (90.3% -> 90.3% on the
+   training rows, 100% on the 39 held-out rows). Switch unset: builds and readings byte-identical. Not done: per event, low-rank map, joint
+   training.
 3. **A learned confidence for the Rules.** A small model over the Rules' own signals: which rule fired, words left unexplained, a
    Clarify, agreement with VSS and SOP-BERT. Fitted on the realistic calibration sets, it would make the Rules a reader that knows when
    it is unsure, on the short commands where they are strongest.
