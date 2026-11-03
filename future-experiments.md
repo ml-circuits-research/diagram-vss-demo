@@ -128,3 +128,34 @@ the load and read time in the browser. A smaller code is adopted only if the sco
 
 **Risk.** Each step needs retraining all worlds (minutes with FAST on the GPU machine, once the memory fix lands). Binarising after
 training may lose much more than quantising phases; that is what step 2(a) measures before any trainer is written.
+
+## The Rules and VSS in one space: a Rules "constellation" to correct VSS's confidence and its representation (2026-11-03, owner's idea)
+
+**Why.** The Rules read their own phrasings almost perfectly (98.9% on the template sets) but cannot estimate when they are wrong (37.5%
+of what they execute on realistic text is wrong). The learned readers are trained largely on data generated from the Rules, yet keep
+losing values and structure. The idea is to use what the Rules know inside VSS's own vector space, not only as a vote.
+
+1. **A Rules constellation as a reference.** Encode the Rules' SOP Lang reading of a request into the same world space VSS reads in:
+   the stars and the route book that the trainer already uses to encode gold rows. The distance between VSS's composed vector of the
+   text and this Rules-encoded vector is a graded agreement, finer than "same wire / different wire". Use it as a confidence feature
+   (VSS and VSS-BERT), and per role (which bound role disagrees), so the reasons can say which value is in doubt. Measure: AUROC and
+   the cost score of the VSS and VSS-BERT confidences with and without the feature, on the fresh2 and short3 calibration parts.
+2. **A learned world-level correction operator before decoding.** Deviations in the hyperspace accumulate along the chain of
+   bindings. A learned operand applied to the composed vector before cleanup / decoding could compensate them. In FHRR, a bind with a
+   learned phase vector is an element-wise rotation (cheap, one per world, or one per event). A small linear or low-rank map in phase
+   space is the next step. Train it to bring VSS's pre-decoding state close to the gold-encoded state (or the Rules-encoded state on
+   the Rules' own phrasings, where they are reliable). Related: resonator networks for factorising bound representations, and cleanup
+   memories. Measure: decoding accuracy per role on the scenes and short3 (oracle cut), and whether the margin becomes a better
+   confidence.
+3. **A learned confidence for the Rules.** A small model over the Rules' own signals: which rule fired, words left unexplained, a
+   Clarify, agreement with VSS and SOP-BERT. Fitted on the realistic calibration sets, it would make the Rules a reader that knows when
+   it is unsure, on the short commands where they are strongest.
+4. **A Rules + VSS tab, like VSS-BERT.** The Rules cut and propose the action; VSS reads the values on the same unit; a confidence is
+   fitted on their agreement. Note: with the 2026-11-02 readers, Rules + VSS agreement without SOP-BERT was right only 35-50% of the
+   time (VSS learned from Rules-generated data, so they share errors); measure again with the current readers before building on it.
+5. **Rules skeleton, learned values.** The Rules decide the action and the roles; VSS fills the role values (names, numbers,
+   descriptions) by its role-filler binding. Each does what it is good at: the Rules are fragile on values, the learned readers on
+   structure (cut, action).
+
+**How it is judged.** The same protocol as the rest: the cost score and the confidently-wrong rate on the held-out parts of fresh2, short3,
+scenes_test and collected_1, against VSS-BERT.
