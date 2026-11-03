@@ -153,6 +153,10 @@ function NEXT_CONTEXT(c, main) {
   else if (main.args.action === "connect" && main.args.to != null && !Array.isArray(main.args.to)) c.last = [main.args.to];
   if (main.args.action === "rename" && main.args.name) c.names = c.names.concat([String(main.args.name)]);
 }
+/* The engine keys that are not legend questions but take the values / kind of one (docs/js/logic.js placeMulti, filterShapes: a second
+   relation to a shape and a canvas region beside the first position). SOP-BERT learns them as heads of their own (make_roles.py reads this
+   table) and decodes them with the legend question named here; a model without these heads (the shipped sop-bert) never reads them. */
+const SAME_AS = { position2: 'position', anchor2: 'anchor', region: 'position' };
 const cutOf = async (m, text) => { if (!m || !m.cut) throw new Error('The loaded neural model has no span head (cut).'); return (await m.cut(text)).map(({ c0, c1 }) => ({ c0, c1 })); };
 const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 const KIND_OF = act => own(ACTION, act) ? 'command' : own(ASK, act) ? 'question' : act === 'fact' || act === 'rule' || act === 'none' ? act : null;
@@ -227,7 +231,7 @@ function create(engine, rulesFormalize) {
       (the shape answer() returns); names: lower-cased name -> the name, or the reference to the wire that created it in this message */
   function role(key, act, R, names) {
     const q = (WORDING[act] && WORDING[act][key]) || WORDING._[key] || (L.get(key) && L.get(key).ask) || key + '?';
-    const lq = L.get(key), kind = lq ? lq.kind : null;
+    const lq = L.get(key) || L.get(SAME_AS[key]), kind = lq ? lq.kind : null;
     if (R.classes[key]) {   // a class head: none or a value of the key
       const c = R.classes[key], out = { q, span: c.value || '', score: c.score, value: null, source: 'neural (class)' };
       if (c.value && lq && (!lq.values || c.value in lq.values)) out.value = c.value;
@@ -242,6 +246,10 @@ function create(engine, rulesFormalize) {
     } else if (!sp.length) return out;
     else if (kind === 'name' || kind === 'text') out.value = sp[0].text;
     else if (kind === 'texts') out.value = sp.map(s => s.text).join(',');   // items / items2 / parents of a template: one span per item, in order
+    else if (kind === 'point') {   // at: one span per coordinate ("x=230 y=90", "(120, 220)") -> "230,90"
+      const xs = sp.map(s => (s.text.match(/-?\d+(?:\.\d+)?/) || [])[0]).filter(x => x != null);
+      if (xs.length === 2) out.value = xs.join(',');
+    }
     else if (kind === 'number') {
       const t = sp[0].text, d = t.match(/\d+(?:\.\d+)?/), w = (st.models.reader.number_words || {})[t.toLowerCase()];
       const n = d ? +d[0] : w != null ? +w : null;
@@ -252,7 +260,7 @@ function create(engine, rulesFormalize) {
 
   /** SOP-BERT, one name-role of one read() -> {q, span, score, value, source, fill} (the shape answer() returns). c: the context
       ({names, last, refs}); mention(args) adds a mention wire and returns the reference to it */
-  function jointRole(key, act, R, c, mention) {
+  function jointRole(key, act, R, c, mention, nDesc) {
     const q = (WORDING[act] && WORDING[act][key]) || WORDING._[key] || (L.get(key) && L.get(key).ask) || key + '?';
     const f = R.classes['fill:' + key], fill = f ? f.value : null;
     if (fill === 'context') {   // a pronoun or a vague reference: the shared context rule's last shape
@@ -260,13 +268,15 @@ function create(engine, rulesFormalize) {
       return { q, span: '', score: f.score, value: v, source: 'context (last shape created or named)', fill };
     }
     if (fill === 'description') {   // the description's own keys -> a mention wire
-      const a = {};
-      for (const k of st.models.reader.desc_keys || []) {
-        const d = R.classes['desc:' + k], lq = L.get(k);
+      /* the second described role of a request (in key order, nDesc = the roles described before it) reads its own heads desc2:<key>
+         when the model has them (make_roles.py reader.desc2_keys); a model without them reads desc:<key> for every role, as before */
+      const RD = st.models.reader, pre = nDesc > 0 && (RD.desc2_keys || []).length ? 'desc2:' : 'desc:', a = {};
+      for (const k of (pre === 'desc2:' ? RD.desc2_keys : RD.desc_keys) || []) {
+        const d = R.classes[pre + k], lq = L.get(k);
         if (d && d.value != null && (!lq || !lq.values || d.value in lq.values)) a[k] = d.value;
       }
-      const sc = Math.min(f.score, ...Object.keys(a).map(k => R.classes['desc:' + k].score));
-      return { q, span: Object.entries(a).map(([k, v]) => `${k}=${v}`).join(', ') || '(any shape)', score: sc, value: mention(a), source: 'neural (description)', fill };
+      const sc = Math.min(f.score, ...Object.keys(a).map(k => R.classes[pre + k].score));
+      return Object.assign({ q, span: Object.entries(a).map(([k, v]) => `${k}=${v}`).join(', ') || '(any shape)', score: sc, value: mention(a), source: 'neural (description)', fill }, pre === 'desc2:' ? { descPre: pre } : {});
     }
     const names = new Map(c.names.map(n => [String(n).toLowerCase(), n]));
     for (const [n, r] of c.refs) names.set(n, r);
@@ -300,7 +310,7 @@ function create(engine, rulesFormalize) {
       const args = {}; if (actKey) args[actKey] = act;
       const mentions = [], mention = ma => { const mid = 'm' + (++m); mentions.push({ id: mid, type: 'mention', args: ma }); return { ref: mid }; };
       for (const k of st.models.reader.act_keys[act || type] || []) {
-        const r = jointRole(k, act || type, R, c, mention); a.keys[k] = r;
+        const r = jointRole(k, act || type, R, c, mention, mentions.length); a.keys[k] = r;
         if (r.value != null) args[k] = r.value;
       }
       if (args.notColor && args.color === args.notColor) delete args.color;

@@ -9,6 +9,13 @@
 # The conversion switches of job 070 (LEGEND_EXT, VAL_PICK, DIAGRAM_OPS; training/sketch/synth/CONVERT_FIX.md) and its convert_check gate are
 # VSS-only: SOP-BERT reads the gold wires directly (make_roles.py, its acts and keys follow the legend), so it keeps the same EXTRA_DIRS as
 # job 070, synth_rules_ops included.
+# 2026-11-03 (training/neural/ROLES_ROUNDTRIP.md): the rows are checked by an oracle round trip before the GPU is taken: roles_roundtrip.py
+# builds the same rows (make_roles.py --all, this EXTRA_DIRS; --compare-rows: byte-identical train.jsonl / reader.json), gives their gold
+# labels to docs/js/neural.js as a perfect prediction and compares the decoded wires with the gold (bench-canon). The job stops if a trained
+# folder round-trips (right, left to the shared context rule, or refused by the engine) below 95%, or if more than 1% of its rows carry a
+# silent wrong label. The pipeline fixes of that check are in the code this job runs (finetune_roles.py class_targets: arrow=none /
+# outline=none are their own class; make_roles.py: list parts aligned in order and by case, a label with a comma is one text, numbers aligned
+# after names, "50px"; at / position2 / anchor2 / region learned; desc2:<key> heads for a second described role).
 # GPU: job 041/062 used 3-4 GB of the 3.73 GB card, so the fine-tuning takes EVERY slot of $HOME/vss-box/state/gpu (the VSS jobs take one per
 # world): it waits until no world is training, and no world starts while it trains. make_roles (CPU) runs before it without the lock.
 # Expected time (job 062: 31.7k request rows + 9.4k cut messages, 100 s per epoch on the RTX 3050 Ti): this data has 54.6k request rows + 24.7k
@@ -46,11 +53,15 @@ python3 - "$FT/roles_all_$ARM/reader.json" <<'PY' | tee -a "$TL" || fail "the ne
 import json, sys
 R = json.load(open(sys.argv[1])); keys = {k for k, _ in R["classes"]}
 need_acts = {"help", "improve", "respace", "snap", "fit", "flip", "sort", "groupBy", "equalize", "straighten", "untangle", "reverse"}
-need_keys = {"template", "topic", "aspect", "scheme", "kind", "quantifier", "property"}
-miss = (need_acts - set(R["acts"])) | (need_keys - keys) | ({"items", "title"} - set(R["span_keys"]))
+need_keys = {"template", "topic", "aspect", "scheme", "kind", "quantifier", "property", "position2", "region", "fill:anchor2"}
+miss = (need_acts - set(R["acts"])) | (need_keys - keys) | ({"items", "title", "at", "anchor2"} - set(R["span_keys"])) | (set() if R.get("desc2_keys") else {"desc2_keys"})
 print(f"acts {len(R['acts'])}, class keys {len(keys)}, span keys {R['span_keys']}; missing: {sorted(miss) or 'none'}")
 sys.exit(1 if miss else 0)
 PY
+# the oracle round trip of the rows (ROLES_ROUNDTRIP.md): gold labels -> docs/js/neural.js decoding -> gold? (CPU, ~1 min)
+python3 training/neural/roles_roundtrip.py --work "$FT/roles_roundtrip_$ARM" --compare-rows "$FT/roles_all_$ARM" --gate 95 1 > "$R/roles_roundtrip.log" 2>&1
+rc=$?; grep -E "^\| (ALL|llm_train/synth)|gate|GATE|FAILED|  llm" "$R/roles_roundtrip.log" | cut -c1-300 | tee -a "$TL"
+[ "$rc" = 0 ] || fail "roles round trip (see $R/roles_roundtrip.log): a trained folder's gold does not come back from its labels"
 stamp "rows done"
 
 # ---- the fine-tuning, alone on the card

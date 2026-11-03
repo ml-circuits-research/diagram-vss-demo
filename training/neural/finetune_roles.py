@@ -78,7 +78,15 @@ class Layout:
         self.offsets = np.cumsum([len(self.acts)] + self.class_sizes).tolist()   # start of each class key in seq_logits
 
     def class_targets(self, row):
-        return [vals.index(row["classes"][k]) if row["classes"].get(k) in vals else 0 for k, vals in self.classes]
+        """index 0 of every head is "no value" (docs/js/neural.js makeReader: index 0 -> null). A gold VALUE that is itself spelled "none"
+        (arrow=none: a plain line; outline=none: no border) is its own class at index >= 1 (make_roles.py lists it after the leading "none"),
+        so it is searched from index 1; before 2026-11-03 vals.index() found the leading "none" and every arrow=none / outline=none row was
+        trained as "no arrow / outline value" (training/neural/ROLES_ROUNDTRIP.md)."""
+        out = []
+        for k, vals in self.classes:
+            v = row["classes"].get(k)
+            out.append(vals.index(v, 1) if v is not None and v in vals[1:] else 0)
+        return out
 
 
 CUT_ID = {"O": 0, "B": 1, "I": 2}
