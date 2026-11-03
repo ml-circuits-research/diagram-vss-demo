@@ -116,9 +116,13 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
             # "stars" into `all`, a typo), a quantifier / pronoun head would read "remove all the stars" as every shape; when a filter
             # (colour, not-colour, recency) has no token, the head alone reads every shape of the kind. Such a description is left
             # out (counted "description filter lost"), so the row says nothing about the role instead of teaching the wrong set.
+            # The same holds for a filter key that a world row cannot carry at all (2026-11-03, TRAIN_PLAN_R3.md A.5: layer and label from
+            # opus_r3_gaps, "delete all the panels" = mention(layer=zone,quantifier=all) was written as delete every shape; size in a
+            # description): the entity holds only a head, a colour and a determiner, so such a description is left out the same way.
             if LEGEND_EXT and head is not None and head not in ("it", "them"):
                 miss = (["shape"] if sh and head not in (PLURAL.get(sh, sh), sh) else []) + [k for k, t in (
-                    ("color", kv.get("color")), ("notcolor", kv.get("notcolor") and "not_" + kv["notcolor"]), ("recency", kv.get("recency"))) if t and t not in T]
+                    ("color", kv.get("color")), ("notcolor", kv.get("notcolor") and "not_" + kv["notcolor"]), ("recency", kv.get("recency"))) if t and t not in T] \
+                    + sorted(k for k in kv if k not in ("quantifier", "shape", "color", "notcolor", "recency"))
                 if miss: head = None; lost.append("description filter lost: " + ",".join(miss))
                 if miss and not soft: raise Skip(f"description filter lost in {v}")
             if head is None:
