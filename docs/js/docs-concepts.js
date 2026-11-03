@@ -6,7 +6,10 @@
    Numbers are evidence of direction (before -> after, with 95% intervals), not a scoreboard. Every number names the result document it comes
    from (training/sketch/*.md unless said otherwise; results/072_measure/... is on branch gpu-runs).
    Sentences in <button class="say" data-quick> are sent to the editor when clicked; they are written for the drawing the page opens with.
-   Old page ids (why-three, knowing, chain-vs-one, fresh-writer, three-readers) are redirected by docs.js (ALIASES). */
+   Old page ids (why-three, knowing, chain-vs-one, fresh-writer, three-readers) are redirected by docs.js (ALIASES).
+   Framing (owner, 2026-11-03 11:19; the introduction is help.js "Start here"): the Rules are the comparison, VSS-BERT is the reader that answers,
+   and the synthetic training data is the main limit today (reliability, section r-synthetic). Result documents named there link to the repository
+   on GitHub (GH below). */
 (function (root) {
 'use strict';
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -15,6 +18,9 @@ const says = (...ts) => `<div class="says">${ts.map(say).join('')}</div>`;
 const AH = '<defs><marker id="ahc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ahead" d="M0,0 L10,5 L0,10 z"/></marker></defs>';
 const pages = [];
 const page = (id, title, lead, html) => pages.push({ id, title, lead, html });
+/* a result document of the repository, as a link to it on GitHub (main, or the branch gpu-runs) */
+const GH = 'https://github.com/ml-circuits-research/diagram-vss-demo/blob/';
+const doc = (path, label, branch) => `<a href="${GH}${branch || 'main'}/${path}"><code>${esc(label || path.split('/').pop())}</code></a>`;
 /* the measurement every page refers to */
 const TEST = 'the test part of fresh2 + short3: 745 messages, 1745 requested actions, none of them trained on';
 
@@ -57,6 +63,8 @@ is the one with the best cost score on calibration messages (out of fold), chose
   <li><a href="#help/rules-vs-learned">The Rules, as a comparison</a>: they read their own phrasings very well, but cannot know when they are wrong.</li>
   <li><a href="#help/parts-alone">The VSS and SOP-BERT tabs</a>: the two parts of VSS-BERT, shown alone.</li>
 </ol>
+<p>The main limit today is not a model: it is the training data, which is synthetic (<a href="#help/reliability/r-synthetic">The data is
+synthetic</a>).</p>
 
 <div class="callout" id="precision-result">
 <p><b>Where it stands (2026-11-03).</b> On ${TEST}, each reader at its own threshold:</p>
@@ -113,7 +121,7 @@ changed that: <a href="#help/reliability">better data and a fixed pipeline</a>, 
 
 /* ============================================================ 3. reliability */
 page('reliability', 'More and better data, a fixed data pipeline',
-'What raised SOP-BERT’s reliability: training on all the data, short commands written from the Rules’ grammar, and finding the places where the pipeline silently taught it wrong answers.', `
+'What raised SOP-BERT’s reliability: training on all the data, short commands written from the Rules’ grammar, and finding the places where the pipeline silently taught it wrong answers. And what still limits every reader: the data is synthetic.', `
 <h2 id="r-data">More and better data</h2>
 <p>On 2026-11-03 SOP-BERT and the VSS worlds were retrained on all the annotated data (arm ALL, <code>TRAIN_PLAN_1103.md</code>): 24,698
 messages and 54,584 annotated requests for SOP-BERT. Two kinds of data were new:</p>
@@ -166,6 +174,34 @@ same confidence recipe at its best threshold (<code>results/072_measure/COMPARE.
 commands of short3 alone the change, +3.9 [−4.8, 13.8], is not shown either way.</p>
 <p class="note">With each tab’s own confidence recipe and short3 added to the test, the SOP-BERT tab went from 31.5 to 33.4 (not shown either way) and from 3.2% to 2.5%
 confidently wrong (commit 220295a; <code>results/072_measure/refit/records/confidence3_report.md</code>).</p>
+
+<h2 id="r-synthetic">The data is synthetic: the main limit today</h2>
+<p>All the data SOP-BERT is fine-tuned on and the VSS worlds are trained on is synthetic; no message from a real user is in it yet. It is of two
+kinds:</p>
+<ul>
+  <li><b>Messages written by AI agents</b>: Opus agents (the earliest sets by Sonnet and Haiku) write whole messages in the style of real use,
+  and every request in them is annotated (${doc('training/sketch/llm_train/OPUS_DATA.md')}; the writing spec
+  ${doc('training/sketch/llm_train/TRAIN_MSG_SPEC.md')}).</li>
+  <li><b>Short commands generated from the Rules</b>: every action, value and construction the Rules read, written from their grammar and cue
+  words (${doc('training/sketch/llm_train/synth_rules/README.md', 'synth_rules')}).</li>
+</ul>
+<p>Many of the current mistakes come from this data, not from the models. The known problems:</p>
+<ul>
+  <li><b>Repetition.</b> Thousands of messages from a few writers, in a few styles. On 600 messages by a writer the models had not seen
+  (fresh2), every reader got worse; VSS missed about 34% of the requests at every message length, against 18–24% on the training writers’
+  messages: the loss follows the writer’s style, not the length (${doc('training/sketch/FRESH2_CAUSES.md')}).</li>
+  <li><b>Frames.</b> The generated commands are built from a fixed set of sentence frames. A model learns those frames well and learns
+  nothing from them about other ways of saying the same thing: adding 8404 generated commands gave VSS no measurable gain on the new
+  writer’s messages, −0.8 [−3.9, 2.4] (${doc('training/sketch/synth/VSS_SYNTH_DIAGNOSIS.md')}; the largest cause found there was the
+  conversion into world rows, fixed since, ${doc('training/sketch/synth/CONVERT_FIX.md')}).</li>
+  <li><b>Thin coverage of short real commands.</b> People with a problem fall back to short, literal commands, and few of the training
+  messages are short commands as people write them. On short3 (short commands written the way a user would), 35% of the requests were out
+  of reach of any VSS training row under the conversion of the day (${doc('training/sketch/synth/VSS_SYNTH_DIAGNOSIS.md')}), and every
+  learned reader is still close to asking about everything there (<a href="#help/limits-today">Where it is weak today</a>).</li>
+</ul>
+<p>The round trips above are how part of this was found: they check that the labels of the synthetic data reach the models unchanged
+(${doc('training/neural/ROLES_ROUNDTRIP.md')} for SOP-BERT, ${doc('training/sketch/synth/CONVERT_FIX.md')} for VSS). What is still missing
+is data that is less repetitive, with more short commands written the way people write them.</p>
 `);
 
 /* ============================================================ 4. VSS-BERT */
@@ -521,6 +557,22 @@ actions that use the same roles per world, read better than 16 one-action worlds
 </div>
 <figcaption>The nine worlds of <code>training/sketch/worlds_micro/GROUPS_8ops.json</code> (questions also holds members and groupOf).</figcaption>
 </figure>
+
+<h2 id="thousand-brains">An inspiration: <i>A Thousand Brains</i></h2>
+<p>VSS (VSA Semantic Space) is built on vector symbolic architectures, and it is also inspired by <i>A Thousand Brains: A New Theory of
+Intelligence</i> by Jeff Hawkins (foreword by Richard Dawkins). In the book, the neocortex is made of many similar units that each learn
+models of the world, and they reach one perception by voting. VSS echoes that idea on a small scale: instead of one large model, many small
+worlds each model one part of the language (a family of actions), several of them read the same request, and one combined reading comes out.</p>
+<p>The analogy is modest, and it has limits:</p>
+<ul>
+  <li>The worlds do not vote by majority. Up to three candidate worlds, named by the cutter, read a request; the reading that leaves the
+  fewest words not understood is kept, and a tie goes to the context filler, then to the cutter’s order
+  (<a href="#help/vss-reader/decide">How a unit is decided</a>).</li>
+  <li>The closest thing to a vote is one level up, in VSS-BERT: a request is done when VSS and SOP-BERT read it the same way and the confidence
+  fitted on their agreement is high enough (<a href="#help/two-readers">VSS-BERT</a>).</li>
+  <li>A world models words and the roles they fill, learned from annotated text; it is not a model of the brain, and VSS makes no claim about
+  how the brain works.</li>
+</ul>
 `);
 
 /* ============================================================ limits today */
@@ -528,6 +580,8 @@ page('limits-today', 'Where it is weak today',
 'The known weak spots of the readers. The editor’s own limits (what it cannot draw) are in What it cannot do.', `
 <p class="note">The readers of 2026-11-03. Numbers at each reader’s threshold are on ${TEST}.</p>
 <ul class="limits">
+  <li><b>The training data is synthetic.</b> It was written by AI agents and generated from the Rules; its repetition, its sentence frames and
+  its few short real commands are behind many of the mistakes below (<a href="#help/reliability/r-synthetic">The data is synthetic</a>).</li>
   <li><b>It asks about half of the requests.</b> VSS-BERT holds back 52.6% of the requested actions, and still 1.8% of what it does is wrong.
   How to get a held request done: <a href="#help/asking/a-do">rephrase it, or Do it anyway</a>.</li>
   <li><b>Mistakes both readers share.</b> About 5 to 6 in 100 of the requests VSS and SOP-BERT read the same way are still wrong;

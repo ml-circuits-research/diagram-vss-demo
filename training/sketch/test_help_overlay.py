@@ -14,7 +14,8 @@ the app's CSS rule for the drawing's svg #canvas, became position:absolute; inse
   4. Back, close (Esc), an example sentence, reopen, browser Back / Forward: the overlay is shown or hidden as the URL says, the app behind
      it is inert exactly while it is open, and the sidebar still takes clicks afterwards;
   5. phone width: the Pages menu opens and each of its entries can be clicked;
-  6. a section link #help/<page>/<anchor> scrolls to the section inside the page;
+  6. a section link #help/<page>/<anchor> scrolls to the section inside the page; a section of the old Start here (#help/start/replies, ...)
+     opens that section of Using the demo (docs.js ALIASES, 2026-11-03);
   7. no broken anchors: every link #help/<page>[/<anchor>] inside a help page, and every data-help button of the app, names a page of the
      sidebar (a removed page's id only through docs.js ALIASES, for the app's buttons) and, when it has one, an id inside that page.
 Exit code 0 when everything passes.
@@ -81,7 +82,7 @@ def main():
         pg.add_init_script(INIT)
         pg.goto(base, wait_until="domcontentloaded")
         pg.click("#help-btn")   # at once, while the models load
-        hrefs = pg.eval_on_selector_all("#docs-nav a", "as => as.map(a => a.getAttribute('href'))")
+        hrefs = pg.eval_on_selector_all("#docs-nav a[href^='#help']", "as => as.map(a => a.getAttribute('href'))")
         check(f"the sidebar lists the help pages ({len(hrefs)})", len(hrefs) >= 15)
 
         # 1, 2, 3: every page, reached by a mouse click on its sidebar entry
@@ -140,6 +141,16 @@ def main():
         top = pg.evaluate("() => { const h = document.querySelector('#docs-page [id=\"canvas-parts\"]'), m = document.querySelector('#docs-main'); return h ? Math.round(h.getBoundingClientRect().top - m.getBoundingClientRect().top) : null; }")
         check("#help/where/canvas-parts scrolls to that section", top is not None and abs(top) < 40, f"section top relative to the page: {top}")
         pg.keyboard.press("Escape"); pg.wait_for_timeout(600)
+        # 6b: a section of the old Start here (moved to Using the demo on 2026-11-03) through docs.js ALIASES
+        moved = [k for k in aliases if k.startswith("start/")]
+        bad_moved = []
+        for k in moved:
+            pg.evaluate("h => { location.hash = h; }", "#help/" + k); pg.wait_for_timeout(400)
+            r = pg.evaluate("a => { const t = (document.querySelector('#docs-title') || {}).textContent, h = document.querySelector(`#docs-page [id=\"${a}\"]`), m = document.querySelector('#docs-main'); return { t, top: h ? Math.round(h.getBoundingClientRect().top - m.getBoundingClientRect().top) : null, end: m.scrollTop + m.clientHeight >= m.scrollHeight - 2 }; }", aliases[k][1])
+            # the last section cannot reach the top of the pane: then the page is scrolled to its end and the section is in view
+            if r["t"] != "Using the demo" or r["top"] is None or not (abs(r["top"]) <= 40 or (r["end"] and 0 <= r["top"] < 700)): bad_moved.append(f"{k}: {r}")
+            pg.keyboard.press("Escape"); pg.wait_for_timeout(500)
+        check(f"the old Start here sections (#help/start/<section>, {len(moved)}) open that section of Using the demo", moved and not bad_moved, "; ".join(bad_moved))
 
         # 5: phone width
         pg.set_viewport_size({"width": 390, "height": 800}); pg.click("#help-btn"); pg.wait_for_timeout(200)

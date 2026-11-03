@@ -1,5 +1,5 @@
-/* The pages of the Help overlay that describe the editor and its language (docs/js/docs.js shows them): Start here, What you can draw,
-   Arrows and lines, Where things go, Everything you can do, Everything you can ask, What it cannot do, SOP Lang and Capabilities.
+/* The pages of the Help overlay that introduce the demo and describe the editor and its language (docs/js/docs.js shows them): Start here
+   (the introduction: what the demo shows and who made it), Using the demo, What you can draw, Arrows and lines, Where things go, Everything you can do, Everything you can ask, What it cannot do, SOP Lang and Capabilities.
    Every list here (shape kinds, colours, sizes, line styles, arrow heads, positions, actions, questions, SOP Lang keys and values,
    capabilities) is read at run time from the engine's legend and plugins (docs/js/logic.js), so the reference cannot drift from what the
    engine does. The prose, the example sentences and the drawings around those lists are written here. A legend value without a
@@ -201,12 +201,58 @@ const shp = (K, o) => Object.assign({ name: '', shape: 'circle', color: 'white',
 const mbText = b => b ? `about ${Math.round(b / 1e6)} MB` : '';
 
 /* ================================================================== START HERE ================================================================== */
-function start(env) {
+/* The introduction (owner, 2026-11-03 11:19): what the demo shows, the three techniques it compares, VSS-BERT, what it is for, the
+   neurosymbolic split, the goal (cautious by design), the synthetic data, and who made it. Plain and short: the numbers are on the later
+   pages (one fact here, with a link). The names and links of Axiologic Research and the Achilles project are exactly the owner's; nothing
+   else is said about either. How to use the editor is the next page, Using the demo (its old links #help/start/<section> are sent there by
+   docs.js ALIASES). */
+const CREDIT = 'This is research by <a href="https://www.axiologic.net">Axiologic Research</a>, part of the <a href="https://www.achilles-project.eu/">Achilles project</a>.';
+function start() {
+  return `<p class="lead">This demo shows that natural-language understanding can run in the browser. You write to a diagram editor in plain English; small language models running in this page turn your words into commands, and nothing is sent to a server.</p>
+  <p class="callout" id="in-credit">${CREDIT}</p>
+
+  <h2 id="in-compare">Three techniques, compared</h2>
+  <p>Three major techniques read the same messages, and you can see what each one does with them:</p>
+  <dl class="readers">
+    <dt>Rules</dt><dd>Hand-written code that looks for known words and their order, like the chatbots before LLMs. Exact on the phrasings it was written for, but it cannot tell when it is wrong. ${go('rules-vs-learned', 'The Rules, as a comparison')}</dd>
+    <dt>SOP-BERT</dt><dd>A BERT model (DistilBERT, a transformer) that we fine-tuned on example messages for this editor. ${go('bert', 'SOP-BERT')}</dd>
+    <dt>VSS</dt><dd><b>VSA Semantic Space</b>: a language model developed by us, built on VSA (vector symbolic architectures), not on transformers, and dedicated to formalization: turning a sentence into a precise command. It is built to estimate better when it is not sure, and to be more explainable: it reads in named steps, so it can say which word or which step it doubts. Its performance comes close to SOP-BERT’s, without reaching it yet. VSS is also inspired by <i>A Thousand Brains</i> by Jeff Hawkins: many small worlds, each modelling part of the language, combine into one reading. ${go('vss-worlds', 'What a VSS world is')}</dd>
+  </dl>
+
+  <h2 id="in-vss-bert">VSS-BERT: the two learned readers combined</h2>
+  <p>The interface shows how VSS and SOP-BERT are combined into <b>VSS-BERT</b>, the reader that answers in the chat. Both read every request. When they read it the same way, it is done; when they do not, it is held back, with the reason and a clearer command to write. That gives a balance between capability and fewer mistakes: of what VSS-BERT does, 1.8% is wrong, and it holds back about half of the requests. ${go('research-question/precision-result', 'The numbers')} · ${go('two-readers', 'How VSS-BERT works')}</p>
+
+  <h2 id="in-uses">What it is for</h2>
+  <p>Replacing LLMs in applications where a sufficiently capable LLM would be too expensive or too slow. These models are small enough to run in a browser tab.</p>
+
+  <h2 id="in-neuro">Neurosymbolic: the models understand, a symbolic layer acts</h2>
+  <p>The whole approach is neurosymbolic. The language models (VSS, BERT) understand the intent: they turn your words into a short formal command in ${go('sop-lang', 'SOP Lang')}. A symbolic layer does the execution: an engine that knows exactly which actions exist (the legend), carries out the commands and answers questions with a small logic engine. The models never change the drawing themselves. This split makes the architecture useful for a large class of agentic applications: the drawing here is the test bench.</p>
+
+  <h2 id="in-goal">The main goal: cautious by design</h2>
+  <p>Avoid claiming to know, and avoid destructive actions. The system should be useful enough, but cautious by design. Today the same rule holds for every action: a request is done only when the reader is sure enough of it (one confident mistake is counted as costly as 10 right answers); the rest is held back, and the reply says why. Every change can be undone in one step. ${go('research-question', 'The goal')} · ${go('asking', 'When it is not sure, it asks')}</p>
+
+  <h2 id="in-data">The data</h2>
+  <p>The data used to fine-tune BERT and to train the VSS worlds is synthetic: messages written by AI agents, and short commands generated from the Rules. Many of the current problems come from its poor quality and repetitiveness. ${go('reliability/r-synthetic', 'The data, and its limits')}</p>
+
+  <h2 id="in-next">Where to go next</h2>
+  <div class="cards">
+    <a class="card" href="#help/using"><b>Using the demo</b><span>How to write to the editor, who answers, the replies, Settings</span></a>
+    <a class="card" href="#help/research-question"><b>The goal</b><span>Do only what you are sure of, ask about the rest</span></a>
+    <a class="card" href="#help/two-readers"><b>VSS-BERT</b><span>SOP-BERT paired with VSS: fewer confident mistakes</span></a>
+    <a class="card" href="#help/vss-worlds"><b>What a VSS world is</b><span>The small models VSS is made of</span></a>
+    <a class="card" href="#help/reliability/r-synthetic"><b>The data</b><span>Synthetic, and the main limit today</span></a>
+    <a class="card" href="#help/architecture"><b>How it works inside</b><span>Every part, model and number</span></a>
+  </div>`;
+}
+
+/* ================================================================== USING THE DEMO ================================================================== */
+/* the former Start here (until 2026-11-03): how to use the editor, who answers, the replies, the screen and Settings */
+function using(env) {
   const { K } = env;
   const vb = mbText(env.vssBytes), nb = mbText(env.neuralBytes);
   const cut = env.cut || {};
   let h = `<p class="lead">A diagram editor you talk to in plain English. You write what you want, for example <q>draw a red circle named Hub and connect Start to it</q>, and it draws it, changes it, or answers questions about the drawing.</p>
-  <p>The reader that answers is <b>VSS-BERT</b>. It does only what it is sure of; when it is not sure, it does not guess and asks no questions: it says which part it held back, why, and the clearer command to write. ${icon('more')} Settings let you see the other readers’ replies too, and each tab’s Settings choose how bold that reader is. ${go('start/readers', 'More below')}</p>
+  <p>The reader that answers is <b>VSS-BERT</b>. It does only what it is sure of; when it is not sure, it does not guess and asks no questions: it says which part it held back, why, and the clearer command to write. ${icon('more')} Settings let you see the other readers’ replies too, and each tab’s Settings choose how bold that reader is. ${go('using/readers', 'More below')}</p>
   <p>You can also ask the editor about itself in the chat: <q>help</q>, <q>how do I connect two shapes?</q>, <q>what colours can I use?</q>. It answers from the same lists as these pages, with example sentences you can send. ${go('templates', 'Templates')} turn a list of texts into a process, a timeline, a heart or a mountain in one step.</p>
   <p>Every sentence marked ▸ in this help is a button: it sends that sentence to the editor and closes the help, so you can see what it does. Try one:</p>
   ${says(START_EX)}
@@ -218,7 +264,7 @@ function start(env) {
   <dl class="readers">
     <dt>VSS-BERT</dt><dd>The two learned readers below, reading the same requests. When they read a request the same way, it is right about 95 times in 100, so it is done; when they disagree, or only one of them found the request, it is held back and you are told why. ${go('two-readers', 'How VSS-BERT works')}</dd>
     <dt>SOP-BERT</dt><dd>A transformer of the BERT family, the kind of model behind many language tools: one DistilBERT model we fine-tuned on example messages written for this editor. It cuts a message into requests and reads each one. ${nb ? nb[0].toUpperCase() + nb.slice(1) + ', loaded' : 'Loaded'} from this site, kept in your browser’s cache after the first visit.</dd>
-    <dt>VSS</dt><dd>Nine small models we trained on the same messages, one per family of actions. VSS stands for vector-symbolic: each word becomes a long list of numbers (a vector), and the model combines these vectors to find the action and its details. Not a transformer, and built so differently that its agreement with SOP-BERT means something. ${vb ? vb[0].toUpperCase() + vb.slice(1) + ', loaded' : 'Loaded'} from this site.</dd>
+    <dt>VSS</dt><dd>Nine small models we trained on the same messages, one per family of actions. VSS stands for VSA Semantic Space; VSA are vector symbolic architectures: each word becomes a long list of numbers (a vector), and the model combines these vectors to find the action and its details. Not a transformer, and built so differently that its agreement with SOP-BERT means something. ${vb ? vb[0].toUpperCase() + vb.slice(1) + ', loaded' : 'Loaded'} from this site.</dd>
     <dt>Rules</dt><dd>Hand-written code that looks for known words (“draw”, “red”, “below”) and their order: a comparison. Instant and exact on the phrasings it was written for, but it has no confidence, so it cannot tell when it is wrong. ${go('rules-vs-learned', 'The Rules, as a comparison')}</dd>
   </dl>
   <p>Why it is built this way: a reader should do only what it is sure of and ask about the rest. In a drawing a confident mistake costs one undo; where actions have serious consequences it is what matters most. ${go('research-question', 'The goal')}</p>
@@ -594,7 +640,7 @@ function capSwitches(env) {
 }
 
 /* the pages, by the id docs/js/docs.js shows them under (#help/<id>) */
-const pages = { start, draw, arrows, where, do: doPage, templates, ask: askPage, limits, 'sop-lang': sop, capabilities };
-const HelpKit = { pages, capSwitches, examples, hlWire, ACTIONS, ASKS, CAPS, EDGE_LABEL, EDGE_STYLE, TOPICS };
+const pages = { start, using, draw, arrows, where, do: doPage, templates, ask: askPage, limits, 'sop-lang': sop, capabilities };
+const HelpKit = { pages, CREDIT, capSwitches, examples, hlWire, ACTIONS, ASKS, CAPS, EDGE_LABEL, EDGE_STYLE, TOPICS };
 if (typeof module !== 'undefined') module.exports = HelpKit; else root.HelpKit = HelpKit;
 })(typeof window !== 'undefined' ? window : this);

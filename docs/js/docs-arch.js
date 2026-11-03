@@ -18,6 +18,9 @@ language, <b>SOP Lang</b> (one line per request, called a <i>wire</i>); and a co
 by request, whether the wire is carried out or held back with a reason (<a href="#help/two-readers">VSS-BERT</a>). The engine carries out the
 wires through plugins; graph and logic questions are answered by a small Datalog evaluator inside the engine. The <b>Rules</b>, a hand-written
 reader, read the same messages as a comparison. Everything runs in the browser: nothing is sent to a server.</p>
+<p>The split is neurosymbolic: the learned readers only understand the intent and write SOP Lang; the engine, from the hand-written legend,
+does the execution. The main limit today is the training data, which is synthetic: written by AI agents and generated from the Rules
+(<a href="#help/reliability/r-synthetic">The data is synthetic</a>).</p>
 
 <figure>
 <div class="fig">
@@ -206,11 +209,17 @@ confidence, so it cannot ask. Its segmenter also cuts text that is not a request
 
 /* ============================================================ VSS */
 page('vss-reader', 'The VSS reader', `
-<p>VSS = vector-symbolic. The VSS reader is not one model: it is a <b>composer</b> of small models, built in
+<p>VSS = VSA Semantic Space: a language model built on vector symbolic architectures (VSA), not on transformers, developed by us for
+formalization. The VSS reader is not one model: it is a <b>composer</b> of small models, built in
 <code>docs/js/vss-composer.js</code> (class <code>Composer</code>, <code>loadComposer</code>) from <code>docs/model/micro/registry.json</code>,
 and loaded when the page opens by <code>docs/js/vss-formalizer.js</code> (<code>loadComposerAt</code>, versioned URLs). It has <b>two
 cutters</b>: the world cutter cuts and names candidate worlds; the event cutter only gives a hint. The idea behind it, and why it is built
 this way: <a href="#help/vss-worlds">What a VSS world is</a>.</p>
+<p>VSS is also inspired by <i>A Thousand Brains: A New Theory of Intelligence</i> by Jeff Hawkins (foreword by Richard Dawkins), in which many
+models, each learning part of the world, vote on one perception. Here many small worlds each model part of the language, and one combined reading
+comes out. In the code that is not a majority vote: the candidate worlds of a unit each read it, and the reading with the fewest words not
+understood is kept (<a href="#help/vss-reader/decide">How a unit is decided</a>); the agreement that decides what is done is VSS-BERT’s, between
+VSS and SOP-BERT (<a href="#help/vss-worlds/thousand-brains">the analogy and its limits</a>).</p>
 
 <figure>
 <div class="fig">
@@ -644,7 +653,10 @@ that key to our versioned file; the Hugging Face models (only used by the headle
 
 /* ============================================================ data */
 page('data', 'Data', `
-<p>All training data are realistic messages written by LLM agents (Sonnet, Haiku) in the style of real use: whole messages of 1 to 20
+<p class="callout warn">All training data is synthetic: no message from a real user is in it yet. Its repetition, its sentence frames and its few
+short real commands are the main limit of the readers today (<a href="#help/reliability/r-synthetic">The data is synthetic</a>).</p>
+<p>Two kinds: messages written by LLM agents (Sonnet, Haiku, later Opus: <code>training/sketch/llm_train/OPUS_DATA.md</code>) in the style of
+real use, and short commands generated from the Rules’ grammar (<code>synth_rules</code>, below). The written messages are whole messages of 1 to 20
 sentences, with text that is not a request, self-corrections, typos, many domains and personas, and the requests annotated as spans
 (<code>{id, names, text, wires: [{span, trigger, type, args}]}</code>). Specifications: <code>training/sketch/llm_train/TRAIN_MSG_SPEC.md</code>,
 <code>training/sketch/llm_bench/SPEC.md</code>, <code>training/sketch/LABEL_CONVENTIONS.md</code>; the writing and checking procedure is the skill
@@ -902,6 +914,7 @@ page('repository', 'Repository map', `
 <tr><td><code>synth/VSS_SYNTH_DIAGNOSIS.md</code>, <code>synth/CONVERT_FIX.md</code></td><td>Why the generated commands gave VSS no gain (31% never reached the worlds in a learnable form) and the fix (synth_rules round trip 65.9% → 79.3%).</td></tr>
 <tr><td><code>confidence3/NEW_FORMS_AUDIT.md</code></td><td>Agreement and scoring checked against what the engine does: false disagreements 3634 → 211, false agreements 205 → 3.</td></tr>
 <tr><td><code>results/072_measure/COMPARE.md</code> (<code>gpu-runs</code>)</td><td>The readers of 2026-11-02 against those of 2026-11-03 with one fixed confidence recipe: SOP-BERT on fresh2 +21.6 [9.7, 33.2].</td></tr>
+<tr><td><code>FRESH2_CAUSES.md</code>, <code>llm_train/OPUS_DATA.md</code>, <code>llm_train/synth_rules/README.md</code></td><td>The data: why the readers lose on a new writer (its style, not message length); the messages written by Opus; the short commands generated from the Rules (<a href="#help/reliability/r-synthetic">The data is synthetic</a>).</td></tr>
 <tr><td><code>FRESH2_RESULT.md</code>, <code>FEEDBACK_RESULT.md</code>, <code>feedback/DATA_NEEDS.md</code></td><td>The new writer (fresh2): every reader worse on it; data written from VSS’s own needs made VSS worse.</td></tr>
 <tr><td><code>RISK_COVERAGE.md</code>, <code>VSS_CONFIDENCE.md</code>, <code>PRECISION.md</code></td><td>The first confidence studies (2026-11-02): VSS margin AUROC 0.59, SOP-BERT 0.72, VSS from every step of its chain 0.81.</td></tr>
 <tr><td><code>CUT_SHARED.md</code></td><td>One cut for all readers: the VSS cut is better on whole messages, the Rules segmenter on one-line commands.</td></tr>
