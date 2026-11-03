@@ -1,0 +1,42 @@
+{"id": "sc3-09-001", "domain": "infographic bar chart", "text": "I want an infographic of ice cream sales, as a bar chart made of shapes."}
+{"id": "sc3-09-002", "domain": "infographic bar chart", "text": "Y axis: a thin black rectangle, 4 wide and 330 tall, at 100,255. Call it AxisY."}
+{"id": "sc3-09-003", "domain": "infographic bar chart", "text": "X axis: black rectangle 560 x 4 at 380,440, named AxisX"}
+{"id": "sc3-09-004", "domain": "infographic bar chart", "text": "Jan bar: rectangle 60 wide, 100 tall, at 160,370, named Jan"}
+{"id": "sc3-09-005", "domain": "infographic bar chart", "text": "Feb: 60 by 150 rectangle at 260,345, Feb"}
+{"id": "sc3-09-006", "domain": "infographic bar chart", "text": "March is a 60 by 200 rectangle at 360,320 called Mar"}
+{"id": "sc3-09-007", "domain": "infographic bar chart", "text": "Apr, a 60 by 250 rectangle, at 460,295"}
+{"id": "sc3-09-008", "domain": "infographic bar chart", "text": "and May, the peak: 60 by 300 rectangle centred at 560,270"}
+{"id": "sc3-09-009", "domain": "infographic bar chart", "text": "Paint Jan blue, Feb teal, Mar green, Apr orange and May red"}
+{"id": "sc3-09-010", "domain": "infographic bar chart", "text": "write the values on the bars: Jan \"120\""}
+{"id": "sc3-09-011", "domain": "infographic bar chart", "text": "Feb \"190\", Mar \"260\""}
+{"id": "sc3-09-012", "domain": "infographic bar chart", "text": "Apr gets \"350\" and May \"400\""}
+{"id": "sc3-09-013", "domain": "infographic bar chart", "text": "Month names under the axis: small text \"Jan\" at 160,458"}
+{"id": "sc3-09-014", "domain": "infographic bar chart", "text": "then small \"Feb\" at 260,458, small \"Mar\" at 360,458"}
+{"id": "sc3-09-015", "domain": "infographic bar chart", "text": "small \"Apr\" at 460,458 and small \"May\" at 560,458"}
+{"id": "sc3-09-016", "domain": "infographic bar chart", "text": "Big title at 310,60: \"Ice cream sales 2026\", navy, huge"}
+{"id": "sc3-09-017", "domain": "infographic bar chart", "text": "Is May bigger than Apr?"}
+{"id": "sc3-09-018", "domain": "infographic bar chart", "text": "which bar is the biggest?"}
+{"id": "sc3-09-019", "domain": "infographic bar chart", "text": "Add a gold star named Best 20 px above May"}
+{"id": "sc3-09-020", "domain": "infographic bar chart", "text": "dashed arrow from Jan to May labeled \"growing!\""}
+{"id": "sc3-09-021", "domain": "infographic bar chart", "text": "make that arrow orange"}
+{"id": "sc3-09-022", "domain": "infographic bar chart", "text": "Now a June bar too: 60 by 260 rectangle named Jun right of May, 40 px gap"}
+{"id": "sc3-09-023", "domain": "infographic bar chart", "text": "paint Jun magenta"}
+{"id": "sc3-09-024", "domain": "infographic bar chart", "text": "move Jun down 20 so its bottom lines up with the others"}
+{"id": "sc3-09-025", "domain": "infographic bar chart", "text": "label Jun \"330\""}
+{"id": "sc3-09-026", "domain": "infographic bar chart", "text": "write \"Jun\" under it, small, at 660,458"}
+{"id": "sc3-09-027", "domain": "infographic bar chart", "text": "how many rectangles are there now, axes included?"}
+{"id": "sc3-09-028", "domain": "infographic bar chart", "text": "List the red shapes."}
+{"id": "sc3-09-029", "domain": "infographic bar chart", "text": "Put a small gray circle in the top left as a logo, call it Logo"}
+{"id": "sc3-09-030", "domain": "infographic bar chart", "text": "Text \"units sold, thousands\", small and gray, at 200,110"}
+{"id": "sc3-09-031", "domain": "infographic bar chart", "text": "Which shape is closest to Best?"}
+{"id": "sc3-09-032", "domain": "infographic bar chart", "text": "group the six bars as Bars"}
+{"id": "sc3-09-033", "domain": "infographic bar chart", "text": "move the title 10 px up"}
+{"id": "sc3-09-034", "domain": "infographic bar chart", "text": "Is Jun right of May?"}
+{"id": "sc3-09-035", "domain": "infographic bar chart", "text": "Move Best 40 px to the right"}
+{"id": "sc3-09-036", "domain": "infographic bar chart", "text": "Take the arrow from Jan to May away, it's too busy"}
+{"id": "sc3-09-037", "domain": "infographic bar chart", "text": "What color is Mar?"}
+{"id": "sc3-09-038", "domain": "infographic bar chart", "text": "Change Mar to lime"}
+{"id": "sc3-09-039", "domain": "infographic bar chart", "text": "hmm, no, green was better. Undo."}
+{"id": "sc3-09-040", "domain": "infographic bar chart", "text": "delete Logo"}
+{"id": "sc3-09-041", "domain": "infographic bar chart", "text": "describe Jun"}
+{"id": "sc3-09-042", "domain": "infographic bar chart", "text": "Nice chart!"}

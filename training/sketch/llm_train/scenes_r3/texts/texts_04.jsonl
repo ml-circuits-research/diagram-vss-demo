@@ -1,0 +1,46 @@
+{"id": "sc3-04-001", "domain": "underwater reef scene", "text": "Underwater reef. A light blue rectangle as the background, 780 by 480, at 400,250, call it Water."}
+{"id": "sc3-04-002", "domain": "underwater reef scene", "text": "hmm, more turquoise. change Water to teal"}
+{"id": "sc3-04-003", "domain": "underwater reef scene", "text": "sand along the bottom: light yellow rectangle zone, 780 wide, 90 tall, at 400,445, named Sand"}
+{"id": "sc3-04-004", "domain": "underwater reef scene", "text": "Our fish is called Finn. Medium orange oval at 300,200, name it FinnBody."}
+{"id": "sc3-04-005", "domain": "underwater reef scene", "text": "tail: small orange triangle at 232,200, Tail"}
+{"id": "sc3-04-006", "domain": "underwater reef scene", "text": "a tiny black circle named Eye at 322,190"}
+{"id": "sc3-04-007", "domain": "underwater reef scene", "text": "group FinnBody, Tail and Eye into Finn"}
+{"id": "sc3-04-008", "domain": "underwater reef scene", "text": "Jellyfish up top: medium purple circle at 620,110, named Jelly."}
+{"id": "sc3-04-009", "domain": "underwater reef scene", "text": "Under it, 5 px below Jelly, put three tiny purple triangles in a row for the tentacles."}
+{"id": "sc3-04-010", "domain": "underwater reef scene", "text": "Group Jelly and those three triangles as Jellyfish."}
+{"id": "sc3-04-011", "domain": "underwater reef scene", "text": "Can you make Finn a friend? Duplicate Finn."}
+{"id": "sc3-04-012", "domain": "underwater reef scene", "text": "move the copy down 110 pixels"}
+{"id": "sc3-04-013", "domain": "underwater reef scene", "text": "What's in Finn2?"}
+{"id": "sc3-04-014", "domain": "underwater reef scene", "text": "Bubbles! four tiny white circles in a column at 380,110"}
+{"id": "sc3-04-015", "domain": "underwater reef scene", "text": "crab on the sand: small red ellipse at 220,440 named CrabBody"}
+{"id": "sc3-04-016", "domain": "underwater reef scene", "text": "Two claws, tiny red circles: ClawL at 170,430, ClawR, a tiny red circle too, at 270,430"}
+{"id": "sc3-04-017", "domain": "underwater reef scene", "text": "group CrabBody, ClawL and ClawR, call it Crab"}
+{"id": "sc3-04-018", "domain": "underwater reef scene", "text": "Is CrabBody below Jelly?"}
+{"id": "sc3-04-019", "domain": "underwater reef scene", "text": "Treasure chest: brown rectangle 90 by 50 at 640,435, ChestBox"}
+{"id": "sc3-04-020", "domain": "underwater reef scene", "text": "With a tiny gold square on it as the lock, at 640,435, named Lock."}
+{"id": "sc3-04-021", "domain": "underwater reef scene", "text": "make a group Chest out of ChestBox and Lock"}
+{"id": "sc3-04-022", "domain": "underwater reef scene", "text": "Which group is Lock in?"}
+{"id": "sc3-04-023", "domain": "underwater reef scene", "text": "draw a dashed arrow from FinnBody to ChestBox and write \"treasure!\" on it"}
+{"id": "sc3-04-024", "domain": "underwater reef scene", "text": "small orange star at 420,450 for a starfish, name it Starfish"}
+{"id": "sc3-04-025", "domain": "underwater reef scene", "text": "medium gray hexagon called Rock at 520,440"}
+{"id": "sc3-04-026", "domain": "underwater reef scene", "text": "Is Rock near Starfish?"}
+{"id": "sc3-04-027", "domain": "underwater reef scene", "text": "seaweed: a thin green rectangle 14 by 110 at 60,370, Weed1"}
+{"id": "sc3-04-028", "domain": "underwater reef scene", "text": "And another green rectangle, a bit shorter, 14 by 80, at 100,385, Weed2."}
+{"id": "sc3-04-029", "domain": "underwater reef scene", "text": "group Weed1 and Weed2 as Kelp"}
+{"id": "sc3-04-030", "domain": "underwater reef scene", "text": "Large pink triangle at 745,395 called Coral"}
+{"id": "sc3-04-031", "domain": "underwater reef scene", "text": "coral should be magenta"}
+{"id": "sc3-04-032", "domain": "underwater reef scene", "text": "add a magenta star above ChestBox"}
+{"id": "sc3-04-033", "domain": "underwater reef scene", "text": "How many ellipses are there? Fish bodies count too."}
+{"id": "sc3-04-034", "domain": "underwater reef scene", "text": "which shapes are pink in my reef?"}
+{"id": "sc3-04-035", "domain": "underwater reef scene", "text": "What is near the chest?"}
+{"id": "sc3-04-036", "domain": "underwater reef scene", "text": "Title \"Coral Cove\" in the top left, big and white"}
+{"id": "sc3-04-037", "domain": "underwater reef scene", "text": "Move it 20 px to the right"}
+{"id": "sc3-04-038", "domain": "underwater reef scene", "text": "Finn should swim in front of everything else"}
+{"id": "sc3-04-039", "domain": "underwater reef scene", "text": "Is the starfish orange?"}
+{"id": "sc3-04-040", "domain": "underwater reef scene", "text": "the starfish should be gold actually"}
+{"id": "sc3-04-041", "domain": "underwater reef scene", "text": "make the bubbles a little bigger"}
+{"id": "sc3-04-042", "domain": "underwater reef scene", "text": "Delete Weed2."}
+{"id": "sc3-04-043", "domain": "underwater reef scene", "text": "Undo, keep the seaweed."}
+{"id": "sc3-04-044", "domain": "underwater reef scene", "text": "What's the topmost shape? Probably a bubble."}
+{"id": "sc3-04-045", "domain": "underwater reef scene", "text": "Which shape is farthest from Rock?"}
+{"id": "sc3-04-046", "domain": "underwater reef scene", "text": "Lovely reef, thank you!"}

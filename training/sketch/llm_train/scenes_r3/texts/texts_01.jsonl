@@ -1,0 +1,51 @@
+{"id": "sc3-01-001", "domain": "farm scene", "text": "Let's draw a farm. Start with a pale cyan rectangle as the sky background, 780 wide and 250 tall, centred at 400,135, and call it Sky."}
+{"id": "sc3-01-002", "domain": "farm scene", "text": "Now the grass: a light green rectangle zone named Grass, 780 by 230, at 400,375."}
+{"id": "sc3-01-003", "domain": "farm scene", "text": "Put a large gold circle in the top right for the sun and name it Sun."}
+{"id": "sc3-01-004", "domain": "farm scene", "text": "huge red square at 170,330, call it Walls"}
+{"id": "sc3-01-005", "domain": "farm scene", "text": "Next a huge brown triangle named Roof at 170,204, that's the barn roof."}
+{"id": "sc3-01-006", "domain": "farm scene", "text": "small navy rectangle for the door at 170,362, named Door"}
+{"id": "sc3-01-007", "domain": "farm scene", "text": "Write \"BARN\" on the roof please"}
+{"id": "sc3-01-008", "domain": "farm scene", "text": "group Walls, Roof and Door as Barn"}
+{"id": "sc3-01-009", "domain": "farm scene", "text": "Next to the barn I want a silo: a gray rectangle 50 wide and 150 tall, called Silo, right of Barn."}
+{"id": "sc3-01-010", "domain": "farm scene", "text": "Could you add a small gray circle named Dome 10 px above Silo?"}
+{"id": "sc3-01-011", "domain": "farm scene", "text": "how many rectangles are there now?"}
+{"id": "sc3-01-012", "domain": "farm scene", "text": "Time for the cow. Big white oval with a black outline at 480,370, name it Cow."}
+{"id": "sc3-01-013", "domain": "farm scene", "text": "and a small white circle for its head at 566,340, call that one CowHead"}
+{"id": "sc3-01-014", "domain": "farm scene", "text": "Put a tiny black circle named Spot1 at 455,355 and another tiny black circle, Spot2, at 505,385."}
+{"id": "sc3-01-015", "domain": "farm scene", "text": "bundle Cow, CowHead, Spot1 and Spot2 into a group called Bessie"}
+{"id": "sc3-01-016", "domain": "farm scene", "text": "shift Bessie 30 pixels to the left"}
+{"id": "sc3-01-017", "domain": "farm scene", "text": "Add a light blue ellipse zone called Pond in the bottom right, 170 by 70."}
+{"id": "sc3-01-018", "domain": "farm scene", "text": "tiny yellow circle named Duck at 690,425"}
+{"id": "sc3-01-019", "domain": "farm scene", "text": "Its beak: a tiny orange triangle at 712,422. Call it Beak."}
+{"id": "sc3-01-020", "domain": "farm scene", "text": "Group the duck and its beak as Ducky."}
+{"id": "sc3-01-021", "domain": "farm scene", "text": "There's a tree on the far left too, a large green circle at 55,215 called Leaves."}
+{"id": "sc3-01-022", "domain": "farm scene", "text": "Trunk goes at 55,285: small brown rectangle, name Trunk."}
+{"id": "sc3-01-023", "domain": "farm scene", "text": "Let's make Leaves and Trunk one group, TreeA."}
+{"id": "sc3-01-024", "domain": "farm scene", "text": "white oval cloud in the sky at 330,70, name it Cloud"}
+{"id": "sc3-01-025", "domain": "farm scene", "text": "duplicate Cloud"}
+{"id": "sc3-01-026", "domain": "farm scene", "text": "move the copy up by 15"}
+{"id": "sc3-01-027", "domain": "farm scene", "text": "rename it Cloud2"}
+{"id": "sc3-01-028", "domain": "farm scene", "text": "Along the bottom left, five tiny brown squares in a row for the fence."}
+{"id": "sc3-01-029", "domain": "farm scene", "text": "join them in a chain with plain brown lines"}
+{"id": "sc3-01-030", "domain": "farm scene", "text": "What colour is the roof?"}
+{"id": "sc3-01-031", "domain": "farm scene", "text": "Hmm, change the roof to gray, red and brown together look odd."}
+{"id": "sc3-01-032", "domain": "farm scene", "text": "drag Cloud2 to 660,95 so it covers part of the sun"}
+{"id": "sc3-01-033", "domain": "farm scene", "text": "bring Cloud2 to the front"}
+{"id": "sc3-01-034", "domain": "farm scene", "text": "Is the sun still right of the barn?"}
+{"id": "sc3-01-035", "domain": "farm scene", "text": "I need a hen: small white circle named Hen, below Silo."}
+{"id": "sc3-01-036", "domain": "farm scene", "text": "Hen gets an orange beak too, a tiny orange triangle called HenBeak at 2 o'clock... no, just put it right of Hen, 4 px away."}
+{"id": "sc3-01-037", "domain": "farm scene", "text": "group Hen and HenBeak as Chick"}
+{"id": "sc3-01-038", "domain": "farm scene", "text": "Write the title \"Sunny Acres\" at the top, large and dark green."}
+{"id": "sc3-01-039", "domain": "farm scene", "text": "oops I meant navy for the title, not green"}
+{"id": "sc3-01-040", "domain": "farm scene", "text": "three tiny gold stars in a row above Silo, like a sign of good luck"}
+{"id": "sc3-01-041", "domain": "farm scene", "text": "Actually delete the stars, too much."}
+{"id": "sc3-01-042", "domain": "farm scene", "text": "how many groups do I have?"}
+{"id": "sc3-01-043", "domain": "farm scene", "text": "Which shapes are in Bessie?"}
+{"id": "sc3-01-044", "domain": "farm scene", "text": "Put a small yellow hexagon called Hay between Barn and Bessie."}
+{"id": "sc3-01-045", "domain": "farm scene", "text": "make that a bit bigger"}
+{"id": "sc3-01-046", "domain": "farm scene", "text": "Is Hay a hexagon?"}
+{"id": "sc3-01-047", "domain": "farm scene", "text": "Add a dashed brown arrow from Hen to Hay, the hen walks to the hay."}
+{"id": "sc3-01-048", "domain": "farm scene", "text": "label that arrow \"lunch\""}
+{"id": "sc3-01-049", "domain": "farm scene", "text": "What is the leftmost shape?"}
+{"id": "sc3-01-050", "domain": "farm scene", "text": "Can the hen get from Hen to Hay along the arrows?"}
+{"id": "sc3-01-051", "domain": "farm scene", "text": "Thanks, that's the farm!"}

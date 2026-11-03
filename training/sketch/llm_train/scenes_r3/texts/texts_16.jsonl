@@ -1,0 +1,42 @@
+{"id": "sc3-19-001", "domain": "robot factory scene", "text": "Robot factory. Background: a faint gray rectangle, 780 by 480, in the center, background layer, named Floor."}
+{"id": "sc3-19-002", "domain": "robot factory scene", "text": "conveyor belt: a black rectangle, 600 by 30, at the bottom, named Belt"}
+{"id": "sc3-19-003", "domain": "robot factory scene", "text": "rollers: a gray circle RollerL 16 px left of Belt and a gray circle RollerR 16 px right of Belt"}
+{"id": "sc3-19-004", "domain": "robot factory scene", "text": "group Belt, RollerL and RollerR as Conveyor"}
+{"id": "sc3-19-005", "domain": "robot factory scene", "text": "First robot body: a medium blue square named Body1 2 px above Belt"}
+{"id": "sc3-19-006", "domain": "robot factory scene", "text": "its head, a small blue square named Head1, with a 2 px gap above Body1"}
+{"id": "sc3-19-007", "domain": "robot factory scene", "text": "and a tiny red circle 2 px on top of Head1 for the antenna, named Antenna1"}
+{"id": "sc3-19-008", "domain": "robot factory scene", "text": "put Body1, Head1 and Antenna1 into one group named Bot1"}
+{"id": "sc3-19-009", "domain": "robot factory scene", "text": "duplicate Bot1 twice"}
+{"id": "sc3-19-010", "domain": "robot factory scene", "text": "What's in Bot12?"}
+{"id": "sc3-19-011", "domain": "robot factory scene", "text": "Robot arm: an orange rectangle named ArmPole, 20 by 120, in the top left"}
+{"id": "sc3-19-012", "domain": "robot factory scene", "text": "a small orange circle named Joint right of ArmPole, 16 px gap"}
+{"id": "sc3-19-013", "domain": "robot factory scene", "text": "link ArmPole and Joint with an orange line"}
+{"id": "sc3-19-014", "domain": "robot factory scene", "text": "Control panel: a navy rectangle named Panel in the top right"}
+{"id": "sc3-19-015", "domain": "robot factory scene", "text": "three tiny lime circles in a row below Panel for the buttons"}
+{"id": "sc3-19-016", "domain": "robot factory scene", "text": "two medium gray hexagons for gears: GearA in the top center, and a medium gray hexagon GearB right of GearA"}
+{"id": "sc3-19-017", "domain": "robot factory scene", "text": "align GearA and GearB horizontally"}
+{"id": "sc3-19-018", "domain": "robot factory scene", "text": "draw an arrow from Panel to Joint with \"signal\" written on it"}
+{"id": "sc3-19-019", "domain": "robot factory scene", "text": "and a dashed arrow from Joint to Head1"}
+{"id": "sc3-19-020", "domain": "robot factory scene", "text": "Does anything lead from Panel to Head1?"}
+{"id": "sc3-19-021", "domain": "robot factory scene", "text": "What is connected to Joint?"}
+{"id": "sc3-19-022", "domain": "robot factory scene", "text": "make GearB smaller than GearA"}
+{"id": "sc3-19-023", "domain": "robot factory scene", "text": "is GearB smaller than GearA?"}
+{"id": "sc3-19-024", "domain": "robot factory scene", "text": "Write \"ROBO WORKS\" above the belt? no, at the bottom left, in large gray letters"}
+{"id": "sc3-19-025", "domain": "robot factory scene", "text": "make the title orange"}
+{"id": "sc3-19-026", "domain": "robot factory scene", "text": "Which group holds Antenna1?"}
+{"id": "sc3-19-027", "domain": "robot factory scene", "text": "paint the robot bodies of the copies purple... hmm, never mind, that is hard to say"}
+{"id": "sc3-19-028", "domain": "robot factory scene", "text": "Which shapes are blue?"}
+{"id": "sc3-19-029", "domain": "robot factory scene", "text": "raise Conveyor to the top layer"}
+{"id": "sc3-19-030", "domain": "robot factory scene", "text": "How many groups do we have?"}
+{"id": "sc3-19-031", "domain": "robot factory scene", "text": "Which shape has the most connections, the joint?"}
+{"id": "sc3-19-032", "domain": "robot factory scene", "text": "move Bot1 a bit to the left"}
+{"id": "sc3-19-033", "domain": "robot factory scene", "text": "how many squares are there with the three robots?"}
+{"id": "sc3-19-034", "domain": "robot factory scene", "text": "Is ArmPole left of Panel?"}
+{"id": "sc3-19-035", "domain": "robot factory scene", "text": "Which shape is closest to GearB?"}
+{"id": "sc3-19-036", "domain": "robot factory scene", "text": "make the arrow from Joint to Head1 red"}
+{"id": "sc3-19-037", "domain": "robot factory scene", "text": "reverse the signal arrow"}
+{"id": "sc3-19-038", "domain": "robot factory scene", "text": "oops, undo"}
+{"id": "sc3-19-039", "domain": "robot factory scene", "text": "describe the Panel for me"}
+{"id": "sc3-19-040", "domain": "robot factory scene", "text": "What color is Belt?"}
+{"id": "sc3-19-041", "domain": "robot factory scene", "text": "make the belt gray"}
+{"id": "sc3-19-042", "domain": "robot factory scene", "text": "the factory is ready, thanks!"}

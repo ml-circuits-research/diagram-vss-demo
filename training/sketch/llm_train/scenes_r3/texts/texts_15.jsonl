@@ -1,0 +1,42 @@
+{"id": "sc3-18-001", "domain": "pirate ship scene", "text": "Pirate ship scene. Background: a light cyan rectangle, 780 by 480, in the center, background layer, named Sky."}
+{"id": "sc3-18-002", "domain": "pirate ship scene", "text": "the sea: a blue rectangle zone, 780 by 160, at the bottom, named Ocean"}
+{"id": "sc3-18-003", "domain": "pirate ship scene", "text": "Ship hull: a large brown rectangle named Hull in the center"}
+{"id": "sc3-18-004", "domain": "pirate ship scene", "text": "move it down 90"}
+{"id": "sc3-18-005", "domain": "pirate ship scene", "text": "Mast: a brown rectangle 12 wide and 180 tall right above Hull, no gap, named Mast"}
+{"id": "sc3-18-006", "domain": "pirate ship scene", "text": "a big white sail: large white square named Sail left of Mast, 20 px away"}
+{"id": "sc3-18-007", "domain": "pirate ship scene", "text": "black flag: small black triangle just 2 px above Mast, called Flag"}
+{"id": "sc3-18-008", "domain": "pirate ship scene", "text": "write \"X\" on the flag"}
+{"id": "sc3-18-009", "domain": "pirate ship scene", "text": "three tiny gold circles in a row at 400,340 for portholes"}
+{"id": "sc3-18-010", "domain": "pirate ship scene", "text": "group Hull, Mast, Sail, Flag and the three portholes as Ship"}
+{"id": "sc3-18-011", "domain": "pirate ship scene", "text": "Island on the right: a large yellow ellipse named Island in the bottom right"}
+{"id": "sc3-18-012", "domain": "pirate ship scene", "text": "palm tree: a brown rectangle, 14 by 70, named Trunk right above Island, no gap"}
+{"id": "sc3-18-013", "domain": "pirate ship scene", "text": "and a medium green star 3 px above Trunk for the leaves, named PalmTop"}
+{"id": "sc3-18-014", "domain": "pirate ship scene", "text": "treasure chest on the island: small orange square named Chest left of Trunk, 16 px gap"}
+{"id": "sc3-18-015", "domain": "pirate ship scene", "text": "group Island, Trunk, PalmTop and Chest as Isle"}
+{"id": "sc3-18-016", "domain": "pirate ship scene", "text": "dotted arrow from Flag to Chest, label it \"X marks the spot\""}
+{"id": "sc3-18-017", "domain": "pirate ship scene", "text": "Is Chest right of Hull?"}
+{"id": "sc3-18-018", "domain": "pirate ship scene", "text": "Parrot: tiny red circle named Polly near Mast"}
+{"id": "sc3-18-019", "domain": "pirate ship scene", "text": "make Polly lime... no, keep it red but small"}
+{"id": "sc3-18-020", "domain": "pirate ship scene", "text": "Shark! a small gray triangle named Fin left of Ship"}
+{"id": "sc3-18-021", "domain": "pirate ship scene", "text": "move Fin a little down"}
+{"id": "sc3-18-022", "domain": "pirate ship scene", "text": "Is Fin below the flag?"}
+{"id": "sc3-18-023", "domain": "pirate ship scene", "text": "sun: medium gold circle in the top right, Sun"}
+{"id": "sc3-18-024", "domain": "pirate ship scene", "text": "two white ovals for clouds, one left of Sun and a white oval in the top left"}
+{"id": "sc3-18-025", "domain": "pirate ship scene", "text": "make the clouds smaller"}
+{"id": "sc3-18-026", "domain": "pirate ship scene", "text": "title \"Captain Saltbeard\" at the top in large black letters"}
+{"id": "sc3-18-027", "domain": "pirate ship scene", "text": "Cannonball: tiny black circle right of Hull, 20 px gap"}
+{"id": "sc3-18-028", "domain": "pirate ship scene", "text": "dashed arrow from Hull to the cannonball"}
+{"id": "sc3-18-029", "domain": "pirate ship scene", "text": "How many circles are there, portholes included?"}
+{"id": "sc3-18-030", "domain": "pirate ship scene", "text": "Which shape is closest to Polly?"}
+{"id": "sc3-18-031", "domain": "pirate ship scene", "text": "Bring Ship to the front"}
+{"id": "sc3-18-032", "domain": "pirate ship scene", "text": "move Ship 40 px to the left"}
+{"id": "sc3-18-033", "domain": "pirate ship scene", "text": "What's in Isle?"}
+{"id": "sc3-18-034", "domain": "pirate ship scene", "text": "the sail should be gray, it's an old ship"}
+{"id": "sc3-18-035", "domain": "pirate ship scene", "text": "Is Chest reachable from Flag?"}
+{"id": "sc3-18-036", "domain": "pirate ship scene", "text": "How many groups are there on the canvas?"}
+{"id": "sc3-18-037", "domain": "pirate ship scene", "text": "duplicate Fin"}
+{"id": "sc3-18-038", "domain": "pirate ship scene", "text": "put the copy left of Fin"}
+{"id": "sc3-18-039", "domain": "pirate ship scene", "text": "Which shapes are gray?"}
+{"id": "sc3-18-040", "domain": "pirate ship scene", "text": "delete the cannonball"}
+{"id": "sc3-18-041", "domain": "pirate ship scene", "text": "Give me a description of Hull."}
+{"id": "sc3-18-042", "domain": "pirate ship scene", "text": "Arr, finished!"}

@@ -1,0 +1,49 @@
+{"id": "sc3-02-001", "domain": "city street scene", "text": "City street at night. First a faint navy background rectangle over the whole canvas, 780 by 480, centred at 400,250, named Night."}
+{"id": "sc3-02-002", "domain": "city street scene", "text": "road: light gray rectangle zone, 780 x 110, at 400,430, name Road"}
+{"id": "sc3-02-003", "domain": "city street scene", "text": "Please write MAIN ST on the road."}
+{"id": "sc3-02-004", "domain": "city street scene", "text": "Tall indigo rectangle for the first building: 120 wide, 250 high, at 90,240. Name it Tower1."}
+{"id": "sc3-02-005", "domain": "city street scene", "text": "four tiny yellow squares in a grid at 90,200 for its windows"}
+{"id": "sc3-02-006", "domain": "city street scene", "text": "Then group Tower1 with those four windows and call the group Block1."}
+{"id": "sc3-02-007", "domain": "city street scene", "text": "Second building, a teal rectangle named Tower2, 110 by 190, centred on 240,270."}
+{"id": "sc3-02-008", "domain": "city street scene", "text": "Label Tower2 \"HOTEL\"."}
+{"id": "sc3-02-009", "domain": "city street scene", "text": "Is Tower2 smaller than Tower1?"}
+{"id": "sc3-02-010", "domain": "city street scene", "text": "Lamp post: a gray rectangle 12 wide and 130 tall at 380,305, call it Pole."}
+{"id": "sc3-02-011", "domain": "city street scene", "text": "stick a small yellow circle on top at 380,220 and name it Bulb"}
+{"id": "sc3-02-012", "domain": "city street scene", "text": "Bulb and Pole together, as a group named Lamp."}
+{"id": "sc3-02-013", "domain": "city street scene", "text": "Moon in the top right corner, medium white circle called Moon."}
+{"id": "sc3-02-014", "domain": "city street scene", "text": "a scatter of stars: five tiny white stars in a row at the top"}
+{"id": "sc3-02-015", "domain": "city street scene", "text": "hmm make the stars gold instead"}
+{"id": "sc3-02-016", "domain": "city street scene", "text": "Traffic light time. A black rectangle 36 by 96 at 470,250, named Signal."}
+{"id": "sc3-02-017", "domain": "city street scene", "text": "Red circle, tiny, at 470,220, call it RedLight"}
+{"id": "sc3-02-018", "domain": "city street scene", "text": "then a tiny yellow circle, AmberLight, at 470,250"}
+{"id": "sc3-02-019", "domain": "city street scene", "text": "and the tiny green one, GreenLight, at 470,280"}
+{"id": "sc3-02-020", "domain": "city street scene", "text": "Group Signal, RedLight, AmberLight and GreenLight; name it TrafficLight."}
+{"id": "sc3-02-021", "domain": "city street scene", "text": "Car: a red rectangle, 140 by 50, at 580,405. Name it CarBody."}
+{"id": "sc3-02-022", "domain": "city street scene", "text": "Two tiny black circles for wheels: Wheel1 at 540,435 and Wheel2, also tiny and black, a circle at 620,435."}
+{"id": "sc3-02-023", "domain": "city street scene", "text": "Put CarBody and both wheels in one group, Car."}
+{"id": "sc3-02-024", "domain": "city street scene", "text": "Bring the car to the front."}
+{"id": "sc3-02-025", "domain": "city street scene", "text": "slide Car 60 px to the left"}
+{"id": "sc3-02-026", "domain": "city street scene", "text": "Where is CarBody now?"}
+{"id": "sc3-02-027", "domain": "city street scene", "text": "Bus stop on the right: gray rectangle, 10 wide 100 tall, at 720,320, called StopPole."}
+{"id": "sc3-02-028", "domain": "city street scene", "text": "Small red hexagon labeled STOP right at 720,255. Its name is StopSign."}
+{"id": "sc3-02-029", "domain": "city street scene", "text": "make a group BusStop out of StopPole and StopSign"}
+{"id": "sc3-02-030", "domain": "city street scene", "text": "Now a little person: small pink circle for the head at 330,300, name Head."}
+{"id": "sc3-02-031", "domain": "city street scene", "text": "body: blue rectangle 30 x 56 at 330,352, call it Torso"}
+{"id": "sc3-02-032", "domain": "city street scene", "text": "Head and Torso are one person, group them as Walker."}
+{"id": "sc3-02-033", "domain": "city street scene", "text": "Draw a dotted arrow from Torso to StopPole, that's where he is walking."}
+{"id": "sc3-02-034", "domain": "city street scene", "text": "Label the arrow \"to the bus\"."}
+{"id": "sc3-02-035", "domain": "city street scene", "text": "How many circles are on the canvas?"}
+{"id": "sc3-02-036", "domain": "city street scene", "text": "which shapes are gold?"}
+{"id": "sc3-02-037", "domain": "city street scene", "text": "the moon looks too big, shrink it"}
+{"id": "sc3-02-038", "domain": "city street scene", "text": "Is Moon right of Signal?"}
+{"id": "sc3-02-039", "domain": "city street scene", "text": "Put a small gray oval near the moon, a cloud."}
+{"id": "sc3-02-040", "domain": "city street scene", "text": "Delete the oval, it's a clear night."}
+{"id": "sc3-02-041", "domain": "city street scene", "text": "copy Bulb"}
+{"id": "sc3-02-042", "domain": "city street scene", "text": "put the copy at 640,300"}
+{"id": "sc3-02-043", "domain": "city street scene", "text": "Give it a post too: gray rectangle 12 by 100 at 640,372, named Pole2."}
+{"id": "sc3-02-044", "domain": "city street scene", "text": "Put the title \"Night Shift\" at the top, in white."}
+{"id": "sc3-02-045", "domain": "city street scene", "text": "make the title huge"}
+{"id": "sc3-02-046", "domain": "city street scene", "text": "Undo that, huge looks silly over the stars."}
+{"id": "sc3-02-047", "domain": "city street scene", "text": "Is there a path from Torso to StopPole?"}
+{"id": "sc3-02-048", "domain": "city street scene", "text": "Describe CarBody."}
+{"id": "sc3-02-049", "domain": "city street scene", "text": "nice, I'm happy with the street"}

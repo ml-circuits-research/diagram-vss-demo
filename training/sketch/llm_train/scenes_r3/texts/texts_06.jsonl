@@ -1,0 +1,42 @@
+{"id": "sc3-07-001", "domain": "circuit board drawing", "text": "Let's sketch a circuit board. The board itself: a green rectangle zone, 740 by 430, at 400,265, named Board."}
+{"id": "sc3-07-002", "domain": "circuit board drawing", "text": "CPU chip: black rectangle 120 x 90 at 360,260, label \"CPU\", name Cpu"}
+{"id": "sc3-07-003", "domain": "circuit board drawing", "text": "memory: gray rectangle 34 wide 90 tall right of Cpu, call it Ram1"}
+{"id": "sc3-07-004", "domain": "circuit board drawing", "text": "Ram2 is the same, a gray rectangle 34 by 90, 20 px right of Ram1"}
+{"id": "sc3-07-005", "domain": "circuit board drawing", "text": "gold traces from Cpu to Ram1 and Ram2, plain lines"}
+{"id": "sc3-07-006", "domain": "circuit board drawing", "text": "Crystal: small gray oval 20 px above Cpu, named Xtal"}
+{"id": "sc3-07-007", "domain": "circuit board drawing", "text": "four tiny red circles in a row 30 px above Xtal, those are the LEDs"}
+{"id": "sc3-07-008", "domain": "circuit board drawing", "text": "link the LEDs one after the other with gold lines"}
+{"id": "sc3-07-009", "domain": "circuit board drawing", "text": "3 small brown rectangles in a column left of Cpu for the resistors"}
+{"id": "sc3-07-010", "domain": "circuit board drawing", "text": "rename rectangle1 to R1"}
+{"id": "sc3-07-011", "domain": "circuit board drawing", "text": "rectangle2 becomes R2"}
+{"id": "sc3-07-012", "domain": "circuit board drawing", "text": "and call rectangle3 R3"}
+{"id": "sc3-07-013", "domain": "circuit board drawing", "text": "Is R2 left of Cpu?"}
+{"id": "sc3-07-014", "domain": "circuit board drawing", "text": "Battery: medium gold circle labeled 3V at 140,410, Battery."}
+{"id": "sc3-07-015", "domain": "circuit board drawing", "text": "a small blue hexagon C1 right of the battery, and C2, another small blue hexagon, right of C1"}
+{"id": "sc3-07-016", "domain": "circuit board drawing", "text": "wire Battery to C1, C1 to C2 and C2 to Cpu with plain gold lines"}
+{"id": "sc3-07-017", "domain": "circuit board drawing", "text": "six tiny gold squares in a column on the right side as the connector pins"}
+{"id": "sc3-07-018", "domain": "circuit board drawing", "text": "group the six pins as Header"}
+{"id": "sc3-07-019", "domain": "circuit board drawing", "text": "How many gold shapes are there on the board?"}
+{"id": "sc3-07-020", "domain": "circuit board drawing", "text": "connect Cpu to square1 with a gold line"}
+{"id": "sc3-07-021", "domain": "circuit board drawing", "text": "Which shapes are connected to Cpu?"}
+{"id": "sc3-07-022", "domain": "circuit board drawing", "text": "does a route exist from Battery to Ram2?"}
+{"id": "sc3-07-023", "domain": "circuit board drawing", "text": "make the resistors all the same size"}
+{"id": "sc3-07-024", "domain": "circuit board drawing", "text": "Put \"MK-II CONTROLLER\" in white at the bottom."}
+{"id": "sc3-07-025", "domain": "circuit board drawing", "text": "make it bold, I mean large"}
+{"id": "sc3-07-026", "domain": "circuit board drawing", "text": "How many connections does Cpu have?"}
+{"id": "sc3-07-027", "domain": "circuit board drawing", "text": "Change Xtal to a diamond."}
+{"id": "sc3-07-028", "domain": "circuit board drawing", "text": "hmm no, oval was fine. undo"}
+{"id": "sc3-07-029", "domain": "circuit board drawing", "text": "paint the LEDs lime, they are green LEDs"}
+{"id": "sc3-07-030", "domain": "circuit board drawing", "text": "raise Cpu above the traces and everything"}
+{"id": "sc3-07-031", "domain": "circuit board drawing", "text": "group Cpu, Ram1 and Ram2 as Core"}
+{"id": "sc3-07-032", "domain": "circuit board drawing", "text": "move Core 20 px down"}
+{"id": "sc3-07-033", "domain": "circuit board drawing", "text": "Is Xtal above Cpu?"}
+{"id": "sc3-07-034", "domain": "circuit board drawing", "text": "dashed gold line from R3 to Battery"}
+{"id": "sc3-07-035", "domain": "circuit board drawing", "text": "which shape is closest to Battery?"}
+{"id": "sc3-07-036", "domain": "circuit board drawing", "text": "the gold traces look too bright, make all the lines yellow"}
+{"id": "sc3-07-037", "domain": "circuit board drawing", "text": "Is square6 part of Header?"}
+{"id": "sc3-07-038", "domain": "circuit board drawing", "text": "What is the bottommost shape?"}
+{"id": "sc3-07-039", "domain": "circuit board drawing", "text": "delete C2"}
+{"id": "sc3-07-040", "domain": "circuit board drawing", "text": "oops, undo that"}
+{"id": "sc3-07-041", "domain": "circuit board drawing", "text": "Tell me about Cpu."}
+{"id": "sc3-07-042", "domain": "circuit board drawing", "text": "Okay the board is done."}

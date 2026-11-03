@@ -1777,7 +1777,8 @@ def test_texts():
         T[s] = [r["text"] for r in json.load(open(os.path.join(REPO, "docs", "bench", s + ".json")))]
     for name, pat in [("llm_short", "llm_train/*_short/msg_*.jsonl"), ("fresh2", "llm_bench/fresh2/opus_*/batch_*.jsonl"),
                       ("short3", "llm_bench/short3/batch_*.jsonl"), ("short3_texts", "llm_bench/short3/texts/texts_*.jsonl"),   # short3: a new blind set (2026-11-02)
-                      ("collected", "llm_bench/collected_*/batch_*.jsonl"), ("collected_texts", "llm_bench/collected_*/texts/texts_*.jsonl")]:   # real users' messages (2026-11-03)
+                      ("collected", "llm_bench/collected_*/batch_*.jsonl"), ("collected_texts", "llm_bench/collected_*/texts/texts_*.jsonl"),   # real users' messages (2026-11-03)
+                      ("scenes_test", "llm_bench/scenes_test/batch_*.jsonl"), ("scenes_test_texts", "llm_bench/scenes_test/texts/texts_*.jsonl")]:   # held-out step-by-step scenes (2026-11-03)
         T[name] = [json.loads(l)["text"] for f in sorted(glob.glob(os.path.join(SK, pat))) for l in open(f) if l.strip()]
     return T
 

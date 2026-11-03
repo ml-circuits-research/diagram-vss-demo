@@ -1,0 +1,45 @@
+{"id": "sc3-06-001", "domain": "technical drawing of a pump", "text": "Technical drawing of a pump skid. Background sheet: very light gray rectangle, 780 x 480, at 400,250, background layer, name Sheet."}
+{"id": "sc3-06-002", "domain": "technical drawing of a pump", "text": "Tank: blue rectangle, 120 wide, 160 tall, at 110,260, called Tank."}
+{"id": "sc3-06-003", "domain": "technical drawing of a pump", "text": "label it \"TANK 2000 L\""}
+{"id": "sc3-06-004", "domain": "technical drawing of a pump", "text": "Add a large gray circle named Pump to the right of the tank, labelled P-101."}
+{"id": "sc3-06-005", "domain": "technical drawing of a pump", "text": "valve next: medium yellow diamond right of Pump, named Valve, with V1 written on it"}
+{"id": "sc3-06-006", "domain": "technical drawing of a pump", "text": "then a small teal hexagon called Filter to the right of Valve"}
+{"id": "sc3-06-007", "domain": "technical drawing of a pump", "text": "and finally the outlet, a medium green square named Outlet to the right of Filter."}
+{"id": "sc3-06-008", "domain": "technical drawing of a pump", "text": "Connect Tank, Pump, Valve, Filter and Outlet in a chain."}
+{"id": "sc3-06-009", "domain": "technical drawing of a pump", "text": "Motor: gray rectangle 100 by 60, below Pump, named Motor"}
+{"id": "sc3-06-010", "domain": "technical drawing of a pump", "text": "a plain line between Motor and Pump for the shaft"}
+{"id": "sc3-06-011", "domain": "technical drawing of a pump", "text": "Gauge: small white circle above Valve, label PSI, name Gauge"}
+{"id": "sc3-06-012", "domain": "technical drawing of a pump", "text": "hook the gauge to the valve with a dotted line"}
+{"id": "sc3-06-013", "domain": "technical drawing of a pump", "text": "Draw a dashed arrow from Valve back to Tank and label it \"bypass\"."}
+{"id": "sc3-06-014", "domain": "technical drawing of a pump", "text": "make all the arrows navy"}
+{"id": "sc3-06-015", "domain": "technical drawing of a pump", "text": "actually the bypass arrow should be red"}
+{"id": "sc3-06-016", "domain": "technical drawing of a pump", "text": "Make the arrow from Tank to Pump thick, it's the main suction line."}
+{"id": "sc3-06-017", "domain": "technical drawing of a pump", "text": "Can I get from Tank to Outlet following the arrows?"}
+{"id": "sc3-06-018", "domain": "technical drawing of a pump", "text": "How many arrows are there on the sheet?"}
+{"id": "sc3-06-019", "domain": "technical drawing of a pump", "text": "Which shapes is Valve connected to?"}
+{"id": "sc3-06-020", "domain": "technical drawing of a pump", "text": "how many connections does Pump have"}
+{"id": "sc3-06-021", "domain": "technical drawing of a pump", "text": "Put a legend box in the top right: light gray rectangle zone, 200 by 110, named LegendBox."}
+{"id": "sc3-06-022", "domain": "technical drawing of a pump", "text": "write \"solid = flow\" at 690,65 in small navy letters"}
+{"id": "sc3-06-023", "domain": "technical drawing of a pump", "text": "and \"dashed = bypass\" just under it, at 690,95, small and red"}
+{"id": "sc3-06-024", "domain": "technical drawing of a pump", "text": "group LegendBox and both captions as Legend"}
+{"id": "sc3-06-025", "domain": "technical drawing of a pump", "text": "Title block: \"PUMP SKID P-101 rev B\" in the bottom right, medium, black."}
+{"id": "sc3-06-026", "domain": "technical drawing of a pump", "text": "Drain: small blue triangle under Tank, called Drain"}
+{"id": "sc3-06-027", "domain": "technical drawing of a pump", "text": "dotted line from Tank to Drain"}
+{"id": "sc3-06-028", "domain": "technical drawing of a pump", "text": "align Pump, Valve, Filter and Outlet horizontally"}
+{"id": "sc3-06-029", "domain": "technical drawing of a pump", "text": "Spread Valve, Filter and Outlet out evenly, horizontally."}
+{"id": "sc3-06-030", "domain": "technical drawing of a pump", "text": "Is Filter between Valve and Outlet?"}
+{"id": "sc3-06-031", "domain": "technical drawing of a pump", "text": "What does the arrow from Valve to Tank say?"}
+{"id": "sc3-06-032", "domain": "technical drawing of a pump", "text": "rename Filter to Strainer"}
+{"id": "sc3-06-033", "domain": "technical drawing of a pump", "text": "make Strainer a bit bigger"}
+{"id": "sc3-06-034", "domain": "technical drawing of a pump", "text": "Add a tiny red circle named Alarm 8 px right of Gauge"}
+{"id": "sc3-06-035", "domain": "technical drawing of a pump", "text": "connect Alarm to Gauge with a red dashed line"}
+{"id": "sc3-06-036", "domain": "technical drawing of a pump", "text": "reverse the arrow from Valve to Tank, I had it backwards"}
+{"id": "sc3-06-037", "domain": "technical drawing of a pump", "text": "Which shape has the most connections, Pump or Valve?"}
+{"id": "sc3-06-038", "domain": "technical drawing of a pump", "text": "Is Motor below Pump?"}
+{"id": "sc3-06-039", "domain": "technical drawing of a pump", "text": "Motor should be indigo"}
+{"id": "sc3-06-040", "domain": "technical drawing of a pump", "text": "label Motor M1"}
+{"id": "sc3-06-041", "domain": "technical drawing of a pump", "text": "Legend must sit above everything else, bring it forward"}
+{"id": "sc3-06-042", "domain": "technical drawing of a pump", "text": "What's in Legend?"}
+{"id": "sc3-06-043", "domain": "technical drawing of a pump", "text": "delete the alarm"}
+{"id": "sc3-06-044", "domain": "technical drawing of a pump", "text": "Describe the diagram, I want to check it before sending."}
+{"id": "sc3-06-045", "domain": "technical drawing of a pump", "text": "Perfect, sending this to the plant engineer."}

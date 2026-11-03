@@ -1,0 +1,43 @@
+{"id": "sc3-11-001", "domain": "board game design", "text": "Let's design a board game called Jungle Race. Start with a light green rectangle as the background, 780 by 480, centred, named Jungle."}
+{"id": "sc3-11-002", "domain": "board game design", "text": "nine medium white squares in a 3 by 3 grid in the center for the board"}
+{"id": "sc3-11-003", "domain": "board game design", "text": "number them: square1 \"1\""}
+{"id": "sc3-11-004", "domain": "board game design", "text": "square2 \"2\", square3 \"3\""}
+{"id": "sc3-11-005", "domain": "board game design", "text": "square4 gets \"4\", square5 \"5\", square6 \"6\""}
+{"id": "sc3-11-006", "domain": "board game design", "text": "and the last row: square7 \"7\", square8 \"8\", square9 \"9\""}
+{"id": "sc3-11-007", "domain": "board game design", "text": "Make square9 gold, it's the finish"}
+{"id": "sc3-11-008", "domain": "board game design", "text": "square1 is the start, color it lime"}
+{"id": "sc3-11-009", "domain": "board game design", "text": "Ladder! green arrow from square2 to square7, labelled \"ladder\""}
+{"id": "sc3-11-010", "domain": "board game design", "text": "and a snake: dashed red arrow from square8 to square3, write \"snake\" on it"}
+{"id": "sc3-11-011", "domain": "board game design", "text": "Pawns: a small red circle named RedPawn left of square4"}
+{"id": "sc3-11-012", "domain": "board game design", "text": "and a small blue circle BluePawn below RedPawn"}
+{"id": "sc3-11-013", "domain": "board game design", "text": "Dice: a white square with \"6\" on it, in the top right, called Dice"}
+{"id": "sc3-11-014", "domain": "board game design", "text": "give the dice a black outline"}
+{"id": "sc3-11-015", "domain": "board game design", "text": "Title \"Jungle Race\" at the top, large, dark green"}
+{"id": "sc3-11-016", "domain": "board game design", "text": "Is there a path from square2 to square7?"}
+{"id": "sc3-11-017", "domain": "board game design", "text": "how many squares are there with the dice?"}
+{"id": "sc3-11-018", "domain": "board game design", "text": "group all nine board squares as Board"}
+{"id": "sc3-11-019", "domain": "board game design", "text": "move Board 40 px to the right"}
+{"id": "sc3-11-020", "domain": "board game design", "text": "Is RedPawn left of Board?"}
+{"id": "sc3-11-021", "domain": "board game design", "text": "Put a small yellow star between RedPawn and BluePawn as a bonus"}
+{"id": "sc3-11-022", "domain": "board game design", "text": "Actually make the bonus a hexagon"}
+{"id": "sc3-11-023", "domain": "board game design", "text": "swap RedPawn and BluePawn"}
+{"id": "sc3-11-024", "domain": "board game design", "text": "A second dice next to the first one: duplicate Dice"}
+{"id": "sc3-11-025", "domain": "board game design", "text": "label the copy \"3\""}
+{"id": "sc3-11-026", "domain": "board game design", "text": "which shape is the topmost?"}
+{"id": "sc3-11-027", "domain": "board game design", "text": "Hmm, the snake should be dotted, not dashed"}
+{"id": "sc3-11-028", "domain": "board game design", "text": "remove the label of the ladder"}
+{"id": "sc3-11-029", "domain": "board game design", "text": "what is the color of square9?"}
+{"id": "sc3-11-030", "domain": "board game design", "text": "Treasure: tiny gold diamond right of square6 with a 20 px gap, named Gem"}
+{"id": "sc3-11-031", "domain": "board game design", "text": "connect Gem to square6 with a dotted line"}
+{"id": "sc3-11-032", "domain": "board game design", "text": "make the pawns the same size as Gem"}
+{"id": "sc3-11-033", "domain": "board game design", "text": "Undo, they're too small now"}
+{"id": "sc3-11-034", "domain": "board game design", "text": "Rules box: light gray rectangle zone, 160 by 120, in the bottom left, named RulesBox"}
+{"id": "sc3-11-035", "domain": "board game design", "text": "write \"roll, move, climb!\" just above RulesBox, small"}
+{"id": "sc3-11-036", "domain": "board game design", "text": "group RulesBox with that text as Rules"}
+{"id": "sc3-11-037", "domain": "board game design", "text": "Which shapes are near Dice?"}
+{"id": "sc3-11-038", "domain": "board game design", "text": "how many arrows are on the board?"}
+{"id": "sc3-11-039", "domain": "board game design", "text": "Which is the rightmost shape on the board?"}
+{"id": "sc3-11-040", "domain": "board game design", "text": "Delete the second dice"}
+{"id": "sc3-11-041", "domain": "board game design", "text": "bring the pawns to the front"}
+{"id": "sc3-11-042", "domain": "board game design", "text": "Describe square1."}
+{"id": "sc3-11-043", "domain": "board game design", "text": "Game board ready, let's play!"}
