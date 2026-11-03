@@ -100,13 +100,14 @@ export function bertEdges(words, c0, c1) {
 
 /* ---------------------------------------------------------------- the fit of a cut, levels */
 export const FILE = "confidence/combined.json";
-/** the levels (owner, 2026-11-02 22:12): the cost-score optimum when one confident mistake counts as 5 ("bolder"), 10 (the default, "safety
- *  threshold") or 20 ("more careful") right answers, each stored per cut in the file (cuts[cut].levels); and "all" (execute everything) */
-export const LEVELS = ["cost5", "cost", "cost20", "all"], DEFAULT_LEVEL = "cost";
-export const label = (l) => (l === "all" ? "execute all" : l === "cost5" ? "bolder" : l === "cost20" ? "more careful" : "safety threshold");
+/** the levels (owner, 2026-11-02 22:12; 1 and 2 added 2026-11-03 09:30): the cost-score optimum when one confident mistake counts as 1
+ *  ("boldest"), 2 ("very bold"), 5 ("bolder"), 10 (the default, "safety threshold") or 20 ("more careful") right answers, each stored per cut
+ *  in the file (cuts[cut].levels); and "all" (execute everything) */
+export const LEVELS = ["cost1", "cost2", "cost5", "cost", "cost20", "all"], DEFAULT_LEVEL = "cost";
+export const label = (l) => (l === "all" ? "execute all" : l === "cost1" ? "boldest" : l === "cost2" ? "very bold" : l === "cost5" ? "bolder" : l === "cost20" ? "more careful" : "safety threshold");
 /** the fit used for a message cut by `cut` ("bert" | "vss" | "rules" | ...): its own when the file has one, else the best cut's -> {key, fitted} */
 export function fitFor(model, cut) { return model.cuts[cut] ? { key: cut, fitted: true } : { key: model.best_cut, fitted: false }; }
-/** the threshold of a level: "all" -> -Infinity; "cost5" | "cost" | "cost20" -> that level's threshold in the fit (-Infinity when it executes
+/** the threshold of a level: "all" -> -Infinity; "cost1" | "cost2" | "cost5" | "cost" | "cost20" -> that level's threshold in the fit (-Infinity when it executes
  *  everything, Infinity when it asks; a level the file does not have -> the default's) */
 export function threshold(model, cutKey, level = DEFAULT_LEVEL) {
   if (String(level) === "all") return -Infinity;

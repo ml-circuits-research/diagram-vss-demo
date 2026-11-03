@@ -126,9 +126,10 @@ export function confidence(spec, f, act) {
 
 /* ---------------------------------------------------------------- levels and thresholds */
 const LV = (spec) => spec.levels_out_of_fold || {};
-/** the cost levels (owner, 2026-11-02 22:12): one confident mistake counts as 5 ("bolder"), 10 (the default) or 20 ("more careful") right answers */
-export const COST_LEVELS = ["cost5", "cost", "cost20"];
-/** the levels of the file in the order the setting shows them: the cost levels (5, 10, 20), then the precision levels ascending; plus "all" */
+/** the cost levels (owner, 2026-11-02 22:12; 1 and 2 added 2026-11-03 09:30): one confident mistake counts as 1 ("boldest"), 2 ("very
+ *  bold"), 5 ("bolder"), 10 (the default) or 20 ("more careful") right answers */
+export const COST_LEVELS = ["cost1", "cost2", "cost5", "cost", "cost20"];
+/** the levels of the file in the order the setting shows them: the cost levels (1, 2, 5, 10, 20), then the precision levels ascending; plus "all" */
 export function levels(spec) {
   const ks = Object.keys(LV(spec));
   return COST_LEVELS.filter((k) => ks.includes(k)).concat(ks.filter((k) => !COST_LEVELS.includes(k)).sort((a, b) => Number(a) - Number(b))).concat(["all"]);
@@ -158,7 +159,7 @@ export function threshold(spec, level) {
   return e === null ? Infinity : LV(spec)[e].threshold;
 }
 /** a level in words */
-export const label = (l) => (l === "all" ? "execute all" : l === "cost" ? "safety threshold" : l === "cost5" ? "bolder" : l === "cost20" ? "more careful" : `${l}% precision`);
+export const label = (l) => (l === "all" ? "execute all" : l === "cost" ? "safety threshold" : l === "cost1" ? "boldest" : l === "cost2" ? "very bold" : l === "cost5" ? "bolder" : l === "cost20" ? "more careful" : `${l}% precision`);
 
 /* ---------------------------------------------------------------- reasons */
 const heldN = (spec) => { const L = Object.values(LV(spec)).find((x) => x && x.heldout_produced); return L ? L.heldout_produced : spec.heldout && spec.heldout.produced ? spec.heldout.produced : Math.max(...Object.values(spec.tables).map((t) => t.n)); };

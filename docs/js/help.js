@@ -204,55 +204,55 @@ const mbText = b => b ? `about ${Math.round(b / 1e6)} MB` : '';
 function start(env) {
   const { K } = env;
   const vb = mbText(env.vssBytes), nb = mbText(env.neuralBytes);
-  const now = env.neuralModels && env.neuralModels.length ? env.neuralModels.join(' + ') : null;
   const cut = env.cut || {};
   let h = `<p class="lead">A diagram editor you talk to in plain English. You write what you want, for example <q>draw a red circle named Hub and connect Start to it</q>, and it draws it, changes it, or answers questions about the drawing.</p>
+  <p>The reader that answers is <b>VSS-BERT</b>. It does only what it is sure of; when it is not sure, it does not guess: it says which part it held back and why. ${icon('more')} Settings let you see the other readers’ replies too, and each tab’s Settings choose how bold that reader is. ${go('start/readers', 'More below')}</p>
   <p>You can also ask the editor about itself in the chat: <q>help</q>, <q>how do I connect two shapes?</q>, <q>what colours can I use?</q>. It answers from the same lists as these pages, with example sentences you can send. ${go('templates', 'Templates')} turn a list of texts into a process, a timeline, a heart or a mountain in one step.</p>
   <p>Every sentence marked ▸ in this help is a button: it sends that sentence to the editor and closes the help, so you can see what it does. Try one:</p>
   ${says(START_EX)}
 
-  <h2 id="readers">Three readers, one language</h2>
-  <p>The page is also an experiment. Three different programs, called <b>readers</b>, each turn your sentence into the same small command language, <b>SOP Lang</b>. One drawing engine then carries out the commands. “Draw a red circle named Hub” becomes this line, called a <i>wire</i>:</p>
+  <h2 id="readers">Who answers: VSS-BERT</h2>
+  <p>VSS-BERT does a request only when it is sure of it. For a request it holds back, the reply gives the reason and offers <b>Do it anyway</b>; or you can say it more plainly. ${icon('more')} Settings › Replies in the chat lets the other readers reply too; VSS-BERT › Settings chooses how bold it is. ${go('asking', 'When it is not sure, it asks')}</p>
+  <p>Every reader turns your sentence into the same small command language, <b>SOP Lang</b>, and one drawing engine carries out the commands. “Draw a red circle named Hub” becomes this line, called a <i>wire</i>:</p>
   <pre class="sop">${hlWire(env, { id: 's1', type: 'command', args: { action: 'create', shape: 'circle', color: 'red', name: 'Hub' } })}</pre>
-  <p>Each reader keeps its own drawing, so you can see side by side how well each one understood you, and how fast.</p>
   <dl class="readers">
-    <dt>Rules</dt><dd>Hand-written code that looks for known words (“draw”, “red”, “below”) and their order. Instant, nothing to download.</dd>
-    <dt>VSS</dt><dd>Seven small models we trained on example messages written for this editor, one per family of actions. VSS stands for vector-symbolic: each word becomes a long list of numbers (a vector), and the model combines these vectors to find the action and its details. Not a transformer. ${vb ? vb[0].toUpperCase() + vb.slice(1) + ', loaded' : 'Loaded'} from this site when the page opens, and run in your browser.</dd>
-    <dt>Neural</dt><dd>A transformer of the BERT family, the kind of model behind many language tools. <b>SOP-BERT</b> is one DistilBERT model we fine-tuned on the same example messages: it cuts a message into requests and reads each request’s action, values, names and descriptions (“the red circle”) itself, without the Rules reader.${now ? ` Loaded now: ${escH(now)}.` : ''} ${nb ? nb[0].toUpperCase() + nb.slice(1) + ', loaded' : 'Loaded'} from this site, kept in your browser’s cache after the first visit, and run in your browser.</dd>
+    <dt>VSS-BERT</dt><dd>The two learned readers below, reading the same requests. When they read a request the same way, it is right about 95 times in 100, so it is done; when they disagree, or only one of them found the request, it is held back and you are told why. ${go('two-readers', 'How VSS-BERT works')}</dd>
+    <dt>SOP-BERT</dt><dd>A transformer of the BERT family, the kind of model behind many language tools: one DistilBERT model we fine-tuned on example messages written for this editor. It cuts a message into requests and reads each one. ${nb ? nb[0].toUpperCase() + nb.slice(1) + ', loaded' : 'Loaded'} from this site, kept in your browser’s cache after the first visit.</dd>
+    <dt>VSS</dt><dd>Nine small models we trained on the same messages, one per family of actions. VSS stands for vector-symbolic: each word becomes a long list of numbers (a vector), and the model combines these vectors to find the action and its details. Not a transformer, and built so differently that its agreement with SOP-BERT means something. ${vb ? vb[0].toUpperCase() + vb.slice(1) + ', loaded' : 'Loaded'} from this site.</dd>
+    <dt>Rules</dt><dd>Hand-written code that looks for known words (“draw”, “red”, “below”) and their order: a comparison. Instant and exact on the phrasings it was written for, but it has no confidence, so it cannot tell when it is wrong. ${go('rules-vs-learned', 'The Rules, as a comparison')}</dd>
   </dl>
-  <p>What the experiment measures first is not how much each reader gets right, but how much of what it <i>does</i> is right: a reader should do only what it is sure of and ask about the rest, saying why. In a drawing a confident mistake costs one undo; where actions have serious consequences it is what matters most. ${go('research-question', 'What this project measures')}</p>
-  <p class="note">Why three, and what each is good at: ${go('why-three', 'Three readers side by side')}; how well each knows when it is unsure: ${go('knowing', 'Knowing what it does not know')}.</p>
+  <p>Why it is built this way: a reader should do only what it is sure of and ask about the rest. In a drawing a confident mistake costs one undo; where actions have serious consequences it is what matters most. ${go('research-question', 'The goal')}</p>
 
   <h2 id="steps">How one message is read</h2>
   <ol class="steps">
     <li><b>Spelling.</b> A spell checker corrects near misses (“gree circle” → “green circle”). Your message shows what it changed. ${go('spelling', 'How it works')}</li>
-    <li><b>Cutting.</b> The message is cut into requests: “draw a red circle named Hub” and “connect Start to it” are two. It is cut once, and all three readers read the same requests, so the tabs differ only in how each reader understands a request. The cut is chosen in ${icon('more')} Settings: the Rules segmenter, the VSS cutter or the BERT cutter${cut.current ? ` (now: ${escH(cut.current)}${cut.def && cut.def !== cut.current ? `; default: ${escH(cut.def)}` : ''})` : ''}. ${go('cutting', 'How the cut works')}</li>
-    <li><b>Reading.</b> Each reader turns each request into one wire of SOP Lang.</li>
-    <li><b>Doing.</b> The engine carries out the wires on that reader’s drawing. A wire it cannot carry out gets a reason (“There is already a shape named Hub”).</li>
+    <li><b>Cutting.</b> The message is cut into requests: “draw a red circle named Hub” and “connect Start to it” are two. VSS-BERT reads the requests of the SOP-BERT cutter; the other tabs read the cut chosen in ${icon('more')} Settings${cut.current ? ` (now: ${escH(cut.current)}${cut.def && cut.def !== cut.current ? `; default: ${escH(cut.def)}` : ''})` : ''}. ${go('cutting', 'How the cut works')}</li>
+    <li><b>Reading.</b> Each reader turns each request into one wire of SOP Lang, with a confidence.</li>
+    <li><b>Doing or asking.</b> The engine carries out the wires the reader is sure of on that reader’s drawing; the others are held back with a reason. A wire the engine cannot carry out gets a reason too (“There is already a shape named Hub”).</li>
   </ol>
-  <p>Nothing you type leaves your browser: all three readers run in this page. The drawings are not saved: reloading the page starts again from the example drawing.</p>
+  <p>Nothing you type leaves your browser: every reader runs in this page. The drawings are not saved: reloading the page starts again from the example drawing.</p>
 
   <h2 id="replies">Reading the replies</h2>
-  <p>Every reply has one line per reader:</p>
-  <div class="hreply"><div class="rl"><b>Rules · 0.4 ms:</b> Drew Gem. Connected Check → Gem.</div><div class="rl"><b>VSS · 12 ms:</b> Drew Gem. Connected Check → Gem.</div><div class="rl"><b>SOP-BERT · 140 ms:</b> Drew star1. Connected Check → star1.</div><div class="rl"><b>VSS-BERT · 152 ms:</b> Drew Gem. Not sure about 1 of the 2 requests, so it was not done: “connect it to Check”: the two readers disagree on where the link ends.</div><div class="meta"><span class="lnk">details</span></div></div>
+  <p>A reply is VSS-BERT’s, with its time beside it:</p>
+  <div class="hreply"><div class="rl">Drew Gem. Not sure about 1 of the 2 requests, so it was not done: “connect it to Check”: the two readers disagree on where the link ends. <span class="lnk">Do it anyway</span></div><div class="meta"><span class="lnk">VSS-BERT · 152 ms</span> <span class="lnk">details</span></div></div>
   <ul>
-    <li><b>The time</b> is how long that reader took to turn your message into SOP Lang. Drawing is not counted. A reader that has not finished loading says so instead of answering.</li>
-    <li><b>Different results</b>: here SOP-BERT missed the name, so its star got an automatic name; VSS-BERT, which executes only what it is sure of, did not connect a star the two readers read differently. Each reader changes only its own drawing.</li>
-    <li><b>details</b> under a reply shows how the message was cut, what each reader wrote in SOP Lang, what the engine changed, and for questions the logic query it ran.</li>
+    <li><b>The time</b> is how long the reader took to turn your message into SOP Lang. Drawing is not counted. A reader that has not finished loading says so instead of answering.</li>
+    <li><b>“Not sure about …”</b>: the requests it held back, each with its words and the reason (the two readers disagree on a value, only one reader found the request, or what the reader itself was unsure of). <b>Do it anyway</b> does that one reading now, as one step you can undo. Held back is never counted as an error; a change you did not ask for is. ${go('asking', 'When it is not sure, it asks')}</li>
+    <li><b>details</b> under a reply shows how the message was cut, what every reader wrote in SOP Lang (all the tabs, not only the ones shown in the chat), what the engine changed, and for questions the logic query it ran.</li>
     <li><b>Buttons under a reply</b> answer a question the reader asked, e.g. “Which circle? Start or Done”.</li>
-    <li><b>“I didn’t understand …”</b> is an honest refusal: the reader found no request it could read in that part. It still does every other part of your message. Try plainer words, with shapes and arrows: “connect Plankton to Krill” instead of “plankton feeds the krill”. A refusal or a question is never counted as an error; a change you did not ask for is.</li>
-    <li><b>When a reader is not sure.</b> The rule of this project: do only what you are sure of, ask about the rest, and say why. The Rules have no confidence: they say “I didn’t understand” where none of their words match and carry out the rest. VSS, SOP-BERT, VSS-BERT and 3 readers carry out a request only when their confidence clears a threshold; below it the reply says “Not sure about …”, gives the reason (for VSS and SOP-BERT first whether the other two readers read it the same way) and offers <b>Do it anyway</b>. 3 readers, by default, acts only when the Rules, VSS and SOP-BERT all read a request the same. ${go('three-readers', 'Three readers voting')} · ${go('knowing', 'Knowing what it does not know')}</li>
+    <li><b>“I didn’t understand …”</b> is an honest refusal: no request could be read in that part. Every other part of your message is still done. Try plainer words, with shapes and arrows: “connect Plankton to Krill” instead of “plankton feeds the krill”.</li>
     <li><b>A reason instead of a result</b> (“There is already a shape named Hub”, “I can't find a red square”) comes from the engine: the request was understood but could not be done as asked.</li>
+    <li><b>Replies of other readers.</b> ${icon('more')} Settings › Replies in the chat lets the Rules, VSS and SOP-BERT reply too, one line each; each changes only its own drawing.</li>
   </ul>
 
   <h2 id="screen">What is on the screen</h2>
   <ul class="screen">
-    <li><b>The tabs Rules, VSS, SOP-BERT, VSS-BERT, 3 readers</b> above the drawing show each reader’s own drawing. VSS-BERT is VSS and SOP-BERT together: it executes what they are sure of together (${go('two-readers', 'Two readers together')}). 3 readers executes what the Rules, VSS and SOP-BERT all read the same (${go('three-readers', 'Three readers voting')}). A dot on a tab means that drawing differs from the one on screen.</li>
-    <li><b>Under each tab</b>: <i>Drawing</i>; <i>SOP Lang</i>, that drawing written as SOP Lang wires; and <i>Settings</i>, the reader’s models, sizes and state.</li>
+    <li><b>The tabs VSS-BERT, Rules, VSS, SOP-BERT</b> above the drawing show each reader’s own drawing: VSS-BERT first, then the Rules as a comparison, then the two parts of VSS-BERT alone (${go('parts-alone', 'The VSS and SOP-BERT tabs')}). A dot on a tab means that drawing differs from the one on screen.</li>
+    <li><b>Under each tab</b>: <i>Drawing</i>; <i>SOP Lang</i>, that drawing written as SOP Lang wires; and <i>Settings</i>, the reader’s models, sizes and state, and for the learned readers how bold it is (from more careful to the boldest level, or execute all).</li>
     <li>${icon('copy')} <b>Copy</b> appears when the drawings differ. It copies the drawing on screen, with its undo history, to the other tabs, so every reader starts the next message from the same drawing.</li>
     <li>${icon('view')} <b>Whole canvas / zoom</b>, ${icon('undo')} <b>Undo</b>, ${icon('redo')} <b>Redo</b>, ${icon('clear')} <b>Clear</b> act on every reader’s drawing. ${icon('help')} opens this help.</li>
     <li>${icon('plus')} next to the message box: example sentences and scripted scenarios. ↑ and ↓ in the box bring back earlier messages.</li>
-    <li>${icon('more')} at the top: <b>Settings</b>: how messages are cut, the spell checker, the capability switches and the benchmark, which runs every reader on the same test sentences.</li>
+    <li>${icon('more')} at the top: <b>Settings</b>: whose replies the chat shows, how messages are cut, the spell checker, the capability switches and the benchmark, which runs every reader on the same test sentences.</li>
     <li>A message that starts with <code>@</code> is not read by any reader: it is SOP Lang, sent straight to the engine (${go('sop-lang', 'SOP Lang')}).</li>
   </ul>
 
@@ -262,9 +262,9 @@ function start(env) {
     <a class="card" href="#help/do"><b>Everything you can do</b><span>Every action, with examples</span></a>
     <a class="card" href="#help/ask"><b>Everything you can ask</b><span>Every question, with examples</span></a>
     <a class="card" href="#help/sop-lang"><b>SOP Lang</b><span>The language the readers write</span></a>
-    <a class="card" href="#help/research-question"><b>What this project measures</b><span>Do only what you are sure of, ask about the rest</span></a>
-    <a class="card" href="#help/knowing"><b>Knowing what it does not know</b><span>VSS vs SOP-BERT: right, wrong, or “I don’t know”</span></a>
-    <a class="card" href="#help/vss-worlds"><b>What a VSS world is</b><span>The idea behind the VSS reader</span></a>
+    <a class="card" href="#help/research-question"><b>The goal</b><span>Do only what you are sure of, ask about the rest</span></a>
+    <a class="card" href="#help/two-readers"><b>VSS-BERT</b><span>SOP-BERT paired with VSS: fewer confident mistakes</span></a>
+    <a class="card" href="#help/asking"><b>When it is not sure, it asks</b><span>What you see, and what you can do</span></a>
     <a class="card" href="#help/architecture"><b>How it works inside</b><span>Every part, model and number</span></a>
   </div>`;
   return h;
@@ -457,7 +457,7 @@ function limits(env) {
     <li>Groups cannot be nested, and a shape is in one group at a time.</li>
     <li>English only. Words from other worlds (“the manager approves the budget”) are not translated into diagrams; say it with shapes and arrows. A part of a message it cannot map to a request gets “I didn’t understand …”, and the rest of the message is still done.</li>
     <li>No saving, export or sharing: the drawing lives in this page until you reload it.</li>
-    <li>The readers make mistakes, each in its own way, and today they can still carry out a reading they are not sure of. Making each one act only above a confidence threshold, and ask below it, is in progress (${go('research-question', 'What this project measures')}). Undo fixes any change in one step. ${say('Undo')}</li>
+    <li>The readers make mistakes. VSS-BERT does a request only when it is sure of it, and still about 2 in 100 of what it does are wrong; it holds back about half of the requests and says why (${go('asking', 'When it is not sure, it asks')}). Undo fixes any change in one step. ${say('Undo')}</li>
   </ul>`;
 }
 
@@ -498,7 +498,7 @@ function explainWire(env, n) {
 }
 function sop(env) {
   const { K, engine } = env;
-  let h = `<p class="lead">SOP Lang is the small command language between the readers and the drawing engine. A reader’s only job is to turn your English into SOP Lang; the engine only ever sees SOP Lang. Because all three readers must write the same language, their results can be compared line by line.</p>
+  let h = `<p class="lead">SOP Lang is the small command language between the readers and the drawing engine. A reader’s only job is to turn your English into SOP Lang; the engine only ever sees SOP Lang. Because every reader must write the same language, their readings can be compared line by line, which is how VSS-BERT checks that its two readers agree.</p>
   <h2 id="wire">One request, one wire</h2>
   <p>Each request becomes one line, called a <b>wire</b>:</p>
   <pre class="sop">${hlWire(env, { id: 's1', type: 'command', args: { action: 'create', shape: 'star', color: 'red', name: 'Gem' } })}</pre>
@@ -574,7 +574,7 @@ const switchHTML = (p, c) => `<label class="sw"><input type="checkbox" data-plug
 function capabilities(env) {
   const { engine } = env;
   let h = `<p class="lead">The engine is built from separate parts, one per kind of thing it can do. Each card says what that part lets you do, and what stops working without it.</p>
-  <p>Switch a part off and send one of its examples: the readers still understand your sentence and still write the SOP Lang, but the engine answers that it cannot do it. That shows which part of the system did the work, and that it says so honestly when it cannot. Switches apply to all three readers until the page is reloaded; the same switches are in ${icon('more')} Settings › Capabilities.</p>`;
+  <p>Switch a part off and send one of its examples: the readers still understand your sentence and still write the SOP Lang, but the engine answers that it cannot do it. That shows which part of the system did the work, and that it says so honestly when it cannot. Switches apply to every reader until the page is reloaded; the same switches are in ${icon('more')} Settings › Capabilities.</p>`;
   for (const p of engine.plugins) {
     const c = CAPS[p.name] || { t: p.title, d: p.description, ex: [] };
     const { lost, still } = lostWithout(engine, p);

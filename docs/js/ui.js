@@ -8,12 +8,16 @@ const escH = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;
 // Three readers turn each message into SOP wires, and a fourth tab combines two of them. Each has its own system (world, engine, undo/redo),
 // changed only by its own readings; the canvas shows the active tab's world. Every message goes to every reader that is loaded. The tab of the
 // neural reader is labelled SOP-BERT (its id stays 'neural'); VSS-BERT (id 'combined') is the combined reader of VSS and SOP-BERT (see the
-// "VSS-BERT" block below; training/sketch/combine/COMBINED_READER.md). "3 readers" (id 'vote3') executes what Rules, VSS and SOP-BERT read
-// the same (the "Three readers voting" block below; training/sketch/confidence3/RESULT.md).
-const READERS = [['rules', 'Rules'], ['vss', 'VSS'], ['neural', 'SOP-BERT'], ['combined', 'VSS-BERT'], ['vote3', '3 readers']].map(([id, label]) => Object.assign({ id, label, last: [], pending: null, focusCell: null, reads: 0, lastRead: null }, K.createSystem()));
+// "VSS-BERT" block below; training/sketch/combine/COMBINED_READER.md).
+// The tabs (owner, 2026-11-03 09:30): VSS-BERT first, then Rules, VSS, SOP-BERT; the page opens on VSS-BERT. The "3 readers" tab (the three
+// readers voting) was removed then: VSS-BERT measured better (test part cost score 34.8 against 31.8, confidently wrong 1.8% against 2.6%).
+// READERS is the order of the tabs, of the lines of a reply and of the details; READ_ORDER is the order in which they read a message
+// (VSS-BERT reuses the readings of VSS and SOP-BERT, so it reads last).
+const READERS = [['combined', 'VSS-BERT'], ['rules', 'Rules'], ['vss', 'VSS'], ['neural', 'SOP-BERT']].map(([id, label]) => Object.assign({ id, label, last: [], pending: null, focusCell: null, reads: 0, lastRead: null }, K.createSystem()));
 const RD = Object.fromEntries(READERS.map(r => [r.id, r]));
+const READ_ORDER = ['rules', 'vss', 'neural', 'combined'].map(id => RD[id]);
 const sys = RD.rules, engine = sys.engine;          // the legend, plugins and SOP rendering are the same in every reader; the Rules system serves them
-let cur = RD.rules, world = cur.world;               // the active tab
+let cur = RD.combined, world = cur.world;            // the active tab
 const neural = NeuralKit.create(RD.neural.engine, RD.neural.formalize);
 let models = null, queue = Promise.resolve();
 // the VSS formalizer reads through the composer (docs/model/micro/registry.json: 9 micro-worlds, CandidateRouter, event hint;
@@ -33,24 +37,27 @@ const clock = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute:
 // reasons: [{text}]}], executed (the nodes to run, message order), held (the units not executed)} (vss-confidence.js gate).
 // VSS and SOP-BERT (since 2026-11-03, training/sketch/confidence3/RESULT.md method (c), judged "better" than each reader's own confidence
 // on the fresh2 test part): the confidence of a request is the reader's own signals plus whether the other two readers, reading the same
-// requests, read it the same way (the "Three readers voting" block below: columnVss, columnSop of docs/js/vote-confidence.js, model
+// requests, read it the same way (the "votes of the other readers" block below: columnVss, columnSop of docs/js/vote-confidence.js, model
 // docs/model/confidence/vote3.json, a threshold for commands and one for questions). When the other learned reader has not read the message
 // (not loaded), the tab uses its own confidence alone: VSS docs/model/confidence/vss.json (vss-confidence.js), SOP-BERT
 // docs/model/confidence/sop-bert.json (the "Neural gate" block below); the details say which. Level: the tab's Settings (default "cost": the
 // safety threshold that maximises the cost score, one confident mistake = 10 right answers, owner 2026-11-02 21:24; execute all, never the
 // default; a choice other than the default is kept in this browser when storage works). readPart / doPart, the reply, "Do it anyway" and the details
 // are the same code for every reader. The Rules have no confidence and execute everything.
-// The cost levels (owner, 2026-11-02 22:12): besides the default (cost 10), "bolder" (one confident mistake counts as 5 right answers) and
-// "more careful" (as 20), each the cost-score optimum fitted the same way and stored in the reader's confidence file (vote3.json, vss.json,
-// sop-bert.json, combined.json); a file without one falls back to the default. The precision levels 95 / 97 / 99 of vss.json and
-// sop-bert.json are not offered any more: the confidences with the votes have only the cost levels.
-const GATE_KEY = 'sop.vss.gate', GATE_LEVELS = ['cost5', 'cost', 'cost20', 'all'], GATE_DEFAULT = 'cost';
-const COST_OF = { cost5: 5, cost: 10, cost20: 20 }, costWords = c => `one confident mistake counts as ${c} right answers`;
+// The cost levels (owner, 2026-11-02 22:12; cost 2 and cost 1 added 2026-11-03 09:30): besides the default (cost 10), "boldest", "very bold"
+// and "bolder" (one confident mistake counts as 1, 2 or 5 right answers: the reader is more confident and makes more mistakes) and "more
+// careful" (as 20), each the cost-score optimum fitted the same way on the calibration data and stored in the reader's confidence file
+// (vote3.json, vss.json, sop-bert.json, combined.json; never typed by hand); a file without one falls back to the default. Each tab's Settings
+// shows them as a table with their numbers on the calibration part (done right, confidently wrong, asked). The precision levels 95 / 97 / 99
+// of vss.json and sop-bert.json are not offered any more: the confidences with the votes have only the cost levels.
+const GATE_KEY = 'sop.vss.gate', GATE_LEVELS = ['cost1', 'cost2', 'cost5', 'cost', 'cost20', 'all'], GATE_DEFAULT = 'cost';
+const COST_LEVELS = GATE_LEVELS.filter(l => l !== 'all'), NON_DEFAULT = GATE_LEVELS.filter(l => l !== GATE_DEFAULT);
+const COST_OF = { cost1: 1, cost2: 2, cost5: 5, cost: 10, cost20: 20 }, costWords = c => `one confident mistake counts as ${c} right answer${c === 1 ? '' : 's'}`;
 /** what a reader does at a level, for the note when the setting changes */
 const gateDoes = l => l === 'all' ? 'executes every request it reads (no gate)' : COST_OF[l] ? `executes a request only when its confidence clears its ${gateLabel(l)} threshold (${costWords(COST_OF[l])}); below it, it asks` : `executes a request only at ${l}% precision; below it, it asks`;
 let vssGate = GATE_LEVELS.includes(store.get(GATE_KEY)) ? store.get(GATE_KEY) : GATE_DEFAULT;
 const GATES = { vss: v => window.VSSFormalizer && window.VSSFormalizer.gate ? window.VSSFormalizer.gate(v, vssGate) : null, neural: null };
-const gateLabel = l => l === 'all' ? 'execute all' : l === 'cost' ? 'safety threshold' : l === 'cost5' ? 'bolder' : l === 'cost20' ? 'more careful' : `${l}% precision`;
+const gateLabel = l => l === 'all' ? 'execute all' : l === 'cost' ? 'safety threshold' : l === 'cost1' ? 'boldest' : l === 'cost2' ? 'very bold' : l === 'cost5' ? 'bolder' : l === 'cost20' ? 'more careful' : `${l}% precision`;
 // Neural gate (GATES.neural): SOP-BERT's fitted confidence (docs/js/neural-confidence.js; model docs/model/confidence/sop-bert.json, versioned;
 // training/sketch/PRECISION_BERT.md), 24 numbers read from the head logits of the reader's own model calls (the act, the value heads, who
 // fills each role, the word tags, the cut head, the word pieces), the same value as the scripts (training/sketch/test_neural_confidence.mjs).
@@ -59,7 +66,7 @@ const gateLabel = l => l === 'all' ? 'execute all' : l === 'cost' ? 'safety thre
 // output of the cutter's call is reused; with another cut (Rules, VSS) neural.js runs the cut head once more to read it at that cut's units.
 // Without the file every request is asked (the reason says so).
 const NGATE_KEY = 'sop.neural.gate';
-let neuralGate = ['cost5', 'cost20', 'all'].includes(store.get(NGATE_KEY)) ? store.get(NGATE_KEY) : null;   // null: the default level ("cost")
+let neuralGate = NON_DEFAULT.includes(store.get(NGATE_KEY)) ? store.get(NGATE_KEY) : null;   // null: the default level ("cost")
 let ncNow = null;   // the module once loaded (the settings render synchronously)
 const ncP = import(new URL('js/neural-confidence.js', document.baseURI).href).then(m => { ncNow = m; return m; }).catch(e => { console.error(e); return null; });
 const nconf = { spec: null, error: null, url: null };
@@ -87,9 +94,9 @@ async function neuralOwnGate(n) {
 // executed, otherwise the one that exists; each gets the combined confidence (SOP-BERT's or VSS's own signals, the agreement of the two, VSS's
 // own confidence of its paired reading), executed when it clears the file's threshold; below it the reply says why ("the two readers disagree
 // on the colour", "only one reader found this request", what the executing reader itself was unsure of) and offers "Do it anyway". Level:
-// VSS-BERT › Settings: safety threshold (default) or execute all, kept in this browser when it is not the default. Every number comes from the file.
+// VSS-BERT › Settings: the cost levels (default the safety threshold) or execute all, kept in this browser when it is not the default. Every number comes from the file.
 const CGATE_KEY = 'sop.combined.gate';
-let combGate = ['cost5', 'cost20', 'all'].includes(store.get(CGATE_KEY)) ? store.get(CGATE_KEY) : 'cost';
+let combGate = NON_DEFAULT.includes(store.get(CGATE_KEY)) ? store.get(CGATE_KEY) : 'cost';
 let ccNow = null;
 const ccP = import(new URL('js/combined-confidence.js', document.baseURI).href).then(m => { ccNow = m; return m; }).catch(e => { console.error(e); return null; });
 const vcP = import(new URL('js/vss-confidence.js', document.baseURI).href).catch(e => { console.error(e); return null; });
@@ -102,7 +109,7 @@ async function combinedSpec() {
   return cconf.spec;
 }
 const CNAMES = { sop: 'SOP-BERT', vss: 'VSS' };
-/** the request's text as written on a wire rebuilt from a reader's wire (VSS-BERT, 3 readers): the help world answers from its words
+/** the request's text as written on a wire rebuilt from a reader's wire (VSS-BERT): the help world answers from its words
  *  ("how do I label an arrow?"; logic.js help plugin reads node.src, else node.unit.src) */
 const keepSrc = (x, y) => { const src = x.src || (x.unit && x.unit.src); if (src) Object.defineProperty(y, 'src', { value: src, enumerable: false, configurable: true }); };
 /** VSS-BERT reads one message: the two readings on the BERT cut, paired, the combined confidence and the gate -> {nodes, notes, gate, ms, ...} */
@@ -184,37 +191,47 @@ function combinedHTML(c) {
     return `<li><span class="src">“${escH(u.src)}”</span> → ${escH(what)}</li>`; }).join('')}</ul>`;
   return h;
 }
-/** VSS-BERT › Settings: what it is, the level (safety threshold or execute all) and the file's numbers */
+/** the levels of a tab's gate as a table (owner, 2026-11-03 09:30): one row per level in plain words, with its numbers on the calibration
+ *  part (out-of-fold confidences): the share of the requested actions done right, the share of what it executed that was wrong (confidently
+ *  wrong), the share of the requested actions it asked about; a radio in each row chooses the level. rows: [{level, num: {right, wrong,
+ *  asked} | null, acts: the threshold in words}] */
+const LEVEL_NAME = l => { const t = gateLabel(l); return t.charAt(0).toUpperCase() + t.slice(1); };
+function levelTableHTML(name, chosen, rows) {
+  const pc = v => Number.isFinite(v) ? (v * 100).toFixed(1) + '%' : '–';
+  return `<div class="tbl lvt"><table><thead><tr><th>level</th><th>done right</th><th>confidently wrong</th><th>asked</th></tr></thead><tbody>${rows.map(r => `<tr${r.level === chosen ? ' class="on"' : ''}>
+    <td><label><input type="radio" name="${name}" value="${r.level}" ${r.level === chosen ? 'checked' : ''}><span><b>${escH(LEVEL_NAME(r.level))}</b>${r.level === GATE_DEFAULT ? ' (default)' : ''}<span class="lvw">${escH(r.level === 'all' ? 'no gate: it does every request it reads' : costWords(COST_OF[r.level]))}${r.acts ? `; ${escH(r.acts)}` : ''}</span></span></label></td>
+    <td>${pc(r.num && r.num.right)}</td><td>${pc(r.num && r.num.wrong)}</td><td>${pc(r.num && r.num.asked)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+const LEVELS_NOTE = 'Bolder levels do more and are wrong more often; more careful ones ask more. The numbers: the calibration part of the fresh2 and short3 messages (368 messages, 808 requested actions), out-of-fold confidences; done right and asked are shares of the requested actions, confidently wrong is the share of what it executed (wrong or not requested). Each level’s threshold is the one that scores best on that part when a mistake costs that many right answers; none is typed by hand.';
+/** VSS-BERT › Settings: what it is, the level (the cost levels or execute all, as a table with the file's numbers) */
 function combinedSettingsHTML() {
   const spec = cconf.spec;
   if (!spec) { const again = () => { if (sub === 'settings' && cur.id === 'combined') renderSub(); }; if (!cconf.error) combinedSpec().then(again, again); }
   const pc = v => (v * 100).toFixed(1) + '%', B = spec ? spec.cuts[spec.best_cut] : null, cal = B && B.calibration_oof, te = B && B.test_already_read_exploratory, alone = spec && spec.readers_alone;
-  const opt = (l, about) => `<label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:pointer"><input type="radio" name="comb-gate" value="${l}" ${l === combGate ? 'checked' : ''}> <span><b>${escH(gateLabel(l))}</b>${l === 'cost' ? ' (default)' : ''}: ${escH(about)}</span></label>`;
-  const costAbout = l => { const x = B && (B.levels || {})[l];
-    if (!x) return cconf.error ? `the model could not be loaded (${cconf.error.message || cconf.error}): every request is asked` : spec ? `not in the model file: the safety threshold is used` : 'loading the model…';
-    return `acts when its combined confidence is at least ${x.threshold.toFixed(4)}: the threshold that scores best when ${costWords(x.cost)}; on the calibration messages (out-of-fold scores) ${pc(x.heldout_oof_precision)} of what it executed was right, it did ${pc(x.heldout_oof_coverage)} of the requests right and asked about ${pc(x.heldout_oof_asked)}`; };
+  const row = l => { const x = l === 'all' ? B && B.execute_all : B && (B.levels || {})[l];
+    return { level: l, num: x ? { right: x.heldout_oof_coverage, wrong: x.heldout_oof_precision == null ? NaN : 1 - x.heldout_oof_precision, asked: x.heldout_oof_asked } : null,
+      acts: l === 'all' ? '' : x ? (Number.isFinite(x.threshold) ? `acts from confidence ${x.threshold.toFixed(4)}` : x.kind) : B ? 'not in the model file: the safety threshold is used' : '' }; };
+  const state = !spec ? `<p class="note">${cconf.error ? `The model could not be loaded (${escH(cconf.error.message || cconf.error)}): every request is asked.` : 'Loading the model…'}</p>` : '';
   return `<h3 class="sub">VSS-BERT reader</h3>${readerFacts(RD.combined)}
   <p class="intro">VSS-BERT is not a third model: it is VSS and SOP-BERT reading the same requests, and it does what they are sure of together. Both read the requests of the BERT cutter (the cut with which this combination scored best; when the message was cut by it, the readings of the two tabs are reused, otherwise VSS-BERT cuts and reads here, with two SOP-BERT model calls). The two readings of each request are paired: when both readers have it, SOP-BERT’s reading is the one executed; when only one has it, that one. Each request gets a combined confidence: the executing reader’s own numbers, whether the two readers agree (all the values, or a share of them) and VSS’s own confidence. When the two agree, a request is right about 95% of the time, so agreement raises the confidence; when they disagree, or only one reader found the request, it is lowered. Below the threshold it asks, says why, and offers <b>Do it anyway</b>.</p>
   <p class="intro"><button type="button" class="btn" data-help="two-readers">Two readers together</button></p>
   <h3 class="sub">When VSS-BERT acts</h3>
-  ${['cost5', 'cost', 'cost20'].map(l => opt(l, costAbout(l))).join('')}${opt('all', 'no gate: every request is executed (SOP-BERT’s reading on a pair, the one that exists otherwise)')}
+  ${state}${levelTableHTML('comb-gate', combGate, GATE_LEVELS.map(row))}
+  <p class="note">${escH(LEVELS_NOTE)} A level other than the default is kept in this browser.</p>
   ${B ? `<p class="note">Fitted on the calibration part of the fresh2 and short3 messages (368 messages), out of fold (training/sketch/combine/COMBINED_READER.md, refitted for the readers of 2026-11-03${spec.variant && spec.variant !== '(a)' ? `; variant ${escH(spec.variant)}: the combined confidence reads neither how often SOP-BERT’s action nor how often VSS’s world is read right, the variant chosen on the calibration part by the rule of training/sketch/confidence3/PLAN.md` : ''}). Cost score on that part: VSS-BERT ${cal.score.toFixed(1)}, SOP-BERT alone ${alone.sop.calibration_oof_score.toFixed(1)}, VSS alone ${alone.vss.calibration_oof_score.toFixed(1)}. On the test part (already read before; exploratory): ${te.score.toFixed(1)}, ${pc(te.confidently_wrong)} of what it executed wrong, ${pc(te.done_right)} of the requests done right. The clean confirmation needs a fresh set of messages (fresh3). Model <code>confidence/combined.json</code>${cconf.url && /[?&]v=/.test(cconf.url) ? `, version <code>${escH(decodeURIComponent(cconf.url.split('v=').pop()))}</code>` : ''}.</p>` : ''}`;
 }
-// Three readers voting (owner, 2026-11-02 evening; training/sketch/confidence3/PLAN.md, RESULT.md; docs/js/vote-confidence.js, model
+// The votes of the other readers (owner, 2026-11-02 evening; training/sketch/confidence3/PLAN.md, RESULT.md; docs/js/vote-confidence.js, model
 // docs/model/confidence/vote3.json, versioned, written by training/sketch/confidence3/export3.mjs). The Rules, VSS and SOP-BERT read the same
 // requests (the shared cut); their readings of a request are paired, and two readings agree when every canonical value (bench-canon.js) is
 // equal after engineNorm (d1: what logic.js does with them: an arrange / distribute / whole-drawing operation's list in any order, "no target" = "all" = every name on
 // the canvas). The Rules are edited often: comparing after engineNorm keeps a change in how they write the same request from counting as a
 // disagreement. Uses:
 //  - VSS tab: columnVss (VSS's own signals, no world prior, + whether SOP-BERT and the Rules read it the same), method (c) of RESULT.md;
-//  - SOP-BERT tab: columnSop (its own signals and act prior + the votes of VSS and the Rules), method (c);
-//  - "3 readers" tab (id vote3): by default a request is executed only when all three read it the same (no fitted weight: on the
-//    calibration messages such a request was right 96.7% of the time, on the test part 95.8%); "fitted vote": the fitted vote (vote3.json
-//    columns.vote3) at its cost-score threshold (it executes less than "all three agree" and is confidently wrong less often on the BERT
-//    cut it was fitted on; the page cuts with the VSS cutter by default, see voteSettingsHTML); execute all. "2 of 3 agree" is not offered:
-//    measured, it is not safe (RESULT.md section 2).
+//  - SOP-BERT tab: columnSop (its own signals and act prior + the votes of VSS and the Rules), method (c).
+// (The "3 readers" tab, which executed what all three read the same, was removed on 2026-11-03: VSS-BERT measured better; vote3.json's
+// column vote3 is no longer used by the page.)
 // Every vote reuses the readings the three tabs made of this message (rec.readers): nothing is read twice. Thresholds per type (commands,
-// questions) and weights are the file's. The fitted columns were fitted on the BERT cut (SOP-BERT, 3 readers) and the VSS cut (VSS).
+// questions) and weights are the file's. The fitted columns were fitted on the BERT cut (SOP-BERT) and the VSS cut (VSS).
 const VOTE_OPTS = { agreement: 'engine' };
 let vtNow = null;
 const vtP = import(new URL('js/vote-confidence.js', document.baseURI).href).then(m => { vtNow = m; return m; }).catch(e => { console.error(e); return null; });
@@ -226,9 +243,6 @@ async function voteSpec() {
   try { vconf.url = await VT.urlUnder(new URL('model/', document.baseURI).href); vconf.spec = await VT.load(vconf.url); vconf.error = null; } catch (e) { vconf.error = e; throw e; }
   return vconf.spec;
 }
-const VKEY = 'sop.vote3.gate';
-let voteGate = ['fitted', 'all'].includes(store.get(VKEY)) ? store.get(VKEY) : 'agree3';   // 'agree3' (default) | 'fitted' (the fitted vote) | 'all'
-const voteLabel = l => l === 'agree3' ? 'all three agree' : l === 'fitted' ? 'fitted vote' : 'execute all';
 const unitOfNode = (n, text) => { if (n.span) return [n.span[0], n.span[1]]; const k = n.src ? text.indexOf(n.src) : -1; return k < 0 ? [0, 0] : [k, k + n.src.length]; };
 const paOf = x => `${x.type}:${x.args.action || x.args.ask || ''}`;
 const args0Of = x => ({ action: x.args.action ?? null, name: typeof x.args.name === 'string' ? x.args.name : null, count: x.args.count ?? null });
@@ -337,80 +351,6 @@ GATES.neural = async (n, rec, r) => {
       { label: 'the Rules', agree: it.agree_rules, reading: it.partner_rules >= 0 ? m.rules[it.partner_rules] : VT.otherAct(m.text, m.rules, s) }], m.names, NC.reasons(own, s.sig));
   });
 };
-/** the "3 readers" tab reads one message: the three tabs' readings, paired, voted on, gated -> {nodes, notes, gate, units, ms, ...} */
-async function voteRead(rd, text, rec, ctx) {
-  const t0 = performance.now(), VT = await vtP;
-  let spec = null; try { spec = await voteSpec(); } catch (e) { console.error(e); }
-  const R = rec.readers;
-  if (!(R.rules && R.rules.rulesRes) || !(R.vss && R.vss.vss) || !(R.neural && R.neural.neural)) throw new Error('3 readers needs the readings of Rules, VSS and SOP-BERT for this message');
-  const votes = await votesOf(rec), m = voteMsg(votes, rd), level = voteGate, ok = !!(VT && spec);
-  const items = ok ? VT.vote3(spec, m, level === 'all' ? 'all' : 'cost', level === 'agree3', VOTE_OPTS)
-    : m.sop.map((s, j) => ({ from: 'sop', j, pa: s.pa, n_agree: 1, pattern: '?', vss: -1, rules: -1, conf: NaN, threshold: Infinity, execute: level === 'all' }));
-  // the wires to run: per request, the wires of the reader whose reading is executed (with the mentions of that request), fresh ids
-  const RES = { sop: { res: R.neural.neural, list: m.sop }, vss: { res: R.vss.vss, list: m.vss } };
-  const groups = new Map();   // one request of the reply per unit of the reader whose reading is executed: a unit with two wires is executed whole
-  for (const it of items) { const q = RES[it.from].list[it.j], u = q.node.unit;
-    if (!groups.has(u)) groups.set(u, { from: it.from, unit: u, items: [], req: q }); groups.get(u).items.push(it); }
-  const G = [...groups.values()].sort((a, b) => (a.req.span[0] - b.req.span[0]) || (a.from === 'sop' ? -1 : 1));
-  G.forEach(g => { g.nodes0 = RES[g.from].res.nodes.filter(x => x.unit === g.unit); });
-  const idOf = new Map(); let k = 0;
-  for (const g of G) for (const x of g.nodes0) idOf.set(g.from + ':' + x.id, (x.type === 'mention' ? 'm' : 'w') + (++k));
-  for (const g of G) for (const it of g.items) {   // a reference to the paired reading of the other learned reader refers to the one executed
-    if (it.from === 'sop' && it.vss >= 0) idOf.set('vss:' + m.vss[it.vss].node.id, idOf.get('sop:' + m.sop[it.j].node.id));
-    if (it.from === 'vss' && it.sop >= 0) idOf.set('sop:' + m.sop[it.sop].node.id, idOf.get('vss:' + m.vss[it.j].node.id));
-  }
-  const mapV = (from, val) => K.isRef(val) ? { ref: idOf.get(from + ':' + val.ref) || val.ref } : Array.isArray(val) ? val.map(y => mapV(from, y)) : val;
-  const rule = level === 'agree3', names = m.names;
-  const whyOf = it => {   // plain words: who reads it the same; what the one that differs reads instead
-    if (!ok) return [{ text: !VT ? 'the code of the votes could not be loaded' : 'the model of the votes (confidence/vote3.json) could not be loaded' }];
-    const has = c => it.pattern.includes(c);
-    if (it.pattern === 'R+V+S') return [{ text: 'all three readers read it the same, but the fitted vote’s confidence is below its threshold' }];
-    if (it.from === 'vss') return [{ text: VT.agreementWords('VSS', m.vss[it.j], [{ label: 'the Rules', agree: has('R'), reading: it.rules >= 0 ? m.rules[it.rules] : VT.otherAct(m.text, m.rules, m.vss[it.j]) }, { label: 'SOP-BERT', agree: 0, reading: it.sop >= 0 ? m.sop[it.sop] : VT.otherAct(m.text, m.sop, m.vss[it.j]) }], names, 'engine') }];
-    return [{ text: VT.agreementWords('SOP-BERT', m.sop[it.j], [{ label: 'the Rules', agree: has('R'), reading: it.rules >= 0 ? m.rules[it.rules] : VT.otherAct(m.text, m.rules, m.sop[it.j]) }, { label: 'VSS', agree: has('V'), reading: it.vss >= 0 ? m.vss[it.vss] : VT.otherAct(m.text, m.vss, m.sop[it.j]) }], names, 'engine') }];
-  };
-  const units = G.map((g, index) => {
-    const nodes = g.nodes0.map(x => { const y = { id: idOf.get(g.from + ':' + x.id), type: x.type, args: Object.fromEntries(Object.entries(x.args).map(([a, b]) => [a, mapV(g.from, b)])) };
-      if (x.span) Object.defineProperty(y, 'span', { value: x.span, enumerable: false, configurable: true }); keepSrc(x, y); return y; });
-    const src = text.slice(g.req.span[0], g.req.span[1]).trim() || g.req.node.src || '';
-    const execute = g.items.every(i => i.execute), held = g.items.filter(i => !i.execute);
-    const conf = rule ? NaN : Math.min(...g.items.map(i => i.conf)), t = rule ? NaN : Math.max(...g.items.map(i => i.threshold));
-    return { index, from: g.from, items: g.items, src, conf, t, execute, nodes, reasons: held.length ? whyOf(held[0]) : [], dependsOn: [] };
-  });
-  const owner = new Map(); units.forEach(u => u.nodes.forEach(x => owner.set(x.id, u)));
-  const refsOf = val => K.isRef(val) ? [val.ref] : Array.isArray(val) ? val.flatMap(refsOf) : [];
-  for (const u of units) for (const x of u.nodes) for (const r of Object.values(x.args).flatMap(refsOf)) { const o = owner.get(r); if (o && o !== u && !u.dependsOn.includes(o)) u.dependsOn.push(o); }
-  for (const u of units) { const off = u.dependsOn.filter(d => !d.execute); if (u.execute && off.length) { u.execute = false; u.reasons = off.map(d => ({ text: `it uses what “${d.src}” would have made, which was not done` })); } }
-  const all = units.flatMap(u => u.nodes), run = new Set(units.filter(u => u.execute).flatMap(u => u.nodes));
-  const L = ok && level === 'fitted' ? spec.columns.vote3.levels : null;
-  const thresholds = L ? { command: VT.thresholdOf(L, 'cost', 'command:'), question: VT.thresholdOf(L, 'cost', 'question:') } : null;
-  const gate = { level, effective: level, label: voteLabel(level), threshold: level === 'all' ? -Infinity : thresholds ? thresholds.command : NaN, thresholds, rule, units, executed: all.filter(x => run.has(x)), held: units.filter(u => !u.execute) };
-  const notes = [];
-  if (level === 'fitted' && votes.cut && votes.cut !== 'bert') notes.push(`The fitted vote was fitted on the requests of the BERT cutter; this message was cut by the ${cutLabel(votes.cut)}.`);
-  return { nodes: all, notes, gate, units, items, cut: votes.cut, ok, ms: performance.now() - t0 };
-}
-GATES.vote3 = async x => x.gate;
-/** "3 readers" in a message's details: where the readings came from, and who agrees on each request */
-function voteHTML(x) {
-  const names = { sop: 'SOP-BERT’s reading', vss: 'VSS’s reading' };
-  let h = `<div class="note">3 readers: the readings of the Rules, VSS and SOP-BERT tabs on the ${escH(cutLabel(x.cut || 'rules'))}’s requests, reused (voting ${fmtMs(x.ms)}); readings compared after engineNorm.</div>`;
-  h += `<ul class="units">${x.units.map(u => `<li><span class="src">“${escH(u.src)}”</span> → ${escH(names[u.from])}; ${escH(u.items.map(i => i.pattern === 'R+V+S' ? 'all three read it the same' : i.pattern === 'V+S' ? 'VSS and SOP-BERT agree' : i.pattern === 'R+S' ? 'the Rules and SOP-BERT agree' : i.pattern === 'R+V' ? 'the Rules and VSS agree' : 'no two readers agree').join('; '))}</li>`).join('')}</ul>`;
-  return h;
-}
-/** 3 readers › Settings: what it is, the level, the file's numbers */
-function voteSettingsHTML() {
-  const spec = vconf.spec;
-  if (!spec) { const again = () => { if (sub === 'settings' && cur.id === 'vote3') renderSub(); }; if (!vconf.error) voteSpec().then(again, again); }
-  const pc = v => (v * 100).toFixed(1) + '%', C = spec && spec.columns.vote3, L = C && C.levels.cost;
-  const opt = (l, about) => `<label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:pointer"><input type="radio" name="vote-gate" value="${l}" ${l === voteGate ? 'checked' : ''}> <span><b>${escH(voteLabel(l))}</b>${l === 'agree3' ? ' (default)' : ''}: ${escH(about)}</span></label>`;
-  const fitted = !spec ? (vconf.error ? `the model could not be loaded (${vconf.error.message || vconf.error}): every request is asked` : 'loading the model…')
-    : `the fitted vote: a confidence from SOP-BERT’s or VSS’s own numbers and who agrees with whom; it acts when the confidence is at least ${L.command.toFixed(4)} for commands and ${L.question.toFixed(4)} for questions, the thresholds that score best when ${costWords(10)}; on the calibration messages (out-of-fold scores) ${pc(C.calibration_oof.done_right)} of the requests done right, ${pc(C.calibration_oof.confidently_wrong)} of what it executed wrong; on the test part ${pc(C.test.done_right)} and ${pc(C.test.confidently_wrong)} (all three agree: 47.4% and 4.2%): it does less and is wrong less often. It was fitted on requests of the BERT cutter; with the VSS cutter (the default cut) it is used as is, and it then holds requests all three read the same, such as “arrange all in a circle”, which is why it is not the default`;
-  return `<h3 class="sub">3 readers</h3>${readerFacts(RD.vote3)}
-  <p class="intro">3 readers is not a new model: it is the Rules, VSS and SOP-BERT reading the same requests (the readings of their tabs, reused) and voting. Two readings agree when they would make the editor do the same thing (an arrange or distribute list in any order; “all” = no target = every shape). By default a request is executed only when <b>all three</b> read it the same: on the calibration messages such requests were right 96.7% of the time, on the test part 95.9%. When only two agree, a request is right 34–89% of the time (calibration and test part), depending on which two: too often wrong, so it asks, says who reads it differently, and offers <b>Do it anyway</b>. “2 of 3 agree” is not a level: executing it scored −23.6 (calibration) and −22.9 (test part) against +31.3 and +26.8 for “all three agree” (cost score; the refit of 2026-11-03, results/072_measure/refit/records/confidence3_report.md on branch gpu-runs).</p>
-  <p class="intro"><button type="button" class="btn" data-help="three-readers">Three readers voting</button> <button type="button" class="btn" data-help="two-readers">Two readers together</button></p>
-  <h3 class="sub">When 3 readers acts</h3>
-  ${opt('agree3', 'it acts on a request only when the Rules, VSS and SOP-BERT read it the same (no fitted weight); the reading executed is SOP-BERT’s, which is the same')}${opt('fitted', fitted)}${opt('all', 'no gate: every request SOP-BERT or VSS found is executed (SOP-BERT’s reading, VSS’s when only VSS and the Rules agree)')}
-  ${spec ? `<p class="note">Model <code>confidence/vote3.json</code>${vconf.url && /[?&]v=/.test(vconf.url) ? `, version <code>${escH(decodeURIComponent(vconf.url.split('v=').pop()))}</code>` : ''} (fitted on the calibration part of the fresh2 and short3 messages, training/sketch/confidence3/fit3.mjs, export3.mjs).</p>` : ''}`;
-}
 // spelling (docs/js/spell.js): a VSA spell checker corrects typed messages before the readers read them; every reader reads the same
 // corrected text. Its vocabulary: docs/model/spell/vocab.json (the VSS worlds' words), the legend's values and cue words, and the names
 // on the active reader's canvas. The switch is in ⋮ › Settings (Spelling); it is kept in this browser when storage works.
@@ -625,13 +565,30 @@ function meBubble(text, sp) {
   d.innerHTML = `<div class="txt">${escH(text)}</div>${fix}<div class="meta"><time>${clock()}</time></div>`;
   msgs.appendChild(d); scrollDown();
 }
+// Which tabs' replies the chat shows (owner, 2026-11-03 09:30): ⋮ › Settings › Replies in the chat, default VSS-BERT only, so that the
+// conversation reads as one reply. Every tab still reads every message into its own drawing, and a message's details show every reader.
+// When none of the chosen tabs read a message (VSS-BERT waits until VSS and SOP-BERT are loaded), the chat shows the lines of the readers that
+// did read it, by name, and says why. A reply of one line from the only tab shown has no "VSS-BERT · 12 ms:" prefix: the reader and its time
+// are a quiet tag beside the time. The choice is kept in this browser when it is not the default.
+const CHAT_KEY = 'sop.chat.tabs', CHAT_DEFAULT = ['combined'];
+const chatTabs = (() => { const ids = String(store.get(CHAT_KEY) || '').split(',').filter(id => RD[id]); return new Set(ids.length ? ids : CHAT_DEFAULT); })();
+/** the lines of a reply the chat shows (see CHAT_KEY): {lines, note} */
+function chatLines(parts) {
+  const chosen = parts.filter(p => chatTabs.has(p.rd.id));
+  if (chosen.some(p => !p.off)) return { lines: chosen, note: null };
+  const others = parts.filter(p => !chatTabs.has(p.rd.id) && !p.off);
+  if (!others.length) return { lines: chosen, note: null };
+  return { lines: others, note: `${listing(chosen.map(p => p.rd.label))} ${chosen.length === 1 ? 'is' : 'are'} not ready yet, so here is what ${listing(others.map(p => p.rd.label))} made of it.` };
+}
 function botBubble(o) {
   const d = document.createElement('div'); d.className = 'b bot' + (o.err ? ' err' : '');
-  let h = o.lines ? o.lines.map(p => `<div class="rl${p.err ? ' err' : ''}${p.off ? ' off' : ''}"><b>${escH(p.rd.label)}${p.ms != null ? ` · ${fmtMs(p.ms)}` : ''}:</b> <span class="t">${escH(p.off || p.text)}</span>${p.held && p.held.length ? heldHTML(p.held) : ''}${p.sub ? `<div class="sub">${escH(p.sub)}</div>` : ''}</div>`).join('')
+  const solo = o.lines && o.lines.length === 1 && chatTabs.size === 1 && chatTabs.has(o.lines[0].rd.id) ? o.lines[0] : null;   // no prefix
+  let h = o.lines ? o.lines.map(p => `<div class="rl${p.err ? ' err' : ''}${p.off ? ' off' : ''}" data-reader="${p.rd.id}">${solo ? '' : `<b>${escH(p.rd.label)}${p.ms != null ? ` · ${fmtMs(p.ms)}` : ''}:</b> `}<span class="t">${escH(p.off || p.text)}</span>${p.held && p.held.length ? heldHTML(p.held) : ''}${p.sub ? `<div class="sub">${escH(p.sub)}</div>` : ''}</div>`).join('')
     : `<div class="txt">${escH(o.text)}</div>`;
   if (o.sub) h += `<div class="sub">${escH(o.sub)}</div>`;
   if (o.chips && o.chips.length) h += `<div class="chips">${o.chips.map(c => `<button type="button" data-pick="${escH(c)}">${escH(c)}</button>`).join('')}</div>`;
-  h += `<div class="meta">${o.tag ? `<span class="tag2">${escH(o.tag)}</span>` : ''}${o.turn ? `<button type="button" data-turn="${o.turn}">details</button>` : ''}<time>${clock()}</time></div>`;
+  const who = solo ? `<span class="who" title="${escH(`The reply of the ${solo.rd.label} tab; ⋮ › Settings › Replies in the chat shows the other tabs’ replies too`)}">${escH(solo.rd.label)}${solo.ms != null ? ` · ${fmtMs(solo.ms)}` : ''}</span>` : '';
+  h += `<div class="meta">${o.tag ? `<span class="tag2">${escH(o.tag)}</span>` : ''}${who}${o.turn ? `<button type="button" data-turn="${o.turn}">details</button>` : ''}<time>${clock()}</time></div>`;
   d.innerHTML = h;
   if (o.replace) o.replace.replaceWith(d); else msgs.appendChild(d);
   scrollDown(); return d;
@@ -644,7 +601,6 @@ const isReady = rd => rd.id === 'rules' || (rd.id === 'vss' ? vssState === 'read
 /** what a reader that is not loaded says instead of an answer */
 function offText(rd) {
   if (rd.id === 'combined') { const wait = [RD.vss, RD.neural].filter(x => !isReady(x)); return `waits for ${listing(wait.map(x => x.label))} (it combines the readings of VSS and SOP-BERT)`; }
-  if (rd.id === 'vote3') { const wait = [RD.vss, RD.neural].filter(x => !isReady(x)); return `waits for ${listing(wait.map(x => x.label))} (it votes on the readings of Rules, VSS and SOP-BERT)`; }
   if (rd.id === 'vss') return vssState === 'failed' ? 'not available (it could not be loaded)' : 'still loading, did not read this';
   return { unpublished: 'not available (the neural model is not published yet)', failed: 'not available (loading failed; see SOP-BERT › Settings)' }[nState] || 'still loading, did not read this';
 }
@@ -716,10 +672,10 @@ async function run(text, sop) {
   const anyPick = [...picks.values()].some(Boolean);
   const wait = live.length > 1 ? typing() : null; if (wait) setStatus('typing…');
   if (!rec.raw && !anyPick && live.length) rec.cut = await cutMessage(text);   // one cut, read by every reader
-  // first every reader reads (formalizes) the message, then each one's gate and engine run: the gates of VSS and SOP-BERT use the
-  // readings of the other two readers (see GATES), and "3 readers" votes on the three readings
+  // first every reader reads (formalizes) the message (READ_ORDER: VSS-BERT reuses the readings of VSS and SOP-BERT), then each one's gate
+  // and engine run: the gates of VSS and SOP-BERT use the readings of the other two readers (see GATES)
   const plan = [];
-  for (const rd of READERS) {
+  for (const rd of READ_ORDER) {
     if (!live.includes(rd)) { rec.off[rd.id] = offText(rd); plan.push({ rd, line: { off: rec.off[rd.id] } }); continue; }
     const pend = rd.pending; rd.pending = null;
     if (anyPick && !picks.get(rd)) { plan.push({ rd, ran: true, line: { text: 'No question was open here; nothing to choose.' } }); continue; }
@@ -733,7 +689,9 @@ async function run(text, sop) {
     parts.push(Object.assign(p, { rd: x.rd }));
   }
   setStatus(idleStatus());
-  botBubble({ lines: parts, chips: [...new Set(parts.flatMap(p => p.chips || []))], turn: id, tag: rec.button ? 'button' : rec.raw ? 'SOP Lang' : null, replace: wait });
+  parts.sort((a, b) => READERS.indexOf(a.rd) - READERS.indexOf(b.rd));   // the order of the tabs
+  const shown = chatLines(parts);   // the chat shows the chosen tabs' lines (see CHAT_KEY); the details show every reader
+  botBubble({ lines: shown.lines, sub: shown.note, chips: [...new Set(shown.lines.flatMap(p => p.chips || []))], turn: id, tag: rec.button ? 'button' : rec.raw ? 'SOP Lang' : null, replace: wait });
   const mine = parts.find(p => p.rd === cur);
   if (mine && mine.highlight) flash(mine.highlight); else renderCanvas();
   updateTabs(); renderSopBar();
@@ -797,7 +755,6 @@ async function readPart(rd, text, rec, pk) {
     else if (rd.id === 'rules') { const f = rec.cut && rec.cut.strategy !== 'rules' ? rd.formalize(text, ctx, { units: rec.cut.units }) : rd.formalize(text, ctx); r.ms = performance.now() - t0; r.rulesRes = f; r.nodes = f.nodes; r.notes = f.notes; }
     else if (rd.id === 'vss') { const v = await window.VSSFormalizer.formalize(text, ctx, rd.formalize, Object.assign({}, VSS_OPTS, rec.cut ? { units: rec.cut.units } : {})); r.ms = performance.now() - t0; r.vss = v; r.nodes = v.nodes; r.notes = v.notes; }
     else if (rd.id === 'combined') { const c = await combinedRead(rd, text, rec, ctx); r.ms = c.ms; r.combined = c; r.nodes = c.nodes; r.notes = c.notes; }
-    else if (rd.id === 'vote3') { const x = await voteRead(rd, text, rec, ctx); r.ms = x.ms; r.vote = x; r.nodes = x.nodes; r.notes = x.notes; }
     else { const n = await neural.formalize(text, ctx, rec.cut ? { units: rec.cut.units, signals: true } : { signals: true }); r.ms = performance.now() - t0; r.neural = n; r.nodes = n.nodes; r.notes = n.notes.filter(x => !/couldn't find an action/.test(x)); }
     if (rec.cut && !pk && !rec.raw) r.cutBy = r.combined ? r.combined.cut : rec.cut.strategy;
   } catch (e) { r.error = e; r.ms = performance.now() - t0; return { text: `The ${rd.label} reader failed: ${e.message}`, err: true, ms: r.ms }; }
@@ -808,7 +765,7 @@ async function doPart(rd, text, rec, pk) {
   const r = rec.readers[rd.id], overrides = r.overrides;
   try {
     // the gate (see GATES): the requests this reader is not sure of are not executed; the reply lists them with "Do it anyway"
-    const gf = !pk && !rec.raw ? GATES[rd.id] : null, gsrc = rd.id === 'vss' ? r.vss : rd.id === 'combined' ? r.combined : rd.id === 'vote3' ? r.vote : r.neural;
+    const gf = !pk && !rec.raw ? GATES[rd.id] : null, gsrc = rd.id === 'vss' ? r.vss : rd.id === 'combined' ? r.combined : r.neural;
     if (gf && gsrc) { const g = await gf(gsrc, rec, r); if (g) { r.gate = g; r.allNodes = r.nodes; r.nodes = g.executed; } }
   } catch (e) { r.error = e; return { text: `The ${rd.label} reader failed: ${e.message}`, err: true, ms: r.ms }; }
   const ms = r.ms, nodes = r.nodes, notes = r.notes, world = rd.world, engine = rd.engine;
@@ -870,7 +827,6 @@ function turnHTML(r) {
     if (x.vss) h += vssHTML(x.vss);
     if (x.neural) h += neuralHTML(x.neural);
     if (x.combined) h += combinedHTML(x.combined);
-    if (x.vote) h += voteHTML(x.vote);
     if (x.result) h += x.result.steps.map(stepHTML).join('');
     for (const a of x.anyway || []) h += `<div class="note">Done anyway: “${escH(a.src)}”</div><pre class="sop">${a.nodes.map(hlNode).join('\n')}</pre>` + a.result.steps.map(stepHTML).join('');
     const err = x.error && x.error.message !== 'No wires.' ? x.error : x.result && !x.result.ok ? x.result.error : null;
@@ -939,8 +895,7 @@ const fmtV = v => v == null ? '' : K.fmtValue(v);
 /** the gate of one reader on one message (see GATES): the level, each request's confidence, executed or not and why, the wires not run */
 function gateHTML(x, rd) {
   const g = x.gate, ex = g.units.filter(u => u.execute).length, t = g.threshold, T = g.thresholds;
-  const tt = g.rule ? ' (it acts only when the Rules, VSS and SOP-BERT read a request the same)'
-    : T && Number.isFinite(T.command) && Number.isFinite(T.question) ? ` (it acts from confidence ${T.command.toFixed(4)} for commands and ${T.question.toFixed(4)} for questions${g.method === 'votes' ? ', with the votes of the other two readers' : ''})`
+  const tt = T && Number.isFinite(T.command) && Number.isFinite(T.question) ? ` (it acts from confidence ${T.command.toFixed(4)} for commands and ${T.question.toFixed(4)} for questions${g.method === 'votes' ? ', with the votes of the other two readers' : ''})`
     : Number.isFinite(t) ? ` (it acts from confidence ${t.toFixed(4)})` : t === -Infinity ? ' (every request is executed)' : ' (no confidence: every request is asked)';
   const lab = g.label || gateLabel(g.effective || g.level);
   let h = `<div class="note">${escH(rd.label)} gate: ${escH(lab)}${!g.label && g.effective && g.effective !== g.level ? ` (${escH(gateLabel(g.level))} is not reached)` : ''}${escH(tt)}; executed ${ex} of ${g.units.length} request${g.units.length === 1 ? '' : 's'}${g.held.length ? `, not sure about ${g.held.length}` : ''}.</div>`;
@@ -1168,10 +1123,10 @@ function renderCard() {
   const c = $('#rcard');
   if (cur.id === 'rules' || isReady(cur) || sub !== 'drawing') { c.hidden = true; return; }
   c.hidden = false;
-  c.className = 'rcard' + (cur.id === 'neural' && nState === 'unpublished' ? ' small' : '');
+  c.className = 'rcard' + ((cur.id === 'neural' && nState === 'unpublished') || cur.id === 'combined' ? ' small' : '');
   c.innerHTML = cur.id === 'vss' ? `<b>VSS reader</b>${vssState === 'failed' ? errHTML(vssError) : `<p>Loading the 9 micro-worlds from this site (about ${mb0(VSS_HINT)})…</p>`}`
-    : cur.id === 'combined' ? `<b>VSS-BERT reader</b><p>It ${escH(offText(cur))}; it starts when both are loaded.</p>`
-    : cur.id === 'vote3' ? `<b>3 readers</b><p>It ${escH(offText(cur))}; it starts when both are loaded.</p>`
+    : cur.id === 'combined' ? `<b>VSS-BERT reader</b><p>It ${escH(offText(cur))}; it starts when both are loaded. Until then the chat shows the replies of the readers that are ready.</p>`
+      + `<div class="note"><b>VSS</b>: ${vssState === 'ready' ? 'ready' : vssState === 'failed' ? 'could not be loaded' : `loading (about ${mb0(VSS_HINT)})…`}</div><div class="note"><b>SOP-BERT</b>:</div>${neuralBoxHTML()}`
     : `<b>SOP-BERT reader</b>${neuralBoxHTML()}`;
 }
 
@@ -1193,7 +1148,7 @@ async function ensureVSS(announce) {
     const fresh = !RD.vss.reads;
     if (announce !== false) sysNote((vssInfo.composer ? `VSS ready: ${vssInfo.worlds.length} micro-worlds, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
       : `VSS model ready: ${mb(vssInfo.bytes)}, D ${vssInfo.D}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`) + (fresh ? ' It starts from the Rules drawing.' : ''));
-    adoptRules(RD.vss); if (isReady(RD.combined)) adoptRules(RD.combined); if (isReady(RD.vote3)) adoptRules(RD.vote3);
+    adoptRules(RD.vss); if (isReady(RD.combined)) adoptRules(RD.combined);
   } catch (e) { vssState = 'failed'; vssError = e; sysNote('The VSS reader could not be loaded: ' + (e && e.message || e)); }
   refreshReaders(); return vssState === 'ready';
 }
@@ -1247,7 +1202,7 @@ async function loadModels(fromCache) {
     if (!neuralBytes) neuralBytes = nBytesHint();
     const fresh = !RD.neural.reads;
     sysNote(`SOP-BERT reader ready: ${neuralNames().join(' + ')} on the CPU, ${mb(neuralBytes)}${fromCache ? ' from the browser cache' : ''}, ${(neuralLoadMs / 1000).toFixed(1)} s.` + (fresh ? ' It starts from the Rules drawing.' : ''));
-    adoptRules(RD.neural); if (isReady(RD.combined)) adoptRules(RD.combined); if (isReady(RD.vote3)) adoptRules(RD.vote3);
+    adoptRules(RD.neural); if (isReady(RD.combined)) adoptRules(RD.combined);
   } catch (e) {
     if (tok !== nToken) return;
     console.error(e); nState = e && e.unpublished ? 'unpublished' : 'failed'; nError = e;
@@ -1277,20 +1232,14 @@ function setSub(k) { if (k === sub || !SUBS.some(x => x[0] === k)) return; sub =
 subbar.addEventListener('click', ev => { const b = ev.target.closest('[data-sub]'); if (b) setSub(b.dataset.sub); });
 rpanel.addEventListener('change', ev => {   // SOP-BERT › Settings: the level of the neural gate (GATES.neural)
   if (ev.target.name !== 'neural-gate') return;
-  const l = ['cost5', 'cost20', 'all'].includes(ev.target.value) ? ev.target.value : 'cost'; neuralGate = l === 'cost' ? null : l; store.set(NGATE_KEY, neuralGate);
+  const l = NON_DEFAULT.includes(ev.target.value) ? ev.target.value : 'cost'; neuralGate = l === 'cost' ? null : l; store.set(NGATE_KEY, neuralGate);
   sysNote(`SOP-BERT now ${gateDoes(l)}.`);
   if (sub === 'settings') renderSub();
 });
-rpanel.addEventListener('change', ev => {   // VSS-BERT › Settings: safety threshold or execute all
+rpanel.addEventListener('change', ev => {   // VSS-BERT › Settings: a cost level or execute all
   if (ev.target.name !== 'comb-gate') return;
-  combGate = ['cost5', 'cost20', 'all'].includes(ev.target.value) ? ev.target.value : 'cost'; store.set(CGATE_KEY, combGate === 'cost' ? null : combGate);
+  combGate = NON_DEFAULT.includes(ev.target.value) ? ev.target.value : 'cost'; store.set(CGATE_KEY, combGate === 'cost' ? null : combGate);
   sysNote(`VSS-BERT now ${gateDoes(combGate)}.`);
-  if (sub === 'settings') renderSub();
-});
-rpanel.addEventListener('change', ev => {   // 3 readers › Settings: all three agree (default), the fitted vote or execute all
-  if (ev.target.name !== 'vote-gate') return;
-  voteGate = ['fitted', 'all'].includes(ev.target.value) ? ev.target.value : 'agree3'; store.set(VKEY, voteGate === 'agree3' ? null : voteGate);
-  sysNote(`3 readers now ${voteGate === 'agree3' ? 'executes a request only when the Rules, VSS and SOP-BERT read it the same' : voteGate === 'fitted' ? `executes a request when the fitted vote’s confidence clears its threshold (${costWords(10)})` : 'executes every request (no gate)'}.`);
   if (sub === 'settings') renderSub();
 });
 rpanel.addEventListener('change', ev => {
@@ -1301,24 +1250,25 @@ function vssStatusHTML() {
   return escH(vssState === 'ready' ? (vssInfo.composer ? `Ready: ${vssInfo.worlds.length} micro-worlds, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
     : `Ready: D ${vssInfo.D}, ${vssInfo.bits || 8}-bit route book, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`) : vssState === 'failed' ? 'Failed: ' + (vssError && vssError.message || vssError) : `Loading (about ${mb0(VSS_HINT)} from this site)…`);
 }
-/** the cost levels of a column of the vote file in the settings (VSS and SOP-BERT tabs): one radio per level, the file's thresholds per type */
+/** the levels of a column of the vote file in the settings (VSS and SOP-BERT tabs): the table of levelTableHTML with the file's numbers of
+ *  each level on the calibration part (level_stats) and its thresholds for commands and questions */
 function columnLevelsHTML(name, col, chosen, fallbackNote) {
   const spec = vconf.spec, C = spec && spec.columns[col], pc = v => (v * 100).toFixed(1) + '%';
   if (!spec) { const again = () => { if (sub === 'settings') renderSub(); }; if (!vconf.error) voteSpec().then(again, again); }
-  const opt = (l, about) => `<label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:pointer"><input type="radio" name="${name}" value="${l}" ${l === chosen ? 'checked' : ''}> <span><b>${escH(gateLabel(l))}</b>${l === 'cost' ? ' (default)' : ''}: ${escH(about)}</span></label>`;
-  const about = l => { const x = C && C.levels[l];
-    if (!x) return vconf.error ? `the model of the votes could not be loaded (${vconf.error.message || vconf.error}): ${fallbackNote}` : 'loading the model…';
-    const num = v => typeof v === 'number' ? v.toFixed(4) : v;
-    return `acts when its confidence is at least ${num(x.command ?? x.all)} for commands and ${num(x.question ?? x.all)} for questions: the thresholds that score best when ${costWords(COST_OF[l])}`; };
+  const num = v => typeof v === 'number' ? v.toFixed(4) : v;
+  const row = l => { const x = C && C.levels[l], st = C && C.level_stats && C.level_stats[l] && C.level_stats[l].calibration_oof;
+    return { level: l, num: st ? { right: st.done_right, wrong: st.confidently_wrong == null ? NaN : st.confidently_wrong, asked: st.asked } : null,
+      acts: l === 'all' ? '' : x ? `acts from confidence ${num(x.command ?? x.all)} for commands, ${num(x.question ?? x.all)} for questions` : C ? 'not in the model file: the safety threshold is used' : '' }; };
+  const state = !spec ? `<p class="note">${vconf.error ? `The model of the votes could not be loaded (${escH(vconf.error.message || vconf.error)}): ${escH(fallbackNote)}.` : 'Loading the model…'}</p>` : '';
   const cal = C && C.calibration_oof, te = C && C.test;
-  return ['cost5', 'cost', 'cost20'].map(l => opt(l, about(l))).join('') + opt('all', 'no gate: every request it reads is executed (as before 2026-11-02)')
-    + (C ? `<p class="note">At the safety threshold, on the calibration part of the fresh2 and short3 messages (out-of-fold scores): cost score ${cal.score.toFixed(1)}, ${pc(cal.done_right)} of the requests done right, ${pc(cal.confidently_wrong)} of what it executed wrong; on the test part ${te.score.toFixed(1)}, ${pc(te.done_right)} and ${pc(te.confidently_wrong)}. Model <code>confidence/vote3.json</code>${vconf.url && /[?&]v=/.test(vconf.url) ? `, version <code>${escH(decodeURIComponent(vconf.url.split('v=').pop()))}</code>` : ''}, column <code>${escH(col)}</code> (${escH(C.variant)}).</p>` : '');
+  return state + levelTableHTML(name, chosen, GATE_LEVELS.map(row)) + `<p class="note">${escH(LEVELS_NOTE)} A level other than the default is kept in this browser.</p>`
+    + (C ? `<p class="note">At the safety threshold, on the calibration part (out-of-fold scores): cost score ${cal.score.toFixed(1)}; on the test part ${te.score.toFixed(1)}, ${pc(te.done_right)} of the requests done right, ${pc(te.confidently_wrong)} of what it executed wrong. Model <code>confidence/vote3.json</code>${vconf.url && /[?&]v=/.test(vconf.url) ? `, version <code>${escH(decodeURIComponent(vconf.url.split('v=').pop()))}</code>` : ''}, column <code>${escH(col)}</code> (${escH(C.variant)}).</p>` : '');
 }
 /** VSS › Settings: the level of the gate (see GATES): the confidence with the votes (vote3.json column vss) */
 function gateSettingsHTML() {
   const info = window.VSSFormalizer && window.VSSFormalizer.confidenceInfo ? window.VSSFormalizer.confidenceInfo() : null;
   return `<h3 class="sub">When VSS acts</h3>
-  <p class="intro">VSS executes a request only when its confidence clears the threshold of the level chosen here (by default its safety threshold: the one that scores best when a confident mistake costs as much as 10 right answers; “bolder” and “more careful” are the same rule with a mistake counted as 5 or as 20 right answers); below it, it does not execute the request, says why it is not sure and offers <b>Do it anyway</b>. The confidence combines 13 numbers from VSS’s own chain (the cut, the world, the reading, the words, the context filler) with <b>whether SOP-BERT and the Rules, reading the same request, read it the same way</b> (and whether the Rules had a note about it). Commands and questions have their own threshold. It was fitted on the calibration part of the fresh2 and short3 messages, from out-of-fold scores (the refit of 2026-11-03 for the 9 worlds: votes as inputs, no world prior, a threshold for commands and one for questions), and on the test part it did better than VSS’s confidence without the votes: cost score 22.9 against 4.8, difference +18.2 (95% interval 11.9 to 24.7), 37.8% of the requests done right instead of 5.3%. So a held request’s reason first says who reads it differently (“SOP-BERT reads colour ‘red’ instead of colour ‘blue’”), then what VSS itself was unsure of. When SOP-BERT has not read the message (still loading, or not available), VSS uses its confidence without the votes (<code>confidence/vss.json</code>${info && info.version ? `, version <code>${escH(info.version)}</code>` : ''}) at the same level, and the details say so. A level other than the default is kept in this browser.</p>
+  <p class="intro">VSS executes a request only when its confidence clears the threshold of the level chosen here (by default its safety threshold: the one that scores best when a confident mistake costs as much as 10 right answers; “boldest”, “very bold”, “bolder” and “more careful” are the same rule with a mistake counted as 1, 2, 5 or 20 right answers, see the table below); below it, it does not execute the request, says why it is not sure and offers <b>Do it anyway</b>. The confidence combines 13 numbers from VSS’s own chain (the cut, the world, the reading, the words, the context filler) with <b>whether SOP-BERT and the Rules, reading the same request, read it the same way</b> (and whether the Rules had a note about it). Commands and questions have their own threshold. It was fitted on the calibration part of the fresh2 and short3 messages, from out-of-fold scores (the refit of 2026-11-03 for the 9 worlds: votes as inputs, no world prior, a threshold for commands and one for questions), and on the test part it did better than VSS’s confidence without the votes: cost score 22.9 against 4.8, difference +18.2 (95% interval 11.9 to 24.7), 37.8% of the requests done right instead of 5.3%. So a held request’s reason first says who reads it differently (“SOP-BERT reads colour ‘red’ instead of colour ‘blue’”), then what VSS itself was unsure of. When SOP-BERT has not read the message (still loading, or not available), VSS uses its confidence without the votes (<code>confidence/vss.json</code>${info && info.version ? `, version <code>${escH(info.version)}</code>` : ''}) at the same level, and the details say so.</p>
   ${columnLevelsHTML('vss-gate', 'vss', vssGate, 'VSS uses its confidence without the votes (vss.json)')}`;
 }
 /** what every reader's Settings subtab starts with: its drawing and what it has read */
@@ -1326,10 +1276,9 @@ function readerFacts(rd) {
   const S = rd.world.state, n = S.shapes.length, m = S.edges.length, u = rd.world.undoStack.length;
   return `<table class="kv"><tr><td>State</td><td>${escH(isReady(rd) ? 'ready' : offText(rd).replace(/, did not read this$/, '').replace(/ \(see SOP-BERT › Settings\)$/, '').replace(/; see SOP-BERT › Settings\)$/, ')'))}</td></tr><tr><td>Messages read</td><td>${rd.reads}</td></tr><tr><td>Its drawing</td><td>${n} shape${n === 1 ? '' : 's'} · ${m} link${m === 1 ? '' : 's'} · ${u} step${u === 1 ? '' : 's'} to undo</td></tr><tr><td>Requests cut by</td><td>${escH(cutLabel(cutWanted()))} (the same for every reader; ⋮ › Settings)</td></tr></table>`;
 }
-const sharedNote = `<p class="intro">SOP Lang (the commands every reader writes) and the engine’s capabilities are the same for all three readers. Help explains both: <button type="button" class="btn" data-help="sop-lang">SOP Lang</button> <button type="button" class="btn" data-help="capabilities">Capabilities</button> <button type="button" class="btn" data-help="architecture">How it works inside</button></p>`;
+const sharedNote = `<p class="intro">SOP Lang (the commands every reader writes) and the engine’s capabilities are the same for every reader. Help explains both: <button type="button" class="btn" data-help="sop-lang">SOP Lang</button> <button type="button" class="btn" data-help="capabilities">Capabilities</button> <button type="button" class="btn" data-help="architecture">How it works inside</button></p>`;
 function renderReaderSettings(rd) {
   if (rd.id === 'combined') return combinedSettingsHTML() + sharedNote;
-  if (rd.id === 'vote3') return voteSettingsHTML() + sharedNote;
   if (rd.id === 'rules') return `<h3 class="sub">Rules reader</h3>${readerFacts(rd)}
   <p class="intro">Hand-written code (<code>docs/js/logic.js</code>, ${mb(rulesBytes())}): it cuts the message into requests, finds the action by its cue words and answers the SOP Lang questions from the words around it. Nothing to download and nothing to choose; it reads every message at once.</p>${sharedNote}`;
   if (rd.id === 'vss') {
@@ -1357,7 +1306,7 @@ function renderReaderSettings(rd) {
 /** SOP-BERT › Settings: the level of the neural gate (GATES.neural): the confidence with the votes (vote3.json column sop) */
 function neuralGateSettingsHTML() {
   return `<h3 class="sub">When SOP-BERT acts</h3>
-  <p class="intro">SOP-BERT executes a request only when its confidence clears the threshold of the level chosen here (by default its safety threshold, the one that scores best when a confident mistake costs as much as 10 right answers; “bolder” and “more careful” count a mistake as 5 or 20 right answers); below it, it does not execute the request, says why it is not sure and offers <b>Do it anyway</b>. The confidence combines 24 numbers read from the model’s own outputs for that request (the action, the values, who fills each role, the word tags, the cut, the word pieces, how often its action is read right) with <b>whether VSS and the Rules, reading the same request, read it the same way</b> (and whether the Rules had a note about it). Commands and questions have their own threshold. It was fitted on requests of the BERT cutter, on the calibration part of the fresh2 and short3 messages, from out-of-fold scores (the refit of 2026-11-03 for the new SOP-BERT: votes as inputs, a threshold for commands and one for questions); on the test part it scored 33.4 against 29.3 for SOP-BERT’s confidence without the votes, difference +4.0 (95% interval −2.4 to 9.8: not shown either way), confidently wrong on 2.5% of what it executed instead of 3.0%. A held request’s reason first says who reads it differently, then what SOP-BERT itself was unsure of. When VSS has not read the message (still loading, or not available), SOP-BERT uses its confidence without the votes (<code>confidence/sop-bert.json</code>${nconf.url && /[?&]v=/.test(nconf.url) ? `, version <code>${escH(decodeURIComponent(nconf.url.split('v=').pop()))}</code>` : ''}) at the same level. With another cut than the BERT cutter, the model’s cut head runs once more and is read at that cut’s requests. A level other than the default is kept in this browser.</p>
+  <p class="intro">SOP-BERT executes a request only when its confidence clears the threshold of the level chosen here (by default its safety threshold, the one that scores best when a confident mistake costs as much as 10 right answers; “boldest”, “very bold”, “bolder” and “more careful” count a mistake as 1, 2, 5 or 20 right answers, see the table below); below it, it does not execute the request, says why it is not sure and offers <b>Do it anyway</b>. The confidence combines 24 numbers read from the model’s own outputs for that request (the action, the values, who fills each role, the word tags, the cut, the word pieces, how often its action is read right) with <b>whether VSS and the Rules, reading the same request, read it the same way</b> (and whether the Rules had a note about it). Commands and questions have their own threshold. It was fitted on requests of the BERT cutter, on the calibration part of the fresh2 and short3 messages, from out-of-fold scores (the refit of 2026-11-03 for the new SOP-BERT: votes as inputs, a threshold for commands and one for questions); on the test part it scored 33.4 against 29.3 for SOP-BERT’s confidence without the votes, difference +4.0 (95% interval −2.4 to 9.8: not shown either way), confidently wrong on 2.5% of what it executed instead of 3.0%. A held request’s reason first says who reads it differently, then what SOP-BERT itself was unsure of. When VSS has not read the message (still loading, or not available), SOP-BERT uses its confidence without the votes (<code>confidence/sop-bert.json</code>${nconf.url && /[?&]v=/.test(nconf.url) ? `, version <code>${escH(decodeURIComponent(nconf.url.split('v=').pop()))}</code>` : ''}) at the same level. With another cut than the BERT cutter, the model’s cut head runs once more and is read at that cut’s requests.</p>
   ${columnLevelsHTML('neural-gate', 'sop', neuralGate || 'cost', 'SOP-BERT uses its confidence without the votes (sop-bert.json)')}`;
 }
 sbody.addEventListener('click', async ev => {
@@ -1378,6 +1327,12 @@ sbody.addEventListener('click', async ev => {
 });
 sbody.addEventListener('change', ev => {
   if (ev.target.name === 'cut-strategy') { const id = ev.target.value, def = VF ? VF.DEFAULT_CUT : null; cutPick = id === def ? null : id; store.set(CUT_KEY, cutPick); sysNote(`Requests are now cut by the ${cutLabel(id)}${cutWhyNot(id) ? ` (until it is available, by the Rules segmenter: ${cutWhyNot(id)})` : ''}; every reader reads them.`); if (sub === 'settings') renderSub(); return; }
+  const ck = ev.target.closest('[data-chat]');
+  if (ck) {   // Replies in the chat: at least one tab stays chosen
+    if (ck.checked) chatTabs.add(ck.dataset.chat); else if (chatTabs.size > 1) chatTabs.delete(ck.dataset.chat); else { ck.checked = true; return; }
+    const ids = READERS.map(r => r.id).filter(i => chatTabs.has(i)); store.set(CHAT_KEY, ids.join(',') === CHAT_DEFAULT.join(',') ? null : ids.join(','));
+    sysNote(`The chat now shows the replies of ${listing(ids.map(i => RD[i].label))}.`); return;
+  }
   if (ev.target.id === 'spell-on') { spellEnabled = ev.target.checked; store.set(SPELL_OFF, spellEnabled ? null : '1'); sysNote(`Spelling check ${spellEnabled ? 'on' : 'off'}.`); return; }
   if (ev.target.id === 'sc-file' && ev.target.files[0]) {
     const f = ev.target.files[0], rd = new FileReader();
@@ -1468,8 +1423,14 @@ function setPlug(name, on) {
   const p = engine.plugin(name); sysNote(`${(HelpKit.CAPS[p.name] || p).t || p.title} switched ${p.enabled ? 'on' : 'off'} for every reader`);
 }
 /** ⋮ › Settings: the two steps that act before every reader */
-const renderSettings = () => `<p class="intro">These act before every reader: the spell checker, then the cut into requests. What each one is: <button type="button" class="btn" data-help="spelling">Spell checker</button> <button type="button" class="btn" data-help="cutting">One cut for all readers</button></p>` + cutHelpHTML() + spellHelpHTML()
+const renderSettings = () => chatSettingsHTML() + `<h3 class="sub">Before every reader</h3><p class="intro">These act before every reader: the spell checker, then the cut into requests. What each one is: <button type="button" class="btn" data-help="spelling">Spell checker</button> <button type="button" class="btn" data-help="cutting">One cut for all readers</button></p>` + cutHelpHTML() + spellHelpHTML()
   + `<div class="help"><h3 class="sub">Help</h3><p class="note">How to use the editor, SOP Lang, the concepts and the architecture are in Help: the <b>?</b> button above the drawing. <button type="button" class="btn" data-help="start">Open Help</button></p></div>`;
+/** ⋮ › Settings › Replies in the chat: which tabs' replies the chat shows (see CHAT_KEY) */
+function chatSettingsHTML() {
+  return `<div class="help"><h3 class="sub">Replies in the chat</h3>
+  <p class="note">Every tab reads every message into its own drawing; choose whose replies the chat shows. By default only VSS-BERT’s, so the conversation reads as one reply. <b>details</b> under a reply always shows every reader.</p>
+  ${READERS.map(rd => `<label style="display:flex;gap:8px;align-items:center;margin:4px 0;cursor:pointer"><input type="checkbox" data-chat="${rd.id}" ${chatTabs.has(rd.id) ? 'checked' : ''}> <span>${escH(rd.label)}${CHAT_DEFAULT.includes(rd.id) ? ' (default)' : ''}</span></label>`).join('')}</div>`;
+}
 /** the cut setting, in ⋮ › Settings (it acts before every reader, so it is not one reader's setting) */
 function cutHelpHTML() {
   const want = cutWanted(), def = VF ? VF.DEFAULT_CUT : null;
@@ -1557,7 +1518,10 @@ window.addEventListener('resize', () => { if (!drag) renderCanvas(); activeTabIn
 
 /* ---------------- start ---------------- */
 updateTabs(); renderCanvas(); setStatus(idleStatus());
-botBubble({ text: 'Hi! Tell me what to draw, change or connect, or ask me about the drawing. Three readers (Rules, VSS, SOP-BERT) read every message, each into its own drawing; VSS-BERT does what VSS and SOP-BERT are sure of together, and 3 readers does what all three read the same; the tabs above the canvas switch between them. Tap + for examples and whole scenarios, ? for help, ⋮ for settings.' });
+{ const ids = READERS.map(r => r.id).filter(i => chatTabs.has(i)), def = ids.join(',') === CHAT_DEFAULT.join(',');
+  botBubble({ text: 'Hi! Tell me what to draw, change or connect, or ask me about the drawing. I do what I am sure of and ask about the rest. ' + (def
+    ? 'The replies here are VSS-BERT’s: VSS and SOP-BERT reading together. Rules, VSS and SOP-BERT also read every message, each into its own drawing: the tabs above the canvas switch between them, and ⋮ › Settings can show their replies here too.'
+    : `The replies here are those of ${listing(ids.map(i => RD[i].label))} (⋮ › Settings › Replies in the chat); every tab reads every message into its own drawing, and the tabs above the canvas switch between them.`) + ' Tap + for examples and whole scenarios, ? for help.' }); }
 /* the opening drawing (docs/js/start-diagram.js): a background, two zones, the items and their texts, as SOP Lang wires run by every
    reader's engine (not a message: no reader reads it); then its first question is sent as a message */
 const START = [StartDiagram.SOP];

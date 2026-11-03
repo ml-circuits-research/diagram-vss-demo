@@ -336,7 +336,8 @@ function runVariant(v) {
   const test = cands.filter((x) => x.test).map((x) => item(x, F.conf(x)));
   const sh = {};
   SHS.forEach((H, i) => { const sc = BS[i][v.mk.key]; if (F.setOther) for (const x of sc) if (x.from === "sop") x.f.other_conf = x.partner < 0 ? 0 : PM.all.score({ f: demoF(H.S.I.vss_bert[x.partner]), w: H.S.I.vss_bert[x.partner].w }); sh[H.name] = sc.map((x) => item(x, F.conf(x))); });
-  const T = { 5: chooseT(cal, M.Gcal, 5, v.perType), 10: chooseT(cal, M.Gcal, 10, v.perType), 20: chooseT(cal, M.Gcal, 20, v.perType) };
+  // the cost levels of the setting: one confident mistake = 1, 2, 5, 10 (the default) or 20 right answers (owner, 2026-11-02 22:12; 1 and 2 added 2026-11-03 09:30)
+  const T = Object.fromEntries([1, 2, 5, 10, 20].map((k) => [k, chooseT(cal, M.Gcal, k, v.perType)]));
   const r = { ...v, F, cal, test, sh, T, t: T[10] };
   restat(r);
   r.auc = auroc(cal.map((x) => ({ c: x.c, ok: x.o === "right" })));
@@ -547,5 +548,5 @@ console.error(`wrote ${OUT}`);
 // ================================================================== EXPORT
 if (process.env.EXPORT === "1") {
   const { exportVote } = await import("./export3.mjs");
-  exportVote({ REPO, CHOSEN, CURRENT, VERD, M, SHS, ROW, BUILT, thrTxt, scoreOf, VSS_NAMES, SOP_NAMES, KIND, PM, demoF });
+  exportVote({ REPO, CHOSEN, CURRENT, VERD, M, SHS, ROW, BUILT, thrTxt, scoreOf, stats, VSS_NAMES, SOP_NAMES, KIND, PM, demoF });
 }

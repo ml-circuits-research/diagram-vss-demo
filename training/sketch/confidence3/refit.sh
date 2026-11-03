@@ -17,7 +17,7 @@
 #   1. combine/collect_pair.mjs   records of SOP-BERT and VSS on both cuts (+ units.jsonl)                 -> $REC
 #   2. confidence3/collect_rules3.mjs   records of the Rules on their own cut and on both cuts' units     -> $REC
 #   3. fresh2/fit_report.mjs (ARM) + fresh2/export_confidence.mjs   -> docs/model/confidence/vss.json, sop-bert.json
-#   4. combine/combined_report.mjs EXPORT=1 VARIANT=d2              -> docs/model/confidence/combined.json (+ cost5 / cost20 levels in
+#   4. combine/combined_report.mjs EXPORT=1 VARIANT=d2              -> docs/model/confidence/combined.json (+ cost1 / cost2 / cost5 / cost20 levels in
 #                                                                      vss.json and sop-bert.json), combine/combined_parity.json
 #   5. confidence3/fit3.mjs EXPORT=1                                -> docs/model/confidence/vote3.json, confidence3/vote3_parity.json,
 #                                                                      the report $REC/confidence3_report.md (variants, selection, test part)

@@ -21,6 +21,9 @@ import * as VC from "../../../docs/js/vss-confidence.js";
 const [RECDIR, OUT, ...DATADIRS] = process.argv.slice(2);
 if (!RECDIR || !OUT || !DATADIRS.length) { console.error("usage: combined_report.mjs <records dir> <out.md> <data dir>..."); process.exit(2); }
 const REPO = new URL("../../../", import.meta.url).pathname;
+// the cost levels of the setting (owner, 2026-11-02 22:12 and 2026-11-03 09:30): one confident mistake counts as 1, 2, 5, 10 (the default) or 20
+// right answers; the key of a level is "cost<k>", except the default's, "cost"
+const COSTS = [1, 2, 5, 10, 20], levelKey = (k) => (k === 10 ? "cost" : `cost${k}`);
 const COST = 10, BOOT = 1000, SEED = 1, FOLDS = 5, LAMS = [0.01, 0.1, 1, 10], NPARITY = 200;
 const readJ = (f) => readFileSync(f, "utf8").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l));
 const out = []; const log = (s = "") => out.push(s);
@@ -314,9 +317,9 @@ function costAt(c, cost) {
     }
     log("");
   }
-  log(`## The cost score's weight: the operating point at cost 5, 10 and 20 (threshold chosen on cal oof at that cost; the demo keeps cost 10)\n`);
-  log(`| situation | ${[BEST, SOP].flatMap((c) => [5, 10, 20].map((k) => `${c.label}, cost ${k}`)).join(" | ")} |`); log(`|---|${[BEST, SOP].flatMap(() => [5, 10, 20]).map(() => "---").join("|")}|`);
-  const P = [BEST, SOP].flatMap((c) => [5, 10, 20].map((k) => costAt(c, k)));
+  log(`## The cost score's weight: the operating point at cost ${COSTS.join(", ")} (threshold chosen on cal oof at that cost; the demo's default is cost 10)\n`);
+  log(`| situation | ${[BEST, SOP].flatMap((c) => COSTS.map((k) => `${c.label}, cost ${k}`)).join(" | ")} |`); log(`|---|${[BEST, SOP].flatMap(() => COSTS).map(() => "---").join("|")}|`);
+  const P = [BEST, SOP].flatMap((c) => COSTS.map((k) => costAt(c, k)));
   log(`| threshold | ${P.map((x) => (Number.isFinite(x.t) ? x.t.toFixed(4) : String(x.t))).join(" | ")} |`);
   for (const [part, tag] of [["cal", "cal (oof)"], ["test", "test (already read; exploratory)"]]) {
     log(`| done right % (${tag}) | ${P.map((x) => pc(x[part].cov)).join(" | ")} |`);
@@ -335,13 +338,17 @@ if (process.env.EXPORT === "1") {
   const lvl = (c) => ({ threshold: Number.isFinite(c.t) ? c.t : null, kind: c.ct.kind, cost: COST,
     calibration_oof: { score: scoreOf(c.calSt), score_ci95: bootScore(c, "cal"), confidently_wrong: c.calSt.conf_wrong, done_right: c.calSt.cov, asked: c.calSt.asked, executed: c.calSt.n, produced: c.calItems.length, extras_executed: c.calSt.e, auroc: c.auc },
     test_already_read_exploratory: { score: scoreOf(c.testSt), score_ci95: bootScore(c, "test"), confidently_wrong: c.testSt.conf_wrong, done_right: c.testSt.cov, asked: c.testSt.asked, executed: c.testSt.n, produced: c.tItems.length, extras_executed: c.testSt.e, auroc: c.aucT } });
-  // the levels of the setting (owner, 2026-11-02 22:12): the cost-score optimum at cost 5 ("bolder"), 10 (the default) and 20 ("more careful"),
-  // each chosen on the calibration out-of-fold confidences exactly as the default
+  // the levels of the setting (owner, 2026-11-02 22:12; 2026-11-03 09:30 added cost 2 and cost 1): the cost-score optimum at cost 1 and 2
+  // ("boldest", "very bold"), 5 ("bolder"), 10 (the default) and 20 ("more careful"), each chosen on the calibration out-of-fold confidences
+  // exactly as the default
   const costLevel = (c, cost) => { const x = costAt(c, cost), sc = (st) => ((st.r - cost * (st.w + st.e)) / st.G) * 100;
     return { threshold: Number.isFinite(x.t) ? x.t : null, kind: x.kind, cost, heldout_oof_score: x.score, heldout_oof_precision: x.cal.n ? 1 - x.cal.conf_wrong : null, heldout_oof_coverage: x.cal.cov,
       heldout_oof_asked: x.cal.asked, heldout_oof_executed: x.cal.n, heldout_produced: c.calItems.length, test_score: sc(x.test), test_confidently_wrong: x.test.n ? x.test.conf_wrong : null,
       test_done_right: x.test.cov, test_asked: x.test.asked, test_executed: x.test.n }; };
-  const cutSpec = (c) => Object.assign({ levels: { cost5: costLevel(c, 5), cost: costLevel(c, COST), cost20: costLevel(c, 20) }, sop: part(c.fitS.model, "sop"), vss: Object.assign(part(c.fitV.model, "vss"), { cut_signals: c.cut === "bert" ? "the SOP-BERT cut head at the unit's edges (cut_start = P(B) of its first word; cut_end = 1 - P(I) of the word after its last, 1 at the end of the text)" : "the VSS world cutter's (vss-composer.js unit.signals)" }) }, lvl(c));
+  // "execute all" (no gate) on the same calibration part, for the setting's table
+  const allLevel = (c) => { const st = stats(c.calItems, Gcal, -Infinity);
+    return { heldout_oof_precision: st.n ? 1 - st.conf_wrong : null, heldout_oof_coverage: st.cov, heldout_oof_asked: st.asked, heldout_oof_executed: st.n, heldout_produced: c.calItems.length }; };
+  const cutSpec = (c) => Object.assign({ levels: Object.fromEntries(COSTS.map((k) => [levelKey(k), costLevel(c, k)])), execute_all: allLevel(c), sop: part(c.fitS.model, "sop"), vss: Object.assign(part(c.fitV.model, "vss"), { cut_signals: c.cut === "bert" ? "the SOP-BERT cut head at the unit's edges (cut_start = P(B) of its first word; cut_end = 1 - P(I) of the word after its last, 1 at the end of the text)" : "the VSS world cutter's (vss-composer.js unit.signals)" }) }, lvl(c));
   const vv = JSON.parse(readFileSync(`${REPO}docs/model/versions.json`, "utf8")).files["confidence/vss.json"];
   const file = {
     about: `The combined reader's confidence (VSS + Neural, COMBINED_READER.md): SOP-BERT and VSS read the same cut, their requests are paired (layer_common.mjs pairValue, as COMBINE.md); on a pair SOP-BERT's reading is executed, otherwise the one that exists. Two logistic models: 'sop' (SOP-BERT executes: ${VARIANT === "d2" ? "its 23 signals without the act prior" : "its 24 signals with the act prior"}, plus agree, agree_share, other_conf) and 'vss' (a VSS request nothing was paired with: ${VARIANT === "d2" ? "VSS's 13 signals without the world prior" : "VSS's 14 signals with the world prior"}). Fitted on the fresh2 calibration part out of fold by training/sketch/combine/combined_report.mjs (EXPORT=1); browser code docs/js/combined-confidence.js (training/sketch/test_combined_confidence.mjs checks it). A refit replaces this file only; training/sketch/stamp_models.py gives it a new version.`,
@@ -349,8 +356,8 @@ if (process.env.EXPORT === "1") {
     protocol: `COMBINED_READER.md: calibration part only (${nCal} messages, ${Gcal} requested actions); 5 folds by message; percentile maps, prior and L2 (0.01, 0.1, 1, 10 by out-of-fold AUROC) per model; one threshold over all the combined requests, the cost-score optimum (one confident mistake = 10 right answers) on the out-of-fold confidences; inside the folds other_conf came from vss.json's recipe refitted on the training folds. The test part (${nTest} messages) is scored once, never used to choose: its numbers are exploratory. The clean confirmation needs a fresh set (fresh3).`,
     how_to: "Per cut: pair the requests (SOP-BERT produced side, VSS gold side of pairValue); agree_share = keys with equal canonical values / union of keys (action, ask excluded; empty union 1), agree = agree_share == 1; other_conf = vss.json's confidence of the paired VSS request on the VSS signals as the demo has them (0 when unpaired). confidence = 1/(1+exp(-(intercept + sum weight * percentile))) of the part that executes, percentile as vss-confidence.js (null -> 1). Execute when confidence >= threshold.",
     partner: { file: "confidence/vss.json", version: vv || null, note: "other_conf is computed with this file; a refit of vss.json needs a refit of this file" },
-    cost: COST, best_cut: BEST.cut, levels: ["cost5", "cost", "cost20", "all"], default_level: "cost",
-    levels_note: "Per cut, levels.cost (the default, = threshold) is the threshold that maximises the cost score with one confident mistake = 10 right answers on the calibration part's out-of-fold confidences; cost5 ('bolder': one mistake = 5 right answers) and cost20 ('more careful': = 20), chosen the same way. heldout_oof_*: the calibration part at that threshold; test_*: the test part (already read; exploratory).",
+    cost: COST, best_cut: BEST.cut, levels: COSTS.map(levelKey).concat(["all"]), default_level: "cost",
+    levels_note: "Per cut, levels.cost (the default, = threshold) is the threshold that maximises the cost score with one confident mistake = 10 right answers on the calibration part's out-of-fold confidences; cost1, cost2, cost5 (bolder: one mistake = 1, 2 or 5 right answers) and cost20 ('more careful': = 20), chosen the same way. heldout_oof_*: the calibration part at that threshold; test_*: the test part (already read; exploratory).",
     cuts: { bert: cutSpec(CB), vss: cutSpec(CV) },
     readers_alone: Object.fromEntries([SOP, VSS].map((c) => [c.id, { label: c.label, threshold: c.t, calibration_oof_score: scoreOf(c.calSt), test_score: scoreOf(c.testSt) }])),
     comparison_calibration_oof: { vs_sop_bert: bootDiff(BEST, SOP, "cal"), vs_vss: bootDiff(BEST, VSS, "cal") },
@@ -362,9 +369,12 @@ if (process.env.EXPORT === "1") {
   if (VJ.readers.vss_combined.levels.cost.threshold !== VSS.t || BJ.levels_out_of_fold.cost.threshold !== SOP.t || vssRefitDiff > 1e-12)
     throw new Error(`the readers alone do not reproduce their shipped files: VSS ${VSS.t} vs ${VJ.readers.vss_combined.levels.cost.threshold}, SOP-BERT ${SOP.t} vs ${BJ.levels_out_of_fold.cost.threshold}`);
   const note = " Levels cost5 ('bolder': one confident mistake counts as 5 right answers) and cost20 ('more careful': as 20): the cost-score optimum at that cost on the same out-of-fold calibration confidences (added 2026-11-02 by training/sketch/combine/combined_report.mjs EXPORT=1; the weights are unchanged).";
-  for (const [J, L, c] of [[VJ, VJ.readers.vss_combined.levels, VSS], [BJ, BJ.levels_out_of_fold, SOP]]) { L.cost5 = costLevel(c, 5); L.cost20 = costLevel(c, 20); }
+  const note2 = " Levels cost1 and cost2 (bolder still: one confident mistake counts as 1 or 2 right answers), chosen the same way (added 2026-11-03).";
+  for (const [J, L, c] of [[VJ, VJ.readers.vss_combined.levels, VSS], [BJ, BJ.levels_out_of_fold, SOP]]) for (const k of COSTS) if (k !== COST) L[levelKey(k)] = costLevel(c, k);
   if (!VJ.readers.vss_combined.levels_note.includes("cost5")) VJ.readers.vss_combined.levels_note += note;
   if (!BJ.levels_note.includes("cost5")) BJ.levels_note += note;
+  if (!VJ.readers.vss_combined.levels_note.includes("cost1")) VJ.readers.vss_combined.levels_note += note2;
+  if (!BJ.levels_note.includes("cost1")) BJ.levels_note += note2;
   writeFileSync(`${REPO}docs/model/confidence/vss.json`, JSON.stringify(VJ, null, 1) + "\n");
   writeFileSync(`${REPO}docs/model/confidence/sop-bert.json`, JSON.stringify(BJ, null, 1) + "\n");
   // the parity fixture: per cut, the first messages of the test part (data order) until NPARITY combined requests; the inputs as the

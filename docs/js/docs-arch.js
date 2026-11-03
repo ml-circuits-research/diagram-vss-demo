@@ -12,16 +12,17 @@ const page = (id, title, html, lead) => pages.push({ id, title, lead, html });
 
 /* ============================================================ overview */
 page('architecture', 'Overview', `
-<p>A person types a message in English. A spell checker corrects near-miss words. The message is then <b>cut once</b> into requests, by
-one of three cutters chosen in Settings, and three independent <b>readers</b> each turn those same requests into the same small language,
-<b>SOP Lang</b> (one line per request, called a <i>wire</i>). Each reader has its own copy of the same engine and its own drawing, so the
-three results can be compared side by side. The engine carries out the wires through plugins; graph and logic questions are answered by
-a small Datalog evaluator inside the engine. Everything runs in the browser: nothing is sent to a server.</p>
+<p>A person types a message in English. A spell checker corrects near-miss words. <b>VSS-BERT</b>, the reader that answers, then works in
+three steps: the SOP-BERT cutter cuts the message into requests; <b>SOP-BERT</b> and <b>VSS</b> each read every request into the same small
+language, <b>SOP Lang</b> (one line per request, called a <i>wire</i>); and a confidence fitted on whether the two readings agree decides, request
+by request, whether the wire is carried out or held back with a reason (<a href="#help/two-readers">VSS-BERT</a>). The engine carries out the
+wires through plugins; graph and logic questions are answered by a small Datalog evaluator inside the engine. The <b>Rules</b>, a hand-written
+reader, read the same messages as a comparison. Everything runs in the browser: nothing is sent to a server.</p>
 
 <figure>
 <div class="fig">
-<svg class="dg" viewBox="0 0 400 560" role="img" aria-labelledby="d1t">
-<title id="d1t">Overall flow: message, spell checker, one cut for all readers, three readers, SOP Lang wires, engine with Datalog, one drawing per reader</title>
+<svg class="dg" viewBox="0 0 400 600" role="img" aria-labelledby="d1t">
+<title id="d1t">Overall flow: message, spell checker, the SOP-BERT cutter, SOP-BERT and VSS read the same requests, pairing and confidence, do or ask, SOP Lang wires, engine with Datalog, the drawing; the Rules read the same messages as a comparison</title>
 ${AH}
 <rect class="box" x="80" y="8" width="240" height="40" rx="8"/>
 <text class="t" x="200" y="25" text-anchor="middle">A message in English</text>
@@ -31,68 +32,54 @@ ${AH}
 <text class="t" x="200" y="85" text-anchor="middle">Spell checker (VSA)</text>
 <text class="m" x="200" y="100" text-anchor="middle">docs/js/spell.js</text>
 <path class="ar" d="M200 108 V126"/>
-<rect class="mod" x="30" y="128" width="340" height="56" rx="8"/>
-<text class="t" x="200" y="146" text-anchor="middle">Cut into requests, once (a setting)</text>
-<text x="200" y="162" text-anchor="middle">Rules segmenter · VSS cutter (default) · BERT cutter</text>
-<text class="s" x="200" y="177" text-anchor="middle">every reader reads the same units</text>
-<path class="ar" d="M200 184 V198 H68 V214"/>
-<path class="ar" d="M200 184 V214"/>
-<path class="ar" d="M200 184 V198 H332 V214"/>
-<rect class="acc" x="8" y="216" width="120" height="96" rx="8"/>
-<text class="t" x="68" y="235" text-anchor="middle">Rules</text>
-<text class="m" x="68" y="250" text-anchor="middle">logic.js</text>
-<text x="68" y="268" text-anchor="middle">hand-written code</text>
-<text x="68" y="283" text-anchor="middle">legend cue words</text>
-<text x="68" y="298" text-anchor="middle">no model</text>
-<rect class="acc" x="140" y="216" width="120" height="96" rx="8"/>
-<text class="t" x="200" y="235" text-anchor="middle">VSS</text>
-<text class="m" x="200" y="250" text-anchor="middle">vss-composer.js</text>
-<text x="200" y="268" text-anchor="middle">9 micro-worlds</text>
-<text x="200" y="283" text-anchor="middle">event hint</text>
-<text x="200" y="298" text-anchor="middle">context filler</text>
-<rect class="acc" x="272" y="216" width="120" height="96" rx="8"/>
-<text class="t" x="332" y="235" text-anchor="middle">SOP-BERT</text>
-<text class="m" x="332" y="250" text-anchor="middle">neural.js</text>
-<text x="332" y="268" text-anchor="middle">one DistilBERT</text>
-<text x="332" y="283" text-anchor="middle">with small heads</text>
-<text x="332" y="298" text-anchor="middle">cut + read</text>
-<path class="ar" d="M68 312 V330 H160 V346"/>
-<path class="ar" d="M200 312 V346"/>
-<path class="ar" d="M332 312 V330 H240 V346"/>
-<rect class="box" x="30" y="348" width="340" height="56" rx="8"/>
-<text class="t" x="200" y="366" text-anchor="middle">SOP Lang wires (the same language for all three)</text>
-<text class="m" x="200" y="382" text-anchor="middle">@s1 command action=create shape=circle color=red</text>
-<text class="m" x="200" y="396" text-anchor="middle">@s2 command action=connect from=$s1 to=Start</text>
-<path class="ar" d="M200 404 V422"/>
-<rect class="box" x="30" y="424" width="340" height="62" rx="8"/>
-<text class="t" x="200" y="442" text-anchor="middle">Engine + plugins (logic.js)</text>
-<text x="200" y="459" text-anchor="middle">the legend: the hand-written spec of the language</text>
-<text x="200" y="475" text-anchor="middle">mentions resolved on the canvas · Datalog</text>
-<path class="ar" d="M200 486 V498 H68 V512"/>
-<path class="ar" d="M200 486 V512"/>
-<path class="ar" d="M200 486 V498 H332 V512"/>
-<rect class="box" x="8" y="514" width="120" height="40" rx="8"/>
-<text class="t" x="68" y="531" text-anchor="middle">Rules drawing</text>
-<text class="s" x="68" y="546" text-anchor="middle">own world, undo</text>
-<rect class="box" x="140" y="514" width="120" height="40" rx="8"/>
-<text class="t" x="200" y="531" text-anchor="middle">VSS drawing</text>
-<text class="s" x="200" y="546" text-anchor="middle">own world, undo</text>
-<rect class="box" x="272" y="514" width="120" height="40" rx="8"/>
-<text class="t" x="332" y="531" text-anchor="middle">SOP-BERT drawing</text>
-<text class="s" x="332" y="546" text-anchor="middle">own world, undo</text>
+<rect class="mod" x="60" y="128" width="280" height="44" rx="8"/>
+<text class="t" x="200" y="146" text-anchor="middle">The SOP-BERT cutter: cut once</text>
+<text class="s" x="200" y="162" text-anchor="middle">both readers read the same requests</text>
+<path class="ar" d="M200 172 V184 H120 V198"/>
+<path class="ar" d="M200 172 V184 H280 V198"/>
+<rect class="mod" x="40" y="200" width="160" height="72" rx="8"/>
+<text class="t" x="120" y="219" text-anchor="middle">SOP-BERT</text>
+<text class="m" x="120" y="234" text-anchor="middle">neural.js</text>
+<text x="120" y="251" text-anchor="middle">one DistilBERT</text>
+<text x="120" y="266" text-anchor="middle">with small heads</text>
+<rect class="mod" x="210" y="200" width="160" height="72" rx="8"/>
+<text class="t" x="290" y="219" text-anchor="middle">VSS</text>
+<text class="m" x="290" y="234" text-anchor="middle">vss-composer.js</text>
+<text x="290" y="251" text-anchor="middle">9 micro-worlds,</text>
+<text x="290" y="266" text-anchor="middle">context filler</text>
+<path class="ar" d="M120 272 V286 H200 V300"/>
+<path class="ar" d="M290 272 V286 H200"/>
+<rect class="acc" x="40" y="302" width="330" height="62" rx="8"/>
+<text class="t" x="205" y="320" text-anchor="middle">VSS-BERT: pair the readings, confidence</text>
+<text class="m" x="205" y="336" text-anchor="middle">combined-confidence.js · confidence/combined.json</text>
+<text x="205" y="354" text-anchor="middle">sure: do it · not sure: hold it, say why</text>
+<path class="ar" d="M205 364 V382"/>
+<rect class="box" x="40" y="384" width="330" height="48" rx="8"/>
+<text class="t" x="205" y="402" text-anchor="middle">SOP Lang wires of the requests it is sure of</text>
+<text class="m" x="205" y="420" text-anchor="middle">@s1 command action=create shape=circle color=red</text>
+<path class="ar" d="M205 432 V450"/>
+<rect class="box" x="40" y="452" width="330" height="62" rx="8"/>
+<text class="t" x="205" y="470" text-anchor="middle">Engine + plugins (logic.js)</text>
+<text x="205" y="487" text-anchor="middle">the legend: the hand-written spec of the language</text>
+<text x="205" y="503" text-anchor="middle">mentions resolved on the canvas · Datalog</text>
+<path class="ar" d="M205 514 V532"/>
+<rect class="box" x="110" y="534" width="190" height="40" rx="8"/>
+<text class="t" x="205" y="551" text-anchor="middle">The drawing</text>
+<text class="s" x="205" y="566" text-anchor="middle">undo, redo</text>
+<rect class="grp" x="4" y="200" width="30" height="232" rx="6"/>
+<text class="s" x="19" y="316" text-anchor="middle" transform="rotate(-90 19 316)">tabs Rules · VSS · SOP-BERT: each alone</text>
 </svg>
 </div>
-<figcaption>Figure 1. The whole flow in the browser. Every message goes to every loaded reader (<code>docs/js/ui.js</code>, <code>READERS</code>,
-each with <code>K.createSystem()</code>). The cut is described in <a href="#help/cutting">One cut for all readers</a>.</figcaption>
+<figcaption>Figure 1. VSS-BERT in the browser (<code>docs/js/ui.js</code>, <code>READERS</code>, each tab with its own <code>K.createSystem()</code>).
+The tabs Rules, VSS and SOP-BERT show each reader alone, with its own drawing; they read the cut chosen in Settings
+(<a href="#help/cutting">One cut for all readers</a>).</figcaption>
 </figure>
 
 <h2 id="judged">How the readers are judged</h2>
-<p>The main number of every reader is its <b>precision of execution</b>: of everything it executes, the share done right. Each reader is to
-execute a request only when its own confidence clears a threshold chosen on held-out data, and to ask below it, saying why; readers are
-compared by the share of requests they do right at equal precision (owner, 2026-11-02; AGENTS.md). In the demo every learned tab (VSS,
-SOP-BERT, VSS-BERT, 3 readers) has such a threshold, the one with the best cost score on the calibration messages (one confident mistake
-costs as much as 10 right answers); the Rules execute everything. <a href="#help/measurement">Measurement and current numbers</a>,
-<a href="#help/research-question">What this project measures</a>.</p>
+<p>The first number of every reader is how often it is <b>confidently wrong</b>: of everything it does, the share done wrong. Each learned reader
+does a request only when its own confidence clears a threshold, the one with the best cost score on calibration messages (one confident mistake
+costs as much as 10 right answers), and asks below it, saying why. The Rules have no confidence and do everything
+(<a href="#help/research-question">The goal</a>, <a href="#help/measurement">Measurement</a>).</p>
 
 <h2 id="parts">The parts, their code and their models</h2>
 <div class="tw"><table>
@@ -100,32 +87,32 @@ costs as much as 10 right answers); the Rules execute everything. <a href="#help
 <tbody>
 <tr><td>Page, tabs, chat, canvas, help</td><td><code>docs/index.html</code>, <code>docs/js/ui.js</code>, <code>docs/js/help.js</code>, <code>docs/js/docs.js</code>, <code>docs/js/docs-concepts.js</code>, <code>docs/js/docs-arch.js</code>, <code>docs/js/scenarios.js</code></td><td>none</td><td class="num">—</td></tr>
 <tr><td>Spell checker</td><td><code>docs/js/spell.js</code></td><td><code>docs/model/spell/vocab.json</code></td><td class="num">28.0 KB</td></tr>
-<tr><td>Rules reader, SOP Lang, engine, plugins, Datalog</td><td><code>docs/js/logic.js</code></td><td>none</td><td class="num">—</td></tr>
-<tr><td>The shared cut</td><td><code>docs/js/vss-composer.js</code> (<code>cutUnits</code>, <code>CUT_STRATEGIES</code>, <code>DEFAULT_CUT</code>), <code>docs/js/vss-formalizer.js</code> (<code>cut</code>)</td><td>the cutter of the strategy chosen</td><td class="num">—</td></tr>
+<tr><td>VSS-BERT: pairing and confidence</td><td><code>docs/js/combined-confidence.js</code></td><td><code>docs/model/confidence/combined.json</code></td><td class="num">(below)</td></tr>
+<tr><td>SOP-BERT reader (and the SOP-BERT cutter)</td><td><code>docs/js/neural.js</code> (transformers.js 3.8.1 from jsDelivr)</td><td><code>docs/model/neural/sop-bert/</code> (one DistilBERT, 8-bit)</td><td class="num">68.7 MB</td></tr>
 <tr><td>VSS reader (composer)</td><td><code>docs/js/vss-formalizer.js</code>, <code>docs/js/vss-composer.js</code>, <code>docs/js/front.js</code>, <code>docs/js/vss.js</code> + <code>docs/js/vss/</code>, <code>docs/js/vss-context.js</code>, <code>docs/js/vss-adapter.js</code></td><td><code>docs/model/micro/registry.json</code> and what it names: 2 cutters, 9 worlds, <code>docs/model/context/weights.json</code></td><td class="num">31.4 MB</td></tr>
-<tr><td>SOP-BERT reader</td><td><code>docs/js/neural.js</code> (transformers.js 3.8.1 from jsDelivr)</td><td><code>docs/model/neural/sop-bert/</code> (one DistilBERT, 8-bit)</td><td class="num">68.7 MB</td></tr>
-<tr><td>Confidences of the learned tabs</td><td><code>docs/js/vss-confidence.js</code>, <code>neural-confidence.js</code>, <code>combined-confidence.js</code>, <code>vote-confidence.js</code></td><td><code>docs/model/confidence/</code>: <code>vss.json</code>, <code>sop-bert.json</code>, <code>combined.json</code>, <code>vote3.json</code></td><td class="num">0.72 MB</td></tr>
+<tr><td>Rules reader, SOP Lang, engine, plugins, Datalog</td><td><code>docs/js/logic.js</code></td><td>none</td><td class="num">—</td></tr>
+<tr><td>The cut of the other tabs</td><td><code>docs/js/vss-composer.js</code> (<code>cutUnits</code>, <code>CUT_STRATEGIES</code>, <code>DEFAULT_CUT</code>), <code>docs/js/vss-formalizer.js</code> (<code>cut</code>)</td><td>the cutter of the strategy chosen</td><td class="num">—</td></tr>
+<tr><td>Confidences of the VSS and SOP-BERT tabs</td><td><code>docs/js/vss-confidence.js</code>, <code>neural-confidence.js</code>, <code>vote-confidence.js</code></td><td><code>docs/model/confidence/</code>: <code>vss.json</code>, <code>sop-bert.json</code>, <code>vote3.json</code> (with <code>combined.json</code>)</td><td class="num">0.72 MB</td></tr>
 <tr><td>Benchmark (scoring)</td><td><code>docs/js/bench-canon.js</code></td><td><code>docs/bench/</code> (6 sets)</td><td class="num">—</td></tr>
 </tbody></table></div>
 <p class="note">Sizes: what the page downloads, measured with <code>du -b</code> on 2026-11-03, MB = 10<sup>6</sup> bytes. VSS: the 9 world folders
-(26.8 MB, <code>BUILD.json</code> left out: not loaded), the two cutters the registry names (4.6 MB), the context weights and the registry (the
-previous 7 worlds: 23.0 MB). SOP-BERT: <code>config.json</code>, the two tokenizer files and <code>onnx/model_quantized.onnx</code> (the previous
-model: 68.5 MB).</p>
+(26.8 MB, <code>BUILD.json</code> left out: not loaded), the two cutters the registry names (4.6 MB), the context weights and the registry.
+SOP-BERT: <code>config.json</code>, the two tokenizer files and <code>onnx/model_quantized.onnx</code>.</p>
 
 <h2 id="inside-pages">The pages of this part</h2>
 <ul class="pagelist">
-<li><a href="#help/engine">The engine and the legend</a>: wires, the legend, the plugins, Datalog.</li>
-<li><a href="#help/rules-reader">The Rules reader</a>: hand-written, and what it is good and bad at.</li>
+<li><a href="#help/neural-reader">The SOP-BERT reader</a>: one fine-tuned DistilBERT with small heads; it cuts and reads.</li>
 <li><a href="#help/vss-reader">The VSS reader</a>: the composer, its cutters, the 9 worlds, the context filler, the adapter.</li>
-<li><a href="#help/neural-reader">The SOP-BERT reader</a>: SOP-BERT, one fine-tuned DistilBERT with small heads.</li>
+<li><a href="#help/engine">The engine and the legend</a>: wires, the legend, the plugins, Datalog.</li>
+<li><a href="#help/rules-reader">The Rules reader</a>: hand-written, the comparison.</li>
 <li><a href="#help/cutting">One cut for all readers</a>: the three cutters and what they cost each reader.</li>
 <li><a href="#help/spelling">The spell checker</a>, <a href="#help/models">Models and versions</a>, <a href="#help/data">Data</a>,
-<a href="#help/training">Training and the GPU runner</a>, <a href="#help/measurement">Measurement and current numbers</a>,
+<a href="#help/training">Training and the GPU runner</a>, <a href="#help/measurement">Measurement</a>,
 <a href="#help/repository">Repository map</a>, <a href="#help/planned">In progress</a>.</li>
 </ul>
 <p class="note">Described: the system as committed on ${AS_OF}. Names in <code>code</code> are file, function and field names you can search for.
 Plans are only in <a href="#help/planned">In progress</a>, and are labelled there. The same pages as one long page: <a href="architecture.html">architecture.html</a>.</p>
-`, 'How the editor turns a message into a drawing: the parts, where their code and models are, how they are trained and measured.');
+`, 'How the editor turns a message into a drawing: VSS-BERT and its two readers, the engine, where the code and models are, how they are trained and measured.');
 
 /* ============================================================ engine */
 page('engine', 'The engine and the legend', `
@@ -199,27 +186,23 @@ page('rules-reader', 'The Rules reader', `
   <li><b>Reading:</b> regular expressions over the legend’s cue words (shapes, colours, sizes, actions, positions) and their order. The cue
   words are the hand-written cues of the legend’s values (<code>SHAPE_VALUES</code>, <code>COLOR_VALUES</code>, … in <code>docs/js/logic.js</code>).</li>
 </ol>
-<p><b>Fair comparison rule</b> (AGENTS.md): Rules and VSS use the same legend and the same cue list
-(<code>training/sketch/export_cues.mjs</code> → <code>training/sketch/make_normalizer.py</code>); a cue added for one is added for both, and only from training data.</p>
+<p><b>Fair comparison</b> (AGENTS.md): the Rules and the learned readers read the same legend. The Rules’ cue words are their own (the
+hand-written cues of the legend’s values in <code>docs/js/logic.js</code>); the learned readers use no cue list, every word they know comes
+from the annotated data, and nothing learned is merged into the Rules.</p>
 
 <h2 id="rules-measured">What it is good and bad at (measured)</h2>
 <div class="tw"><table>
-<thead><tr><th>Data</th><th>Cut</th><th class="num">Requests</th><th class="num">Right / wrong / not done (%)</th><th class="num">Extra</th><th>Source</th></tr></thead>
+<thead><tr><th>Situation</th><th class="num">Rules</th><th>Source</th></tr></thead>
 <tbody>
-<tr><td>Demo short sets, all six</td><td>Rules</td><td class="num">1140</td><td class="num">97.5 / 0.5 / 1.9</td><td class="num">16</td><td><code>CUT_SHARED.md</code></td></tr>
-<tr><td>Demo short sets, all six</td><td>VSS</td><td class="num">1140</td><td class="num">87.7 / 1.8 / 10.4</td><td class="num">17</td><td>same</td></tr>
-<tr><td>Short sets written by hand (hand, blind, broad)</td><td>Rules</td><td class="num">240</td><td class="num">92.1 / 1.7 / 6.2</td><td class="num">—</td><td><code>SHORT.md</code> §1</td></tr>
-<tr><td>Fixed 1000-message sample (long messages)</td><td>Rules</td><td class="num">4858</td><td class="num">67.9 / 16.8 / 15.3</td><td class="num">821</td><td><code>CUT_SHARED.md</code></td></tr>
-<tr><td>Fixed 1000-message sample</td><td>VSS (the default)</td><td class="num">4858</td><td class="num">73.6 / 11.9 / 14.5</td><td class="num">406</td><td>same</td></tr>
+<tr><td>Short template sets (1140 requests, written from the Rules’ own templates): right / wrong / not done</td><td class="num">98.9% / 0.4% / 0.8%</td><td><code>regress.sh</code>, 2026-11-03</td></tr>
+<tr><td>llm_short (3000 realistic one-line commands)</td><td class="num">72.4% / 5.6% / 22.0%</td><td>same</td></tr>
+<tr><td>Fixed 1000-message sample (long messages, 4858 requests), its own cut</td><td class="num">69.1% / 15.5% / 15.4%, 769 extra</td><td>same</td></tr>
+<tr><td>Test part of fresh2 + short3: wrong, of what it did</td><td class="num">37.5%</td><td><code>confidence3_report.md</code> (job 072)</td></tr>
 </tbody></table></div>
-<p>Good at: short commands that use its words; the three generated sets come from <code>training/sketch/generate.py</code> templates whose words
-the rules were written with, so the fair short-set figure is the 240 hand-written requests. Bad at: long, natural messages. With its own cut
-it does about one request in six wrong and makes over 800 requests nobody asked for: its segmenter cuts text that is not a request into units
-(1202 extra units on the sample, <code>CUT_SHARED.md</code>). Read through the VSS cut, the same rules make a third fewer wrong requests and half
-the extras. Why this matters: <a href="#help/rules-vs-learned">What rules do well, and where they fail</a>.</p>
-<p class="note">SHORT.md §1 gives 67.6 / 16.9 / 15.5, extra 806, for the Rules reader on the sample; every later run gives 67.9 / 16.8 / 15.3,
-extra 821. The difference is not explained: both Rules commits since then report unchanged scores.</p>
-`, 'Hand-written code over the legend’s cue words: instant, exact on short commands, weak on long natural messages.');
+<p>Good at: short commands that use its words. Bad at: long, natural messages, and it cannot tell which of its readings are doubtful: it has no
+confidence, so it cannot ask. Its segmenter also cuts text that is not a request into units (1202 extra units on the sample,
+<code>CUT_SHARED.md</code>). It is in the demo as a comparison: <a href="#help/rules-vs-learned">The Rules, as a comparison</a>.</p>
+`, 'Hand-written code over the legend’s cue words: instant, exact on its own phrasings, weak on long natural messages, and without a confidence. The comparison.');
 
 /* ============================================================ VSS */
 page('vss-reader', 'The VSS reader', `
@@ -322,11 +305,12 @@ graphq 5038, manage 4051, history 1069, help 857, layout 564. Trained on the GPU
 <code>star_version</code> 2, <code>docs/js/vss/stars.js</code>); the learned route book (<code>docs/js/vss/routebook.js</code>) gives each token
 an address from its path, bigram and position, and the reader (<code>docs/js/vss/reader.js</code>) decodes the frame: the predicate (which
 event, from the world’s verb lemmas) and the role fillers (target, colour, landmark, …). The reader returns a status:
-<code>ok</code>, <code>abstain</code> (margin under 0.05: uncertain, still executed today), <code>unknown-event</code> (no action word found) or
-<code>no-sense</code> (more than half of the tokens could not be placed). Executing <code>abstain</code> readings goes against the main metric
-of 2026-11-02 (execute only what it is sure of); in the demo the VSS tab now executes a request only when its confidence clears a threshold:
-a confidence from every step of the chain plus whether SOP-BERT and the Rules read the request the same way (<a href="#help/three-readers">Three
-readers voting</a>). The margin behind <code>abstain</code> alone is a poor confidence (AUROC 0.59 on the sample, RISK_COVERAGE.md).</p>
+<code>ok</code>, <code>abstain</code> (margin under 0.05: uncertain), <code>unknown-event</code> (no action word found) or
+<code>no-sense</code> (more than half of the tokens could not be placed). The status is one input of the confidence; whether a reading is done is
+decided by the confidence against a threshold. In VSS-BERT that confidence is the combined one (<a href="#help/two-readers">VSS-BERT</a>); the
+VSS tab alone uses a confidence from every step of the chain plus whether SOP-BERT and the Rules read the request the same way
+(<a href="#help/parts-alone">The VSS and SOP-BERT tabs</a>). The margin behind <code>abstain</code> alone is a poor confidence (AUROC 0.59 on the
+sample, <code>RISK_COVERAGE.md</code>).</p>
 <p>Before the model, the world’s own <b>front end</b> <code>front.json</code> normalizes the tokens: learned value n-grams (“bottom right” →
 <code>bottom_right</code>) and trigger rules, learned from the annotated rows of that world’s events only (<code>FRONT_ROWS=world</code>;
 thresholds <code>val_min_count</code> 5, <code>val_min_prec</code> 0.8, <code>trig_min_count</code> 2, <code>trig_share</code> 0.75, <code>trig_min_prec</code> 0.6).
@@ -387,11 +371,9 @@ several, description constraints, recency); a linear ranker with 165 features an
 <code>training/sketch/train_context.mjs</code> on the gold args of an 80% split. Decision today: fill with the best candidate when it beats the
 runner-up by the <code>margin</code>; the margin is <b>0</b>, so it asks only when “nobody” ranks first. A request with a gap it cannot fill
 becomes a question to the user, not an execution.</p>
-<p class="callout warn">The margin 0 comes from the owner’s rule of 2026-11-01, “ask as little as possible” (in drawing a mistake costs one undo,
-a question costs more). It was replaced on 2026-11-02 by the main metric: do only what you are sure of, ask about the rest (AGENTS.md). The
-filler keeps ranking the candidates, but whether its filling is executed is to be decided by the reader’s confidence against a threshold
-chosen on held-out data (the VSS confidence includes the filler’s own margin, <code>ctx_margin</code>, and whether the other two readers read the
-request the same way). The filler still fills at margin 0; the VSS tab’s confidence then decides whether that request is executed.</p>
+<p class="callout">The filler fills at margin 0 (the rule of 2026-11-01, “ask as little as possible”), but it no longer decides alone whether
+its filling is done: the confidence does (it includes the filler’s own margin, <code>ctx_margin</code>), against a threshold chosen on held-out
+data (AGENTS.md, 2026-11-02: do only what you are sure of, ask about the rest).</p>
 
 <h2 id="adapter">(e) The adapter to SOP Lang wires</h2>
 <p><code>docs/js/vss-adapter.js</code>: <code>readingFromWires</code> turns the reader’s wires into an event with roles; <code>toNodes</code> maps the
@@ -429,8 +411,9 @@ page('neural-reader', 'The SOP-BERT reader', `
 <p>Code: <code>docs/js/neural.js</code> (<code>NeuralKit</code>, strategy <code>finetuned</code>), run by transformers.js 3.8.1 (loaded from
 jsDelivr) on the CPU through WebAssembly, with 8-bit files (<code>q8</code>, <code>onnx/model_quantized.onnx</code>). The models are served
 from this site and load by themselves when the page opens (from the browser cache after the first time). The demo has <b>one neural model</b>,
-SOP-BERT, in <code>docs/model/neural/sop-bert/</code> (owner’s decision, 2026-11-02; the earlier pair of models was removed). Why fine-tune a
-transformer at all: <a href="#help/bert">What we do with BERT</a>.</p>
+SOP-BERT, in <code>docs/model/neural/sop-bert/</code>. It is the cutter and the executed reading of VSS-BERT
+(<a href="#help/two-readers">VSS-BERT</a>). Why fine-tune a transformer, and why it is not enough alone:
+<a href="#help/bert">SOP-BERT reads well, but alone it is too bold</a>.</p>
 
 <h2 id="sop-bert">SOP-BERT: one model that cuts and reads</h2>
 <p>One DistilBERT encoder (<code>distilbert-base-uncased</code>) fine-tuned on our annotated requests, with small heads on top
@@ -507,57 +490,33 @@ quantization; <code>config.json</code> carries the head layout (<code>"reader"</
 training requests through the demo’s decoding code and compares them with torch (ids, act, classes, tags 50/50, cut 19/20). It is tested only
 on messages it was not trained on: fresh2 and short3 (below).</p>
 <h2 id="sop-bert-measured">Measured</h2>
-<p>Test part of the new writer’s messages and of the short commands (fresh2 + short3: 745 messages, 1745 requested actions), each reader
-executing only above the threshold its confidence recipe chose on the calibration part (368 messages, out of fold); cost score = right − 10 ×
-(executed wrong + extras executed), per 100 requested actions (<code>results/072_measure/refit/records/confidence3_report.md</code> on branch
-<code>gpu-runs</code>).</p>
+<p>Before → after the retraining on all the data, on the new writer’s test messages (fresh2: 405 messages, 1313 requested actions), each model
+with the same confidence recipe at its best threshold (<code>results/072_measure/COMPARE.md</code>; 95% interval of 1000 paired resamples):</p>
 <div class="tw"><table>
-<thead><tr><th>Situation</th><th class="num">SOP-BERT</th><th class="num">VSS</th><th class="num">VSS-BERT</th><th class="num">3 readers</th></tr></thead>
+<thead><tr><th>Situation</th><th class="num">SOP-BERT of 2026-11-02</th><th class="num">SOP-BERT of 2026-11-03</th></tr></thead>
 <tbody>
-<tr><td>Cost score, the previous readers (arms G)</td><td class="num">31.5</td><td class="num">20.7</td><td class="num">29.7</td><td class="num">32.6</td></tr>
-<tr><td>Cost score, these readers (arm ALL)</td><td class="num"><b>33.4</b></td><td class="num">22.9</td><td class="num"><b>34.8</b></td><td class="num">31.8</td></tr>
-<tr><td>Done right, of the requested actions (arm ALL)</td><td class="num">44.8%</td><td class="num">37.8%</td><td class="num">42.8%</td><td class="num">43.3%</td></tr>
-<tr><td>Confidently wrong, of what it executed (arm ALL)</td><td class="num">2.5%</td><td class="num">3.8%</td><td class="num">1.8%</td><td class="num">2.6%</td></tr>
-<tr><td>Asked, of the requested actions (arm ALL)</td><td class="num">49.3%</td><td class="num">39.1%</td><td class="num">52.6%</td><td class="num">52.0%</td></tr>
-<tr><td>AUROC of the confidence (calibration, out of fold)</td><td class="num">0.912</td><td class="num">0.911</td><td class="num">0.919</td><td class="num">0.935</td></tr>
+<tr><td>fresh2: confidently wrong, of what it did</td><td class="num">7.1%</td><td class="num"><b>3.6%</b></td></tr>
+<tr><td>fresh2: cost score [95% interval]</td><td class="num">14.4 [2.0, 26.7]</td><td class="num">35.9 [27.6, 44.4]</td></tr>
+<tr><td>short3: cost score [95% interval]</td><td class="num">0.2 [−10.5, 10.3]</td><td class="num">4.2 [−1.4, 8.5]</td></tr>
 </tbody></table></div>
-<p>The same comparison with the confidence recipe of the previous release, on fresh2 alone (405 test messages, 1313 requested actions;
-<code>results/072_measure/COMPARE.md</code>): SOP-BERT 14.4 → <b>35.9</b>, +21.6 [9.7, 33.2] (95% interval of 1000 paired resamples): the new
-model is better, and the interval shows it. On short3 alone 0.2 → 4.2, +3.9 [−4.8, 13.8]: not shown either way. On its own training data (a fit,
-not a test) it reads the act of 99.98% of the sample’s requests right and 98.0% of the requests entirely right.</p>
-<p>Where it is weak: help questions (the act prior of ‘help’ is 34% right on the calibration messages; the topic head knows 109 of the 217
-topics), descriptions in roles, and the layout acts (arrange 55% right on the calibration messages). The confidence holds most of these back:
-it executes a request only when its confidence, fitted on 24 numbers of its own heads plus whether VSS and the Rules read the request the same
-way, clears the threshold (<a href="#help/three-readers">Three readers voting</a>). Why the difference between guessing and stopping matters:
-<a href="#help/knowing">Knowing what it does not know</a>.</p>
-<p class="note">Size of <code>onnx/model_quantized.onnx</code> (q8): 68.0 MB. The time of each message in the demo is in its reply.</p>
-
-<h2 id="pair">Before SOP-BERT: the act classifier and the QA model (removed)</h2>
-<p>Until 2026-11-02 the Neural reader was a pair: our classifier <code>act-distilbert</code> (DistilBERT fine-tuned on our requests to name the act:
-36 classes) and a ready-made extractive question-answering model, <code>Xenova/distilbert-base-cased-distilled-squad</code>, that answered each
-legend question (“Where does the connection start?”) with a span of the request. It ran the Rules reader too and borrowed from it the references
-(“it”) and the descriptions (“the red circle”). Both folders were removed when SOP-BERT became the only neural model; they are in git history.</p>
-<div class="tw"><table>
-<thead><tr><th>The pair, on the fixed 1000-message sample</th><th class="num">Value</th><th>Source</th></tr></thead>
-<tbody>
-<tr><td>Act accuracy of act-distilbert (4858 requests, never trained on)</td><td class="num">0.987</td><td>act-distilbert README</td></tr>
-<tr><td>Act accuracy on blind / hand / broad</td><td class="num">0.983 / 1.000 / 0.949</td><td>same</td></tr>
-<tr><td>Whole requests right / wrong / not done (%), Rules cut</td><td class="num" id="pair-score">30.2 / 64.3 / 5.5</td><td>neural_score.mjs, main at af78073</td></tr>
-<tr><td>Extra requests; ms per message (busy machine: Rules 23.6, VSS 97.3)</td><td class="num">1387; 714</td><td>same run</td></tr>
-</tbody></table></div>
-<p>The act was right, the <b>roles</b> were not: the SQuAD model was never trained on our requests and answered “which shape?” with a span that was
-often the wrong name, several names or none. Requests with few roles were mostly right (count 122 of 167, undo 44 of 44), requests whose roles carry
-the meaning almost never (connect 34 of 747, create 4 of 190, path 1 of 126). It also never asked back: what it did not read was done wrong. That is
-what SOP-BERT’s heads, trained on our annotation, replace.</p>
-<p class="note">Act classifier: 15,683 training request spans (<code>training/neural/make_data.py</code>), 8 epochs, lr 6e-5, batch 32, fp16 on cuda,
-seed 0 (GPU job 011, branch <code>gpu-runs</code>). The whole-request run: <code>ZS=act-distilbert node training/laptop/neural_score.mjs</code> over
-the 9 folders of the sample, CPU, q8 files, scoring of <code>training/sketch/llm_score.mjs</code> (<code>PAIR=value</code>).</p>
+<p>On fresh2 the difference, +21.6 [9.7, 33.2], is a gain the interval shows; on short3, +3.9 [−4.8, 13.8], it is not shown either way. What
+raised it: <a href="#help/reliability">More and better data, a fixed data pipeline</a>. On its own training data (a fit, not a test) it reads
+the act of 99.98% of the sample’s requests right.</p>
+<p>Alone, with its own confidence (24 numbers of its own heads, a logistic regression, <code>docs/model/confidence/sop-bert.json</code>), on the
+test part of fresh2 + short3 it is confidently wrong on 3.0% of what it does; paired with VSS in VSS-BERT, 1.8% at the same amount done
+(<a href="#help/two-readers/tr-numbers">VSS-BERT</a>). Where it is weak: help questions (the topic head knows 109 of the 217 topics),
+descriptions in roles, and the layout acts (arrange 55% right on the calibration messages).</p>
+<p class="note">Size of <code>onnx/model_quantized.onnx</code> (q8): 68.0 MB. The time of each message in the demo is in its reply. The neural
+models before SOP-BERT (an act classifier and a ready-made question-answering model, removed 2026-11-02) are in
+<a href="#help/history/h-neural">How we got here</a>.</p>
 `, 'SOP-BERT: one fine-tuned DistilBERT that cuts a message and reads every request itself.');
 
 /* ============================================================ cutting */
 page('cutting', 'One cut for all readers', `
-<p><b>Owner’s decision, 2026-11-02.</b> The three readers read the <b>same units</b> of a message. How the message is cut is one global
-setting (Settings › Cutting into requests), so the tabs differ only in how each reader reads a request, never in how the message was split.
+<p><b>Owner’s decision, 2026-11-02.</b> The readers read the <b>same units</b> of a message, so they differ only in how each reads a request,
+never in how the message was split. VSS-BERT always reads the requests of the <b>BERT cutter</b> (the cut its confidence was fitted on; when the
+message was already cut by it, the readings of the VSS and SOP-BERT tabs are reused). The tabs Rules, VSS and SOP-BERT read the cut chosen in
+Settings › Cutting into requests.
 <b>details</b> under a reply lists the units and how long the cut took.</p>
 <div class="tw"><table>
 <thead><tr><th>Cutter</th><th>What it is</th><th>Code / model</th></tr></thead>
@@ -598,7 +557,7 @@ The default is the VSS cutter because real messages are whole messages. The BERT
 are in <a href="#help/measurement/confidence-now">Measurement</a>.</p>
 <p class="note">The cutter is judged by the errors it causes in the readers (requested actions done wrong or not done, and extras), not by
 span-match scores (AGENTS.md).</p>
-`, 'One setting decides how every message is cut into requests; all three readers then read the same requests.');
+`, 'Every message is cut into requests once, and the readers read the same requests: VSS-BERT the BERT cutter’s, the other tabs the cut chosen in Settings.');
 
 /* ============================================================ spelling */
 page('spelling', 'The spell checker', `
@@ -746,7 +705,7 @@ page('training', 'Training and the GPU runner', `
 <tr><td>One VSS world</td><td><code>training/sketch/train_micro.sh &lt;world&gt; &lt;events&gt;</code> → <code>msg_to_world.py</code>, <code>sop check</code>, <code>sop train</code>, <code>sop export-web --bits 8 --sparse</code></td><td>CPU here, or GPU (<code>DEVICE=cuda</code>)</td><td>the 9 worlds of the default registry, the two cutters (CPU, in parallel) and the context filler: 3273 s in all on the GPU machine (job 070, <code>FAST=1</code>, two worlds at once)</td></tr>
 <tr><td>A cutter</td><td><code>training/sketch/train_cutter.py --worlds &lt;grouping&gt;</code></td><td>CPU</td><td>in job 070, beside the worlds</td></tr>
 <tr><td>Context filler weights</td><td><code>training/sketch/train_context.mjs</code></td><td>CPU (node)</td><td>—</td></tr>
-<tr><td>Neural act classifier (removed)</td><td><code>training/neural/make_data.py</code>, <code>training/neural/finetune.py</code> (ONNX export + 8-bit quantization, <code>check_node.mjs</code>)</td><td>GPU</td><td>245 s for 8 epochs (DistilBERT); 326 s for 7 epochs (DeBERTa-v3 xsmall, early stop)</td></tr>
+<tr><td>Round trips: does the training gold come back?</td><td><code>training/sketch/convert_check.py</code> / <code>.mjs</code> (VSS), <code>training/neural/roles_roundtrip.py</code> / <code>.mjs</code> (SOP-BERT)</td><td>CPU</td><td>a gate at the start of jobs 070 and 071 (<a href="#help/reliability/r-roundtrip">why</a>)</td></tr>
 <tr><td>SOP-BERT</td><td><code>training/neural/make_roles.py</code>, <code>training/neural/finetune_roles.py --name sop-bert</code>, <code>check_roles_node.mjs</code>, <code>cut_node.mjs</code></td><td>GPU (the owner’s machine)</td><td>1209 s for 8 epochs on 54,584 request rows (job 071)</td></tr>
 <tr><td>Spell vocabulary</td><td><code>training/sketch/spell/build_spell.mjs</code></td><td>CPU (node)</td><td>—</td></tr>
 <tr><td>Versions</td><td><code>training/sketch/stamp_models.py</code></td><td>CPU</td><td>seconds</td></tr>
@@ -828,101 +787,89 @@ reviews and commits.</p>
 `, 'The scripts that build every model, their switches, and the git runner on the owner’s GPU machine.');
 
 /* ============================================================ measurement */
-page('measurement', 'Measurement and current numbers', `
+page('measurement', 'Measurement', `
 <h2 id="metric">The main metric (owner, 2026-11-02)</h2>
-<p><b>Do only what you are sure of, ask about the rest.</b> The research question is a reader that says clearly where it is not sure, not one
-that approximates well (<a href="#help/research-question">What this project measures</a>). This replaces “ask as little as possible” of
-2026-11-01 (DECISIONS.md).</p>
+<p><b>Do only what you are sure of, ask about the rest.</b> The first number of every reader is how often it is <b>confidently wrong</b>; the
+readers are chosen and compared by the <b>cost score</b>, in which one confident mistake costs as much as 10 right answers
+(<a href="#help/research-question">The goal</a>; AGENTS.md, “What counts as an error”).</p>
 <div class="tw"><table>
-<thead><tr><th>Number</th><th>Definition</th><th>Use</th></tr></thead>
+<thead><tr><th>Number</th><th>Definition</th></tr></thead>
 <tbody>
-<tr><td><b>Precision of execution</b></td><td>right / everything executed (requested actions executed, right or wrong, plus extras)</td><td>the headline of every reader</td></tr>
-<tr><td>Requests done right</td><td>right / gold requests, at that precision</td><td>reported with it</td></tr>
-<tr><td>Right at equal precision</td><td>the same, read off each reader’s risk-coverage curve at one precision</td><td>the comparison between readers</td></tr>
-<tr><td>AUROC</td><td>how well the reader’s confidence separates its right from its not-right requests</td><td>reported beside</td></tr>
+<tr><td><b>Confidently wrong</b></td><td>(executed wrong + extras executed) / everything executed = 1 − the precision of execution</td></tr>
+<tr><td>Done right</td><td>right / requested actions</td></tr>
+<tr><td>Asked</td><td>requested actions read but held back / requested actions; never an error</td></tr>
+<tr><td><b>Cost score</b></td><td>(right − 10 × (executed wrong + extras executed)) per 100 requested actions; asking scores 0 (<code>COST_SCORE.md</code>)</td></tr>
+<tr><td>AUROC</td><td>how well a confidence separates its right from its not-right requests (0.5 = not at all, 1 = perfectly)</td></tr>
 </tbody></table></div>
-<p>Each reader executes a request only when its confidence clears a threshold chosen on held-out data by a protocol written before the run;
-below it, it asks and says why (which words, which step). <b>Not done / asked</b> is never an error: it is the price paid for precision, and it
-is reported. The Rules, which have no confidence, are measured the same way: what they execute and how much of it is right. The context
-filler may still rank candidates, but the reader’s confidence decides whether its filling is executed.</p>
+<p>Each learned reader’s threshold is the one with the best cost score on the calibration part, from out-of-fold confidences; the confidence
+recipe of each reader was chosen there too, among 16–22 variants, by a rule written before (<code>confidence3/PLAN.md</code>). Results are
+reported on the test part, with 95% intervals from 1000 paired resamples of the test messages. A difference whose interval lies above 0 is a
+gain shown; otherwise it is “not shown either way”.</p>
 <h3 id="metric-requests">Under it: per requested action (owner, 2026-11-01)</h3>
 <p>Per <b>requested action</b>, never per message: of the gold requests, the share done <b>right</b>, done <b>wrong</b> (executed with the wrong
-action, shape or value), and <b>not done</b> (not understood, or asked); plus <b>extra</b>: the count of requests nobody asked for.
-Decisions weigh “done wrong” first. A reference the reader leaves for the context (“it”, a name from an earlier sentence) is not an error.
-Every number measured before 2026-11-02, including the table below, is in this form, with every request executed.</p>
-<div class="callout" id="precision-measure"><p><b>Precision of execution</b> (<code>training/sketch/PRECISION.md</code>, thresholds fixed on the
-held-out split): at 97%, VSS with its combined confidence (threshold 0.893) does 35.5% of the sample’s requests right at 95.8% precision and asks
-about 52.2%; the VSS margin (at most 87.3%) and SOP-BERT’s smallest probability (at most 94.9%) reach 95% at no threshold; the Rules execute
-everything at 67.1%. Tools: <code>precision.mjs</code>, <code>precision_confidence.mjs</code>, <code>precision_thresholds.json</code>. A fitted
-confidence for SOP-BERT, for a fair comparison, is being measured (<code>PRECISION_BERT.md</code>). Summary: <a href="#help/research-question/precision-result">What this project measures</a>.</p></div>
+action, shape or value), and <b>not done</b> (not understood, or asked); plus <b>extra</b>: the count of requests nobody asked for. A reference
+the reader leaves for the context (“it”, a name from an earlier sentence) is not an error.</p>
+
+<h2 id="sets-used">The data it is measured on</h2>
+<p>The <b>test part of fresh2 + short3</b>: 745 messages, 1745 requested actions, by writers and in forms no training read; the other third
+(368 messages, chosen by <code>sha256(id) % 3 == 0</code>) is the calibration part (<a href="#help/data/sets">the sets</a>). The test part had
+been read for earlier studies, so its numbers are exploratory; a set written after these models (fresh3) is planned.</p>
+
+<h2 id="confidence-now">Current numbers: direction, before → after</h2>
+<p>Each reader at its own threshold on the test part (<code>results/072_measure/refit/records/confidence3_report.md</code>, branch
+<code>gpu-runs</code>; the readers of 2026-11-02 from commit 220295a):</p>
+<div class="tw"><table>
+<thead><tr><th>Situation</th><th class="num">VSS-BERT</th><th class="num">SOP-BERT tab</th><th class="num">VSS tab</th><th class="num">Rules</th></tr></thead>
+<tbody>
+<tr><td>Confidently wrong, readers of 2026-11-02</td><td class="num">3.8%</td><td class="num">3.2%</td><td class="num">—</td><td class="num">—</td></tr>
+<tr><td>Confidently wrong, readers of 2026-11-03</td><td class="num"><b>1.8%</b></td><td class="num">2.5%</td><td class="num">3.8%</td><td class="num">37.5%</td></tr>
+<tr><td>Done right, of the requested actions</td><td class="num">42.8%</td><td class="num">44.8%</td><td class="num">37.8%</td><td class="num">57.8%</td></tr>
+<tr><td>Asked, of the requested actions</td><td class="num">52.6%</td><td class="num">49.3%</td><td class="num">39.1%</td><td class="num">0%</td></tr>
+<tr><td>Cost score, readers of 2026-11-02</td><td class="num">29.7</td><td class="num">31.5</td><td class="num">20.7</td><td class="num">—</td></tr>
+<tr><td>Cost score, readers of 2026-11-03 [95% interval]</td><td class="num">34.8 [29.8, 39.5]</td><td class="num">33.4 [27.2, 39.0]</td><td class="num">22.9 [16.6, 29.5]</td><td class="num">−288.4</td></tr>
+<tr><td>AUROC of the confidence (calibration, out of fold)</td><td class="num">0.919</td><td class="num">0.912</td><td class="num">0.911</td><td class="num">—</td></tr>
+</tbody></table></div>
+<p>Read as direction: every learned reader makes fewer confident mistakes than the day before, VSS-BERT fewest. The score differences between the
+two days are within their intervals (commit 220295a: none shown either way); the gain the intervals do show is SOP-BERT’s on fresh2 with one
+fixed confidence recipe, 14.4 → 35.9, +21.6 [9.7, 33.2] (<code>results/072_measure/COMPARE.md</code>,
+<a href="#help/reliability/r-result">More and better data</a>).</p>
+<p class="note">The SOP-BERT and VSS tabs’ confidences also use whether the other readers read the request the same way (<code>vote3.json</code>);
+SOP-BERT with only its own numbers scores 29.3 [23.8, 35.2], 3.0% confidently wrong; VSS with only its own numbers 4.8, asking about almost
+everything. VSS-BERT uses <code>combined.json</code>, the variant without the act prior (against the plain recipe +2.2 [−1.3, 6.0], not shown
+either way). The 3-readers vote (31.8, 2.6% confidently wrong; against VSS-BERT −0.8 [−5.1, 3.4]) was removed
+(<a href="#help/rules-vs-learned/rv-vote">why</a>).</p>
+
+<h2 id="now">Every request executed: the regression sets (<code>training/sketch/regress.sh</code>)</h2>
+<p>Per gold request: right / wrong / not done (%) + extra, every request executed (no confidence), each reader with its own cut; 2026-11-03.
+The sample and llm_short are training data of both learned readers; the templates are written from the Rules’ own templates. These are the
+regression checks run before every commit that touches a reader, not a test of the confidence.</p>
+<div class="tw"><table>
+<thead><tr><th>Set</th><th class="num">Rules</th><th class="num">VSS, 7 worlds of 2026-11-02</th><th class="num">VSS, 9 worlds of 2026-11-03</th></tr></thead>
+<tbody>
+<tr><td>Fixed sample (1000 messages, 4858 requests)</td><td class="num">69.1 / 15.5 / 15.4 +769</td><td class="num">77.8 / 10.0 / 12.2 +309</td><td class="num">76.9 / 10.1 / 12.9 +471</td></tr>
+<tr><td>Short: templates (1140)</td><td class="num">98.9 / 0.4 / 0.8 +4</td><td class="num">59.5 / 11.8 / 28.7 +76</td><td class="num">78.0 / 8.2 / 13.9 +69</td></tr>
+<tr><td>Short: llm_short (3000)</td><td class="num">72.4 / 5.6 / 22.0 +375</td><td class="num">67.0 / 9.3 / 23.7 +400</td><td class="num">70.8 / 8.9 / 20.3 +442</td></tr>
+</tbody></table></div>
+
+<h2 id="scripts">The scripts</h2>
 <dl class="kv">
-  <dt><code>training/sketch/llm_score.mjs</code></dt><dd>Scores a reader on folders of annotated messages. <code>SEG=composer</code>: the whole
-  composer on whole messages; <code>SEG=gold</code> with <code>MODEL=micro/&lt;world&gt;</code>: one world on gold spans (no cut). <code>PAIR=value</code>
-  pairs produced and gold requests by their values. Also scores the Rules reader.</dd>
+  <dt><code>training/sketch/confidence3/fit3.mjs</code>, <code>refit.sh</code></dt><dd>Fit every confidence file (<code>vss.json</code>,
+  <code>sop-bert.json</code>, <code>combined.json</code>, <code>vote3.json</code>) on the calibration part, choose each recipe and threshold, and
+  report the test part with intervals; run again after every retraining.</dd>
+  <dt><code>training/sketch/combine/combined_report.mjs</code></dt><dd>VSS-BERT: pairing, agreement and its confidence (<code>COMBINED_READER.md</code>).</dd>
+  <dt><code>training/sketch/llm_score.mjs</code></dt><dd>Scores a reader on folders of annotated messages (<code>SEG=composer</code> whole messages,
+  <code>SEG=gold</code> one world on gold spans; <code>PAIR=value</code> pairs produced and gold requests by their values). Also scores the Rules.</dd>
   <dt><code>training/sketch/cut_bench.mjs</code></dt><dd>Every cut with every reader on the same gold (<a href="#help/cutting">One cut for all readers</a>).</dd>
-  <dt><code>training/sketch/short_bench/</code></dt><dd><code>short_bench.mjs</code> (the demo’s six sets, called as the demo calls the reader),
-  <code>agg.py</code> (per set), <code>classify.py</code> (the cause of each miss: A no unit, B partial unit, C right world not a candidate, D unknown-event,
-  E wrong event, F lost to another world, G1/G2 the filler asks, H1/H2 role values).</dd>
-  <dt><code>training/sketch/error_analysis.mjs</code></dt><dd>Root causes of one world’s misses on perfectly cut requests: A action word not
-  recognized, B wrong action, C reader refuses, D value not reachable, E name not reachable, F role missed, G role wrong.</dd>
-  <dt><code>training/laptop/neural_score.mjs</code></dt><dd>Rules, VSS and SOP-BERT on the same gold, with the scoring of <code>llm_score.mjs</code>,
-  plus milliseconds per message.</dd>
-  <dt><code>training/sketch/risk_coverage.mjs</code></dt><dd>Every produced request of VSS and SOP-BERT with its outcome and the reader’s
-  confidence; the risk-coverage curves, AUROC, calibration and the thresholds chosen on held-out (RISK_COVERAGE.md).</dd>
-  <dt><code>training/sketch/vss_confidence.mjs</code></dt><dd>A VSS confidence from every step of the chain, read from the composer from
-  outside, combined by a logistic regression fitted on the held-out split (VSS_CONFIDENCE.md).</dd>
+  <dt><code>training/sketch/short_bench/</code>, <code>error_analysis.mjs</code></dt><dd>The demo’s short sets, and the root cause of each miss
+  (no unit, wrong world, unknown event, role values, …).</dd>
+  <dt><code>training/sketch/confidence3/audit_new_forms.mjs</code></dt><dd>Checks that two readings counted as the same make the engine do the same
+  thing (<code>NEW_FORMS_AUDIT.md</code>).</dd>
 </dl>
 <div class="callout"><b>Discipline (AGENTS.md “Experiments”).</b> Before a run: the hypothesis, the measure and the threshold for “it worked”,
 written down and shown. No knobs turned on the fly; one change at a time; a miss is reported, not patched. After every evaluation: a
 root-cause analysis of the misses, each classified by the first cause that explains it and <i>where</i> it sits (data, front end, our code,
 calibration, model); fixes go where the cause is.</div>
-
-<h2 id="confidence-now">Current numbers: each reader at its own threshold</h2>
-<p>The test part of fresh2 + short3 (745 messages, 1745 requested actions; <a href="#help/data/sets">the sets</a>). Each reader executes a
-request only when its confidence clears the threshold chosen on the calibration part (368 messages, out of fold), with the confidence recipe
-that scored best there; cost score = right − 10 × (executed wrong + extras executed), per 100 requested actions, asking scores 0
-(<code>results/072_measure/refit/records/confidence3_report.md</code>, branch <code>gpu-runs</code>). The Rules execute everything: −288.4.</p>
-<div class="tw"><table>
-<thead><tr><th>Situation</th><th class="num">VSS</th><th class="num">SOP-BERT</th><th class="num">VSS-BERT</th><th class="num">3 readers</th></tr></thead>
-<tbody>
-<tr><td>Cost score, the previous readers (arms G, 2026-11-02)</td><td class="num">20.7</td><td class="num">31.5</td><td class="num">29.7</td><td class="num">32.6</td></tr>
-<tr><td>Cost score, the readers of the demo (arm ALL, 2026-11-03)</td><td class="num">22.9</td><td class="num">33.4</td><td class="num"><b>34.8</b></td><td class="num">31.8</td></tr>
-<tr><td>Cost score of what the demo’s tab runs by default</td><td class="num">22.9</td><td class="num">33.4</td><td class="num">32.6</td><td class="num">26.8</td></tr>
-<tr><td>95% interval of the new score</td><td class="num">[16.6, 29.5]</td><td class="num">[27.2, 39.0]</td><td class="num">[29.8, 39.5]</td><td class="num">[26.0, 37.8]</td></tr>
-<tr><td>Done right, of the requested actions</td><td class="num">37.8%</td><td class="num">44.8%</td><td class="num">42.8%</td><td class="num">43.3%</td></tr>
-<tr><td>Confidently wrong, of what it executed</td><td class="num">3.8%</td><td class="num">2.5%</td><td class="num">1.8%</td><td class="num">2.6%</td></tr>
-<tr><td>Asked, of the requested actions</td><td class="num">39.1%</td><td class="num">49.3%</td><td class="num">52.6%</td><td class="num">52.0%</td></tr>
-<tr><td>AUROC of the confidence (calibration, out of fold)</td><td class="num">0.911</td><td class="num">0.912</td><td class="num">0.919</td><td class="num">0.935</td></tr>
-<tr><td>Recipe chosen on the calibration part</td><td>votes as inputs, no world prior, a threshold for commands and one for questions</td><td>votes as inputs, a threshold for commands and one for questions</td><td>its own confidence, no act prior</td><td>votes as inputs, act prior shrunk with k = 50, two thresholds</td></tr>
-</tbody></table></div>
-<p>What the tabs run: VSS and SOP-BERT use the chosen recipes (<code>vote3.json</code>, columns <code>vss</code> and <code>sop</code>); VSS-BERT
-uses <code>combined.json</code>, since 2026-11-03 the chosen variant without the act prior (34.8 on the test part; the plain recipe scored
-32.6); 3 readers acts by default only when all three read a request the same (no fitted weight: 26.8), and its “fitted vote” level is the
-fitted vote (31.8; confidently wrong 2.6% instead of 4.2%, done right 43.3% instead of 47.4%).</p>
-<p>With the confidence recipe of the previous release, on fresh2 alone (405 test messages; <code>results/072_measure/COMPARE.md</code>, paired
-bootstrap, 1000 resamples): SOP-BERT 14.4 → <b>35.9</b>, +21.6 [9.7, 33.2], a gain the interval shows; VSS 12.1 → 10.1, −2.0 [−8.9, 4.9],
-not shown either way. On short3 alone: SOP-BERT 0.2 → 4.2, +3.9 [−4.8, 13.8]; VSS 6.2 → 0.0 (with its own confidence alone it asks
-everything there), −6.2 [−12.5, 1.6]. Neither short3 difference is shown. The test part had been read for earlier studies, so its numbers
-are exploratory; the clean confirmation needs a fresh set (fresh3).</p>
-<p class="note">VSS without SOP-BERT (while SOP-BERT is still loading, or in <code>regress.sh</code>) uses its own confidence alone
-(<code>docs/model/confidence/vss.json</code>, one threshold 0.8718): AUROC 0.779, cost score 4.8 on the test part. It asks about most requests
-then, help questions included.</p>
-
-<h2 id="now">Every request executed: the regression sets (<code>training/sketch/regress.sh</code>)</h2>
-<p>Per gold request: right / wrong / not done (%) + extra, every request executed (no confidence), each reader with its own cut (Rules: the
-Rules segmenter, VSS: the VSS cutter); 2026-11-03. The sample and
-the llm_short commands are training data of both VSS arms; the templates are written from the Rules’ own templates.</p>
-<div class="tw"><table>
-<thead><tr><th>Set</th><th class="num">Rules</th><th class="num">VSS, previous worlds (7)</th><th class="num">VSS, the 9 worlds of the demo</th></tr></thead>
-<tbody>
-<tr><td>Fixed sample (1000 messages, 4858 requests)</td><td class="num">69.1 / 15.5 / 15.4 +769</td><td class="num">77.8 / 10.0 / 12.2 +309</td><td class="num">76.9 / 10.1 / 12.9 +471</td></tr>
-<tr><td>Short: templates (1140)</td><td class="num">98.9 / 0.4 / 0.8 +4</td><td class="num">59.5 / 11.8 / 28.7 +76</td><td class="num"><b>78.0 / 8.2 / 13.9 +69</b></td></tr>
-<tr><td>Short: llm_short (3000)</td><td class="num">72.4 / 5.6 / 22.0 +375</td><td class="num">67.0 / 9.3 / 23.7 +400</td><td class="num">70.8 / 8.9 / 20.3 +442</td></tr>
-</tbody></table></div>
-<p>The new worlds read the Rules’ short commands far better (78.0 right against 59.5: they were trained on commands generated from the Rules’
-grammar), read slightly more of llm_short, and produce more extras on whole messages (471 against 309). SOP-BERT is not in
-<code>regress.sh</code>; its numbers are the test part above.</p>
-`, 'The main metric (precision of execution, readers compared at equal precision), the per-request counts under it, the scripts that compute them, and every reader’s current numbers with their source.');
+`, 'The main metric (how often a reader is confidently wrong, and the cost score), the data it is measured on, the current numbers as before → after, and the scripts.');
 
 /* ============================================================ repository */
 page('repository', 'Repository map', `
@@ -930,7 +877,7 @@ page('repository', 'Repository map', `
 <thead><tr><th>Folder</th><th>What it holds</th></tr></thead>
 <tbody>
 <tr><td><code>docs/</code></td><td>The site published by GitHub Pages: <code>docs/index.html</code> (the demo), <code>docs/architecture.html</code> (these pages as one page).</td></tr>
-<tr><td><code>docs/js/</code></td><td>All the page’s code: engine and Rules (<code>logic.js</code>), VSS composer and its parts, SOP-BERT (<code>neural.js</code>), the combined reader VSS-BERT (<code>combined-confidence.js</code>), the three readers’ votes used by the VSS, SOP-BERT and 3 readers tabs (<code>vote-confidence.js</code>), spell checker, UI, help (<code>help.js</code>, <code>docs.js</code>, <code>docs-concepts.js</code>, <code>docs-arch.js</code>).</td></tr>
+<tr><td><code>docs/js/</code></td><td>All the page’s code: engine and Rules (<code>logic.js</code>), VSS composer and its parts, SOP-BERT (<code>neural.js</code>), the reader that answers, VSS-BERT (<code>combined-confidence.js</code>), the other readers’ votes used by the VSS and SOP-BERT tabs (<code>vote-confidence.js</code>), spell checker, UI, help (<code>help.js</code>, <code>docs.js</code>, <code>docs-concepts.js</code>, <code>docs-arch.js</code>).</td></tr>
 <tr><td><code>docs/js/vss/</code></td><td>The VSS reader in the browser: <code>loader.js</code>, <code>stars.js</code>, <code>routebook.js</code>, <code>reader.js</code>, <code>soplang.js</code>.</td></tr>
 <tr><td><code>docs/model/</code></td><td>Every model the page loads, with <code>versions.json</code> (<a href="#help/models">Models and versions</a>).</td></tr>
 <tr><td><code>docs/bench/</code></td><td>The six short benchmark sets.</td></tr>
@@ -943,56 +890,47 @@ page('repository', 'Repository map', `
 <tr><td>root</td><td><code>AGENTS.md</code> (rules: read first), <code>README.md</code>, <code>DECISIONS.md</code>, <code>future-experiments.md</code>, <code>ISSUES_OTHER_REPOS.md</code>.</td></tr>
 </tbody></table></div>
 
-<h2 id="result-docs">Result documents of 2026-11-02 (<code>training/sketch/</code>)</h2>
+<h2 id="result-docs">Result documents (<code>training/sketch/</code> unless said otherwise)</h2>
 <div class="tw"><table>
 <thead><tr><th>Document</th><th>One line</th></tr></thead>
 <tbody>
-<tr><td><code>PLAN_B.md</code></td><td>The 7 worlds (GROUPS_7, grouped by cutter confusion) trained with <code>FRONT_ROWS=world</code>; per-event fit vs the 16 one-action worlds; composer G7 on the sample 69.6 / 14.3 / 16.1, extra 321; causes in shapes7 (create colour, verbless set, rule read as set).</td></tr>
-<tr><td><code>EVENT_HINT.md</code></td><td>The event cutter and the hint. H1 worked (right 69.6 → 73.2, wrong 14.8, extra 300); H2 did not (70.0, extra 431).</td></tr>
-<tr><td><code>CREATE_COLOR.md</code></td><td>shapes7c: a new shape’s colour in the event role. Missed its per-action threshold (create 70.3 &lt; 75.0); the colour error is fixed (507 → 16 wrong colours); in the composer 71.3 / 12.6 / 16.1.</td></tr>
-<tr><td><code>COMBINED.md</code></td><td>shapes7c + H1 together: worked, 74.9 / 13.1 / 12.0, extra 302; became the default registry.</td></tr>
-<tr><td><code>BETWEEN.md</code></td><td>“between A and B” loses its second anchor: the presence threshold of <code>landmark2</code> is fitted on 9 rows; refit on all rows → <code>N_CAL</code>. Its build (shapes7d) was dropped and the fix moved into round 2.</td></tr>
-<tr><td><code>SEEDS_SHAPES7.md</code></td><td>Seed noise of a per-action difference: three cuda seeds of shapes7c trained on the GPU machine (jobs 003–005); the Result section is not written yet.</td></tr>
-<tr><td><code>HOLDOUT_PURPLE.md</code></td><td>Can a world read a value it never saw? Mostly yes (100 of 128 purple requests), but a seen colour in the same message wins; missed by one request.</td></tr>
-<tr><td><code>SHORT.md</code></td><td>VSS on short commands (51.0 right vs Rules 97.5): the cutter made no unit for 260 of 559 misses; cutter retrained with 3000 short commands → 60.5; narrowly missed its threshold; cutter_worlds7s became the default.</td></tr>
-<tr><td><code>SHORT2.md</code></td><td>Causes of the remaining short-command misses; adapter fix (position value by what it is): sample 77.2 / 11.4 / 11.4; need_read and desc-ask tested and not adopted; fallback world removed.</td></tr>
-<tr><td><code>DIAGRAM_OPS.md</code></td><td>Groups and double positions: SOP Lang forms, engine, Rules reader and adapter done and tested (<code>test_diagram_ops.mjs</code>); what the VSS worlds need.</td></tr>
-<tr><td><code>ROUND2.md</code></td><td>Pre-registration of round 2: every world retrained once with all measured fixes, the 7 commands, thresholds A–D. Trained afterwards (commit 63274ae): not the default.</td></tr>
-<tr><td><code>CUT_SHARED.md</code></td><td>One cut for all three readers: the VSS cut is better on whole messages for both readers, the Rules segmenter on one-line commands; default VSS.</td></tr>
-<tr><td><code>RISK_COVERAGE.md</code></td><td>Does each reader know when it does not know? AUROC VSS margin 0.59, SOP-BERT 0.72 on the sample; risk-coverage curves; thresholds for SOP-BERT chosen on held-out.</td></tr>
-<tr><td><code>VSS_CONFIDENCE.md</code></td><td>A VSS confidence from every step of the chain: AUROC 0.81 on the sample, 0.84 on short held-out commands; each weight named.</td></tr>
-<tr><td><code>PRECISION.md</code></td><td>Precision of execution of each reader at a threshold fixed on held-out; at 97% only VSS with its combined confidence qualifies (35.5% done right on the sample, 52.2% asked).</td></tr>
-<tr><td><code>TRAIN_PLAN_1103.md</code></td><td>2026-11-03: one set of GPU jobs (070 VSS, 071 SOP-BERT, 072 measure) that teaches both learned readers the forms of 2026-11-02 on all the data; the 9 worlds (GROUPS_8ops), the switches LEGEND_EXT, VAL_PICK, DIAGRAM_OPS; its models are the demo’s since 2026-11-03.</td></tr>
-<tr><td><code>confidence3/RESULT.md</code>, <code>combine/COMBINED_READER.md</code></td><td>The three readers’ votes as inputs of each confidence, and the combined reader VSS-BERT; refitted for the new readers in job 072 (<code>results/072_measure/refit/records/confidence3_report.md</code> on <code>gpu-runs</code>).</td></tr>
+<tr><td><code>confidence3/RESULT.md</code>, <code>confidence3/PLAN.md</code></td><td>Each reader’s confidence with the other readers’ votes as inputs; the 3-readers vote (tried, then removed); the selection rule of the recipes. Refitted for the readers of 2026-11-03 in job 072 (<code>results/072_measure/refit/records/confidence3_report.md</code> on <code>gpu-runs</code>).</td></tr>
+<tr><td><code>combine/COMBINED_READER.md</code>, <code>combine/COMBINE.md</code></td><td>VSS-BERT: one cut, two readings, pairing, the confidence fitted on agreement; a request both read the same is right about 95% of the time.</td></tr>
+<tr><td><code>COST_SCORE.md</code></td><td>The cost score (one confident mistake = 10 right answers) and how each threshold is chosen.</td></tr>
+<tr><td><code>TRAIN_PLAN_1103.md</code></td><td>2026-11-03: the GPU jobs 070 (VSS), 071 (SOP-BERT), 072 (measure) that trained both learned readers on all the data; their models are the demo’s.</td></tr>
+<tr><td><code>training/neural/ROLES_ROUNDTRIP.md</code></td><td>SOP-BERT’s training labels decoded back through the demo’s code: silent wrong labels 2.8% → 0.1%, round trip 92.7% → 95.3%.</td></tr>
+<tr><td><code>synth/VSS_SYNTH_DIAGNOSIS.md</code>, <code>synth/CONVERT_FIX.md</code></td><td>Why the generated commands gave VSS no gain (31% never reached the worlds in a learnable form) and the fix (synth_rules round trip 65.9% → 79.3%).</td></tr>
+<tr><td><code>confidence3/NEW_FORMS_AUDIT.md</code></td><td>Agreement and scoring checked against what the engine does: false disagreements 3634 → 211, false agreements 205 → 3.</td></tr>
+<tr><td><code>results/072_measure/COMPARE.md</code> (<code>gpu-runs</code>)</td><td>The readers of 2026-11-02 against those of 2026-11-03 with one fixed confidence recipe: SOP-BERT on fresh2 +21.6 [9.7, 33.2].</td></tr>
+<tr><td><code>FRESH2_RESULT.md</code>, <code>FEEDBACK_RESULT.md</code>, <code>feedback/DATA_NEEDS.md</code></td><td>The new writer (fresh2): every reader worse on it; data written from VSS’s own needs made VSS worse.</td></tr>
+<tr><td><code>RISK_COVERAGE.md</code>, <code>VSS_CONFIDENCE.md</code>, <code>PRECISION.md</code></td><td>The first confidence studies (2026-11-02): VSS margin AUROC 0.59, SOP-BERT 0.72, VSS from every step of its chain 0.81.</td></tr>
+<tr><td><code>CUT_SHARED.md</code></td><td>One cut for all readers: the VSS cut is better on whole messages, the Rules segmenter on one-line commands.</td></tr>
+<tr><td><code>PLAN_A.md</code>, <code>PLAN_B.md</code>, <code>EVENT_HINT.md</code>, <code>CREATE_COLOR.md</code>, <code>SHORT.md</code>, <code>SHORT2.md</code>, <code>BETWEEN.md</code>, <code>HOLDOUT_PURPLE.md</code></td><td>How the VSS worlds were grouped and fixed (<a href="#help/history/h-vss">How we got here</a>).</td></tr>
+<tr><td><code>DIAGRAM_OPS.md</code>, <code>legend_ext/LEGEND_EXT.md</code></td><td>Groups, double positions and the forms of 2026-11-02 (templates, free text, help questions, layout operations, arrow labels).</td></tr>
 </tbody></table></div>
-<p class="note">Older documents in the same folder: <code>VSS_READER_SPEC.md</code> (what is given and learned), <code>ROUTER_V2.md</code> (the router),
-<code>CUTTER.md</code>, <code>PLAN_A.md</code> (16 worlds), <code>LABEL_CONVENTIONS.md</code>, <code>ERROR_ANALYSIS.md</code>, <code>COMPOSER_ERRORS.md</code>,
-<code>MICRO_ROUND1.md</code>, <code>MICRO_ROUND2.md</code>, <code>RESULTS.md</code> (first single-model runs). Several name model folders removed on 2026-11-02;
-each says from which commit to restore them.</p>
+<p class="note">Older documents in the same folder: <code>VSS_READER_SPEC.md</code> (what is given and learned), <code>ROUTER_V2.md</code>,
+<code>CUTTER.md</code>, <code>LABEL_CONVENTIONS.md</code>, <code>ERROR_ANALYSIS.md</code>, <code>COMPOSER_ERRORS.md</code>, <code>ROUND2.md</code>,
+<code>MICRO_ROUND1.md</code>, <code>MICRO_ROUND2.md</code>, <code>RESULTS.md</code>. Several name model folders removed since; each says from which
+commit to restore them.</p>
 `, 'Where everything is in the repository, and the result documents behind the numbers.');
 
 /* ============================================================ planned */
 page('planned', 'In progress', `
 <p class="callout warn">Everything on this page is work in progress or a plan. None of it is used by the published demo today.</p>
 <ul>
-  <li><b>A fresh test set neither reader has seen</b> (fresh3, planned): the test part of fresh2 + short3 had been read for earlier studies, so
-  the numbers of 2026-11-03 are exploratory; the clean confirmation of the new readers and of their confidences needs messages written after
-  the models (<a href="#help/chain-vs-one/fairness">Is the comparison fair?</a>).</li>
-  <li><b>The spell checker’s vocabulary</b> is still built from the 7 previous worlds; rebuilding it from the 9 worlds
-  (<code>training/sketch/spell/build_spell.mjs</code>) is one change with its own measure.</li>
+  <li><b>Better questions back.</b> VSS-BERT holds a whole request when it is unsure of one value; a question about that one value (“which
+  colour: orange or red?”) would let you answer in one word. Its failures and the clarification dialogue are being studied.</li>
+  <li><b>A fresh test set</b> (fresh3, planned): the test part of fresh2 + short3 had been read for earlier studies, so the numbers of 2026-11-03
+  are exploratory; the clean confirmation of VSS-BERT and its confidence needs messages written after the models.</li>
+  <li><b>Short commands</b>: every learned reader is still close to asking about everything on short3 alone (SOP-BERT 4.2 [−1.4, 8.5]).</li>
   <li><b>The VSS help world</b>: the topic of a help question is often lost to the aspect words, and <code>about</code> is not read
-  (TRAIN_PLAN_1103.md §6); data or a front-end fix where the cause is.</li>
-  <li><b>SOP-BERT, further measures</b>: the short sets, the BERT cut read by the other readers (<code>cut_bench.mjs</code>) and the root-cause
-  analysis of its misses. The risk-coverage comparison with VSS is done (<a href="#help/knowing/experiment">Knowing what it does not know</a>).</li>
-  <li><b>Data for descriptions in roles</b> (SHORT2.md §3): annotated messages where descriptions (“the red circle”, “every gray square”, “the last
-  star”, “not blue”) fill the entity roles, which today they almost never do (0–3.5% per role).</li>
-  <li><b>The shared context rule holds one shape</b>: “them” after a list of names cannot be filled by any reader that uses it
-  (<code>make_roles.py</code> counts these context fillers as ones that cannot come out right).</li>
-  <li><b><code>future-experiments.md</code></b>: the VSS reader decides the action from the construction, not only from a verb (variant (b) of the
-  event hint; needs the owner’s approval); catastrophic forgetting in the fine-tuned BERT readers, and LoRA adapters per family of actions;
-  ModernBERT as the base of the neural reader; the same readers on a legend where a wrong action is costly, as the real test of the main metric.</li>
-  <li><b>Debt listed in ROUND2.md §7</b>: value n-grams applied longest-first, ambiguous position phrases inside move, chain pairing words in
-  links, names that are colour words, “box” as rectangle.</li>
+  (<code>TRAIN_PLAN_1103.md</code> §6); data or a front-end fix where the cause is.</li>
+  <li><b>Data for descriptions in roles</b> (<code>SHORT2.md</code> §3): annotated messages where descriptions (“the red circle”, “every gray
+  square”) fill the entity roles, which today they almost never do (0–3.5% per role).</li>
+  <li><b>The shared context rule holds one shape</b>: “them” after a list of names cannot be filled by any reader that uses it.</li>
+  <li><b><code>future-experiments.md</code></b>: catastrophic forgetting in the fine-tuned SOP-BERT, and LoRA adapters per family of actions;
+  ModernBERT as its base; the VSS reader deciding the action from the construction, not only from a verb (needs the owner’s approval); the same
+  readers on a legend where a wrong action is costly, as the real test of the main metric.</li>
 </ul>
 `, 'Work that is not in the demo yet.');
 

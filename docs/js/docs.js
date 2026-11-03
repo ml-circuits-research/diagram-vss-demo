@@ -1,6 +1,7 @@
 /* The Help overlay: a full-screen reader for the documentation, opened by the ? button above the drawing or by a link #help/<page>.
-   Pages, in this order: the editor and its language (docs/js/help.js, generated from the live engine), Concepts (docs/js/docs-concepts.js)
-   and How it works inside (docs/js/docs-arch.js, also shown as one page by docs/architecture.html).
+   Pages, in this order: the editor and its language (docs/js/help.js, generated from the live engine), Why VSS-BERT (docs/js/docs-concepts.js:
+   the goal, SOP-BERT, the data, VSS-BERT, asking, the Rules as a comparison) and How it works inside (docs/js/docs-arch.js, also shown as one
+   page by docs/architecture.html). Removed pages keep working as links: ALIASES sends them to the page (and section) that took their place.
    Navigation is the browser's history: every page is an entry (#help/<page>, or #help/<page>/<anchor> for a section), so Back, Forward,
    reload and shared links work. Closing (✕ or Esc) goes back to the entry the overlay was opened from; an overlay opened by a link
    (reload, shared URL) has no such entry, so closing removes the #help part instead. While it is open the app behind it is inert.
@@ -17,16 +18,21 @@ const HELP = (root.HelpKit && root.HelpKit.pages) || {};
 const GROUPS = [
   { title: 'Using the editor', pages: [['start', 'Start here'], ['draw', 'What you can draw'], ['arrows', 'Arrows and lines'], ['where', 'Where things go'], ['do', 'Everything you can do'], ['templates', 'Templates'], ['ask', 'Everything you can ask'], ['limits', 'What it cannot do']].map(([id, title]) => ({ id, title, render: env => HELP[id](env) })) },
   { title: 'The language', pages: [['sop-lang', 'SOP Lang'], ['capabilities', 'Capabilities']].map(([id, title]) => ({ id, title, render: env => HELP[id](env) })) },
-  { title: 'Concepts', pages: ((root.DocsConcepts && root.DocsConcepts.pages) || []).map(p => ({ id: p.id, title: p.title, lead: p.lead, render: () => p.html })) },
+  { title: 'Why VSS-BERT', pages: ((root.DocsConcepts && root.DocsConcepts.pages) || []).map(p => ({ id: p.id, title: p.title, lead: p.lead, render: () => p.html })) },
   { title: 'How it works inside', pages: ((root.DocsArch && root.DocsArch.pages) || []).map(p => ({ id: p.id, title: p.title, lead: p.lead, render: () => p.html })) }
 ];
 const FLAT = [];
 GROUPS.forEach(g => g.pages.forEach(p => { p.group = g.title; FLAT.push(p); }));
 const BY = Object.fromEntries(FLAT.map(p => [p.id, p]));
 const ROUTE = /^#help(?:\/([\w-]+))?(?:\/([\w-]+))?\/?$/;
+/* pages removed on 2026-11-03 (the documentation restructured around VSS-BERT): a link to one opens the page that took its place */
+const ALIASES = { 'why-three': ['rules-vs-learned'], knowing: ['history', 'h-confidence'], 'chain-vs-one': ['history', 'h-vss'],
+  'fresh-writer': ['history', 'h-fresh'], 'three-readers': ['rules-vs-learned', 'rv-vote'] };
 /** #help/<page>/<anchor> -> {id, anchor, missing}; null when the hash is not a help link */
 function parse(hash) {
   const m = ROUTE.exec(hash || ''); if (!m) return null;
+  const al = m[1] && !BY[m[1]] && ALIASES[m[1]] && BY[ALIASES[m[1]][0]] ? ALIASES[m[1]] : null;
+  if (al) return { id: al[0], anchor: al[1] || null, missing: null };
   return { id: m[1] && BY[m[1]] ? m[1] : 'start', anchor: m[2] || null, missing: m[1] && !BY[m[1]] ? m[1] : null };
 }
 
@@ -100,7 +106,7 @@ function navigate(hash) {
   } else history.pushState({ help: 1 }, '', hash);
   show(r, 0);
 }
-function open(id, anchor) { navigate('#help/' + (id && BY[id] ? id : 'start') + (anchor ? '/' + anchor : '')); }
+function open(id, anchor) { navigate('#help/' + (id && (BY[id] || ALIASES[id]) ? id : 'start') + (anchor ? '/' + anchor : '')); }
 /** close: back to the entry before the first help page, or drop the #help part when the overlay was opened by a link */
 function close() {
   if (!isOpen) return;
@@ -154,6 +160,6 @@ function init(o) {
   if (r) { history.replaceState({ help: 1, deep: true }, ''); show(r, 0); }
 }
 
-const DocsKit = { init, open, close, rerender, isOpen: () => isOpen, current: () => current, pages: FLAT.map(p => ({ id: p.id, title: p.title, group: p.group })) };
+const DocsKit = { init, open, close, rerender, isOpen: () => isOpen, current: () => current, pages: FLAT.map(p => ({ id: p.id, title: p.title, group: p.group })), aliases: ALIASES };
 root.DocsKit = DocsKit;
 })(window);

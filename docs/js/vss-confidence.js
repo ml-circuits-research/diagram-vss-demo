@@ -22,11 +22,12 @@
 // every group with a pull of at least REASON_MIN (in logit units), at most REASON_MAX, and always the first one. These two numbers only
 // choose how many sentences the reply shows; they do not change any decision.
 export const REASON_MIN = 0.1, REASON_MAX = 3;
-/** the levels of the setting: "cost" (the cost-score threshold, one confident mistake = 10 right answers, the default), "cost5" (bolder:
- *  = 5) and "cost20" (more careful: = 20), chosen the same way and stored in the file (owner, 2026-11-02 22:12), the precision levels of the
+/** the levels of the setting: "cost" (the cost-score threshold, one confident mistake = 10 right answers, the default), "cost1", "cost2",
+ *  "cost5" (bolder: = 1, 2, 5; owner 2026-11-03 09:30 for 1 and 2) and "cost20" (more careful: = 20), chosen the same way and stored in the
+ *  file (owner, 2026-11-02 22:12), the precision levels of the
  *  model file, and "all" (execute everything, no gate; never the default) */
-export const LEVELS = ["cost5", "cost", "cost20", "95", "97", "99", "all"];
-export const COST_LEVELS = ["cost5", "cost", "cost20"];
+export const LEVELS = ["cost1", "cost2", "cost5", "cost", "cost20", "95", "97", "99", "all"];
+export const COST_LEVELS = ["cost1", "cost2", "cost5", "cost", "cost20"];
 export const DEFAULT_LEVEL = "cost";
 
 /** the reader's part of the model file (the file itself, or its readers.vss_combined) */
@@ -56,7 +57,7 @@ export function reachedLevels(model) {
   const lv = specOf(model).levels || {};
   return Object.keys(lv).filter((k) => /^\d+$/.test(k) && lv[k] && Number.isFinite(lv[k].threshold)).map(Number).sort((a, b) => a - b);
 }
-/** a cost level of the model file ("cost", "cost5", "cost20"), or null when the file has none */
+/** a cost level of the model file ("cost", "cost1", "cost2", "cost5", "cost20"), or null when the file has none */
 const costOf = (model, key = "cost") => { const L = (specOf(model).levels || {})[key]; return L && (Number.isFinite(L.threshold) || L.kind === "executes everything" || L.kind === "asks everything") ? L : null; };
 /** the level the gate uses for a chosen level: "all" stays "all"; "cost" stays when the file has it; a reached precision level stays; a
  *  precision level the model does not reach -> the highest reached level below it, else "cost"; else null (every request is asked) */
