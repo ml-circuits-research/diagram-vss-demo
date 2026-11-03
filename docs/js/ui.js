@@ -394,7 +394,21 @@ async function cutMessage(text) {
 /* ---------------- canvas ---------------- */
 /* ---------------- canvas ---------------- */
 function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
-function lum(hex) { const n = parseInt(hex.slice(1), 16), r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255; return (0.299 * r + 0.587 * g + 0.114 * b) / 255; }
+/* the palette (logic.js PALETTE, the one table of shades) as CSS variables --pc-<name>-<fill|edge|ink|line> and --pc-arrow, with its dark
+   values under the page's dark theme (the same two selectors as index.html), so a theme change repaints without a re-render */
+(function paletteCss() {
+  const val = (p, r, dark) => (dark && p.dark && p.dark[r]) || p[r];
+  /* wash: a label on the colour's light / faint tint: on the pale wash the hue's own dark ink (light hues) or its edge (deep hues);
+     on the dark wash its dark line */
+  const wash = (p, dark) => dark ? val(p, 'line', true) : p.ink !== '#FFFFFF' ? p.ink : p.edge;
+  const vars = dark => Object.entries(K.PALETTE).map(([n, p]) => ['fill', 'edge', 'ink', 'line'].map(r => `--pc-${n}-${r}: ${val(p, r, dark)};`).join(' ') + ` --pc-${n}-wash: ${wash(p, dark)};`).join('\n  ')
+    + `\n  --pc-arrow: ${dark ? K.PALETTE_ARROW.dark : K.PALETTE_ARROW.light};`;
+  const st = document.createElement('style'); st.id = 'palette';
+  st.textContent = `:root {\n  ${vars(false)}\n}\n@media (prefers-color-scheme: dark) {\n:root:not([data-theme="light"]) {\n  ${vars(true)}\n}\n}\n:root[data-theme="dark"] {\n  ${vars(true)}\n}`;
+  document.head.appendChild(st);
+})();
+/** a colour name -> the CSS value of one of its roles (fill, edge, ink, line, wash); an unknown name is drawn as white */
+const pc = (name, role) => `var(--pc-${K.PALETTE[name] ? name : 'white'}-${role})`;
 function outlinePts(s) {
   const { w, h } = K.dims(s), hw = w / 2, hh = h / 2;
   if (s.shape === 'triangle') return [[0, -hh], [hw, hh], [-hw, hh]];
@@ -415,19 +429,16 @@ function rayDist(s, ux, uy) {
     default: return hw * 0.62;
   }
 }
-/* fill=light / faint / none (zones, backgrounds, venn circles): the opacity of the body's fill */
-const FILL_OPACITY = { light: 0.3, faint: 0.13, none: 0 };
 function drawShape(g, s) {
   const grp = el('g', { class: 'shp' + (hl.shapes.has(s.name) ? ' hl' : '') + (s.layer ? ' ' + s.layer : '') + (s.shape === 'text' ? ' txt' : ''), 'data-name': s.name, transform: `translate(${s.x} ${s.y})` }, g);
-  const { w, h } = K.dims(s), fill = K.COLOR_HEX[s.color] || '#ffffff';
+  const { w, h } = K.dims(s), tint = K.PALETTE_TINT[s.fill];   /* fill=light / faint / none: the body's fill opacity (logic.js PALETTE_TINT) */
   if (s.shape === 'text') {   /* a free text: no body, no name tag; its colour is the text's */
     if (hl.shapes.has(s.name)) el('rect', { class: 'halo', x: -w / 2 - 5, y: -h / 2 - 4, width: w + 10, height: h + 8, rx: 8 }, grp);
-    const t = el('text', { class: 'ftext', x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': K.fontOf(s), fill: K.COLOR_HEX[s.color] || '#24282E' }, grp); t.textContent = s.label || '';
+    const t = el('text', { class: 'ftext', x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': K.fontOf(s), style: `fill: ${pc(s.color || 'black', 'line')}` }, grp); t.textContent = s.label || '';
     return;
   }
-  const attrs = { class: 'body' + (s.outline ? ' outlined' : ''), fill };
-  if (s.outline) attrs.style = `stroke: ${K.COLOR_HEX[s.outline]}`;
-  if (FILL_OPACITY[s.fill] != null) attrs['fill-opacity'] = FILL_OPACITY[s.fill];
+  const attrs = { class: 'body' + (s.outline ? ' outlined' : ''), style: `fill: ${pc(s.color, 'fill')}; stroke: ${s.outline ? pc(s.outline, 'line') : pc(s.color, 'edge')}` };
+  if (tint != null) attrs['fill-opacity'] = tint;
   const pts = outlinePts(s);
   if (s.shape === 'circle') el('circle', Object.assign({ r: w / 2 }, attrs), grp);
   else if (s.shape === 'ellipse') el('ellipse', Object.assign({ rx: w / 2, ry: h / 2 }, attrs), grp);
@@ -444,7 +455,7 @@ function drawShape(g, s) {
     let fs = s.w ? Math.max(10, Math.min(15, s.h / 2.8)) : Math.max(9, Math.min(14, s.size / 4.4)), txt = s.label;   // a box of its own size: the font follows its height
     while (txt.length * fs * 0.56 > room && fs > 9) fs -= 0.5;
     const maxc = Math.max(3, Math.floor(room / (fs * 0.56))); if (txt.length > maxc) txt = txt.slice(0, maxc - 1) + '…';
-    const t = el('text', { class: 'lbl', x: 0, y: s.shape === 'triangle' ? h * 0.18 : 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': fs.toFixed(1), fill: lum(fill) > 0.62 ? '#17202B' : '#FFFFFF' }, grp);
+    const t = el('text', { class: 'lbl', x: 0, y: s.shape === 'triangle' ? h * 0.18 : 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': fs.toFixed(1), style: `fill: ${pc(s.color, tint != null ? 'wash' : 'ink')}` }, grp);
     t.textContent = txt;
   }
 }
@@ -455,7 +466,7 @@ function drawEdge(g, e, a, b, offset, taken) {
   if (ra + rb >= L - 4) return;
   const x1 = a.x + ux * ra + ox, y1 = a.y + uy * ra + oy, x2 = b.x - ux * rb + ox, y2 = b.y - uy * rb + oy;
   const grp = el('g', { class: 'edge' + (hl.edges.has(e.id) ? ' hl' : '') }, g);
-  const col = e.color ? K.COLOR_HEX[e.color] : null;
+  const col = e.color ? pc(e.color, 'line') : null;
   const head = (tx, ty, vx, vy) => { const bx = tx - vx * 11, by = ty - vy * 11; el('polygon', { class: 'hd', points: `${tx},${ty} ${bx - vy * 5},${by + vx * 5} ${bx + vy * 5},${by - vx * 5}`, style: col ? `fill:${col}` : '' }, grp); };
   const sx = e.arrow === 'both' ? x1 + ux * 9 : x1, sy = e.arrow === 'both' ? y1 + uy * 9 : y1;
   const ex = e.arrow === 'none' ? x2 : x2 - ux * 9, ey = e.arrow === 'none' ? y2 : y2 - uy * 9;

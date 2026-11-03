@@ -200,7 +200,51 @@ class Engine {
    ===================================================================== */
 const CANVAS = { W: 800, H: 500 };
 const SIZE_PX = { tiny: 30, small: 44, medium: 62, large: 88, huge: 118 };
-const COLOR_HEX = { red: '#E5484D', orange: '#F0803C', yellow: '#F2C94C', gold: '#D4A017', lime: '#9CCB3B', green: '#3E9B57', teal: '#159E93', cyan: '#3BB4D0', blue: '#3A6BDC', navy: '#22346B', indigo: '#4F46C8', purple: '#8B4FC4', magenta: '#C23FA6', pink: '#EC7FAE', brown: '#8B5A3C', gray: '#8C929B', black: '#24282E', white: '#F7F8F9' };
+/* The palette: the shades each colour NAME is drawn with. Rendering only: the engine and the readers use the names (the keys, in the
+   order of COLOR_VALUES); never rename or remove one here. ui.js turns this table into CSS variables (--pc-<name>-<role>), with the
+   dark-mode values under the page's dark theme, and draws with them; the help pages draw through ui.js and show `fill` as swatches.
+   Roles:
+     fill  the body of a shape (fill=light / faint draw it at PALETTE_TINT opacity: zones, backgrounds, venn circles)
+     edge  the shape's own outline: the same hue one step deeper (an ink line round a wash), never a shared grey
+     ink   a label written on the solid fill (WCAG AA, 4.5:1 or more, on every fill: 4.7 to 15.8)
+     line  the colour on the bare canvas: an arrow, an outline=<colour>, a free text. The deep hues use their fill; the light ones
+           (yellow, gold, lime, orange, cyan, pink, gray) are deepened until they reach 3:1 on white, which is why a yellow arrow or text
+           is ochre rather than lemon (a lemon line on white is invisible). White stays pale (1.9:1): a white line on white can only hint.
+           A label on a light / faint fill (ui.js "wash") takes the ink of a light hue, the edge of a deep one (4.5:1 or more on the tint
+           in both themes), and the dark line in dark mode
+     dark  what changes on the dark canvas (#111B21): lines lifted to 5.5:1 on it (4.5:1 on their own tint), outlines of the deep hues lighter than their fill so
+           navy and black shapes keep their edge, and a softer white (pure white glares on a dark page). Fills otherwise stay.
+   The choices (OKLCH, 2026-11-03): the old shades were saturated primaries at uneven lightness (a neon lime beside a heavy navy). These sit
+   in two lightness bands with chroma held back by about a fifth, like a set of drafting inks: deep hues (red, green, teal, blue, indigo,
+   purple, magenta, brown, navy, black) at L 0.26-0.56 carry white labels; light hues (yellow, gold, lime, orange, cyan, pink, gray,
+   white) at L 0.72-1.0 carry a dark ink of their own hue instead of a generic black. Each still reads as its name: red is a brick red,
+   not coral; navy is a deep blue-black, not slate; gold sits between orange and yellow; pink is a rose, not magenta. White is pure white
+   with a cool grey edge (the default shape: its edge is the one people see most). */
+const PALETTE = {
+  red:     { fill: '#C63C3C', edge: '#9D1820', ink: '#FFFFFF', line: '#C63C3C', dark: { edge: '#DF6962', line: '#F1645F' } },
+  orange:  { fill: '#ED8641', edge: '#AC5100', ink: '#482206', line: '#DF7A32', dark: { line: '#ED8641' } },
+  yellow:  { fill: '#F9D460', edge: '#BC9B24', ink: '#3A2C00', line: '#B49100', dark: { line: '#F9D460' } },
+  gold:    { fill: '#DEA63D', edge: '#A17000', ink: '#402900', line: '#C08A11', dark: { line: '#DEA63D' } },
+  lime:    { fill: '#ABDA69', edge: '#769F34', ink: '#233407', line: '#76A12D', dark: { line: '#ABDA69' } },
+  green:   { fill: '#35824B', edge: '#14612E', ink: '#FFFFFF', line: '#35824B', dark: { edge: '#609E6E', line: '#5BA76D' } },
+  teal:    { fill: '#188178', edge: '#006058', ink: '#FFFFFF', line: '#188178', dark: { edge: '#529D95', line: '#40A79C' } },
+  cyan:    { fill: '#5FCCE5', edge: '#2192A8', ink: '#003540', line: '#2DA2BA', dark: { line: '#5FCCE5' } },
+  blue:    { fill: '#356AC3', edge: '#184A9B', ink: '#FFFFFF', line: '#356AC3', dark: { edge: '#5B8AD7', line: '#5991ED' } },
+  navy:    { fill: '#203462', edge: '#071841', ink: '#FFFFFF', line: '#203462', dark: { edge: '#4A5E8A', line: '#7892C7' } },
+  indigo:  { fill: '#4E4BAC', edge: '#332C85', ink: '#FFFFFF', line: '#4E4BAC', dark: { edge: '#6A6DC0', line: '#8387ED' } },
+  purple:  { fill: '#7C47A5', edge: '#5C2980', ink: '#FFFFFF', line: '#7C47A5', dark: { edge: '#976BBC', line: '#B07BDD' } },
+  magenta: { fill: '#AB3782', edge: '#841561', ink: '#FFFFFF', line: '#AB3782', dark: { edge: '#C4619D', line: '#DF67B0' } },
+  pink:    { fill: '#EF9DBC', edge: '#B06785', ink: '#44212F', line: '#CB7C9B', dark: { line: '#EF9DBC' } },
+  brown:   { fill: '#7B4F36', edge: '#59321B', ink: '#FFFFFF', line: '#7B4F36', dark: { edge: '#956D58', line: '#BC8567' } },
+  gray:    { fill: '#A4AAB1', edge: '#6E757D', ink: '#1F2329', line: '#81878D', dark: { edge: '#C5CBD2', line: '#A4AAB1' } },
+  black:   { fill: '#1F2329', edge: '#070A0F', ink: '#FFFFFF', line: '#1F2329', dark: { edge: '#5A616A', line: '#C9D3DA' } },
+  white:   { fill: '#FFFFFF', edge: '#8C939B', ink: '#1F2329', line: '#B8BEC5', dark: { fill: '#E4E8ED', edge: '#9FA5AC', line: '#E4E8ED' } }
+};
+/* the rest of the drawing's paint: an arrow without a colour (light / dark canvas; a slate ink, 8.5:1 and 9.4:1), and the opacity of
+   fill=light and fill=faint (zones, the background, venn circles: a wash that a label in the colour's `line` still reads on) */
+const PALETTE_ARROW = { light: '#434E5B', dark: '#B4C0C8' };
+const PALETTE_TINT = { light: 0.2, faint: 0.07, none: 0 };
+const COLOR_HEX = Object.fromEntries(Object.entries(PALETTE).map(([k, v]) => [k, v.fill]));   /* name -> fill (help swatches, othercolor) */
 const sizeName = px => Object.entries(SIZE_PX).reduce((b, [k, v]) => Math.abs(v - px) < Math.abs(SIZE_PX[b] - px) ? k : b, 'medium');
 /* free text (shape=text): the font size of each size value (the same table as docs/js/templates.js FONT_PX); its box is estimated from
    the text as the renderer draws it (0.56 em per character) */
@@ -2751,7 +2795,7 @@ function createSystem(opts = {}) {
   return { world, engine, formalize, cut: (input, ctx) => rulesCut(formalize, input, ctx) };
 }
 
-return { createSystem, CELL, cellOf, parse, serialize, fmtValue, isRef, names, SOPError, Clarify, CANVAS, COLOR_HEX, SIZE_PX, FONT_PX, fontOf, dims, sizeName, region, edgeText, groupBox, groupLabels, tagBox, worldNodes, worldSOP };
+return { createSystem, CELL, cellOf, parse, serialize, fmtValue, isRef, names, SOPError, Clarify, CANVAS, COLOR_HEX, PALETTE, PALETTE_ARROW, PALETTE_TINT, SIZE_PX, FONT_PX, fontOf, dims, sizeName, region, edgeText, groupBox, groupLabels, tagBox, worldNodes, worldSOP };
 })();
 if (typeof module !== 'undefined') module.exports = SOPKit;
 /*LOGIC-END*/
