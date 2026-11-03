@@ -1,0 +1,96 @@
+{
+ "data": [
+  "training/sketch/llm_bench/fresh2/opus_a",
+  "training/sketch/llm_bench/fresh2/opus_b",
+  "training/sketch/llm_bench/fresh2/opus_c",
+  "training/sketch/llm_bench/fresh2/opus_d"
+ ],
+ "boot": 1000,
+ "seed": 1,
+ "cost": 10,
+ "test_messages": 405,
+ "test_requests": 1313,
+ "cal_messages": 195,
+ "arms": {
+  "VSS-G": {
+   "records": "results/072_measure/fresh2/G/records/vss_arm.jsonl",
+   "threshold": 0.8140321213812954,
+   "score": 12.10967250571211,
+   "ci": [
+    5.457227138643068,
+    18.51851851851852
+   ],
+   "done_right": 0.25057121096725055,
+   "conf_wrong": 0.049132947976878616,
+   "executed": 346,
+   "extras_executed": 5,
+   "all_right": 0.6222391469916222,
+   "all_wrong": 0.16984006092916984,
+   "done_right_at_3pct": 0.19878141660319879
+  },
+  "VSS-T": {
+   "records": "results/072_measure/fresh2/ALL/records/vss_arm.jsonl",
+   "threshold": 0.9072463423199828,
+   "score": 10.12947448591013,
+   "ci": [
+    6.412213740458015,
+    13.503086419753085
+   ],
+   "done_right": 0.13175932977913177,
+   "conf_wrong": 0.022598870056497175,
+   "executed": 177,
+   "extras_executed": 0,
+   "all_right": 0.642041127189642,
+   "all_wrong": 0.16527037319116528,
+   "done_right_at_3pct": 0.2079207920792079
+  },
+  "BERT-G": {
+   "records": "results/072_measure/fresh2/G/records/sop_arm_own.jsonl",
+   "threshold": 0.8233306859291084,
+   "score": 14.394516374714394,
+   "ci": [
+    1.954887218045113,
+    26.68112798264642
+   ],
+   "done_right": 0.6009139375476009,
+   "conf_wrong": 0.0706713780918728,
+   "executed": 849,
+   "extras_executed": 5,
+   "all_right": 0.7875095201827875,
+   "all_wrong": 0.1805026656511805,
+   "done_right_at_3pct": 0.2041127189642041
+  },
+  "BERT-T": {
+   "records": "results/072_measure/fresh2/ALL/records/sop_arm_own.jsonl",
+   "threshold": 0.8073860766267541,
+   "score": 35.94821020563595,
+   "ci": [
+    27.58881330309902,
+    44.36781609195402
+   ],
+   "done_right": 0.5727341964965728,
+   "conf_wrong": 0.035897435897435895,
+   "executed": 780,
+   "extras_executed": 7,
+   "all_right": 0.8080731150038081,
+   "all_wrong": 0.15917745620715917,
+   "done_right_at_3pct": 0.5613099771515613
+  }
+ },
+ "diff": {
+  "vss": {
+   "point": -1.9801980198019802,
+   "ci": [
+    -8.88888888888889,
+    4.905063291139242
+   ]
+  },
+  "bert": {
+   "point": 21.55369383092156,
+   "ci": [
+    9.700948212983224,
+    33.160621761658035
+   ]
+  }
+ }
+}

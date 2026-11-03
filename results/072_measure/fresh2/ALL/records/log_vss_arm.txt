@@ -1,0 +1,7 @@
+composer: cutter /home/claude/vss-box/diagram-vss-demo/docs/model/arms/ALL/cutter_worlds8s.json · worlds shapes [create,set,resize,fact,rule], links [connect,disconnect,reverse], position [move,swap,arrange,align,distribute,toFront,toBack], layout [improve,respace,snap,fit,flip,sort,groupBy,equalize,straighten,untangle], graphq [check,connected,path,reachable,cycle,exists], questions [count,list,extreme,nearest,describe,neighbors,degree,property,members,groupOf], manage [delete,duplicate,rename,label,group,ungroup], history [undo,redo,forget], help [help]
+composer v2: router cutter (top 3 of 9 cutter worlds) · fewest words not understood · ties and gaps: context filler docs/model/arms/ALL/context/weights.json margin 0
+event hint: mode H1 · event cutter /home/claude/vss-box/diagram-vss-demo/docs/model/arms/ALL/cutter_events8.json
+200 messages (fresh2)
+400 messages (fresh2)
+600 messages (fresh2)
+fresh2 vss: 600 messages, 1909 gold · right 65.6 · wrong 16.3 · not done 18.1 · extra 237 (checked against tally)

@@ -1,0 +1,93 @@
+{
+ "data": [
+  "results/072_measure/data/short3"
+ ],
+ "boot": 1000,
+ "seed": 1,
+ "cost": 10,
+ "test_messages": 340,
+ "test_requests": 432,
+ "cal_messages": 173,
+ "arms": {
+  "VSS-G": {
+   "records": "results/072_measure/short3/G/records/vss_arm.jsonl",
+   "threshold": 0.6355001875339173,
+   "score": 6.25,
+   "ci": [
+    -1.6018306636155606,
+    12.587412587412588
+   ],
+   "done_right": 0.1087962962962963,
+   "conf_wrong": 0.04081632653061224,
+   "executed": 49,
+   "extras_executed": 1,
+   "all_right": 0.3680555555555556,
+   "all_wrong": 0.14583333333333334,
+   "done_right_at_3pct": 0.09490740740740741
+  },
+  "VSS-T": {
+   "records": "results/072_measure/short3/ALL/records/vss_arm.jsonl",
+   "threshold": "asks everything",
+   "score": 0,
+   "ci": [
+    0,
+    0
+   ],
+   "done_right": 0,
+   "conf_wrong": null,
+   "executed": 0,
+   "extras_executed": 0,
+   "all_right": 0.5046296296296297,
+   "all_wrong": 0.19212962962962962,
+   "done_right_at_3pct": 0.020833333333333332
+  },
+  "BERT-G": {
+   "records": "results/072_measure/short3/G/records/sop_arm_own.jsonl",
+   "threshold": 0.6795176332213816,
+   "score": 0.23148148148148145,
+   "ci": [
+    -10.451306413301662,
+    10.328638497652582
+   ],
+   "done_right": 0.11805555555555555,
+   "conf_wrong": 0.08928571428571429,
+   "executed": 56,
+   "extras_executed": 2,
+   "all_right": 0.44907407407407407,
+   "all_wrong": 0.22453703703703703,
+   "done_right_at_3pct": 0.08333333333333333
+  },
+  "BERT-T": {
+   "records": "results/072_measure/short3/ALL/records/sop_arm_own.jsonl",
+   "threshold": 0.9423886500627533,
+   "score": 4.166666666666666,
+   "ci": [
+    -1.3574660633484164,
+    8.466819221967963
+   ],
+   "done_right": 0.06481481481481481,
+   "conf_wrong": 0.034482758620689655,
+   "executed": 29,
+   "extras_executed": 0,
+   "all_right": 0.6851851851851852,
+   "all_wrong": 0.21064814814814814,
+   "done_right_at_3pct": 0.08101851851851852
+  }
+ },
+ "diff": {
+  "vss": {
+   "point": -6.25,
+   "ci": [
+    -12.52847380410023,
+    1.643192488262911
+   ]
+  },
+  "bert": {
+   "point": 3.9351851851851847,
+   "ci": [
+    -4.761904761904762,
+    13.817330210772834
+   ]
+  }
+ }
+}

@@ -1,0 +1,78 @@
+{
+ "switches": "no switch",
+ "groups": "/home/claude/vss-box/diagram-vss-demo/docs/model/micro/registry.json",
+ "results": [
+  {
+   "folder": "llm_bench/short3 (no pending)",
+   "trained": false,
+   "requests": 644,
+   "counts": {
+    "ok": 271,
+    "differs": 221,
+    "no event token": 77,
+    "no world": 75
+   },
+   "bad_keys": {
+    "shape": 51,
+    "target": 45,
+    "template": 30,
+    "layout": 27,
+    "to": 27,
+    "from": 26,
+    "label": 17,
+    "outline": 15,
+    "position": 12,
+    "items": 11
+   },
+   "lost": {
+    "verb": 172,
+    "shape": 47,
+    "head of mention": 21,
+    "name": 15,
+    "layers": 6,
+    "$new": 5,
+    "t_x": 5,
+    "left_side": 5,
+    "center": 3,
+    "edge": 3
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_bench/fresh2 (opus_a..d)",
+   "trained": false,
+   "requests": 1909,
+   "counts": {
+    "ok": 1408,
+    "differs": 302,
+    "no event token": 194,
+    "every shape": 5
+   },
+   "bad_keys": {
+    "target": 173,
+    "shape": 33,
+    "anchor": 30,
+    "to": 21,
+    "from": 19,
+    "position": 18,
+    "kind": 12,
+    "color": 9,
+    "ask": 8,
+    "superlative": 6
+   },
+   "lost": {
+    "verb": 236,
+    "name": 166,
+    "chain": 45,
+    "shape": 18,
+    "head of mention": 17,
+    "$new": 17,
+    "rules": 8,
+    "circle": 7,
+    "square": 5,
+    "right_of": 4
+   },
+   "examples": {}
+  }
+ ]
+}

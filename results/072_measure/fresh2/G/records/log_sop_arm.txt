@@ -1,0 +1,10 @@
+composer: cutter /home/claude/vss-box/diagram-vss-demo/docs/model/micro/cutter_worlds7s.json · worlds shapes [create,set,resize,fact,rule], links [connect,disconnect], position [move,swap,arrange,align,distribute,toFront,toBack], graphq [check,connected,path,reachable,cycle,exists], questions [count,list,extreme,nearest,describe,neighbors,degree,property], manage [delete,duplicate,rename,label], history [undo,redo,forget]
+composer v2: router cutter (top 3 of 7 cutter worlds) · fewest words not understood · ties and gaps: context filler /home/claude/vss-box/diagram-vss-demo/docs/model/context/weights.json margin 0
+event hint: mode H1 · event cutter /home/claude/vss-box/diagram-vss-demo/docs/model/micro/cutter_events.json
+100 messages (fresh2, sop-bert, cut own)
+200 messages (fresh2, sop-bert, cut own)
+300 messages (fresh2, sop-bert, cut own)
+400 messages (fresh2, sop-bert, cut own)
+500 messages (fresh2, sop-bert, cut own)
+600 messages (fresh2, sop-bert, cut own)
+fresh2 sop-bert cut own: 600 messages, 2029 produced requests; max |min over recorded heads - confSop| = 2.24e-4

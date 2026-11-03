@@ -1,0 +1,6 @@
+
+convert_check (no switch; groups registry.json): share of the requests whose world row ...
+| folder | requests | round trip | every shape | no world | no event token | differs | no node / no span | keys that differ most |
+|---|---|---|---|---|---|---|---|---|
+| llm_bench/short3 (no pending) | 644 | 42.1% | 0.0% | 11.6% | 12.0% | 34.3% | 0.0% | shape 51 target 45 template 30 layout 27 to 27 from 26 |
+| llm_bench/fresh2 (opus_a..d) | 1909 | 73.8% | 0.3% | 0.0% | 10.2% | 15.8% | 0.0% | target 173 shape 33 anchor 30 to 21 from 19 position 18 |

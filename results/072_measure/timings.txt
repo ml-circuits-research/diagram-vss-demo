@@ -1,0 +1,21 @@
+In all: 18716 variants; false agreements 3, false disagreements 211 (vote, engine mode); VSS-BERT: 1 / 1030; scorer: false right 1310, false wrong 721.
+short3: 530 messages, 17 left out (a pending wire), 513 kept with 644 gold requests
+ceiling G:
+| folder | requests | round trip | every shape | no world | no event token | differs | no node / no span | keys that differ most |
+|---|---|---|---|---|---|---|---|---|
+| llm_bench/short3 (no pending) | 644 | 42.1% | 0.0% | 11.6% | 12.0% | 34.3% | 0.0% | shape 51 target 45 template 30 layout 27 to 27 from 26 |
+| llm_bench/fresh2 (opus_a..d) | 1909 | 73.8% | 0.3% | 0.0% | 10.2% | 15.8% | 0.0% | target 173 shape 33 anchor 30 to 21 from 19 position 18 |
+ceiling ALL:
+| folder | requests | round trip | every shape | no world | no event token | differs | no node / no span | keys that differ most |
+|---|---|---|---|---|---|---|---|---|
+| llm_bench/short3 (no pending) | 644 | 61.0% | 0.0% | 0.0% | 15.5% | 23.4% | 0.0% | target 28 shape 19 label 15 position 14 count 12 from 11 |
+| llm_bench/fresh2 (opus_a..d) | 1909 | 74.3% | 0.3% | 0.0% | 10.0% | 15.5% | 0.0% | target 157 anchor 49 position 39 shape 29 to 21 from 19 |
+[06:51:22 +30s] fresh2: collectors
+fresh2 vss: 600 messages, 1909 gold · right 64.0 · wrong 16.3 · not done 19.7 · extra 182 (checked against tally)
+fresh2 vss: 600 messages, 1909 gold · right 65.6 · wrong 16.3 · not done 18.1 · extra 237 (checked against tally)
+[06:52:03 +71s] fresh2: reports written (results/072_measure/fresh2/{G,ALL}/report.md, verdicts.md, verdicts.json)
+[06:52:03 +71s] short3: collectors
+short3 vss: 513 messages, 644 gold · right 34.5 · wrong 14.3 · not done 51.2 · extra 81 (checked against tally)
+short3 vss: 513 messages, 644 gold · right 48.1 · wrong 17.5 · not done 34.3 · extra 92 (checked against tally)
+[06:52:15 +83s] short3: reports written (results/072_measure/short3/{G,ALL}/report.md, verdicts.md, verdicts.json)
+[06:52:15 +83s] FAILED: COMPARE.md
