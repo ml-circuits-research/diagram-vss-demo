@@ -34,7 +34,7 @@ SHIPPED = {"shapes": "shapes7c", "links": "links7", "position": "position7", "gr
 KEYS = ["DATA", "FRAC", "QCOLOR", "MARKER", "ROW_SHAPE", "FRONT_ROWS", "KINDMAP", "CAL_FALLBACK", "D", "EPOCHS", "SEED", "N_EVAL", "EVAL_MODES", "HOLDOUT",
         "CREATE_COLOR", "N_CAL", "VAL_PREC", "VAL_SUB", "VAL_PICK", "SHORT", "OPS", "DIAGRAM_OPS", "FRONT_NEG", "VAL_GUARD", "NEW_DISTINCT", "SET_CAL"]
 COMMON = "DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary"
-PER_WORLD = ("CREATE_COLOR", "QCOLOR", "VAL_PREC", "VAL_SUB", "VAL_PICK", "FRONT_ROWS", "ROW_SHAPE", "FRONT_NEG", "VAL_GUARD", "NEW_DISTINCT")   # read at call time: may differ per world
+PER_WORLD = ("CREATE_COLOR", "QCOLOR", "VAL_PREC", "VAL_SUB", "VAL_PICK", "VAL_SHADOW", "FRONT_ROWS", "ROW_SHAPE", "FRONT_NEG", "VAL_GUARD", "NEW_DISTINCT")   # read at call time: may differ per world
 GLOBAL = ("LEGEND_EXT", "DIAGRAM_OPS", "DATA", "SHORT", "OPS")                                     # read at import or by load_msgs: one value for all
 
 
@@ -58,7 +58,7 @@ def settings_table(groups, tsv):
             b = json.load(open(os.path.join(REPO, f"docs/model/micro/{SHIPPED[w]}/BUILD.json")))
             out[w] = {k: str(b[k]) for k in KEYS if k in b and str(b[k]) != ""}
         else: out[w] = dict(x.split("=", 1) for x in COMMON.split())
-        for k in ("VAL_PICK", "LEGEND_EXT", "DIAGRAM_OPS", "FRONT_NEG", "VAL_GUARD", "NEW_DISTINCT"):   # the environment's switches apply to every world (as 070 / 073 pass them)
+        for k in ("VAL_PICK", "LEGEND_EXT", "DIAGRAM_OPS", "FRONT_NEG", "VAL_GUARD", "NEW_DISTINCT", "VAL_SUB", "VAL_PREC", "VAL_SHADOW"):   # the environment's switches apply to every world (as 070 / 073 pass them; VAL_SUB / VAL_PREC added 2026-11-03, scenes_r3/ROOT_CAUSES.md: before, they were dropped here)
             if os.environ.get(k): out[w][k] = os.environ[k]
     return out
 

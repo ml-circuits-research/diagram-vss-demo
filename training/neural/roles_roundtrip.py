@@ -24,6 +24,10 @@ import make_data as MD
 import make_roles as MR
 
 ALSO = ["llm_bench/short3", "llm_bench/fresh2/opus_a", "llm_bench/fresh2/opus_b", "llm_bench/fresh2/opus_c", "llm_bench/fresh2/opus_d"]
+# ALSO_DIRS="<folder> ..." (relative to training/sketch; off by default): more folders checked, not trained on, labelled with the same layout
+# (scenes_r3/ROOT_CAUSES.md: llm_bench/scenes_test, and llm_train/scenes_r3 when it is not in EXTRA_DIRS: the label ceiling of a layout
+# trained without the scenes, the shipped model's)
+ALSO = ALSO + [d for d in os.environ.get("ALSO_DIRS", "").split() if d not in ALSO]
 # causes that are not in the labels: the reference the shared context rule fills (AGENTS.md: left to the reasoning layer, not a reader
 # error), and the gold writing the name of a shape created earlier in the message where the decoder (as every reader) writes $new
 NOT_LABEL = ("context:", "$new vs the created name")
