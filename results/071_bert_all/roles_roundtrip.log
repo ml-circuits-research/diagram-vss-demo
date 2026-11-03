@@ -1,0 +1,138 @@
+25828 messages -> node (docs/js/neural.js decoding)
+5000/25828 messages
+10000/25828 messages
+15000/25828 messages
+20000/25828 messages
+25000/25828 messages
+decoded 25828 messages
+| folder | trained | requests | round trip right | right or reference only | asked (layout cannot hold) | wrong | missing | extra wires | rows | silent wrong labels | rows the layout cannot hold (refused) | cut lost or merged the span | label="" | template | count/at/outline/kind | description broader/narrower | one word, two keys (group) | lists cut or merged | context rule | arrow from/to | gold names a shape created earlier ($new) | name tags | key not learned | other |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| llm_train/sonnet_msg | yes | 3127 | 87.9% | 99.8% | 0.0% | 12.0% | 0.1% | 0 | 3127 | 0.0% | 0.0% | 0.1% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 11.3% | 0.1% | 0.6% | 0.0% | 0.0% | 0.0% |
+| llm_train/haiku_msg | yes | 2304 | 100.0% | 100.0% | 0.0% | 0.0% | 0.0% | 0 | 2304 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/sonnet_msg2 | yes | 2789 | 93.3% | 99.8% | 0.0% | 6.6% | 0.0% | 0 | 2789 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 6.5% | 0.0% | 0.0% | 0.0% | 0.0% | 0.1% |
+| llm_train/haiku_msg2 | yes | 2001 | 99.5% | 100.0% | 0.0% | 0.5% | 0.0% | 0 | 2001 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.5% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/sonnet_long | yes | 2562 | 87.2% | 99.8% | 0.0% | 12.8% | 0.0% | 0 | 2562 | 0.1% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.1% | 0.0% | 0.0% | 12.6% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_bench/fresh1/sonnet | yes | 3030 | 94.2% | 99.9% | 0.0% | 5.8% | 0.0% | 0 | 3030 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 5.7% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_bench/fresh1/haiku | yes | 2514 | 95.7% | 100.0% | 0.0% | 4.3% | 0.0% | 0 | 2514 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 4.2% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/sonnet_short | yes | 1500 | 99.9% | 100.0% | 0.0% | 0.1% | 0.0% | 0 | 1500 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.1% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/haiku_short | yes | 1500 | 99.5% | 100.0% | 0.0% | 0.5% | 0.0% | 0 | 1500 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.5% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/opus_train_a | yes | 994 | 93.4% | 99.9% | 0.0% | 6.6% | 0.0% | 0 | 994 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 6.5% | 0.0% | 0.0% | 0.0% | 0.0% | 0.1% |
+| llm_train/opus_train_b | yes | 891 | 88.9% | 100.0% | 0.0% | 11.1% | 0.0% | 0 | 891 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 11.1% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/opus_train_c | yes | 1059 | 89.2% | 100.0% | 0.0% | 10.8% | 0.0% | 0 | 1059 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 10.8% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/opus_train_d | yes | 1015 | 83.3% | 100.0% | 0.0% | 16.7% | 0.0% | 0 | 1015 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 16.7% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/opus_gen_1 | yes | 991 | 90.2% | 99.9% | 0.0% | 9.8% | 0.0% | 0 | 991 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 9.7% | 0.1% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/opus_gen_2 | yes | 1094 | 91.7% | 100.0% | 0.0% | 8.3% | 0.0% | 0 | 1094 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 8.3% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/synth_rules | yes | 11707 | 98.5% | 99.8% | 0.0% | 1.5% | 0.0% | 0 | 11707 | 0.2% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.2% | 0.0% | 0.0% | 1.3% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/synth_rules_ops | yes | 1470 | 85.3% | 87.6% | 12.1% | 14.7% | 0.0% | 0 | 1470 | 0.0% | 12.1% | 0.0% | 9.4% | 0.0% | 0.0% | 0.0% | 2.7% | 0.0% | 2.5% | 0.0% | 0.0% | 0.1% | 0.0% | 0.0% |
+| llm_train/synth_rules_ext | yes | 3664 | 99.5% | 99.9% | 0.0% | 0.5% | 0.0% | 0 | 3664 | 0.1% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.1% | 0.0% | 0.0% | 0.4% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/ops_formulations | yes | 733 | 99.5% | 100.0% | 0.0% | 0.5% | 0.0% | 0 | 733 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.5% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_train/opus_ext_1 | yes | 743 | 91.4% | 97.7% | 1.1% | 8.6% | 0.0% | 0 | 743 | 0.1% | 1.1% | 0.0% | 0.9% | 1.1% | 0.0% | 0.0% | 0.0% | 0.0% | 6.5% | 0.0% | 0.0% | 0.1% | 0.0% | 0.0% |
+| llm_train/synth_combo | yes | 4521 | 99.7% | 99.7% | 0.0% | 0.3% | 0.0% | 0 | 4521 | 0.3% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.3% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_bench/sonnet_spans | yes | 2173 | 90.1% | 99.9% | 0.0% | 9.9% | 0.0% | 0 | 2173 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 9.6% | 0.3% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_bench/haiku_spans | yes | 2202 | 99.2% | 100.0% | 0.0% | 0.8% | 0.0% | 0 | 2202 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.7% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_bench/short3 | no | 650 | 95.7% | 98.0% | 0.6% | 4.3% | 0.0% | 0 | 650 | 0.3% | 0.6% | 0.0% | 0.6% | 0.2% | 0.6% | 0.2% | 0.0% | 0.0% | 2.3% | 0.0% | 0.0% | 0.3% | 0.2% | 0.0% |
+| llm_bench/fresh2/opus_a | no | 514 | 87.9% | 99.8% | 0.0% | 12.1% | 0.0% | 0 | 514 | 0.2% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 11.9% | 0.0% | 0.0% | 0.2% | 0.0% | 0.0% |
+| llm_bench/fresh2/opus_b | no | 468 | 91.5% | 99.8% | 0.0% | 8.5% | 0.0% | 0 | 468 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 8.5% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_bench/fresh2/opus_c | no | 471 | 94.3% | 100.0% | 0.0% | 5.7% | 0.0% | 0 | 471 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 5.7% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| llm_bench/fresh2/opus_d | no | 456 | 90.8% | 100.0% | 0.0% | 9.2% | 0.0% | 0 | 456 | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 9.2% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| ALL trained folders | yes | 54584 | 95.3% | 99.5% | 0.3% | 4.7% | 0.0% | 0 | 54584 | 0.1% | 0.3% | 0.0% | 0.3% | 0.0% | 0.0% | 0.1% | 0.1% | 0.0% | 4.2% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+| ALL | yes | 57143 | 95.2% | 99.5% | 0.3% | 4.8% | 0.0% | 0 | 57143 | 0.1% | 0.3% | 0.0% | 0.3% | 0.0% | 0.0% | 0.1% | 0.1% | 0.0% | 4.3% | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% |
+
+causes of the requests that do not round-trip (all folders; first wrong key):
+- context rule / context: the shared rule gives another shape (gold is a list): 1304
+    - e.g. sm-0007 "link them all from Api" {"action": "connect", "from": "Api", "to": "Db,Cache,Queue"} -> [['to', '∅', 'db,cache,queue']]
+    - e.g. sm-0023 "Put all the desks in a grid" {"action": "arrange", "target": "Desk1,Desk2,Desk3,Desk4", "layout": "grid"} -> [['target', '∅', 'desk1,desk2,desk3,desk4']]
+    - e.g. sm-0023 "align them vertically" {"action": "align", "target": "Desk1,Desk2,Desk3,Desk4", "axis": "vertical"} -> [['target', '∅', 'desk1,desk2,desk3,desk4']]
+- context rule / context: the shared rule gives another shape: 1149
+    - e.g. sm-0001 "make it large" {"action": "set", "target": "Cart", "size": "large"} -> [['target', '∅', 'cart']]
+    - e.g. sm-0001 "turn it green" {"action": "set", "target": "Cart", "color": "green"} -> [['target', '∅', 'cart']]
+    - e.g. sm-0001 "put a blue diamond named Pay right of it" {"action": "create", "shape": "diamond", "color": "blue", "name": "Pay", "position": "rightOf", "anchor": "Cart"} -> [['position', '∅', 'rightof'], ['anchor', '∅', 'cart']]
+- label="" / label="": 149
+    - e.g. so-00005 "get rid of the label on the edge between Krill and Heron" {"action": "label", "label": "", "from": "Krill", "to": "Heron"} -> [['label', '∅', '']]
+    - e.g. so-00046 "remove the text from the arrow leaving Deploy" {"action": "label", "label": "", "from": "Deploy"} -> [['label', '∅', '']]
+    - e.g. so-00062 "remove the label of the oldest hexagon" {"action": "label", "target": "mention(recency=oldest,shape=hexagon)", "label": ""} -> [['label', '∅', '']]
+- description broader/narrower / description mixed with names (names dropped): 41
+    - e.g. sm-0549 "Make both desks brown" {"action": "set", "target": "Desk,mention(recency=newest)", "color": "brown"} -> [['target', 'mention(recency=newest)', 'desk,mention(recency=newest)']]
+    - e.g. sm2-0258 "arrange them in a row" {"action": "arrange", "target": "Pod1,Pod2,Pod3,mention(recency=newest)", "layout": "row"} -> [['target', 'mention(recency=newest)', 'pod1,pod2,pod3,mention(recency=newest)']]
+    - e.g. sl-0023 "Conect both hydrogens to Oxygen with plain lines, no arrows" {"action": "connect", "from": "Hydrogen,mention(recency=newest)", "to": "Oxygen", "arrow": "none"} -> [['from', 'mention(recency=newest)', 'hydrogen,mention(recency=newest)']]
+- one word, two keys (group) / one word for two keys (the group name is also a target): 40
+    - e.g. so-00064 "Move Scene3 into Intake" {"action": "group", "target": "Scene3,Intake", "name": "Intake"} -> [['target', 'scene3', 'scene3,intake']]
+    - e.g. so-00094 "put Export in Ring3" {"action": "group", "target": "Export,Ring3", "name": "Ring3"} -> [['target', 'export', 'export,ring3']]
+    - e.g. so-00141 "add Queue to Block7" {"action": "group", "target": "Queue,Block7", "name": "Block7"} -> [['target', 'queue', 'queue,block7']]
+- gold names a shape created earlier ($new) / $new vs the created name: 20
+    - e.g. sm-0037 "Where is Budget relative to Plan" {"ask": "property", "target": "Budget", "property": "position"} -> [['target', '$new', 'budget']]
+    - e.g. sm-0230 "Label Plot "Act one"" {"action": "label", "target": "Plot", "label": "Act one"} -> [['target', '$new', 'plot']]
+    - e.g. sm-0242 "Duplicate Food once" {"action": "duplicate", "target": "Food"} -> [['target', '$new', 'food']]
+- arrow from/to / name tags misaligned: 11
+    - e.g. sm-0341 "remove the Sugar link" {"action": "disconnect", "from": "Sugar", "to": "Stand"} -> [['from', 'sugar', 'stand']]
+    - e.g. sl-0016 "connect Oven to it" {"action": "connect", "from": "$new", "to": "$new"} -> [['to', '∅', '$new']]
+    - e.g. fs-0380 "Kickoff is first and Launch is last, with Design, Build and Review in between in that order. Connect them all one after the other" {"action": "connect", "from": "Kickoff,Design,Build,Review,Launch", "pairing": "chain"} -> [['from', 'kickoff,launch,design,build,review', 'kickoff,design,build,review,launch']]
+- arrow from/to / $new vs the created name: 7
+    - e.g. sm-0290 "Connect Scope and Risks to Project" {"action": "connect", "from": "Scope,Risks", "to": "Project"} -> [['from', '$new,$new', 'scope,risks']]
+    - e.g. sm-0290 "label the Scope line "core"" {"action": "connect", "from": "Scope", "to": "Project", "label": "core"} -> [['from', '$new', 'scope']]
+    - e.g. s-0052 "there is a path from Triage to Exit" {"ask": "path", "from": "Triage", "to": "Exit"} -> [['to', '$new', 'exit']]
+- cut lost or merged the span / missing: the cut tags lost or merged the span: 5
+    - e.g. sm-0070 "put the Bride and Groom left and right of it" {"action": "move", "target": "Groom", "position": "rightOf", "anchor": "Cake"} -> missing
+    - e.g. sm-0194 "Add a red square and a blue circle near Red1" {"action": "create", "shape": "circle", "color": "blue", "position": "near", "anchor": "Red1"} -> missing
+    - e.g. sm-0394 "each team its color" {"action": "set", "target": "Greens", "color": "green"} -> missing
+- name tags / name tags misaligned: 5
+    - e.g. sr-09102 "Is Todo connected to Testong" {"ask": "connected", "target": "Todo", "anchor": "Testing"} -> [['target', 'todo', 'testing'], ['anchor', '∅', 'todo']]
+    - e.g. so-01376 "is Dave right of Carol and below Unzle" {"ask": "check", "target": "Dave", "position": "rightOf", "anchor": "Carol", "position2": "below", "anchor2": "Uncle"} -> [['anchor', '∅', 'uncle']]
+    - e.g. sc-00076 "Drag it between Clean and Source" {"action": "move", "target": "Source", "position": "between", "anchor": "Clean,Source"} -> [['target', '∅', 'source']]
+- template / list cut or merged (items): 5
+    - e.g. oe1-0302 "draw an org chart: Maria (CEO), then Tom and Priya under Maria, and Lee under Tom" {"action": "create", "template": "hierarchy", "items": "Maria (CEO),Tom,Priya,Lee", "parents": "Maria,Maria,Tom"} -> [['parents', 'maria,tom', 'maria,maria,tom']]
+    - e.g. oe1-0402 "org chart please. Ana is CEO, Raj and Mei report to Ana, Sam reports to Raj" {"action": "create", "template": "hierarchy", "items": "Ana,Raj,Mei,Sam", "parents": "Ana,Ana,Raj"} -> [['parents', 'ana,raj', 'ana,ana,raj']]
+    - e.g. oe1-0412 "Can you make a family tree where Grandma Ivy is at the top, Rose and Lily are her daughters, and Max is Rose's son" {"action": "create", "template": "hierarchy", "items": "Grandma Ivy,Rose,Lily,Max", "parents": "Grandma Ivy,Grandma Ivy,Rose"} -> [['parents', 'rose', 'grandma ivy,grandma ivy,rose']]
+- template / item texts differ: 4
+    - e.g. oe1-0140 "make a pyramid with Love at the bottom then Safety, Routines, Play, and Independence on top" {"action": "create", "template": "pyramid", "items": "Independence,Play,Routines,Safety,Love"} -> [['items', 'love,safety,routines,play,independence', 'independence,play,routines,safety,love']]
+    - e.g. oe1-0220 "pyramid of training: Rest at the base, then Strength, Speed, and Skill at the top. Title it "Season prep"" {"action": "create", "template": "pyramid", "items": "Skill,Speed,Strength,Rest", "title": "Season prep"} -> [['items', 'rest,strength,speed,skill', 'skill,speed,strength,rest']]
+    - e.g. oe1-0330 "Make a pyramid of my money: Emergency fund on the bottom, then Retirement, then Investing, and Fun money at the very top. Call it "Money plan"" {"action": "create", "template": "pyramid", "items": "Fun money,Investing,Retirement,Emergency fund", "title": "Money plan"} -> [['items', 'emergency fund,retirement,investing,fun money', 'fun money,investing,retirement,emergency fund']]
+- other / number not read back: 3
+    - e.g. sm2-0229 "Slide Day to the left" {"action": "move", "target": "Day", "direction": "left", "distance": "100"} -> [['distance', '∅', '100']]
+    - e.g. sm2-0500 "Slide Yes left" {"action": "move", "target": "Yes", "direction": "left", "distance": "50"} -> [['distance', '∅', '50']]
+    - e.g. ot-0275 "then Box3 too" {"action": "move", "target": "Box3", "direction": "down", "distance": "50"} -> [['distance', '∅', '50']]
+- count/at/outline/kind / key not read for this act (act_keys): 3
+    - e.g. s3-0062 "undo twice" {"action": "undo", "count": "2"} -> [['count', '∅', '2']]
+    - e.g. s3-0188 "undo the last 2 changes" {"action": "undo", "count": "2"} -> [['count', '∅', '2']]
+    - e.g. s3-0411 "go back three steps" {"action": "undo", "count": "3"} -> [['count', '∅', '3']]
+- count/at/outline/kind / number not read back: 2
+    - e.g. fs-0379 "Same again below it" {"action": "create", "count": "2", "size": "tiny", "shape": "circle", "position": "below", "anchor": "Cup"} -> [['count', '∅', '2'], ['anchor', '$new', 'cup']]
+    - e.g. s3-0166 "add a 3 by 3 grid of small squares" {"action": "create", "count": "9", "shape": "square", "size": "small", "layout": "grid"} -> [['count', '∅', '9']]
+- name tags / key not read for this act (act_keys): 2
+    - e.g. s3-0310 "no more arrows on done" {"action": "disconnect", "target": "Done"} -> [['target', '∅', 'done']]
+    - e.g. s3-0367 "remove every connection of Check" {"action": "disconnect", "target": "Check"} -> [['target', '∅', 'check']]
+- lists cut or merged / list cut or merged (names): 1
+    - e.g. sm2-0162 "Link Raw to Bronze, Bronze to Silver and Silver to Gold in a chain" {"action": "connect", "from": "Raw,$new,$new,Gold", "pairing": "chain"} -> [['from', 'raw,$new,gold', 'raw,$new,$new,gold']]
+- name tags / text span not read back: 1
+    - e.g. oe1-0211 "three boxes under it called Price, Speed, Trust, in a row" {"action": "create", "shape": "rectangle", "count": "3", "name": "Price,Speed,Trust", "position": "below", "anchor": "$new"} -> [['name', 'price', 'price,speed,trust']]
+- other / text span not read back: 1
+    - e.g. s-0096 "label Box1 with that one" {"action": "label", "target": "Box1", "label": "1"} -> [['label', '∅', '1']]
+- description broader/narrower / description broader (a gold key dropped): 1
+    - e.g. s3-0293 "trash the small squares" {"action": "delete", "target": "mention(quantifier=all,shape=square,size=small)"} -> [['target', 'mention(quantifier=all,shape=square)', 'mention(quantifier=all,shape=square,size=small)']]
+- key not learned / key not read for this act (act_keys): 1
+    - e.g. s3-0515 "Done has the label "end"" {"target": "Done", "label": "end"} -> [['label', '∅', 'end']]
+
+silent wrong labels (rows; reason):
+- llm_train/synth_rules: target: names beside a description dropped: 22
+- llm_train/synth_combo: target: names beside a description dropped: 12
+- llm_train/sonnet_long: from: names beside a description dropped: 2
+- llm_train/synth_rules_ext: target: names beside a description dropped: 2
+- llm_train/opus_ext_1: parents: value written but not tagged: 2
+- llm_train/synth_combo: target: value written but not tagged: 2
+- llm_train/sonnet_msg: target: names beside a description dropped: 1
+- llm_train/sonnet_msg2: target: names beside a description dropped: 1
+- llm_train/sonnet_long: target: names beside a description dropped: 1
+- llm_bench/short3: target: description label differs: 1
+- llm_bench/short3: scale: number word mapped to another number: 1
+- llm_bench/fresh2/opus_a: target: value written but not tagged: 1
+    - e.g. sm-0549 "Make both desks brown" {"action": "set", "target": "Desk,mention(recency=newest)", "color": "brown"}: target: names beside a description dropped
+    - e.g. sm2-0258 "arrange them in a row" {"action": "arrange", "target": "Pod1,Pod2,Pod3,mention(recency=newest)", "layout": "row"}: target: names beside a description dropped
+    - e.g. sl-0023 "Conect both hydrogens to Oxygen with plain lines, no arrows" {"action": "connect", "from": "Hydrogen,mention(recency=newest)", "to": "Oxygen", "arrow": "none"}: from: names beside a description dropped
+    - e.g. sl-0096 "Draw a plain line from each of the swings to the Sandbox" {"action": "connect", "from": "Swing,mention(recency=newest)", "to": "Sandbox", "arrow": "none"}: from: names beside a description dropped
+    - e.g. oe1-0412 "Can you make a family tree where Grandma Ivy is at the top, Rose and Lily are her daughters, and Max is Rose's son" {"action": "create", "template": "hierarchy", "items": "Grandma Ivy,Rose,Lily,Max", "parents": "Grandma Ivy,Grandma Ivy,Rose"}: parents: value written but not tagged (Grandma Ivy)
+    - e.g. oe1-0412 "Can you make a family tree where Grandma Ivy is at the top, Rose and Lily are her daughters, and Max is Rose's son" {"action": "create", "template": "hierarchy", "items": "Grandma Ivy,Rose,Lily,Max", "parents": "Grandma Ivy,Grandma Ivy,Rose"}: parents: value written but not tagged (Grandma Ivy)
+    - e.g. sc-00076 "Drag it between Clean and Source" {"action": "move", "target": "Source", "position": "between", "anchor": "Clean,Source"}: target: value written but not tagged (Source)
+    - e.g. sc-00089 "Drag it between Backlog and Ticket9" {"action": "move", "target": "Ticket9", "position": "between", "anchor": "Backlog,Ticket9"}: target: value written but not tagged (Ticket9)
+    - e.g. s3-0293 "trash the small squares" {"action": "delete", "target": "mention(quantifier=all,shape=square,size=small)"}: target: description label differs ({'quantifier': 'all', 'shape': 'square', 'size': 'small'} -> {'quantifier': 'all', 'shape': 'square'})
+    - e.g. s3-0365 "double check's size" {"action": "resize", "target": "Check", "scale": "2"}: scale: number word mapped to another number (['double'] -> [None], gold 2)
+gate passed: every trained folder round-trips (right, reference only or asked) >= 95.0% with <= 1.0% silent wrong labels
