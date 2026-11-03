@@ -43,7 +43,7 @@ Help: the ? button above the drawing opens it full screen (deep links such as `i
 | path | content |
 |---|---|
 | `docs/index.html`, `docs/js/` | the application: `logic.js` (SOP Lang, legend, engine, plugins, rules formalizer, Datalog reasoner), `ui.js`, `scenarios.js`, `neural.js` (Transformers.js formalizer), `vss-formalizer.js` + `vss-composer.js` + `vss-context.js` + `vss-adapter.js` + `front.js` (the VSS pipeline), `vss.js` + `vss/` (the browser VSS reader, copied from vss-demo `app/src`), `bench-canon.js` (benchmark scoring) |
-| `docs/model/micro/` | the 7 exported VSS worlds (each: `model.json`, `routebook.bin`, `stars.bin`, `manifest.json`, `front.json`), the cutters and `registry.json` |
+| `docs/model/micro/` | the 7 exported VSS worlds (each: `model.json`, `routebook.bin`, `stars.json` (word vectors generated in the browser), `manifest.json`, `front.json`), the cutters and `registry.json` |
 | `docs/bench/` | the benchmark sets (labelled sentences with their gold wires) |
 | `training/sketch/` | the VSS worlds: legend and sentence generator, world and cutter training (`train_micro.sh`, `train_cutter.py`), scoring (`llm_score.mjs`, `score_rules.mjs`), benchmark builder, the experiment records (`*.md`), run logs |
 

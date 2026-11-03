@@ -1,0 +1,6645 @@
+[
+ {
+  "set": "llm_short",
+  "id": "ts-0438",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "tell me the rules",
+  "names": [
+   "Ore"
+  ],
+  "gold": {
+   "act": "question:rules",
+   "span": "tell me the rules",
+   "args": {
+    "ask": "rules"
+   }
+  },
+  "conf": null,
+  "want": {
+   "ask": "rules"
+  },
+  "rules": [
+   {
+    "act": "question:rules",
+    "got": {
+     "ask": "rules"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:list",
+    "got": {
+     "ask": "list"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:rules",
+    "got": {
+     "ask": "rules"
+    }
+   }
+  ],
+  "skel": "tell me the rules",
+  "exact": true,
+  "n_other_sop": 5,
+  "n_other_vss": 5,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 13
+ },
+ {
+  "set": "llm_short",
+  "id": "th-0801",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "add a teal box named Session under User",
+  "names": [
+   "User"
+  ],
+  "gold": {
+   "act": "command:create",
+   "span": "add a teal box named Session under User",
+   "args": {
+    "action": "create",
+    "shape": "rectangle",
+    "color": "teal",
+    "name": "Session",
+    "position": "below",
+    "anchor": "User"
+   }
+  },
+  "conf": 0.8908034629911578,
+  "want": {
+   "action": "create",
+   "shape": "rectangle",
+   "color": "teal",
+   "name": "session",
+   "position": "below",
+   "anchor": "user"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "name": "session",
+     "position": "below",
+     "anchor": "user",
+     "shape": "rectangle",
+     "color": "teal"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "circle",
+     "color": "teal",
+     "name": "session",
+     "position": "below",
+     "anchor": "user"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "anchor": "user",
+     "color": "teal",
+     "name": "session",
+     "position": "below",
+     "shape": "rectangle"
+    }
+   }
+  ],
+  "skel": "add a COL SHP named session under NAME",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 379
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0974",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "from now on squares are small",
+  "names": [],
+  "gold": {
+   "act": "rule:",
+   "span": "from now on squares are small",
+   "args": {
+    "shape": "square",
+    "size": "small"
+   }
+  },
+  "conf": null,
+  "want": {
+   "shape": "square",
+   "size": "small"
+  },
+  "rules": [
+   {
+    "act": "rule:",
+    "got": {
+     "shape": "square",
+     "size": "small"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "fact:",
+    "got": {
+     "target": "mention(shape=square)",
+     "size": "small"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "rule:",
+    "got": {
+     "shape": "square",
+     "size": "small"
+    }
+   }
+  ],
+  "skel": "from now on SHP are SZ",
+  "exact": true,
+  "n_other_sop": 6,
+  "n_other_vss": 5,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 181
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0780",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "change all the purple things to teal",
+  "names": [
+   "Sump"
+  ],
+  "gold": {
+   "act": "command:set",
+   "span": "change all the purple things to teal",
+   "args": {
+    "action": "set",
+    "target": "mention(color=purple,quantifier=all)",
+    "color": "teal"
+   }
+  },
+  "conf": null,
+  "want": {
+   "action": "set",
+   "target": "mention(color=purple,quantifier=all)",
+   "color": "teal"
+  },
+  "rules": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "teal",
+     "target": "mention(color=purple,quantifier=all)"
+    }
+   }
+  ],
+  "vss": [],
+  "sop": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "teal",
+     "target": "mention(quantifier=all)"
+    }
+   }
+  ],
+  "skel": "change all the COL things to COL",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 44
+ },
+ {
+  "set": "llm_short",
+  "id": "th-0994",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "which red shape is farthest from Ball",
+  "names": [
+   "Ball"
+  ],
+  "gold": {
+   "act": "question:nearest",
+   "span": "which red shape is farthest from Ball",
+   "args": {
+    "ask": "nearest",
+    "anchor": "Ball",
+    "superlative": "farthest",
+    "color": "red"
+   }
+  },
+  "conf": 0.8056786727343673,
+  "want": {
+   "ask": "nearest",
+   "anchor": "ball",
+   "superlative": "farthest",
+   "color": "red"
+  },
+  "rules": [
+   {
+    "act": "question:nearest",
+    "got": {
+     "superlative": "farthest",
+     "ask": "nearest",
+     "anchor": "ball",
+     "color": "red"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:nearest",
+    "got": {
+     "ask": "nearest",
+     "superlative": "farthest",
+     "anchor": "ball"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:nearest",
+    "got": {
+     "ask": "nearest",
+     "anchor": "ball",
+     "color": "red",
+     "superlative": "farthest"
+    }
+   }
+  ],
+  "skel": "which COL shape is farthest from NAME",
+  "exact": true,
+  "n_other_sop": 4,
+  "n_other_vss": 1,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 449
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0351",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "how large is the Lotus",
+  "names": [
+   "Lotus"
+  ],
+  "gold": {
+   "act": "question:property",
+   "span": "how large is the Lotus",
+   "args": {
+    "ask": "property",
+    "target": "Lotus",
+    "property": "size"
+   }
+  },
+  "conf": null,
+  "want": {
+   "ask": "property",
+   "target": "lotus",
+   "property": "size"
+  },
+  "rules": [
+   {
+    "act": "question:property",
+    "got": {
+     "property": "size",
+     "ask": "property",
+     "target": "lotus"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "fact:",
+    "got": {
+     "target": "lotus",
+     "size": "large"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:property",
+    "got": {
+     "ask": "property",
+     "property": "size",
+     "target": "lotus"
+    }
+   }
+  ],
+  "skel": "how SZ is the NAME",
+  "exact": true,
+  "n_other_sop": 3,
+  "n_other_vss": 3,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 23
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-1245",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "add a gray ellipse at the top right",
+  "names": [
+   "Strait"
+  ],
+  "gold": {
+   "act": "command:create",
+   "span": "add a gray ellipse at the top right",
+   "args": {
+    "action": "create",
+    "shape": "ellipse",
+    "color": "gray",
+    "position": "topRight"
+   }
+  },
+  "conf": 0.7367999083276875,
+  "want": {
+   "action": "create",
+   "shape": "ellipse",
+   "color": "gray",
+   "position": "topright"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "position": "topright",
+     "shape": "ellipse",
+     "color": "gray"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "ellipse",
+     "color": "gray"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "color": "green",
+     "position": "topright",
+     "shape": "ellipse"
+    }
+   }
+  ],
+  "skel": "add a COL SHP at the top right",
+  "exact": true,
+  "n_other_sop": 1,
+  "n_other_vss": 1,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 379
+ },
+ {
+  "set": "llm_short",
+  "id": "th-0921",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "two-way link between Mid and Coach",
+  "names": [
+   "Mid",
+   "Coach"
+  ],
+  "gold": {
+   "act": "command:connect",
+   "span": "two-way link between Mid and Coach",
+   "args": {
+    "action": "connect",
+    "from": "Mid",
+    "to": "Coach",
+    "arrow": "both"
+   }
+  },
+  "conf": 0.6414969080523787,
+  "want": {
+   "action": "connect",
+   "from": "mid",
+   "to": "coach",
+   "arrow": "both"
+  },
+  "rules": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "to": "coach",
+     "from": "mid",
+     "arrow": "both"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "mid",
+     "to": "mid,coach",
+     "arrow": "both"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "arrow": "both",
+     "from": "mid",
+     "to": "coach"
+    }
+   }
+  ],
+  "skel": "N way link between NAME and NAME",
+  "exact": true,
+  "n_other_sop": 1,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 392
+ },
+ {
+  "set": "llm_short",
+  "id": "th-1287",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "list the defaults in effect",
+  "names": [],
+  "gold": {
+   "act": "question:rules",
+   "span": "list the defaults in effect",
+   "args": {
+    "ask": "rules"
+   }
+  },
+  "conf": null,
+  "want": {
+   "ask": "rules"
+  },
+  "rules": [
+   {
+    "act": "question:rules",
+    "got": {
+     "ask": "rules"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:list",
+    "got": {
+     "ask": "list"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:rules",
+    "got": {
+     "ask": "rules"
+    }
+   }
+  ],
+  "skel": "list the defaults in effect",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 13
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-1179",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "is there a diamond that is not red",
+  "names": [
+   "Trike"
+  ],
+  "gold": {
+   "act": "question:exists",
+   "span": "is there a diamond that is not red",
+   "args": {
+    "ask": "exists",
+    "shape": "diamond",
+    "notColor": "red"
+   }
+  },
+  "conf": 0.9113791730796859,
+  "want": {
+   "ask": "exists",
+   "shape": "diamond",
+   "notColor": "red"
+  },
+  "rules": [
+   {
+    "act": "question:exists",
+    "got": {
+     "ask": "exists",
+     "notColor": "red",
+     "shape": "diamond"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:exists",
+    "got": {
+     "ask": "exists",
+     "shape": "diamond",
+     "color": "red"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:exists",
+    "got": {
+     "ask": "exists",
+     "notColor": "red",
+     "shape": "diamond"
+    }
+   }
+  ],
+  "skel": "is there a SHP that is not COL",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 236
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-1142",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "set the last diamond to black",
+  "names": [
+   "Moat"
+  ],
+  "gold": {
+   "act": "command:set",
+   "span": "set the last diamond to black",
+   "args": {
+    "action": "set",
+    "target": "mention(recency=newest,shape=diamond)",
+    "color": "black"
+   }
+  },
+  "conf": 0.7236400357985309,
+  "want": {
+   "action": "set",
+   "target": "mention(recency=newest,shape=diamond)",
+   "color": "black"
+  },
+  "rules": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "black",
+     "target": "mention(recency=newest,shape=diamond)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "target": "mention(shape=diamond)",
+     "color": "black"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "black",
+     "target": "mention(recency=newest,shape=circle)"
+    }
+   }
+  ],
+  "skel": "set the last SHP to COL",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 353
+ },
+ {
+  "set": "llm_short",
+  "id": "th-0971",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "what color is the newest triangle",
+  "names": [],
+  "gold": {
+   "act": "question:property",
+   "span": "what color is the newest triangle",
+   "args": {
+    "ask": "property",
+    "target": "mention(recency=newest,shape=triangle)",
+    "property": "color"
+   }
+  },
+  "conf": 0.9386128953496145,
+  "want": {
+   "ask": "property",
+   "target": "mention(recency=newest,shape=triangle)",
+   "property": "color"
+  },
+  "rules": [
+   {
+    "act": "question:property",
+    "got": {
+     "property": "color",
+     "ask": "property",
+     "target": "mention(recency=newest,shape=triangle)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:property",
+    "got": {
+     "ask": "property",
+     "target": "mention(shape=triangle)",
+     "property": "color"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:property",
+    "got": {
+     "ask": "property",
+     "property": "color",
+     "target": "mention(recency=newest,shape=diamond)"
+    }
+   }
+  ],
+  "skel": "what color is the newest SHP",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 328
+ },
+ {
+  "set": "llm_short",
+  "id": "th-1162",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "discard the default rules you saved",
+  "names": [],
+  "gold": {
+   "act": "command:forget",
+   "span": "discard the default rules you saved",
+   "args": {
+    "action": "forget"
+   }
+  },
+  "conf": null,
+  "want": {
+   "action": "forget"
+  },
+  "rules": [
+   {
+    "act": "command:forget",
+    "got": {
+     "action": "forget"
+    }
+   }
+  ],
+  "vss": [],
+  "sop": [
+   {
+    "act": "command:forget",
+    "got": {
+     "action": "forget"
+    }
+   }
+  ],
+  "skel": "discard the default rules you saved",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 3
+ },
+ {
+  "set": "llm_short",
+  "id": "th-0524",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "connect Mix and Dough both ways",
+  "names": [
+   "Mix",
+   "Dough"
+  ],
+  "gold": {
+   "act": "command:connect",
+   "span": "connect Mix and Dough both ways",
+   "args": {
+    "action": "connect",
+    "from": "Mix",
+    "to": "Dough",
+    "arrow": "both"
+   }
+  },
+  "conf": 0.6382535270081067,
+  "want": {
+   "action": "connect",
+   "from": "mix",
+   "to": "dough",
+   "arrow": "both"
+  },
+  "rules": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "to": "dough",
+     "from": "mix",
+     "arrow": "both"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "mix,dough",
+     "to": "mix,dough",
+     "arrow": "both"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "arrow": "both",
+     "from": "mix",
+     "to": "dough"
+    }
+   }
+  ],
+  "skel": "connect NAME and NAME both ways",
+  "exact": true,
+  "n_other_sop": 1,
+  "n_other_vss": 1,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 2039
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-1232",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "what shape is nearest to Rover",
+  "names": [
+   "Probe",
+   "Rover"
+  ],
+  "gold": {
+   "act": "question:nearest",
+   "span": "what shape is nearest to Rover",
+   "args": {
+    "ask": "nearest",
+    "anchor": "Rover",
+    "superlative": "closest"
+   }
+  },
+  "conf": null,
+  "want": {
+   "ask": "nearest",
+   "anchor": "rover",
+   "superlative": "closest"
+  },
+  "rules": [
+   {
+    "act": "question:nearest",
+    "got": {
+     "superlative": "closest",
+     "ask": "nearest",
+     "anchor": "rover"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:property",
+    "got": {
+     "ask": "property",
+     "target": "rover",
+     "property": "shape"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:nearest",
+    "got": {
+     "ask": "nearest",
+     "anchor": "rover",
+     "superlative": "closest"
+    }
+   }
+  ],
+  "skel": "what shape is nearest to NAME",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 101
+ },
+ {
+  "set": "llm_short",
+  "id": "th-1499",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "new hexagons should be large",
+  "names": [],
+  "gold": {
+   "act": "rule:",
+   "span": "new hexagons should be large",
+   "args": {
+    "shape": "hexagon",
+    "size": "large"
+   }
+  },
+  "conf": null,
+  "want": {
+   "shape": "hexagon",
+   "size": "large"
+  },
+  "rules": [
+   {
+    "act": "rule:",
+    "got": {
+     "shape": "hexagon",
+     "size": "large"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "target": "mention(shape=hexagon)",
+     "size": "large"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "rule:",
+    "got": {
+     "shape": "hexagon",
+     "size": "large"
+    }
+   }
+  ],
+  "skel": "new SHP should be SZ",
+  "exact": true,
+  "n_other_sop": 8,
+  "n_other_vss": 2,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 132
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0380",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "arrange the whole thing in a column",
+  "names": [
+   "Clay"
+  ],
+  "gold": {
+   "act": "command:arrange",
+   "span": "arrange the whole thing in a column",
+   "args": {
+    "action": "arrange",
+    "layout": "column"
+   }
+  },
+  "conf": null,
+  "want": {
+   "action": "arrange",
+   "layout": "column"
+  },
+  "rules": [
+   {
+    "act": "command:arrange",
+    "got": {
+     "action": "arrange",
+     "layout": "column"
+    }
+   }
+  ],
+  "vss": [],
+  "sop": [
+   {
+    "act": "command:arrange",
+    "got": {
+     "action": "arrange",
+     "layout": "column"
+    }
+   }
+  ],
+  "skel": "arrange the whole thing in a column",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 322
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0567",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "connect Root to every triangle",
+  "names": [
+   "Root"
+  ],
+  "gold": {
+   "act": "command:connect",
+   "span": "connect Root to every triangle",
+   "args": {
+    "action": "connect",
+    "from": "Root",
+    "to": "mention(quantifier=all,shape=triangle)"
+   }
+  },
+  "conf": 0.8197383201617151,
+  "want": {
+   "action": "connect",
+   "from": "root",
+   "to": "mention(quantifier=all,shape=triangle)"
+  },
+  "rules": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "to": "mention(quantifier=all,shape=triangle)",
+     "from": "root"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "root",
+     "to": "mention(shape=triangle)"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "root",
+     "to": "mention(quantifier=all)"
+    }
+   }
+  ],
+  "skel": "connect NAME to every SHP",
+  "exact": true,
+  "n_other_sop": 1,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 2039
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0685",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "count all the boxes",
+  "names": [
+   "Fawn"
+  ],
+  "gold": {
+   "act": "question:count",
+   "span": "count all the boxes",
+   "args": {
+    "ask": "count",
+    "shape": "rectangle"
+   }
+  },
+  "conf": 0.8467130445116616,
+  "want": {
+   "ask": "count",
+   "shape": "rectangle"
+  },
+  "rules": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count",
+     "shape": "rectangle"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count",
+     "shape": "rectangle"
+    }
+   }
+  ],
+  "skel": "count all the SHP",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 211
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0499",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "call the Dew Mist",
+  "names": [
+   "Dew"
+  ],
+  "gold": {
+   "act": "command:rename",
+   "span": "call the Dew Mist",
+   "args": {
+    "action": "rename",
+    "target": "Dew",
+    "name": "Mist"
+   }
+  },
+  "conf": 0.6101395247681441,
+  "want": {
+   "action": "rename",
+   "target": "dew",
+   "name": "mist"
+  },
+  "rules": [
+   {
+    "act": "command:rename",
+    "got": {
+     "action": "rename",
+     "name": "mist",
+     "target": "dew"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:rename",
+    "got": {
+     "action": "rename",
+     "target": "mist",
+     "name": "dew"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:rename",
+    "got": {
+     "action": "rename",
+     "name": "mist",
+     "target": "dew"
+    }
+   }
+  ],
+  "skel": "call the NAME mist",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 27
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0063",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "reachable from Peg, what's there?",
+  "names": [
+   "Peg"
+  ],
+  "gold": {
+   "act": "question:reachable",
+   "span": "reachable from Peg, what's there",
+   "args": {
+    "ask": "reachable",
+    "from": "Peg"
+   }
+  },
+  "conf": null,
+  "want": {
+   "ask": "reachable",
+   "from": "peg"
+  },
+  "rules": [
+   {
+    "act": "question:reachable",
+    "got": {
+     "ask": "reachable",
+     "from": "peg"
+    }
+   }
+  ],
+  "vss": [],
+  "sop": [
+   {
+    "act": "question:reachable",
+    "got": {
+     "ask": "reachable",
+     "from": "peg"
+    }
+   }
+  ],
+  "skel": "reachable from NAME what s there",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 70
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0205",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "how many hexagons are on the board?",
+  "names": [
+   "Beta"
+  ],
+  "gold": {
+   "act": "question:count",
+   "span": "how many hexagons are on the board",
+   "args": {
+    "ask": "count",
+    "shape": "hexagon"
+   }
+  },
+  "conf": 0.7690233568878837,
+  "want": {
+   "ask": "count",
+   "shape": "hexagon"
+  },
+  "rules": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count",
+     "shape": "hexagon"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count",
+     "shape": "hexagon"
+    }
+   }
+  ],
+  "skel": "how many SHP are on the board",
+  "exact": true,
+  "n_other_sop": 4,
+  "n_other_vss": 4,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 740
+ },
+ {
+  "set": "llm_short",
+  "id": "th-1223",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "a navy link from Curtain to Stage labelled 'Act 2'",
+  "names": [
+   "Curtain",
+   "Stage"
+  ],
+  "gold": {
+   "act": "command:connect",
+   "span": "a navy link from Curtain to Stage labelled 'Act 2'",
+   "args": {
+    "action": "connect",
+    "from": "Curtain",
+    "to": "Stage",
+    "color": "navy",
+    "label": "Act 2"
+   }
+  },
+  "conf": 0.46940095993233083,
+  "want": {
+   "action": "connect",
+   "from": "curtain",
+   "to": "stage",
+   "color": "navy",
+   "label": "act 2"
+  },
+  "rules": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "label": "act 2",
+     "from": "curtain",
+     "to": "stage",
+     "color": "navy"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "curtain",
+     "to": "stage",
+     "label": "act 2"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "color": "navy",
+     "from": "curtain",
+     "label": "act 2",
+     "to": "stage"
+    }
+   }
+  ],
+  "skel": "a COL link from NAME to NAME labelled act N",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 1273
+ },
+ {
+  "set": "llm_short",
+  "id": "th-0702",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "hey, put a huge black rectangle in the bottom right named Depot",
+  "names": [],
+  "gold": {
+   "act": "command:create",
+   "span": "put a huge black rectangle in the bottom right named Depot",
+   "args": {
+    "action": "create",
+    "shape": "rectangle",
+    "color": "black",
+    "size": "huge",
+    "name": "Depot",
+    "position": "bottomRight"
+   }
+  },
+  "conf": 0.7041202214325057,
+  "want": {
+   "action": "create",
+   "shape": "rectangle",
+   "color": "black",
+   "size": "huge",
+   "name": "depot",
+   "position": "bottomright"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "name": "depot",
+     "position": "bottomright",
+     "shape": "rectangle",
+     "color": "black",
+     "size": "huge"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "rectangle",
+     "color": "black",
+     "size": "huge",
+     "position": "bottomright"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "color": "black",
+     "name": "depot",
+     "position": "bottomright",
+     "shape": "rectangle",
+     "size": "huge"
+    }
+   }
+  ],
+  "skel": "put a SZ COL SHP in the bottom right named depot",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 254
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0471",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "how many arrows are there in total",
+  "names": [
+   "Net"
+  ],
+  "gold": {
+   "act": "question:count",
+   "span": "how many arrows are there in total",
+   "args": {
+    "ask": "count",
+    "kind": "edge"
+   }
+  },
+  "conf": 0.8837440565679798,
+  "want": {
+   "ask": "count",
+   "kind": "edge"
+  },
+  "rules": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count",
+     "kind": "edge"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count",
+     "kind": "edge"
+    }
+   }
+  ],
+  "skel": "how many arrows are there in total",
+  "exact": true,
+  "n_other_sop": 5,
+  "n_other_vss": 5,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 740
+ },
+ {
+  "set": "llm_short",
+  "id": "th-1085",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "is there a loop between rooms",
+  "names": [],
+  "gold": {
+   "act": "question:cycle",
+   "span": "is there a loop between rooms",
+   "args": {
+    "ask": "cycle"
+   }
+  },
+  "conf": null,
+  "want": {
+   "ask": "cycle"
+  },
+  "rules": [
+   {
+    "act": "question:cycle",
+    "got": {
+     "ask": "cycle"
+    }
+   }
+  ],
+  "vss": [],
+  "sop": [
+   {
+    "act": "question:cycle",
+    "got": {
+     "ask": "cycle"
+    }
+   }
+  ],
+  "skel": "is there a loop between rooms",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 210
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0776",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "put a tiny gold star between Dunes and Oasis",
+  "names": [
+   "Dunes",
+   "Oasis"
+  ],
+  "gold": {
+   "act": "command:create",
+   "span": "put a tiny gold star between Dunes and Oasis",
+   "args": {
+    "action": "create",
+    "shape": "star",
+    "color": "gold",
+    "size": "tiny",
+    "position": "between",
+    "anchor": "Dunes,Oasis"
+   }
+  },
+  "conf": 0.7859076369180551,
+  "want": {
+   "action": "create",
+   "shape": "star",
+   "color": "gold",
+   "size": "tiny",
+   "position": "between",
+   "anchor": "dunes,oasis"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "position": "between",
+     "anchor": "dunes,oasis",
+     "shape": "star",
+     "color": "gold",
+     "size": "tiny"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "star",
+     "color": "gold",
+     "size": "tiny",
+     "position": "between",
+     "anchor": "dunes"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "anchor": "dunes,oasis",
+     "color": "gold",
+     "position": "between",
+     "shape": "star",
+     "size": "tiny"
+    }
+   }
+  ],
+  "skel": "put a SZ COL SHP between NAME and NAME",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 254
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-1345",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "what rules have been defined",
+  "names": [
+   "Seam"
+  ],
+  "gold": {
+   "act": "question:rules",
+   "span": "what rules have been defined",
+   "args": {
+    "ask": "rules"
+   }
+  },
+  "conf": null,
+  "want": {
+   "ask": "rules"
+  },
+  "rules": [
+   {
+    "act": "question:rules",
+    "got": {
+     "ask": "rules"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:list",
+    "got": {
+     "ask": "list"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:rules",
+    "got": {
+     "ask": "rules"
+    }
+   }
+  ],
+  "skel": "what rules have been defined",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 85
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0650",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "add a lime hexagon to the right of Spruce",
+  "names": [
+   "Spruce",
+   "Pine"
+  ],
+  "gold": {
+   "act": "command:create",
+   "span": "add a lime hexagon to the right of Spruce",
+   "args": {
+    "action": "create",
+    "shape": "hexagon",
+    "color": "lime",
+    "position": "rightOf",
+    "anchor": "Spruce"
+   }
+  },
+  "conf": null,
+  "want": {
+   "action": "create",
+   "shape": "hexagon",
+   "color": "lime",
+   "position": "rightof",
+   "anchor": "spruce"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "position": "rightof",
+     "anchor": "spruce",
+     "shape": "hexagon",
+     "color": "lime"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:check",
+    "got": {
+     "ask": "check",
+     "target": "mention(color=lime,shape=hexagon)",
+     "position": "rightof",
+     "anchor": "spruce"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "anchor": "spruce",
+     "color": "lime",
+     "position": "rightof",
+     "shape": "hexagon"
+    }
+   }
+  ],
+  "skel": "add a lime SHP to the right of NAME",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 379
+ },
+ {
+  "set": "llm_short",
+  "id": "th-0304",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "a box labeled 'Board' at the top",
+  "names": [],
+  "gold": {
+   "act": "command:create",
+   "span": "a box labeled 'Board' at the top",
+   "args": {
+    "action": "create",
+    "shape": "rectangle",
+    "label": "Board",
+    "position": "top"
+   }
+  },
+  "conf": 0.5957875393616735,
+  "want": {
+   "action": "create",
+   "shape": "rectangle",
+   "label": "board",
+   "position": "top"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "label": "board",
+     "position": "top",
+     "shape": "rectangle"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "circle",
+     "label": "board",
+     "position": "top"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "label": "board",
+     "position": "top",
+     "shape": "rectangle"
+    }
+   }
+  ],
+  "skel": "a SHP labeled board at the top",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 1214
+ },
+ {
+  "set": "llm_short",
+  "id": "th-1404",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "make a small green oval named Sprint at the center",
+  "names": [],
+  "gold": {
+   "act": "command:create",
+   "span": "make a small green oval named Sprint at the center",
+   "args": {
+    "action": "create",
+    "shape": "ellipse",
+    "color": "green",
+    "size": "small",
+    "name": "Sprint",
+    "position": "center"
+   }
+  },
+  "conf": 0.9723591440411127,
+  "want": {
+   "action": "create",
+   "shape": "ellipse",
+   "color": "green",
+   "size": "small",
+   "name": "sprint",
+   "position": "center"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "name": "sprint",
+     "position": "center",
+     "shape": "ellipse",
+     "color": "green",
+     "size": "small"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "ellipse",
+     "color": "green",
+     "size": "small",
+     "name": "sprint",
+     "position": "center"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "color": "green",
+     "name": "sprint",
+     "position": "left",
+     "shape": "ellipse",
+     "size": "small"
+    }
+   }
+  ],
+  "skel": "make a SZ COL SHP named sprint at the center",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 69
+ },
+ {
+  "set": "llm_short",
+  "id": "th-1106",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "a large yellow oval at the bottom",
+  "names": [],
+  "gold": {
+   "act": "command:create",
+   "span": "a large yellow oval at the bottom",
+   "args": {
+    "action": "create",
+    "shape": "ellipse",
+    "color": "yellow",
+    "size": "large",
+    "position": "bottom"
+   }
+  },
+  "conf": 0.9747709879176003,
+  "want": {
+   "action": "create",
+   "shape": "ellipse",
+   "color": "yellow",
+   "size": "large",
+   "position": "bottom"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "position": "bottom",
+     "shape": "ellipse",
+     "color": "yellow",
+     "size": "large"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "ellipse",
+     "color": "yellow",
+     "size": "large",
+     "position": "bottom"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "color": "yellow",
+     "position": "bottom",
+     "shape": "ellipse",
+     "size": "small"
+    }
+   }
+  ],
+  "skel": "a SZ COL SHP at the bottom",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 1214
+ },
+ {
+  "set": "llm_short",
+  "id": "th-1247",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "line up all the cyan shapes vertically",
+  "names": [],
+  "gold": {
+   "act": "command:align",
+   "span": "line up all the cyan shapes vertically",
+   "args": {
+    "action": "align",
+    "target": "mention(color=cyan,quantifier=all)",
+    "axis": "vertical"
+   }
+  },
+  "conf": 0.551907122613317,
+  "want": {
+   "action": "align",
+   "target": "mention(color=cyan,quantifier=all)",
+   "axis": "vertical"
+  },
+  "rules": [
+   {
+    "act": "command:align",
+    "got": {
+     "action": "align",
+     "axis": "vertical",
+     "target": "mention(color=cyan,quantifier=all)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:align",
+    "got": {
+     "action": "align",
+     "target": "mention(quantifier=all)",
+     "axis": "vertical"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:align",
+    "got": {
+     "action": "align",
+     "axis": "vertical",
+     "target": "mention(quantifier=all,shape=circle)"
+    }
+   }
+  ],
+  "skel": "line up all the COL shapes vertically",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 101
+ },
+ {
+  "set": "llm_short",
+  "id": "th-0556",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "bring the newest hexagon to the front",
+  "names": [],
+  "gold": {
+   "act": "command:toFront",
+   "span": "bring the newest hexagon to the front",
+   "args": {
+    "action": "toFront",
+    "target": "mention(recency=newest,shape=hexagon)"
+   }
+  },
+  "conf": 0.7608511088207194,
+  "want": {
+   "action": "tofront",
+   "target": "mention(recency=newest,shape=hexagon)"
+  },
+  "rules": [
+   {
+    "act": "command:toFront",
+    "got": {
+     "action": "tofront",
+     "target": "mention(recency=newest,shape=hexagon)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:toFront",
+    "got": {
+     "action": "tofront",
+     "target": "mention(shape=hexagon)"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:toFront",
+    "got": {
+     "action": "tofront",
+     "target": "mention(recency=newest,shape=square)"
+    }
+   }
+  ],
+  "skel": "bring the newest SHP to the front",
+  "exact": true,
+  "n_other_sop": 2,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 161
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0661",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "turn the black squares white",
+  "names": [
+   "Dusk"
+  ],
+  "gold": {
+   "act": "command:set",
+   "span": "turn the black squares white",
+   "args": {
+    "action": "set",
+    "target": "mention(color=black,quantifier=all,shape=square)",
+    "color": "white"
+   }
+  },
+  "conf": 0.40883043919697004,
+  "want": {
+   "action": "set",
+   "target": "mention(color=black,quantifier=all,shape=square)",
+   "color": "white"
+  },
+  "rules": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "white",
+     "target": "mention(color=black,quantifier=all,shape=square)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "target": "mention(color=black,quantifier=all,shape=square)",
+     "color": "white"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "white",
+     "target": "mention(quantifier=all,shape=square)"
+    }
+   }
+  ],
+  "skel": "turn the COL SHP COL",
+  "exact": true,
+  "n_other_sop": 1,
+  "n_other_vss": 1,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 80
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-1278",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "arrange all the hexagons in a circle",
+  "names": [
+   "Floe"
+  ],
+  "gold": {
+   "act": "command:arrange",
+   "span": "arrange all the hexagons in a circle",
+   "args": {
+    "action": "arrange",
+    "target": "mention(quantifier=all,shape=hexagon)",
+    "layout": "circle"
+   }
+  },
+  "conf": 0.6263560856301666,
+  "want": {
+   "action": "arrange",
+   "target": "mention(quantifier=all,shape=hexagon)",
+   "layout": "circle"
+  },
+  "rules": [
+   {
+    "act": "command:arrange",
+    "got": {
+     "action": "arrange",
+     "layout": "circle",
+     "target": "mention(quantifier=all,shape=hexagon)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:arrange",
+    "got": {
+     "action": "arrange",
+     "target": "mention(quantifier=all,shape=hexagon)",
+     "layout": "circle"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:arrange",
+    "got": {
+     "action": "arrange",
+     "layout": "circle",
+     "target": "mention(quantifier=all,shape=square)"
+    }
+   }
+  ],
+  "skel": "arrange all the SHP in a SHP",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 322
+ },
+ {
+  "set": "llm_short",
+  "id": "th-1419",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "make all the black diamonds white",
+  "names": [],
+  "gold": {
+   "act": "command:set",
+   "span": "make all the black diamonds white",
+   "args": {
+    "action": "set",
+    "target": "mention(color=black,quantifier=all,shape=diamond)",
+    "color": "white"
+   }
+  },
+  "conf": 0.5317409612318907,
+  "want": {
+   "action": "set",
+   "target": "mention(color=black,quantifier=all,shape=diamond)",
+   "color": "white"
+  },
+  "rules": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "white",
+     "target": "mention(color=black,quantifier=all,shape=diamond)"
+    }
+   }
+  ],
+  "vss": [],
+  "sop": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "white",
+     "target": "mention(quantifier=all,shape=circle)"
+    }
+   }
+  ],
+  "skel": "make all the COL SHP COL",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 3014
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0841",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "make the last circle yellow",
+  "names": [
+   "Bean"
+  ],
+  "gold": {
+   "act": "command:set",
+   "span": "make the last circle yellow",
+   "args": {
+    "action": "set",
+    "target": "mention(recency=newest,shape=circle)",
+    "color": "yellow"
+   }
+  },
+  "conf": 0.7081160581408794,
+  "want": {
+   "action": "set",
+   "target": "mention(recency=newest,shape=circle)",
+   "color": "yellow"
+  },
+  "rules": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "yellow",
+     "target": "mention(recency=newest,shape=circle)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "target": "mention(shape=circle)",
+     "color": "yellow"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "yellow",
+     "target": "mention(recency=oldest,shape=circle)"
+    }
+   }
+  ],
+  "skel": "make the last SHP COL",
+  "exact": true,
+  "n_other_sop": 1,
+  "n_other_vss": 1,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 3014
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-1245",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "add a gray ellipse at the top right",
+  "names": [
+   "Strait"
+  ],
+  "gold": {
+   "act": "command:create",
+   "span": "add a gray ellipse at the top right",
+   "args": {
+    "action": "create",
+    "shape": "ellipse",
+    "color": "gray",
+    "position": "topRight"
+   }
+  },
+  "conf": 0.9414136596864371,
+  "want": {
+   "action": "create",
+   "shape": "ellipse",
+   "color": "gray",
+   "position": "topright"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "position": "topright",
+     "shape": "ellipse",
+     "color": "gray"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "ellipse",
+     "color": "gray"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "color": "green",
+     "position": "topright",
+     "shape": "ellipse"
+    }
+   }
+  ],
+  "skel": "add a COL SHP at the top right",
+  "exact": true,
+  "n_other_sop": 1,
+  "n_other_vss": 1,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 379
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-1453",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "delete all stars that are not red",
+  "names": [
+   "Scrap"
+  ],
+  "gold": {
+   "act": "command:delete",
+   "span": "delete all stars that are not red",
+   "args": {
+    "action": "delete",
+    "target": "mention(notcolor=red,quantifier=all,shape=star)"
+   }
+  },
+  "conf": 0.7902709495395122,
+  "want": {
+   "action": "delete",
+   "target": "mention(notcolor=red,quantifier=all,shape=star)"
+  },
+  "rules": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(notcolor=red,quantifier=all,shape=star)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(quantifier=all,shape=star)"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(quantifier=all)"
+    }
+   }
+  ],
+  "skel": "delete all SHP that are not COL",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 174
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0647",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "get rid of the red hexagons",
+  "names": [
+   "Sparrow"
+  ],
+  "gold": {
+   "act": "command:delete",
+   "span": "get rid of the red hexagons",
+   "args": {
+    "action": "delete",
+    "target": "mention(color=red,quantifier=all,shape=hexagon)"
+   }
+  },
+  "conf": 0.5408151664742044,
+  "want": {
+   "action": "delete",
+   "target": "mention(color=red,quantifier=all,shape=hexagon)"
+  },
+  "rules": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(color=red,quantifier=all,shape=hexagon)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(color=red,quantifier=all,shape=hexagon)"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(quantifier=all,shape=square)"
+    }
+   }
+  ],
+  "skel": "get rid of the COL SHP",
+  "exact": true,
+  "n_other_sop": 1,
+  "n_other_vss": 1,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 45
+ },
+ {
+  "set": "llm_short",
+  "id": "th-0825",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "draw a navy line from User to Ledger",
+  "names": [
+   "User",
+   "Ledger"
+  ],
+  "gold": {
+   "act": "command:connect",
+   "span": "draw a navy line from User to Ledger",
+   "args": {
+    "action": "connect",
+    "from": "User",
+    "to": "Ledger",
+    "color": "navy",
+    "arrow": "none"
+   }
+  },
+  "conf": 0.9018918012122321,
+  "want": {
+   "action": "connect",
+   "from": "user",
+   "to": "ledger",
+   "color": "navy",
+   "arrow": "none"
+  },
+  "rules": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "user",
+     "to": "ledger",
+     "color": "navy",
+     "arrow": "none"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "circle",
+     "color": "navy"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "color": "navy",
+     "from": "user",
+     "to": "ledger"
+    }
+   }
+  ],
+  "skel": "draw a COL line from NAME to NAME",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 294
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0106",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "remove every red square",
+  "names": [
+   "Temp"
+  ],
+  "gold": {
+   "act": "command:delete",
+   "span": "remove every red square",
+   "args": {
+    "action": "delete",
+    "target": "mention(color=red,quantifier=all,shape=square)"
+   }
+  },
+  "conf": 0.5214702624810795,
+  "want": {
+   "action": "delete",
+   "target": "mention(color=red,quantifier=all,shape=square)"
+  },
+  "rules": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(color=red,quantifier=all,shape=square)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(color=red,quantifier=all,shape=square)"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(quantifier=all,shape=square)"
+    }
+   }
+  ],
+  "skel": "remove every COL SHP",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 38
+ },
+ {
+  "set": "llm_short",
+  "id": "th-0856",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "raise the newest square to the top layer",
+  "names": [],
+  "gold": {
+   "act": "command:toFront",
+   "span": "raise the newest square to the top layer",
+   "args": {
+    "action": "toFront",
+    "target": "mention(recency=newest,shape=square)"
+   }
+  },
+  "conf": 0.7893226482186092,
+  "want": {
+   "action": "tofront",
+   "target": "mention(recency=newest,shape=square)"
+  },
+  "rules": [
+   {
+    "act": "command:toFront",
+    "got": {
+     "action": "tofront",
+     "position": "top",
+     "target": "mention(recency=newest,shape=square)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:move",
+    "got": {
+     "action": "move",
+     "target": "mention(recency=newest,shape=square)",
+     "position": "top"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:toFront",
+    "got": {
+     "action": "tofront",
+     "target": "mention(recency=newest,shape=circle)"
+    }
+   }
+  ],
+  "skel": "raise the newest SHP to the top layer",
+  "exact": true,
+  "n_other_sop": 1,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 5
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0844",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "line, no arrow heads, Mic to Amp",
+  "names": [
+   "Mic",
+   "Amp"
+  ],
+  "gold": {
+   "act": "command:connect",
+   "span": "line, no arrow heads, Mic to Amp",
+   "args": {
+    "action": "connect",
+    "from": "Mic",
+    "to": "Amp",
+    "arrow": "none"
+   }
+  },
+  "conf": 0.9867651927247658,
+  "want": {
+   "action": "connect",
+   "from": "mic",
+   "to": "amp",
+   "arrow": "none"
+  },
+  "rules": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "to": "amp",
+     "from": "mic",
+     "arrow": "none"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "to": "amp",
+     "arrow": "none",
+     "from": "mic"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "mic",
+     "to": "amp"
+    }
+   }
+  ],
+  "skel": "line no arrow heads NAME to NAME",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 587
+ },
+ {
+  "set": "llm_short",
+  "id": "th-1098",
+  "j": 0,
+  "reader": "vss",
+  "kind": "ask",
+  "status": "asked",
+  "text": "new squares should be small from now on",
+  "names": [],
+  "gold": {
+   "act": "rule:",
+   "span": "new squares should be small from now on",
+   "args": {
+    "shape": "square",
+    "size": "small"
+   }
+  },
+  "conf": 0.8598718825947886,
+  "want": {
+   "shape": "square",
+   "size": "small"
+  },
+  "rules": [
+   {
+    "act": "rule:",
+    "got": {
+     "shape": "square",
+     "size": "small"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "rule:",
+    "got": {
+     "shape": "square",
+     "size": "small"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "rule:",
+    "got": {
+     "shape": "square",
+     "size": "small"
+    }
+   }
+  ],
+  "skel": "new SHP should be SZ from now on",
+  "exact": true,
+  "n_other_sop": 1,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 132
+ },
+ {
+  "set": "llm_short",
+  "id": "th-1277",
+  "j": 0,
+  "reader": "vss",
+  "kind": "ask",
+  "status": "asked",
+  "text": "are Drum and Cymbal joined",
+  "names": [
+   "Drum",
+   "Cymbal"
+  ],
+  "gold": {
+   "act": "question:connected",
+   "span": "are Drum and Cymbal joined",
+   "args": {
+    "ask": "connected",
+    "target": "Drum",
+    "anchor": "Cymbal"
+   }
+  },
+  "conf": 0.8662582914627018,
+  "want": {
+   "ask": "connected",
+   "target": "cymbal",
+   "anchor": "drum"
+  },
+  "rules": [
+   {
+    "act": "question:connected",
+    "got": {
+     "ask": "connected",
+     "target": "cymbal",
+     "anchor": "drum"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:connected",
+    "got": {
+     "ask": "connected",
+     "target": "cymbal",
+     "anchor": "drum"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:connected",
+    "got": {
+     "ask": "connected",
+     "anchor": "drum",
+     "target": "cymbal"
+    }
+   }
+  ],
+  "skel": "are NAME and NAME joined",
+  "exact": true,
+  "n_other_sop": 2,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 92
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-1329",
+  "j": 0,
+  "reader": "vss",
+  "kind": "ask",
+  "status": "asked",
+  "text": "disconnect Millet and Sorghum",
+  "names": [
+   "Millet",
+   "Sorghum"
+  ],
+  "gold": {
+   "act": "command:disconnect",
+   "span": "disconnect Millet and Sorghum",
+   "args": {
+    "action": "disconnect",
+    "from": "Millet",
+    "to": "Sorghum"
+   }
+  },
+  "conf": 0.6514198070017703,
+  "want": {
+   "action": "disconnect",
+   "from": "millet",
+   "to": "sorghum"
+  },
+  "rules": [
+   {
+    "act": "command:disconnect",
+    "got": {
+     "action": "disconnect",
+     "to": "sorghum",
+     "from": "millet"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:disconnect",
+    "got": {
+     "action": "disconnect",
+     "from": "millet",
+     "to": "sorghum"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:disconnect",
+    "got": {
+     "action": "disconnect",
+     "from": "millet",
+     "to": "sorghum"
+    }
+   }
+  ],
+  "skel": "disconnect NAME and NAME",
+  "exact": true,
+  "n_other_sop": 5,
+  "n_other_vss": 3,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 121
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-1313",
+  "j": 0,
+  "reader": "vss",
+  "kind": "ask",
+  "status": "asked",
+  "text": "step back, undo it",
+  "names": [
+   "Pi"
+  ],
+  "gold": {
+   "act": "command:undo",
+   "span": "step back, undo it",
+   "args": {
+    "action": "undo"
+   }
+  },
+  "conf": 0.7551540451101408,
+  "want": {
+   "action": "undo"
+  },
+  "rules": [
+   {
+    "act": "command:undo",
+    "got": {
+     "action": "undo"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:undo",
+    "got": {
+     "action": "undo"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:undo",
+    "got": {
+     "action": "undo"
+    }
+   }
+  ],
+  "skel": "step back undo it",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 15
+ },
+ {
+  "set": "llm_short",
+  "id": "th-0487",
+  "j": 0,
+  "reader": "vss",
+  "kind": "ask",
+  "status": "asked",
+  "text": "does this mind map loop",
+  "names": [],
+  "gold": {
+   "act": "question:cycle",
+   "span": "does this mind map loop",
+   "args": {
+    "ask": "cycle"
+   }
+  },
+  "conf": 0.8398869351445231,
+  "want": {
+   "ask": "cycle"
+  },
+  "rules": [
+   {
+    "act": "question:cycle",
+    "got": {
+     "ask": "cycle"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:cycle",
+    "got": {
+     "ask": "cycle"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:cycle",
+    "got": {
+     "ask": "cycle"
+    }
+   }
+  ],
+  "skel": "does this mind map loop",
+  "exact": true,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 55
+ },
+ {
+  "set": "llm_short",
+  "id": "th-0269",
+  "j": 0,
+  "reader": "sop",
+  "kind": "ask",
+  "status": "asked",
+  "text": "is there a navy circle",
+  "names": [],
+  "gold": {
+   "act": "question:exists",
+   "span": "is there a navy circle",
+   "args": {
+    "ask": "exists",
+    "shape": "circle",
+    "color": "navy"
+   }
+  },
+  "conf": 0.7906612335514552,
+  "want": {
+   "ask": "exists",
+   "shape": "circle",
+   "color": "navy"
+  },
+  "rules": [
+   {
+    "act": "question:exists",
+    "got": {
+     "ask": "exists",
+     "shape": "circle",
+     "color": "navy"
+    }
+   }
+  ],
+  "vss": [],
+  "sop": [
+   {
+    "act": "question:exists",
+    "got": {
+     "ask": "exists",
+     "color": "navy",
+     "shape": "circle"
+    }
+   }
+  ],
+  "skel": "is there a COL SHP",
+  "exact": true,
+  "n_other_sop": 12,
+  "n_other_vss": 1,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 236
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0528",
+  "j": 0,
+  "reader": "sop",
+  "kind": "ask",
+  "status": "asked",
+  "text": "list the orange ones",
+  "names": [
+   "Deli"
+  ],
+  "gold": {
+   "act": "question:list",
+   "span": "list the orange ones",
+   "args": {
+    "ask": "list",
+    "color": "orange"
+   }
+  },
+  "conf": 0.7368658116629954,
+  "want": {
+   "ask": "list",
+   "color": "orange"
+  },
+  "rules": [
+   {
+    "act": "question:list",
+    "got": {
+     "ask": "list",
+     "color": "orange"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:list",
+    "got": {
+     "ask": "list",
+     "color": "orange"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:list",
+    "got": {
+     "ask": "list",
+     "color": "orange"
+    }
+   }
+  ],
+  "skel": "list the COL ones",
+  "exact": true,
+  "n_other_sop": 3,
+  "n_other_vss": 3,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 123
+ },
+ {
+  "set": "llm_short",
+  "id": "th-0068",
+  "j": 0,
+  "reader": "sop",
+  "kind": "ask",
+  "status": "asked",
+  "text": "any gray hexagons around?",
+  "names": [],
+  "gold": {
+   "act": "question:exists",
+   "span": "any gray hexagons around",
+   "args": {
+    "ask": "exists",
+    "shape": "hexagon",
+    "color": "gray"
+   }
+  },
+  "conf": 0.5453028228822203,
+  "want": {
+   "ask": "exists",
+   "shape": "hexagon",
+   "color": "gray"
+  },
+  "rules": [
+   {
+    "act": "question:exists",
+    "got": {
+     "ask": "exists",
+     "shape": "hexagon",
+     "color": "gray"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:exists",
+    "got": {
+     "ask": "exists",
+     "shape": "hexagon",
+     "color": "gray"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:exists",
+    "got": {
+     "ask": "exists",
+     "color": "gray",
+     "shape": "hexagon"
+    }
+   }
+  ],
+  "skel": "any COL SHP around",
+  "exact": true,
+  "n_other_sop": 2,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 218
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0340",
+  "j": 0,
+  "reader": "sop",
+  "kind": "ask",
+  "status": "asked",
+  "text": "remove the newest circle",
+  "names": [
+   "Pond"
+  ],
+  "gold": {
+   "act": "command:delete",
+   "span": "remove the newest circle",
+   "args": {
+    "action": "delete",
+    "target": "mention(recency=newest,shape=circle)"
+   }
+  },
+  "conf": 0.7345834150735698,
+  "want": {
+   "action": "delete",
+   "target": "mention(recency=newest,shape=circle)"
+  },
+  "rules": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(recency=newest,shape=circle)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(recency=newest,shape=circle)"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(recency=newest,shape=circle)"
+    }
+   }
+  ],
+  "skel": "remove the newest SHP",
+  "exact": true,
+  "n_other_sop": 1,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 38
+ },
+ {
+  "set": "llm_short",
+  "id": "ts-0865",
+  "j": 0,
+  "reader": "sop",
+  "kind": "ask",
+  "status": "asked",
+  "text": "arrange the circles in a row",
+  "names": [
+   "Pod"
+  ],
+  "gold": {
+   "act": "command:arrange",
+   "span": "arrange the circles in a row",
+   "args": {
+    "action": "arrange",
+    "target": "mention(quantifier=all,shape=circle)",
+    "layout": "row"
+   }
+  },
+  "conf": 0.5136640816167388,
+  "want": {
+   "action": "arrange",
+   "target": "mention(quantifier=all,shape=circle)",
+   "layout": "row"
+  },
+  "rules": [
+   {
+    "act": "command:arrange",
+    "got": {
+     "action": "arrange",
+     "layout": "row",
+     "target": "mention(quantifier=all,shape=circle)"
+    }
+   }
+  ],
+  "vss": [],
+  "sop": [
+   {
+    "act": "command:arrange",
+    "got": {
+     "action": "arrange",
+     "layout": "row",
+     "target": "mention(quantifier=all,shape=circle)"
+    }
+   }
+  ],
+  "skel": "arrange the SHP in a row",
+  "exact": true,
+  "n_other_sop": 1,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 322
+ },
+ {
+  "set": "broad",
+  "id": "broad-0022",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "erase the blue square",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:delete",
+   "span": null,
+   "args": {
+    "action": "delete",
+    "target": "mention(color=blue,shape=square)"
+   }
+  },
+  "conf": null,
+  "want": {
+   "action": "delete",
+   "target": "mention(color=blue,shape=square)"
+  },
+  "rules": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(color=blue,shape=square)"
+    }
+   }
+  ],
+  "vss": [],
+  "sop": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(quantifier=all,shape=circle)"
+    }
+   }
+  ],
+  "skel": "erase the COL SHP",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 3
+ },
+ {
+  "set": "broad",
+  "id": "broad-0012",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "draw a purple square to the left of Start",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:create",
+   "span": null,
+   "args": {
+    "action": "create",
+    "shape": "square",
+    "color": "purple",
+    "position": "leftof",
+    "anchor": "start"
+   }
+  },
+  "conf": null,
+  "want": {
+   "action": "create",
+   "shape": "square",
+   "color": "purple",
+   "position": "leftof",
+   "anchor": "start"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "position": "leftof",
+     "anchor": "start",
+     "shape": "square",
+     "color": "purple"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:check",
+    "got": {
+     "ask": "check",
+     "target": "mention(color=purple,shape=square)",
+     "color": "purple",
+     "position": "leftof",
+     "anchor": "start"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "anchor": "start",
+     "color": "purple",
+     "position": "leftof",
+     "shape": "square"
+    }
+   }
+  ],
+  "skel": "draw a COL SHP to the left of NAME",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 38
+ },
+ {
+  "set": "blind",
+  "id": "blind-0030",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Align all the circles vertically",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:align",
+   "span": null,
+   "args": {
+    "action": "align",
+    "target": "mention(quantifier=all,shape=circle)",
+    "axis": "vertical"
+   }
+  },
+  "conf": 0.35257836777944596,
+  "want": {
+   "action": "align",
+   "target": "mention(quantifier=all,shape=circle)",
+   "axis": "vertical"
+  },
+  "rules": [
+   {
+    "act": "command:align",
+    "got": {
+     "action": "align",
+     "axis": "vertical",
+     "target": "mention(quantifier=all,shape=circle)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:align",
+    "got": {
+     "action": "align",
+     "axis": "vertical",
+     "target": "check,done,process,start"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:align",
+    "got": {
+     "action": "align",
+     "axis": "vertical",
+     "target": "mention(quantifier=all,shape=circle)"
+    }
+   }
+  ],
+  "skel": "align all the SHP vertically",
+  "exact": true,
+  "n_other_sop": 2,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 214
+ },
+ {
+  "set": "blind",
+  "id": "blind-0025",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "Detach Done from Check",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:disconnect",
+   "span": null,
+   "args": {
+    "action": "disconnect",
+    "from": "done",
+    "to": "check"
+   }
+  },
+  "conf": null,
+  "want": {
+   "action": "disconnect",
+   "from": "check",
+   "to": "done"
+  },
+  "rules": [
+   {
+    "act": "command:disconnect",
+    "got": {
+     "action": "disconnect",
+     "from": "check",
+     "to": "done"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "done,check",
+     "to": "check"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:disconnect",
+    "got": {
+     "action": "disconnect",
+     "from": "check",
+     "to": "done"
+    }
+   }
+  ],
+  "skel": "detach NAME from NAME",
+  "exact": true,
+  "n_other_sop": 2,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 2
+ },
+ {
+  "set": "hand",
+  "id": "hand-0004",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "Erase Done",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:delete",
+   "span": null,
+   "args": {
+    "action": "delete",
+    "target": "done"
+   }
+  },
+  "conf": null,
+  "want": {
+   "action": "delete",
+   "target": "done"
+  },
+  "rules": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "done"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:duplicate",
+    "got": {
+     "action": "duplicate",
+     "target": "done"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "done"
+    }
+   }
+  ],
+  "skel": "erase NAME",
+  "exact": true,
+  "n_other_sop": 1,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 3
+ },
+ {
+  "set": "broad",
+  "id": "broad-0121",
+  "j": 1,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Add a square named Log below Process and link Process to Log with a dashed arrow",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:connect",
+   "span": null,
+   "args": {
+    "action": "connect",
+    "from": "process",
+    "to": "$new",
+    "style": "dashed"
+   }
+  },
+  "conf": 0.7868894094156097,
+  "want": {
+   "action": "connect",
+   "from": "process",
+   "to": "$new",
+   "style": "dashed"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "name": "log",
+     "position": "below",
+     "anchor": "process",
+     "shape": "square"
+    }
+   },
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "to": "$new",
+     "from": "process",
+     "style": "dashed"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "square",
+     "name": "log",
+     "position": "below",
+     "anchor": "process"
+    }
+   },
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "process,$new",
+     "to": "$new",
+     "style": "dashed"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "anchor": "process",
+     "name": "log",
+     "position": "below",
+     "shape": "square"
+    }
+   },
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "process",
+     "style": "dashed",
+     "to": "$new"
+    }
+   }
+  ],
+  "skel": "add a SHP named log below NAME and link NAME to log with a dashed arrow",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 0.6,
+  "unseen_words": [],
+  "first_word_in_act_spans": 39
+ },
+ {
+  "set": "blind",
+  "id": "blind-0040",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "How large is Process?",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "question:property",
+   "span": null,
+   "args": {
+    "ask": "property",
+    "target": "process",
+    "property": "size"
+   }
+  },
+  "conf": null,
+  "want": {
+   "ask": "property",
+   "target": "process",
+   "property": "size"
+  },
+  "rules": [
+   {
+    "act": "question:property",
+    "got": {
+     "property": "size",
+     "ask": "property",
+     "target": "process"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "fact:",
+    "got": {
+     "target": "process",
+     "size": "large"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:property",
+    "got": {
+     "ask": "property",
+     "property": "size",
+     "target": "process"
+    }
+   }
+  ],
+  "skel": "how SZ is NAME",
+  "exact": true,
+  "n_other_sop": 9,
+  "n_other_vss": 4,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 23
+ },
+ {
+  "set": "hand",
+  "id": "hand-0031",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Connect the circles in a chain",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:connect",
+   "span": null,
+   "args": {
+    "action": "connect",
+    "from": "mention(quantifier=all,shape=circle)",
+    "pairing": "chain"
+   }
+  },
+  "conf": 0.28675841202486296,
+  "want": {
+   "action": "connect",
+   "from": "mention(quantifier=all,shape=circle)",
+   "pairing": "chain"
+  },
+  "rules": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "mention(quantifier=all,shape=circle)",
+     "pairing": "chain"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "pairing": "chain",
+     "from": "check,done,process,start"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "pairing": "chain"
+    }
+   }
+  ],
+  "skel": "connect the SHP in a chain",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 0.8,
+  "unseen_words": [],
+  "first_word_in_act_spans": 2039
+ },
+ {
+  "set": "blind",
+  "id": "blind-0002",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Throw a big yellow star in the upper left corner",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:create",
+   "span": null,
+   "args": {
+    "action": "create",
+    "shape": "star",
+    "color": "yellow",
+    "size": "large",
+    "position": "topleft"
+   }
+  },
+  "conf": 0.5884713972264841,
+  "want": {
+   "action": "create",
+   "shape": "star",
+   "color": "yellow",
+   "size": "large",
+   "position": "topleft"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "position": "topleft",
+     "shape": "star",
+     "color": "yellow",
+     "size": "large"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "star",
+     "color": "yellow",
+     "size": "large"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "color": "yellow",
+     "position": "topright",
+     "shape": "star",
+     "size": "large"
+    }
+   }
+  ],
+  "skel": "throw a SZ COL SHP in the upper left corner",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 0.78,
+  "unseen_words": [],
+  "first_word_in_act_spans": 42
+ },
+ {
+  "set": "broad",
+  "id": "broad-0116",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "make the last circle green",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:set",
+   "span": null,
+   "args": {
+    "action": "set",
+    "target": "mention(recency=newest,shape=circle)",
+    "color": "green"
+   }
+  },
+  "conf": 0.7314304901648182,
+  "want": {
+   "action": "set",
+   "target": "mention(recency=newest,shape=circle)",
+   "color": "green"
+  },
+  "rules": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "green",
+     "target": "mention(recency=newest,shape=circle)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "target": "mention(shape=circle)",
+     "color": "green"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "green",
+     "target": "mention(shape=circle)"
+    }
+   }
+  ],
+  "skel": "make the last SHP COL",
+  "exact": true,
+  "n_other_sop": 2,
+  "n_other_vss": 1,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 3014
+ },
+ {
+  "set": "broad",
+  "id": "broad-0103",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "how many cricles are there?",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "question:count",
+   "span": null,
+   "args": {
+    "ask": "count",
+    "shape": "circle"
+   }
+  },
+  "conf": 0.8340915939628102,
+  "want": {
+   "ask": "count",
+   "shape": "circle"
+  },
+  "rules": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count",
+     "shape": "circle"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count"
+    }
+   }
+  ],
+  "skel": "how many cricles are there",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 0.5,
+  "unseen_words": [
+   "cricles"
+  ],
+  "first_word_in_act_spans": 740
+ },
+ {
+  "set": "blind",
+  "id": "blind-0000",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "Could you sketch me a tiny purple hexagon?",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:create",
+   "span": null,
+   "args": {
+    "action": "create",
+    "shape": "hexagon",
+    "color": "purple",
+    "size": "tiny"
+   }
+  },
+  "conf": null,
+  "want": {
+   "action": "create",
+   "shape": "hexagon",
+   "color": "purple",
+   "size": "tiny"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "hexagon",
+     "color": "purple",
+     "size": "tiny"
+    }
+   }
+  ],
+  "vss": [],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "color": "purple",
+     "shape": "hexagon",
+     "size": "tiny"
+    }
+   }
+  ],
+  "skel": "could you sketch me a SZ COL SHP",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 0.71,
+  "unseen_words": [],
+  "first_word_in_act_spans": 11
+ },
+ {
+  "set": "broad",
+  "id": "broad-0104",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "ok now get rid of Process",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:delete",
+   "span": null,
+   "args": {
+    "action": "delete",
+    "target": "process"
+   }
+  },
+  "conf": null,
+  "want": {
+   "action": "delete",
+   "target": "process"
+  },
+  "rules": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "process"
+    }
+   }
+  ],
+  "vss": [],
+  "sop": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "process"
+    }
+   }
+  ],
+  "skel": "ok now get rid of NAME",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 0.6,
+  "unseen_words": [],
+  "first_word_in_act_spans": 0
+ },
+ {
+  "set": "broad",
+  "id": "broad-0049",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "join Start and Done with a dotted line",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:connect",
+   "span": null,
+   "args": {
+    "action": "connect",
+    "from": "start",
+    "to": "done",
+    "style": "dotted",
+    "arrow": "none"
+   }
+  },
+  "conf": 0.9449372114137847,
+  "want": {
+   "action": "connect",
+   "from": "start",
+   "to": "done",
+   "style": "dotted",
+   "arrow": "none"
+  },
+  "rules": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "to": "done",
+     "from": "start",
+     "style": "dotted",
+     "arrow": "none"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "start,done",
+     "style": "dotted",
+     "arrow": "none"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "start",
+     "style": "dotted",
+     "to": "done"
+    }
+   }
+  ],
+  "skel": "join NAME and NAME with a dotted line",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 38
+ },
+ {
+  "set": "broad",
+  "id": "broad-0052",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "connect the red circle to Done",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:connect",
+   "span": null,
+   "args": {
+    "action": "connect",
+    "from": "mention(color=red,shape=circle)",
+    "to": "done"
+   }
+  },
+  "conf": 0.6100486833885836,
+  "want": {
+   "action": "connect",
+   "from": "mention(color=red,shape=circle)",
+   "to": "done"
+  },
+  "rules": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "to": "done",
+     "from": "mention(color=red,shape=circle)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "mention(shape=circle)",
+     "to": "done"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "to": "done"
+    }
+   }
+  ],
+  "skel": "connect the COL SHP to NAME",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 2039
+ },
+ {
+  "set": "broad",
+  "id": "broad-0058",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "align all the squares horizontally",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:align",
+   "span": null,
+   "args": {
+    "action": "align",
+    "target": "mention(quantifier=all,shape=square)",
+    "axis": "horizontal"
+   }
+  },
+  "conf": 0.4970714942931956,
+  "want": {
+   "action": "align",
+   "target": "mention(quantifier=all,shape=square)",
+   "axis": "horizontal"
+  },
+  "rules": [
+   {
+    "act": "command:align",
+    "got": {
+     "action": "align",
+     "axis": "horizontal",
+     "target": "mention(quantifier=all,shape=square)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:align",
+    "got": {
+     "action": "align",
+     "axis": "horizontal",
+     "target": "check,done,process,start"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:align",
+    "got": {
+     "action": "align",
+     "axis": "horizontal",
+     "target": "mention(quantifier=all,shape=circle)"
+    }
+   }
+  ],
+  "skel": "align all the SHP horizontally",
+  "exact": true,
+  "n_other_sop": 1,
+  "n_other_vss": 1,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 214
+ },
+ {
+  "set": "broad",
+  "id": "broad-0118",
+  "j": 1,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "nd",
+  "text": "Draw a red circle named Hub and connect it to Start",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:connect",
+   "span": null,
+   "args": {
+    "action": "connect",
+    "from": "$new",
+    "to": "start"
+   }
+  },
+  "conf": null,
+  "want": {
+   "action": "connect",
+   "from": "$new",
+   "to": "start"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "name": "hub",
+     "shape": "circle",
+     "color": "red"
+    }
+   },
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "to": "start",
+     "from": "$new"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "circle",
+     "color": "red",
+     "name": "hub"
+    }
+   },
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "$new",
+     "to": "start"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "color": "red",
+     "name": "hub",
+     "shape": "circle"
+    }
+   }
+  ],
+  "skel": "draw a COL SHP named hub and connect it to NAME",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 0.7,
+  "unseen_words": [],
+  "first_word_in_act_spans": 294
+ },
+ {
+  "set": "hand",
+  "id": "hand-0033",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Remove the triangles that are not green",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:delete",
+   "span": null,
+   "args": {
+    "action": "delete",
+    "target": "mention(notcolor=green,quantifier=all,shape=triangle)"
+   }
+  },
+  "conf": 0.6225407249377816,
+  "want": {
+   "action": "delete",
+   "target": "mention(notcolor=green,quantifier=all,shape=triangle)"
+  },
+  "rules": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(notcolor=green,quantifier=all,shape=triangle)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(quantifier=all,shape=triangle)"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(quantifier=all)"
+    }
+   }
+  ],
+  "skel": "remove the SHP that are not COL",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 38
+ },
+ {
+  "set": "broad",
+  "id": "broad-0111",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "delete the stars that are not yellow",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:delete",
+   "span": null,
+   "args": {
+    "action": "delete",
+    "target": "mention(notcolor=yellow,quantifier=all,shape=star)"
+   }
+  },
+  "conf": 0.7397343779234035,
+  "want": {
+   "action": "delete",
+   "target": "mention(notcolor=yellow,quantifier=all,shape=star)"
+  },
+  "rules": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(notcolor=yellow,quantifier=all,shape=star)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(quantifier=all,shape=star)"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(quantifier=all)"
+    }
+   }
+  ],
+  "skel": "delete the SHP that are not COL",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 174
+ },
+ {
+  "set": "blind",
+  "id": "blind-0002",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Throw a big yellow star in the upper left corner",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:create",
+   "span": null,
+   "args": {
+    "action": "create",
+    "shape": "star",
+    "color": "yellow",
+    "size": "large",
+    "position": "topleft"
+   }
+  },
+  "conf": 0.9588750587839472,
+  "want": {
+   "action": "create",
+   "shape": "star",
+   "color": "yellow",
+   "size": "large",
+   "position": "topleft"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "position": "topleft",
+     "shape": "star",
+     "color": "yellow",
+     "size": "large"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "star",
+     "color": "yellow",
+     "size": "large"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "color": "yellow",
+     "position": "topright",
+     "shape": "star",
+     "size": "large"
+    }
+   }
+  ],
+  "skel": "throw a SZ COL SHP in the upper left corner",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 0.78,
+  "unseen_words": [],
+  "first_word_in_act_spans": 42
+ },
+ {
+  "set": "broad",
+  "id": "broad-0101",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "make Strat yelow",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:set",
+   "span": null,
+   "args": {
+    "action": "set",
+    "target": "start",
+    "color": "yellow"
+   }
+  },
+  "conf": 0.7401787962326397,
+  "want": {
+   "action": "set",
+   "target": "start",
+   "color": "yellow"
+  },
+  "rules": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "yellow",
+     "target": "start"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "target": "strat",
+     "color": "yellow"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "yellow",
+     "target": "strat"
+    }
+   }
+  ],
+  "skel": "make strat yelow",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 0.0,
+  "unseen_words": [
+   "strat"
+  ],
+  "first_word_in_act_spans": 3014
+ },
+ {
+  "set": "blind",
+  "id": "blind-0007",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Wipe out the red ones",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:delete",
+   "span": null,
+   "args": {
+    "action": "delete",
+    "target": "mention(color=red,quantifier=all)"
+   }
+  },
+  "conf": 0.5649181161072437,
+  "want": {
+   "action": "delete",
+   "target": "mention(color=red,quantifier=all)"
+  },
+  "rules": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(color=red,quantifier=all)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:extreme",
+    "got": {
+     "ask": "extreme"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:delete",
+    "got": {
+     "action": "delete",
+     "target": "mention(quantifier=all)"
+    }
+   }
+  ],
+  "skel": "wipe out the COL ones",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 0.5,
+  "unseen_words": [],
+  "first_word_in_act_spans": 0
+ },
+ {
+  "set": "blind",
+  "id": "blind-0022",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Join Process with Check using a dotted line",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:connect",
+   "span": null,
+   "args": {
+    "action": "connect",
+    "from": "process",
+    "to": "check",
+    "style": "dotted",
+    "arrow": "none"
+   }
+  },
+  "conf": 0.9521045441528725,
+  "want": {
+   "action": "connect",
+   "from": "process",
+   "to": "check",
+   "style": "dotted",
+   "arrow": "none"
+  },
+  "rules": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "to": "check",
+     "from": "process",
+     "style": "dotted",
+     "arrow": "none"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "to": "check",
+     "from": "process,check",
+     "style": "dotted",
+     "arrow": "none"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "process",
+     "style": "dotted",
+     "to": "check"
+    }
+   }
+  ],
+  "skel": "join NAME with NAME using a dotted line",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 38
+ },
+ {
+  "set": "blind",
+  "id": "blind-0014",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Recolour all stars blue",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "command:set",
+   "span": null,
+   "args": {
+    "action": "set",
+    "target": "mention(quantifier=all,shape=star)",
+    "color": "blue"
+   }
+  },
+  "conf": 0.46236605595994595,
+  "want": {
+   "action": "set",
+   "target": "mention(quantifier=all,shape=star)",
+   "color": "blue"
+  },
+  "rules": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "blue",
+     "target": "mention(quantifier=all,shape=star)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "target": "mention(quantifier=all,shape=star)",
+     "color": "blue"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "blue",
+     "target": "mention(quantifier=all)"
+    }
+   }
+  ],
+  "skel": "recolour all SHP COL",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 0.67,
+  "unseen_words": [],
+  "first_word_in_act_spans": 28
+ },
+ {
+  "set": "broad",
+  "id": "broad-0077",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "nd",
+  "text": "what is Done?",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done"
+  ],
+  "gold": {
+   "act": "question:describe",
+   "span": null,
+   "args": {
+    "ask": "describe",
+    "target": "done"
+   }
+  },
+  "conf": null,
+  "want": {
+   "ask": "describe",
+   "target": "done"
+  },
+  "rules": [
+   {
+    "act": "question:describe",
+    "got": {
+     "ask": "describe",
+     "target": "done"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:check",
+    "got": {
+     "ask": "check",
+     "target": "done"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:rules",
+    "got": {
+     "ask": "rules"
+    }
+   }
+  ],
+  "skel": "what is NAME",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 44
+ },
+ {
+  "set": "help",
+  "id": "help-046",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "Is there a red shape?",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "question:exists",
+   "span": null,
+   "args": {
+    "ask": "exists",
+    "color": "red"
+   }
+  },
+  "conf": null,
+  "want": {
+   "ask": "exists",
+   "color": "red"
+  },
+  "rules": [
+   {
+    "act": "question:exists",
+    "got": {
+     "ask": "exists",
+     "color": "red"
+    }
+   }
+  ],
+  "vss": [],
+  "sop": [
+   {
+    "act": "question:exists",
+    "got": {
+     "ask": "exists",
+     "color": "red"
+    }
+   }
+  ],
+  "skel": "is there a COL shape",
+  "exact": true,
+  "n_other_sop": 6,
+  "n_other_vss": 5,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 236
+ },
+ {
+  "set": "help",
+  "id": "help-028",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Distribute the shapes evenly",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "command:distribute",
+   "span": null,
+   "args": {
+    "action": "distribute",
+    "axis": "horizontal",
+    "target": "mention(quantifier=all)"
+   }
+  },
+  "conf": 0.8275531338738016,
+  "want": {
+   "action": "distribute",
+   "axis": "horizontal",
+   "target": "mention(quantifier=all)"
+  },
+  "rules": [
+   {
+    "act": "command:distribute",
+    "got": {
+     "action": "distribute",
+     "axis": "horizontal",
+     "target": "mention(quantifier=all)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:distribute",
+    "got": {
+     "action": "distribute",
+     "target": "mention(quantifier=all)"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:distribute",
+    "got": {
+     "action": "distribute",
+     "axis": "horizontal"
+    }
+   }
+  ],
+  "skel": "distribute the shapes evenly",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 181
+ },
+ {
+  "set": "help",
+  "id": "help-014",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Give Process a red outline",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "command:set",
+   "span": null,
+   "args": {
+    "action": "set",
+    "outline": "red",
+    "target": "Process"
+   }
+  },
+  "conf": 0.8028694710716874,
+  "want": {
+   "action": "set",
+   "outline": "red",
+   "target": "process"
+  },
+  "rules": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "outline": "red",
+     "target": "process"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "target": "process",
+     "color": "red"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "red",
+     "target": "process"
+    }
+   }
+  ],
+  "skel": "give NAME a COL outline",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 0.75,
+  "unseen_words": [
+   "outline"
+  ],
+  "first_word_in_act_spans": 15
+ },
+ {
+  "set": "help",
+  "id": "help-051",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "What does Process say?",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "question:property",
+   "span": null,
+   "args": {
+    "property": "label",
+    "ask": "property",
+    "target": "Process"
+   }
+  },
+  "conf": null,
+  "want": {
+   "property": "label",
+   "ask": "property",
+   "target": "process"
+  },
+  "rules": [
+   {
+    "act": "question:property",
+    "got": {
+     "property": "label",
+     "ask": "property",
+     "target": "process"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:neighbors",
+    "got": {
+     "ask": "neighbors",
+     "target": "process"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:describe",
+    "got": {
+     "ask": "describe",
+     "target": "process"
+    }
+   }
+  ],
+  "skel": "what does NAME say",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 0.67,
+  "unseen_words": [],
+  "first_word_in_act_spans": 328
+ },
+ {
+  "set": "help",
+  "id": "help-039",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "Done is connected to Start",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "fact:",
+   "span": null,
+   "args": {
+    "linked": "Start",
+    "target": "Done"
+   }
+  },
+  "conf": null,
+  "want": {
+   "linked": "start",
+   "target": "done"
+  },
+  "rules": [
+   {
+    "act": "fact:",
+    "got": {
+     "linked": "start",
+     "target": "done"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:connected",
+    "got": {
+     "ask": "connected",
+     "target": "done",
+     "anchor": "start"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:connected",
+    "got": {
+     "ask": "connected",
+     "anchor": "start",
+     "target": "done"
+    }
+   }
+  ],
+  "skel": "NAME is connected to NAME",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": true,
+  "pre3": false,
+  "bi": 0.5,
+  "unseen_words": [],
+  "first_word_in_act_spans": 1075
+ },
+ {
+  "set": "help",
+  "id": "help-033",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "nd",
+  "text": "Group Start and Process as Intake",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "command:group",
+   "span": null,
+   "args": {
+    "action": "group",
+    "name": "Intake",
+    "target": [
+     "Start",
+     "Process"
+    ]
+   }
+  },
+  "conf": null,
+  "want": {
+   "action": "group",
+   "name": "intake",
+   "target": "start,process"
+  },
+  "rules": [
+   {
+    "act": "command:group",
+    "got": {
+     "action": "group",
+     "name": "intake",
+     "target": "start,process"
+    }
+   }
+  ],
+  "vss": [],
+  "sop": [
+   {
+    "act": "command:label",
+    "got": {
+     "action": "label",
+     "label": "intake",
+     "target": "start,process"
+    }
+   }
+  ],
+  "skel": "group NAME and NAME as NAME",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 0.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 0
+ },
+ {
+  "set": "help",
+  "id": "help-002",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Draw a gold star named Gem with a black outline in the top right",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "command:create",
+   "span": null,
+   "args": {
+    "action": "create",
+    "name": "Gem",
+    "outline": "black",
+    "position": "topRight",
+    "shape": "star",
+    "color": "gold"
+   }
+  },
+  "conf": 0.6429956716658372,
+  "want": {
+   "action": "create",
+   "name": "gem",
+   "outline": "black",
+   "position": "topright",
+   "shape": "star",
+   "color": "gold"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "name": "gem",
+     "outline": "black",
+     "position": "topright",
+     "shape": "star",
+     "color": "gold"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "star",
+     "color": "gold",
+     "name": "gem",
+     "position": "topright"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "color": "black",
+     "name": "gem",
+     "position": "topright",
+     "shape": "star"
+    }
+   }
+  ],
+  "skel": "draw a COL SHP named gem with a COL outline in the top right",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 0.62,
+  "unseen_words": [
+   "gem",
+   "outline"
+  ],
+  "first_word_in_act_spans": 38
+ },
+ {
+  "set": "help",
+  "id": "help-074",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Connect Start and Check with a two-way arrow",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "command:connect",
+   "span": null,
+   "args": {
+    "action": "connect",
+    "to": "Check",
+    "from": "Start",
+    "arrow": "both"
+   }
+  },
+  "conf": 0.7177981314805347,
+  "want": {
+   "action": "connect",
+   "to": "check",
+   "from": "start",
+   "arrow": "both"
+  },
+  "rules": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "to": "check",
+     "from": "start",
+     "arrow": "both"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "from": "start,check",
+     "arrow": "both"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:connect",
+    "got": {
+     "action": "connect",
+     "arrow": "both",
+     "from": "start",
+     "to": "check"
+    }
+   }
+  ],
+  "skel": "connect NAME and NAME with a N way arrow",
+  "exact": true,
+  "n_other_sop": 2,
+  "n_other_vss": 1,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 2039
+ },
+ {
+  "set": "help",
+  "id": "help-042",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "How many groups are there?",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "question:count",
+   "span": null,
+   "args": {
+    "ask": "count",
+    "kind": "group"
+   }
+  },
+  "conf": 0.8340915939628102,
+  "want": {
+   "ask": "count",
+   "kind": "group"
+  },
+  "rules": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count",
+     "kind": "group"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count"
+    }
+   }
+  ],
+  "skel": "how many groups are there",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 0.5,
+  "unseen_words": [],
+  "first_word_in_act_spans": 740
+ },
+ {
+  "set": "help",
+  "id": "help-072",
+  "j": 0,
+  "reader": "vss",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Draw a circle named Hub at 400, 250",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "command:create",
+   "span": null,
+   "args": {
+    "action": "create",
+    "name": "Hub",
+    "at": [
+     400,
+     250
+    ],
+    "shape": "circle"
+   }
+  },
+  "conf": 0.5281315482847204,
+  "want": {
+   "action": "create",
+   "name": "hub",
+   "at": "400,250",
+   "shape": "circle"
+  },
+  "rules": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "name": "hub",
+     "at": "400,250",
+     "shape": "circle"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "shape": "circle",
+     "count": "400",
+     "name": "hub"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:create",
+    "got": {
+     "action": "create",
+     "name": "hub",
+     "shape": "circle"
+    }
+   }
+  ],
+  "skel": "draw a SHP named hub at N N",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 0.71,
+  "unseen_words": [],
+  "first_word_in_act_spans": 38
+ },
+ {
+  "set": "help",
+  "id": "help-033",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "nd",
+  "text": "Group Start and Process as Intake",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "command:group",
+   "span": null,
+   "args": {
+    "action": "group",
+    "name": "Intake",
+    "target": [
+     "Start",
+     "Process"
+    ]
+   }
+  },
+  "conf": null,
+  "want": {
+   "action": "group",
+   "name": "intake",
+   "target": "start,process"
+  },
+  "rules": [
+   {
+    "act": "command:group",
+    "got": {
+     "action": "group",
+     "name": "intake",
+     "target": "start,process"
+    }
+   }
+  ],
+  "vss": [],
+  "sop": [
+   {
+    "act": "command:label",
+    "got": {
+     "action": "label",
+     "label": "intake",
+     "target": "start,process"
+    }
+   }
+  ],
+  "skel": "group NAME and NAME as NAME",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 0.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 0
+ },
+ {
+  "set": "help",
+  "id": "help-051",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "nd",
+  "text": "What does Process say?",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "question:property",
+   "span": null,
+   "args": {
+    "property": "label",
+    "ask": "property",
+    "target": "Process"
+   }
+  },
+  "conf": null,
+  "want": {
+   "property": "label",
+   "ask": "property",
+   "target": "process"
+  },
+  "rules": [
+   {
+    "act": "question:property",
+    "got": {
+     "property": "label",
+     "ask": "property",
+     "target": "process"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:neighbors",
+    "got": {
+     "ask": "neighbors",
+     "target": "process"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:describe",
+    "got": {
+     "ask": "describe",
+     "target": "process"
+    }
+   }
+  ],
+  "skel": "what does NAME say",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 0.67,
+  "unseen_words": [],
+  "first_word_in_act_spans": 328
+ },
+ {
+  "set": "help",
+  "id": "help-030",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Arrange everything in a grid",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "command:arrange",
+   "span": null,
+   "args": {
+    "action": "arrange",
+    "layout": "grid",
+    "target": "mention(quantifier=all)"
+   }
+  },
+  "conf": 0.7614415841568376,
+  "want": {
+   "action": "arrange",
+   "layout": "grid",
+   "target": "mention(quantifier=all)"
+  },
+  "rules": [
+   {
+    "act": "command:arrange",
+    "got": {
+     "action": "arrange",
+     "layout": "grid",
+     "target": "mention(quantifier=all)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:arrange",
+    "got": {
+     "action": "arrange",
+     "target": "mention(quantifier=all)",
+     "layout": "grid"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:arrange",
+    "got": {
+     "action": "arrange",
+     "layout": "grid"
+    }
+   }
+  ],
+  "skel": "arrange everything in a grid",
+  "exact": true,
+  "n_other_sop": 6,
+  "n_other_vss": 4,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 322
+ },
+ {
+  "set": "help",
+  "id": "help-014",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Give Process a red outline",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "command:set",
+   "span": null,
+   "args": {
+    "action": "set",
+    "outline": "red",
+    "target": "Process"
+   }
+  },
+  "conf": 0.9658821684979045,
+  "want": {
+   "action": "set",
+   "outline": "red",
+   "target": "process"
+  },
+  "rules": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "outline": "red",
+     "target": "process"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "target": "process",
+     "color": "red"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:set",
+    "got": {
+     "action": "set",
+     "color": "red",
+     "target": "process"
+    }
+   }
+  ],
+  "skel": "give NAME a COL outline",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 0.75,
+  "unseen_words": [
+   "outline"
+  ],
+  "first_word_in_act_spans": 15
+ },
+ {
+  "set": "help",
+  "id": "help-029",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Arrange everything in a circle",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "command:arrange",
+   "span": null,
+   "args": {
+    "action": "arrange",
+    "layout": "circle",
+    "target": "mention(quantifier=all)"
+   }
+  },
+  "conf": 0.6600421585708045,
+  "want": {
+   "action": "arrange",
+   "layout": "circle",
+   "target": "mention(quantifier=all)"
+  },
+  "rules": [
+   {
+    "act": "command:arrange",
+    "got": {
+     "action": "arrange",
+     "layout": "circle",
+     "target": "mention(quantifier=all)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:arrange",
+    "got": {
+     "action": "arrange",
+     "target": "mention(quantifier=all)",
+     "layout": "circle"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:arrange",
+    "got": {
+     "action": "arrange",
+     "layout": "circle"
+    }
+   }
+  ],
+  "skel": "arrange everything in a SHP",
+  "exact": true,
+  "n_other_sop": 10,
+  "n_other_vss": 9,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 322
+ },
+ {
+  "set": "help",
+  "id": "help-076",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Is the green circle below Check?",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "question:check",
+   "span": null,
+   "args": {
+    "ask": "check",
+    "position": "below",
+    "anchor": "Check",
+    "target": "mention(color=green,shape=circle)"
+   }
+  },
+  "conf": 0.4614243506574952,
+  "want": {
+   "ask": "check",
+   "position": "below",
+   "anchor": "check",
+   "target": "mention(color=green,shape=circle)"
+  },
+  "rules": [
+   {
+    "act": "question:check",
+    "got": {
+     "ask": "check",
+     "position": "below",
+     "anchor": "check",
+     "target": "mention(color=green,shape=circle)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "fact:",
+    "got": {
+     "target": "mention(color=green,shape=circle)",
+     "position": "below",
+     "anchor": "check"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:check",
+    "got": {
+     "ask": "check",
+     "anchor": "check",
+     "position": "below",
+     "shape": "circle"
+    }
+   }
+  ],
+  "skel": "is the COL SHP below NAME",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": true,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 1412
+ },
+ {
+  "set": "help",
+  "id": "help-039",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "nd",
+  "text": "Done is connected to Start",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "fact:",
+   "span": null,
+   "args": {
+    "linked": "Start",
+    "target": "Done"
+   }
+  },
+  "conf": null,
+  "want": {
+   "linked": "start",
+   "target": "done"
+  },
+  "rules": [
+   {
+    "act": "fact:",
+    "got": {
+     "linked": "start",
+     "target": "done"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:connected",
+    "got": {
+     "ask": "connected",
+     "target": "done",
+     "anchor": "start"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:connected",
+    "got": {
+     "ask": "connected",
+     "anchor": "start",
+     "target": "done"
+    }
+   }
+  ],
+  "skel": "NAME is connected to NAME",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": true,
+  "pre3": false,
+  "bi": 0.5,
+  "unseen_words": [],
+  "first_word_in_act_spans": 1075
+ },
+ {
+  "set": "help",
+  "id": "help-028",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Distribute the shapes evenly",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "command:distribute",
+   "span": null,
+   "args": {
+    "action": "distribute",
+    "axis": "horizontal",
+    "target": "mention(quantifier=all)"
+   }
+  },
+  "conf": 0.5407535898621441,
+  "want": {
+   "action": "distribute",
+   "axis": "horizontal",
+   "target": "mention(quantifier=all)"
+  },
+  "rules": [
+   {
+    "act": "command:distribute",
+    "got": {
+     "action": "distribute",
+     "axis": "horizontal",
+     "target": "mention(quantifier=all)"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "command:distribute",
+    "got": {
+     "action": "distribute",
+     "target": "mention(quantifier=all)"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "command:distribute",
+    "got": {
+     "action": "distribute",
+     "axis": "horizontal"
+    }
+   }
+  ],
+  "skel": "distribute the shapes evenly",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 1.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 181
+ },
+ {
+  "set": "help",
+  "id": "help-025",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "Remove all connections",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "command:disconnect",
+   "span": null,
+   "args": {
+    "action": "disconnect",
+    "quantifier": "all"
+   }
+  },
+  "conf": 0.49335178148965747,
+  "want": {
+   "action": "disconnect",
+   "quantifier": "all"
+  },
+  "rules": [
+   {
+    "act": "command:disconnect",
+    "got": {
+     "action": "disconnect",
+     "quantifier": "all"
+    }
+   }
+  ],
+  "vss": [],
+  "sop": [
+   {
+    "act": "command:disconnect",
+    "got": {
+     "action": "disconnect"
+    }
+   }
+  ],
+  "skel": "remove all connections",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 0.0,
+  "unseen_words": [],
+  "first_word_in_act_spans": 47
+ },
+ {
+  "set": "help",
+  "id": "help-042",
+  "j": 0,
+  "reader": "sop",
+  "kind": "fail",
+  "status": "wrong",
+  "text": "How many groups are there?",
+  "names": [
+   "Start",
+   "Process",
+   "Check",
+   "Done",
+   "Intake"
+  ],
+  "gold": {
+   "act": "question:count",
+   "span": null,
+   "args": {
+    "ask": "count",
+    "kind": "group"
+   }
+  },
+  "conf": 0.9436286658408469,
+  "want": {
+   "ask": "count",
+   "kind": "group"
+  },
+  "rules": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count",
+     "kind": "group"
+    }
+   }
+  ],
+  "vss": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count"
+    }
+   }
+  ],
+  "sop": [
+   {
+    "act": "question:count",
+    "got": {
+     "ask": "count"
+    }
+   }
+  ],
+  "skel": "how many groups are there",
+  "exact": false,
+  "n_other_sop": 0,
+  "n_other_vss": 0,
+  "exact_other_act": false,
+  "pre3": false,
+  "bi": 0.5,
+  "unseen_words": [],
+  "first_word_in_act_spans": 740
+ }
+]

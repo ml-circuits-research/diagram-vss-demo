@@ -5,11 +5,22 @@
 const REL = { left_of: "leftOf", right_of: "rightOf", above: "above", below: "below", next_to: "near", between: "between" };
 const REGION = { center: "center", top: "top", bottom: "bottom", left_side: "left", right_side: "right", top_left: "topLeft", top_right: "topRight", bottom_left: "bottomLeft", bottom_right: "bottomRight" };
 export const SHAPES = { circle: "circle", circles: "circle", square: "square", squares: "square", rectangle: "rectangle", rectangles: "rectangle", triangle: "triangle",
-  triangles: "triangle", diamond: "diamond", diamonds: "diamond", ellipse: "ellipse", ellipses: "ellipse", hexagon: "hexagon", hexagons: "hexagon", star: "star", stars: "star" };
+  triangles: "triangle", diamond: "diamond", diamonds: "diamond", ellipse: "ellipse", ellipses: "ellipse", hexagon: "hexagon", hexagons: "hexagon", star: "star", stars: "star",
+  text: "text", texts: "text" };   // text: a free text (shape=text, LEGEND_EXT.md; worlds built with LEGEND_EXT=1)
 const PLURAL = new Set(["circles", "squares", "rectangles", "triangles", "diamonds", "ellipses", "hexagons", "stars", "shapes"]);
 export const PROPERTY = { what_color: "color", where_is: "position", how_big: "size", what_shape: "shape", what_says: "label" };
-const COMMANDS = new Set(["create", "delete", "move", "set", "resize", "rename", "label", "duplicate", "swap", "connect", "disconnect", "align", "arrange", "distribute", "toFront", "toBack", "undo", "redo", "forget", "group", "ungroup"]);
-const QUESTIONS = new Set(["count", "exists", "list", "property", "describe", "neighbors", "path", "reachable", "cycle", "check", "extreme", "nearest", "connected", "degree", "members", "groupOf"]);
+// the layout operations of HIGH_LEVEL_OPS.md and reverse (worlds built with LEGEND_EXT=1, training/sketch/TRAIN_PLAN_1103.md)
+const OPS = new Set(["improve", "respace", "snap", "fit", "flip", "sort", "groupBy", "equalize", "straighten", "untangle"]);
+const COMMANDS = new Set(["create", "delete", "move", "set", "resize", "rename", "label", "duplicate", "swap", "connect", "disconnect", "align", "arrange", "distribute", "toFront", "toBack", "undo", "redo", "forget", "group", "ungroup", "reverse", ...OPS]);
+const QUESTIONS = new Set(["count", "exists", "list", "property", "describe", "neighbors", "path", "reachable", "cycle", "check", "extreme", "nearest", "connected", "degree", "members", "groupOf", "help"]);
+// LEGEND_EXT value tokens -> legend values: the world token is a prefix + the value, a capital written as "_" + the letter (training/sketch/front.py
+// PREFIX / ext_token: topic toFront -> tp_to_front). The tables are legend key -> token prefix, not words.
+const EXT_PREFIX = { template: "tpl_", scheme: "sch_", fill: "fill_", layer: "layer_", topic: "tp_", aspect: "asp_", property: "prop_", kind: "kind_" };
+export function extValue(key, tok) {
+  const p = EXT_PREFIX[key], t = String(tok);
+  if (!p || !t.startsWith(p)) return undefined;
+  return t.slice(p.length).replace(/_([a-z0-9])/g, (_, c) => c.toUpperCase());
+}
 const SUPER = { biggest: "biggest", smallest: "smallest", leftmost: "leftmost", rightmost: "rightmost", topmost: "topmost", bottommost: "bottommost", mostconnected: "mostConnected", leastconnected: "leastConnected", closest: "closest", farthest: "farthest" };
 
 /** VSS wires -> { event, roles, verb }; roles: role -> string | {head, attr, det} */
@@ -36,7 +47,7 @@ export function readingFromWires(wires, verb, tokens = null) {
   }
   return { event: top.type, roles, verb: verb || top.value("_verb"), offered, tokens };
 }
-const ENTITY_ROLES = new Set(["object", "landmark", "landmark2", "landmark3", "source", "target", "edge"]);
+const ENTITY_ROLES = new Set(["object", "landmark", "landmark2", "landmark3", "source", "target", "edge", "linked"]);
 
 /** the gold frame of an eval row -> the same shape */
 export function readingFromGold(row, normalizedTokens, verbsOfEvent) {
@@ -65,7 +76,7 @@ export function toNodes(reading, info, ctx, seq) {
       return last.length === 1 ? last[0] : last.slice();
     }
     const a = {};
-    const all = h === "everything" || h === "canvas" || PLURAL.has(h) || ["all", "every", "each"].includes(en.det);
+    const all = h === "everything" || h === "canvas" || h === "all" || PLURAL.has(h) || ["all", "every", "each"].includes(en.det);   // head "all": "the whole diagram" (LEGEND_EXT)
     if (all) a.quantifier = "all";
     if (SHAPES[h]) a.shape = SHAPES[h];
     if (en.attr) a.color = en.attr;
@@ -103,17 +114,22 @@ export function toNodes(reading, info, ctx, seq) {
   if (type === "question") args.ask = ev;
   const obj = R.object;
   const shapeOf = (en) => (en && typeof en === "object" && SHAPES[en.head]) || undefined;
-  const withMembers = () => { if (R.members && !["connect", "disconnect", "path"].includes(ev)) args.target = list(R.members); };
+  const withMembers = () => { if (R.members && !["connect", "disconnect", "path", "reverse"].includes(ev)) args.target = list(R.members); };
+  // an existing arrow named by its ends (set / resize / label / property, LEGEND_EXT): the roles source / target -> from / to
+  const ends = () => { if (R.source) args.from = ref(R.source); if (R.target) args.to = ref(R.target); };
+  const arrowArgs = () => { if (R.style) args.style = R.style; if (R.arrow === "two_way") args.arrow = "both"; else if (R.arrow === "plain") args.arrow = "none"; else if (R.arrow === "forward") args.arrow = "forward"; };
   switch (ev) {
     case "create": {
-      args.shape = shapeOf(obj) || "circle"; if (obj && obj.attr) args.color = obj.attr; if (R.color) args.color = R.color;
+      if (!(R.template || R.items || R.title) || shapeOf(obj)) args.shape = shapeOf(obj) || "circle";   // a template (its form, items or title read) names no shape (LEGEND_EXT)
+      if (obj && obj.attr) args.color = obj.attr; if (R.color) args.color = R.color;
+      if (R.layout) args.layout = R.layout === "ring" ? "circle" : R.layout;   // several new shapes in a layout
       if (R.size) args.size = R.size; if (R.quantity) args.count = +R.quantity; if (R.name) args.name = plainName(R.name); if (R.text) args.label = textOf(R.text);
       place(args); break;
     }
     case "delete": case "duplicate": case "neighbors": case "describe": case "property":
       if (obj && !(obj.head === "canvas" && ev === "describe")) args.target = ref(obj);
       if (ev === "duplicate" && R.quantity) args.count = +R.quantity;
-      if (ev === "property") args.property = PROPERTY[reading.verb] || "color";
+      if (ev === "property") { args.property = PROPERTY[reading.verb] || "color"; ends(); }
       break;
     case "move": {
       args.target = ref(obj);
@@ -121,16 +137,17 @@ export function toNodes(reading, info, ctx, seq) {
       break;
     }
     case "set": {
-      args.target = ref(obj); if (R.color) args.color = R.color; if (R.shape) args.shape = R.shape;
+      args.target = ref(obj); if (R.color) args.color = R.color; if (R.shape) args.shape = R.shape; ends(); arrowArgs();
       if (R.size === "bigger" || R.size === "smaller") { args.action = "resize"; args.scale = R.size === "bigger" ? 1.5 : 0.67; }
       else if (R.size) args.size = R.size;
       break;
     }
-    case "resize": args.target = ref(obj); if (R.size && R.size !== "bigger" && R.size !== "smaller") args.size = R.size; else args.scale = reading.verb === "smaller_v" || R.size === "smaller" ? 0.67 : 1.5; break;
+    case "resize": args.target = ref(obj); ends(); if (R.size && R.size !== "bigger" && R.size !== "smaller") args.size = R.size; else args.scale = reading.verb === "smaller_v" || R.size === "smaller" ? 0.67 : 1.5; break;
     case "rename": args.target = ref(obj); if (R.name) args.name = plainName(R.name); break;
-    case "label": args.target = ref(obj); if (R.text) args.label = textOf(R.text); break;
+    case "label": args.target = ref(obj); ends(); if (R.text) args.label = R.text === "no_label" ? "" : textOf(R.text); break;   // no_label: remove the label (LEGEND_EXT)
     case "swap": { const a = ref(obj), b = ref(R.target); args.target = [a, b].filter((x) => x !== undefined); break; }
-    case "connect": case "disconnect": case "path": {
+    case "connect": case "disconnect": case "path": case "reverse": {
+      if (ev === "reverse" && obj && !R.source && !R.target) args.target = ref(obj);   // the arrows at a shape
       if (R.source) args.from = ref(R.source); if (R.target) args.to = ref(R.target);
       if (R.members) args.from = list(R.members);          // "connect A, B and C in a chain", "connect A and B to C"
       if (R.targets) args.to = list(R.targets);            // "link Hub to A, B and C"
@@ -144,9 +161,19 @@ export function toNodes(reading, info, ctx, seq) {
       break;
     }
     case "reachable": if (R.source) args.from = ref(R.source); break;
-    case "align": case "distribute": args.target = ref(obj); if (R.axis) args.axis = R.axis === "vertically" ? "vertical" : "horizontal"; break;
+    case "align": case "distribute": args.target = ref(obj); if (R.axis) args.axis = R.axis === "vertically" ? "vertical" : "horizontal"; if (R.direction) args.direction = R.direction; break;
     case "toFront": case "toBack": args.target = ref(obj); break;
-    case "arrange": args.target = ref(obj); if (R.layout) args.layout = R.layout === "ring" ? "circle" : R.layout; break;
+    case "arrange": args.target = ref(obj); if (R.layout) args.layout = R.layout === "ring" ? "circle" : R.layout; if (R.direction) args.direction = R.direction; if (R.landmark) args.anchor = ref(R.landmark); break;
+    // the layout operations (HIGH_LEVEL_OPS.md section 3): target, axis (flip), comparison and distance (respace, snap), a canvas place (fit
+    // position=center), superlative and layout (sort), the model or root (anchor); property is read below with the other LEGEND_EXT keys
+    case "improve": case "respace": case "snap": case "fit": case "flip": case "sort": case "groupBy": case "equalize": case "straighten": case "untangle":
+      if (obj) args.target = ref(obj);
+      if (R.axis) args.axis = R.axis === "vertically" ? "vertical" : "horizontal";
+      if (R.comparison) args.comparison = R.comparison; if (R.amount) args.distance = +R.amount;
+      if (R.superlative) args.superlative = SUPER[R.superlative] || R.superlative; if (R.layout) args.layout = R.layout === "ring" ? "circle" : R.layout;
+      if (R.landmark) args.anchor = ref(R.landmark);
+      place(args); break;
+    case "help": break;   // topic, aspect: below
     case "count": case "exists": case "list": {
       if (obj && obj.head === "rules") { args.ask = "rules"; break; }
       if (obj && (obj.head === "groups" || obj.head === "group")) { args.kind = "group"; break; }   // "what groups are there?"
@@ -177,6 +204,23 @@ export function toNodes(reading, info, ctx, seq) {
     default: break;
   }
   withMembers();
+  // LEGEND_EXT keys of any event (templates, panels, help, arrows): value tokens -> legend values, lists of texts in their order in the text
+  for (const k of ["template", "scheme", "fill", "layer", "topic", "aspect", "kind"]) if (R[k] != null && extValue(k, R[k]) !== undefined) args[k] = extValue(k, R[k]);
+  if (R.property != null && ev !== "property" && extValue("property", R.property) !== undefined) args.property = extValue("property", R.property);
+  if (R.quantifier === "all") args.quantifier = "all";
+  for (const k of ["width", "height"]) if (R[k] != null && /^\d+$/.test(String(R[k]))) args[k] = +R[k];
+  for (const k of ["items", "items2", "parents"]) if (R[k] != null) {
+    const xs = [].concat(R[k]).slice().sort((a, b) => pos(a) - pos(b)).map((e) => textOf(typeof e === "string" ? e : e.head)).filter((x) => x);
+    if (xs.length) args[k] = xs.join(",");
+  }
+  if (R.title != null) args.title = textOf(typeof R.title === "string" ? R.title : R.title.head);
+  // the keys that had no role before 2026-11-03 (training/sketch/synth/CONVERT_FIX.md; worlds built with LEGEND_EXT=1): outline (a colour
+  // token, or no_outline = "none"), at = x,y (two number roles), linked (a shape), the count of undo / redo (role quantity)
+  if (R.outline != null) args.outline = R.outline === "no_outline" ? "none" : String(R.outline);
+  else if (args.color === "no_outline") { args.outline = "none"; delete args.color; }   // a value placed by what it IS (as region / relation above): no_outline is never a colour
+  if (R.x != null && R.y != null && /^\d+$/.test(String(R.x)) && /^\d+$/.test(String(R.y))) args.at = `${R.x},${R.y}`;
+  if (R.linked != null) args.linked = ref(R.linked);
+  if ((ev === "undo" || ev === "redo") && R.quantity != null && /^\d+$/.test(String(R.quantity))) args.count = +R.quantity;
   for (const k of Object.keys(args)) if (args[k] === undefined) delete args[k];
   nodes.push({ id: (type === "rule" ? "r" : "s") + (++seq.s), type, args });
   return { nodes, notes };

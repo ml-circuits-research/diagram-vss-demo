@@ -1,0 +1,4 @@
+help sentences (single request): 79  with a description/quantifier as a role (mention): 9 = 11%
+llm_short with a mention: 219 of 3000 = 7%
+help actions: {'command:create': 6, 'command:delete': 4, 'command:duplicate': 2, 'command:move': 3, 'command:swap': 1, 'command:set': 6, 'command:resize': 4, 'command:label': 1, 'command:rename': 1, 'command:connect': 6, 'command:disconnect': 2, 'command:align': 2, 'command:distribute': 1, 'command:arrange': 2, 'command:toFront': 1, 'command:toBack': 1, 'command:group': 1, 'command:undo': 1, 'rule:': 2, 'fact:': 3, 'question:count': 3, 'question:list': 3, 'question:exists': 2, 'question:property': 4, 'question:check': 4, 'question:describe': 2, 'question:neighbors': 1, 'question:connected': 1, 'question:degree': 1, 'question:path': 1, 'question:reachable': 1, 'question:cycle': 1, 'question:nearest': 2, 'question:extreme': 3}
+actions in help with 0 training actions: group, ungroup, outline set, at (coordinates)

@@ -13,10 +13,17 @@ The head layout is `reader` in config.json; docs/js/neural.js makeReader decodes
 AutoModel (dtype `q8`, file `onnx/model_quantized.onnx`); outputs `token_logits` and `seq_logits`.
 
 - Base model: `distilbert-base-uncased` (license: Apache-2.0); fine-tuned here, weights are a derivative of it.
-- Data: 15683 request spans from the span-annotated messages of training/sketch (made by training/neural/make_roles.py; split by message id,
-  10% of the messages held out; the fixed 1000-message sample and the docs/bench sets are never trained on).
-- Held-out act accuracy (fp32 torch): 0.9889. Held-out requests read right (act, every gold class key incl. fill / desc, every gold role on exactly its words): 0.8808.
-  Held-out name-roles per filler kind (value read right / gold): context 83/103, description 4/34, written 1611/1659.
-  1000-message sample: act 0.9879, requests read right 0.8666.
-- Size: onnx/model_quantized.onnx 67.8 MB (q8). Node check (docs/js/neural.js makeReader, q8) vs torch on 50 held-out requests: {"ids": "50/50", "act": "50/50", "classes": "50/50", "tags": "49/50", "cut": "19/20"}.
-- Trained with training/neural/finetune_roles.py (epochs <= 8, lr 6e-05, batch 32, fp16 on cuda, seed 0).
+- Model: arm BERT-G of training/sketch/FEEDBACK_PLAN.md (FEEDBACK_RESULT.md), installed 2026-11-02 by the owner's decision (it replaces the
+  model trained on 15683 spans with 10% of the messages held out; that one stays in git history).
+- Training data: `make_data.py --all` / `make_roles.py --all` (training/neural/ALL_DATA.md) with
+  EXTRA_DIRS = llm_train/opus_train_a opus_train_b opus_train_c opus_train_d (1200 base Opus messages) + llm_train/opus_gen_1 opus_gen_2
+  (600 general Opus messages): every span-annotated message the VSS chain trains on plus these, 9440 messages, 31746 request spans,
+  nothing held out (so no early stop: 8 epochs, the last kept). The same data as the VSS worlds of docs/model/micro/registry.json (arm VSS-G).
+  The fixed 1000-message sample is inside this training data (its numbers are a fit, not a test): act 0.9998, requests read right 0.9428.
+- Test: the fresh2 messages (training/sketch/llm_bench/fresh2, 600 messages by a writer not in the training data): the confidence
+  (docs/model/confidence/sop-bert.json) is fitted on the calibration part (195 messages), the numbers are the test part (405 messages,
+  1313 requested actions): cost score 14.4 [2.0, 26.7] at the cost-score threshold 0.8233 (60.1% of the requests done right, 7.1% of
+  what it executed wrong); the previous model 9.9 [6.7, 12.6] (fresh2/VERDICTS.md).
+- Size: onnx/model_quantized.onnx 67.8 MB (q8). Node check (docs/js/neural.js makeReader, q8) vs torch on 50 training requests: {"ids": "50/50", "act": "50/50", "classes": "50/50", "tags": "50/50", "cut": "19/20"}.
+- Trained with training/neural/finetune_roles.py (8 epochs, lr 6e-05, batch 32, fp16 on cuda, seed 0); run: GPU machine job 062
+  (branch gpu-runs, results/062_arm_bert_G).

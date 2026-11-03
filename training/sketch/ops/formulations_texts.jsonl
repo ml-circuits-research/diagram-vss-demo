@@ -1,0 +1,744 @@
+{"id": "ops-0001", "text": "tidy up"}
+{"id": "ops-0002", "text": "tidy this up pls"}
+{"id": "ops-0003", "text": "can you tidy up the diagram?"}
+{"id": "ops-0004", "text": "tidy up everything"}
+{"id": "ops-0005", "text": "ok clean this up"}
+{"id": "ops-0006", "text": "clean up the canvas please"}
+{"id": "ops-0007", "text": "clean it up a bit"}
+{"id": "ops-0008", "text": "pls clean up the whole diagram"}
+{"id": "ops-0009", "text": "make it look better"}
+{"id": "ops-0010", "text": "can you make this look nicer"}
+{"id": "ops-0011", "text": "make the diagram look more professional"}
+{"id": "ops-0012", "text": "make it look less messy"}
+{"id": "ops-0013", "text": "improve the layout"}
+{"id": "ops-0014", "text": "improve everything"}
+{"id": "ops-0015", "text": "just improve it"}
+{"id": "ops-0016", "text": "improve the diagram pls"}
+{"id": "ops-0017", "text": "fix the layout"}
+{"id": "ops-0018", "text": "fix this mess"}
+{"id": "ops-0019", "text": "can u fix the layout its all over the place"}
+{"id": "ops-0020", "text": "sort out the mess"}
+{"id": "ops-0021", "text": "neaten it up"}
+{"id": "ops-0022", "text": "neaten everything"}
+{"id": "ops-0023", "text": "declutter"}
+{"id": "ops-0024", "text": "declutter the canvas"}
+{"id": "ops-0025", "text": "less clutter pls"}
+{"id": "ops-0026", "text": "less messy please"}
+{"id": "ops-0027", "text": "tidy pls"}
+{"id": "ops-0028", "text": "tidyup the diagram pls"}
+{"id": "ops-0029", "text": "tidey up"}
+{"id": "ops-0030", "text": "tidy up all the shapes"}
+{"id": "ops-0031", "text": "clean up the boxes"}
+{"id": "ops-0032", "text": "tidy up the circles"}
+{"id": "ops-0033", "text": "tidy up Start, Process and Check"}
+{"id": "ops-0034", "text": "clean up Hub, Api and Db"}
+{"id": "ops-0035", "text": "beautify it"}
+{"id": "ops-0036", "text": "prettify the diagram"}
+{"id": "ops-0037", "text": "it's a mess, tidy it up"}
+{"id": "ops-0038", "text": "this looks awful, clean it up for me"}
+{"id": "ops-0039", "text": "make everything look neater"}
+{"id": "ops-0040", "text": "make it tidier"}
+{"id": "ops-0041", "text": "make it cleaner"}
+{"id": "ops-0042", "text": "clean things up a little"}
+{"id": "ops-0043", "text": "hey tidy up the drawing before the meeting"}
+{"id": "ops-0044", "text": "improve the look of the whole thing"}
+{"id": "ops-0045", "text": "fix up the layout please"}
+{"id": "ops-0046", "text": "tidy the whole thing up"}
+{"id": "ops-0047", "text": "improve the layout of everything"}
+{"id": "ops-0048", "text": "fix the positioning"}
+{"id": "ops-0049", "text": "make it look good"}
+{"id": "ops-0050", "text": "make it nicer pls"}
+{"id": "ops-0051", "text": "declutter this diagram"}
+{"id": "ops-0052", "text": "neaten up the layout"}
+{"id": "ops-0053", "text": "arrange everything as a tree"}
+{"id": "ops-0054", "text": "arrange all as a tree"}
+{"id": "ops-0055", "text": "arrange it as a tree"}
+{"id": "ops-0056", "text": "arrange as a tree"}
+{"id": "ops-0057", "text": "tree layout pls"}
+{"id": "ops-0058", "text": "tree layout please"}
+{"id": "ops-0059", "text": "make it a tree"}
+{"id": "ops-0060", "text": "make the diagram a tree"}
+{"id": "ops-0061", "text": "lay out the diagram as a tree"}
+{"id": "ops-0062", "text": "lay everything out as a tree"}
+{"id": "ops-0063", "text": "organize it as a hierarchy"}
+{"id": "ops-0064", "text": "arrange hierarchically"}
+{"id": "ops-0065", "text": "arrange it like an org chart"}
+{"id": "ops-0066", "text": "org chart style pls"}
+{"id": "ops-0067", "text": "layout as an org chart"}
+{"id": "ops-0068", "text": "turn this into an org chart"}
+{"id": "ops-0069", "text": "arrange the shapes as a tree"}
+{"id": "ops-0070", "text": "arrange Start, Process and Check as a tree"}
+{"id": "ops-0071", "text": "arange it as a tree"}
+{"id": "ops-0072", "text": "arrange as a tre"}
+{"id": "ops-0073", "text": "arrange as a tree with Ceo at the top"}
+{"id": "ops-0074", "text": "arrange everything as a tree rooted at Ceo"}
+{"id": "ops-0075", "text": "make it a tree with Root at the top"}
+{"id": "ops-0076", "text": "arrange as a tree starting from Start"}
+{"id": "ops-0077", "text": "tree layout with Hub as the root"}
+{"id": "ops-0078", "text": "arrange as a hierarchy with Ceo on top"}
+{"id": "ops-0079", "text": "arrange as a tree from left to right"}
+{"id": "ops-0080", "text": "horizontal tree layout"}
+{"id": "ops-0081", "text": "arrange as a horizontal tree"}
+{"id": "ops-0082", "text": "arrange as a tree going right"}
+{"id": "ops-0083", "text": "make it a tree growing sideways"}
+{"id": "ops-0084", "text": "arrange as a vertical tree"}
+{"id": "ops-0085", "text": "arrange as a tree top to bottom"}
+{"id": "ops-0086", "text": "arrange as a top-down tree"}
+{"id": "ops-0087", "text": "arrange as an upside down tree"}
+{"id": "ops-0088", "text": "arrange as a tree growing upwards"}
+{"id": "ops-0089", "text": "arrange as a tree bottom to top"}
+{"id": "ops-0090", "text": "arrange as a tree right to left"}
+{"id": "ops-0091", "text": "lay out as a tree, root at the left"}
+{"id": "ops-0092", "text": "arrange the org chart from left to right"}
+{"id": "ops-0093", "text": "reorganize it as a family tree"}
+{"id": "ops-0094", "text": "rearrange as a tree"}
+{"id": "ops-0095", "text": "arrange Ceo, Cto and Cfo as a hierarchy"}
+{"id": "ops-0096", "text": "organise the boxes as a tree"}
+{"id": "ops-0097", "text": "relayout as tree"}
+{"id": "ops-0098", "text": "arrange in layers"}
+{"id": "ops-0099", "text": "arrange everything in layers"}
+{"id": "ops-0100", "text": "layered layout pls"}
+{"id": "ops-0101", "text": "arrange as a flowchart"}
+{"id": "ops-0102", "text": "lay out the diagram as a flow"}
+{"id": "ops-0103", "text": "arrange as a flow from left to right"}
+{"id": "ops-0104", "text": "arrange in layers left to right"}
+{"id": "ops-0105", "text": "layout as a flowchart, top to bottom"}
+{"id": "ops-0106", "text": "arrange as a layered flow going down"}
+{"id": "ops-0107", "text": "arrange in layers bottom to top"}
+{"id": "ops-0108", "text": "arrange in layers right to left"}
+{"id": "ops-0109", "text": "arrange in tiers"}
+{"id": "ops-0110", "text": "arrange in levels"}
+{"id": "ops-0111", "text": "organize it in layers by the arrows"}
+{"id": "ops-0112", "text": "lay it out as a flow chart"}
+{"id": "ops-0113", "text": "flowchart layout pls"}
+{"id": "ops-0114", "text": "make it a flowchart left to right"}
+{"id": "ops-0115", "text": "arrange all of it in layers"}
+{"id": "ops-0116", "text": "arrange Start, Process, Check and Done as a flow"}
+{"id": "ops-0117", "text": "arange in layers"}
+{"id": "ops-0118", "text": "arrange in layrs"}
+{"id": "ops-0119", "text": "arrange as a horizontal flow"}
+{"id": "ops-0120", "text": "arrange as a vertical flowchart"}
+{"id": "ops-0121", "text": "arrange in layers starting from Start"}
+{"id": "ops-0122", "text": "arrange as a flow with Start at the left"}
+{"id": "ops-0123", "text": "lay out the whole diagram in layers"}
+{"id": "ops-0124", "text": "rearrange as a layered flow"}
+{"id": "ops-0125", "text": "arrange the arrows' flow top to bottom"}
+{"id": "ops-0126", "text": "organise everything as a flowchart"}
+{"id": "ops-0127", "text": "layers layout LR"}
+{"id": "ops-0128", "text": "layout TD"}
+{"id": "ops-0129", "text": "layout LR pls"}
+{"id": "ops-0130", "text": "auto layout"}
+{"id": "ops-0131", "text": "auto-layout everything"}
+{"id": "ops-0132", "text": "autolayout pls"}
+{"id": "ops-0133", "text": "arrange everything"}
+{"id": "ops-0134", "text": "arrange the diagram"}
+{"id": "ops-0135", "text": "lay it out"}
+{"id": "ops-0136", "text": "re-layout the whole diagram"}
+{"id": "ops-0137", "text": "rearrange everything"}
+{"id": "ops-0138", "text": "left to right pls"}
+{"id": "ops-0139", "text": "make it flow left to right"}
+{"id": "ops-0140", "text": "arrange left to right"}
+{"id": "ops-0141", "text": "top to bottom please"}
+{"id": "ops-0142", "text": "arrange everything top to bottom"}
+{"id": "ops-0143", "text": "arrange it right to left"}
+{"id": "ops-0144", "text": "arrange bottom to top"}
+{"id": "ops-0145", "text": "lay out left to right"}
+{"id": "ops-0146", "text": "organize the shapes left to right"}
+{"id": "ops-0147", "text": "reorganize the diagram"}
+{"id": "ops-0148", "text": "arrange Api, Db and Cache left to right"}
+{"id": "ops-0149", "text": "relayout"}
+{"id": "ops-0150", "text": "arrange things automatically"}
+{"id": "ops-0151", "text": "reformat the diagram"}
+{"id": "ops-0152", "text": "rearange everything"}
+{"id": "ops-0153", "text": "arrange all the shapes"}
+{"id": "ops-0154", "text": "radial layout"}
+{"id": "ops-0155", "text": "arrange radially"}
+{"id": "ops-0156", "text": "arrange everything radially"}
+{"id": "ops-0157", "text": "arrange in a radial layout"}
+{"id": "ops-0158", "text": "arrange radially around Hub"}
+{"id": "ops-0159", "text": "radial layout with Check at the center"}
+{"id": "ops-0160", "text": "arrange radially with Start in the middle"}
+{"id": "ops-0161", "text": "arrange as a mind map around Idea"}
+{"id": "ops-0162", "text": "arrange as a mind map"}
+{"id": "ops-0163", "text": "lay out the diagram radially"}
+{"id": "ops-0164", "text": "arrange in concentric rings"}
+{"id": "ops-0165", "text": "arrange as a sunburst"}
+{"id": "ops-0166", "text": "arrange hub and spokes with Api as the hub"}
+{"id": "ops-0167", "text": "radial please"}
+{"id": "ops-0168", "text": "arrange radially centred on Hub"}
+{"id": "ops-0169", "text": "radial layout around Root"}
+{"id": "ops-0170", "text": "arange radially"}
+{"id": "ops-0171", "text": "arrange all of them radially"}
+{"id": "ops-0172", "text": "make it radial"}
+{"id": "ops-0173", "text": "organize it as a mind map"}
+{"id": "ops-0174", "text": "arrange radialy around Hub"}
+{"id": "ops-0175", "text": "arrange Hub, Api, Db and Cache radially"}
+{"id": "ops-0176", "text": "radial layout with Hub as the centre"}
+{"id": "ops-0177", "text": "arrange in rings around Start"}
+{"id": "ops-0178", "text": "rearrange radially"}
+{"id": "ops-0179", "text": "lay everything out radially around Ceo"}
+{"id": "ops-0180", "text": "organic layout"}
+{"id": "ops-0181", "text": "arrange organically"}
+{"id": "ops-0182", "text": "arrange everything organically"}
+{"id": "ops-0183", "text": "force-directed layout pls"}
+{"id": "ops-0184", "text": "arrange with a force directed layout"}
+{"id": "ops-0185", "text": "spring layout"}
+{"id": "ops-0186", "text": "arrange it organically"}
+{"id": "ops-0187", "text": "lay out the network organically"}
+{"id": "ops-0188", "text": "arrange in an organic layout"}
+{"id": "ops-0189", "text": "organic please"}
+{"id": "ops-0190", "text": "arrange the diagram organically"}
+{"id": "ops-0191", "text": "arange organically"}
+{"id": "ops-0192", "text": "arrange Router, Lan and Hub organically"}
+{"id": "ops-0193", "text": "make it organic"}
+{"id": "ops-0194", "text": "arrange with physics"}
+{"id": "ops-0195", "text": "layout: organic"}
+{"id": "ops-0196", "text": "rearrange organically"}
+{"id": "ops-0197", "text": "organise everything organically"}
+{"id": "ops-0198", "text": "arrange the shapes organically"}
+{"id": "ops-0199", "text": "force directed pls"}
+{"id": "ops-0200", "text": "arrange all of it organically"}
+{"id": "ops-0201", "text": "organic layout for the network pls"}
+{"id": "ops-0202", "text": "arrange everything force-directed"}
+{"id": "ops-0203", "text": "lay it out organically"}
+{"id": "ops-0204", "text": "arrange as a force directed graph"}
+{"id": "ops-0205", "text": "arrange everything in a grid"}
+{"id": "ops-0206", "text": "grid layout"}
+{"id": "ops-0207", "text": "arrange in a grid"}
+{"id": "ops-0208", "text": "put them in a grid"}
+{"id": "ops-0209", "text": "arrange the boxes in a grid"}
+{"id": "ops-0210", "text": "lay out everything as a grid"}
+{"id": "ops-0211", "text": "arrange all of them in a grid"}
+{"id": "ops-0212", "text": "arrange Start, Process, Check and Done in a grid"}
+{"id": "ops-0213", "text": "arange in a grid"}
+{"id": "ops-0214", "text": "arrange in a gird"}
+{"id": "ops-0215", "text": "organize the shapes into a grid"}
+{"id": "ops-0216", "text": "make it a grid"}
+{"id": "ops-0217", "text": "arrange the stars in a grid"}
+{"id": "ops-0218", "text": "grid pls"}
+{"id": "ops-0219", "text": "arrange the diagram in a grid"}
+{"id": "ops-0220", "text": "arrange the red ones in a grid"}
+{"id": "ops-0221", "text": "tidy them into a grid"}
+{"id": "ops-0222", "text": "organise everything in a grid"}
+{"id": "ops-0223", "text": "lay the circles out in a grid"}
+{"id": "ops-0224", "text": "arrange Hub, Api and Db in a grid"}
+{"id": "ops-0225", "text": "rearrange into a grid"}
+{"id": "ops-0226", "text": "arrange all shapes in a grid"}
+{"id": "ops-0227", "text": "put everything in a grid"}
+{"id": "ops-0228", "text": "arrange the whole thing in a grid"}
+{"id": "ops-0229", "text": "arrange into a neat grid"}
+{"id": "ops-0230", "text": "lay out in a grid please"}
+{"id": "ops-0231", "text": "arrange everything in a circle"}
+{"id": "ops-0232", "text": "arrange in a circle"}
+{"id": "ops-0233", "text": "circle layout"}
+{"id": "ops-0234", "text": "arrange them in a ring"}
+{"id": "ops-0235", "text": "put them in a circle"}
+{"id": "ops-0236", "text": "arrange the stars in a circle"}
+{"id": "ops-0237", "text": "arrange Plan, Build, Ship and Check in a circle"}
+{"id": "ops-0238", "text": "lay out everything in a circle"}
+{"id": "ops-0239", "text": "arrange all shapes in a circle"}
+{"id": "ops-0240", "text": "arange in a circle"}
+{"id": "ops-0241", "text": "arrange in a cirle"}
+{"id": "ops-0242", "text": "make a ring of them"}
+{"id": "ops-0243", "text": "arrange the diagram in a circle"}
+{"id": "ops-0244", "text": "organize the shapes in a circle"}
+{"id": "ops-0245", "text": "arrange everything as a ring"}
+{"id": "ops-0246", "text": "arrange the blue ones in a circle"}
+{"id": "ops-0247", "text": "arrange all of them in a circle"}
+{"id": "ops-0248", "text": "rearrange into a circle"}
+{"id": "ops-0249", "text": "circle layout please"}
+{"id": "ops-0250", "text": "arrange the hexagons in a ring"}
+{"id": "ops-0251", "text": "organise it in a circle"}
+{"id": "ops-0252", "text": "arrange Hub, Api, Db and Web in a ring"}
+{"id": "ops-0253", "text": "put everything in a ring"}
+{"id": "ops-0254", "text": "arrange the whole thing in a circle"}
+{"id": "ops-0255", "text": "lay them out in a circle"}
+{"id": "ops-0256", "text": "arrange everything in a row"}
+{"id": "ops-0257", "text": "arrange in a row"}
+{"id": "ops-0258", "text": "put them in a row"}
+{"id": "ops-0259", "text": "arrange them in a line"}
+{"id": "ops-0260", "text": "arrange Start, Process, Check and Done in a row"}
+{"id": "ops-0261", "text": "arrange the circles in a row"}
+{"id": "ops-0262", "text": "lay out everything in a row"}
+{"id": "ops-0263", "text": "arrange all of them horizontally"}
+{"id": "ops-0264", "text": "arrange everything horizontally"}
+{"id": "ops-0265", "text": "arange in a row"}
+{"id": "ops-0266", "text": "arrange in one row"}
+{"id": "ops-0267", "text": "organize the shapes in a row"}
+{"id": "ops-0268", "text": "arrange the boxes in a line"}
+{"id": "ops-0269", "text": "line them up in a row"}
+{"id": "ops-0270", "text": "arrange Plan, Build and Ship in a row, left to right"}
+{"id": "ops-0271", "text": "arrange in a row from right to left"}
+{"id": "ops-0272", "text": "row layout pls"}
+{"id": "ops-0273", "text": "arrange the diagram in a row"}
+{"id": "ops-0274", "text": "arrange all shapes in a line"}
+{"id": "ops-0275", "text": "rearrange into a row"}
+{"id": "ops-0276", "text": "arrange the green ones in a row"}
+{"id": "ops-0277", "text": "put everything in a line"}
+{"id": "ops-0278", "text": "lay them out in a row"}
+{"id": "ops-0279", "text": "arrange Api, Db and Cache horizontally"}
+{"id": "ops-0280", "text": "organise them in a row"}
+{"id": "ops-0281", "text": "arrange everything in a column"}
+{"id": "ops-0282", "text": "arrange in a column"}
+{"id": "ops-0283", "text": "put them in a column"}
+{"id": "ops-0284", "text": "stack them"}
+{"id": "ops-0285", "text": "arrange Start, Process, Check and Done in a column"}
+{"id": "ops-0286", "text": "arrange the circles in a column"}
+{"id": "ops-0287", "text": "lay out everything in a column"}
+{"id": "ops-0288", "text": "arrange all of them vertically"}
+{"id": "ops-0289", "text": "arrange everything vertically"}
+{"id": "ops-0290", "text": "arange in a column"}
+{"id": "ops-0291", "text": "arrange in a colum"}
+{"id": "ops-0292", "text": "organize the shapes in a column"}
+{"id": "ops-0293", "text": "arrange the boxes in a stack"}
+{"id": "ops-0294", "text": "arrange in a column from bottom to top"}
+{"id": "ops-0295", "text": "column layout pls"}
+{"id": "ops-0296", "text": "arrange the diagram in a column"}
+{"id": "ops-0297", "text": "arrange all shapes in a column"}
+{"id": "ops-0298", "text": "rearrange into a column"}
+{"id": "ops-0299", "text": "arrange the red ones in a column"}
+{"id": "ops-0300", "text": "put everything in a column"}
+{"id": "ops-0301", "text": "lay them out in a column"}
+{"id": "ops-0302", "text": "arrange Login, Home and Cart vertically"}
+{"id": "ops-0303", "text": "organise them in a column"}
+{"id": "ops-0304", "text": "arrange them in a stack"}
+{"id": "ops-0305", "text": "arrange Idea, Plan and Build in a column, top to bottom"}
+{"id": "ops-0306", "text": "line up everything"}
+{"id": "ops-0307", "text": "line everything up"}
+{"id": "ops-0308", "text": "align all the shapes horizontally"}
+{"id": "ops-0309", "text": "align everything vertically"}
+{"id": "ops-0310", "text": "align Start, Process and Check horizontally"}
+{"id": "ops-0311", "text": "line up Api and Db vertically"}
+{"id": "ops-0312", "text": "align the circles"}
+{"id": "ops-0313", "text": "allign everything horizontally"}
+{"id": "ops-0314", "text": "align them in a row"}
+{"id": "ops-0315", "text": "line up the boxes in a column"}
+{"id": "ops-0316", "text": "align the stars horizontally"}
+{"id": "ops-0317", "text": "align all of them vertically"}
+{"id": "ops-0318", "text": "line up Ceo, Cto and Cfo"}
+{"id": "ops-0319", "text": "align the diagram horizontally"}
+{"id": "ops-0320", "text": "line up the red ones horizontally"}
+{"id": "ops-0321", "text": "align Hub and Api vertically"}
+{"id": "ops-0322", "text": "align everything to the left"}
+{"id": "ops-0323", "text": "align left"}
+{"id": "ops-0324", "text": "left align everything"}
+{"id": "ops-0325", "text": "align the left edges"}
+{"id": "ops-0326", "text": "align all the shapes to the right"}
+{"id": "ops-0327", "text": "align right pls"}
+{"id": "ops-0328", "text": "align the right edges of Start, Process and Check"}
+{"id": "ops-0329", "text": "right align the boxes"}
+{"id": "ops-0330", "text": "align the tops"}
+{"id": "ops-0331", "text": "align their tops"}
+{"id": "ops-0332", "text": "align top"}
+{"id": "ops-0333", "text": "top align everything"}
+{"id": "ops-0334", "text": "align Api, Db and Cache to the top"}
+{"id": "ops-0335", "text": "align the bottoms"}
+{"id": "ops-0336", "text": "align bottom"}
+{"id": "ops-0337", "text": "bottom align the circles"}
+{"id": "ops-0338", "text": "align everything to the bottom"}
+{"id": "ops-0339", "text": "align the bottom edges"}
+{"id": "ops-0340", "text": "line up the left edges"}
+{"id": "ops-0341", "text": "line up the tops of Ceo, Cto and Cfo"}
+{"id": "ops-0342", "text": "allign left"}
+{"id": "ops-0343", "text": "align left edges pls"}
+{"id": "ops-0344", "text": "align the stars to the left"}
+{"id": "ops-0345", "text": "align Hub and Api to the right"}
+{"id": "ops-0346", "text": "align all of them to the top"}
+{"id": "ops-0347", "text": "align the diagram to the left"}
+{"id": "ops-0348", "text": "align the blue ones to the bottom"}
+{"id": "ops-0349", "text": "left-align the labels column"}
+{"id": "ops-0350", "text": "space them out evenly"}
+{"id": "ops-0351", "text": "space out everything evenly"}
+{"id": "ops-0352", "text": "distribute horizontally"}
+{"id": "ops-0353", "text": "distribute everything vertically"}
+{"id": "ops-0354", "text": "distribute Start, Process and Check horizontally"}
+{"id": "ops-0355", "text": "spread the circles out evenly"}
+{"id": "ops-0356", "text": "even out the spacing"}
+{"id": "ops-0357", "text": "space the boxes evenly in a row"}
+{"id": "ops-0358", "text": "distribute all the shapes evenly"}
+{"id": "ops-0359", "text": "distrbute everything horizontally"}
+{"id": "ops-0360", "text": "space Api, Db and Cache evenly"}
+{"id": "ops-0361", "text": "spread them out vertically"}
+{"id": "ops-0362", "text": "distribute the stars in a column"}
+{"id": "ops-0363", "text": "equal spacing between all shapes"}
+{"id": "ops-0364", "text": "space everything out evenly, horizontally"}
+{"id": "ops-0365", "text": "distribute them evenly"}
+{"id": "ops-0366", "text": "spread out the shapes evenly"}
+{"id": "ops-0367", "text": "distribute the diagram vertically"}
+{"id": "ops-0368", "text": "space Ceo, Cto and Cfo evenly"}
+{"id": "ops-0369", "text": "spread all of them out evenly"}
+{"id": "ops-0370", "text": "distribute the red ones horizontally"}
+{"id": "ops-0371", "text": "even the gaps out"}
+{"id": "ops-0372", "text": "space them equally"}
+{"id": "ops-0373", "text": "distribute evenly pls"}
+{"id": "ops-0374", "text": "spread everything out evenly in a row"}
+{"id": "ops-0375", "text": "make the gaps equal"}
+{"id": "ops-0376", "text": "more space between the shapes"}
+{"id": "ops-0377", "text": "more space pls"}
+{"id": "ops-0378", "text": "give them more room"}
+{"id": "ops-0379", "text": "spread them out more"}
+{"id": "ops-0380", "text": "spread everything out more"}
+{"id": "ops-0381", "text": "space things out a bit"}
+{"id": "ops-0382", "text": "less space between them"}
+{"id": "ops-0383", "text": "less space pls"}
+{"id": "ops-0384", "text": "tighten it up"}
+{"id": "ops-0385", "text": "make it more compact"}
+{"id": "ops-0386", "text": "compact the layout"}
+{"id": "ops-0387", "text": "compact everything"}
+{"id": "ops-0388", "text": "squeeze them together"}
+{"id": "ops-0389", "text": "bring everything closer together"}
+{"id": "ops-0390", "text": "closer together please"}
+{"id": "ops-0391", "text": "further apart pls"}
+{"id": "ops-0392", "text": "move them further apart"}
+{"id": "ops-0393", "text": "push everything further apart"}
+{"id": "ops-0394", "text": "double the spacing"}
+{"id": "ops-0395", "text": "halve the spacing"}
+{"id": "ops-0396", "text": "increase the spacing"}
+{"id": "ops-0397", "text": "reduce the spacing"}
+{"id": "ops-0398", "text": "increase the gaps a little"}
+{"id": "ops-0399", "text": "decrease the spacing between all shapes"}
+{"id": "ops-0400", "text": "it's too crowded, spread it out"}
+{"id": "ops-0401", "text": "too cramped, more room pls"}
+{"id": "ops-0402", "text": "too spread out, pull it in"}
+{"id": "ops-0403", "text": "a lot more space between the shapes"}
+{"id": "ops-0404", "text": "much less space please"}
+{"id": "ops-0405", "text": "more space between Start, Process and Check"}
+{"id": "ops-0406", "text": "less space between the boxes"}
+{"id": "ops-0407", "text": "condense the diagram"}
+{"id": "ops-0408", "text": "more breathing room pls"}
+{"id": "ops-0409", "text": "bigger gaps between the circles"}
+{"id": "ops-0410", "text": "smaller gaps"}
+{"id": "ops-0411", "text": "space them 50 px apart"}
+{"id": "ops-0412", "text": "spread everything out a bit more"}
+{"id": "ops-0413", "text": "make it tighter"}
+{"id": "ops-0414", "text": "more space betwen the shapes"}
+{"id": "ops-0415", "text": "les space pls"}
+{"id": "ops-0416", "text": "give everything more room"}
+{"id": "ops-0417", "text": "pack them tighter"}
+{"id": "ops-0418", "text": "untangle the arrows"}
+{"id": "ops-0419", "text": "untangle it"}
+{"id": "ops-0420", "text": "untangle everything"}
+{"id": "ops-0421", "text": "fewer crossings pls"}
+{"id": "ops-0422", "text": "reduce the crossings"}
+{"id": "ops-0423", "text": "remove the crossings"}
+{"id": "ops-0424", "text": "make the lines not cross"}
+{"id": "ops-0425", "text": "make the arrows stop crossing"}
+{"id": "ops-0426", "text": "fix the crossing lines"}
+{"id": "ops-0427", "text": "so the lines don't cross"}
+{"id": "ops-0428", "text": "no crossing arrows please"}
+{"id": "ops-0429", "text": "minimize crossings"}
+{"id": "ops-0430", "text": "untangle the diagram"}
+{"id": "ops-0431", "text": "disentangle the links"}
+{"id": "ops-0432", "text": "uncross the lines"}
+{"id": "ops-0433", "text": "untagle the arrows"}
+{"id": "ops-0434", "text": "untangle the lines between Hub, Api and Db"}
+{"id": "ops-0435", "text": "avoid crossings"}
+{"id": "ops-0436", "text": "the arrows are a mess, untangle them"}
+{"id": "ops-0437", "text": "less crossings please"}
+{"id": "ops-0438", "text": "make the links not overlap"}
+{"id": "ops-0439", "text": "arrows overlap, fix it"}
+{"id": "ops-0440", "text": "untangle the whole thing"}
+{"id": "ops-0441", "text": "rearrange to reduce crossings"}
+{"id": "ops-0442", "text": "get rid of the crossings"}
+{"id": "ops-0443", "text": "untangle the spaghetti"}
+{"id": "ops-0444", "text": "untangle all of it"}
+{"id": "ops-0445", "text": "fix the tangled arrows"}
+{"id": "ops-0446", "text": "straighten the arrows"}
+{"id": "ops-0447", "text": "straighten the lines"}
+{"id": "ops-0448", "text": "straighten everything"}
+{"id": "ops-0449", "text": "make the lines straight"}
+{"id": "ops-0450", "text": "make the arrows straight"}
+{"id": "ops-0451", "text": "straighten it out"}
+{"id": "ops-0452", "text": "straighten the links"}
+{"id": "ops-0453", "text": "no diagonal lines pls"}
+{"id": "ops-0454", "text": "no more diagonal arrows"}
+{"id": "ops-0455", "text": "straighten the connections"}
+{"id": "ops-0456", "text": "straigten the arrows"}
+{"id": "ops-0457", "text": "straighten the arrows between Start and Done"}
+{"id": "ops-0458", "text": "make all the lines straight"}
+{"id": "ops-0459", "text": "straight lines please"}
+{"id": "ops-0460", "text": "straighten the wonky arrows"}
+{"id": "ops-0461", "text": "straighten the diagram"}
+{"id": "ops-0462", "text": "straighten the lines between Hub and Api"}
+{"id": "ops-0463", "text": "straighten out the arrows"}
+{"id": "ops-0464", "text": "fix the slanted lines"}
+{"id": "ops-0465", "text": "make the arrows straight again"}
+{"id": "ops-0466", "text": "straighten all the arrows"}
+{"id": "ops-0467", "text": "straighten up the links"}
+{"id": "ops-0468", "text": "make every line straight"}
+{"id": "ops-0469", "text": "straighten the crooked lines"}
+{"id": "ops-0470", "text": "straighten all of it"}
+{"id": "ops-0471", "text": "make the connectors straight"}
+{"id": "ops-0472", "text": "snap to grid"}
+{"id": "ops-0473", "text": "snap everything to the grid"}
+{"id": "ops-0474", "text": "snap it to the grid"}
+{"id": "ops-0475", "text": "snap to grid pls"}
+{"id": "ops-0476", "text": "align everything to the grid"}
+{"id": "ops-0477", "text": "put everything on the grid"}
+{"id": "ops-0478", "text": "snap all shapes to the grid"}
+{"id": "ops-0479", "text": "snap the boxes to the grid"}
+{"id": "ops-0480", "text": "snap Start, Process and Check to the grid"}
+{"id": "ops-0481", "text": "snap to a 20px grid"}
+{"id": "ops-0482", "text": "snap everything to a 50 px grid"}
+{"id": "ops-0483", "text": "snap them to the grid"}
+{"id": "ops-0484", "text": "snpa to grid"}
+{"id": "ops-0485", "text": "snap the circles to the grid"}
+{"id": "ops-0486", "text": "line everything up with the grid"}
+{"id": "ops-0487", "text": "snap to the grid please"}
+{"id": "ops-0488", "text": "snap the diagram to the grid"}
+{"id": "ops-0489", "text": "snap all of them to the grid"}
+{"id": "ops-0490", "text": "move everything onto the grid"}
+{"id": "ops-0491", "text": "grid-snap everything"}
+{"id": "ops-0492", "text": "snap positions to the grid"}
+{"id": "ops-0493", "text": "snap Hub and Api to the grid"}
+{"id": "ops-0494", "text": "snap the stars to the grid"}
+{"id": "ops-0495", "text": "snap every shape to the grid"}
+{"id": "ops-0496", "text": "snap to a 10 pixel grid"}
+{"id": "ops-0497", "text": "make them all the same size"}
+{"id": "ops-0498", "text": "make everything the same size"}
+{"id": "ops-0499", "text": "same size for all pls"}
+{"id": "ops-0500", "text": "make all the boxes the same size"}
+{"id": "ops-0501", "text": "make the circles the same size"}
+{"id": "ops-0502", "text": "make Start, Process and Check the same size"}
+{"id": "ops-0503", "text": "make everything the same size as Start"}
+{"id": "ops-0504", "text": "make all shapes the same color"}
+{"id": "ops-0505", "text": "make them the same colour"}
+{"id": "ops-0506", "text": "make everything the same colour as Hub"}
+{"id": "ops-0507", "text": "make all of them the same shape"}
+{"id": "ops-0508", "text": "make the stars the same size"}
+{"id": "ops-0509", "text": "equalize the sizes"}
+{"id": "ops-0510", "text": "equalise the sizes"}
+{"id": "ops-0511", "text": "unify the colours"}
+{"id": "ops-0512", "text": "make Api, Db and Cache as big as Hub"}
+{"id": "ops-0513", "text": "same size please"}
+{"id": "ops-0514", "text": "make everything same size"}
+{"id": "ops-0515", "text": "give all the shapes the same size"}
+{"id": "ops-0516", "text": "set everything to the same size"}
+{"id": "ops-0517", "text": "make them teh same size"}
+{"id": "ops-0518", "text": "resize them all to the same size"}
+{"id": "ops-0519", "text": "make the boxes the same size as Login"}
+{"id": "ops-0520", "text": "match the sizes"}
+{"id": "ops-0521", "text": "make all the circles the same colour as Start"}
+{"id": "ops-0522", "text": "make the outlines the same"}
+{"id": "ops-0523", "text": "make Ceo, Cto and Cfo the same size"}
+{"id": "ops-0524", "text": "same colour for all the stars"}
+{"id": "ops-0525", "text": "make the diagram's shapes the same size"}
+{"id": "ops-0526", "text": "fit everything on the canvas"}
+{"id": "ops-0527", "text": "fit it on the screen"}
+{"id": "ops-0528", "text": "make everything fit"}
+{"id": "ops-0529", "text": "fit to canvas"}
+{"id": "ops-0530", "text": "fit the diagram to the page"}
+{"id": "ops-0531", "text": "bring everything back on the canvas"}
+{"id": "ops-0532", "text": "bring it all into view"}
+{"id": "ops-0533", "text": "some shapes are off the canvas, fix that"}
+{"id": "ops-0534", "text": "center the diagram"}
+{"id": "ops-0535", "text": "centre everything"}
+{"id": "ops-0536", "text": "center it"}
+{"id": "ops-0537", "text": "center the whole thing"}
+{"id": "ops-0538", "text": "center the drawing on the canvas"}
+{"id": "ops-0539", "text": "recenter pls"}
+{"id": "ops-0540", "text": "centre the diagram on the page"}
+{"id": "ops-0541", "text": "fit all shapes on the canvas"}
+{"id": "ops-0542", "text": "fit to screen"}
+{"id": "ops-0543", "text": "fit everything in"}
+{"id": "ops-0544", "text": "center everything on the canvas"}
+{"id": "ops-0545", "text": "fit and center everything"}
+{"id": "ops-0546", "text": "fit the drawing on the canvas"}
+{"id": "ops-0547", "text": "put everything back on the canvas"}
+{"id": "ops-0548", "text": "centre the layout"}
+{"id": "ops-0549", "text": "cetner the diagram"}
+{"id": "ops-0550", "text": "fit all of it on the page"}
+{"id": "ops-0551", "text": "make it all fit on the screen"}
+{"id": "ops-0552", "text": "move everything into view"}
+{"id": "ops-0553", "text": "center the shapes"}
+{"id": "ops-0554", "text": "fit Start, Process and Check on the canvas"}
+{"id": "ops-0555", "text": "scale it to fit the canvas"}
+{"id": "ops-0556", "text": "flip the diagram"}
+{"id": "ops-0557", "text": "flip it horizontally"}
+{"id": "ops-0558", "text": "flip everything vertically"}
+{"id": "ops-0559", "text": "mirror it"}
+{"id": "ops-0560", "text": "mirror the diagram left to right"}
+{"id": "ops-0561", "text": "flip it upside down"}
+{"id": "ops-0562", "text": "turn it upside down"}
+{"id": "ops-0563", "text": "flip left and right"}
+{"id": "ops-0564", "text": "flip top and bottom"}
+{"id": "ops-0565", "text": "mirror everything"}
+{"id": "ops-0566", "text": "flip Start, Process and Check horizontally"}
+{"id": "ops-0567", "text": "flip the boxes vertically"}
+{"id": "ops-0568", "text": "flipp it horizontally"}
+{"id": "ops-0569", "text": "mirror horizontally"}
+{"id": "ops-0570", "text": "flip it pls"}
+{"id": "ops-0571", "text": "flip the whole thing"}
+{"id": "ops-0572", "text": "mirror the drawing vertically"}
+{"id": "ops-0573", "text": "flip it sideways"}
+{"id": "ops-0574", "text": "flip everything left to right"}
+{"id": "ops-0575", "text": "flip all of them"}
+{"id": "ops-0576", "text": "mirror the layout"}
+{"id": "ops-0577", "text": "flip the diagram top to bottom"}
+{"id": "ops-0578", "text": "flip Hub, Api and Db"}
+{"id": "ops-0579", "text": "mirror image of the diagram pls"}
+{"id": "ops-0580", "text": "flip the circles horizontally"}
+{"id": "ops-0581", "text": "flip vertically"}
+{"id": "ops-0582", "text": "sort by name"}
+{"id": "ops-0583", "text": "sort them alphabetically"}
+{"id": "ops-0584", "text": "sort everything by name"}
+{"id": "ops-0585", "text": "alphabetize"}
+{"id": "ops-0586", "text": "alphabetize the shapes"}
+{"id": "ops-0587", "text": "sort by colour"}
+{"id": "ops-0588", "text": "sort by color"}
+{"id": "ops-0589", "text": "sort by size"}
+{"id": "ops-0590", "text": "sort by size, biggest first"}
+{"id": "ops-0591", "text": "sort them by size, smallest first"}
+{"id": "ops-0592", "text": "order them by size"}
+{"id": "ops-0593", "text": "order the shapes by name"}
+{"id": "ops-0594", "text": "sort the boxes alphabetically"}
+{"id": "ops-0595", "text": "sort by shape"}
+{"id": "ops-0596", "text": "sort by label"}
+{"id": "ops-0597", "text": "sort alphabetically in a row"}
+{"id": "ops-0598", "text": "sort by size in a column"}
+{"id": "ops-0599", "text": "sort Start, Process, Check and Done by name"}
+{"id": "ops-0600", "text": "srot by name"}
+{"id": "ops-0601", "text": "sort the circles by size"}
+{"id": "ops-0602", "text": "arrange them alphabetically"}
+{"id": "ops-0603", "text": "put them in alphabetical order"}
+{"id": "ops-0604", "text": "order everything biggest first"}
+{"id": "ops-0605", "text": "line up by size"}
+{"id": "ops-0606", "text": "sort the stars by colour"}
+{"id": "ops-0607", "text": "sort by name A to Z"}
+{"id": "ops-0608", "text": "rank them by size"}
+{"id": "ops-0609", "text": "sort all of them by colour"}
+{"id": "ops-0610", "text": "sort everything by size in a grid"}
+{"id": "ops-0611", "text": "group them by colour"}
+{"id": "ops-0612", "text": "group everything by color"}
+{"id": "ops-0613", "text": "cluster by colour"}
+{"id": "ops-0614", "text": "cluster the shapes by color"}
+{"id": "ops-0615", "text": "put the same colours together"}
+{"id": "ops-0616", "text": "keep the same colours together"}
+{"id": "ops-0617", "text": "group by shape"}
+{"id": "ops-0618", "text": "cluster by kind"}
+{"id": "ops-0619", "text": "group the shapes by type"}
+{"id": "ops-0620", "text": "arrange by colour"}
+{"id": "ops-0621", "text": "arrange everything by color"}
+{"id": "ops-0622", "text": "organize by shape"}
+{"id": "ops-0623", "text": "gather them by colour"}
+{"id": "ops-0624", "text": "cluster by size"}
+{"id": "ops-0625", "text": "group the circles by colour"}
+{"id": "ops-0626", "text": "clsuter by colour"}
+{"id": "ops-0627", "text": "group by colour please"}
+{"id": "ops-0628", "text": "lay out by colour"}
+{"id": "ops-0629", "text": "bunch them by color"}
+{"id": "ops-0630", "text": "group all of them by shape"}
+{"id": "ops-0631", "text": "put colours together"}
+{"id": "ops-0632", "text": "cluster the diagram by colour"}
+{"id": "ops-0633", "text": "organise the shapes by colour"}
+{"id": "ops-0634", "text": "group Start, Process, Check and Done by colour"}
+{"id": "ops-0635", "text": "cluster them"}
+{"id": "ops-0636", "text": "collect the shapes by kind"}
+{"id": "ops-0637", "text": "reverse the arrow from Check to Done"}
+{"id": "ops-0638", "text": "reverse the Check→Done arrow"}
+{"id": "ops-0639", "text": "flip the arrow between Start and Process"}
+{"id": "ops-0640", "text": "reverse all the arrows"}
+{"id": "ops-0641", "text": "reverse the arrows"}
+{"id": "ops-0642", "text": "flip the arrows"}
+{"id": "ops-0643", "text": "turn the arrow from Api to Db around"}
+{"id": "ops-0644", "text": "make the arrow from Hub to Web point the other way"}
+{"id": "ops-0645", "text": "reverse the direction of the arrow from Login to Home"}
+{"id": "ops-0646", "text": "reverse the link Cart-Pay"}
+{"id": "ops-0647", "text": "the arrow from Check to Done should go the other way"}
+{"id": "ops-0648", "text": "flip the direction of the Process->Check arrow"}
+{"id": "ops-0649", "text": "reverse every arrow"}
+{"id": "ops-0650", "text": "flip all the arrows"}
+{"id": "ops-0651", "text": "revese the arrow from Start to Process"}
+{"id": "ops-0652", "text": "reverse the arrows at Hub"}
+{"id": "ops-0653", "text": "switch the direction of the arrow from Api to Cache"}
+{"id": "ops-0654", "text": "reverse the connection between Router and Lan"}
+{"id": "ops-0655", "text": "flip the Start-Process arrow"}
+{"id": "ops-0656", "text": "turn all the arrows around"}
+{"id": "ops-0657", "text": "reverse the line from Queue to Worker"}
+{"id": "ops-0658", "text": "the arrow between Idea and Plan points backwards, flip it"}
+{"id": "ops-0659", "text": "reverse each arrow"}
+{"id": "ops-0660", "text": "invert the arrows"}
+{"id": "ops-0661", "text": "reverse the arrow Process→Check"}
+{"id": "ops-0662", "text": "flip arrow direction Check to Done"}
+{"id": "ops-0663", "text": "arrow from Check to Done backwards pls"}
+{"id": "ops-0664", "text": "reverse the arrows from Hub"}
+{"id": "ops-0665", "text": "make the arrow from Start to Process dashed"}
+{"id": "ops-0666", "text": "Process-Check line red"}
+{"id": "ops-0667", "text": "make the arrow from Check to Done red"}
+{"id": "ops-0668", "text": "make all arrows red"}
+{"id": "ops-0669", "text": "make the arrows dashed"}
+{"id": "ops-0670", "text": "make every line dotted"}
+{"id": "ops-0671", "text": "change all connections to dashed"}
+{"id": "ops-0672", "text": "color the arrow from Hub to Api blue"}
+{"id": "ops-0673", "text": "make the arrow between Start and Done two-way"}
+{"id": "ops-0674", "text": "remove the arrowhead from the Start to Process arrow"}
+{"id": "ops-0675", "text": "make the line from Api to Db plain, no arrowhead"}
+{"id": "ops-0676", "text": "make the Start→Process arrow thicker"}
+{"id": "ops-0677", "text": "make the arrow from Start to Process thick and blue"}
+{"id": "ops-0678", "text": "make the lines thinner"}
+{"id": "ops-0679", "text": "paint all the arrows gray"}
+{"id": "ops-0680", "text": "make the connections grey"}
+{"id": "ops-0681", "text": "set the arrow from Login to Home to dotted"}
+{"id": "ops-0682", "text": "Check→Done arrow dashed"}
+{"id": "ops-0683", "text": "make the link between Cart and Pay solid"}
+{"id": "ops-0684", "text": "make the arrow from Ceo to Cfo two-way"}
+{"id": "ops-0685", "text": "make all the lines black"}
+{"id": "ops-0686", "text": "turn the arrow from Hub to Web green"}
+{"id": "ops-0687", "text": "make the arrows between Api and Cache bidirectional"}
+{"id": "ops-0688", "text": "remove the arrowheads"}
+{"id": "ops-0689", "text": "remove all arrowheads"}
+{"id": "ops-0690", "text": "make the arrow from Plan to Build dashed and orange"}
+{"id": "ops-0691", "text": "make the Router-Lan link dotted"}
+{"id": "ops-0692", "text": "dash the line from Queue to Worker"}
+{"id": "ops-0693", "text": "make the arrow from Start to Done thiker"}
+{"id": "ops-0694", "text": "make the arrows bolder"}
+{"id": "ops-0695", "text": "Start-Process arrow blue pls"}
+{"id": "ops-0696", "text": "colour the connections purple"}
+{"id": "ops-0697", "text": "make every arrow solid"}
+{"id": "ops-0698", "text": "change the line between Idea and Plan to red"}
+{"id": "ops-0699", "text": "make the arrow from Mars to Venus one-way"}
+{"id": "ops-0700", "text": "add an arrowhead to the line from Alpha to Beta"}
+{"id": "ops-0701", "text": "make the arrow from Check to Done very thick"}
+{"id": "ops-0702", "text": "make the arrows thin"}
+{"id": "ops-0703", "text": "make the dashed arrow from Api to Db solid"}
+{"id": "ops-0704", "text": "recolor all the links teal"}
+{"id": "ops-0705", "text": "arrange everything as a tree then make Ceo red"}
+{"id": "ops-0706", "text": "tidy up and make the arrows dashed"}
+{"id": "ops-0707", "text": "arrange as a tree with Ceo at the top, then make Ceo gold"}
+{"id": "ops-0708", "text": "clean up the diagram and then center it"}
+{"id": "ops-0709", "text": "arrange in layers left to right then straighten the arrows"}
+{"id": "ops-0710", "text": "make all the boxes the same size and line up the tops"}
+{"id": "ops-0711", "text": "reverse the arrow from Check to Done and make it red"}
+{"id": "ops-0712", "text": "radial layout around Hub, then make Hub bigger"}
+{"id": "ops-0713", "text": "group the shapes by colour and tidy up"}
+{"id": "ops-0714", "text": "sort by name in a row, then snap to grid"}
+{"id": "ops-0715", "text": "more space between the shapes and fit everything on the canvas"}
+{"id": "ops-0716", "text": "untangle the arrows then tidy up"}
+{"id": "ops-0717", "text": "delete Cache and tidy up"}
+{"id": "ops-0718", "text": "draw a red circle named Log then arrange everything in a grid"}
+{"id": "ops-0719", "text": "connect Api to Db and arrange as a tree"}
+{"id": "ops-0720", "text": "arrange everything in a circle then make the arrows gray"}
+{"id": "ops-0721", "text": "flip the diagram horizontally and center it"}
+{"id": "ops-0722", "text": "less space and align everything to the left"}
+{"id": "ops-0723", "text": "make the arrow from Start to Process dashed and the one from Process to Check dotted"}
+{"id": "ops-0724", "text": "tidy up, then how many arrows are there?"}
+{"id": "ops-0725", "text": "arrange as an org chart and paint the boxes blue"}
+{"id": "ops-0726", "text": "organic layout then snap everything to the grid"}
+{"id": "ops-0727", "text": "straighten the lines and make them black"}
+{"id": "ops-0728", "text": "arrange Start, Process and Check in a row and connect them in a chain"}
+{"id": "ops-0729", "text": "tidy this up and undo if it looks worse"}
+{"id": "ops-0730", "text": "arrange as a tree left to right then fit it on the screen"}
+{"id": "ops-0731", "text": "make everything the same size then arrange in a grid"}
+{"id": "ops-0732", "text": "reverse all the arrows and arrange in layers"}
+{"id": "ops-0733", "text": "remove the arrowheads and straighten the lines"}
+{"id": "ops-0734", "text": "compact the layout then move Legend to the bottom right"}
+{"id": "ops-0735", "text": "arrange radially with Hub in the middle and make the lines thin"}
+{"id": "ops-0736", "text": "sort by colour and then align them horizontally"}
+{"id": "ops-0737", "text": "clean up, snap to grid and center everything"}
+{"id": "ops-0738", "text": "tidy up the diagram but keep Start at the top"}
+{"id": "ops-0739", "text": "arrange everything as a tree and color the arrow from Ceo to Cto red"}
+{"id": "ops-0740", "text": "flip it upside down then tidy up"}
+{"id": "ops-0741", "text": "spread them out more and make them all the same size"}
+{"id": "ops-0742", "text": "untangle it and make the arrow from Api to Db dashed"}
+{"id": "ops-0743", "text": "group by shape then arrange each... no, just tidy up"}
+{"id": "ops-0744", "text": "arrange in layers and make the arrow from Check to Start dotted, it's the loop back"}

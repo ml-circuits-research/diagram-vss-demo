@@ -29,4 +29,5 @@ for gname,sets,note in GROUPS:
         G=collections.Counter()
         for r in rows: G.update(r['vss']['gated'])
         ex=G['r']+G['w']+G['e']; g=G['gold']; pc=lambda x: f"{x/g*100:.1f}"
-        print(f"ALL {gname} vss gated {rows[0]['gate']}%: precision {G['r']/ex*100 if ex else 0:.1f} · right {pc(G['r'])} · asked {pc(G['ar']+G['aw'])} · unread {pc(g-G['r']-G['w']-G['ar']-G['aw'])} · executed wrong {pc(G['w'])} · extras executed {G['e']} (of {G['e']+G['ae']}) · executed {ex} of {G['n']} produced")
+        lvl=rows[0]['gate']; lvl=lvl+'%' if lvl.isdigit() else lvl
+        print(f"ALL {gname} vss gated {lvl}: precision {G['r']/ex*100 if ex else 0:.1f} · right {pc(G['r'])} · asked {pc(G['ar']+G['aw'])} · unread {pc(g-G['r']-G['w']-G['ar']-G['aw'])} · executed wrong {pc(G['w'])} · extras executed {G['e']} (of {G['e']+G['ae']}) · executed {ex} of {G['n']} produced")

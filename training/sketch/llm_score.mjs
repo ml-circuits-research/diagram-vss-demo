@@ -21,7 +21,7 @@
 // PAIR=value: produced and gold actions are paired by layer_common.mjs pairValue (per action label, a maximum-weight matching: most pairs,
 //   then most gold keys right, then most letters shared by the unit and the gold span; the unit is node.span when the composer gives it,
 //   else the first occurrence of node.src in the text) instead of the order-only LCS. Default (unset or PAIR=order): the LCS, as before.
-// GATE=95|97|99 (SEG=composer; PRECISION.md, the demo's gate): the VSS requests are also scored gated: a produced request is executed only when
+// GATE=cost|95|97|99 (SEG=composer; the demo's gate; cost = the cost-score threshold of the model file, the demo's default): the VSS requests are also scored gated: a produced request is executed only when
 //   its combined confidence (docs/js/vss-confidence.js on the composer's unit.signals, model CONFIDENCE=<file>, default
 //   docs/model/confidence/vss.json, thresholds from the out-of-fold scores, PRECISION_BERT.md; CONFIDENCE=training/sketch/precision_thresholds.json
 //   gives PRECISION.md's in-sample thresholds) clears the level's threshold; a level the model does not reach is an error. Each produced request keeps the outcome it has when everything is executed
@@ -175,7 +175,7 @@ function gateTally(G, nodes, row) {
   G.gold += gold.length;
 }
 const gateLine = (G) => { const p = (x) => (x * 100).toFixed(1), ex = G.r + G.w + G.e;
-  return `vss gated ${GATE}% (t=${GATE_T.toFixed(4)}): precision of execution ${ex ? p(G.r / ex) : "-"}% · right ${p(G.r / G.gold)}% · asked ${p((G.ar + G.aw) / G.gold)}% · unread ${p((G.gold - G.r - G.w - G.ar - G.aw) / G.gold)}% · executed wrong ${p(G.w / G.gold)}% · extras executed ${G.e} (of ${G.e + G.ae}) · executed ${ex} of ${G.n} produced`; };
+  return `vss gated ${/^\d+$/.test(GATE) ? GATE + "%" : GATE} (t=${GATE_T.toFixed(4)}): precision of execution ${ex ? p(G.r / ex) : "-"}% · right ${p(G.r / G.gold)}% · asked ${p((G.ar + G.aw) / G.gold)}% · unread ${p((G.gold - G.r - G.w - G.ar - G.aw) / G.gold)}% · executed wrong ${p(G.w / G.gold)}% · extras executed ${G.e} (of ${G.e + G.ae}) · executed ${ex} of ${G.n} produced`; };
 // one message's outcome: right (all gold wires right, no extra) / wrong (a wrong or an extra wire) / honest (the rest: requests not done, nothing wrong)
 const outcome = (s) => (s.exact ? "mRight" : s.wrongAligned > 0 || s.extra > 0 ? "mWrong" : "mHonest");
 const msgLine = (f, T, n) => `${f.padEnd(5)} per message: right ${(T.mRight / n * 100).toFixed(1)}% (${T.mRight}) · honest ${(T.mHonest / n * 100).toFixed(1)}% (${T.mHonest}) · wrong ${(T.mWrong / n * 100).toFixed(1)}% (${T.mWrong})`;

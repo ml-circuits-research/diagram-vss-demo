@@ -29,7 +29,21 @@ const ACTION = {
   distribute: ['The user wants to space shapes evenly.', ['distribute the circles evenly', 'space the boxes out horizontally']],
   toFront: ['The user wants to bring a shape to the front.', ['bring Start to the front', 'move A on top of the others']],
   toBack: ['The user wants to send a shape to the back.', ['send Done to the back', 'put A behind the others']],
-  arrange: ['The user wants to arrange shapes in a layout.', ['arrange everything in a grid', 'tidy up the diagram', 'put all shapes in a circle']],
+  arrange: ['The user wants to arrange shapes in a layout.', ['arrange everything in a grid', 'lay them out as a tree', 'put all shapes in a circle']],
+  group: ['The user wants to group shapes together.', ['group A and B', 'put Start and Done in a group called Ends']],
+  ungroup: ['The user wants to dissolve a group.', ['ungroup Ends', 'break up the group']],
+  /* the layout operations of training/sketch/ops/HIGH_LEVEL_OPS.md and reverse */
+  improve: ['The user wants the layout of the diagram improved.', ['tidy up the diagram', 'clean this up', 'make it look better']],
+  respace: ['The user wants more or less space between the shapes.', ['spread everything further apart', 'compact the diagram', 'less space between them']],
+  snap: ['The user wants the shapes snapped to the grid.', ['snap everything to the grid', 'snap to a 40 px grid']],
+  fit: ['The user wants the drawing moved onto the canvas or centred.', ['fit everything on the canvas', 'center the drawing']],
+  flip: ['The user wants the positions mirrored.', ['flip the diagram horizontally', 'mirror it upside down']],
+  sort: ['The user wants the shapes sorted.', ['sort the shapes by name', 'order them by size, biggest first']],
+  groupBy: ['The user wants the shapes clustered by a property.', ['cluster the shapes by colour', 'put the same shapes together']],
+  equalize: ['The user wants the shapes made the same in some property.', ['make them all the same size', 'give everything the colour of Start']],
+  straighten: ['The user wants nearly straight arrows made straight.', ['straighten the lines', 'make the arrows straight']],
+  untangle: ['The user wants the crossing arrows untangled.', ['untangle the diagram', 'remove the crossings']],
+  reverse: ['The user wants arrows turned around.', ['reverse the arrow from A to B', 'flip all the arrows']],
   undo: ['The user wants to undo the last change.', ['undo', 'take that back', 'revert the last step']],
   redo: ['The user wants to redo a change that was undone.', ['redo', 'do that again']],
   forget: ['The user wants to remove the default rules.', ['forget the rules', 'clear all defaults']]
@@ -49,7 +63,10 @@ const ASK = {
   path: ['The user wants to know whether there is a path between two shapes.', ['is there a path from A to B?', 'can I get from Start to Done?']],
   reachable: ['The user wants to know what can be reached from a shape.', ['what can be reached from A?', 'what comes after Start?']],
   cycle: ['The user wants to know whether the arrows form a cycle.', ['are there any cycles?', 'is there a loop?']],
-  rules: ['The user wants to know which default rules are active.', ['what rules are active?', 'list the defaults']]
+  rules: ['The user wants to know which default rules are active.', ['what rules are active?', 'list the defaults']],
+  members: ['The user wants to know what a group contains.', ['what is in the group Ends?', 'which shapes are in Intake?']],
+  groupOf: ['The user wants to know which group a shape belongs to.', ['which group is Start in?']],
+  help: ['The user asks how the editor works or what it can do.', ['how do I connect two shapes?', 'what colours can I use?', 'can I add images?']]
 };
 
 /* Which legend questions each kind of sentence answers (its frame). */
@@ -112,6 +129,10 @@ function cosine(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] 
         `mention` wire with the desc:<key> values (resolved by the engine, as the Rules and VSS mentions), "context" takes the context;
      4. applies the context rule every reader shares after each request (NEXT_CONTEXT, a copy of docs/js/vss-composer.js nextContext:
         "it" = the last shape created or named; opts.update replaces it, e.g. by the scorer's rule).
+     The result's `joint` carries what the fitted confidence reads (docs/js/neural-confidence.js, the Neural gate of ui.js): the reads with
+     the head logits of the batched call (read.logits) and the cut head's probabilities per word (from step 1, or from the BERT cutter's call
+     on the same text; with units of another cutter only when opts.signals is set, by one more call of the cut head). Each wire's `unit`
+     (not enumerable) is the analysis it comes from.
    The act "none" (top-1) means the unit is not a request ("Thanks", "I run a small bakery"): no wire and no question come from it; it is
    listed in the notes as "Ignored (not a request)".
    Earlier pair (until the joint model is published): our act classifier (training/neural/finetune.py) + extractive QA for the roles:
@@ -220,6 +241,7 @@ function create(engine, rulesFormalize) {
       if (found.length) out.value = found.length === 1 ? found[0] : found;
     } else if (!sp.length) return out;
     else if (kind === 'name' || kind === 'text') out.value = sp[0].text;
+    else if (kind === 'texts') out.value = sp.map(s => s.text).join(',');   // items / items2 / parents of a template: one span per item, in order
     else if (kind === 'number') {
       const t = sp[0].text, d = t.match(/\d+(?:\.\d+)?/), w = (st.models.reader.number_words || {})[t.toLowerCase()];
       const n = d ? +d[0] : w != null ? +w : null;
@@ -264,6 +286,11 @@ function create(engine, rulesFormalize) {
     const segs = units.map(u => ({ c0: u.c0, c1: u.c1, src: text.slice(u.c0, u.c1).trim() })).filter(g => g.src);
     const reads = segs.length ? (st.models.readMany ? await st.models.readMany(segs.map(g => g.src)) : await Promise.all(segs.map(g => st.models.read(g.src)))) : [];
     if (segs.length) st.calls += st.models.readMany ? 1 : segs.length;
+    /* the cut head's probabilities per word of the message, for the fitted confidence (its cut signals): from the cut call above, or from
+       the BERT cutter's call on this same text (cutProbs, no model call); with units from another cutter (Rules, VSS) only when
+       opts.signals asks for them: then the cut head runs once over the message (one more model call) and is read at those units. */
+    let cutP = st.models.cutProbs && segs.length ? st.models.cutProbs(text) : null, cutFrom = cutP ? (cutBy === 'model' ? 'model' : 'bert cutter') : null;
+    if (!cutP && segs.length && opts && opts.signals && st.models.cut && st.models.cutProbs) { await st.models.cut(text); st.calls++; cutP = st.models.cutProbs(text); cutFrom = 'cut head (extra call)'; }
     const nodes = [], analyses = [], notRequest = [], notes = []; let n = 0, m = 0;
     segs.forEach((seg, si) => {
       const R = reads[si], id = 'n' + (++n), a = { id, src: seg.src, rules: null, keys: {} };
@@ -278,19 +305,26 @@ function create(engine, rulesFormalize) {
       }
       if (args.notColor && args.color === args.notColor) delete args.color;
       if (args.position && !['center', 'top', 'bottom', 'left', 'right', 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'].includes(args.position) && args.anchor == null) delete args.position;
-      if (args.anchor != null && !args.position && !['nearest', 'connected', 'check'].includes(act)) delete args.anchor;
+      if (args.anchor != null && !args.position && !['nearest', 'connected', 'check', 'arrange', 'equalize'].includes(act)) delete args.anchor;   // arrange: the root of a tree; equalize: the model (HIGH_LEVEL_OPS.md)
       const used = new Set(); for (const v of Object.values(args)) [].concat(v).forEach(x => { if (K.isRef(x)) used.add(x.ref); });
       const node = { id, type, args };
       Object.defineProperty(node, 'span', { value: [seg.c0, seg.c1], enumerable: false, configurable: true });
-      nodes.push(...mentions.filter(x => used.has(x.id)), node); analyses.push(a);
+      const mine = mentions.filter(x => used.has(x.id));
+      // the request (analysis) each wire comes from, as the VSS composer's n.unit: the gate groups the wires by it
+      for (const x of mine.concat([node])) Object.defineProperty(x, 'unit', { value: a, enumerable: false, configurable: true });
+      Object.defineProperty(a, 'span', { value: [seg.c0, seg.c1], enumerable: false, configurable: true });
+      nodes.push(...mine, node); analyses.push(a);
       update(c, node);
     });
     if (notRequest.length) notes.push('Ignored (not a request): ' + notRequest.map(z => `“${z}”`).join(', '));
-    return { nodes, notes, rulesNodes: [], analyses, cutBy, ms: Date.now() - t0, calls: st.calls };
+    /* joint: what the fitted confidence reads (docs/js/neural-confidence.js signals): reads[i] is the read of analyses[i] (its head logits
+       in reads[i].logits), cut the cut head's probabilities per word of the message (null: not available), the head layout and [UNK] */
+    const joint = { text, reads, cut: cutP, cutFrom, reader: st.models.reader, unk: st.models.unk };
+    return { nodes, notes, rulesNodes: [], analyses, cutBy, joint, ms: Date.now() - t0, calls: st.calls };
   }
 
   async function formalize(input, ctx, opts) {
-    if (!st.models) throw new K.SOPError('The neural models are not loaded yet. Open the Neural tab and load them.');
+    if (!st.models) throw new K.SOPError('The neural models are not loaded yet. Open the SOP-BERT tab and load them.');
     if (st.strategy === 'finetuned' && st.models.read) return formalizeJoint(input, ctx || {}, opts);   // SOP-BERT: no Rules reader
     // the earlier pair (act classifier + extractive QA) and the baselines: the Rules reader's cut and references, until the pair is removed
     const t0 = Date.now(); st.calls = 0;
@@ -334,7 +368,7 @@ function create(engine, rulesFormalize) {
       }
       if (args.notColor && args.color === args.notColor) delete args.color;
       if (args.position && !['center', 'top', 'bottom', 'left', 'right', 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'].includes(args.position) && args.anchor == null) delete args.position;
-      if (args.anchor != null && !args.position && !['nearest', 'connected', 'check'].includes(act)) delete args.anchor;
+      if (args.anchor != null && !args.position && !['nearest', 'connected', 'check', 'arrange', 'equalize'].includes(act)) delete args.anchor;   // arrange: the root of a tree; equalize: the model (HIGH_LEVEL_OPS.md)
       const id = rn.id;
       const node = { id, type, args };
       for (const v of Object.values(args)) [].concat(v).forEach(x => { if (K.isRef(x) && mentionById.has(x.ref)) used.add(x.ref); });
@@ -427,13 +461,13 @@ function makeReader(T, tokenizer, model) {
   const sp = tokenizer.encode('');   // [CLS] [SEP]
   if (sp.length !== 2) throw new Error(`The tokenizer adds ${sp.length} special tokens to a text; 2 ([CLS] [SEP]) are expected.`);
   function prep(text, limit) {
-    const ws = wordsOf(text), ids = [sp[0]], first = new Map();
+    const ws = wordsOf(text), ids = [sp[0]], first = new Map(), pieces = [];   // pieces[i]: every word piece of word i (the words reached)
     for (let i = 0; i < ws.length && ids.length < limit - 1; i++) {   // truncation as in training: at most limit - 2 word pieces
-      const p = tokenizer.encode(ws[i].w, { add_special_tokens: false });
+      const p = tokenizer.encode(ws[i].w, { add_special_tokens: false }); pieces[i] = p;
       for (let j = 0; j < p.length && ids.length < limit - 1; j++) { if (j === 0) first.set(i, ids.length); ids.push(p[j]); }
     }
     ids.push(sp[1]);
-    return { text: String(text), ws, ids, first };
+    return { text: String(text), ws, ids, first, pieces };
   }
   /** one model call over a batch of prepared texts (padded; the attention mask hides the padding) */
   async function run(ps) {
@@ -448,10 +482,11 @@ function makeReader(T, tokenizer, model) {
     const pa = softmax(sl.slice(0, nA)), acts = R.acts.map((label, i) => ({ label, score: pa[i] })).sort((x, y) => y.score - x.score);
     const classes = {};
     R.classes.forEach(([k, vals], c) => { const q = softmax(sl.slice(offs[c], offs[c] + vals.length)); let bi = 0; q.forEach((x, i) => { if (x > q[bi]) bi = i; }); classes[k] = { value: bi ? vals[bi] : null, score: q[bi] }; });
-    const tags = [], probs = [];
+    const tags = [], probs = [], tok = [];
     for (let i = 0; i < ws.length; i++) {
-      const t = first.get(i); if (t == null) { tags.push('O'); probs.push(1); continue; }
-      const q = softmax(Array.from(tl.slice((b * nTok + t) * nT, (b * nTok + t + 1) * nT))); let bi = 0; q.forEach((x, k) => { if (x > q[bi]) bi = k; });
+      const t = first.get(i); if (t == null) { tags.push('O'); probs.push(1); tok.push(null); continue; }
+      const l = Array.from(tl.slice((b * nTok + t) * nT, (b * nTok + t + 1) * nT)); tok.push(l);
+      const q = softmax(l); let bi = 0; q.forEach((x, k) => { if (x > q[bi]) bi = k; });
       tags.push(R.tags[bi]); probs.push(q[bi]);
     }
     const spans = {}; let cur = null;   // B starts a role; I continues the role of the same key just before it, else starts one
@@ -462,7 +497,12 @@ function makeReader(T, tokenizer, model) {
       else { list.push({ i, j: i + 1, p: probs[i] }); cur = k; }
     });
     for (const k of Object.keys(spans)) spans[k] = spans[k].map(s => ({ text: String(text).slice(ws[s.i].start, ws[s.j - 1].end), start: ws[s.i].start, end: ws[s.j - 1].end, score: s.p }));
-    return { words: ws.map(w => w.w), ids, acts, classes, tags, spans };
+    const res = { words: ws.map(w => w.w), ids, acts, classes, tags, spans };
+    /* the head logits of this call, for the fitted confidence (docs/js/neural-confidence.js; training/sketch/precision_bert_collect.mjs
+       reads the same numbers): seq = the request's row of seq_logits (act, then the class heads), tok[i] = the token_logits of word i's
+       first word piece (null: the word is beyond the truncation), pieces[i] = the word pieces of word i. Not enumerable: no copy, no JSON. */
+    Object.defineProperty(res, 'logits', { value: { seq: sl, tok, pieces: p.pieces }, enumerable: false });
+    return res;
   }
   /** readMany(texts): ONE model call for all the texts (the requests of one message) -> [read result] */
   async function readMany(texts) {
@@ -473,20 +513,27 @@ function makeReader(T, tokenizer, model) {
   const read = async text => (await readMany([text]))[0];
   /** cut(text): the request spans of a whole message, from the span head: [{c0, c1, score}] character offsets into text (one model call);
       words beyond the first cut.max_length word pieces are outside every request */
+  let lastCut = null;   // {text, words}: the cut head's probabilities per word of the last message cut (cutProbs)
   async function cut(text) {
     if (!cutLen) throw new Error('This model has no span head (config.json reader.cut): retrain with training/neural/finetune_roles.py.');
-    const p = prep(text, cutLen), { out, n } = await run([p]), cl = out.cut_logits.data, spans = [];
+    const p = prep(text, cutLen), { out, n } = await run([p]), cl = out.cut_logits.data, spans = [], words = [];
     let cur = null;
     p.ws.forEach((w, i) => {
       const t = p.first.get(i); let tag = 'O', pr = 1;
-      if (t != null) { const q = softmax(Array.from(cl.slice(t * 3, t * 3 + 3))); let bi = 0; q.forEach((x, k) => { if (x > q[bi]) bi = k; }); tag = 'OBI'[bi]; pr = q[bi]; }
+      if (t != null) { const q = softmax(Array.from(cl.slice(t * 3, t * 3 + 3))); let bi = 0; q.forEach((x, k) => { if (x > q[bi]) bi = k; }); tag = 'OBI'[bi]; pr = q[bi]; words.push({ start: w.start, end: w.end, pO: q[0], pB: q[1], pI: q[2] }); }
+      else words.push({ start: w.start, end: w.end, pO: 1, pB: 0, pI: 0 });   // beyond the truncation: outside every request
       if (tag === 'O') { cur = null; return; }
       if (tag === 'I' && cur) { cur.c1 = w.end; cur.score = Math.min(cur.score, pr); }
       else { cur = { c0: w.start, c1: w.end, score: pr }; spans.push(cur); }
     });
+    lastCut = { text: String(text), words };
     return spans;
   }
-  return { read, readMany, act: async text => (await read(text)).acts, reader: R, ...(cutLen ? { cut } : {}) };
+  /** cutProbs(text): the cut head's [{start, end, pO, pB, pI}] per word of text, from the last cut() of exactly this text (the BERT cutter's
+      call, or the reader's own), else null; no model call */
+  const cutProbs = text => lastCut && lastCut.text === String(text) ? lastCut.words : null;
+  const unk = tokenizer.model && tokenizer.model.unk_token_id != null ? tokenizer.model.unk_token_id : tokenizer.unk_token_id;   // [UNK]
+  return { read, readMany, act: async text => (await read(text)).acts, reader: R, unk, ...(cutLen ? { cut, cutProbs } : {}) };
 }
 
 /* ---------------- Transformers.js loader (browser only) ---------------- */
@@ -649,6 +696,13 @@ async function pruneStale() {
     return n;
   } catch (e) { return 0; }
 }
+/** the URL of the fitted confidence of the joint model (docs/js/neural-confidence.js; training/sketch/PRECISION_BERT.md), with its version
+    from versions.json: docs/model/confidence/sop-bert.json?v=<version> (null outside the browser) */
+async function confidenceUrl() {
+  if (!MODEL_ROOT) return null;
+  await loadVersions();
+  return `${MODEL_ROOT}confidence/${READER_MODEL}.json?v=${encodeURIComponent(NVERS['confidence/' + READER_MODEL + '.json'] || 'unversioned')}`;
+}
 const looksNetwork = e => /failed to fetch|networkerror|load failed|network|dynamically imported module|importing a module script failed|err_|timeout|cors/i.test(String(e && e.message || e)) || (e && e.name === 'TypeError' && /fetch/i.test(String(e.message)));
 /** load the demo's model(s) (status() must say published); the `m` object create() takes */
 async function load(onProgress) {
@@ -695,7 +749,7 @@ async function load(onProgress) {
   }
 }
 
-return { NEXT_CONTEXT, cut: (text, ctx) => cutOf(ACTIVE, text), canCut: () => !!(ACTIVE && ACTIVE.cut), create, load, status, cached, modelsFor, urlsFor, bytesOf, revOf, dtypeOf, dtypeText, makeReader, wordsOf, KIND_OF, MODELS, OURS, NAMES, ABOUT, ACT_MODEL, QA_MODEL, READER_MODEL, DTYPE };
+return { NEXT_CONTEXT, cut: (text, ctx) => cutOf(ACTIVE, text), canCut: () => !!(ACTIVE && ACTIVE.cut), create, load, status, cached, confidenceUrl, modelsFor, urlsFor, bytesOf, revOf, dtypeOf, dtypeText, makeReader, wordsOf, KIND_OF, MODELS, OURS, NAMES, ABOUT, ACT_MODEL, QA_MODEL, READER_MODEL, DTYPE };
 })();
 if (typeof module !== 'undefined') module.exports = NeuralKit;
 /*NEURAL-END*/

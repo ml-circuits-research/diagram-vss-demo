@@ -1,0 +1,484 @@
+{"id": "sr-00030", "text": "list the squares", "how": "exact", "set": "llm_short"}
+{"id": "sr-00047", "text": "how many shapes are there?", "how": "exact", "set": "heldout_formulations"}
+{"id": "sr-00094", "text": "which shape is the lowest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-00140", "text": "Take that back.", "how": "exact", "set": "llm_short"}
+{"id": "sr-00172", "text": "Undo that.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-00190", "text": "which one is biggest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-00275", "text": "redo that", "how": "exact", "set": "llm_short"}
+{"id": "sr-00295", "text": "which shape is the largest?", "how": "exact", "set": "hand"}
+{"id": "sr-00330", "text": "how many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-00499", "text": "Delete everything.", "how": "exact", "set": "llm_short"}
+{"id": "sr-00517", "text": "Redo that!", "how": "exact", "set": "llm_short"}
+{"id": "sr-00624", "text": "list the squares", "how": "exact", "set": "llm_short"}
+{"id": "sr-00634", "text": "Take that back", "how": "exact", "set": "llm_short"}
+{"id": "sr-00666", "text": "Describe the canvas?", "how": "exact", "set": "new_identities"}
+{"id": "sr-00730", "text": "redo!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-00766", "text": "Show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-00778", "text": "describe the diagram?", "how": "exact", "set": "llm_short"}
+{"id": "sr-00945", "text": "Which one is biggest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-00946", "text": "Are there any cycles?", "how": "exact", "set": "seen"}
+{"id": "sr-00952", "text": "which shape is the largest?", "how": "exact", "set": "hand"}
+{"id": "sr-00971", "text": "reapply", "how": "exact", "set": "llm_short"}
+{"id": "sr-01004", "text": "undo the last change", "how": "exact", "set": "llm_short"}
+{"id": "sr-01022", "text": "is there a loop?", "how": "exact", "set": "llm_short"}
+{"id": "sr-01156", "text": "redo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-01252", "text": "How many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-01264", "text": "Is there a loop?", "how": "exact", "set": "llm_short"}
+{"id": "sr-01346", "text": "undo the last change!", "how": "exact", "set": "llm_short"}
+{"id": "sr-01354", "text": "Describe the canvas?", "how": "exact", "set": "new_identities"}
+{"id": "sr-01367", "text": "What's the bottommost one?", "how": "exact", "set": "llm_short"}
+{"id": "sr-01383", "text": "redo that!", "how": "exact", "set": "llm_short"}
+{"id": "sr-01404", "text": "undo.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-01490", "text": "are there any cycles", "how": "exact", "set": "seen"}
+{"id": "sr-01520", "text": "show me the rules", "how": "exact", "set": "llm_short"}
+{"id": "sr-01521", "text": "undo that.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-01529", "text": "take that back", "how": "exact", "set": "llm_short"}
+{"id": "sr-01579", "text": "how many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-01601", "text": "Forget the rules.", "how": "exact", "set": "llm_short"}
+{"id": "sr-01711", "text": "How many triangles do we have?", "how": "exact", "set": "llm_short"}
+{"id": "sr-01715", "text": "Any loops?", "how": "exact", "set": "llm_short"}
+{"id": "sr-01731", "text": "which shape has the most connections?", "how": "exact", "set": "broad"}
+{"id": "sr-01819", "text": "Redo that.", "how": "exact", "set": "llm_short"}
+{"id": "sr-01902", "text": "undo the last step!", "how": "exact", "set": "llm_short"}
+{"id": "sr-01996", "text": "Delete everything.", "how": "exact", "set": "llm_short"}
+{"id": "sr-02051", "text": "i want you to redo", "how": "exact", "set": "new_identities"}
+{"id": "sr-02059", "text": "forget the defaults", "how": "exact", "set": "llm_short"}
+{"id": "sr-02076", "text": "How many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-02152", "text": "Undo the last step", "how": "exact", "set": "llm_short"}
+{"id": "sr-02155", "text": "is there a cycle?", "how": "exact", "set": "llm_short"}
+{"id": "sr-02185", "text": "Redo.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-02210", "text": "add a hexagon", "how": "exact", "set": "broad"}
+{"id": "sr-02215", "text": "Align everything vertically", "how": "exact", "set": "short3_texts"}
+{"id": "sr-02231", "text": "describe the canvas", "how": "exact", "set": "new_identities"}
+{"id": "sr-02392", "text": "show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-02466", "text": "forget the rules", "how": "exact", "set": "llm_short"}
+{"id": "sr-02467", "text": "Line up the stars in a column", "how": "token set", "set": "llm_short"}
+{"id": "sr-02489", "text": "any loops?", "how": "exact", "set": "llm_short"}
+{"id": "sr-02617", "text": "undo the last step", "how": "exact", "set": "llm_short"}
+{"id": "sr-02732", "text": "Describe the diagram?", "how": "exact", "set": "llm_short"}
+{"id": "sr-02804", "text": "Show me the rules", "how": "exact", "set": "llm_short"}
+{"id": "sr-02826", "text": "Reapply", "how": "exact", "set": "llm_short"}
+{"id": "sr-02831", "text": "undo!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-02837", "text": "which is the topmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-02848", "text": "any loops", "how": "exact", "set": "llm_short"}
+{"id": "sr-02951", "text": "show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-03046", "text": "Bring Check to the front!", "how": "exact", "set": "hand"}
+{"id": "sr-03070", "text": "which shape is the leftmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-03116", "text": "How many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-03224", "text": "describe everything?", "how": "exact", "set": "llm_short"}
+{"id": "sr-03262", "text": "Which is the topmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-03337", "text": "Any cycles?", "how": "exact", "set": "short3_texts"}
+{"id": "sr-03341", "text": "Undo that", "how": "exact", "set": "short3_texts"}
+{"id": "sr-03407", "text": "please align the indigo diamonds horizontally.", "how": "exact", "set": "seen"}
+{"id": "sr-03408", "text": "How many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-03545", "text": "show me the rules", "how": "exact", "set": "llm_short"}
+{"id": "sr-03581", "text": "how many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-03612", "text": "which one is biggest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-03614", "text": "What's the leftmost one?", "how": "exact", "set": "llm_short"}
+{"id": "sr-03945", "text": "which is the rightmost", "how": "exact", "set": "llm_short"}
+{"id": "sr-04008", "text": "which shape is the lowest", "how": "exact", "set": "llm_short"}
+{"id": "sr-04280", "text": "which is the topmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-04288", "text": "redo!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-04327", "text": "Reapply", "how": "exact", "set": "llm_short"}
+{"id": "sr-04346", "text": "Undo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-04353", "text": "undo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-04382", "text": "show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-04396", "text": "Undo the last step", "how": "exact", "set": "llm_short"}
+{"id": "sr-04458", "text": "Forget the rules.", "how": "exact", "set": "llm_short"}
+{"id": "sr-04462", "text": "which shapes are white?", "how": "exact", "set": "llm_short"}
+{"id": "sr-04501", "text": "undo that", "how": "exact", "set": "short3_texts"}
+{"id": "sr-04508", "text": "how many connections are there", "how": "exact", "set": "llm_short"}
+{"id": "sr-04567", "text": "How many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-04621", "text": "describe the diagram", "how": "exact", "set": "llm_short"}
+{"id": "sr-04744", "text": "List the squares?", "how": "exact", "set": "llm_short"}
+{"id": "sr-04842", "text": "is there a cycle?", "how": "exact", "set": "llm_short"}
+{"id": "sr-04950", "text": "are there any cycles?", "how": "exact", "set": "seen"}
+{"id": "sr-05022", "text": "are there any cycles?", "how": "exact", "set": "seen"}
+{"id": "sr-05113", "text": "how many circles do we have?", "how": "exact", "set": "hand"}
+{"id": "sr-05140", "text": "How many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-05243", "text": "What's the bottommost one", "how": "exact", "set": "llm_short"}
+{"id": "sr-05259", "text": "How many arrows are there", "how": "exact", "set": "fresh2"}
+{"id": "sr-05306", "text": "how many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-05374", "text": "Which shape is the highest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-05450", "text": "which shape is the leftmost", "how": "exact", "set": "llm_short"}
+{"id": "sr-05464", "text": "undo!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-05559", "text": "take that back", "how": "exact", "set": "llm_short"}
+{"id": "sr-05678", "text": "redo!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-05728", "text": "how many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-05761", "text": "which is the rightmost", "how": "exact", "set": "llm_short"}
+{"id": "sr-05766", "text": "how many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-05813", "text": "how many shapes are there?", "how": "exact", "set": "heldout_formulations"}
+{"id": "sr-05833", "text": "Redo.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-05855", "text": "is there a cycle?", "how": "exact", "set": "llm_short"}
+{"id": "sr-05876", "text": "Is there a cycle?", "how": "exact", "set": "llm_short"}
+{"id": "sr-05878", "text": "describe the diagram", "how": "exact", "set": "llm_short"}
+{"id": "sr-05914", "text": "Forget the rules!", "how": "exact", "set": "llm_short"}
+{"id": "sr-05980", "text": "how many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-05986", "text": "take that back", "how": "exact", "set": "llm_short"}
+{"id": "sr-05987", "text": "how many shapes do we have?", "how": "exact", "set": "heldout_formulations"}
+{"id": "sr-06015", "text": "List all shapes?", "how": "exact", "set": "short3_texts"}
+{"id": "sr-06049", "text": "redo.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-06060", "text": "redo that.", "how": "exact", "set": "llm_short"}
+{"id": "sr-06100", "text": "Is there a loop?", "how": "exact", "set": "llm_short"}
+{"id": "sr-06117", "text": "delete everything!", "how": "exact", "set": "llm_short"}
+{"id": "sr-06340", "text": "how many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-06555", "text": "Redo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-06596", "text": "Is there a hexagon?", "how": "exact", "set": "llm_short"}
+{"id": "sr-06613", "text": "undo that", "how": "exact", "set": "short3_texts"}
+{"id": "sr-06715", "text": "undo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-06821", "text": "How many arrows are there", "how": "exact", "set": "fresh2"}
+{"id": "sr-06873", "text": "which shape is the leftmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-06890", "text": "which is the rightmost", "how": "exact", "set": "llm_short"}
+{"id": "sr-06915", "text": "undo the last step", "how": "exact", "set": "llm_short"}
+{"id": "sr-06916", "text": "are there any cycles", "how": "exact", "set": "seen"}
+{"id": "sr-06928", "text": "redo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-06950", "text": "lay out everything as a grid.", "how": "token set", "set": "hand"}
+{"id": "sr-07062", "text": "How many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-07093", "text": "how many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-07117", "text": "How many arrows are there", "how": "exact", "set": "fresh2"}
+{"id": "sr-07197", "text": "show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07278", "text": "Forget the defaults", "how": "exact", "set": "llm_short"}
+{"id": "sr-07333", "text": "Describe everything", "how": "exact", "set": "llm_short"}
+{"id": "sr-07335", "text": "Which shape is the largest?", "how": "exact", "set": "hand"}
+{"id": "sr-07354", "text": "which one is biggest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07412", "text": "how many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07437", "text": "how many diamonds do we have?", "how": "exact", "set": "heldout_formulations"}
+{"id": "sr-07526", "text": "Which one is biggest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07561", "text": "list all indigo hexagons", "how": "exact", "set": "heldout_formulations"}
+{"id": "sr-07621", "text": "which shape is the highest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07670", "text": "Is there a hexagon?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07877", "text": "undo the last change", "how": "exact", "set": "llm_short"}
+{"id": "sr-07903", "text": "show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-07942", "text": "what's the leftmost one?", "how": "exact", "set": "llm_short"}
+{"id": "sr-08087", "text": "how many triangles do we have?", "how": "exact", "set": "llm_short"}
+{"id": "sr-08136", "text": "undo!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-08210", "text": "Which shape is the smallest?", "how": "token set", "set": "llm_short"}
+{"id": "sr-08235", "text": "are there any cycles?", "how": "exact", "set": "seen"}
+{"id": "sr-08245", "text": "Undo the last change", "how": "exact", "set": "llm_short"}
+{"id": "sr-08315", "text": "redo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-08442", "text": "Redo that.", "how": "exact", "set": "llm_short"}
+{"id": "sr-08540", "text": "describe the diagram?", "how": "exact", "set": "llm_short"}
+{"id": "sr-08546", "text": "Is there a loop?", "how": "exact", "set": "llm_short"}
+{"id": "sr-08611", "text": "Take that back!", "how": "exact", "set": "llm_short"}
+{"id": "sr-08630", "text": "how many connections are there", "how": "exact", "set": "llm_short"}
+{"id": "sr-08641", "text": "Undo the last step!", "how": "exact", "set": "llm_short"}
+{"id": "sr-08695", "text": "how many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-08770", "text": "Which is the rightmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-08780", "text": "Show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-08801", "text": "I want you to redo", "how": "exact", "set": "new_identities"}
+{"id": "sr-08899", "text": "Forget the defaults", "how": "exact", "set": "llm_short"}
+{"id": "sr-09143", "text": "What's the leftmost one?", "how": "exact", "set": "llm_short"}
+{"id": "sr-09160", "text": "How many arrows are there", "how": "exact", "set": "fresh2"}
+{"id": "so-00124", "text": "Straighten the lines", "how": "exact", "set": "short3_texts"}
+{"id": "so-00482", "text": "Straighten the lines", "how": "exact", "set": "short3_texts"}
+{"id": "so-00492", "text": "straighten the lines", "how": "exact", "set": "short3_texts"}
+{"id": "so-00547", "text": "untangle the arrows", "how": "exact", "set": "short3_texts"}
+{"id": "so-00571", "text": "straighten the lines", "how": "exact", "set": "short3_texts"}
+{"id": "so-01394", "text": "untangle the arrows.", "how": "exact", "set": "short3_texts"}
+{"id": "se-00016", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00032", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00067", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00069", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00075", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00091", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00099", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00154", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00166", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00202", "text": "what can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-00220", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00262", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00268", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00285", "text": "what can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-00301", "text": "help", "how": "exact", "set": "short3_texts"}
+{"id": "se-00309", "text": "Help", "how": "exact", "set": "short3_texts"}
+{"id": "se-00355", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00382", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00384", "text": "what can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-00466", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00472", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00475", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00480", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00481", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00527", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00543", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00546", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00548", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00550", "text": "help", "how": "exact", "set": "short3_texts"}
+{"id": "se-00566", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00582", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00589", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00606", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00618", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00624", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00635", "text": "help", "how": "exact", "set": "short3_texts"}
+{"id": "se-00665", "text": "what can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-00675", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00676", "text": "Can I group shapes?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00693", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00721", "text": "help", "how": "exact", "set": "short3_texts"}
+{"id": "se-00726", "text": "help", "how": "exact", "set": "short3_texts"}
+{"id": "se-00742", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00772", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00776", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00809", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00811", "text": "Help", "how": "exact", "set": "short3_texts"}
+{"id": "se-00860", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00884", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00885", "text": "Help", "how": "exact", "set": "short3_texts"}
+{"id": "se-00892", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00901", "text": "What can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-00927", "text": "What can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-00949", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00982", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-00997", "text": "help", "how": "exact", "set": "short3_texts"}
+{"id": "se-01000", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01041", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01086", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01117", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01119", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01140", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01147", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01192", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01212", "text": "help", "how": "exact", "set": "short3_texts"}
+{"id": "se-01219", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01235", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01239", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01273", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01275", "text": "help", "how": "exact", "set": "short3_texts"}
+{"id": "se-01291", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01298", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01338", "text": "What can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-01349", "text": "help", "how": "exact", "set": "short3_texts"}
+{"id": "se-01409", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01441", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01481", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01524", "text": "help", "how": "exact", "set": "short3_texts"}
+{"id": "se-01543", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01546", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01559", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01636", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01643", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01654", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01660", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01668", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01672", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01678", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01698", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01714", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01775", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01812", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01839", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01865", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01925", "text": "What can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-01935", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01971", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-01985", "text": "what can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-02001", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02005", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02035", "text": "what can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-02103", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02107", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02108", "text": "Help", "how": "exact", "set": "short3_texts"}
+{"id": "se-02165", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02171", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02180", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02188", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02206", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02217", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02232", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02260", "text": "what can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-02311", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02364", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02370", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02431", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02438", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02533", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02534", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02558", "text": "what can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-02570", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02585", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02587", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02635", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02648", "text": "help", "how": "exact", "set": "short3_texts"}
+{"id": "se-02688", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02729", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02742", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02762", "text": "what can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-02776", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02817", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02832", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02835", "text": "What can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-02857", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02867", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02890", "text": "What can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-02898", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02903", "text": "what can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-02967", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-02972", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03009", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03027", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03042", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03045", "text": "What can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03053", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03075", "text": "can I group shapes?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03079", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03102", "text": "What can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-03103", "text": "help", "how": "exact", "set": "short3_texts"}
+{"id": "se-03138", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03149", "text": "what can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-03170", "text": "What can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-03192", "text": "help", "how": "exact", "set": "short3_texts"}
+{"id": "se-03262", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03268", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03275", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03309", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03314", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03321", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03339", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03345", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03375", "text": "what can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-03381", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03389", "text": "Help", "how": "exact", "set": "short3_texts"}
+{"id": "se-03392", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03424", "text": "what can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-03452", "text": "what can you do?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03479", "text": "Help?", "how": "exact", "set": "short3_texts"}
+{"id": "se-03480", "text": "What can you do", "how": "exact", "set": "short3_texts"}
+{"id": "se-03485", "text": "help?", "how": "exact", "set": "short3_texts"}
+{"id": "sr-09207", "text": "What is on the canvas?", "how": "exact", "set": "llm_short"}
+{"id": "sr-09286", "text": "redo that", "how": "exact", "set": "llm_short"}
+{"id": "sr-09314", "text": "How many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-09381", "text": "undo that!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-09448", "text": "which shape is the lowest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-09522", "text": "how many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-09556", "text": "Which shape is the leftmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-09779", "text": "undo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-09868", "text": "undo that!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-10020", "text": "describe the canvas?", "how": "exact", "set": "new_identities"}
+{"id": "sr-10081", "text": "Undo the last step!", "how": "exact", "set": "llm_short"}
+{"id": "sr-10119", "text": "are there any cycles?", "how": "exact", "set": "seen"}
+{"id": "sr-10161", "text": "forget the defaults", "how": "exact", "set": "llm_short"}
+{"id": "sr-10328", "text": "take that back", "how": "exact", "set": "llm_short"}
+{"id": "sr-10431", "text": "which one is biggest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-10440", "text": "take that back!", "how": "exact", "set": "llm_short"}
+{"id": "sr-10510", "text": "What's the leftmost one?", "how": "exact", "set": "llm_short"}
+{"id": "sr-10530", "text": "Take that back", "how": "exact", "set": "llm_short"}
+{"id": "sr-10605", "text": "How many connections are there", "how": "exact", "set": "llm_short"}
+{"id": "sr-10755", "text": "Are there any hexagons", "how": "exact", "set": "broad"}
+{"id": "sr-10766", "text": "Forget the rules", "how": "exact", "set": "llm_short"}
+{"id": "sr-10898", "text": "Describe the canvas", "how": "exact", "set": "new_identities"}
+{"id": "sr-10947", "text": "what is on the canvas", "how": "exact", "set": "llm_short"}
+{"id": "sr-10954", "text": "redo that.", "how": "exact", "set": "llm_short"}
+{"id": "sr-11094", "text": "How many shapes are there?", "how": "exact", "set": "heldout_formulations"}
+{"id": "sr-11166", "text": "undo the last change.", "how": "exact", "set": "llm_short"}
+{"id": "sr-11315", "text": "Any loops?", "how": "exact", "set": "llm_short"}
+{"id": "sr-11379", "text": "Reapply!", "how": "exact", "set": "llm_short"}
+{"id": "sr-11498", "text": "is there a hexagon", "how": "exact", "set": "llm_short"}
+{"id": "sr-11550", "text": "reapply", "how": "exact", "set": "llm_short"}
+{"id": "sr-11578", "text": "Show me the rules", "how": "exact", "set": "llm_short"}
+{"id": "sr-11629", "text": "Which is the rightmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-11648", "text": "undo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-11674", "text": "Show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-11809", "text": "any loops", "how": "exact", "set": "llm_short"}
+{"id": "sr-11881", "text": "what is on the canvas", "how": "exact", "set": "llm_short"}
+{"id": "sr-11927", "text": "What is on the canvas?", "how": "exact", "set": "llm_short"}
+{"id": "sr-11928", "text": "Are there any cycles?", "how": "exact", "set": "seen"}
+{"id": "sr-11946", "text": "Describe everything?", "how": "exact", "set": "llm_short"}
+{"id": "sr-11966", "text": "What's the leftmost one", "how": "exact", "set": "llm_short"}
+{"id": "sr-12027", "text": "What's the topmost one", "how": "exact", "set": "llm_short"}
+{"id": "sr-12152", "text": "undo the last change!", "how": "exact", "set": "llm_short"}
+{"id": "sr-12278", "text": "which shape is the smallest?", "how": "token set", "set": "llm_short"}
+{"id": "sr-12282", "text": "undo that!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-12401", "text": "What's the topmost one?", "how": "exact", "set": "llm_short"}
+{"id": "sr-12541", "text": "undo the last step", "how": "exact", "set": "llm_short"}
+{"id": "sr-12881", "text": "redo that.", "how": "exact", "set": "llm_short"}
+{"id": "sr-12894", "text": "forget the defaults, please", "how": "token set", "set": "new_identities"}
+{"id": "sr-12951", "text": "Which shape is the highest", "how": "exact", "set": "llm_short"}
+{"id": "sr-12986", "text": "are there any cycles?", "how": "exact", "set": "seen"}
+{"id": "sr-12987", "text": "undo the last change", "how": "exact", "set": "llm_short"}
+{"id": "sr-13069", "text": "list all shapes?", "how": "exact", "set": "short3_texts"}
+{"id": "sr-13108", "text": "Which shape is the biggest", "how": "exact", "set": "llm_short"}
+{"id": "sr-13117", "text": "Delete everything", "how": "exact", "set": "llm_short"}
+{"id": "sr-13172", "text": "Show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-13197", "text": "Is there a loop?", "how": "exact", "set": "llm_short"}
+{"id": "sr-13236", "text": "Redo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-13305", "text": "is there a cycle", "how": "exact", "set": "llm_short"}
+{"id": "sr-13316", "text": "describe everything", "how": "exact", "set": "llm_short"}
+{"id": "sr-13319", "text": "How many arrows are there", "how": "exact", "set": "fresh2"}
+{"id": "sr-13468", "text": "any cycles?", "how": "exact", "set": "short3_texts"}
+{"id": "sr-13517", "text": "is there a cycle", "how": "exact", "set": "llm_short"}
+{"id": "sr-13521", "text": "list the hexagons", "how": "exact", "set": "llm_short"}
+{"id": "sr-13627", "text": "Reapply", "how": "exact", "set": "llm_short"}
+{"id": "sr-13636", "text": "Is there a loop?", "how": "exact", "set": "llm_short"}
+{"id": "sr-13688", "text": "show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-13766", "text": "undo.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-13920", "text": "delete everything!", "how": "exact", "set": "llm_short"}
+{"id": "sr-13990", "text": "are there any cycles?", "how": "exact", "set": "seen"}
+{"id": "sr-14079", "text": "undo the last step!", "how": "exact", "set": "llm_short"}
+{"id": "sr-14141", "text": "redo that", "how": "exact", "set": "llm_short"}
+{"id": "sr-14146", "text": "Take that back", "how": "exact", "set": "llm_short"}
+{"id": "sr-14160", "text": "which one is biggest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-14205", "text": "is there a star?", "how": "exact", "set": "llm_short"}
+{"id": "sr-14258", "text": "Redo, please", "how": "exact", "set": "short3_texts"}
+{"id": "sr-14267", "text": "undo the last change", "how": "exact", "set": "llm_short"}
+{"id": "sr-14284", "text": "undo that.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-14460", "text": "how many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-14637", "text": "which triangles are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-14652", "text": "Is there a loop?", "how": "exact", "set": "llm_short"}
+{"id": "sr-14693", "text": "take that back", "how": "exact", "set": "llm_short"}
+{"id": "sr-14808", "text": "Show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-14898", "text": "how many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-14939", "text": "redo that.", "how": "exact", "set": "llm_short"}
+{"id": "sr-14943", "text": "Undo that.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-14970", "text": "which is the topmost", "how": "exact", "set": "llm_short"}
+{"id": "sr-15067", "text": "what is on the canvas?", "how": "exact", "set": "llm_short"}
+{"id": "sr-15197", "text": "how many connections are there", "how": "exact", "set": "llm_short"}
+{"id": "sr-15207", "text": "undo the last change.", "how": "exact", "set": "llm_short"}
+{"id": "sr-15260", "text": "Any cycles", "how": "exact", "set": "short3_texts"}
+{"id": "sr-15304", "text": "which shape has the most connections?", "how": "exact", "set": "broad"}
+{"id": "sr-15322", "text": "Which shape is the lowest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-15361", "text": "which shape is the highest?", "how": "exact", "set": "llm_short"}
+{"id": "sr-15376", "text": "which is the topmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-15385", "text": "Is there a hexagon?", "how": "exact", "set": "llm_short"}
+{"id": "sr-15390", "text": "which one is biggest", "how": "exact", "set": "llm_short"}
+{"id": "sr-15446", "text": "Are there any cycles", "how": "exact", "set": "seen"}
+{"id": "sr-15462", "text": "which shapes are not magenta?", "how": "token set", "set": "seen"}
+{"id": "sr-15510", "text": "Delete everything", "how": "exact", "set": "llm_short"}
+{"id": "sr-15535", "text": "is there a loop", "how": "exact", "set": "llm_short"}
+{"id": "sr-15556", "text": "I want you to redo", "how": "exact", "set": "new_identities"}
+{"id": "sr-15636", "text": "forget the defaults.", "how": "exact", "set": "llm_short"}
+{"id": "sr-15641", "text": "describe the canvas?", "how": "exact", "set": "new_identities"}
+{"id": "sr-15645", "text": "Which shape is the smallest?", "how": "token set", "set": "llm_short"}
+{"id": "sr-15692", "text": "undo the last change", "how": "exact", "set": "llm_short"}
+{"id": "sr-15786", "text": "describe the diagram?", "how": "exact", "set": "llm_short"}
+{"id": "sr-15823", "text": "Which shape is the largest?", "how": "exact", "set": "hand"}
+{"id": "sr-15884", "text": "Describe the diagram?", "how": "exact", "set": "llm_short"}
+{"id": "sr-15965", "text": "which shape is the smallest?", "how": "token set", "set": "llm_short"}
+{"id": "sr-15968", "text": "undo the last change", "how": "exact", "set": "llm_short"}
+{"id": "sr-16050", "text": "How many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-16112", "text": "show me the rules?", "how": "exact", "set": "llm_short"}
+{"id": "sr-16137", "text": "undo the last change", "how": "exact", "set": "llm_short"}
+{"id": "sr-16200", "text": "How many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-16260", "text": "Any loops", "how": "exact", "set": "llm_short"}
+{"id": "sr-16262", "text": "Which shape is the smallest", "how": "token set", "set": "llm_short"}
+{"id": "sr-16332", "text": "any cycles?", "how": "exact", "set": "short3_texts"}
+{"id": "sr-16370", "text": "forget the rules", "how": "exact", "set": "llm_short"}
+{"id": "sr-16403", "text": "What's the leftmost one?", "how": "exact", "set": "llm_short"}
+{"id": "sr-16427", "text": "how many connections are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-16443", "text": "list the stars?", "how": "exact", "set": "llm_short"}
+{"id": "sr-16466", "text": "how many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-16539", "text": "undo.", "how": "exact", "set": "short3_texts"}
+{"id": "sr-16575", "text": "are there any cycles?", "how": "exact", "set": "seen"}
+{"id": "sr-16596", "text": "delete everything.", "how": "exact", "set": "llm_short"}
+{"id": "sr-16633", "text": "How many arrows are there?", "how": "exact", "set": "fresh2"}
+{"id": "sr-16722", "text": "Describe the canvas?", "how": "exact", "set": "new_identities"}
+{"id": "sr-16775", "text": "Undo that!", "how": "exact", "set": "short3_texts"}
+{"id": "sr-16784", "text": "Which shape has the most connections?", "how": "exact", "set": "broad"}
+{"id": "sr-16797", "text": "How many triangles are there?", "how": "exact", "set": "llm_short"}
+{"id": "sr-16824", "text": "redo", "how": "exact", "set": "short3_texts"}
+{"id": "sr-16825", "text": "Which shape is the largest?", "how": "exact", "set": "hand"}
+{"id": "sr-16839", "text": "Which shape is the leftmost?", "how": "exact", "set": "llm_short"}
+{"id": "sr-16840", "text": "reapply", "how": "exact", "set": "llm_short"}
+{"id": "sr-17019", "text": "any loops?", "how": "exact", "set": "llm_short"}
+{"id": "sr-17034", "text": "is there a cycle?", "how": "exact", "set": "llm_short"}
+{"id": "sr-17084", "text": "describe the canvas", "how": "exact", "set": "new_identities"}

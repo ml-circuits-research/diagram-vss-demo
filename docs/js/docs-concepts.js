@@ -122,10 +122,10 @@ ${says('Hi, I am sketching a workflow. Draw a red circle named Hub in the center
 
 <h2 id="table">The three, in one table</h2>
 <div class="tw"><table>
-<thead><tr><th></th><th>Rules</th><th>VSS</th><th>Neural</th></tr></thead>
+<thead><tr><th></th><th>Rules</th><th>VSS</th><th>SOP-BERT</th></tr></thead>
 <tbody>
 <tr><th>Learns from</th><td>nothing: written by hand</td><td>our annotated requests only</td><td>English text in general (pretraining), then our annotated requests</td></tr>
-<tr><th>Size</th><td>code</td><td>38.0 MB, seven worlds of 1.2–8.1 MB</td><td>68.5 MB, one DistilBERT in 8-bit form</td></tr>
+<tr><th>Size</th><td>code</td><td>19.4 MB, seven worlds of 0.7–3.8 MB (word vectors generated in the browser)</td><td>68.5 MB, one DistilBERT in 8-bit form</td></tr>
 <tr><th>Confidence</th><td>none: it executes what its rules match</td><td>a margin per reading (weak); a confidence from every step of its chain, measured, not in the demo</td><td>a probability per head (ranks well, runs high)</td></tr>
 <tr><th>When unsure, today</th><td>says it did not understand</td><td>says what it did not understand, or asks which shape; executes readings it is unsure of (status <code>abstain</code>)</td><td>rarely stops (2.8% not done): it reads something</td></tr>
 </tbody></table></div>
@@ -141,7 +141,7 @@ executed:</p>
 <tbody>
 <tr><td>Rules</td><td class="num">73.6 / 11.9 / 14.5 (VSS cut)</td><td class="num">97.5 / 0.5 / 1.9 (Rules cut)</td></tr>
 <tr><td>VSS</td><td class="num">77.2 / 11.4 / 11.4 (VSS cut)</td><td class="num">61.1 / 11.1 / 27.7 (VSS cut)</td></tr>
-<tr><td>Neural (SOP-BERT)</td><td class="num">80.8 / 16.5 / 2.8 (its own cut)</td><td class="num">—</td></tr>
+<tr><td>SOP-BERT</td><td class="num">80.8 / 16.5 / 2.8 (its own cut)</td><td class="num">—</td></tr>
 </tbody></table></div>
 <p class="note">% of requested actions. Sources: CUT_SHARED.md (Rules, VSS), commit 1f3c806 (SOP-BERT). The sample is 1000 realistic
 messages with 4858 requests; the short sets are the demo’s 1140 one-line commands.</p>
@@ -357,7 +357,7 @@ circle”), and one tags the words that are names, labels and numbers. The wires
 
 <h2 id="history">How we got here</h2>
 <ol>
-  <li><b>Zero-shot.</b> The first Neural reader used ready-made models with no training on our data: a natural-language-inference model asked
+  <li><b>Zero-shot.</b> The first neural reader used ready-made models with no training on our data: a natural-language-inference model asked
   whether “The user wants to create a new shape” follows from the message (<code>training/laptop/zs_check.mjs</code>, <code>zs_eval.mjs</code>).
   Such a model is trained to judge statements against statements, not to recognise commands, and it read the kind of request badly; its scores
   are not in a committed result document, only the scripts that produce them are.</li>
@@ -373,7 +373,7 @@ circle”), and one tags the words that are names, labels and numbers. The wires
 <div class="tw"><table>
 <thead><tr><th>Brings</th><th>Costs</th></tr></thead>
 <tbody>
-<tr><td>It knows English words that never occur in our data: a synonym it was not shown still has a meaning to it. A VSS world gives such a word the kind “unknown”.</td><td>Size: 68.5 MB for one DistilBERT in 8-bit form, against 1.2–8.1 MB for a VSS world.</td></tr>
+<tr><td>It knows English words that never occur in our data: a synonym it was not shown still has a meaning to it. A VSS world gives such a word the kind “unknown”.</td><td>Size: 68.5 MB for one DistilBERT in 8-bit form, against 0.7–3.8 MB for a VSS world.</td></tr>
 <tr><td>One model reads every action; no grouping into worlds. Two calls per message: 22.6 ms per message in its scoring run (commit 1f3c806).</td><td>It almost never says “I don’t know”: what it cannot read, it guesses (<a href="#help/knowing">Knowing what it does not know</a>).</td></tr>
 <tr><td>It learns the cut, the action and the details together.</td><td>One model: a fix for one action means retraining the whole model, and it can forget what it knew (see below).</td></tr>
 <tr><td>It reads “it” and “the red circle” with its own heads, so it needs no hand-written reader beside it (the pair borrowed both from the Rules reader).</td><td>Less inspectable: a VSS reading shows which word filled which role and with what margin; a transformer’s heads give a score, not a reason.</td></tr>
@@ -420,7 +420,7 @@ that a reader needs a confidence that knows when it is unsure; the rest of this 
   <li><b>You can follow it word by word.</b> Under <b>details</b>, each request shows the words as the world normalised them, which words it could not
   place, the margins, the status and the <b>residual</b>: how much of the request the reading does not explain.</li>
 </ul>
-<p>Try a message with an invented verb, then compare the VSS and Neural lines of the reply, and open <b>details</b>:</p>
+<p>Try a message with an invented verb, then compare the VSS and SOP-BERT lines of the reply, and open <b>details</b>:</p>
 ${says('Make Done red, then frobnicate Check', 'Snorkle Process')}
 <p>Run through the VSS composer in node on the opening drawing (2026-11-02): in the first message VSS makes Done red and reports “then frobnicate
 Check” as not understood; the second it does not read at all and says so.</p>
@@ -695,8 +695,18 @@ new writer’s calibration part (195 messages) and listed 501 needs. The labels 
 unsure, not what to add. Two blind spots: a wrong action read with confidence, and a value the phrase tables do not turn into a word, give
 no specific cause. From the calibration text alone the list also predicted the largest causes found with the labels (FRESH2_CAUSES.md): the
 cut, terse “A to B” connects, “them”.</p>
-<p><b>Whether data written from it helps</b> is the experiment of <code>FEEDBACK_PLAN.md</code>, running: 600 messages written from the list
-against 600 written from the general brief, both readers trained on each, measured once on the test part with the cost score.</p>
+<p><b>Whether data written from it helps: no</b> (2026-11-02, <code>FEEDBACK_RESULT.md</code>, verdicts fixed beforehand). 600 messages
+written from the list against 600 written from the general brief, each on top of the same 1200 new messages, both readers trained on
+each, measured once on the test part with the cost score (one confident mistake = 10 right answers):</p>
+<table>
+<tr><th>Reader</th><th>General data</th><th>Data from VSS’s list</th></tr>
+<tr><td>VSS</td><td>12.9 [9.2, 16.5]</td><td>8.5 [4.1, 12.7]</td></tr>
+<tr><td>SOP-BERT</td><td>14.4 [2.0, 26.7]</td><td>18.6 [9.3, 28.0]</td></tr>
+</table>
+<p>The targeted data made VSS worse (−4.3 [−8.4, −0.4]); it did not help VSS more than SOP-BERT, and VSS did not reach SOP-BERT. A negative
+result, reported as such. What did help VSS: more varied writers. On the same test, the shipped VSS scores 4.0; trained with the new Opus
+messages, 12.9, with the fewest confident mistakes of any reader (1.9% of what it executes), within SOP-BERT’s interval. Why the targeted
+data hurt is not measured yet: the list’s top needs were broad doubts, and the targeted data came out skewed toward a few kinds of requests.</p>
 </div>
 
 <h2 id="fair">What keeps it honest</h2>
@@ -706,6 +716,144 @@ against 600 written from the general brief, both readers trained on each, measur
   had more.</li>
   <li>Every number names its document; a negative result is reported as such (AGENTS.md).</li>
 </ul>
+`);
+
+/* ============================================================ two readers together (VSS-BERT) */
+page('two-readers', 'Two readers together',
+'The tab VSS-BERT is VSS and SOP-BERT reading the same requests. When both read a request the same way it is right about 95% of the time, so it acts on that; when they disagree, or only one found the request, it asks. On the calibration messages it makes about a third as many confident mistakes as SOP-BERT alone and gets almost as much done.', `
+<h2 id="tr-what">What it does</h2>
+<p>The owner’s aim (2026-11-02): a system that makes few mistakes and does a lot; three readers side by side are for measuring, not a goal.
+VSS-BERT is not a new model. For every message:</p>
+<ol>
+  <li><b>One cut, two readings.</b> VSS and SOP-BERT read the same requests, cut by the BERT cutter (with it this combination scored best:
+  46.3 against 31.9 with the VSS cutter, cost score on the calibration messages). When the message was already cut by the BERT cutter, the
+  two tabs’ readings are reused; otherwise VSS-BERT cuts and reads again (two calls of the SOP-BERT model).</li>
+  <li><b>Pairing.</b> Each SOP-BERT request is paired with the VSS request of the same action, the way the benchmark pairs a reading with
+  the right answer. They <i>agree</i> when every value is the same (colour, shape, names, position…).</li>
+  <li><b>One reading is executed.</b> When both readers have the request, SOP-BERT’s reading (the better reader alone); when only one has it,
+  that one.</li>
+  <li><b>A combined confidence</b> per request: the executing reader’s own numbers, whether the two agree (fully, or on a share of the
+  values) and VSS’s own confidence in its reading. Weights and threshold were fitted on data, not set by hand.</li>
+  <li><b>Act or ask.</b> Above the threshold the request is done; below it the reply says why (“the two readers disagree on the colour”,
+  “only one reader found this request”, and what the executing reader itself was unsure of) and offers <b>Do it anyway</b>.</li>
+</ol>
+${says('Add a small red square named Gate below Start and connect it to Process', 'Make Check orange')}
+
+<h2 id="tr-numbers">The numbers</h2>
+<p>New writer’s messages (fresh2, <a href="#help/fresh-writer">A new writer</a>). Everything was fitted and chosen on the 195 calibration
+messages, from out-of-fold scores. The cost score counts one confident mistake as 10 right answers (per 100 requested actions; asking scores 0).
+The test part (405 messages) had already been read for earlier studies, so its numbers are exploratory.</p>
+<div class="tw"><table>
+<thead><tr><th>Reader, at its safety threshold</th><th>Cost score</th><th>Done right</th><th>Confidently wrong (of executed)</th><th>Test part: cost score / done right / confidently wrong</th></tr></thead>
+<tbody>
+<tr><td><b>VSS-BERT</b></td><td class="num"><b>46.3</b></td><td class="num">56.4%</td><td class="num">1.8%</td><td class="num">40.6 / 52.8% / 2.3%</td></tr>
+<tr><td>SOP-BERT alone</td><td class="num">24.8</td><td class="num">63.4%</td><td class="num">5.7%</td><td class="num">14.4 / 60.1% / 7.1%</td></tr>
+<tr><td>VSS alone</td><td class="num">8.2</td><td class="num">18.3%</td><td class="num">5.2%</td><td class="num">12.9 / 15.9% / 1.9%</td></tr>
+</tbody></table></div>
+<p>VSS-BERT against SOP-BERT alone: +21.5 on the calibration messages (95% interval 7.2 to 37.9, so the bar written beforehand is met);
+against VSS alone +38.1 (27.1 to 49.0).</p>
+<p><b>At the same rate of confident mistakes it does more.</b> Allowed at most 2% confidently wrong, VSS-BERT does 56.4% of the requests
+right and SOP-BERT alone 6.4% (test part: 51.9% and 10.2%). Allowed SOP-BERT’s own rate, 5.7%: 64.8% against 63.4% (test part: 63.4% and
+48.1%). These are the best points of each reader’s curve, read the same way for both.</p>
+<p><b>Where the gain comes from.</b> Most requests both readers read the same way are right (95%), so they are done; the requests the
+readers disagree on are right only about half the time, and those SOP-BERT alone finds are right a third of the time: VSS-BERT asks about
+them. Requests only VSS finds are almost never right (1 in 55), so they are always asked.</p>
+
+<h2 id="tr-levels">How careful</h2>
+<p>VSS-BERT › Settings offers the safety threshold (the default: one confident mistake counts as 10 right answers), <b>bolder</b> (5),
+<b>more careful</b> (20) and execute all. Each threshold was chosen on the calibration messages the same way; the VSS and SOP-BERT tabs offer the same levels.</p>
+
+<h2 id="tr-limits">Limits</h2>
+<ul>
+  <li><b>Mistakes both readers share stay invisible.</b> They learned from the same annotated data; about 5% of the requests they agree on are still wrong.</li>
+  <li><b>Not confirmed on new text yet.</b> The calibration part chose the cut, the weights and the threshold; the test part had been read before.
+  The clean check is a fresh set of messages from a new writer (fresh3), read once with everything fixed: that is the next step.</li>
+  <li>The reused readings were made with the VSS and SOP-BERT drawings; when those differ from the VSS-BERT drawing, a name can be read differently.</li>
+</ul>
+<p class="note">Sources: <code>training/sketch/combine/COMBINED_READER.md</code>, <code>COMBINE.md</code>; model <code>docs/model/confidence/combined.json</code>.</p>
+`);
+
+/* ============================================================ three readers voting (training/sketch/confidence3/RESULT.md) */
+page('three-readers', 'Three readers voting',
+'The Rules, VSS and SOP-BERT read the same requests. When all three read a request the same way it was right 98.4% of the time on the calibration messages and 97.2% on the test part, so the tab 3 readers acts on that and asks about the rest. “Two of three agree” is not safe and is not used. The VSS and SOP-BERT tabs now also use the votes in their confidence.', `
+<h2 id="tv-what">What it does</h2>
+<p>The owner asked (2026-11-02): could the Rules give a vote too, so that three readers decide together? For every message the three readers
+read the same requests; each request of one reader is paired with the same request of the others, and two readings <i>agree</i> when they would
+make the editor do the same thing: every value equal, an arrange or distribute list in any order (the editor sorts it anyway), and “all”, no
+target and the list of every shape counted as the same. The tab <b>3 readers</b> reuses the readings of the three tabs; nothing is read twice.</p>
+<ul>
+  <li><b>All three agree</b> (the default): the request is done.</li>
+  <li><b>Not all three</b>: it is not done; the reply says who agrees and what the other one reads, e.g. “the Rules and VSS agree, SOP-BERT reads
+  layout ‘circle’ instead of no layout”, and offers <b>Do it anyway</b>.</li>
+  <li><b>Bolder</b> (3 readers › Settings): a fitted vote, a confidence from the reader’s own numbers and who agrees with whom, at its safety threshold.</li>
+</ul>
+${says('arrange all in a circle', 'distribute all vertically')}
+
+<h2 id="tv-agree">What an agreement is worth</h2>
+<p>Share of the requests right, by who agrees (in brackets: how many requests). Calibration and test: the new writer’s messages (fresh2, 195 and
+405 messages). Short commands: generated from the Rules’ own grammar (the Rules are right on all of them by construction), and short3, short
+commands written blind (its gold has conventions not yet aligned, so its numbers are lower bounds).</p>
+<div class="tw"><table>
+<thead><tr><th>Situation</th><th>Rules + VSS + SOP-BERT</th><th>VSS + SOP-BERT</th><th>Rules + SOP-BERT</th><th>Rules + VSS</th><th>None agree</th></tr></thead>
+<tbody>
+<tr><td>Calibration</td><td class="num"><b>98.4%</b> (316)</td><td class="num">83.7% (92)</td><td class="num">66.7% (69)</td><td class="num">52.6% (19)</td><td class="num">42.6% (94)</td></tr>
+<tr><td>Test part</td><td class="num"><b>97.2%</b> (654)</td><td class="num">89.8% (167)</td><td class="num">69.9% (133)</td><td class="num">51.0% (49)</td><td class="num">39.7% (247)</td></tr>
+<tr><td>Short, from the Rules’ grammar</td><td class="num">100.0% (128)</td><td class="num">0.0% (23)</td><td class="num">98.8% (84)</td><td class="num">100.0% (31)</td><td class="num">1.6% (188)</td></tr>
+<tr><td>Short, written blind (short3)</td><td class="num">88.7% (150)</td><td class="num">64.9% (74)</td><td class="num">82.7% (52)</td><td class="num">45.0% (20)</td><td class="num">16.7% (72)</td></tr>
+</tbody></table></div>
+
+<h2 id="tv-two">Why “2 of 3” is not used</h2>
+<p>With a confident mistake counted as 10 right answers, a request is worth doing only when it is right at least about 91% of the time. When
+only two readers agree, it is right 51.0% to 89.8% of the time on the new writer’s messages, depending on which two: below that bar. Measured
+with the cost score (per 100 requested actions; asking scores 0):</p>
+<div class="tw"><table>
+<thead><tr><th>Situation</th><th>All three agree: score · done right · confidently wrong</th><th>2 of 3 agree: score · done right · confidently wrong</th></tr></thead>
+<tbody>
+<tr><td>Calibration</td><td class="num"><b>43.8</b> · 52.2% · 1.6%</td><td class="num">−11.1 · 74.5% · 10.3%</td></tr>
+<tr><td>Test part</td><td class="num"><b>36.1</b> · 48.3% · 2.5%</td><td class="num">−5.9 · 68.7% · 9.8%</td></tr>
+<tr><td>Short, from the Rules’ grammar</td><td class="num">25.7 · 25.7% · 0.0%</td><td class="num">2.0 · 49.0% · 8.7%</td></tr>
+<tr><td>Short, written blind (short3)</td><td class="num">−7.8 · 26.3% · 11.5%</td><td class="num">−65.5 · 46.7% · 19.4%</td></tr>
+</tbody></table></div>
+<p>“2 of 3” does more, but one executed request in ten is wrong: worse than asking. So 3 readers acts on all three agreeing, or on the fitted vote.</p>
+
+<h2 id="tv-columns">The votes inside each reader’s confidence</h2>
+<p>The same votes, as inputs of each reader’s fitted confidence (method (c): its own numbers, plus whether the other two read the request the
+same way and whether the Rules had a note about it; VSS without its world prior; commands and questions with their own threshold). Each
+reader at its safety threshold: cost score · done right · confidently wrong (of what it executed).</p>
+<div class="tw"><table>
+<thead><tr><th>Situation</th><th>VSS tab</th><th>SOP-BERT tab</th><th>3 readers, all agree</th><th>3 readers, bolder</th></tr></thead>
+<tbody>
+<tr><td>Calibration (out of fold)</td><td class="num">30.5 · 42.3% · 2.7%</td><td class="num">51.2 · 56.2% · 0.9%</td><td class="num">43.8 · 52.2% · 1.6%</td><td class="num">51.3 · 66.4% · 2.2%</td></tr>
+<tr><td>Test part</td><td class="num">25.1 · 41.1% · 3.7%</td><td class="num">41.1 · 54.1% · 2.3%</td><td class="num">36.1 · 48.3% · 2.5%</td><td class="num">46.0 · 61.2% · 2.4%</td></tr>
+<tr><td>Short, from the Rules’ grammar</td><td class="num">16.7 · 22.9% · 2.6%</td><td class="num">10.4 · 30.8% · 6.2%</td><td class="num">25.7 · 25.7% · 0.0%</td><td class="num">−46.9 · 36.7% · 18.6%</td></tr>
+<tr><td>Short, written blind (short3)</td><td class="num">−4.4 · 25.7% · 10.5%</td><td class="num">−29.5 · 30.7% · 16.4%</td><td class="num">−7.8 · 26.3% · 11.5%</td><td class="num">−46.9 · 35.3% · 18.9%</td></tr>
+</tbody></table></div>
+
+<h2 id="tv-verdicts">The verdicts</h2>
+<p>Written before the test part was scored: each new confidence against the one it replaces, on the 405 test messages (paired bootstrap, 95%
+interval). “Better” only when the whole interval is above 0.</p>
+<div class="tw"><table>
+<thead><tr><th>Reader</th><th>Test part: new vs before</th><th>Difference [95% interval]</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr><td>VSS, with the votes</td><td class="num">25.1 vs 12.9</td><td class="num">+12.3 [4.0, 19.8]</td><td><b>better</b></td></tr>
+<tr><td>SOP-BERT, with the votes</td><td class="num">41.1 vs 14.4</td><td class="num">+26.7 [15.9, 38.2]</td><td><b>better</b></td></tr>
+<tr><td>VSS-BERT, with the Rules’ vote</td><td class="num">40.0 vs 40.6</td><td class="num">−0.6 [−7.1, 4.8]</td><td>not shown (VSS-BERT is unchanged)</td></tr>
+<tr><td>3 readers (fitted) vs VSS-BERT</td><td class="num">46.0 vs 40.6</td><td class="num">+5.4 [−1.0, 11.0]</td><td>not shown</td></tr>
+</tbody></table></div>
+<p>So the VSS and SOP-BERT tabs use the confidence with the votes; VSS-BERT keeps its own.</p>
+
+<h2 id="tv-limits">Limits</h2>
+<ul>
+  <li><b>Short commands are not solved.</b> On short3 every learned reader, with any confidence, is confidently wrong on 10–30% of what it
+  executes; the fitted votes were calibrated on long messages only. On the short commands from the Rules’ grammar, VSS and SOP-BERT agree with
+  each other against the Rules 23 times and are wrong every time; the fitted weights trust that agreement. All three agreeing is the most
+  robust rule (0% wrong there), which is why it is the default.</li>
+  <li><b>Mistakes all three share stay invisible</b>: about 2–3% of the requests all three agree on are still wrong on the new writer’s messages.</li>
+  <li>The confidences belong to the models they were fitted on; after a retraining they are refitted (<code>training/sketch/confidence3/refit.sh</code>).</li>
+</ul>
+<p class="note">Sources: <code>training/sketch/confidence3/RESULT.md</code> (sections 2–4), <code>PLAN.md</code>, <code>REPORT_fit3.md</code>; model
+<code>docs/model/confidence/vote3.json</code>; code <code>docs/js/vote-confidence.js</code>. The “all agree” numbers are without the engine-true
+equivalence of lists; with it they change by less than 1.5 points.</p>
 `);
 
 /* ============================================================ limits today */

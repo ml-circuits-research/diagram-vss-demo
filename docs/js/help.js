@@ -29,20 +29,31 @@ const icon = k => `<svg class="i inl" viewBox="0 0 24 24" aria-hidden="true">${I
 
 /* ---------------- what each action and question is, in plain words ---------------- */
 const ACTIONS = {
-  create: { t: 'Draw', d: 'Add one or more shapes (up to 12 at once). Say the kind, colour, size, name, label and place you want; whatever you leave out gets a default: a medium white circle in a free spot, named circle1, circle2…', ex: ['Draw a red circle named Hub in the center', 'Add three small squares in a row below Process', 'Draw a gold star named Gem with a black outline in the top right'] },
+  create: { t: 'Draw', d: 'Add one or more shapes (up to 12 at once). Say the kind, colour, size, name, label and place you want; whatever you leave out gets a default: a medium white circle in a free spot, named circle1, circle2…. Several new shapes can be laid out together: “in a row” (also “side by side”, “in a line”), “in a column” (“stacked”), “in a grid”, “in a circle” (“as a ring”), next to a shape or in a part of the canvas.', ex: ['Draw a red circle named Hub in the center', 'Add three small squares in a row below Process', 'Add 6 triangles in a circle layout', 'Add 5 red stars arranged in a grid', 'Draw a gold star named Gem with a black outline in the top right'] },
   delete: { t: 'Delete', d: 'Remove shapes together with their arrows.', ex: ['Delete Done', 'Delete the yellow diamond', 'Clear the canvas'] },
   duplicate: { t: 'Copy', d: 'Make copies next to the original, with the same look.', ex: ['Copy Check', 'Duplicate Done twice'] },
   move: { t: 'Move', d: 'Put a shape next to another one, in a part of the canvas, at x,y coordinates, or a distance in a direction (80 pixels if you give no distance).', ex: ['Move Done to the top right', 'Move Done left by 100', 'Put Done between Start and Check'] },
   swap: { t: 'Swap', d: 'Two shapes trade places.', ex: ['Swap Start and Done'] },
   set: { t: 'Change', d: 'Change the colour, the kind of shape, the size or the outline. “all” changes every shape that fits.', ex: ['Make Done red', 'Turn Done into a star', 'Give Process a red outline', 'Make all circles red'] },
   resize: { t: 'Resize', d: 'Make a shape bigger or smaller. “Bigger” alone means one and a half times; you can also say a factor or a size name.', ex: ['Make Process bigger', 'Shrink Start', 'Make Check twice as big'] },
-  label: { t: 'Label', d: 'Write text inside a shape. Put the text in quotes. Long text is shortened with “…” to fit.', ex: ['Label Done "finish"'] },
+  label: { t: 'Label', d: 'Write text inside a shape. Put the text in quotes. Long text is shortened with “…” to fit. “Remove the label” takes it away again. A shape can also be named with its kind in front: “the shape Process”, “the box Process”, “the circle named Done”.', ex: ['Label Done "finish"', 'Label the shape Process as "Great"', 'Remove the label of Process'] },
   rename: { t: 'Rename', d: 'Give a shape (or a group) a new name. Arrows stay attached.', ex: ['Rename Done to End'] },
   connect: { t: 'Connect', d: 'Draw arrows or lines between shapes. One shape can connect to several at once, and a list can be joined as a chain.', ex: ['Connect Start to Done with a dashed arrow', 'Connect Start to Process, Check and Done', 'Connect Start, Check and Done in a chain'] },
   disconnect: { t: 'Disconnect', d: 'Remove the arrows between two shapes, all arrows of one shape, or every arrow.', ex: ['Disconnect Start from Process', 'Remove all connections'] },
   align: { t: 'Align', d: 'Put shapes on one horizontal line (the default) or one vertical line, without overlapping.', ex: ['Align Start, Process and Check', 'Align Check and Done vertically'] },
-  distribute: { t: 'Space evenly', d: 'Keep the first and last shape where they are and space the others evenly between them (needs three or more).', ex: ['Distribute the shapes evenly'] },
-  arrange: { t: 'Arrange', d: 'Lay shapes out as a row, a column, a grid or a circle.', ex: ['Arrange everything in a circle', 'Arrange everything in a grid'] },
+  distribute: { t: 'Space evenly', d: 'Put equal gaps between the shapes, left to right (or top to bottom); the first and last stay where they are when the others fit between them, else the span grows, so no two touch (needs three or more).', ex: ['Distribute the shapes evenly', 'Space Start, Process and Check evenly'] },
+  arrange: { t: 'Arrange', d: 'Lay shapes out as a row, column, grid or circle, or by their links as a tree, layers (a flow), radial or organic layout; say a direction (left to right, top to bottom) and a root ("with Ceo at the top"). “Everything” means every shape, across zones (the answer says which shapes left their zone); titles and captions stay where they are, or move aside when a shape needs their place.', ex: ['Arrange everything as a tree', 'Arrange in layers left to right', 'Radial layout around Hub'] },
+  improve: { t: 'Tidy up', d: 'Make the layout better by a measured score (fewer overlaps and crossings, shapes on the canvas, even spacing, aligned shapes, arrows one way): it tries removing overlaps, straightening, untangling and the layout the links ask for, and keeps the best only if it scores higher.', ex: ['Tidy up', 'Clean up the diagram', 'Make it look better'] },
+  respace: { t: 'More or less space', d: 'Spread the shapes out or bring them closer, keeping the layout.', ex: ['More space between the shapes', 'Make it more compact', 'Space them 50 px apart'] },
+  snap: { t: 'Snap to grid', d: 'Put every shape on the grid (20 px, or the size you say).', ex: ['Snap everything to the grid'] },
+  flip: { t: 'Flip', d: 'Mirror the drawing left to right (or top to bottom).', ex: ['Flip the diagram horizontally', 'Flip it upside down'] },
+  reverse: { t: 'Reverse arrows', d: 'Turn arrows around: the start becomes the end.', ex: ['Reverse the arrow from Check to Done', 'Reverse all the arrows'] },
+  sort: { t: 'Sort', d: 'Put the shapes in order by name, colour, size, shape or label, in their current places or in a row, column or grid.', ex: ['Sort by name', 'Sort by size, biggest first, in a row'] },
+  groupBy: { t: 'Group by', d: 'Gather shapes of the same colour (or kind, or size) together.', ex: ['Group them by colour'] },
+  equalize: { t: 'Same size', d: 'Give shapes the same size, colour, shape or outline (the most common one, or that of a shape you name).', ex: ['Make them all the same size', 'Make everything the same colour as Hub'] },
+  straighten: { t: 'Straighten', d: 'Make nearly straight links exactly horizontal or vertical.', ex: ['Straighten the arrows'] },
+  untangle: { t: 'Untangle', d: 'Swap shapes to reduce arrow crossings without changing the layout.', ex: ['Untangle the arrows'] },
+  fit: { t: 'Fit and centre', d: 'Bring everything onto the canvas, or centre the drawing.', ex: ['Fit everything on the canvas', 'Center the diagram'] },
   toFront: { t: 'Bring to front', d: 'Draw a shape on top of the ones it overlaps.', ex: ['Bring Start to the front'] },
   toBack: { t: 'Send to back', d: 'Draw a shape behind the ones it overlaps.', ex: ['Send Process to the back'] },
   group: { t: 'Group', d: 'Give several shapes one name. The group then moves, copies, aligns and is deleted as one block, and its name works anywhere a shape name does. A dashed frame shows it.', ex: GROUP_PRE.slice() },
@@ -51,6 +62,8 @@ const ACTIONS = {
   redo: { t: 'Redo', d: 'Put back what undo took away.', ex: [{ text: 'Redo', pre: ['Make Done red', 'Undo'] }] },
   forget: { t: 'Forget the rules', d: 'Drop every “from now on” rule.', ex: [{ text: 'Forget the rules', pre: ['From now on, circles are orange'] }] }
 };
+/* the label of an arrow already drawn: action=label with from= / to= (its two ends) instead of target= (listed under Arrows and lines) */
+const EDGE_LABEL = { t: 'Label an arrow', d: 'Write, change or remove the text next to an arrow or line that is already drawn. Name the arrow by its two ends: “the arrow between Process and Check”, “the arrow from Check to Done”, “the link Process–Check”. Text without spaces needs no quotes. If one end has several arrows, the reply asks which one; if there is no such arrow, it says so.', ex: ['Label the arrow between Process and Check as Valid', 'Put the label "maybe" on the arrow from Check to Done', 'Name the link Start–Process Begin', 'Remove the label of the arrow between Check and Done', 'What does the arrow from Check to Done say?'] };
 /* requests that are not an action: a rule for new shapes, and a statement of fact (wire types `rule` and `fact`) */
 const WIRE_ITEMS = {
   rule: { t: 'Rules for new shapes', d: '“From now on …” sets a default for shapes drawn later. It fills in only what you leave out, and it does not change shapes already drawn.', ex: ['From now on, circles are orange', 'From now on, new shapes are small and purple'] },
@@ -60,8 +73,8 @@ const ACTION_GROUPS = [
   ['Draw, copy, delete', ['create', 'duplicate', 'delete']],
   ['Move and swap', ['move', 'swap']],
   ['Change how it looks', ['set', 'resize', 'label', 'rename']],
-  ['Arrows and lines', ['connect', 'disconnect']],
-  ['Tidy up', ['align', 'distribute', 'arrange', 'toFront', 'toBack']],
+  ['Arrows and lines', ['connect', 'disconnect', 'labelEdge']],
+  ['Tidy up', ['align', 'distribute', 'arrange', 'improve', 'respace', 'snap', 'flip', 'sort', 'groupBy', 'equalize', 'straighten', 'untangle', 'fit', 'reverse', 'toFront', 'toBack']],
   ['Groups', ['group', 'ungroup']],
   ['Rules and statements', ['rule', 'forget', 'fact']],
   ['Undo', ['undo', 'redo']]
@@ -70,7 +83,7 @@ const ASKS = {
   count: { t: 'How many', ex: ['How many circles are there?', 'How many connections are there?', 'How many groups are there?'] },
   list: { t: 'Which ones', ex: ['Which shapes are green?', 'Which shapes are below Start?', 'Which circles are not blue?'] },
   exists: { t: 'Is there…', ex: ['Is there a red shape?', 'Are there any stars?'] },
-  property: { t: 'What colour, where, how big, what text', ex: ['What color is Check?', 'Where is Done?', 'How big is Start?', 'What does Process say?'] },
+  property: { t: 'What colour, where, how big, what text', d: 'Of a shape, or the text of an arrow (named by its two ends).', ex: ['What color is Check?', 'Where is Done?', 'How big is Start?', 'What does Process say?', 'What does the arrow from Check to Done say?'] },
   check: { t: 'Yes-or-no checks', ex: ['Is Check above Done?', 'Is Done a green circle?', 'Is Start bigger than Done?'] },
   describe: { t: 'Describe', ex: ['Describe Check', 'Describe the diagram'] },
   neighbors: { t: 'What is it connected to', ex: ['What is connected to Check?'] },
@@ -83,7 +96,12 @@ const ASKS = {
   extreme: { t: 'Biggest, leftmost, most connected…', ex: ['Which shape is the biggest?', 'Which shape is the leftmost?', 'Which shape has the most connections?'] },
   members: { t: 'What is in a group', ex: [{ text: 'What is in Intake?', pre: GROUP_PRE }] },
   groupOf: { t: 'Which group', ex: [{ text: 'Which group is Start in?', pre: GROUP_PRE }] },
-  rules: { t: 'Which rules are on', ex: [{ text: 'What rules are there?', pre: ['From now on, circles are orange'] }] }
+  rules: { t: 'Which rules are on', ex: [{ text: 'What rules are there?', pre: ['From now on, circles are orange'] }] },
+  help: { t: 'Help: what can I do, and how?', d: 'A question about the editor itself, not the drawing: what it can do, how to do something, which values there are, or an example. The answer is put together from the legend and these pages, so it lists exactly what the editor knows; the example sentences under it are buttons. Nothing is drawn.', ex: ['help', 'How do I connect two shapes?', 'What colours can I use?', 'Can I group things?', 'What can you do with arrows?', 'How do I make a timeline?'] }
+};
+/* help topics that are a value rather than an action or a question (help-answers.js uses them for topic=<value>), keyed key:value */
+const TOPICS = {
+  'shape:text': { t: 'Free text', d: 'A text of its own on the canvas (a title, a heading, a note), not inside a shape. Say the words in quotes, and if you like a size for the letters (tiny to huge), a colour and a place; without a place it goes near the top. It is moved, recoloured, resized, relabelled, deleted and brought to the front like a shape, but it has no outline and arrows do not attach to it. A label is different: it is written inside a shape and moves with it. A name is the handle above a shape that you use to point at it.', ex: ['Add a title "Q3 roadmap" at the top in big red letters', 'Write "Draft" in the bottom right', 'Move MainTitle to the bottom'] }
 };
 
 /* ---------------- capabilities (the engine's plugins) in plain words ---------------- */
@@ -92,23 +110,27 @@ const CAPS = {
   history: { t: 'Undo and redo', d: 'Steps back through your changes and forward again. The arrow buttons above the drawing use it too.', ex: ['Undo', { text: 'Redo', pre: ['Make Done red', 'Undo'] }] },
   shapes: { t: 'Shapes', d: 'Drawing, deleting, moving, copying, swapping, recolouring, resizing, labelling and renaming shapes, and placing them by position.', ex: ['Draw a red circle named Hub in the center', 'Move Done to the top right', 'Turn Done into a star'] },
   groups: { t: 'Groups', d: 'Several shapes under one name, handled as one block.', ex: GROUP_PRE.concat([{ text: 'Move Intake to the bottom right', pre: GROUP_PRE }]) },
-  connections: { t: 'Arrows and lines', d: 'Connecting and disconnecting shapes, with a line style, arrow heads, a colour and a label.', ex: ['Connect Start to Done with a dashed arrow', 'Disconnect Start from Process'] },
+  connections: { t: 'Arrows and lines', d: 'Connecting and disconnecting shapes, with a line style, arrow heads, a colour and a label; writing, changing or removing the label of an arrow already drawn, and saying what an arrow says.', ex: ['Connect Start to Done with a dashed arrow', 'Disconnect Start from Process', 'Label the arrow between Process and Check as Valid', 'What does the arrow from Check to Done say?'] },
   layout: { t: 'Tidying up', d: 'Aligning, spacing evenly, arranging as a row, column, grid or circle, and bringing to the front or sending to the back.', ex: ['Arrange everything in a circle', 'Align Start, Process and Check'] },
   queries: { t: 'Questions about the drawing', d: 'Answers questions by looking at the drawing: how many, which, where, what colour, what is connected, biggest, closest, and so on.', ex: ['How many circles are there?', 'Describe Check', 'Which shape is the biggest?'] },
   reasoning: { t: 'Paths and cycles', d: 'Follows the arrows from shape to shape to answer whether there is a path, what can be reached and whether there are loops.', ex: ['Is there a path from Start to Done?', 'Are there any cycles?'] },
   logic: { t: 'Answers checked by logic (Datalog)', d: 'A second way to answer questions. The drawing is written as logical facts, such as color(Done, green) and above(Check, Done), and your question as a query over those facts; a small logic engine (Datalog) solves it. Under “details” you can read the facts and the query.', ex: ['Which shapes are below Start?', 'Is Check above Done?'], off: 'The plain question code answers instead, so the answers should stay the same: switching it off is a way to check that both give the same answer.' },
   rules: { t: 'Rules for new shapes', d: '“From now on …” defaults for shapes drawn later, and forgetting them.', ex: ['From now on, circles are orange', { text: 'What rules are there?', pre: ['From now on, circles are orange'] }] },
-  facts: { t: 'Statements', d: 'Sentences that say how things are (“Check is above Process”): if already true nothing changes, otherwise the drawing is changed until it is true.', ex: ['Check is above Process', 'Done is red'] }
+  facts: { t: 'Statements', d: 'Sentences that say how things are (“Check is above Process”): if already true nothing changes, otherwise the drawing is changed until it is true.', ex: ['Check is above Process', 'Done is red'] },
+  templates: { t: 'Templates', d: 'Ready-made diagram forms: a list of texts becomes a process, a cycle, a timeline, a pyramid, an org chart, or a form that recalls something felt (a heart, a mountain, a sunrise, a bridge…), in one step, as one group. Existing shapes can be laid out in such a form too.', ex: ['Make a timeline of Kickoff, Design, Build and Launch titled "2027"', 'Draw a heart of Trust, Care and Joy in warm colours', 'Arrange Start, Process, Check and Done as a cycle'] },
+  help: { t: 'Help in the chat', d: 'Answers questions about the editor itself (“how do I…?”, “what colours can I use?”, “can I group things?”) from the legend and these pages; it never draws.', ex: ['help', 'How do I connect two shapes?', 'What colours can I use?'] }
 };
 
 /* ---------------- the SOP Lang keys, grouped by what they are for, each with one English example ---------------- */
 const KEY_GROUPS = [
   ['What to do', 'The kind of request.', ['action', 'ask', 'property', 'kind', 'superlative', 'comparison']],
   ['Which shapes', 'Who the request is about.', ['target', 'name', 'quantifier', 'count', 'recency', 'notColor', 'linked', 'members']],
-  ['How it looks', '', ['shape', 'color', 'size', 'scale', 'outline', 'label']],
+  ['How it looks', '', ['shape', 'color', 'size', 'scale', 'outline', 'label', 'fill', 'width', 'height', 'layer']],
   ['Where', '', ['position', 'anchor', 'at', 'direction', 'distance']],
   ['Arrows and lines', '', ['from', 'to', 'style', 'arrow', 'pairing']],
-  ['Layout', '', ['axis', 'layout']]
+  ['Layout', '', ['axis', 'layout']],
+  ['Templates', 'A ready-made form from a list of texts.', ['template', 'items', 'items2', 'title', 'parents', 'scheme']],
+  ['Help', 'A question about the editor itself.', ['topic', 'aspect', 'about']]
 ];
 const KEY_EX = {
   action: 'Make Done red', ask: 'How many circles are there?', property: 'What color is Check?', kind: 'How many connections are there?',
@@ -120,7 +142,10 @@ const KEY_EX = {
   at: 'Draw a circle named Hub at 400, 250', direction: 'Move Done left by 100', distance: 'Move Done left by 100',
   from: 'Connect Start to Done', to: 'Connect Start to Done', style: 'Connect Start to Done with a dashed arrow',
   arrow: 'Connect Start and Check with a two-way arrow', pairing: 'Connect Start, Check and Done in a chain',
-  axis: 'Align Check and Done vertically', layout: 'Arrange everything in a circle'
+  axis: 'Align Check and Done vertically', layout: 'Arrange everything in a circle',
+  template: 'Make a timeline of Kickoff, Design, Build and Launch', items: 'Make a timeline of Kickoff, Design, Build and Launch', title: 'Draw a cycle of Plan, Do, Check and Act titled "PDCA"',
+  items2: 'Draw a balance of Cost and Risk against Speed', scheme: 'Draw a heart of Trust, Care and Joy in warm colours',
+  topic: 'How do I connect two shapes?', aspect: 'What colours can I use?', about: 'Can I add images?'
 };
 const KIND_WORDS = { enum: 'one of these values', names: 'one or more shape names, or $id of another wire', name: 'a name', number: 'a number', text: 'text, in quotes when it has spaces', point: 'x,y in pixels' };
 const WIRE_WORDS = {
@@ -130,13 +155,14 @@ const WIRE_WORDS = {
   rule: 'A default for shapes drawn from now on: “From now on, circles are orange”.',
   mention: 'A description that points at existing shapes: “the green circle” in “make the green circle bigger”.'
 };
-const NAMES_ON_START = ['Start', 'Process', 'Check', 'Done', 'Intake'];
+const NAMES_ON_START = ['Backdrop', 'IntakeZone', 'ReviewZone', 'Start', 'Process', 'Check', 'Done', 'MainTitle', 'IntakeCaption', 'ReviewCaption', 'Intake', 'Review'];
+const TK = () => root.TemplateKit || (typeof require === 'function' ? (() => { try { return require('./templates.js'); } catch (e) { return null; } })() : null);
 
 /* every clickable example, for the test (training-free check that each one works with the Rules reader) */
 const START_EX = ['Draw a red circle named Hub in the center', 'Connect Done to Start with a dotted line', 'Is there a path from Start to Done?'];
 function examples() {
   const out = [], add = e => out.push(typeof e === 'string' ? { text: e, pre: [] } : { text: e.text, pre: e.pre || [] });
-  Object.values(ACTIONS).concat(Object.values(WIRE_ITEMS), Object.values(ASKS), Object.values(CAPS)).forEach(x => x.ex.forEach(add));
+  Object.values(ACTIONS).concat(Object.values(WIRE_ITEMS), [EDGE_LABEL], Object.values(ASKS), Object.values(CAPS), Object.values(TOPICS)).forEach(x => x.ex.forEach(add));
   Object.values(KEY_EX).forEach(add);
   START_EX.forEach(add); WORKED.forEach(add);
   return out.filter((e, i) => out.findIndex(o => o.text === e.text && o.pre.join('|') === e.pre.join('|')) === i);
@@ -179,6 +205,7 @@ function start(env) {
   const now = env.neuralModels && env.neuralModels.length ? env.neuralModels.join(' + ') : null;
   const cut = env.cut || {};
   let h = `<p class="lead">A diagram editor you talk to in plain English. You write what you want, for example <q>draw a red circle named Hub and connect Start to it</q>, and it draws it, changes it, or answers questions about the drawing.</p>
+  <p>You can also ask the editor about itself in the chat: <q>help</q>, <q>how do I connect two shapes?</q>, <q>what colours can I use?</q>. It answers from the same lists as these pages, with example sentences you can send. ${go('templates', 'Templates')} turn a list of texts into a process, a timeline, a heart or a mountain in one step.</p>
   <p>Every sentence marked ▸ in this help is a button: it sends that sentence to the editor and closes the help, so you can see what it does. Try one:</p>
   ${says(START_EX)}
 
@@ -205,20 +232,20 @@ function start(env) {
 
   <h2 id="replies">Reading the replies</h2>
   <p>Every reply has one line per reader:</p>
-  <div class="hreply"><div class="rl"><b>Rules · 0.4 ms:</b> Drew Gem. Connected Check → Gem.</div><div class="rl"><b>VSS · 12 ms:</b> Drew Gem. Connected Check → Gem.</div><div class="rl"><b>Neural · 140 ms:</b> Drew star1. Connected Check → star1.</div><div class="meta"><span class="lnk">details</span></div></div>
+  <div class="hreply"><div class="rl"><b>Rules · 0.4 ms:</b> Drew Gem. Connected Check → Gem.</div><div class="rl"><b>VSS · 12 ms:</b> Drew Gem. Connected Check → Gem.</div><div class="rl"><b>SOP-BERT · 140 ms:</b> Drew star1. Connected Check → star1.</div><div class="rl"><b>VSS-BERT · 152 ms:</b> Drew Gem. Not sure about 1 of the 2 requests, so it was not done: “connect it to Check”: the two readers disagree on where the link ends.</div><div class="meta"><span class="lnk">details</span></div></div>
   <ul>
     <li><b>The time</b> is how long that reader took to turn your message into SOP Lang. Drawing is not counted. A reader that has not finished loading says so instead of answering.</li>
-    <li><b>Different results</b>: here the Neural reader missed the name, so its star got an automatic name. Each reader changes only its own drawing.</li>
+    <li><b>Different results</b>: here SOP-BERT missed the name, so its star got an automatic name; VSS-BERT, which executes only what it is sure of, did not connect a star the two readers read differently. Each reader changes only its own drawing.</li>
     <li><b>details</b> under a reply shows how the message was cut, what each reader wrote in SOP Lang, what the engine changed, and for questions the logic query it ran.</li>
     <li><b>Buttons under a reply</b> answer a question the reader asked, e.g. “Which circle? Start or Done”.</li>
     <li><b>“I didn’t understand …”</b> is an honest refusal: the reader found no request it could read in that part. It still does every other part of your message. Try plainer words, with shapes and arrows: “connect Plankton to Krill” instead of “plankton feeds the krill”. A refusal or a question is never counted as an error; a change you did not ask for is.</li>
-    <li><b>When a reader is not sure.</b> The rule of this project: do only what you are sure of, ask about the rest, and say why. Today the readers follow it only in part. The Rules say “I didn’t understand” where none of their words match. VSS says which words it did not understand, and asks which shape you mean when no candidate fits “it” or a missing name, but it still carries out readings it is unsure of. SOP-BERT almost never stops: it carries out what it reads. A confidence threshold per reader, below which it asks instead of acting, is in progress. ${go('knowing', 'Knowing what it does not know')}</li>
+    <li><b>When a reader is not sure.</b> The rule of this project: do only what you are sure of, ask about the rest, and say why. The Rules have no confidence: they say “I didn’t understand” where none of their words match and carry out the rest. VSS, SOP-BERT, VSS-BERT and 3 readers carry out a request only when their confidence clears a threshold; below it the reply says “Not sure about …”, gives the reason (for VSS and SOP-BERT first whether the other two readers read it the same way) and offers <b>Do it anyway</b>. 3 readers, by default, acts only when the Rules, VSS and SOP-BERT all read a request the same. ${go('three-readers', 'Three readers voting')} · ${go('knowing', 'Knowing what it does not know')}</li>
     <li><b>A reason instead of a result</b> (“There is already a shape named Hub”, “I can't find a red square”) comes from the engine: the request was understood but could not be done as asked.</li>
   </ul>
 
   <h2 id="screen">What is on the screen</h2>
   <ul class="screen">
-    <li><b>The tabs Rules, VSS, Neural</b> above the drawing show each reader’s own drawing. A dot on a tab means that drawing differs from the one on screen.</li>
+    <li><b>The tabs Rules, VSS, SOP-BERT, VSS-BERT, 3 readers</b> above the drawing show each reader’s own drawing. VSS-BERT is VSS and SOP-BERT together: it executes what they are sure of together (${go('two-readers', 'Two readers together')}). 3 readers executes what the Rules, VSS and SOP-BERT all read the same (${go('three-readers', 'Three readers voting')}). A dot on a tab means that drawing differs from the one on screen.</li>
     <li><b>Under each tab</b>: <i>Drawing</i>; <i>SOP Lang</i>, that drawing written as SOP Lang wires; and <i>Settings</i>, the reader’s models, sizes and state.</li>
     <li>${icon('copy')} <b>Copy</b> appears when the drawings differ. It copies the drawing on screen, with its undo history, to the other tabs, so every reader starts the next message from the same drawing.</li>
     <li>${icon('view')} <b>Whole canvas / zoom</b>, ${icon('undo')} <b>Undo</b>, ${icon('redo')} <b>Redo</b>, ${icon('clear')} <b>Clear</b> act on every reader’s drawing. ${icon('help')} opens this help.</li>
@@ -270,6 +297,12 @@ function draw(env) {
     <li><b>Label</b>: text written inside the shape, put in quotes. ${say('Label Done "finish"')}</li>
     <li><b>Outline</b>: a thick border in any of the colours above, or none. ${say('Give Process a red outline')} ${say('Give Process no outline')}</li>
   </ul>
+  <h2 id="free-text">Free text</h2>
+  <p>${escH(TOPICS['shape:text'].d)}</p>
+  ${says(TOPICS['shape:text'].ex)}
+  <h2 id="panels">Backgrounds and zones</h2>
+  <p>A rectangle can be any size (width and height in pixels), see-through (fill light, faint or none) and a <b>background</b> or a <b>zone</b>: new shapes are placed on it rather than around it, and it stays behind the shapes. The drawing the page opens with has a background (Backdrop), two zones (IntakeZone, ReviewZone) and the shapes on them; each zone with its shapes and caption is a group (Intake, Review). Newer shapes go on top; “bring to the front” and “send to the back” change that.</p>
+  ${says(['Send Start to the back', 'Bring Backdrop to the front', 'Move Review to the bottom right'])}
   <h2 id="describe">Pointing at shapes by their look</h2>
   <p>You do not need names: “the green circle”, “all squares”, “the newest star”, “every circle that is not blue” point at shapes by what they look like. If a description fits more than one shape, the reply asks which one you mean.</p>
   ${says(['Make the green circle bigger', 'Make all circles red', 'Delete the yellow diamond'])}`;
@@ -303,10 +336,13 @@ function arrows(env) {
   }, 'a chain A to B to C', 'mid')}
   <p>One shape to several, or a list joined as a chain: ${escH(listing(valuesOf(engine, 'pairing').map(v => `“${cuesOf(L('pairing'), v)[0] || words(v)}”`)))}.</p>
   ${says(['Connect Start, Check and Done in a chain', 'Connect Start to Process, Check and Done'])}
+  <h2 id="edge-labels">Labels on arrows already drawn</h2>
+  <p>Name the arrow by its two ends (${['the arrow between Process and Check', 'the arrow from Check to Done', 'the link Process–Check', 'the Process→Check line'].map(x => `“${escH(x)}”`).join(', ')}) and say the text. A new label replaces the old one; “remove the label” takes it away. With only one end (“the arrow from Process”) it works when that shape has one arrow; with several the reply asks which one. If there is no arrow between the two shapes, the reply says so and nothing changes.</p>
+  ${says(['Label the arrow between Process and Check as Valid', 'Put the label "maybe" on the arrow from Check to Done', 'Name the link Start–Process Begin', 'Remove the label of the arrow between Check and Done', 'What does the arrow from Check to Done say?'])}
   <h2 id="remove">Removing connections</h2>
   <p>Between two shapes, all arrows of one shape, or every arrow.</p>
   ${says(['Disconnect Start from Process', 'Remove all connections'])}
-  <p class="note">To change an arrow you already drew (its style, colour or label), disconnect it and connect again; an existing arrow cannot be edited. A shape cannot be connected to itself.</p>`;
+  <p class="note">The label of an arrow can be changed (above); to change its style or colour, disconnect it and connect again. A shape cannot be connected to itself.</p>`;
 }
 
 /* ================================================================== WHERE THINGS GO ================================================================== */
@@ -357,12 +393,13 @@ function doPage(env) {
     const ps = type === 'command' ? providers(engine, 'command', 'action', key) : providers(engine, key, null, null);
     return `<div class="hitem"><div class="ht"><b>${escH(x.t)}</b>${offNote(ps)}</div><p>${escH(x.d || '')}${extra || ''}</p>${says(x.ex)}</div>`;
   };
-  let h = `<p class="lead">Every action the engine knows, with sentences to try. Point at shapes by name (“Done”), by description (“the yellow diamond”, “the newest circle”), or all at once (“all circles”, “everything”).</p>
+  let h = `<p class="lead">Every action the engine knows, with sentences to try. Point at shapes by name (“Done”, or with its kind in front: “the shape Done”, “the circle named Done”), by description (“the yellow diamond”, “the newest circle”), or all at once (“all circles”, “everything”).</p>
   <p>One message can hold several requests: <q>draw a black circle named A, a white circle named B and connect A to B</q>.</p>
   <nav class="jump" aria-label="On this page">${ACTION_GROUPS.map(([t], i) => `<a href="#help/do/g${i}">${escH(t)}</a>`).join('')}</nav>`;
   ACTION_GROUPS.forEach(([title, keys], i) => {
     const parts = keys.map(k => {
       if (WIRE_ITEMS[k]) return engine.wireTypes.has(k) ? item(k, k, WIRE_ITEMS[k]) : '';
+      if (k === 'labelEdge') return acts.includes('label') && engine.handlers.some(h => h.type === 'command' && h.when && h.when.action === 'label' && (h.when.from || h.when.to)) ? item('label', 'command', EDGE_LABEL) : '';
       if (!acts.includes(k)) return '';
       seen.add(k);
       const x = ACTIONS[k], ex = k === 'arrange' ? ` Layouts: ${valuesOf(engine, 'layout').join(', ')}.` : '';
@@ -374,6 +411,18 @@ function doPage(env) {
   if (rest.length) h += `<h2 id="other">Other actions</h2>${rest.map(a => `<div class="hitem"><div class="ht"><b>${escH(words(a))}</b></div><p class="note">Words it is read from: ${escH(cuesOf(L('action'), a).join(', ') || a)}</p></div>`).join('')}`;
   return h;
 }
+
+/* ================================================================== TEMPLATES ================================================================== */
+function templates(env) {
+  const T = TK(); if (!T) return '<p class="note">The templates are not loaded.</p>';
+  const cat = T.catalogue(), fam = f => cat.filter(c => c.family === f);
+  const item = c => `<div class="hitem" id="t-${escH(c.name)}"><div class="ht"><b>${escH(c.t)}</b> <code>template=${escH(c.name)}</code></div><p>Good for ${escH(c.good)}. ${escH(cap1(c.how))}. ${c.min === c.max ? c.min : `${c.min} to ${c.max}`} items${c.uses2 ? ', and a second list' : ''}.</p>${says([c.ex])}</div>`;
+  return `<p class="lead">A template turns a list of texts into a whole diagram in one step: the shapes, their texts and their arrows, placed in a free part of the drawing (or a new frame when there is none). It is drawn as one group, so it moves, copies and is undone as one block; its items are named after their texts.</p>
+  <p>Say the form and the items: <q>make a timeline of Kickoff, Design, Build and Launch</q>. You can add a title (<q>titled "2027"</q>), a colour scheme (<q>in warm colours</q>: ${escH(listing(Object.keys(T.SCHEMES)))}) or one colour (<q>in blue</q>), a size (small to huge), a place (<q>in the bottom half</q>, <q>below Done</q>) and, for some, a second list (<q>against …</q>, <q>with roots …</q>). Without items you get placeholders: <q>a 5-step process</q>. Shapes you already have can be laid out in a form: <q>arrange Start, Process, Check and Done as a cycle</q>.</p>
+  <h2 id="structure">Structure (${fam('structure').length})</h2>${fam('structure').map(item).join('')}
+  <h2 id="emotion">Forms with a feeling (${fam('emotion').length})</h2><p>Forms that recall something people feel, made only of the usual shapes, texts and arrows.</p>${fam('emotion').map(item).join('')}`;
+}
+const cap1 = x => x ? x[0].toUpperCase() + x.slice(1) : x;
 
 /* ================================================================== EVERYTHING YOU CAN ASK ================================================================== */
 function askPage(env) {
@@ -398,9 +447,9 @@ function limits(env) {
   const kinds = valuesOf(engine, 'shape').filter(v => v !== 'any'), colors = valuesOf(engine, 'color'), sizes = valuesOf(engine, 'size');
   return `<p class="lead">What the editor does not do, by design or not yet. The readers’ own weak spots are in ${go('limits-today', 'Where it is weak today')}.</p>
   <ul>
-    <li>Only the ${kinds.length} shapes, ${colors.length} colours and ${sizes.length} sizes of ${go('draw', 'What you can draw')}: no free drawing, no curves, no images, no icons, no text without a shape around it.</li>
-    <li>Arrows are straight lines between two shapes: no curved or bent arrows, no arrow to empty space, no arrow from a shape to itself. An existing arrow cannot be restyled; disconnect and connect again.</li>
-    <li>No text formatting (font, size, bold), no line thickness, no transparency, no rotation.</li>
+    <li>Only the ${kinds.length} shapes, ${colors.length} colours and ${sizes.length} sizes of ${go('draw', 'What you can draw')}: no free drawing, no curves, no images, no icons. Free text and templates are made of these same shapes, texts and arrows.</li>
+    <li>Arrows are straight lines between two shapes: no curved or bent arrows, no arrow to empty space, no arrow from a shape to itself. An existing arrow cannot be restyled (only its label can be changed); disconnect and connect again.</li>
+    <li>No text formatting beyond a size and a colour (no fonts, no bold), no line thickness, no rotation; transparency only as the fills solid, light, faint and none.</li>
     <li>At most two positions next to shapes and one part of the canvas in one request; at most 12 new shapes in one request.</li>
     <li>Groups cannot be nested, and a shape is in one group at a time.</li>
     <li>English only. Words from other worlds (“the manager approves the budget”) are not translated into diagrams; say it with shapes and arrows. A part of a message it cannot map to a request gets “I didn’t understand …”, and the rest of the message is still done.</li>
@@ -423,7 +472,7 @@ function hlWire(env, n) {
 /* what the engine did with the wires, run on a fresh copy of the opening drawing */
 function engineRun(env, nodes) {
   const { K } = env; const s = K.createSystem();
-  try { for (const t of env.startMessages || []) { const f = s.formalize(t, { names: s.world.state.shapes.map(x => x.name), last: [] }); s.engine.run(f.nodes); } } catch (e) { return []; }
+  try { for (const t of env.startMessages || []) { const f = t.trim().startsWith('@') ? { nodes: K.parse(t) } : s.formalize(t, { names: s.world.state.shapes.map(x => x.name), last: [] }); s.engine.run(f.nodes); } } catch (e) { return []; }
   let r; try { r = s.engine.run(nodes); } catch (e) { return ['The engine stopped: ' + e.message]; }
   const out = [];
   for (const st of r.steps) {
@@ -496,7 +545,7 @@ function sop(env) {
   }
   const other = [...engine.legend.questions.keys()].filter(k => !used.has(k));
   if (other.length) h += `<h3>Other</h3>${other.map(row).join('')}`;
-  h += `</div><p class="note">The words the Rules reader looks for are written by hand and extended with words found in the training messages. The VSS reader learns its own from those messages; the Neural reader uses none. How the engine is built from the legend and its plugins: ${go('engine', 'The engine and the legend')}.</p>`;
+  h += `</div><p class="note">The words the Rules reader looks for are written by hand and extended with words found in the training messages. The VSS reader learns its own from those messages; SOP-BERT uses none. How the engine is built from the legend and its plugins: ${go('engine', 'The engine and the legend')}.</p>`;
   return h;
 }
 
@@ -542,7 +591,7 @@ function capSwitches(env) {
 }
 
 /* the pages, by the id docs/js/docs.js shows them under (#help/<id>) */
-const pages = { start, draw, arrows, where, do: doPage, ask: askPage, limits, 'sop-lang': sop, capabilities };
-const HelpKit = { pages, capSwitches, examples, hlWire, ACTIONS, ASKS, CAPS };
+const pages = { start, draw, arrows, where, do: doPage, templates, ask: askPage, limits, 'sop-lang': sop, capabilities };
+const HelpKit = { pages, capSwitches, examples, hlWire, ACTIONS, ASKS, CAPS, EDGE_LABEL, TOPICS };
 if (typeof module !== 'undefined') module.exports = HelpKit; else root.HelpKit = HelpKit;
 })(typeof window !== 'undefined' ? window : this);

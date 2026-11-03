@@ -81,7 +81,7 @@ def filler_kind(ws, v, created):
         if p == "$new": return any(find_seq(ws, [w[0].lower() for w in words(n)], set()) is not None for n in created)
         return find_seq(ws, [w[0].lower() for w in words(p)], set()) is not None
     return "written" if all(written(p) for p in ps) else "context"
-SPAN_KINDS = {"names", "name", "text", "number"}
+SPAN_KINDS = {"names", "name", "text", "number", "texts"}   # texts: a list of texts (items, items2, parents of a template, LEGEND_EXT.md): one B-/I- span per item, joined with "," by docs/js/neural.js
 
 
 def legend():

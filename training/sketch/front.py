@@ -38,9 +38,33 @@ KEY_KIND = {"shape": "SHAPE", "color": "COLOR", "notColor": "NOTCOLOR", "size": 
             "style": "STYLE", "arrow": "ARROW", "axis": "AXIS", "layout": "LAYOUT", "pairing": "PAIR", "superlative": "SUPER", "recency": "RECENT"}
 NUM_KEYS = ("count", "distance")
 
+# LEGEND_EXT=1 (off by default; generate.py LEGEND_EXT, TRAIN_PLAN_1103.md): the value tables of the keys added on 2026-11-02, read from the
+# legend itself (legend_ext/legend_values.json, exported from docs/js/logic.js by legend_ext/export_legend_values.mjs). The tokens of the
+# new enum keys carry a prefix (PREFIX), because their values are words that other keys or events already use (template tree / layout
+# tree, topic connect / the verb connect, topic red / the colour red, fill none / arrow none); a camel-case value is written with "_"
+# before the capital (topic toFront -> tp_to_front; docs/js/vss-adapter.js extValue is the inverse). shape gains `text` (plural texts),
+# layout tree / layers / radial / organic, arrow forward; width / height are numbers; label="" (remove a label) is the token no_label.
+LEGEND_EXT = os.environ.get("LEGEND_EXT") == "1"
+PREFIX = {"template": "tpl_", "scheme": "sch_", "fill": "fill_", "layer": "layer_", "topic": "tp_", "aspect": "asp_", "property": "prop_", "kind": "kind_"}
+if LEGEND_EXT:
+    SHAPES = dict(SHAPES, text="texts")
+    KEY_KIND = dict(KEY_KIND, template="TEMPLATE", scheme="SCHEME", fill="FILL", layer="LAYER", topic="TOPIC", aspect="ASPECT", property="PROP", kind="KIND")
+    # outline (CONVERT_FIX.md, 2026-11-03): a colour is the colour's own token (kind COLOR: "red outline", "border teal"); outline=none is the
+    # token no_outline ("with no border"). The world tells outline from color by the role it binds the token to.
+    KEY_KIND["outline"] = "COLOR"
+    NUM_KEYS = NUM_KEYS + ("width", "height")
+    _LV = json.load(open(os.path.join(HERE, "legend_ext", "legend_values.json")))["questions"]
+
+
+def ext_token(key, v):
+    """LEGEND_EXT: the world token of a value of a new enum key (PREFIX + the value, camel case as _x)"""
+    return PREFIX[key] + re.sub(r"([A-Z])", lambda m: "_" + m.group(1).lower(), str(v))
+
 
 def value_token(key, v, plural=False):
     v = str(v)
+    if LEGEND_EXT and key in PREFIX: return ext_token(key, v)
+    if LEGEND_EXT and key == "outline": return "no_outline" if v == "none" else v
     if key == "shape": return SHAPES.get(v, v) if plural else v
     if key == "notColor": return "not_" + v
     if key == "position": return REL.get(v) or REGION.get(v) or v
@@ -59,12 +83,19 @@ def value_kinds():
             "direction": ["left", "right", "up", "down"], "style": ["dashed", "dotted", "solid"], "arrow": ["both", "none"], "axis": ["horizontal", "vertical"],
             "layout": ["row", "column", "grid", "circle"], "pairing": ["chain", "next", "all"], "recency": ["newest", "oldest"],
             "superlative": ["biggest", "smallest", "leftmost", "rightmost", "topmost", "bottommost", "mostConnected", "leastConnected", "closest", "farthest"]}
+    if LEGEND_EXT:   # the legend's own values of the new keys and the new values of old keys (legend_values.json)
+        vals["shape"] = vals["shape"] + ["text"]
+        vals["layout"] = vals["layout"] + [v for v in _LV["layout"]["values"] if v not in vals["layout"]]
+        vals["arrow"] = vals["arrow"] + [v for v in _LV["arrow"]["values"] if v not in vals["arrow"]]
+        for k in PREFIX: vals[k] = list(_LV[k]["values"])
+        vals["outline"] = list(_LV["outline"]["values"])
     out = {}
     for k, vs in vals.items():
         for v in vs:
             out.setdefault(value_token(k, v), KEY_KIND[k])
             if k == "shape": out.setdefault(value_token(k, v, True), "SHAPE")
     out["all"] = "QUANT"   # the legend's quantifier=all (mentions: "every square", "all the boxes")
+    if LEGEND_EXT: out["no_label"] = "NOLABEL"   # label="" (remove a label: LABEL_CONVENTIONS.md, arrow labels)
     return out
 
 
@@ -292,7 +323,10 @@ def mention_kv(v):
 def gold_values(w):
     a = w["args"]; out = set()
     plural = (w["type"] == "question" and a.get("ask") in ("count", "list", "exists")) or bool(a.get("count") and str(a.get("count")) != "1")
+    if LEGEND_EXT and a.get("label") == "": out.add("no_label")
+    if LEGEND_EXT and a.get("quantifier") == "all": out.add("all")   # every arrow (quantifier=all outside a mention)
     for k, v in a.items():
+        if LEGEND_EXT and k == "property" and w["type"] == "question": continue   # the property question's key is read by its pseudo-verb (what_color ...)
         if k in KEY_KIND and v not in (None, ""):
             if k == "position" and v not in REL and v not in REGION: continue
             out.add(value_token(k, v, plural and k == "shape"))
@@ -358,6 +392,7 @@ def value_kind(v, _vk={}):
 
 def val_prec(): return os.environ.get("VAL_PREC", "") or "all"
 def val_sub(): return os.environ.get("VAL_SUB", "") or "any"
+def val_pick(): return os.environ.get("VAL_PICK", "") or "frequent"
 
 
 def learn_values(reqs, min_count, min_prec):
@@ -370,10 +405,23 @@ def learn_values(reqs, min_count, min_prec):
     it: it gives the same value, or its own value is still in the gold of the longer n-gram's requests with precision >= min_prec
     ("circles near": "near" -> next_to stays right there, so it is blocked). One whose sub-n-gram reads wrong inside it ("bottom left"
     -> bottom_left while "left" -> left_of, and left_of is not gold there) is kept when it passes the thresholds on its own, and the
-    longest-first application makes it win. Default (any): any kept sub-n-gram blocks it."""
-    mask = v2(); per_event = val_prec() == "event"
+    longest-first application makes it win. Default (any): any kept sub-n-gram blocks it.
+    VAL_PICK=specific (off by default; VSS_SYNTH_DIAGNOSIS.md section 4 and 6.A): the value an n-gram stands for is chosen among ALL the
+    values that pass the bars (count >= min_count, precision >= min_prec) as the most specific one: the value with the fewest requests in
+    `reqs` (ties: the value's token, alphabetically). Default (frequent): the most frequent co-occurring value, ties broken alphabetically,
+    and the n-gram is dropped when that one value fails the bars. A plural description's gold carries two values, the plural shape token
+    and the quantifier `all`, so a word seen only in descriptions ("circles", "navy" in "the navy ones") tied with `all` and became `all`:
+    "delete all the circles" was normalized to "delete all the all", and the shape was gone before the world read it. The same rule for
+    every kind."""
+    mask = v2(); per_event = val_prec() == "event"; specific = val_pick() == "specific"
     if val_prec() not in ("all", "event"): raise SystemExit(f"VAL_PREC={val_prec()!r}: expected all or event")
     if val_sub() not in ("any", "value"): raise SystemExit(f"VAL_SUB={val_sub()!r}: expected any or value")
+    if val_pick() not in ("frequent", "specific"): raise SystemExit(f"VAL_PICK={val_pick()!r}: expected frequent or specific")
+    tot = collections.Counter()   # VAL_PICK=specific: value -> the number of requests whose gold carries it
+    both = collections.Counter()  # VAL_PICK=specific: (v, u) -> the number of requests whose gold carries both
+    if specific:
+        for m, w, sp, names in reqs:
+            gv = sorted(gold_values(w)); tot.update(gv); both.update((v, u) for v in gv for u in gv if u != v)
     ev_kinds = collections.defaultdict(set)
     if per_event:
         for m, w, sp, names in reqs:
@@ -397,17 +445,34 @@ def learn_values(reqs, min_count, min_prec):
                 if not v.isdigit() or not g.isdigit(): co[g][v] += 1
     V = {}
     same = val_sub() == "value"
+    def refines(g, v, kept):
+        """VAL_PICK=specific: g is kept although kept sub-n-grams would block it when it REFINES one of them: g's value v implies that
+        sub-n-gram's value u (u is in the gold of >= min_prec of the requests that carry v) and is more specific (fewer requests), and no
+        kept sub-n-gram explains g otherwise (none gives v itself, and none whose value is still in the gold of >= min_prec of g's
+        requests is left unexplained by v). "not orange" -> not_orange refines "not" -> all (every not_orange request is a plural
+        description) and "orange" -> orange is not in their gold; "black diamonds" -> diamonds is still blocked by "black" -> black."""
+        if not kept or any(V[s] == v for s in kept): return False
+        imp = lambda u: tot[v] and both[(v, u)] / tot[v] >= min_prec and tot[v] < tot[u]
+        if not any(imp(V[s]) for s in kept): return False
+        return all(imp(V[s]) or not (dn(V[s]) and co[g][V[s]] / dn(V[s]) >= min_prec) for s in kept)
     for n in (1, 2, 3):
         for g, c in co.items():
             if len(g.split()) != n: continue
-            v, k = c.most_common(1)[0]
-            den = occ_k[g][value_kind(v)] if per_event else occ[g]
-            if k < min_count or k / den < min_prec: continue
+            if specific:   # VAL_PICK=specific: the most specific of the values that pass the bars
+                den_of = lambda u: occ_k[g][value_kind(u)] if per_event else occ[g]
+                ok = [u for u, k in c.items() if k >= min_count and den_of(u) and k / den_of(u) >= min_prec]
+                if not ok: continue
+                v = min(ok, key=lambda u: (tot[u], u))
+            else:
+                v, k = c.most_common(1)[0]
+                den = occ_k[g][value_kind(v)] if per_event else occ[g]
+                if k < min_count or k / den < min_prec: continue
             ws = g.split()
             subs = [" ".join(ws[i:i + j]) for j in range(1, n) for i in range(n - j + 1)]
             dn = lambda u: occ_k[g][value_kind(u)] if per_event else occ[g]
             # a shorter n-gram already explains it (VAL_SUB=value: when it gives the same value, or when its own value is still read
             # right inside g, with the same precision bar: "circles near" -> circles must not swallow "near" -> next_to)
+            if specific and refines(g, v, [s for s in subs if s in V]): V[g] = v; continue
             if any(s in V and (not same or V[s] == v or (dn(V[s]) and c[V[s]] / dn(V[s]) >= min_prec)) for s in subs): continue
             V[g] = v
     return V
@@ -486,8 +551,8 @@ def learn(msgs, params=None, keep=None):
     S = train_segmenter(msgs, P["seg_epochs"]) if os.environ.get("FRONT_TAGGER") == "1" else {}
     return {"about": "front.json: the learned front end of the VSS world `real` (training/sketch/front.py); learned from " + str(len(msgs)) + " training messages",
             "params": P, "values": dict(sorted(V.items())), "triggers": T, "segmenter": dict(sorted(S.items())), **({"v2": ["MASK", "CTX2", "NAMEPH"]} if v2() else {}),
-            **({"value_learning": {k: os.environ[k] for k in ("VAL_PREC", "VAL_SUB") if os.environ.get(k)}}
-               if any(os.environ.get(k) for k in ("VAL_PREC", "VAL_SUB")) else {})}
+            **({"value_learning": {k: os.environ[k] for k in ("VAL_PREC", "VAL_SUB", "VAL_PICK") if os.environ.get(k)}}
+               if any(os.environ.get(k) for k in ("VAL_PREC", "VAL_SUB", "VAL_PICK")) else {})}
 
 
 # The training folders, in one place. DATA=old (or unset): the first two (exactly the original behaviour); DATA=all: all five.

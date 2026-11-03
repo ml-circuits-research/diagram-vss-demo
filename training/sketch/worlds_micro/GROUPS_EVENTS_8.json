@@ -1,0 +1,144 @@
+{
+ "_about": "GROUPS_EVENTS_8 (2026-11-03, TRAIN_PLAN_1103.md; needs LEGEND_EXT=1): one world per legend event (the event cutter of the event hint, EVENT_HINT.md), exactly the events of GROUPS_8.json in its order.",
+ "create": [
+  "create"
+ ],
+ "set": [
+  "set"
+ ],
+ "resize": [
+  "resize"
+ ],
+ "fact": [
+  "fact"
+ ],
+ "rule": [
+  "rule"
+ ],
+ "connect": [
+  "connect"
+ ],
+ "disconnect": [
+  "disconnect"
+ ],
+ "reverse": [
+  "reverse"
+ ],
+ "move": [
+  "move"
+ ],
+ "swap": [
+  "swap"
+ ],
+ "arrange": [
+  "arrange"
+ ],
+ "align": [
+  "align"
+ ],
+ "distribute": [
+  "distribute"
+ ],
+ "toFront": [
+  "toFront"
+ ],
+ "toBack": [
+  "toBack"
+ ],
+ "improve": [
+  "improve"
+ ],
+ "respace": [
+  "respace"
+ ],
+ "snap": [
+  "snap"
+ ],
+ "fit": [
+  "fit"
+ ],
+ "flip": [
+  "flip"
+ ],
+ "sort": [
+  "sort"
+ ],
+ "groupBy": [
+  "groupBy"
+ ],
+ "equalize": [
+  "equalize"
+ ],
+ "straighten": [
+  "straighten"
+ ],
+ "untangle": [
+  "untangle"
+ ],
+ "check": [
+  "check"
+ ],
+ "connected": [
+  "connected"
+ ],
+ "path": [
+  "path"
+ ],
+ "reachable": [
+  "reachable"
+ ],
+ "cycle": [
+  "cycle"
+ ],
+ "exists": [
+  "exists"
+ ],
+ "count": [
+  "count"
+ ],
+ "list": [
+  "list"
+ ],
+ "extreme": [
+  "extreme"
+ ],
+ "nearest": [
+  "nearest"
+ ],
+ "describe": [
+  "describe"
+ ],
+ "neighbors": [
+  "neighbors"
+ ],
+ "degree": [
+  "degree"
+ ],
+ "property": [
+  "property"
+ ],
+ "delete": [
+  "delete"
+ ],
+ "duplicate": [
+  "duplicate"
+ ],
+ "rename": [
+  "rename"
+ ],
+ "label": [
+  "label"
+ ],
+ "undo": [
+  "undo"
+ ],
+ "redo": [
+  "redo"
+ ],
+ "forget": [
+  "forget"
+ ],
+ "help": [
+  "help"
+ ]
+}

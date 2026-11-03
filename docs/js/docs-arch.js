@@ -51,9 +51,9 @@ ${AH}
 <text x="200" y="283" text-anchor="middle">event hint</text>
 <text x="200" y="298" text-anchor="middle">context filler</text>
 <rect class="acc" x="272" y="216" width="120" height="96" rx="8"/>
-<text class="t" x="332" y="235" text-anchor="middle">Neural</text>
+<text class="t" x="332" y="235" text-anchor="middle">SOP-BERT</text>
 <text class="m" x="332" y="250" text-anchor="middle">neural.js</text>
-<text x="332" y="268" text-anchor="middle">SOP-BERT</text>
+<text x="332" y="268" text-anchor="middle">one DistilBERT</text>
 <text x="332" y="283" text-anchor="middle">one DistilBERT</text>
 <text x="332" y="298" text-anchor="middle">with small heads</text>
 <path class="ar" d="M68 312 V330 H160 V346"/>
@@ -78,7 +78,7 @@ ${AH}
 <text class="t" x="200" y="531" text-anchor="middle">VSS drawing</text>
 <text class="s" x="200" y="546" text-anchor="middle">own world, undo</text>
 <rect class="box" x="272" y="514" width="120" height="40" rx="8"/>
-<text class="t" x="332" y="531" text-anchor="middle">Neural drawing</text>
+<text class="t" x="332" y="531" text-anchor="middle">SOP-BERT drawing</text>
 <text class="s" x="332" y="546" text-anchor="middle">own world, undo</text>
 </svg>
 </div>
@@ -101,8 +101,8 @@ such a threshold yet: that is in progress. <a href="#help/measurement">Measureme
 <tr><td>Spell checker</td><td><code>docs/js/spell.js</code></td><td><code>docs/model/spell/vocab.json</code></td><td class="num">28.0 KB</td></tr>
 <tr><td>Rules reader, SOP Lang, engine, plugins, Datalog</td><td><code>docs/js/logic.js</code></td><td>none</td><td class="num">—</td></tr>
 <tr><td>The shared cut</td><td><code>docs/js/vss-composer.js</code> (<code>cutUnits</code>, <code>CUT_STRATEGIES</code>, <code>DEFAULT_CUT</code>), <code>docs/js/vss-formalizer.js</code> (<code>cut</code>)</td><td>the cutter of the strategy chosen</td><td class="num">—</td></tr>
-<tr><td>VSS reader (composer)</td><td><code>docs/js/vss-formalizer.js</code>, <code>docs/js/vss-composer.js</code>, <code>docs/js/front.js</code>, <code>docs/js/vss.js</code> + <code>docs/js/vss/</code>, <code>docs/js/vss-context.js</code>, <code>docs/js/vss-adapter.js</code></td><td><code>docs/model/micro/registry.json</code> and what it names: 2 cutters, 7 worlds, <code>docs/model/context/weights.json</code></td><td class="num">38.0 MB</td></tr>
-<tr><td>Neural reader</td><td><code>docs/js/neural.js</code> (transformers.js 3.8.1 from jsDelivr)</td><td><code>docs/model/neural/sop-bert/</code> (one DistilBERT, 8-bit)</td><td class="num">68.5 MB</td></tr>
+<tr><td>VSS reader (composer)</td><td><code>docs/js/vss-formalizer.js</code>, <code>docs/js/vss-composer.js</code>, <code>docs/js/front.js</code>, <code>docs/js/vss.js</code> + <code>docs/js/vss/</code>, <code>docs/js/vss-context.js</code>, <code>docs/js/vss-adapter.js</code></td><td><code>docs/model/micro/registry.json</code> and what it names: 2 cutters, 7 worlds, <code>docs/model/context/weights.json</code></td><td class="num">19.4 MB</td></tr>
+<tr><td>SOP-BERT reader</td><td><code>docs/js/neural.js</code> (transformers.js 3.8.1 from jsDelivr)</td><td><code>docs/model/neural/sop-bert/</code> (one DistilBERT, 8-bit)</td><td class="num">68.5 MB</td></tr>
 <tr><td>Benchmark (scoring)</td><td><code>docs/js/bench-canon.js</code></td><td><code>docs/bench/</code> (6 sets)</td><td class="num">—</td></tr>
 </tbody></table></div>
 <p class="note">Sizes: <code>du -sb</code> and <code>versions.json</code> “sizes” on 2026-11-02, MB = 10<sup>6</sup> bytes. The VSS figure is the 7 world folders (35.6 MB), the two
@@ -113,7 +113,7 @@ cutters the registry names (2.4 MB), the context weights and the registry.</p>
 <li><a href="#help/engine">The engine and the legend</a>: wires, the legend, the plugins, Datalog.</li>
 <li><a href="#help/rules-reader">The Rules reader</a>: hand-written, and what it is good and bad at.</li>
 <li><a href="#help/vss-reader">The VSS reader</a>: the composer, its cutters, the 7 worlds, the context filler, the adapter.</li>
-<li><a href="#help/neural-reader">The Neural reader</a>: SOP-BERT, one fine-tuned DistilBERT with small heads.</li>
+<li><a href="#help/neural-reader">The SOP-BERT reader</a>: SOP-BERT, one fine-tuned DistilBERT with small heads.</li>
 <li><a href="#help/cutting">One cut for all readers</a>: the three cutters and what they cost each reader.</li>
 <li><a href="#help/spelling">The spell checker</a>, <a href="#help/models">Models and versions</a>, <a href="#help/data">Data</a>,
 <a href="#help/training">Training and the GPU runner</a>, <a href="#help/measurement">Measurement and current numbers</a>,
@@ -318,8 +318,9 @@ an address from its path, bigram and position, and the reader (<code>docs/js/vss
 event, from the world’s verb lemmas) and the role fillers (target, colour, landmark, …). The reader returns a status:
 <code>ok</code>, <code>abstain</code> (margin under 0.05: uncertain, still executed today), <code>unknown-event</code> (no action word found) or
 <code>no-sense</code> (more than half of the tokens could not be placed). Executing <code>abstain</code> readings goes against the main metric
-of 2026-11-02 (execute only what it is sure of); the confidence gate that replaces it is in progress (<a href="#help/planned">In progress</a>).
-The margin behind <code>abstain</code> is also a poor confidence (AUROC 0.59 on the sample, RISK_COVERAGE.md).</p>
+of 2026-11-02 (execute only what it is sure of); in the demo the VSS tab now executes a request only when its confidence clears a threshold:
+a confidence from every step of the chain plus whether SOP-BERT and the Rules read the request the same way (<a href="#help/three-readers">Three
+readers voting</a>). The margin behind <code>abstain</code> alone is a poor confidence (AUROC 0.59 on the sample, RISK_COVERAGE.md).</p>
 <p>Before the model, the world’s own <b>front end</b> <code>front.json</code> normalizes the tokens: learned value n-grams (“bottom right” →
 <code>bottom_right</code>) and trigger rules, learned from the annotated rows of that world’s events only (<code>FRONT_ROWS=world</code>;
 thresholds <code>val_min_count</code> 5, <code>val_min_prec</code> 0.8, <code>trig_min_count</code> 2, <code>trig_share</code> 0.75, <code>trig_min_prec</code> 0.6).
@@ -337,7 +338,7 @@ Names are never in the lexicon: an unknown word becomes a name token, quoted tex
 </tbody></table></div>
 <p class="note">Folders under <code>docs/model/</code>. Rows from each folder’s <code>BUILD.json</code>; values / triggers counted in its <code>front.json</code>.
 All seven: D 1024, 10 epochs, seed 0, <code>DATA=spans</code>, trained on CPU here; <code>shapes7c</code> is the build with
-<code>CREATE_COLOR=role</code> (CREATE_COLOR.md). Each folder holds <code>model.json</code>, <code>routebook.bin</code>, <code>stars.bin</code>,
+<code>CREATE_COLOR=role</code> (CREATE_COLOR.md). Each folder holds <code>model.json</code>, <code>routebook.bin</code>, <code>stars.json</code> (the word vectors are generated in the browser, SHRINK.md),
 <code>manifest.json</code> (sha256 of each file, format <code>vss-web-2</code>, 8-bit phases, sparse route book), <code>front.json</code> and
 <code>BUILD.json</code> (not loaded). The grouping of events into these 7 worlds is <code>training/sketch/worlds_micro/GROUPS_7.json</code>,
 chosen by measured cutter confusion (PLAN_B.md). The events group, ungroup, members and groupOf are in the engine, the Rules reader and the
@@ -371,8 +372,8 @@ becomes a question to the user, not an execution.</p>
 <p class="callout warn">The margin 0 comes from the owner’s rule of 2026-11-01, “ask as little as possible” (in drawing a mistake costs one undo,
 a question costs more). It was replaced on 2026-11-02 by the main metric: do only what you are sure of, ask about the rest (AGENTS.md). The
 filler keeps ranking the candidates, but whether its filling is executed is to be decided by the reader’s confidence against a threshold
-chosen on held-out data (the VSS confidence measured in VSS_CONFIDENCE.md includes the filler’s own margin, <code>ctx_margin</code>). In progress; the demo still
-fills at margin 0.</p>
+chosen on held-out data (the VSS confidence includes the filler’s own margin, <code>ctx_margin</code>, and whether the other two readers read the
+request the same way). The filler still fills at margin 0; the VSS tab’s confidence then decides whether that request is executed.</p>
 
 <h2 id="adapter">(e) The adapter to SOP Lang wires</h2>
 <p><code>docs/js/vss-adapter.js</code>: <code>readingFromWires</code> turns the reader’s wires into an event with roles; <code>toNodes</code> maps the
@@ -401,7 +402,7 @@ SHORT2.md §6).</p>
 `, 'A composer of seven small vector-symbolic models, two cutters, a context filler and an adapter to SOP Lang.');
 
 /* ============================================================ neural */
-page('neural-reader', 'The Neural reader', `
+page('neural-reader', 'The SOP-BERT reader', `
 <p>Code: <code>docs/js/neural.js</code> (<code>NeuralKit</code>, strategy <code>finetuned</code>), run by transformers.js 3.8.1 (loaded from
 jsDelivr) on the CPU through WebAssembly, with 8-bit files (<code>q8</code>, <code>onnx/model_quantized.onnx</code>). The models are served
 from this site and load by themselves when the page opens (from the browser cache after the first time). The demo has <b>one neural model</b>,
@@ -490,8 +491,9 @@ requests through the demo’s decoding code and compares them with torch.</p>
 <p>SOP-BERT gets more requests right than VSS on whole messages (80.8 vs 77.2) and also more wrong (16.5 vs 11.4): it almost never leaves a
 request undone (2.8%), so what it does not know it guesses. Descriptions in roles (“next to the orange hexagon”) are its weakest part: 4 of 34
 held-out. These are the earlier measure, every request executed. Under the main metric (precision of execution, owner 2026-11-02) SOP-BERT
-is to execute only when its confidence (the smallest probability among its heads for the request) clears a threshold chosen on held-out data:
-measured offline in RISK_COVERAGE.md, in the demo in progress. Why the difference between guessing and stopping matters:
+executes a request in the demo only when its confidence clears a threshold chosen on held-out data: a confidence fitted on 24 numbers of its
+own heads plus whether VSS and the Rules read the request the same way (<a href="#help/three-readers">Three readers voting</a>). Why the
+difference between guessing and stopping matters:
 <a href="#help/knowing">Knowing what it does not know</a>.</p>
 <p class="note">Trained by <code>training/neural/finetune_roles.py</code> on the GPU machine: epochs ≤ 8, lr 6e-5, batch 32, fp16 on cuda, seed 0; 15,683
 request spans. The milliseconds are from the scoring run in node; the time of each message in the demo is in its reply.</p>
@@ -527,7 +529,7 @@ setting (Settings › Cutting into requests), so the tabs differ only in how eac
 <tbody>
 <tr><td><b>Rules segmenter</b></td><td>Hand-written: sentences, then a comma or “and” before a verb, coordinated names, one clause per created object.</td><td><code>docs/js/logic.js</code> (<code>rulesCut</code>)</td></tr>
 <tr><td><b>VSS cutter</b> (default)</td><td>A learned token tagger <code>B-&lt;world&gt;</code> / I / O trained on the annotated request spans; it also names each unit’s candidate worlds.</td><td><code>docs/model/micro/cutter_worlds7s.json</code></td></tr>
-<tr><td><b>BERT cutter</b></td><td>The cut head of SOP-BERT: B / I / O per word over the whole message. Available once the Neural reader has loaded.</td><td><code>NeuralKit.cut</code>, <code>training/neural/finetune_roles.py</code></td></tr>
+<tr><td><b>BERT cutter</b></td><td>The cut head of SOP-BERT: B / I / O per word over the whole message. Available once SOP-BERT has loaded.</td><td><code>NeuralKit.cut</code>, <code>training/neural/finetune_roles.py</code></td></tr>
 </tbody></table></div>
 <p><b>How.</b> <code>VSSFormalizer.cut(text, ctx, strategy, env)</code> returns <code>[{c0, c1, src}]</code> (character offsets); every reader
 reads exactly those units (<code>rules.formalize(t, ctx, {units})</code>, <code>VSSFormalizer.formalize(t, ctx, _, {units})</code>,
@@ -591,7 +593,7 @@ page('models', 'Models and versions', `
 <svg class="dg" viewBox="0 0 400 560" role="img" aria-labelledby="d4t">
 <title id="d4t">The docs/model folder: versions.json; micro with the two registries, four cutters, the seven worlds and their round-2 versions; context; spell; neural with sop-bert</title>
 <rect class="chipv" x="10" y="8" width="10" height="10" rx="2"/><text class="s" x="25" y="17">VSS loads</text>
-<rect class="chipn" x="98" y="8" width="10" height="10" rx="2"/><text class="s" x="113" y="17">Neural loads</text>
+<rect class="chipn" x="98" y="8" width="10" height="10" rx="2"/><text class="s" x="113" y="17">SOP-BERT loads</text>
 <rect class="chipo" x="196" y="8" width="10" height="10" rx="2"/><text class="s" x="211" y="17">spell, versions</text>
 <rect class="chipx" x="300" y="8" width="10" height="10" rx="2"/><text class="s" x="315" y="17">not loaded</text>
 <text class="m" x="10" y="46" style="font-weight:600">docs/model/</text><text class="m" x="392" y="46" text-anchor="end">149.9 MB</text>
@@ -608,7 +610,7 @@ page('models', 'Models and versions', `
 <rect class="chipv" x="58" y="238" width="9" height="9" rx="2"/><text class="m" x="72" y="246">shapes7c/ links7/ position7/</text><text class="m" x="392" y="246" text-anchor="end">35.6 MB</text>
 <text class="m" x="72" y="262">graphq7/ questions7/ manage7/ history7/</text>
 <rect class="chipx" x="58" y="280" width="9" height="9" rx="2"/><text class="m" x="72" y="288">the same seven, …7r2/</text><text class="m" x="392" y="288" text-anchor="end">40.5 MB</text>
-<text class="s" x="72" y="306">each world: model.json routebook.bin stars.bin manifest.json front.json</text>
+<text class="s" x="72" y="306">each world: model.json routebook.bin stars.json manifest.json front.json</text>
 <text class="s" x="72" y="320">(+ BUILD.json, not loaded)</text>
 <rect class="chipv" x="34" y="352" width="9" height="9" rx="2"/><text class="m" x="48" y="360">context/weights.json</text><text class="m" x="392" y="360" text-anchor="end">14.9 KB</text>
 <rect class="chipo" x="34" y="372" width="9" height="9" rx="2"/><text class="m" x="48" y="380">spell/vocab.json</text><text class="m" x="392" y="380" text-anchor="end">28.0 KB</text>
@@ -625,7 +627,7 @@ page('models', 'Models and versions', `
 </svg>
 </div>
 <figcaption>Figure 4. The model folder the page loads from (<code>du -sb</code>, 2026-11-02). VSS loads only what <code>registry.json</code> names;
-the Neural reader loads <code>sop-bert/</code>; the size of each of its files is also in <code>versions.json</code> (“sizes”) and in Neural › Settings.</figcaption>
+SOP-BERT loads <code>sop-bert/</code>; the size of each of its files is also in <code>versions.json</code> (“sizes”) and in SOP-BERT › Settings.</figcaption>
 </figure>
 
 <h2 id="versions">Versions: the browser never uses a stale model</h2>
@@ -813,7 +815,7 @@ confidence for SOP-BERT, for a fair comparison, is being measured (<code>PRECISI
   E wrong event, F lost to another world, G1/G2 the filler asks, H1/H2 role values).</dd>
   <dt><code>training/sketch/error_analysis.mjs</code></dt><dd>Root causes of one world’s misses on perfectly cut requests: A action word not
   recognized, B wrong action, C reader refuses, D value not reachable, E name not reachable, F role missed, G role wrong.</dd>
-  <dt><code>training/laptop/neural_score.mjs</code></dt><dd>Rules, VSS and Neural on the same gold, with the scoring of <code>llm_score.mjs</code>,
+  <dt><code>training/laptop/neural_score.mjs</code></dt><dd>Rules, VSS and SOP-BERT on the same gold, with the scoring of <code>llm_score.mjs</code>,
   plus milliseconds per message.</dd>
   <dt><code>training/sketch/risk_coverage.mjs</code></dt><dd>Every produced request of VSS and SOP-BERT with its outcome and the reader’s
   confidence; the risk-coverage curves, AUROC, calibration and the thresholds chosen on held-out (RISK_COVERAGE.md).</dd>
@@ -873,7 +875,7 @@ page('repository', 'Repository map', `
 <thead><tr><th>Folder</th><th>What it holds</th></tr></thead>
 <tbody>
 <tr><td><code>docs/</code></td><td>The site published by GitHub Pages: <code>docs/index.html</code> (the demo), <code>docs/architecture.html</code> (these pages as one page).</td></tr>
-<tr><td><code>docs/js/</code></td><td>All the page’s code: engine and Rules (<code>logic.js</code>), VSS composer and its parts, Neural, spell checker, UI, help (<code>help.js</code>, <code>docs.js</code>, <code>docs-concepts.js</code>, <code>docs-arch.js</code>).</td></tr>
+<tr><td><code>docs/js/</code></td><td>All the page’s code: engine and Rules (<code>logic.js</code>), VSS composer and its parts, SOP-BERT (<code>neural.js</code>), the combined reader VSS-BERT (<code>combined-confidence.js</code>), the three readers’ votes used by the VSS, SOP-BERT and 3 readers tabs (<code>vote-confidence.js</code>), spell checker, UI, help (<code>help.js</code>, <code>docs.js</code>, <code>docs-concepts.js</code>, <code>docs-arch.js</code>).</td></tr>
 <tr><td><code>docs/js/vss/</code></td><td>The VSS reader in the browser: <code>loader.js</code>, <code>stars.js</code>, <code>routebook.js</code>, <code>reader.js</code>, <code>soplang.js</code>.</td></tr>
 <tr><td><code>docs/model/</code></td><td>Every model the page loads, with <code>versions.json</code> (<a href="#help/models">Models and versions</a>).</td></tr>
 <tr><td><code>docs/bench/</code></td><td>The six short benchmark sets.</td></tr>

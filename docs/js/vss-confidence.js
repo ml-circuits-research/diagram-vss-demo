@@ -1,11 +1,14 @@
 // vss-confidence.js: the VSS combined confidence of one produced request, the gate that executes a request only when its confidence clears
 // the threshold of a precision level, and the plain-words reasons of a request below it. Browser-ready ES module, no imports.
 //
-// The model is docs/model/confidence/vss.json: the confidence of training/sketch/precision_thresholds.json (PRECISION.md) with the
-// thresholds per precision level as data (readers.vss_combined.levels[L].threshold), from the out-of-fold held-out scores
-// (PRECISION_BERT.md: 95 -> 0.8564, 97 -> 0.9113, 99 not reached; PRECISION.md's in-sample 0.8934 was optimistic). A refit changes the
-// file only. A level the model does not reach (levels[L] null) falls back to the highest reached level below it (effectiveLevel); with no
-// reached level every request is asked. Its readers.vss_combined holds the winner of VSS_CONFIDENCE.md
+// The model is docs/model/confidence/vss.json: the confidence of the VSS worlds of arm VSS-G (FEEDBACK_RESULT.md), fitted on the fresh2
+// calibration part by training/sketch/fresh2/fit_report.mjs and written by fresh2/export_confidence.mjs, with the thresholds per level as
+// data (readers.vss_combined.levels[L].threshold). The default level is "cost" (owner, 2026-11-02 21:24: execute only what it is sure of):
+// the threshold that maximises the cost score (one confident mistake = 10 right answers, AGENTS.md) on the out-of-fold calibration
+// confidences; its entry may instead say kind "executes everything" (threshold null: no gate is better) or "asks everything". The levels
+// 95 / 97 / 99 are precision levels (null when not reached with >= 50 executed). A refit changes the file only. A precision level the model
+// does not reach falls back to the highest reached level below it, else to "cost" (effectiveLevel); with neither, every request is asked.
+// Its readers.vss_combined holds the recipe of VSS_CONFIDENCE.md
 // ("logistic all minus event"): 14 named stage signals, each turned into a percentile of its held-out distribution (tables), a weight each,
 // an intercept; confidence = 1 / (1 + exp(-(intercept + sum weight * percentile))). The input is the composer's unit.signals (the raw
 // signals, vss-composer.js head) and unit.world (the world prior). percentile() and confidence() reproduce
@@ -19,9 +22,12 @@
 // every group with a pull of at least REASON_MIN (in logit units), at most REASON_MAX, and always the first one. These two numbers only
 // choose how many sentences the reply shows; they do not change any decision.
 export const REASON_MIN = 0.1, REASON_MAX = 3;
-/** the precision levels of the setting: the levels of the model file, plus "all" (execute everything, no gate) */
-export const LEVELS = ["95", "97", "99", "all"];
-export const DEFAULT_LEVEL = "97";
+/** the levels of the setting: "cost" (the cost-score threshold, one confident mistake = 10 right answers, the default), "cost5" (bolder:
+ *  = 5) and "cost20" (more careful: = 20), chosen the same way and stored in the file (owner, 2026-11-02 22:12), the precision levels of the
+ *  model file, and "all" (execute everything, no gate; never the default) */
+export const LEVELS = ["cost5", "cost", "cost20", "95", "97", "99", "all"];
+export const COST_LEVELS = ["cost5", "cost", "cost20"];
+export const DEFAULT_LEVEL = "cost";
 
 /** the reader's part of the model file (the file itself, or its readers.vss_combined) */
 export const specOf = (model) => (model && model.readers ? model.readers.vss_combined : model);
@@ -45,26 +51,33 @@ export function confidence(model, signals, world) {
   for (const s of spec.features) z += s.weight * percentile(spec.tables[s.name], rawOf(spec, s.name, signals, world));
   return 1 / (1 + Math.exp(-z));
 }
-/** the levels the model reaches (a finite threshold), as numbers ascending */
+/** the precision levels the model reaches (a finite threshold), as numbers ascending ("cost" is not a precision level) */
 export function reachedLevels(model) {
   const lv = specOf(model).levels || {};
-  return Object.keys(lv).filter((k) => lv[k] && Number.isFinite(lv[k].threshold)).map(Number).sort((a, b) => a - b);
+  return Object.keys(lv).filter((k) => /^\d+$/.test(k) && lv[k] && Number.isFinite(lv[k].threshold)).map(Number).sort((a, b) => a - b);
 }
-/** the level the gate uses for a chosen level: "all" stays "all"; a reached level stays; a level the model does not reach -> the highest
- *  reached level below it (else null: no level, every request is asked) */
+/** a cost level of the model file ("cost", "cost5", "cost20"), or null when the file has none */
+const costOf = (model, key = "cost") => { const L = (specOf(model).levels || {})[key]; return L && (Number.isFinite(L.threshold) || L.kind === "executes everything" || L.kind === "asks everything") ? L : null; };
+/** the level the gate uses for a chosen level: "all" stays "all"; "cost" stays when the file has it; a reached precision level stays; a
+ *  precision level the model does not reach -> the highest reached level below it, else "cost"; else null (every request is asked) */
 export function effectiveLevel(model, level = DEFAULT_LEVEL) {
   if (String(level) === "all") return "all";
+  if (String(level) === "cost") return costOf(model) ? "cost" : null;
+  if (COST_LEVELS.includes(String(level))) return costOf(model, String(level)) ? String(level) : costOf(model) ? "cost" : null;   // a file without it: the default
   const r = reachedLevels(model), want = Number(level);
   if (r.includes(want)) return String(want);
   const below = r.filter((x) => x < want);
-  return below.length ? String(below[below.length - 1]) : null;
+  return below.length ? String(below[below.length - 1]) : costOf(model) ? "cost" : null;
 }
-/** the threshold of a precision level ("95" | "97" | "99" | "all"): "all" -> -Infinity (execute all); a level the model does not reach ->
- *  the threshold of effectiveLevel; no reached level -> Infinity (ask all) */
+/** the threshold of a level ("cost" | "95" | "97" | "99" | "all"): "all" -> -Infinity (execute all); "cost" -> its threshold (-Infinity
+ *  when its kind is "executes everything", Infinity for "asks everything"); a level the model does not reach -> the threshold of
+ *  effectiveLevel; no level -> Infinity (ask all) */
 export function threshold(model, level = DEFAULT_LEVEL) {
   const e = effectiveLevel(model, level);
   if (e === "all") return -Infinity;
-  return e === null ? Infinity : specOf(model).levels[e].threshold;
+  if (e === null) return Infinity;
+  const L = specOf(model).levels[e];
+  return Number.isFinite(L.threshold) ? L.threshold : L.kind === "executes everything" ? -Infinity : Infinity;
 }
 /** the number of held-out requests the tables were fitted on (missing values count 1 in the typical value) */
 const heldN = (spec) => { const L = Object.values(spec.levels || {}).find((x) => x && x.heldout_produced); return L ? L.heldout_produced : Math.max(...Object.values(spec.tables).map((t) => t.n)); };
@@ -106,7 +119,7 @@ function sentence(group, u, model, parts) {
       if (weak) return `${plainRef(weak)} was filled from context with a weak margin`;
       return fills.length ? `${fills.map(plainRef).join(" and ")} ${fills.length > 1 ? "were" : "was"} filled from context` : "a reference was filled from context";
     }
-    case "prior": { const sp = specOf(model), r = sp.world_prior[u.world || "none"] ?? sp.world_prior_default; return `read in the ${u.world || "unknown"} world, which is often wrong (right about ${Math.round(r * 100)}% of the time on held-out messages)`; }
+    case "prior": { const sp = specOf(model), r = sp.world_prior[u.world || "none"] ?? sp.world_prior_default; return `read in the ${u.world || "unknown"} world, which is often wrong (right about ${Math.round(r * 100)}% of the time on the calibration messages)`; }
   }
   return group;
 }

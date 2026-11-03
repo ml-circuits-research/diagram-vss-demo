@@ -40,17 +40,35 @@ export function sha256(bytes) {
 const enc = new TextEncoder();
 const TWO_PI = 2 * Math.PI;
 
-/** phases (Float64Array, length D) of the portable star of `name` under `seed` */
-export function starV2Phases(seed, name, D) {
+/** the D raw 32-bit outputs (Uint32Array) of the portable star of `name` under `seed`: SHA-256 -> xoshiro128** */
+function starV2Raw(seed, name, D) {
   const h = sha256(enc.encode(`${seed}:${name}`)), dv = new DataView(h.buffer);
   let s0 = dv.getUint32(0, true), s1 = dv.getUint32(4, true), s2 = dv.getUint32(8, true), s3 = dv.getUint32(12, true);
   if (!(s0 | s1 | s2 | s3)) { s0 = 0x9E3779B9; s1 = 0x243F6A88; s2 = 0xB7E15162; s3 = 0x6A09E667; }
-  const out = new Float64Array(D);
+  const out = new Uint32Array(D);
   for (let i = 0; i < D; i++) {
     const x = Math.imul(s1, 5) >>> 0, r = (Math.imul(((x << 7) | (x >>> 25)) >>> 0, 9)) >>> 0, t = (s1 << 9) >>> 0;
     s2 = (s2 ^ s0) >>> 0; s3 = (s3 ^ s1) >>> 0; s1 = (s1 ^ s2) >>> 0; s0 = (s0 ^ s3) >>> 0; s2 = (s2 ^ t) >>> 0; s3 = ((s3 << 11) | (s3 >>> 21)) >>> 0;
-    out[i] = TWO_PI * (r + 0.5) / 4294967296 - Math.PI;
+    out[i] = r;
   }
+  return out;
+}
+
+/** phases (Float64Array, length D) of the portable star of `name` under `seed` */
+export function starV2Phases(seed, name, D) {
+  const u = starV2Raw(seed, name, D), out = new Float64Array(D);
+  for (let i = 0; i < D; i++) out[i] = TWO_PI * (u[i] + 0.5) / 4294967296 - Math.PI;
+  return out;
+}
+
+/** the same star quantized to `bits` (1..8) exactly as export_web.py quantize() quantizes its phases, then dequantized as loader.js reads a
+ *  stars.bin: q = round((phase + pi) / 2pi * 2**bits) mod 2**bits, computed on the integer u as floor((u + 2**(31-bits)) / 2**(32-bits))
+ *  (phase = 2pi (u + 0.5) / 2**32 - pi never falls on a rounding boundary), value q * 2pi / 2**bits - pi. Checked byte for byte against
+ *  the 7 shipped worlds' stars.bin (training/sketch/shrink/SHRINK.md) */
+export function starV2Quantized(seed, name, D, bits) {
+  if (!(bits >= 1 && bits <= 8)) throw new Error(`stars.js: quantized stars need 1..8 bits (got ${bits})`);
+  const u = starV2Raw(seed, name, D), L = 1 << bits, half = 2 ** (31 - bits), div = 2 ** (32 - bits), step = TWO_PI / L, out = new Float64Array(D);
+  for (let i = 0; i < D; i++) out[i] = (Math.floor((u[i] + half) / div) & (L - 1)) * step - Math.PI;
   return out;
 }
 
@@ -61,7 +79,7 @@ export function fromPhases(ph) {
   return { re, im };
 }
 
-/** the star table of a model: exported stars (stars.bin) first, the portable function for anything else (star_version 2 only) */
+/** the star table of a model: exported stars (stars.bin, or the generated table of a vss-web-3 export, loader.js) first, the portable function for anything else (star_version 2 only) */
 export class Stars {
   constructor(cfg, exported) {
     this.D = cfg.D; this.seed = cfg.seed; this.starSeed = cfg.star_seed; this.version = cfg.star_version || 1;
@@ -72,7 +90,8 @@ export class Stars {
     if (v) return v;
     const ph = this.exported.get(key);
     if (ph) v = fromPhases(ph);
-    else if (this.version === 2 && !(this.identityTable && key.startsWith("id:"))) v = fromPhases(starV2Phases(seed, name, this.D));
+    else if (this.version === 2 && !(this.identityTable && key.startsWith("id:")))   // generated stars with quantize "all" (loader.js): quantized too
+      v = fromPhases(this.exported.quantizeAll ? starV2Quantized(seed, name, this.D, this.exported.bits) : starV2Phases(seed, name, this.D));
     else { this.missing.add(key); return null; }
     this.cache.set(key, v); return v;
   }

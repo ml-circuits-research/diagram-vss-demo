@@ -1,8 +1,11 @@
 {
- "about": "Default composer (2026-11-02): CandidateRouter on 7 worlds (cutter_worlds7s: the cutter trained also on 3000 short one-request commands, SHORT.md), shapes7c (CREATE_COLOR.md) and the event hint H1 (EVENT_HINT.md). 1000-message sample: 75.5 / 13.1 / 11.3 right / wrong / not done, extra 336; the demo's short sets 60.5 / 12.4 / 27.1 (was 51.0 / 11.0 / 38.1).",
+ "about": "Default composer (2026-11-02 21:24, owner's decision): arm VSS-G of FEEDBACK_PLAN.md (FEEDBACK_RESULT.md): the same chain as before (CandidateRouter on 7 worlds, cutter_worlds7s, cutter_events with the event hint H1, the context filler; each world with the settings of its BUILD.json) retrained on the base data + the Opus messages of EXTRA_DIRS (all learned parts). Stars generated in the browser (vss-web-3, SHRINK.md). fresh2 test part, cost score at the cost-score threshold of docs/model/confidence/vss.json: 12.9 [9.2, 16.5] (the previous worlds: 4.0).",
  "router": "cutter",
  "cutter": "micro/cutter_worlds7s.json",
  "context": "context/weights.json",
+ "event_cutter": "micro/cutter_events.json",
+ "event_hint": "H1",
+ "EXTRA_DIRS": "llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_gen_1 llm_train/opus_gen_2",
  "worlds": [
   {
    "world": "shapes",
@@ -14,7 +17,7 @@
     "rule"
    ],
    "model": "micro/shapes7c",
-   "version": "8b1d6877da"
+   "version": "8ed97b25b1"
   },
   {
    "world": "links",
@@ -23,7 +26,7 @@
     "disconnect"
    ],
    "model": "micro/links7",
-   "version": "7bdd38271f"
+   "version": "1977b44ce1"
   },
   {
    "world": "position",
@@ -37,7 +40,7 @@
     "toBack"
    ],
    "model": "micro/position7",
-   "version": "524c92ad1b"
+   "version": "aba60e3d75"
   },
   {
    "world": "graphq",
@@ -50,7 +53,7 @@
     "exists"
    ],
    "model": "micro/graphq7",
-   "version": "3cdc3e20fa"
+   "version": "d771449db6"
   },
   {
    "world": "questions",
@@ -65,7 +68,7 @@
     "property"
    ],
    "model": "micro/questions7",
-   "version": "b5eeb2d2e5"
+   "version": "d77e6c05b2"
   },
   {
    "world": "manage",
@@ -76,7 +79,7 @@
     "label"
    ],
    "model": "micro/manage7",
-   "version": "d19f5b0e3b"
+   "version": "b1423ee7f7"
   },
   {
    "world": "history",
@@ -86,12 +89,10 @@
     "forget"
    ],
    "model": "micro/history7",
-   "version": "d2be6b87ae"
+   "version": "9e05acedac"
   }
  ],
- "event_cutter": "micro/cutter_events.json",
- "event_hint": "H1",
- "cutter_version": "a1203fdc7e",
- "event_cutter_version": "08e2afb5e4",
- "context_version": "17808ca5c0"
+ "cutter_version": "14f47a02a1",
+ "event_cutter_version": "af1589b3fe",
+ "context_version": "ee4fcc6ab9"
 }

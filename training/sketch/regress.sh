@@ -11,16 +11,20 @@
 #                 was trained on them
 #   rules sets    score_rules.mjs (the demo Benchmark's per-row score, Rules only): hand 38/40 ... in the line "rules sets"
 #   tests         test_diagram_ops.mjs, test_editor_history.mjs (pass / fail)
-#   VSS gated     the same three sets, VSS executing a request only when its combined confidence clears the 97% threshold of PRECISION.md
-#                 (GATE=97 of llm_score.mjs / short_bench.mjs; model docs/model/confidence/vss.json, as the demo): precision of execution,
+#   VSS gated     the same three sets, VSS executing a request only when its combined confidence clears the demo's default threshold
+#                 (GATE=cost of llm_score.mjs / short_bench.mjs: the cost-score threshold of docs/model/confidence/vss.json, as the demo): precision of execution,
 #                 right % of the gold requests, asked %, unread %, extras executed. The ungated rows above are unchanged.
-# It does not change any file of the repository.
+# It does not change any file of the repository. SERIAL=1 runs the two long runs one after the other (for a machine with little memory).
+# GATE=<level> overrides the gate level (default cost).
 set -u
 cd "$(dirname "$0")/../.."
 OUT=${1:-$(mktemp -d)}; mkdir -p "$OUT"
 [ -d training/sketch/eval/sample1000 ] || python3 training/sketch/eval/make_sample.py > /dev/null
-( GATE=97 PAIR=value SEG=composer node training/sketch/llm_score.mjs > "$OUT/sample.txt" 2>&1 ) &
-( GATE=97 node training/sketch/short_bench/short_bench.mjs "$OUT/short.json" > "$OUT/short.log" 2>&1 && python3 training/sketch/short_bench/agg.py "$OUT/short.json" > "$OUT/short.txt" 2>&1 ) &
+LVL=${GATE:-cost}
+( GATE=$LVL PAIR=value SEG=composer node training/sketch/llm_score.mjs > "$OUT/sample.txt" 2>&1 ) &
+[ "${SERIAL:-0}" = 1 ] && wait
+( GATE=$LVL node training/sketch/short_bench/short_bench.mjs "$OUT/short.json" > "$OUT/short.log" 2>&1 && python3 training/sketch/short_bench/agg.py "$OUT/short.json" > "$OUT/short.txt" 2>&1 ) &
+[ "${SERIAL:-0}" = 1 ] && wait
 node training/sketch/score_rules.mjs "$PWD/docs/js/logic.js" > "$OUT/rules_sets.txt" 2>&1
 ( node training/sketch/test_diagram_ops.mjs > "$OUT/test_ops.txt" 2>&1; echo "exit $?" >> "$OUT/test_ops.txt" )
 ( node training/sketch/test_editor_history.mjs > "$OUT/test_hist.txt" 2>&1; echo "exit $?" >> "$OUT/test_hist.txt" )
@@ -50,16 +54,16 @@ print("regress: per gold request, right / wrong / not done (%) + extra")
 print(f"{'':22s}{'gold':>5}  {'Rules':<26}{'VSS':<26}")
 for name, g, a, b in rows: print(f"{name:22s}{g:>5}  {f(a):<26}{f(b):<26}")
 print("  * templates are written or generated from the rules' own templates (they favour the Rules); llm_short: the VSS cutter trained on them")
-gl = re.search(r"^ALL \(.*\n(?:.*\n)*?\s+vss gated (\d+)% \(t=([\d.]+)\): precision of execution ([\d.]+)% · right ([\d.]+)% · asked ([\d.]+)% · unread ([\d.]+)% · executed wrong ([\d.]+)% · extras executed (\d+)", s, re.M)
+gl = re.search(r"^ALL \(.*\n(?:.*\n)*?\s+vss gated (\w+)%? \(t=([\d.]+)\): precision of execution ([\d.]+)% · right ([\d.]+)% · asked ([\d.]+)% · unread ([\d.]+)% · executed wrong ([\d.]+)% · extras executed (\d+)", s, re.M)
 gated = [("sample (1000 msgs)" if m else "sample", gl.groups()[2:] if gl else None, g0 if m else None)]
 for grp, label in (("templates", "short: templates*"), ("llm_short", "short: llm_short")):
-    a = re.search(rf"^ALL {grp} vss gated \d+%: precision ([\d.]+) · right ([\d.]+) · asked ([\d.]+) · unread ([\d.]+) · executed wrong ([\d.]+) · extras executed (\d+)", t, re.M)
+    a = re.search(rf"^ALL {grp} vss gated \w+%?: precision ([\d.]+) · right ([\d.]+) · asked ([\d.]+) · unread ([\d.]+) · executed wrong ([\d.]+) · extras executed (\d+)", t, re.M)
     gated.append((label, a.groups() if a else None, int(rows[1 if grp == "templates" else 2][1]) if a and rows[1 if grp == "templates" else 2][1].isdigit() else None))
-print(f"VSS gated at {gl.group(1) if gl else '97'}% (t = {gl.group(2) if gl else "?"}, docs/model/confidence/vss.json: out-of-fold thresholds, PRECISION_BERT.md): precision of execution / right / asked / unread (%) / executed wrong (%) + extras executed")
+lvl = gl.group(1) if gl else "?"; lvl = lvl + "%" if lvl.isdigit() else ("the cost-score threshold" if lvl == "cost" else lvl)
+print(f"VSS gated at {lvl} (t = {gl.group(2) if gl else "?"}, docs/model/confidence/vss.json: fitted on the fresh2 calibration part, out-of-fold): precision of execution / right / asked / unread (%) / executed wrong (%) + extras executed")
 for name, x, g in gated: print(f"{name:22s}       " + ("  -" if x is None else f"{x[0]:>5} / {x[1]:>4} / {x[2]:>4} / {x[3]:>4} / {x[4]:>3} +{x[5]}"))
-# the cost score (AGENTS.md 2026-11-02): (right - 10 x (executed wrong + extras executed)) per 100 requested actions; asked / not done = 0. At the demo's 97% threshold.
-# The score-optimal threshold (COST_SCORE.md) is NOT here: it would need a second composer run with another threshold (about 3 more minutes); COST_SCORE.md has it from the records.
-print("cost score at the demo's 97% threshold (right - 10 x (executed wrong + extras executed), per 100 requested actions; 0 = asks everything):")
+# the cost score (AGENTS.md 2026-11-02): (right - 10 x (executed wrong + extras executed)) per 100 requested actions; asked / not done = 0. At the gate above.
+print(f"cost score at the gate above ({lvl}) (right - 10 x (executed wrong + extras executed), per 100 requested actions; 0 = asks everything):")
 for name, x, g in gated:
     print(f"{name:22s}       " + ("  -" if x is None or not g else f"{float(x[1]) - 10 * (float(x[4]) + 100 * int(x[5]) / g):7.1f}"))
 print("rules sets (score_rules): " + " ".join(re.findall(r"^(\w+): rules (\d+/\d+)", rd("rules_sets.txt"), re.M) and [f"{a} {b}" for a, b in re.findall(r"^(\w+): rules (\d+/\d+)", rd("rules_sets.txt"), re.M)]))

@@ -32,7 +32,7 @@ import argparse, collections, datetime, json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import generate as G
 import front as FR
-from llm_to_world import convert, Skip
+from llm_to_world import convert, Skip, EXT_SETS
 
 CAL_SHARE = 0.08
 G_EVENT_OF = {v: e for e, vs in G.EVENTS.items() for v in vs}
@@ -151,7 +151,7 @@ def main():
               # MARKER=0 (off by default; owner's decision 2026-10-31, CAPACITY.md S5): no occupancy marker, so a single role's presence is read
               # from the deposit that carries its word (role * F(filler), the rule of the set roles) and the training target has no marker term;
               # with the marker only a word of a one-word kind can write the presence ("delete X": the object is never read)
-              "reader": {"predicate_role": True, "occupancy_marker": os.environ.get("MARKER", "1") != "0", "definite_dets": [], "set_roles": ["members", "targets"]}}
+              "reader": {"predicate_role": True, "occupancy_marker": os.environ.get("MARKER", "1") != "0", "definite_dets": [], "set_roles": ["members", "targets"] + ([r for r in EXT_SETS if r in set().union(*roles_of.values())] if G.LEGEND_EXT else [])}}
     lp = os.path.join(out, "legend.json"); json.dump(legend, open(lp, "w"), indent=1); sha = G.sha256_file(lp)
     with open(os.path.join(out, "kinds.tsv"), "w") as fh:
         rule = (f"the other words -> the kind map KINDMAP={KINDMAP} ({kindmap_sha})" if KINDMAP else
@@ -215,7 +215,7 @@ def main():
           [f"| {x} | {n} |" for x, n in lost_why.most_common(40)] + ["", "| event | rows |", "|---|---|"] + [f"| {e} | {n} |" for e, n in by_ev.most_common()]
     open(os.path.join(out, "REAL_WORLD.md") if WEV else os.path.join(HERE, "llm_train", "REAL_WORLD.md"), "w").write("\n".join(rep) + "\n")
     print("\n".join(rep[:9]))
-    print(f"Switches: VAL_PREC={FR.val_prec()} VAL_SUB={FR.val_sub()} CREATE_COLOR={os.environ.get('CREATE_COLOR', '') or 'attr'} "
+    print(f"Switches: VAL_PREC={FR.val_prec()} VAL_SUB={FR.val_sub()}{' VAL_PICK=' + FR.val_pick() if os.environ.get('VAL_PICK') else ''} CREATE_COLOR={os.environ.get('CREATE_COLOR', '') or 'attr'} LEGEND_EXT={int(G.LEGEND_EXT)} "
           f"DIAGRAM_OPS={os.environ.get('DIAGRAM_OPS', '') or '0'}; data folders {FR.train_dirs()}")
     print("Values left out per legend question kind: " + lost_kind_line(lost_kind))
 

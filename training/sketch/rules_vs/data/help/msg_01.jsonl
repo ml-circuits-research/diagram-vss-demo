@@ -1,0 +1,79 @@
+{"id":"help-000","text":"Draw a red circle named Hub in the center","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"create","name":"Hub","position":"center","shape":"circle","color":"red"}}]}
+{"id":"help-001","text":"Add three small squares in a row below Process","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"create","position":"below","anchor":"Process","count":3,"shape":"square","size":"small"}}]}
+{"id":"help-002","text":"Draw a gold star named Gem with a black outline in the top right","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"create","name":"Gem","outline":"black","position":"topRight","shape":"star","color":"gold"}}]}
+{"id":"help-003","text":"Delete Done","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"delete","target":"Done"}}]}
+{"id":"help-004","text":"Delete the yellow diamond","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"delete","target":"mention(color=yellow,shape=diamond)"}}]}
+{"id":"help-005","text":"Clear the canvas","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"delete","target":"mention(quantifier=all)"}}]}
+{"id":"help-006","text":"Copy Check","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"duplicate","target":"Check"}}]}
+{"id":"help-007","text":"Duplicate Done twice","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"duplicate","count":2,"target":"Done"}}]}
+{"id":"help-008","text":"Move Done to the top right","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"move","position":"topRight","target":"Done"}}]}
+{"id":"help-009","text":"Move Done left by 100","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"move","distance":100,"direction":"left","target":"Done"}}]}
+{"id":"help-010","text":"Put Done between Start and Check","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"move","position":"between","anchor":["Start","Check"],"target":"Done"}}]}
+{"id":"help-011","text":"Swap Start and Done","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"swap","target":["Start","Done"]}}]}
+{"id":"help-012","text":"Make Done red","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"set","color":"red","target":"Done"}}]}
+{"id":"help-013","text":"Turn Done into a star","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"set","shape":"star","target":"Done"}}]}
+{"id":"help-014","text":"Give Process a red outline","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"set","outline":"red","target":"Process"}}]}
+{"id":"help-015","text":"Make all circles red","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"set","color":"red","target":"mention(quantifier=all,shape=circle)"}}]}
+{"id":"help-016","text":"Make Process bigger","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"resize","scale":1.5,"target":"Process"}}]}
+{"id":"help-017","text":"Shrink Start","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"resize","scale":0.67,"target":"Start"}}]}
+{"id":"help-018","text":"Make Check twice as big","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"resize","scale":2,"target":"Check"}}]}
+{"id":"help-019","text":"Label Done \"finish\"","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"label","label":"finish","target":"Done"}}]}
+{"id":"help-020","text":"Rename Done to End","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"rename","name":"End","target":"Done"}}]}
+{"id":"help-021","text":"Connect Start to Done with a dashed arrow","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"connect","to":"Done","from":"Start","style":"dashed"}}]}
+{"id":"help-022","text":"Connect Start to Process, Check and Done","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"connect","to":["Process","Check","Done"],"from":"Start"}}]}
+{"id":"help-023","text":"Connect Start, Check and Done in a chain","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"connect","from":["Start","Check","Done"],"pairing":"chain"}}]}
+{"id":"help-024","text":"Disconnect Start from Process","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"disconnect","from":"Start","to":"Process"}}]}
+{"id":"help-025","text":"Remove all connections","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"disconnect","quantifier":"all"}}]}
+{"id":"help-026","text":"Align Start, Process and Check","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"align","axis":"horizontal","target":["Start","Process","Check"]}}]}
+{"id":"help-027","text":"Align Check and Done vertically","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"align","axis":"vertical","target":["Check","Done"]}}]}
+{"id":"help-028","text":"Distribute the shapes evenly","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"distribute","axis":"horizontal","target":"mention(quantifier=all)"}}]}
+{"id":"help-029","text":"Arrange everything in a circle","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"arrange","layout":"circle","target":"mention(quantifier=all)"}}]}
+{"id":"help-030","text":"Arrange everything in a grid","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"arrange","layout":"grid","target":"mention(quantifier=all)"}}]}
+{"id":"help-031","text":"Bring Start to the front","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"toFront","target":"Start"}}]}
+{"id":"help-032","text":"Send Process to the back","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"toBack","target":"Process"}}]}
+{"id":"help-033","text":"Group Start and Process as Intake","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"group","name":"Intake","target":["Start","Process"]}}]}
+{"id":"help-034","text":"Undo","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"undo"}}]}
+{"id":"help-035","text":"From now on, circles are orange","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"rule","args":{"shape":"circle","color":"orange"}}]}
+{"id":"help-036","text":"From now on, new shapes are small and purple","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"rule","args":{"color":"purple","size":"small"}}]}
+{"id":"help-037","text":"Check is above Process","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"fact","args":{"position":"above","anchor":"Process","target":"Check"}}]}
+{"id":"help-038","text":"Done is red","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"fact","args":{"color":"red","target":"Done"}}]}
+{"id":"help-039","text":"Done is connected to Start","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"fact","args":{"linked":"Start","target":"Done"}}]}
+{"id":"help-040","text":"How many circles are there?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"count","shape":"circle"}}]}
+{"id":"help-041","text":"How many connections are there?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"count","kind":"edge"}}]}
+{"id":"help-042","text":"How many groups are there?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"count","kind":"group"}}]}
+{"id":"help-043","text":"Which shapes are green?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"list","color":"green"}}]}
+{"id":"help-044","text":"Which shapes are below Start?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"list","position":"below","anchor":"Start"}}]}
+{"id":"help-045","text":"Which circles are not blue?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"list","notColor":"blue","shape":"circle"}}]}
+{"id":"help-046","text":"Is there a red shape?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"exists","color":"red"}}]}
+{"id":"help-047","text":"Are there any stars?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"exists","shape":"star"}}]}
+{"id":"help-048","text":"What color is Check?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"property":"color","ask":"property","target":"Check"}}]}
+{"id":"help-049","text":"Where is Done?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"property":"position","ask":"property","target":"Done"}}]}
+{"id":"help-050","text":"How big is Start?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"property":"size","ask":"property","target":"Start"}}]}
+{"id":"help-051","text":"What does Process say?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"property":"label","ask":"property","target":"Process"}}]}
+{"id":"help-052","text":"Is Check above Done?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"check","position":"above","anchor":"Done","target":"Check"}}]}
+{"id":"help-053","text":"Is Done a green circle?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"check","shape":"circle","color":"green","target":"Done"}}]}
+{"id":"help-054","text":"Is Start bigger than Done?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"check","comparison":"bigger","anchor":"Done","target":"Start"}}]}
+{"id":"help-055","text":"Describe Check","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"describe","target":"Check"}}]}
+{"id":"help-056","text":"Describe the diagram","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"describe"}}]}
+{"id":"help-057","text":"What is connected to Check?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"neighbors","target":"Check"}}]}
+{"id":"help-058","text":"Are Start and Done connected?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"connected","target":"Start","anchor":"Done"}}]}
+{"id":"help-059","text":"How many connections does Check have?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"degree","target":"Check"}}]}
+{"id":"help-060","text":"Is there a path from Start to Done?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"path","from":"Start","to":"Done"}}]}
+{"id":"help-061","text":"What can be reached from Process?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"reachable","from":"Process"}}]}
+{"id":"help-062","text":"Are there any cycles?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"cycle"}}]}
+{"id":"help-063","text":"Which shape is closest to Start?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"superlative":"closest","ask":"nearest","anchor":"Start"}}]}
+{"id":"help-064","text":"Which shape is farthest from Start?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"superlative":"farthest","ask":"nearest","anchor":"Start"}}]}
+{"id":"help-065","text":"Which shape is the biggest?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"superlative":"biggest","ask":"extreme"}}]}
+{"id":"help-066","text":"Which shape is the leftmost?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"superlative":"leftmost","ask":"extreme"}}]}
+{"id":"help-067","text":"Which shape has the most connections?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"superlative":"mostConnected","ask":"extreme"}}]}
+{"id":"help-068","text":"Make the green circle bigger","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"resize","scale":1.5,"target":"mention(color=green,shape=circle)"}}]}
+{"id":"help-069","text":"Delete the newest circle","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"delete","target":"mention(recency=newest,shape=circle)"}}]}
+{"id":"help-070","text":"Make Start small","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"set","size":"small","target":"Start"}}]}
+{"id":"help-071","text":"Draw a tiny orange triangle named T1 next to Start","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"create","name":"T1","position":"near","anchor":"Start","shape":"triangle","color":"orange","size":"tiny"}}]}
+{"id":"help-072","text":"Draw a circle named Hub at 400, 250","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"create","name":"Hub","at":[400,250],"shape":"circle"}}]}
+{"id":"help-073","text":"Connect Start to Done","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"connect","to":"Done","from":"Start"}}]}
+{"id":"help-074","text":"Connect Start and Check with a two-way arrow","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"connect","to":"Check","from":"Start","arrow":"both"}}]}
+{"id":"help-075","text":"Connect Done to Start with a dotted line","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"connect","to":"Start","from":"Done","style":"dotted","arrow":"none"}}]}
+{"id":"help-076","text":"Is the green circle below Check?","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"question","args":{"ask":"check","position":"below","anchor":"Check","target":"mention(color=green,shape=circle)"}}]}
+{"id":"help-077","text":"Draw a teal square named Box between Start and Done","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"create","name":"Box","position":"between","anchor":["Start","Done"],"shape":"square","color":"teal"}}]}
+{"id":"help-078","text":"Make Done red, then frobnicate Check","names":["Start","Process","Check","Done","Intake"],"wires":[{"type":"command","args":{"action":"set","color":"red","target":"Done"}}]}

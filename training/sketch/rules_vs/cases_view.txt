@@ -1,0 +1,402 @@
+100 cases: Rules right, the learned reader not right (or right but asked). cause: DATA / CONV / ASK / ERR (classify_cases.py)
+
+#0 [ERR] [llm_short/vss/nd] "tell me the rules"
+   why: wrong act (rules read as list)
+   want question:rules {"ask": "rules"}
+   vss: question:list {"ask": "list"}
+#1 [ERR] [llm_short/vss/wrong conf=0.89] "add a teal box named Session under User"
+   why: 'box' -> circle
+   want command:create {"action": "create", "shape": "rectangle", "color": "teal", "name": "session", "position": "below", "anchor": "user"}
+   vss: command:create {"action": "create", "shape": "circle", "color": "teal", "name": "session", "position": "below", "anchor": "user"}
+#2 [ERR] [llm_short/vss/nd] "from now on squares are small"
+   why: rule read as fact
+   want rule: {"shape": "square", "size": "small"}
+   vss: fact: {"target": "mention(shape=square)", "size": "small"}
+#3 [ERR] [llm_short/vss/nd] "change all the purple things to teal"
+   why: cutter made no unit
+   want command:set {"action": "set", "target": "mention(color=purple,quantifier=all)", "color": "teal"}
+   vss: (nothing)
+#4 [ERR] [llm_short/vss/wrong conf=0.81] "which red shape is farthest from Ball"
+   why: value dropped (red)
+   want question:nearest {"ask": "nearest", "anchor": "ball", "superlative": "farthest", "color": "red"}
+   vss: question:nearest {"ask": "nearest", "superlative": "farthest", "anchor": "ball"}
+#5 [ERR] [llm_short/vss/nd] "how large is the Lotus"
+   why: property read as fact
+   want question:property {"ask": "property", "target": "lotus", "property": "size"}
+   vss: fact: {"target": "lotus", "size": "large"}
+#6 [ERR] [llm_short/vss/wrong conf=0.74] "add a gray ellipse at the top right"
+   why: value dropped (position)
+   want command:create {"action": "create", "shape": "ellipse", "color": "gray", "position": "topright"}
+   vss: command:create {"action": "create", "shape": "ellipse", "color": "gray"}
+#7 [ERR] [llm_short/vss/wrong conf=0.64] "two-way link between Mid and Coach"
+   why: role confusion (to=pair)
+   want command:connect {"action": "connect", "from": "mid", "to": "coach", "arrow": "both"}
+   vss: command:connect {"action": "connect", "from": "mid", "to": "mid,coach", "arrow": "both"}
+#8 [ERR] [llm_short/vss/nd] "list the defaults in effect"
+   why: wrong act (rules read as list)
+   want question:rules {"ask": "rules"}
+   vss: question:list {"ask": "list"}
+#9 [ERR] [llm_short/vss/wrong conf=0.91] "is there a diamond that is not red"
+   why: notColor read as color
+   want question:exists {"ask": "exists", "shape": "diamond", "notColor": "red"}
+   vss: question:exists {"ask": "exists", "shape": "diamond", "color": "red"}
+#10 [ERR] [llm_short/vss/wrong conf=0.72] "set the last diamond to black"
+   why: description attribute dropped (last)
+   want command:set {"action": "set", "target": "mention(recency=newest,shape=diamond)", "color": "black"}
+   vss: command:set {"action": "set", "target": "mention(shape=diamond)", "color": "black"}
+#11 [ERR] [llm_short/vss/wrong conf=0.94] "what color is the newest triangle"
+   why: description attribute dropped (newest)
+   want question:property {"ask": "property", "target": "mention(recency=newest,shape=triangle)", "property": "color"}
+   vss: question:property {"ask": "property", "target": "mention(shape=triangle)", "property": "color"}
+#12 [DATA] [llm_short/vss/nd] "discard the default rules you saved"
+   why: trigger 'discard' (forget): 5 training spans, 2 in the worlds' data
+   want command:forget {"action": "forget"}
+   vss: (nothing)
+#13 [ERR] [llm_short/vss/wrong conf=0.64] "connect Mix and Dough both ways"
+   why: role confusion (from/to=pair)
+   want command:connect {"action": "connect", "from": "mix", "to": "dough", "arrow": "both"}
+   vss: command:connect {"action": "connect", "from": "mix,dough", "to": "mix,dough", "arrow": "both"}
+#14 [ERR] [llm_short/vss/nd] "what shape is nearest to Rover"
+   why: wrong act
+   want question:nearest {"ask": "nearest", "anchor": "rover", "superlative": "closest"}
+   vss: question:property {"ask": "property", "target": "rover", "property": "shape"}
+#15 [ERR] [llm_short/vss/nd] "new hexagons should be large"
+   why: rule read as set
+   want rule: {"shape": "hexagon", "size": "large"}
+   vss: command:set {"action": "set", "target": "mention(shape=hexagon)", "size": "large"}
+#16 [ERR] [llm_short/vss/nd] "arrange the whole thing in a column"
+   why: cutter made no unit
+   want command:arrange {"action": "arrange", "layout": "column"}
+   vss: (nothing)
+#17 [ERR] [llm_short/vss/wrong conf=0.82] "connect Root to every triangle"
+   why: description attribute dropped (every)
+   want command:connect {"action": "connect", "from": "root", "to": "mention(quantifier=all,shape=triangle)"}
+   vss: command:connect {"action": "connect", "from": "root", "to": "mention(shape=triangle)"}
+#18 [ERR] [llm_short/vss/wrong conf=0.85] "count all the boxes"
+   why: value dropped (shape)
+   want question:count {"ask": "count", "shape": "rectangle"}
+   vss: question:count {"ask": "count"}
+#19 [ERR] [llm_short/vss/wrong conf=0.61] "call the Dew Mist"
+   why: name and target swapped
+   want command:rename {"action": "rename", "target": "dew", "name": "mist"}
+   vss: command:rename {"action": "rename", "target": "mist", "name": "dew"}
+#20 [ERR] [llm_short/vss/nd] "reachable from Peg, what's there?"
+   why: cutter made no unit
+   want question:reachable {"ask": "reachable", "from": "peg"}
+   vss: (nothing)
+#21 [ERR] [llm_short/vss/wrong conf=0.77] "how many hexagons are on the board?"
+   why: value dropped (shape)
+   want question:count {"ask": "count", "shape": "hexagon"}
+   vss: question:count {"ask": "count"}
+#22 [ERR] [llm_short/vss/wrong conf=0.47] "a navy link from Curtain to Stage labelled 'Act 2'"
+   why: value dropped (colour)
+   want command:connect {"action": "connect", "from": "curtain", "to": "stage", "color": "navy", "label": "act 2"}
+   vss: command:connect {"action": "connect", "from": "curtain", "to": "stage", "label": "act 2"}
+#23 [ERR] [llm_short/vss/wrong conf=0.70] "hey, put a huge black rectangle in the bottom right named Depot"
+   why: value dropped (name)
+   want command:create {"action": "create", "shape": "rectangle", "color": "black", "size": "huge", "name": "depot", "position": "bottomright"}
+   vss: command:create {"action": "create", "shape": "rectangle", "color": "black", "size": "huge", "position": "bottomright"}
+#24 [ERR] [llm_short/vss/wrong conf=0.88] "how many arrows are there in total"
+   why: value dropped (kind)
+   want question:count {"ask": "count", "kind": "edge"}
+   vss: question:count {"ask": "count"}
+#25 [ERR] [llm_short/vss/nd] "is there a loop between rooms"
+   why: cutter made no unit
+   want question:cycle {"ask": "cycle"}
+   vss: (nothing)
+#26 [ERR] [llm_short/vss/wrong conf=0.79] "put a tiny gold star between Dunes and Oasis"
+   why: anchor list cut to one
+   want command:create {"action": "create", "shape": "star", "color": "gold", "size": "tiny", "position": "between", "anchor": "dunes,oasis"}
+   vss: command:create {"action": "create", "shape": "star", "color": "gold", "size": "tiny", "position": "between", "anchor": "dunes"}
+#27 [ERR] [llm_short/vss/nd] "what rules have been defined"
+   why: wrong act (rules read as list)
+   want question:rules {"ask": "rules"}
+   vss: question:list {"ask": "list"}
+#28 [ERR] [llm_short/vss/nd] "add a lime hexagon to the right of Spruce"
+   why: create read as 'check' (region phrase)
+   want command:create {"action": "create", "shape": "hexagon", "color": "lime", "position": "rightof", "anchor": "spruce"}
+   vss: question:check {"ask": "check", "target": "mention(color=lime,shape=hexagon)", "position": "rightof", "anchor": "spruce"}
+#29 [ERR] [llm_short/vss/wrong conf=0.60] "a box labeled 'Board' at the top"
+   why: 'box' -> circle
+   want command:create {"action": "create", "shape": "rectangle", "label": "board", "position": "top"}
+   vss: command:create {"action": "create", "shape": "circle", "label": "board", "position": "top"}
+#30 [ERR] [llm_short/sop/wrong conf=0.97] "make a small green oval named Sprint at the center"
+   why: value wrong/dropped
+   want command:create {"action": "create", "shape": "ellipse", "color": "green", "size": "small", "name": "sprint", "position": "center"}
+   sop: command:create {"action": "create", "color": "green", "name": "sprint", "position": "left", "shape": "ellipse", "size": "small"}
+#31 [ERR] [llm_short/sop/wrong conf=0.97] "a large yellow oval at the bottom"
+   why: value wrong/dropped
+   want command:create {"action": "create", "shape": "ellipse", "color": "yellow", "size": "large", "position": "bottom"}
+   sop: command:create {"action": "create", "color": "yellow", "position": "bottom", "shape": "ellipse", "size": "small"}
+#32 [ERR] [llm_short/sop/wrong conf=0.55] "line up all the cyan shapes vertically"
+   why: description attribute wrong/dropped
+   want command:align {"action": "align", "target": "mention(color=cyan,quantifier=all)", "axis": "vertical"}
+   sop: command:align {"action": "align", "axis": "vertical", "target": "mention(quantifier=all,shape=circle)"}
+#33 [ERR] [llm_short/sop/wrong conf=0.76] "bring the newest hexagon to the front"
+   why: description attribute wrong/dropped
+   want command:toFront {"action": "tofront", "target": "mention(recency=newest,shape=hexagon)"}
+   sop: command:toFront {"action": "tofront", "target": "mention(recency=newest,shape=square)"}
+#34 [ERR] [llm_short/sop/wrong conf=0.41] "turn the black squares white"
+   why: description attribute wrong/dropped
+   want command:set {"action": "set", "target": "mention(color=black,quantifier=all,shape=square)", "color": "white"}
+   sop: command:set {"action": "set", "color": "white", "target": "mention(quantifier=all,shape=square)"}
+#35 [ERR] [llm_short/sop/wrong conf=0.63] "arrange all the hexagons in a circle"
+   why: description attribute wrong/dropped
+   want command:arrange {"action": "arrange", "target": "mention(quantifier=all,shape=hexagon)", "layout": "circle"}
+   sop: command:arrange {"action": "arrange", "layout": "circle", "target": "mention(quantifier=all,shape=square)"}
+#36 [ERR] [llm_short/sop/wrong conf=0.53] "make all the black diamonds white"
+   why: description attribute wrong/dropped
+   want command:set {"action": "set", "target": "mention(color=black,quantifier=all,shape=diamond)", "color": "white"}
+   sop: command:set {"action": "set", "color": "white", "target": "mention(quantifier=all,shape=circle)"}
+#37 [ERR] [llm_short/sop/wrong conf=0.71] "make the last circle yellow"
+   why: description attribute wrong/dropped
+   want command:set {"action": "set", "target": "mention(recency=newest,shape=circle)", "color": "yellow"}
+   sop: command:set {"action": "set", "color": "yellow", "target": "mention(recency=oldest,shape=circle)"}
+#38 [ERR] [llm_short/sop/wrong conf=0.94] "add a gray ellipse at the top right"
+   why: value wrong/dropped
+   want command:create {"action": "create", "shape": "ellipse", "color": "gray", "position": "topright"}
+   sop: command:create {"action": "create", "color": "green", "position": "topright", "shape": "ellipse"}
+#39 [DATA] [llm_short/sop/wrong conf=0.79] "delete all stars that are not red"
+   why: delete + 'not <colour>': 4 training spans in all
+   want command:delete {"action": "delete", "target": "mention(notcolor=red,quantifier=all,shape=star)"}
+   sop: command:delete {"action": "delete", "target": "mention(quantifier=all)"}
+#40 [ERR] [llm_short/sop/wrong conf=0.54] "get rid of the red hexagons"
+   why: description attribute wrong/dropped
+   want command:delete {"action": "delete", "target": "mention(color=red,quantifier=all,shape=hexagon)"}
+   sop: command:delete {"action": "delete", "target": "mention(quantifier=all,shape=square)"}
+#41 [ERR] [llm_short/sop/wrong conf=0.90] "draw a navy line from User to Ledger"
+   why: value wrong/dropped
+   want command:connect {"action": "connect", "from": "user", "to": "ledger", "color": "navy", "arrow": "none"}
+   sop: command:connect {"action": "connect", "color": "navy", "from": "user", "to": "ledger"}
+#42 [ERR] [llm_short/sop/wrong conf=0.52] "remove every red square"
+   why: description attribute wrong/dropped
+   want command:delete {"action": "delete", "target": "mention(color=red,quantifier=all,shape=square)"}
+   sop: command:delete {"action": "delete", "target": "mention(quantifier=all,shape=square)"}
+#43 [ERR] [llm_short/sop/wrong conf=0.79] "raise the newest square to the top layer"
+   why: description attribute wrong/dropped
+   want command:toFront {"action": "tofront", "target": "mention(recency=newest,shape=square)"}
+   sop: command:toFront {"action": "tofront", "target": "mention(recency=newest,shape=circle)"}
+#44 [ERR] [llm_short/sop/wrong conf=0.99] "line, no arrow heads, Mic to Amp"
+   why: value wrong/dropped
+   want command:connect {"action": "connect", "from": "mic", "to": "amp", "arrow": "none"}
+   sop: command:connect {"action": "connect", "from": "mic", "to": "amp"}
+#45 [ASK] [llm_short/vss/asked conf=0.86] "new squares should be small from now on"
+   why: read right; confidence under the threshold
+   want rule: {"shape": "square", "size": "small"}
+   vss: rule: {"shape": "square", "size": "small"}
+#46 [ASK] [llm_short/vss/asked conf=0.87] "are Drum and Cymbal joined"
+   why: read right; confidence under the threshold
+   want question:connected {"ask": "connected", "target": "cymbal", "anchor": "drum"}
+   vss: question:connected {"ask": "connected", "target": "cymbal", "anchor": "drum"}
+#47 [ASK] [llm_short/vss/asked conf=0.65] "disconnect Millet and Sorghum"
+   why: read right; confidence under the threshold
+   want command:disconnect {"action": "disconnect", "from": "millet", "to": "sorghum"}
+   vss: command:disconnect {"action": "disconnect", "from": "millet", "to": "sorghum"}
+#48 [ASK] [llm_short/vss/asked conf=0.76] "step back, undo it"
+   why: read right; confidence under the threshold
+   want command:undo {"action": "undo"}
+   vss: command:undo {"action": "undo"}
+#49 [ASK] [llm_short/vss/asked conf=0.84] "does this mind map loop"
+   why: read right; confidence under the threshold
+   want question:cycle {"ask": "cycle"}
+   vss: question:cycle {"ask": "cycle"}
+#50 [ASK] [llm_short/sop/asked conf=0.79] "is there a navy circle"
+   why: read right; confidence under the threshold
+   want question:exists {"ask": "exists", "shape": "circle", "color": "navy"}
+   sop: question:exists {"ask": "exists", "color": "navy", "shape": "circle"}
+#51 [ASK] [llm_short/sop/asked conf=0.74] "list the orange ones"
+   why: read right; confidence under the threshold
+   want question:list {"ask": "list", "color": "orange"}
+   sop: question:list {"ask": "list", "color": "orange"}
+#52 [ASK] [llm_short/sop/asked conf=0.55] "any gray hexagons around?"
+   why: read right; confidence under the threshold
+   want question:exists {"ask": "exists", "shape": "hexagon", "color": "gray"}
+   sop: question:exists {"ask": "exists", "color": "gray", "shape": "hexagon"}
+#53 [ASK] [llm_short/sop/asked conf=0.73] "remove the newest circle"
+   why: read right; confidence under the threshold
+   want command:delete {"action": "delete", "target": "mention(recency=newest,shape=circle)"}
+   sop: command:delete {"action": "delete", "target": "mention(recency=newest,shape=circle)"}
+#54 [ASK] [llm_short/sop/asked conf=0.51] "arrange the circles in a row"
+   why: read right; confidence under the threshold
+   want command:arrange {"action": "arrange", "target": "mention(quantifier=all,shape=circle)", "layout": "row"}
+   sop: command:arrange {"action": "arrange", "layout": "row", "target": "mention(quantifier=all,shape=circle)"}
+#55 [DATA] [broad/vss/nd] "erase the blue square"
+   why: trigger 'erase': 3 training spans, 1 in the worlds' data
+   want command:delete {"action": "delete", "target": "mention(color=blue,shape=square)"}
+   vss: (nothing)
+#56 [ERR] [broad/vss/nd] "draw a purple square to the left of Start"
+   why: create read as 'check' (region phrase)
+   want command:create {"action": "create", "shape": "square", "color": "purple", "position": "leftof", "anchor": "start"}
+   vss: question:check {"ask": "check", "target": "mention(color=purple,shape=square)", "color": "purple", "position": "leftof", "anchor": "start"}
+#57 [ERR] [blind/vss/wrong conf=0.35] "Align all the circles vertically"
+   why: all circles filled with every name
+   want command:align {"action": "align", "target": "mention(quantifier=all,shape=circle)", "axis": "vertical"}
+   vss: command:align {"action": "align", "axis": "vertical", "target": "check,done,process,start"}
+#58 [DATA] [blind/vss/nd] "Detach Done from Check"
+   why: trigger 'detach': 2 training spans, none in the worlds' data
+   want command:disconnect {"action": "disconnect", "from": "check", "to": "done"}
+   vss: command:connect {"action": "connect", "from": "done,check", "to": "check"}
+#59 [DATA] [hand/vss/nd] "Erase Done"
+   why: trigger 'erase': 3 training spans, 1 in the worlds' data
+   want command:delete {"action": "delete", "target": "done"}
+   vss: command:duplicate {"action": "duplicate", "target": "done"}
+#60 [ERR] [broad/vss/wrong conf=0.79] "Add a square named Log below Process and link Process to Log with a dashed arrow"
+   why: second request source wrong
+   want command:connect {"action": "connect", "from": "process", "to": "$new", "style": "dashed"}
+   vss: command:create {"action": "create", "shape": "square", "name": "log", "position": "below", "anchor": "process"} | command:connect {"action": "connect", "from": "process,$new", "to": "$new", "style": "dashed"}
+#61 [ERR] [blind/vss/nd] "How large is Process?"
+   why: property read as fact
+   want question:property {"ask": "property", "target": "process", "property": "size"}
+   vss: fact: {"target": "process", "size": "large"}
+#62 [ERR] [hand/vss/wrong conf=0.29] "Connect the circles in a chain"
+   why: all circles filled with every name
+   want command:connect {"action": "connect", "from": "mention(quantifier=all,shape=circle)", "pairing": "chain"}
+   vss: command:connect {"action": "connect", "pairing": "chain", "from": "check,done,process,start"}
+#63 [DATA] [blind/vss/wrong conf=0.59] "Throw a big yellow star in the upper left corner"
+   why: 'upper left corner': 'upper' occurs in 3 training spans (all 'top left' phrasing is covered)
+   want command:create {"action": "create", "shape": "star", "color": "yellow", "size": "large", "position": "topleft"}
+   vss: command:create {"action": "create", "shape": "star", "color": "yellow", "size": "large"}
+#64 [ERR] [broad/vss/wrong conf=0.73] "make the last circle green"
+   why: description attribute dropped (last)
+   want command:set {"action": "set", "target": "mention(recency=newest,shape=circle)", "color": "green"}
+   vss: command:set {"action": "set", "target": "mention(shape=circle)", "color": "green"}
+#65 [DATA] [broad/vss/wrong conf=0.83] "how many cricles are there?"
+   why: typo 'cricles' never seen (the demo's spell checker may fix it)
+   want question:count {"ask": "count", "shape": "circle"}
+   vss: question:count {"ask": "count"}
+#66 [DATA] [blind/vss/nd] "Could you sketch me a tiny purple hexagon?"
+   why: 'sketch me': 'sketch' occurs in 11 training spans, 3 in the worlds' data
+   want command:create {"action": "create", "shape": "hexagon", "color": "purple", "size": "tiny"}
+   vss: (nothing)
+#67 [ERR] [broad/vss/nd] "ok now get rid of Process"
+   why: cutter made no unit
+   want command:delete {"action": "delete", "target": "process"}
+   vss: (nothing)
+#68 [ERR] [broad/sop/wrong conf=0.94] "join Start and Done with a dotted line"
+   why: value wrong/dropped
+   want command:connect {"action": "connect", "from": "start", "to": "done", "style": "dotted", "arrow": "none"}
+   sop: command:connect {"action": "connect", "from": "start", "style": "dotted", "to": "done"}
+#69 [DATA] [broad/sop/wrong conf=0.61] "connect the red circle to Done"
+   why: a description as the source of connect: 4 of 3427 'from' fillers in the worlds' data are descriptions
+   want command:connect {"action": "connect", "from": "mention(color=red,shape=circle)", "to": "done"}
+   sop: command:connect {"action": "connect", "to": "done"}
+#70 [ERR] [broad/sop/wrong conf=0.50] "align all the squares horizontally"
+   why: description attribute wrong/dropped
+   want command:align {"action": "align", "target": "mention(quantifier=all,shape=square)", "axis": "horizontal"}
+   sop: command:align {"action": "align", "axis": "horizontal", "target": "mention(quantifier=all,shape=circle)"}
+#71 [ERR] [broad/sop/nd] "Draw a red circle named Hub and connect it to Start"
+   why: value wrong/dropped
+   want command:connect {"action": "connect", "from": "$new", "to": "start"}
+   sop: command:create {"action": "create", "color": "red", "name": "hub", "shape": "circle"}
+#72 [DATA] [hand/sop/wrong conf=0.62] "Remove the triangles that are not green"
+   why: delete + 'not <colour>': 4 training spans in all
+   want command:delete {"action": "delete", "target": "mention(notcolor=green,quantifier=all,shape=triangle)"}
+   sop: command:delete {"action": "delete", "target": "mention(quantifier=all)"}
+#73 [DATA] [broad/sop/wrong conf=0.74] "delete the stars that are not yellow"
+   why: delete + 'not <colour>': 4 training spans in all
+   want command:delete {"action": "delete", "target": "mention(notcolor=yellow,quantifier=all,shape=star)"}
+   sop: command:delete {"action": "delete", "target": "mention(quantifier=all)"}
+#74 [DATA] [blind/sop/wrong conf=0.96] "Throw a big yellow star in the upper left corner"
+   why: 'upper left corner': 'upper' occurs in 3 training spans
+   want command:create {"action": "create", "shape": "star", "color": "yellow", "size": "large", "position": "topleft"}
+   sop: command:create {"action": "create", "color": "yellow", "position": "topright", "shape": "star", "size": "large"}
+#75 [DATA] [broad/sop/wrong conf=0.74] "make Strat yelow"
+   why: typo 'Strat'/'yelow' never seen (the demo's spell checker may fix it)
+   want command:set {"action": "set", "target": "start", "color": "yellow"}
+   sop: command:set {"action": "set", "color": "yellow", "target": "strat"}
+#76 [DATA] [blind/sop/wrong conf=0.56] "Wipe out the red ones"
+   why: 'wipe out' as delete: 5 training spans, none in the worlds' data
+   want command:delete {"action": "delete", "target": "mention(color=red,quantifier=all)"}
+   sop: command:delete {"action": "delete", "target": "mention(quantifier=all)"}
+#77 [ERR] [blind/sop/wrong conf=0.95] "Join Process with Check using a dotted line"
+   why: value wrong/dropped
+   want command:connect {"action": "connect", "from": "process", "to": "check", "style": "dotted", "arrow": "none"}
+   sop: command:connect {"action": "connect", "from": "process", "style": "dotted", "to": "check"}
+#78 [ERR] [blind/sop/wrong conf=0.46] "Recolour all stars blue"
+   why: description attribute wrong/dropped
+   want command:set {"action": "set", "target": "mention(quantifier=all,shape=star)", "color": "blue"}
+   sop: command:set {"action": "set", "color": "blue", "target": "mention(quantifier=all)"}
+#79 [ERR] [broad/sop/nd] "what is Done?"
+   why: value wrong/dropped
+   want question:describe {"ask": "describe", "target": "done"}
+   sop: question:rules {"ask": "rules"}
+#80 [ERR] [help/vss/nd] "Is there a red shape?"
+   why: value wrong/dropped
+   want question:exists {"ask": "exists", "color": "red"}
+   vss: (nothing)
+#81 [CONV] [help/vss/wrong conf=0.83] "Distribute the shapes evenly"
+   why: no axis in the text: Rules default to horizontal; the training annotator chose per message
+   want command:distribute {"action": "distribute", "axis": "horizontal", "target": "mention(quantifier=all)"}
+   vss: command:distribute {"action": "distribute", "target": "mention(quantifier=all)"}
+#82 [DATA] [help/vss/wrong conf=0.80] "Give Process a red outline"
+   why: 'outline': 0 training spans (key not in the training legend)
+   want command:set {"action": "set", "outline": "red", "target": "process"}
+   vss: command:set {"action": "set", "target": "process", "color": "red"}
+#83 [DATA] [help/vss/nd] "What does Process say?"
+   why: 'what does X say': 'say' occurs in 5 question spans, none about a label
+   want question:property {"property": "label", "ask": "property", "target": "process"}
+   vss: question:neighbors {"ask": "neighbors", "target": "process"}
+#84 [DATA] [help/vss/nd] "Done is connected to Start"
+   why: statement 'X is connected to Y' as a fact with 'linked': 0 training facts have it (training facts are colours/sizes)
+   want fact: {"linked": "start", "target": "done"}
+   vss: question:connected {"ask": "connected", "target": "done", "anchor": "start"}
+#85 [DATA] [help/vss/nd] "Group Start and Process as Intake"
+   why: groups: 14 training spans mention groups, 0 annotate a group action or group count
+   want command:group {"action": "group", "name": "intake", "target": "start,process"}
+   vss: (nothing)
+#86 [DATA] [help/vss/wrong conf=0.64] "Draw a gold star named Gem with a black outline in the top right"
+   why: 'outline': 0 training spans (key not in the training legend)
+   want command:create {"action": "create", "name": "gem", "outline": "black", "position": "topright", "shape": "star", "color": "gold"}
+   vss: command:create {"action": "create", "shape": "star", "color": "gold", "name": "gem", "position": "topright"}
+#87 [CONV] [help/vss/wrong conf=0.72] "Connect Start and Check with a two-way arrow"
+   why: training writes 'connect A and B ...' as from=A,B (61 of 78 spans); Rules write from=A to=B
+   want command:connect {"action": "connect", "to": "check", "from": "start", "arrow": "both"}
+   vss: command:connect {"action": "connect", "from": "start,check", "arrow": "both"}
+#88 [DATA] [help/vss/wrong conf=0.83] "How many groups are there?"
+   why: groups: 14 training spans mention groups, 0 annotate a group action or group count
+   want question:count {"ask": "count", "kind": "group"}
+   vss: question:count {"ask": "count"}
+#89 [DATA] [help/vss/wrong conf=0.53] "Draw a circle named Hub at 400, 250"
+   why: 'at x, y' coordinates: 0 training spans
+   want command:create {"action": "create", "name": "hub", "at": "400,250", "shape": "circle"}
+   vss: command:create {"action": "create", "shape": "circle", "count": "400", "name": "hub"}
+#90 [DATA] [help/sop/nd] "Group Start and Process as Intake"
+   why: groups: 14 training spans mention groups, 0 annotate a group action or group count
+   want command:group {"action": "group", "name": "intake", "target": "start,process"}
+   sop: command:label {"action": "label", "label": "intake", "target": "start,process"}
+#91 [DATA] [help/sop/nd] "What does Process say?"
+   why: 'what does X say': 'say' occurs in 5 question spans, none about a label
+   want question:property {"property": "label", "ask": "property", "target": "process"}
+   sop: question:describe {"ask": "describe", "target": "process"}
+#92 [CONV] [help/sop/wrong conf=0.76] "Arrange everything in a grid"
+   why: 'everything'/'the shapes' as a target: training leaves the target empty (0 of 60 'arrange ... everything' spans write all); Rules write mention(all)
+   want command:arrange {"action": "arrange", "layout": "grid", "target": "mention(quantifier=all)"}
+   sop: command:arrange {"action": "arrange", "layout": "grid"}
+#93 [DATA] [help/sop/wrong conf=0.97] "Give Process a red outline"
+   why: 'outline': 0 training spans (key not in the training legend)
+   want command:set {"action": "set", "outline": "red", "target": "process"}
+   sop: command:set {"action": "set", "color": "red", "target": "process"}
+#94 [CONV] [help/sop/wrong conf=0.66] "Arrange everything in a circle"
+   why: 'everything'/'the shapes' as a target: training leaves the target empty (0 of 60 'arrange ... everything' spans write all); Rules write mention(all)
+   want command:arrange {"action": "arrange", "layout": "circle", "target": "mention(quantifier=all)"}
+   sop: command:arrange {"action": "arrange", "layout": "circle"}
+#95 [ERR] [help/sop/wrong conf=0.46] "Is the green circle below Check?"
+   why: description attribute wrong/dropped
+   want question:check {"ask": "check", "position": "below", "anchor": "check", "target": "mention(color=green,shape=circle)"}
+   sop: question:check {"ask": "check", "anchor": "check", "position": "below", "shape": "circle"}
+#96 [DATA] [help/sop/nd] "Done is connected to Start"
+   why: statement 'X is connected to Y' as a fact with 'linked': 0 training facts have it (training facts are colours/sizes)
+   want fact: {"linked": "start", "target": "done"}
+   sop: question:connected {"ask": "connected", "anchor": "start", "target": "done"}
+#97 [CONV] [help/sop/wrong conf=0.54] "Distribute the shapes evenly"
+   why: 'everything'/'the shapes' as a target: training leaves the target empty (0 of 60 'arrange ... everything' spans write all); Rules write mention(all)
+   want command:distribute {"action": "distribute", "axis": "horizontal", "target": "mention(quantifier=all)"}
+   sop: command:distribute {"action": "distribute", "axis": "horizontal"}
+#98 [DATA] [help/sop/wrong conf=0.49] "Remove all connections"
+   why: 'remove all connections': 0 disconnect spans with all/every/connections
+   want command:disconnect {"action": "disconnect", "quantifier": "all"}
+   sop: command:disconnect {"action": "disconnect"}
+#99 [DATA] [help/sop/wrong conf=0.94] "How many groups are there?"
+   why: groups: 14 training spans mention groups, 0 annotate a group action or group count
+   want question:count {"ask": "count", "kind": "group"}
+   sop: question:count {"ask": "count"}

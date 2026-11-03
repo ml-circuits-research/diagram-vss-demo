@@ -77,9 +77,11 @@ svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-widt
 .ib:hover { background: rgba(127, 127, 127, .14); color: var(--ink); }
 
 .stage { grid-area: stage; position: relative; background: var(--canvas); min-height: 0; min-width: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr); }
-/* reader tabs: each reader (Rules, VSS, Neural) has its own drawing; the canvas shows the active one */
+/* reader tabs: each reader (Rules, VSS, SOP-BERT, VSS-BERT, 3 readers) has its own drawing; the canvas shows the active one. On a narrow
+   screen the tabs scroll sideways inside their strip instead of running under the tools. */
 .rbar { display: flex; align-items: center; gap: 8px; padding: max(8px, env(safe-area-inset-top, 0px)) 10px 0 16px; border-bottom: 1px solid var(--line); background: var(--head); min-width: 0; }
-.rtabs { display: flex; gap: 2px; flex: 1; min-width: 0; }
+.rtabs { display: flex; gap: 2px; flex: 1; min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+.rtabs::-webkit-scrollbar { display: none; }
 .rtab { border: 0; background: none; padding: 8px 12px 9px; cursor: pointer; color: var(--muted); border-bottom: 3px solid transparent; font-weight: 600; white-space: nowrap; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
 .rtab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
 .rtab.off { font-weight: 500; opacity: .62; }
@@ -120,6 +122,9 @@ svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-widt
 .shp .body.outlined { stroke-width: 3; }
 .shp .tag { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
 .shp .lbl { font-family: var(--font); font-weight: 500; pointer-events: none; }
+.shp .ftext { font-family: var(--font); font-weight: 650; }
+.shp.background { cursor: default; }
+.shp.background .body, .shp.zone .body { stroke-dasharray: 0; stroke-opacity: .5; }
 .shp.hl .halo { stroke: var(--hl); stroke-width: 2.5; fill: none; stroke-dasharray: 5 4; animation: march 1.2s linear infinite; }
 .shp.hl .tag { fill: var(--hl); font-weight: 600; }
 .edge .ln { stroke: var(--edge); stroke-width: 1.75; fill: none; }
@@ -420,7 +425,7 @@ html.docs-open, html.docs-open body { overflow: hidden; }
   .msgs { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   .stage { border-bottom: 1px solid var(--line); }
   .rbar { padding: 6px 8px 0 16px; gap: 4px; }
-  .rtab { padding: 7px 8px 8px; font-size: 13.5px; }
+  .rtab { padding: 7px 7px 8px; font-size: 13.5px; }
   .tools { gap: 0; }
   .tools .ib { width: 34px; height: 34px; }
   .sop.mini { max-height: 3.6em; }
@@ -497,6 +502,10 @@ html.docs-open, html.docs-open body { overflow: hidden; }
   <div class="sbody" id="sbody"></div>
 </aside>
 
+<script src="js/templates.js"></script>
+<script src="js/help-answers.js"></script>
+<script src="js/start-diagram.js"></script>
+<script src="js/auto-layout.js"></script>
 <script src="js/logic.js"></script>
 <script src="js/spell.js"></script>
 <script src="js/scenarios.js"></script>
