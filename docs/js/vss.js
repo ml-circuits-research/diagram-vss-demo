@@ -80,6 +80,6 @@ function offersOf(top) {
 
 /** load a model folder (URL in the browser, or a readFile function in node) */
 export async function load(base, opts = {}) {
-  const files = await loadFiles(base, opts.readFile);
+  const files = await loadFiles(base, opts.readFile, { verified: opts.verified });
   return new VSS(files, opts);
 }

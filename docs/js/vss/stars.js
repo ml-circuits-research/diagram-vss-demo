@@ -66,10 +66,38 @@ export function starV2Phases(seed, name, D) {
  *  (phase = 2pi (u + 0.5) / 2**32 - pi never falls on a rounding boundary), value q * 2pi / 2**bits - pi. Checked byte for byte against
  *  the 7 shipped worlds' stars.bin (training/sketch/shrink/SHRINK.md) */
 export function starV2Quantized(seed, name, D, bits) {
-  if (!(bits >= 1 && bits <= 8)) throw new Error(`stars.js: quantized stars need 1..8 bits (got ${bits})`);
-  const u = starV2Raw(seed, name, D), L = 1 << bits, half = 2 ** (31 - bits), div = 2 ** (32 - bits), step = TWO_PI / L, out = new Float64Array(D);
-  for (let i = 0; i < D; i++) out[i] = (Math.floor((u[i] + half) / div) & (L - 1)) * step - Math.PI;
+  const q = starV2Codes(seed, name, D, bits), lv = levels(bits).phase, out = new Float64Array(D);
+  for (let i = 0; i < D; i++) out[i] = lv[q[i]];
   return out;
+}
+
+/** the levels q (Uint8Array, length D) of the quantized star: its phases are levels(bits).phase[q] */
+export function starV2Codes(seed, name, D, bits) {
+  if (!(bits >= 1 && bits <= 8)) throw new Error(`stars.js: quantized stars need 1..8 bits (got ${bits})`);
+  // floor((u + 2**(sh-1)) / 2**sh) with sh = 32 - bits is (u >>> sh) + bit sh-1 of u (adding 2**(sh-1) carries into bit sh exactly when
+  // that bit is set): the same integer, without leaving 32 bits
+  const u = starV2Raw(seed, name, D), mask = (1 << bits) - 1, sh = 32 - bits, out = new Uint8Array(D);
+  for (let i = 0; i < D; i++) { const x = u[i]; out[i] = ((x >>> sh) + ((x >>> (sh - 1)) & 1)) & mask; }
+  return out;
+}
+
+const LEVELS = new Map();
+/** the 2**bits levels of a quantized phase: phase q * 2pi/2**bits - pi (the value loader.js reads from a stars.bin), and its cos and sin
+ *  (Math.cos / Math.sin of that same double: a star built from them equals fromPhases of its phases, value for value) */
+export function levels(bits) {
+  if (!LEVELS.has(bits)) {
+    const L = 1 << bits, step = TWO_PI / L, phase = new Float64Array(L), cos = new Float64Array(L), sin = new Float64Array(L);
+    for (let q = 0; q < L; q++) { phase[q] = q * step - Math.PI; cos[q] = Math.cos(phase[q]); sin[q] = Math.sin(phase[q]); }
+    LEVELS.set(bits, { phase, cos, sin });
+  }
+  return LEVELS.get(bits);
+}
+
+/** a complex vector {re, im} (Float64Array) from the levels of a quantized star (= fromPhases of its phases, one table lookup per value) */
+export function fromCodes(q, bits) {
+  const D = q.length, { cos, sin } = levels(bits), re = new Float64Array(D), im = new Float64Array(D);
+  for (let i = 0; i < D; i++) { re[i] = cos[q[i]]; im[i] = sin[q[i]]; }
+  return { re, im };
 }
 
 /** a complex vector {re, im} (Float64Array) from phases */
@@ -88,10 +116,12 @@ export class Stars {
   _get(key, seed, name) {
     let v = this.cache.get(key);
     if (v) return v;
-    const ph = this.exported.get(key);
-    if (ph) v = fromPhases(ph);
+    const ex = this.exported, q = ex.codes ? ex.codes(key) : null;    // a generated quantized star (loader.js GeneratedStars): from its levels
+    const ph = q ? null : ex.get(key);
+    if (q) v = fromCodes(q, ex.bits);
+    else if (ph) v = fromPhases(ph);
     else if (this.version === 2 && !(this.identityTable && key.startsWith("id:")))   // generated stars with quantize "all" (loader.js): quantized too
-      v = fromPhases(this.exported.quantizeAll ? starV2Quantized(seed, name, this.D, this.exported.bits) : starV2Phases(seed, name, this.D));
+      v = ex.quantizeAll ? fromCodes(starV2Codes(seed, name, this.D, ex.bits), ex.bits) : fromPhases(starV2Phases(seed, name, this.D));
     else { this.missing.add(key); return null; }
     this.cache.set(key, v); return v;
   }

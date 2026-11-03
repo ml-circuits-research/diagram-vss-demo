@@ -1680,7 +1680,7 @@ const loErr = e => `<div class="lo-err">${escH(String(e && e.message || e || 'un
 /** the overlay's rows, from the readers' states */
 function loadRowsHTML() {
   const vb = vssInfo && vssInfo.bytes ? mb(vssInfo.bytes) : `about ${mb0(VSS_HINT)}`;
-  const vss = vssState === 'ready' ? loRow('VSS', `9 worlds, ${vb}`, 'ready', `<div class="lo-s">loaded in ${((vssInfo && vssInfo.loadMs || 0) / 1000).toFixed(1)} s</div>`)
+  const vss = vssState === 'ready' ? loRow('VSS', `9 worlds, ${vb}`, 'ready', `<div class="lo-s">loaded in ${((vssInfo && vssInfo.loadMs || 0) / 1000).toFixed(1)} s${vssInfo && vssInfo.cache && vssInfo.cache.state === 'hit' ? ' from this browser’s cache' : ''}</div>`)
     : vssState === 'failed' ? loRow('VSS', `9 worlds, ${vb}`, 'failed', loErr(vssError))
       : loRow('VSS', `9 worlds, ${vb}`, 'loading', '<div class="prog lo-ind"><div></div></div>');
   const nb = nProg.T ? mb(nProg.T) : (() => { try { return 'about ' + mb0(nBytesHint()); } catch (e) { return ''; } })();
