@@ -323,6 +323,24 @@ function groupBox(state, g) {
   const y1 = Math.min(...ms.map(s => s.y - dims(s).h / 2)), y2 = Math.max(...ms.map(s => s.y + dims(s).h / 2));
   return { x1, y1, x2, y2, x: (x1 + x2) / 2, y: (y1 + y2) / 2, w: x2 - x1, h: y2 - y1, members: ms };
 }
+/* what ui.js draws besides the bodies, so that a group's name can be placed where nothing else is: a shape's name tag above it (11 px
+   mono, 7 px above the body, 12 px when highlighted: both covered; none for a free text, a template's shape or a panel) */
+function tagBox(s) { const d = dims(s), w = String(s.name).length * 6.7; return { x1: s.x - w / 2, x2: s.x + w / 2, y1: s.y - d.h / 2 - 23, y2: s.y - d.h / 2 - 4 }; }
+/** where ui.js writes each group's name (12 px, bold): above its dashed frame on the left, else above on the right, else below on the
+ *  left / right: the first spot that no shape, name tag, free text or earlier group name covers (else the first). The frame is the
+ *  members' box plus 12 px, and 14 px more on top. -> [{name, x, y (baseline), x1, y1, x2, y2}] */
+function groupLabels(state) {
+  const taken = [];
+  for (const s of state.shapes) { if (s.layer) continue; const d = dims(s); taken.push({ x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2 }); if (s.shape !== 'text' && !s.quiet) taken.push(tagBox(s)); }
+  const hit = q => taken.some(o => Math.min(o.x2, q.x2) - Math.max(o.x1, q.x1) > 0.5 && Math.min(o.y2, q.y2) - Math.max(o.y1, q.y1) > 0.5), out = [];
+  for (const g of state.groups || []) {
+    const b = groupBox(state, g); if (!b) continue;
+    const x = b.x1 - 12, y = b.y1 - 26, w = b.w + 24, h = b.h + 38, tw = Math.ceil(g.name.length * 7.2);
+    const spots = [[x + 10, y - 6], [x + w - 10 - tw, y - 6], [x + 10, y + h + 14], [x + w - 10 - tw, y + h + 14]].map(([lx, ly]) => ({ name: g.name, x: lx, y: ly, x1: lx, x2: lx + tw, y1: ly - 12, y2: ly + 3 }));
+    const pick = spots.find(q => !hit(q)) || spots[0]; out.push(pick); taken.push(pick);
+  }
+  return out;
+}
 function needAnchor(W, n) {
   const s = W.find(n); if (s) return s;
   const g = W.findGroup && W.findGroup(n), b = g && groupBox(W.state, g);
@@ -940,29 +958,63 @@ const itemsOnly = list => list.some(s => !isPanel(s)) ? list.filter(s => !isPane
 const autoLayout = () => (typeof AutoLayout !== 'undefined' ? AutoLayout : null) || optRequire('./auto-layout.js');
 const EDGE_PX = { tiny: 1, small: 1.5, medium: 2, large: 3.5, huge: 5 };   /* the stroke width of an arrow per size value (ui.js draws e.width) */
 const inThisCell = s => { const c = cellOf(s.x, s.y); return c.x === FR.x && c.y === FR.y; };
-/** the shapes of the drawing's cell as AutoLayout input (background panels and zones are left out: shapes may sit on them) */
-const alShapes = W => W.state.shapes.filter(s => !isPanel(s) && inThisCell(s)).map(s => { const d = dims(s); return { name: s.name, x: s.x, y: s.y, w: d.w, h: d.h, color: s.color, shape: s.shape, size: s.size, label: s.label, outline: s.outline }; });
+/* the name tag ui.js draws above a shape (11 px text, 7 px above its body, 12 px when highlighted) is part of the shape's box in a re-layout,
+   so that no layout puts a shape's name on another shape or text: the box grows by TAG_PX upwards (centre moved up by half of it) */
+const TAG_PX = 22;
+const hasTag = s => s.shape !== 'text' && !s.quiet && !isPanel(s);
+/** the shapes of the drawing's cell as AutoLayout input (background panels and zones are left out: shapes may sit on them; with panels =
+ *  true they are in, for a layout of panels only). dy = how far the box's centre lies above the shape's own centre (its name tag) */
+const alShapes = (W, panels, noTags) => W.state.shapes.filter(s => (panels || !isPanel(s)) && inThisCell(s)).map(s => { const d = dims(s), t = hasTag(s) && !noTags ? TAG_PX : 0; return { name: s.name, x: s.x, y: s.y - t / 2, w: d.w, h: d.h + t, dy: t / 2, color: s.color, shape: s.shape, size: s.size, label: s.label, outline: s.outline }; });
 const alLinks = (W, shapes) => { const here = new Set(shapes.map(s => s.name)); return W.state.edges.filter(e => here.has(e.from) && here.has(e.to)).map(e => ({ from: e.from, to: e.to, arrow: e.arrow })); };
+/* ---------- zones and free texts in a re-layout (design: training/sketch/ops/HIGH_LEVEL_OPS.md section 2, "Zones and free texts") ----------
+   A re-layout lays out the shapes it is given as ONE set, whatever zone they are on: "arrange all in a circle" is one circle. On the whole
+   drawing (no target, "all", "everything") the free texts (titles, captions) are not part of the set: they stay where they are, the layout
+   keeps off them where it can, and a text a shape still lies on moves aside, as little as it can. A zone (layer=zone) holds the shapes whose centre lies on it (the topmost zone
+   there); the reply names the shapes the layout took off their zone. The zones themselves do not move or grow. */
+const zoneBox = z => { const d = dims(z); return { x: z.x - d.w / 2, y: z.y - d.h / 2, w: d.w, h: d.h }; };
+const zonesHere = W => W.state.shapes.filter(s => s.layer === 'zone' && inThisCell(s));
+/** the zone a point (a shape's centre) lies on: the topmost one, or null */
+function zoneAt(zones, x, y) { for (let i = zones.length - 1; i >= 0; i--) { const b = zoneBox(zones[i]); if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) return zones[i]; } return null; }
 /** runs an AutoLayout operation on the targets (group names expanded; no target = every shape of the drawing's cell, also for
  *  target=mention(quantifier=all)), in the cell of the first target, and emits the new positions. LayoutError -> Clarify when it asks
- *  (no links for a tree, a loop, ...), else SOPError. -> the AutoLayout result */
-function alRun(W, a, ctx, fn) {
+ *  (no links for a tree, a loop, ...), else SOPError. how.relayout = true: a re-layout, where on the whole drawing the free texts stay and
+ *  move aside only when a shape now lies on them (above); how.tags = false: the shapes' own boxes, without their name tags (snap puts the
+ *  shapes' own centres on the grid). -> the AutoLayout result, with r.zoneNote = what the reply says about zones and texts */
+function alRun(W, a, ctx, fn, how) {
   const AL = autoLayout(); if (!AL) throw new SOPError('The layout module (auto-layout.js) is not loaded.');
   const t = expandGroups(W, names(a.target)).map(n => need(W, n).name), first = t.length ? W.find(t[0]) : null;
+  const panelsOnly = t.length > 0 && t.every(n => isPanel(W.find(n))), relayout = !!(how && how.relayout);
   const go = () => {
-    const shapes = alShapes(W), links = alLinks(W, shapes), here = new Set(shapes.map(s => s.name));
-    const targets = t.filter(n => here.has(n)), all = targets.length === shapes.length;
-    const opts = { canvas: { x: FR.x, y: FR.y, w: CANVAS.W, h: CANVAS.H }, targets: targets.length && !all ? targets : null, groups: (W.state.groups || []).map(g => ({ name: g.name, members: g.members.slice() })) };
-    let r;
-    try { r = fn(AL, shapes, links, opts); }
-    catch (e) { if (e && e.name === 'LayoutError') throw (e.ask ? new Clarify(e.message, { wire: ctx.node.id, code: e.code }) : new SOPError(e.message)); throw e; }
-    for (const [n, p] of Object.entries(r.positions || {})) { const s = W.find(n); if (s && (s.x !== p.x || s.y !== p.y)) ctx.emit({ op: 'set', name: s.name, props: { x: p.x, y: p.y } }); }
+    const shapes = alShapes(W, panelsOnly, how && how.tags === false), links = alLinks(W, shapes), here = new Set(shapes.map(s => s.name)), dy = new Map(shapes.map(s => [s.name, s.dy]));
+    const targets = t.filter(n => here.has(n)), whole = targets.length === shapes.length || !t.length;
+    const canvas = { x: FR.x, y: FR.y, w: CANVAS.W, h: CANVAS.H }, groups = (W.state.groups || []).map(g => ({ name: g.name, members: g.members.slice() }));
+    const call = (sh, opts) => {
+      try { return fn(AL, sh, links, Object.assign({ canvas, groups }, opts)); }
+      catch (e) { if (e && e.name === 'LayoutError') throw (e.ask ? new Clarify(e.message, { wire: ctx.node.id, code: e.code }) : new SOPError(e.message)); throw e; }
+    };
+    const zones = zonesHere(W), homeOf = n => { const s = W.find(n); return zoneAt(zones, s.x, s.y); }, homes = new Map(shapes.filter(s => !isPanel(W.find(s.name))).map(s => [s.name, homeOf(s.name)]));
+    const isText = s => W.find(s.name).shape === 'text', texts = relayout && whole && !panelsOnly && shapes.some(s => !isText(s)) ? shapes.filter(isText) : [];
+    const r = call(shapes, { targets: texts.length ? shapes.filter(s => !isText(s)).map(s => s.name) : targets.length && !whole ? targets : null });   // the texts are obstacles: the layout keeps off them where it can
+    let aside = [], moves = [];
+    if (texts.length) {   /* the texts a shape now lies on move aside (the shapes stay fixed); the others stay where they are */
+      const now = shapes.map(s => Object.assign({}, s, (r.positions || {})[s.name] || {})), over = (p, q) => Math.abs(p.x - q.x) < (p.w + q.w) / 2 && Math.abs(p.y - q.y) < (p.h + q.h) / 2;
+      const hit = now.filter(x => isText(x) && now.some(y => y !== x && !isText(y) && over(x, y))).map(x => x.name);
+      if (hit.length) { const m = AL.separate(now, links, { canvas, targets: hit }); aside = hit.filter(n => m.moved.includes(n)); moves = aside.map(n => [n, m.positions[n]]); if (m.crowded) r.crowded = true; }
+    }
+    for (const [n, p] of Object.entries(r.positions || {}).concat(moves)) { const s = W.find(n), y = p.y + (dy.get(n) || 0); if (s && (s.x !== p.x || s.y !== y)) ctx.emit({ op: 'set', name: s.name, props: { x: p.x, y } }); }
     if (t.length > targets.length) r.notes = (r.notes || []).concat([`${t.length - targets.length} of the shapes are in another drawing and stayed where they were`]);
+    /* the reply: the shapes this layout took off the zone they were on (the patches are applied as they are emitted: W holds the new
+       positions), and the texts it moved aside */
+    const off = new Map();
+    for (const [n, z] of homes) if (z && !aside.includes(n) && homeOf(n) !== z) { if (!off.has(z.name)) off.set(z.name, []); off.get(z.name).push(n); }
+    const says = [...off].map(([z, ns]) => `${listing(ns)} ${ns.length === 1 ? 'is' : 'are'} no longer on ${z}.`);
+    if (aside.length) says.push(`I moved the text${aside.length === 1 ? '' : 's'} ${listing(aside)} aside to make room.`);
+    if (says.length) r.zoneNote = says.join(' ');
     return r;
   };
   return first ? inCell(first.x, first.y, go) : go();
 }
-const alSays = (r, what) => what + (r.crowded ? ' They do not all fit on the canvas without touching.' : '');
+const alSays = (r, what) => what + (r.crowded ? ' They do not all fit on the canvas without touching.' : '') + (r.zoneNote ? ' ' + r.zoneNote : '');
 /** the existing arrows a restyle / reverse wire names: from= / to= (edgesNamed), else the arrows touching target=, else every arrow */
 function edgesOf(W, a) {
   if (a.from != null || a.to != null) return edgesNamed(W, a).es;
@@ -1008,7 +1060,7 @@ const opsPlugin = {
   },
   handlers: [
     { type: 'command', when: { action: 'improve' }, run(a, ctx) {
-      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => { if (!sh.length) throw new SOPError('There is nothing to improve: the canvas is empty.'); return AL.improve(sh, ln, o); });
+      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => { if (!sh.length) throw new SOPError('There is nothing to improve: the canvas is empty.'); return AL.improve(sh, ln, o); }, { relayout: true });
       return { value: Object.keys(r.positions), notes: (r.notes || []).concat(r.candidates.map(c => `${c.name}: ${c.score}`)), answer: alSays(r, r.message) };
     } },
     { type: 'command', when: { action: 'respace' }, run(a, ctx) {
@@ -1016,23 +1068,23 @@ const opsPlugin = {
       let f = a.scale != null ? +a.scale : null;
       if (a.comparison === 'smaller') f = f == null ? 0.67 : f > 1 ? 1 / f : f; else if (a.comparison === 'bigger') f = f == null ? 1.5 : f < 1 ? 1 / f : f;
       if (f == null && a.distance == null) throw new SOPError('More space or less space between the shapes?');
-      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.spacing(sh, ln, Object.assign(o, { scale: f != null ? f : undefined, distance: a.distance != null && f == null ? +a.distance : undefined })));
+      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.spacing(sh, ln, Object.assign(o, { scale: f != null ? f : undefined, distance: a.distance != null && f == null ? +a.distance : undefined })), { relayout: true });
       return { value: Object.keys(r.positions), notes: r.notes, answer: alSays(r, r.scale >= 1 ? `More space between the shapes (x${r.scale}).` : `Less space between the shapes (x${r.scale}).`) };
     } },
     { type: 'command', when: { action: 'snap' }, run(a, ctx) {
-      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.snap(sh, ln, Object.assign(o, { grid: a.distance != null ? +a.distance : 20 })));
+      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.snap(sh, ln, Object.assign(o, { grid: a.distance != null ? +a.distance : 20 })), { tags: false });   /* the shapes' own centres on the grid */
       return { value: r.moved, notes: r.notes, answer: `Snapped ${r.moved.length} shape${r.moved.length === 1 ? '' : 's'} to the ${r.grid} px grid.` };
     } },
     { type: 'command', when: { action: 'flip' }, run(a, ctx) {
-      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.flip(sh, ln, Object.assign(o, { axis: a.axis })));
-      return { value: Object.keys(r.positions), notes: r.notes, answer: a.axis === 'vertical' ? 'Flipped top to bottom.' : 'Flipped left to right.' };
+      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.flip(sh, ln, Object.assign(o, { axis: a.axis })), { relayout: true });
+      return { value: Object.keys(r.positions), notes: r.notes, answer: alSays(r, a.axis === 'vertical' ? 'Flipped top to bottom.' : 'Flipped left to right.') };
     } },
     { type: 'command', when: { action: 'sort' }, run(a, ctx) {
-      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.sort(sh, ln, Object.assign(o, { property: a.property || 'name', descending: a.superlative === 'biggest', layout: a.layout })));
+      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.sort(sh, ln, Object.assign(o, { property: a.property || 'name', descending: a.superlative === 'biggest', layout: a.layout })), { relayout: true });
       return { value: r.order, notes: r.notes, answer: alSays(r, `Sorted by ${a.property || 'name'}: ${r.order.join(', ')}.`) };
     } },
     { type: 'command', when: { action: 'groupBy' }, run(a, ctx) {
-      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.cluster(sh, ln, Object.assign(o, { property: a.property || 'color' })));
+      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.cluster(sh, ln, Object.assign(o, { property: a.property || 'color' })), { relayout: true });
       return { value: Object.keys(r.positions), notes: r.notes, answer: alSays(r, `Gathered the shapes by ${a.property || 'color'}: ${r.clusters.join(', ')}.`) };
     } },
     { type: 'command', when: { action: 'equalize' }, run(a, ctx) {
@@ -1046,20 +1098,20 @@ const opsPlugin = {
       return { value: Object.keys(r.props), answer: k ? `Gave ${k} shape${k === 1 ? '' : 's'} the ${p} ${p === 'size' ? sizeName(r.value) : r.value}.` : `They already have the same ${p}.` };
     } },
     { type: 'command', when: { action: 'straighten' }, run(a, ctx) {
-      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.straighten(sh, ln, o));
-      return { value: r.moved, notes: r.notes, answer: r.straightened ? `Straightened ${r.straightened} link${r.straightened === 1 ? '' : 's'}.` : 'No link was nearly straight, so nothing moved; "untangle" or "tidy up" may help more.' };
+      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.straighten(sh, ln, o), { relayout: true });
+      return { value: r.moved, notes: r.notes, answer: alSays(r, r.straightened ? `Straightened ${r.straightened} link${r.straightened === 1 ? '' : 's'}.` : 'No link was nearly straight, so nothing moved; "untangle" or "tidy up" may help more.') };
     } },
     { type: 'command', when: { action: 'untangle' }, run(a, ctx) {
-      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.untangle(sh, ln, o));
-      return { value: r.moved, notes: r.notes, answer: r.swaps ? `Swapped ${r.swaps} pair${r.swaps === 1 ? '' : 's'} of shapes to reduce the crossings.` : 'Swapping shapes did not reduce the crossings; "arrange as a tree" or "in layers" may.' };
+      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.untangle(sh, ln, o), { relayout: true });
+      return { value: r.moved, notes: r.notes, answer: alSays(r, r.swaps ? `Swapped ${r.swaps} pair${r.swaps === 1 ? '' : 's'} of shapes to reduce the crossings.` : 'Swapping shapes did not reduce the crossings; "arrange as a tree" or "in layers" may.') };
     } },
     { type: 'command', when: { action: 'fit' }, run(a, ctx) {
-      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.fit(sh, ln, Object.assign(o, { center: a.position === 'center' })));
+      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.fit(sh, ln, Object.assign(o, { center: a.position === 'center' })));   /* not a re-layout: the drawing, texts included, moves as a whole (the reply names shapes it takes off their zone) */
       return { value: Object.keys(r.positions), notes: r.notes, answer: alSays(r, a.position === 'center' ? 'Centred the drawing on the canvas.' : r.moved.length ? 'Everything is on the canvas now.' : 'Everything was already on the canvas.') };
     } },
     { type: 'command', when: { action: 'align', direction: true }, run(a, ctx) {
-      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => { if (!o.targets && sh.length < 2) throw new SOPError('Align needs at least two shapes.'); return AL.align(sh, ln, Object.assign(o, { direction: a.direction })); });
-      return { value: Object.keys(r.positions), notes: r.notes, answer: `Aligned the ${({ left: 'left edges', right: 'right edges', up: 'tops', down: 'bottoms' })[a.direction]}.` };
+      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => { if (!o.targets && sh.length < 2) throw new SOPError('Align needs at least two shapes.'); return AL.align(sh, ln, Object.assign(o, { direction: a.direction, clear: 24 })); }, { relayout: true });
+      return { value: Object.keys(r.positions), notes: r.notes, answer: alSays(r, `Aligned the ${({ left: 'left edges', right: 'right edges', up: 'tops', down: 'bottoms' })[a.direction]}.`) };
     } },
     { type: 'command', when: { action: 'reverse' }, run(a, ctx) {
       const W = ctx.world, es = edgesOf(W, a);
@@ -1083,12 +1135,11 @@ const layoutPlugin = {
   },
   handlers: [
     { type: 'command', when: { action: 'distribute' }, run(a, ctx) {
-      const W = ctx.world, t = expandGroups(W, names(a.target)), list = itemsOnly(t.length ? t.map(n => need(W, n)) : W.state.shapes.slice());
-      if (list.length < 3) throw new SOPError('Spacing evenly needs at least three shapes.');
-      const horiz = a.axis !== 'vertical', key = horiz ? 'x' : 'y', sorted = list.slice().sort((p, q) => p[key] - q[key]);
-      const lo = sorted[0][key], hi = sorted[sorted.length - 1][key], step = (hi - lo) / (sorted.length - 1);
-      sorted.forEach((s, i) => { if (i && i < sorted.length - 1) ctx.emit({ op: 'set', name: s.name, props: { [key]: Math.round(lo + i * step) } }); });
-      return { value: sorted.map(s => s.name), notes: [`spaced ${horiz ? 'horizontally' : 'vertically'}, ${Math.round(step)} px apart`] };
+      /* equal gaps between neighbours (AutoLayout.distribute): never two of them overlapping; the span widens when they do not fit in it */
+      const vert = a.axis === 'vertical';
+      const r = alRun(ctx.world, a, ctx, (AL, sh, ln, o) => AL.distribute(sh, ln, Object.assign(o, { axis: vert ? 'vertical' : 'horizontal' })), { relayout: true });
+      const n = (r.order || []).length;
+      return { value: r.order, notes: (r.notes || []).concat([`spaced ${vert ? 'vertically' : 'horizontally'}, ${r.gap} px between neighbours`]), answer: alSays(r, `Spaced ${n} shapes evenly ${vert ? 'from top to bottom' : 'from left to right'}${r.gap != null ? `, ${r.gap} px apart` : ''}.`) };
     } },
     { type: 'command', when: { action: ['toFront', 'toBack'] }, run(a, ctx) {
       const W = ctx.world, t = targetsOf(W, a, a.action === 'toFront' ? 'bring to the front' : 'send to the back');
@@ -1096,17 +1147,11 @@ const layoutPlugin = {
       return { value: t };
     } },
     { type: 'command', when: { action: 'align' }, run(a, ctx) {
-      const W = ctx.world, list = itemsOnly(targetsOf(W, a, 'align').map(n => need(W, n)));
-      if (list.length < 2) throw new SOPError('Align needs at least two shapes.');
-      const horiz = a.axis !== 'vertical', base = list[0];
-      const sorted = list.slice().sort((p, q) => horiz ? p.x - q.x : p.y - q.y); let edge = null;
-      for (const s of sorted) {
-        const d = dims(s); let x = horiz ? s.x : base.x, y = horiz ? base.y : s.y;
-        if (edge != null) { if (horiz && x - d.w / 2 < edge + 24) x = edge + 24 + d.w / 2; if (!horiz && y - d.h / 2 < edge + 24) y = edge + 24 + d.h / 2; }
-        const p = inCell(base.x, base.y, () => clampPt(x, y, d.w, d.h)); edge = horiz ? p.x + d.w / 2 : p.y + d.h / 2;
-        ctx.emit({ op: 'set', name: s.name, props: { x: p.x, y: p.y } });
-      }
-      return { value: list.map(s => s.name) };
+      /* the centres on one line through the first shape named (AutoLayout.align); shapes that would overlap are pushed apart along it */
+      const W = ctx.world, t = targetsOf(W, a, 'align'), vert = a.axis === 'vertical';
+      if (t.length < 2) throw new SOPError('Align needs at least two shapes.');
+      const r = alRun(W, a, ctx, (AL, sh, ln, o) => AL.align(sh, ln, Object.assign(o, { axis: vert ? 'vertical' : 'horizontal', base: (o.targets || t).find(n => sh.some(s => s.name === n)), clear: 24 })), { relayout: true });
+      return { value: Object.keys(r.positions), notes: r.notes, answer: alSays(r, `Lined them up ${vert ? 'in a column' : 'in a row'}.`) };
     } },
     { type: 'command', when: { action: 'arrange' }, run(a, ctx) {
       /* layout = row | column | grid | circle | tree | layers | radial | organic; no layout: axis -> row / column; direction -> the
@@ -1125,7 +1170,7 @@ const layoutPlugin = {
           }
           if (['row', 'column'].includes(kind) && (a.direction === 'left' || a.direction === 'up') && !order) order = AL.readingOrderNames(o.targets ? sh.filter(s => o.targets.includes(s.name)) : sh).reverse();
           return AL.layout(kind || 'auto', sh, ln, Object.assign(o, { direction: a.direction, root, order }));
-        });
+        }, { relayout: true });
         const dirW = r.direction && r.direction !== 'down' ? `, ${({ up: 'growing upwards', left: 'right to left', right: 'left to right' })[r.direction]}` : '';
         return { value: Object.keys(r.positions), notes: (r.notes || []).concat([`${r.layout} layout`]), answer: alSays(r, `Arranged ${Object.keys(r.positions).length} shapes as a ${({ layers: 'layered flow', grid: 'grid', row: 'row', column: 'column', circle: 'circle', tree: 'tree', radial: 'radial layout', organic: 'free (organic) layout' })[r.layout]}${dirW}.`) };
       } catch (e) {
@@ -2682,7 +2727,7 @@ function createSystem(opts = {}) {
   return { world, engine, formalize, cut: (input, ctx) => rulesCut(formalize, input, ctx) };
 }
 
-return { createSystem, CELL, cellOf, parse, serialize, fmtValue, isRef, names, SOPError, Clarify, CANVAS, COLOR_HEX, SIZE_PX, FONT_PX, fontOf, dims, sizeName, region, edgeText, groupBox, worldNodes, worldSOP };
+return { createSystem, CELL, cellOf, parse, serialize, fmtValue, isRef, names, SOPError, Clarify, CANVAS, COLOR_HEX, SIZE_PX, FONT_PX, fontOf, dims, sizeName, region, edgeText, groupBox, groupLabels, tagBox, worldNodes, worldSOP };
 })();
 if (typeof module !== 'undefined') module.exports = SOPKit;
 /*LOGIC-END*/

@@ -45,6 +45,23 @@ side by side), generalised to shapes of different sizes and to any direction; th
 - `tidy` / `tidy up` change meaning: today the Rules read them as `arrange layout=grid`; in this design they are `improve`. Training data
   that has "tidy" -> arrange grid must be relabelled (section 8).
 
+- **Zones and free texts (2026-11-03).** A re-layout lays out the shapes it is given as ONE set, whatever zone they are on: "arrange all in
+  a circle" is one circle of every shape, "distribute all vertically" one evenly spaced run from top to bottom (the owner's rule: do what
+  the user says). On the whole drawing (no target, "all", "everything") the **free texts** (titles, captions) are not part of the set:
+  they stay where they are, the layout keeps off them where it can (they are obstacles), and a text a shape still lies on moves aside as
+  little as it can; the reply says so ("I moved the text IntakeCaption aside to make room."). A zone (`layer=zone`) holds the shapes whose
+  centre lies on it (the topmost zone there); the reply names the shapes the layout took off their zone ("Check and Done are no longer on
+  ReviewZone."). Zones and backgrounds do not move or grow: growing each zone around the members left on it makes zones overlap each other
+  as soon as shapes cross over (a circle of the four shapes of the opening drawing), so it is not done. Re-layouts in this sense: arrange
+  (every layout), align, distribute, improve, respace, flip, sort, groupBy, straighten, untangle. Not: snap (local), equalize (not a
+  layout), fit / centre (the drawing, texts included, moves as a whole). A group's name is written where no shape, name tag, text or other
+  group name is (above its frame on the left, else the next free corner; `logic.js groupLabels`, drawn by ui.js), because a group's frame
+  stretches across zones when its shapes leave their zone. History: a first version (2026-11-03, the same day) went zone by zone on the
+  whole drawing; "arrange all in a circle" then showed two pairs and "distribute all vertically" did nothing, which reads as broken.
+- Panels (backgrounds and zones) draw no name tag (ui.js, 2026-11-03): their group's frame, their caption and the details name them, and
+  the name shows on hover. On the opening drawing the zone's tag stood between the group's name and the caption, and a shape laid out on
+  the zone could sit under it.
+
 ## 3. The catalogue
 
 `SOP` shows the wire; parameters in brackets are optional. "Asks" = the engine raises a Clarify (the reader's wire is right, the world
@@ -60,8 +77,8 @@ does not allow it, and the answer proposes what would work); "fails" = an SOPErr
 | auto | `command action=arrange [direction=] [target=]` | - | the layout the links ask for: tree if they form one, layers if loop-free arrows, circle (<= 10) / organic for loops, grid without links; with a direction and no links: a row / column | - | changed (was: grid) |
 | grid, row, column, circle | `command action=arrange layout=grid\|row\|column\|circle [direction=] [target=]` | reading order; circle: linked shapes next to each other | as before, now without overlaps, a selection stays where it is and avoids the other shapes, groups move as blocks; row / column with direction left / up reverse the order | empty: fails | changed (reading order instead of creation order; overlap-free) |
 | align edges | `command action=align direction=left\|right\|up\|down [target=]` | - | left (right, top, bottom) edges flush with the outermost; overlaps pushed apart along the line | < 2 shapes fails | new (`align` with axis unchanged) |
-| align centres | `command action=align axis=horizontal\|vertical [target=]` | - | unchanged | unchanged | existing |
-| distribute | `command action=distribute [axis=] [target=]` | - | unchanged (equal centre steps, ends kept) | < 3 fails | existing |
+| align centres | `command action=align axis=horizontal\|vertical [target=]` | horizontal; the line through the first shape named | the centres on one line; shapes that would overlap are pushed apart along it, 24 px apart (`AutoLayout.align`, since 2026-11-03) | < 2 shapes fails; too long for the canvas: done, the reply says they do not all fit | changed |
+| distribute | `command action=distribute [axis=] [target=]` | horizontal | equal GAPS between neighbours in their order along the axis (`AutoLayout.distribute`, since 2026-11-03; was equal centre steps, which put two shapes of the opening drawing on each other); the ends stay when the others fit between them with at least 16 px between neighbours, else the span widens about its centre, so no two of them touch | < 3 fails; cannot fit on the canvas even at 16 px: nothing moves, the reply says why | changed |
 | more / less space | `command action=respace comparison=bigger\|smaller [scale=] [distance=] [target=]` | bigger x1.5, smaller x0.67; "a lot / double" 2 (0.5), "a bit" 1.25 (0.8); distance = the wanted typical gap in px | positions scaled about the centre of the shapes, overlaps removed, kept on the canvas (compressed if needed, and said) | neither comparison nor distance: asks | new |
 | snap to grid | `command action=snap [distance=grid] [target=]` | 20 px | centres to the nearest grid point; a shape that would overlap takes the nearest free grid point | - | new |
 | centre / fit | `command action=fit [position=center] [target=]` | - | everything inside the canvas, moved as little as possible (position=center: the drawing centred), compressed when too large | empty fails | new |
@@ -83,7 +100,9 @@ and every graph question would need to know about it. Restyling the heads stays 
 Groups (logic.js groups plugin): in the re-layouts (arrange, improve, respace, sort, groupBy, untangle), a group whose members all move,
 together with other shapes, moves as one block (its members keep their offsets); a group named alone as the target is laid out itself.
 z-order (the order of `state.shapes`) is not changed by any operation. Background panels and zones (templates) are left out of the
-layouts. Frames: an operation works in the drawing (canvas cell) of its first target, else in the current one.
+layouts. Frames: an operation works in the drawing (canvas cell) of its first target, else in the current one. A shape's box in every
+layout includes its name tag above it (22 px, as ui.js draws it), so no layout puts a name on another shape or text; snap uses the shapes'
+own centres.
 
 ## 4. The quality score and "improve"
 

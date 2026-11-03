@@ -5,6 +5,10 @@
      level 3, texts:      the title "Order flow" and one caption per zone (free text items, shape=text)
    The zones and their items form two groups, Intake and Review, so a group moves, copies and changes z-order as one block. The order of
    the wires is the z-order (back to front), which the z-order tests check: training/sketch/test_start_diagram.mjs.
+   A re-layout of the whole drawing ("tidy up", "arrange all in a circle") lays the four shapes out as one set, across the zones; the texts
+   stay put or move aside, and the reply names the shapes taken off their zone (logic.js alRun; HIGH_LEVEL_OPS.md section 2, "Zones and
+   free texts"). The zones and the background draw no name tag and a group's name goes where nothing else is (ui.js, logic.js
+   groupLabels), so nothing drawn overlaps (test_start_diagram.mjs section 7).
    Design: training/sketch/legend_ext/LEGEND_EXT.md section 5. */
 (function (root) {
 'use strict';

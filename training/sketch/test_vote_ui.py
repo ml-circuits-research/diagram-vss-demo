@@ -8,7 +8,8 @@ transformers.js 3.8.1 from training/laptop/node_modules in place of cdn.jsdelivr
   1. the tabs read Rules, VSS, SOP-BERT, VSS-BERT, 3 readers; 3 readers has its own drawing and the subtabs Drawing / SOP Lang / Settings;
      every reply has a "3 readers · <ms>" line;
   2. on the opening drawing, "arrange all in a circle" and "distribute all vertically" are executed in the 3 readers tab (all three readers
-     read them the same; the details say so and that the readings of the three tabs were reused); each is undone after;
+     read them the same; the details say so and that the readings of the three tabs were reused); each is undone after. On the rendered canvas no shape body, name tag, free text or group name overlaps another,
+     at the start and after each command (bounding boxes of the SVG elements);
   3. a request the readers do not all read the same is not done in the 3 readers tab: its reason says who agrees and what the other reads
      ("… agree, SOP-BERT reads … instead", "only … found this request", …), with a "Do it anyway" button that runs it; undo takes it back;
   4. the VSS and SOP-BERT tabs use the confidence with the votes: their details show the thresholds of vote3.json per type ("for commands and
@@ -67,6 +68,18 @@ COUNTS = """() => { const m = (((document.querySelector('#readout') || {}).textC
 # where the shapes of the active tab's drawing are (name -> [x, y])
 POS = """() => Object.fromEntries([...document.querySelectorAll('#layer .shp')].map(g => [g.dataset.name, (g.getAttribute('transform').match(/translate\\(([-\\d.]+) ([-\\d.]+)\\)/) || []).slice(1).map(Number)]))"""
 
+# the drawn boxes that must not overlap (shape bodies, name tags, free texts, group names, arrow labels), as pairs of names; panels have no tag
+OVERLAPS = """() => { const L = document.querySelector('#layer'), out = [];
+  const add = (kind, name, el) => { if (!el) return; const r = el.getBoundingClientRect(); if (r.width && r.height) out.push({ kind, name, x1: r.left, y1: r.top, x2: r.right, y2: r.bottom }); };
+  for (const g of L.querySelectorAll('.shp')) { const nm = g.dataset.name, panel = g.classList.contains('zone') || g.classList.contains('background');
+    add('tag', nm, g.querySelector(':scope > text.tag'));
+    if (g.classList.contains('txt')) add('text', nm, g.querySelector('text.ftext')); else if (!panel) add('shape', nm, g.querySelector('.body')); }
+  for (const g of L.querySelectorAll('.grp')) add('group name', g.dataset.group, g.querySelector('text'));
+  for (const t of L.querySelectorAll('.edge text.elbl')) add('arrow label', t.textContent, t);
+  const bad = []; for (let i = 0; i < out.length; i++) for (let j = i + 1; j < out.length; j++) { const a = out[i], b = out[j];
+    if (Math.min(a.x2, b.x2) - Math.max(a.x1, b.x1) > 1 && Math.min(a.y2, b.y2) - Math.max(a.y1, b.y1) > 1) bad.push(`${a.kind} ${a.name} / ${b.kind} ${b.name}`); }
+  return bad; }"""
+
 def send(pg, text, lab="3 readers"):
     n = pg.evaluate("() => document.querySelectorAll('#msgs .b.bot').length")
     pg.fill("#say", text); pg.click("#send-btn")
@@ -110,6 +123,8 @@ with sync_playwright() as p:
     of = pg.evaluate("() => (document.querySelector('#subtabs .of') || {}).textContent")
     check("1. 3 readers has the subtabs Drawing / SOP Lang / Settings", subs == ["drawing", "sop", "settings"] and of == "3 readers reader", f"{subs} {of}")
     pg.screenshot(path=f"{OUT}/0_start.png")
+    ov = pg.evaluate(OVERLAPS)
+    check("2. the opening drawing as drawn: no shape, name tag, text or group name overlaps another", not ov, "; ".join(ov))
 
     # 2: the two symptom commands on the opening drawing: executed when all three readers read them the same (after engineNorm); when one
     # reads them differently, held with the reason (printed: a finding about the readers, not a failure of the tab)
@@ -119,6 +134,8 @@ with sync_playwright() as p:
         r = send(pg, msg)
         p1 = pg.evaluate(POS)
         pg.screenshot(path=f"{OUT}/{1 + k}_{msg.replace(' ', '_')}.png")
+        ov = pg.evaluate(OVERLAPS)
+        check(f"2. {msg!r} as drawn: no shape, name tag, text or group name overlaps another", not ov, "; ".join(ov))
         check(f"1. the reply has a 3 readers line with its time in ms ({msg!r})", bool(r and r["label"] and re.match(r"3 readers · [\d.]+ ms:", r["label"])), str(r))
         det = details(pg, 1)
         sec = section(det, "3 readers", None)

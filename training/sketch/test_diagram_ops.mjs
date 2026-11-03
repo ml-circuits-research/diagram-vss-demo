@@ -398,5 +398,32 @@ const base = () => { const S = K.createSystem(); run(S, `@a command action=creat
   const words = "point points part written read reads stays note notes zones tones clean cold".split(" ");
   eq("no pattern word or legend cue is corrected by the spelling step", words.filter((w) => S0.formalize(`${w}`, { names: [], last: [] }).corrections.length), []);
 }
+// ---------- distribute and align never overlap the shapes they move (equal gaps; the span widens; zones and free texts) ----------
+{
+  const nameTop = (s) => s.y - K.dims(s).h / 2 - 22;   // the box with its name tag (logic.js TAG_PX), as the layouts see it
+  const boxes = (S) => S.world.state.shapes.filter((s) => !s.layer).map((s) => { const d = K.dims(s); return { n: s.name, x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.shape === "text" ? s.y - d.h / 2 : nameTop(s), y2: s.y + d.h / 2 }; });
+  const overlaps = (S) => { const b = boxes(S), out = []; for (let i = 0; i < b.length; i++) for (let j = i + 1; j < b.length; j++) if (Math.min(b[i].x2, b[j].x2) - Math.max(b[i].x1, b[j].x1) > 0.5 && Math.min(b[i].y2, b[j].y2) - Math.max(b[i].y1, b[j].y1) > 0.5) out.push(b[i].n + "/" + b[j].n); return out; };
+  // the bug of the opening drawing, reduced: two shapes one above the other, 130 px apart, and two more at the top: equal centre steps put them on each other
+  const mk = () => { const S = K.createSystem(); run(S, `@a command action=create shape=circle name=P size=large at=110,245
+@b command action=create shape=rectangle name=Q at=280,245
+@c command action=create shape=diamond name=R at=480,245
+@d command action=create shape=circle name=T at=480,375`); return S; };
+  let S = mk(), r = run(S, "@s command action=distribute target=P,Q,R,T axis=vertical");
+  eq("distribute 4 shapes vertically that do not fit between the extremes: no overlap (name tags included)", [r.ok, overlaps(S)], [true, []]);
+  const ys = ["P", "Q", "R", "T"].map((x) => S.world.find(x)), gaps = ys.slice(1).map((s, i) => Math.round((s.y - K.dims(s).h / 2 - 22) - (ys[i].y + K.dims(ys[i]).h / 2)));
+  eq("  ... equal gaps of at least 16 px between neighbours (the span widened)", [new Set(gaps).size <= 2 && Math.max(...gaps) - Math.min(...gaps) <= 1, Math.min(...gaps) >= 15], [true, true]);
+  eq("  ... the reply says how far apart", /Spaced 4 shapes evenly from top to bottom, \d+ px apart/.test(r.steps[0].answer || ""), true);
+  S = mk(); run(S, "@s command action=distribute target=P,Q,R axis=horizontal");
+  eq("distribute 3 shapes horizontally with room between the ends: the ends stay, the middle one is centred in the gap", [S.world.find("P").x, S.world.find("R").x, Math.abs(((S.world.find("Q").x - 49.5) - (110 + 44)) - ((480 - 31) - (S.world.find("Q").x + 49.5))) <= 1], [110, 480, true]);
+  S = K.createSystem(); run(S, "@a command action=create count=9 shape=circle size=huge layout=row");
+  const before = S.world.state.shapes.map((s) => [s.x, s.y]); r = run(S, "@s command action=distribute axis=vertical");
+  eq("9 huge circles cannot stand one above the other on the canvas: nothing moves, the reply says why", [r.ok, S.world.state.shapes.map((s) => [s.x, s.y]), /do not fit one above the other/.test(r.errors[0] && r.errors[0].error.message)], [false, before, true]);
+  S = mk(); r = run(S, "@s command action=distribute target=P,Q");
+  eq("distribute 2 shapes: needs three", /at least three/.test(r.errors[0] && r.errors[0].error.message), true);
+  S = mk(); run(S, "@s command action=align target=R,T axis=horizontal");
+  eq("align R and T (one above the other) in a row: one y, pushed apart, no overlap", [S.world.find("R").y === S.world.find("T").y, overlaps(S)], [true, []]);
+  S = K.createSystem(); run(S, "@a command action=create count=8 shape=rectangle size=large layout=grid"); r = run(S, "@s command action=align axis=horizontal target=" + S.world.state.shapes.map((s) => s.name).join(","));
+  eq("align 8 large boxes in one row (too wide for the canvas): the reply says they do not fit", /do not all fit/.test(r.steps[0].answer || ""), true);
+}
 console.log(`\n${n - fail}/${n} passed`);
 process.exit(fail ? 1 : 0);

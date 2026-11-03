@@ -7,6 +7,10 @@
 //  4. Backgrounds and zones are not obstacles: a new shape is placed on them; arrange / align ignore them when items are there too.
 //  5. Free text: create, move, recolour, resize, relabel, delete; it cannot be connected or turned into a shape.
 //  6. A template on the opening drawing: one group, one undo, its z-bands.
+//  7. The layout commands people type ("arrange all in a circle", "align everything horizontally", "distribute all vertically", "tidy up",
+//     "make it a tree", "arrange all in a grid", ...) on the opening drawing: one layout of all the shapes (a circle of 4 is a circle, a
+//     vertical distribute is evenly spaced), nothing drawn overlaps (shapes, name tags, texts, group names), the texts stay put or the reply
+//     says they moved aside, and the reply names the shapes taken off their zone.
 // Run: node training/sketch/test_start_diagram.mjs   (exit code 1 on a failure)
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
@@ -108,6 +112,56 @@ const level = s => s.layer === "background" ? 0 : s.layer === "zone" ? 1 : s.sha
   ok("its items are named after their texts", ["Idea", "Prototype", "Beta", "Launch"].every(x => S.world.find(x)));
   run(S, "@u command action=undo");
   ok("one undo removes the whole template", S.world.state.shapes.length === n0 && !S.world.findGroup("OurClimb"));
+}
+// ---------- 7. the layout commands people type, on the opening drawing: one layout of all the shapes, nothing drawn overlaps ----------
+// What is drawn (ui.js): each shape's body; its name tag above it (11 px mono, 7 px above, 12 px when highlighted: both covered), not for
+// a free text, a template's shape or a panel (panels show no name tag); a free text's box; each group's name where K.groupLabels puts it
+// (above its frame, or the first free corner).
+// A re-layout of the whole drawing lays the shapes out as ONE set (one circle, one tree), the texts stay put (or move aside when a shape
+// would lie on them), and the reply names the shapes taken off their zone (a shape is on the zone its centre lies on; logic.js alRun).
+{
+  const tagBox = s => { const d = K.dims(s), w = String(s.name).length * 6.7; return { x1: s.x - w / 2, x2: s.x + w / 2, y1: s.y - d.h / 2 - 23, y2: s.y - d.h / 2 - 4 }; };
+  const drawn = S => {
+    const out = [], st = S.world.state;
+    for (const s of st.shapes) {
+      if (s.layer) continue;
+      const d = K.dims(s); out.push({ n: (s.shape === "text" ? "text " : "shape ") + s.name, x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2 });
+      if (s.shape !== "text" && !s.quiet) out.push(Object.assign({ n: "tag " + s.name }, tagBox(s)));
+    }
+    for (const q of K.groupLabels(st)) out.push({ n: "group name " + q.name, x1: q.x1, x2: q.x2, y1: q.y1, y2: q.y2 });   // where ui.js writes it
+    return out;
+  };
+  const overlaps = (S, noGroups) => { const b = drawn(S).filter(x => !noGroups || !x.n.startsWith("group name")), bad = []; for (let i = 0; i < b.length; i++) for (let j = i + 1; j < b.length; j++) if (Math.min(b[i].x2, b[j].x2) - Math.max(b[i].x1, b[j].x1) > 0.5 && Math.min(b[i].y2, b[j].y2) - Math.max(b[i].y1, b[j].y1) > 0.5) bad.push(`${b[i].n} / ${b[j].n}`); return bad; };
+  const inside = (S, a, z) => { const da = K.dims(a), dz = K.dims(z); return a.x - da.w / 2 >= z.x - dz.w / 2 && a.x + da.w / 2 <= z.x + dz.w / 2 && a.y - da.h / 2 - (a.shape === "text" ? 0 : 23) >= z.y - dz.h / 2 && a.y + da.h / 2 <= z.y + dz.h / 2; };
+  const homes = { Start: "IntakeZone", Process: "IntakeZone", IntakeCaption: "IntakeZone", Check: "ReviewZone", Done: "ReviewZone", ReviewCaption: "ReviewZone" };
+  const outOfZone = S => Object.entries(homes).filter(([n, z]) => !inside(S, S.world.find(n), S.world.find(z))).map(([n]) => n);
+  const texts = S => S.world.state.shapes.filter(s => s.shape === "text").map(s => `${s.name}@${s.x},${s.y}`).join(" ");
+  const S0 = fresh();
+  ok("the opening drawing: no shape, text, name tag or group name overlaps another", !overlaps(S0).length, overlaps(S0).join("; "));
+  ok("the opening drawing: every shape (with its name tag) and caption inside its zone", !outOfZone(S0).length, outOfZone(S0).join(", "));
+  const centreOff = S => Object.entries(homes).filter(([n, z]) => { const a = S.world.find(n), q = S.world.find(z), d = K.dims(q); return Math.abs(a.x - q.x) > d.w / 2 || Math.abs(a.y - q.y) > d.h / 2; }).map(([n]) => n);
+  const textAt = S => Object.fromEntries(S.world.state.shapes.filter(s => s.shape === "text").map(s => [s.name, `${s.x},${s.y}`]));
+  const run7 = c => { const S = fresh(), t0 = textAt(S), x = say(S, c), st = x.r.steps.filter(s => s.node.type === "command").pop() || {}; return { S, x, t0, msg: st.answer || (st.error && st.error.message) || "" }; };
+  const CMDS = ["arrange all in a circle", "align everything horizontally", "distribute all vertically", "tidy up", "make it a tree", "arrange all in a grid",
+    "align everything to the left", "more space between the shapes", "make it more compact", "flip the diagram horizontally", "sort by name", "group them by colour", "untangle the arrows",
+    "distribute Start, Process, Check and Done vertically", "arrange Start, Process, Check and Done in a circle", "align Start, Process, Check and Done vertically", "Distribute Start, Process and Check"];
+  for (const c of CMDS) {
+    const { S, x, t0, msg } = run7(c), now = textAt(S), moved = Object.keys(t0).filter(n => t0[n] !== now[n]), gone = centreOff(S).filter(n => S.world.find(n).shape !== "text");
+    ok(`"${c}": done, no overlap (shapes, texts, name tags, group names)`, x.r.ok && !overlaps(S).length, overlaps(S).join("; ") + " | " + msg);
+    ok(`"${c}": the texts stay where they are, unless the reply says they moved aside`, moved.every(n => new RegExp(`moved the texts? [^.]*\\b${n}\\b[^.]* aside`).test(msg)), `${moved.join(", ")} | ${msg}`);
+    ok(`"${c}": the reply names every shape it took off its zone`, gone.every(n => new RegExp(`\\b${n}\\b[^.]*no longer on ${homes[n]}`).test(msg)), `${gone.join(", ")} | ${msg}`);
+  }
+  { const { S, msg } = run7("arrange all in a circle"), ps = ["Start", "Process", "Check", "Done"].map(n => S.world.find(n));
+    const cx = ps.reduce((t, s) => t + s.x, 0) / 4, cy = ps.reduce((t, s) => t + s.y, 0) / 4, rs = ps.map(s => Math.hypot(s.x - cx, s.y - cy)), an = ps.map(s => Math.atan2(s.y - cy, s.x - cx)).sort((a, b) => a - b);
+    const steps = an.map((a, i) => ((i ? a - an[i - 1] : a + 2 * Math.PI - an[3]) * 180 / Math.PI));
+    ok('"arrange all in a circle": ONE circle of the four shapes (same distance from the centre, a quarter turn apart)', /Arranged 4 shapes as a circle/.test(msg) && Math.max(...rs) - Math.min(...rs) <= 2 && steps.every(d => Math.abs(d - 90) <= 3), `r ${rs.map(Math.round)} steps ${steps.map(Math.round)} | ${msg}`); }
+  { const { S, msg } = run7("distribute all vertically"), ps = ["Start", "Process", "Check", "Done"].map(n => S.world.find(n)).sort((a, b) => a.y - b.y);
+    const gaps = ps.slice(1).map((s, i) => (s.y - K.dims(s).h / 2 - 22) - (ps[i].y + K.dims(ps[i]).h / 2));
+    ok('"distribute all vertically": the four shapes one below the other, equal gaps (name tags included), no overlap', /Spaced 4 shapes evenly from top to bottom/.test(msg) && Math.max(...gaps) - Math.min(...gaps) <= 1 && Math.min(...gaps) >= 15 && !overlaps(S).length, `gaps ${gaps.map(Math.round)} | ${msg}`); }
+  { const { S } = run7("make it a tree"), y = n => S.world.find(n).y;
+    ok('"make it a tree": one tree, Start above Process above Check above Done', y("Start") < y("Process") && y("Process") < y("Check") && y("Check") < y("Done"), ["Start", "Process", "Check", "Done"].map(y).join(",")); }
+  { const { S } = run7("align everything horizontally");
+    ok('"align everything horizontally": the four shapes on one line', new Set(["Start", "Process", "Check", "Done"].map(n => S.world.find(n).y)).size === 1); }
 }
 for (const f of fails) console.log("FAIL " + f);
 console.log(`\n${n - fail}/${n} passed`);

@@ -626,9 +626,38 @@ function align(shapes, links, opts) {
   else if (dir === 'up') { const v = Math.min(...list.map(n => n.y - n.h / 2)); list.forEach(n => { n.y = v + n.h / 2; }); }
   else if (dir === 'down') { const v = Math.max(...list.map(n => n.y + n.h / 2)); list.forEach(n => { n.y = v - n.h / 2; }); }
   else { const base = o.base != null ? list.find(n => n.name === String(o.base)) || list[0] : list[0]; if (axis === 'vertical') list.forEach(n => { n.x = base.x; }); else list.forEach(n => { n.y = base.y; }); }
-  const nodes = list.concat(ctx.obstacles), movable = nodes.map((_, i) => i < list.length);
-  const left = separateNodes(nodes, movable, { lock: axis === 'vertical' ? 'y' : 'x', bounds: ctx.inner });
+  const nodes = list.concat(ctx.obstacles), movable = nodes.map((_, i) => i < list.length), lock = axis === 'vertical' ? 'y' : 'x';
+  if (o.clear != null) separateNodes(list.slice(), list.map(() => true), { lock, bounds: ctx.inner, clear: o.clear });   // opts.clear: the gap between the aligned shapes (not the obstacles)
+  const left = separateNodes(nodes, movable, { lock, bounds: ctx.inner });
   return result(ctx, 'align', left > 0);
+}
+
+/** distribute(shapes, links, {axis}): equal gaps between neighbours along the axis (horizontal by default), in their current order along
+ *  it (ties: the other axis, then the name); the other coordinate is kept. The span is the movable shapes' current extent along the axis;
+ *  when they do not fit in it with at least MIN_GAP between neighbours, the span widens about its centre (kept inside the canvas), so no two
+ *  of them overlap. When they cannot fit inside the canvas even then, it throws 'no-room' and nothing moves. Obstacles in the way: the
+ *  overlap is removed as in align (the result says crowded when that is impossible). Fewer than 3 shapes: 'too-few'. */
+const MIN_GAP = 16;
+function distribute(shapes, links, opts) {
+  const o = opts || {}, ctx = context(shapes, links, o, false), list = ctx.work;
+  if (list.length < 3) throw new LayoutError('too-few', 'Spacing evenly needs at least three shapes.');
+  const vert = o.axis === 'vertical', k = vert ? 'y' : 'x', s = vert ? 'h' : 'w', ok = vert ? 'x' : 'y';
+  const sorted = list.slice().sort((p, q) => p[k] - q[k] || p[ok] - q[ok] || cmpStr(p.name, q.name));
+  const sum = sorted.reduce((t, n) => t + n[s], 0), lo0 = Math.min(...sorted.map(n => n[k] - n[s] / 2)), hi0 = Math.max(...sorted.map(n => n[k] + n[s] / 2));
+  const room = vert ? ctx.inner.y2 - ctx.inner.y1 : ctx.inner.x2 - ctx.inner.x1, need = sum + (sorted.length - 1) * MIN_GAP;
+  if (need > room + 0.5) throw new LayoutError('no-room', `They do not fit ${vert ? 'one above the other' : 'side by side'} without touching: they need ${Math.round(need)} px and there are ${Math.round(room)} px. Make them smaller, or space fewer shapes.`);
+  let lo = lo0, span = hi0 - lo0;
+  if (span < need) {
+    const lim = vert ? [ctx.inner.y1, ctx.inner.y2] : [ctx.inner.x1, ctx.inner.x2];
+    lo = Math.min(lim[1] - need, Math.max(lim[0], (lo0 + hi0) / 2 - need / 2)); span = need;
+    ctx.notes.push(`widened the span to ${Math.round(need)} px so that none of them touch`);
+  }
+  const gap = (span - sum) / (sorted.length - 1);
+  let c = lo; for (const n of sorted) { n[k] = c + n[s] / 2; c += n[s] + gap; }
+  const nodes = list.concat(ctx.obstacles), movable = nodes.map((_, i) => i < list.length);
+  const left = ctx.obstacles.length ? separateNodes(nodes, movable, { bounds: ctx.inner }) : 0;
+  const r = result(ctx, 'distribute', left > 0);
+  return Object.assign(r, { order: sorted.map(n => n.name), gap: Math.round(gap) });
 }
 
 /** spacing(shapes, links, {scale | distance}): more or less space between the shapes, keeping the layout: positions scaled about the centre
@@ -910,6 +939,6 @@ function improve(shapes, links, opts) {
 /** apply(shapes, result): the shapes with the result's positions (a convenience for tests and callers) */
 function apply(shapes, res) { return shapes.map(s => Object.assign({}, s, (res && res.positions && res.positions[String(s.name)]) || {})); }
 
-const AutoLayout = { LayoutError, LAYOUTS, WEIGHTS, analyse, score, layout, improve, align, spacing, snap, flip, fit, sort, cluster, equalize, straighten, untangle, separate, apply, readingOrderNames: shapes => readingOrder(nodesOf(shapes)).map(n => n.name) };
+const AutoLayout = { LayoutError, LAYOUTS, WEIGHTS, analyse, score, layout, improve, align, distribute, spacing, snap, flip, fit, sort, cluster, equalize, straighten, untangle, separate, apply, readingOrderNames: shapes => readingOrder(nodesOf(shapes)).map(n => n.name) };
 if (typeof module !== 'undefined' && module.exports) module.exports = AutoLayout; else root.AutoLayout = AutoLayout;
 })(typeof window !== 'undefined' ? window : this);

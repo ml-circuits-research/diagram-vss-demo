@@ -469,8 +469,11 @@ function drawShape(g, s) {
   else if (pts) el('polygon', Object.assign({ points: pts.map(p => p.map(v => v.toFixed(1)).join(',')).join(' '), 'stroke-linejoin': 'round' }, attrs), grp);
   else el('rect', Object.assign({ x: -w / 2, y: -h / 2, width: w, height: h, rx: 6 }, attrs), grp);
   if (hl.shapes.has(s.name)) el('rect', { class: 'halo', x: -w / 2 - 7, y: -h / 2 - 7, width: w + 14, height: h + 14, rx: 10 }, grp);
-  /* the name above the shape; a template's own shapes do not show it (their texts say what they are; the details list the names) */
-  if (!s.quiet) { const tag = el('text', { class: 'tag', x: 0, y: -h / 2 - (hl.shapes.has(s.name) ? 12 : 7), 'text-anchor': 'middle' }, grp); tag.textContent = s.name; }
+  /* the name above the shape; a template's own shapes do not show it (their texts say what they are; the details list the names), nor does
+     a panel (a background or a zone: its group's frame, its caption and the details name it, and its name shows on hover), so that no
+     shape laid out on a zone sits under the zone's name */
+  if (s.layer === 'background' || s.layer === 'zone') el('title', {}, grp).textContent = s.name;
+  else if (!s.quiet) { const tag = el('text', { class: 'tag', x: 0, y: -h / 2 - (hl.shapes.has(s.name) ? 12 : 7), 'text-anchor': 'middle' }, grp); tag.textContent = s.name; }
   if (s.label) {
     const room = s.shape === 'rectangle' || s.shape === 'square' || s.shape === 'ellipse' || s.shape === 'circle' ? w * 0.84 : w * 0.56;
     let fs = s.w ? Math.max(10, Math.min(15, s.h / 2.8)) : Math.max(9, Math.min(14, s.size / 4.4)), txt = s.label;   // a box of its own size: the font follows its height
@@ -480,7 +483,7 @@ function drawShape(g, s) {
     t.textContent = txt;
   }
 }
-function drawEdge(g, e, a, b, offset) {
+function drawEdge(g, e, a, b, offset, taken) {
   let dx = b.x - a.x, dy = b.y - a.y; const L = Math.hypot(dx, dy) || 1; const ux = dx / L, uy = dy / L;
   const ox = -uy * offset, oy = ux * offset;
   const ra = rayDist(a, ux, uy) + 3, rb = rayDist(b, -ux, -uy) + 3;
@@ -497,17 +500,24 @@ function drawEdge(g, e, a, b, offset) {
   if (e.width) ln.setAttribute('stroke-width', String(e.style === 'dotted' ? Math.max(2.6, e.width + 0.6) : e.width));   /* an arrow restyled thicker / thinner (size -> px, logic.js EDGE_PX) */
   if (e.arrow !== 'none') head(x2, y2, ux, uy);
   if (e.arrow === 'both') head(x1, y1, -ux, -uy);
-  if (e.label) { const t = el('text', { class: 'elbl', x: (x1 + x2) / 2 - uy * 12, y: (y1 + y2) / 2 + ux * 12, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, grp); t.textContent = e.label; }
+  if (e.label) {
+    /* beside the arrow, at its middle; when a shape, a name tag or a text is there, the first free spot further along it or on its other side */
+    const lw = String(e.label).length * 6.8 + 4, free = (cx, cy) => !(taken || []).some(o => Math.min(o.x2, cx + lw / 2) - Math.max(o.x1, cx - lw / 2) > 0.5 && Math.min(o.y2, cy + 8) - Math.max(o.y1, cy - 8) > 0.5);
+    const spots = []; for (const f of [0.5, 0.38, 0.62, 0.26, 0.74]) for (const side of [1, -1]) { const off = side * (12 + Math.abs(uy) * lw / 2); spots.push([x1 + (x2 - x1) * f - uy * off, y1 + (y2 - y1) * f + ux * off]); }
+    const [lx, ly] = spots.find(([cx, cy]) => free(cx, cy)) || spots[0];
+    const t = el('text', { class: 'elbl', x: lx, y: ly, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, grp); t.textContent = e.label;
+  }
 }
 
 /* a group: a light dashed frame around its members with its name, drawn behind them and recomputed from the members on every render */
 function drawGroups(g, S) {
+  const spots = new Map(K.groupLabels(S).map(q => [q.name, q]));   /* the name where nothing else is drawn (logic.js groupLabels) */
   for (const gr of S.groups || []) {
     const b = K.groupBox(S, gr); if (!b) continue;
-    const pad = 12, x = b.x1 - pad, y = b.y1 - pad - 14, w = b.w + 2 * pad, h = b.h + 2 * pad + 14;
+    const pad = 12, x = b.x1 - pad, y = b.y1 - pad - 14, w = b.w + 2 * pad, h = b.h + 2 * pad + 14, at = spots.get(gr.name) || { x: x + 10, y: y - 6 };
     const grp = el('g', { class: 'grp', 'data-group': gr.name }, g);
     el('rect', { x, y, width: w, height: h, rx: 12, style: 'fill: var(--accent); fill-opacity: .045; stroke: var(--faint); stroke-width: 1.25; stroke-dasharray: 6 5; pointer-events: none' }, grp);
-    const t = el('text', { x: x + 10, y: y - 6, style: 'font-family: var(--font); font-size: 12px; font-weight: 600; fill: var(--faint); pointer-events: none' }, grp);
+    const t = el('text', { x: at.x, y: at.y, style: 'font-family: var(--font); font-size: 12px; font-weight: 600; fill: var(--faint); pointer-events: none' }, grp);
     t.textContent = gr.name;
   }
 }
@@ -548,9 +558,11 @@ function renderCanvas() {
   if (!S.shapes.length) { const f = S.frame || { x: 0, y: 0 }, t = el('text', { class: 'empty-note', x: f.x + 400, y: f.y + 250, 'text-anchor': 'middle' }, layer); t.textContent = 'Nothing here yet. Write what to draw.'; }
   const gg = el('g', {}, layer), eg = el('g', {}, layer), sg = el('g', {}, layer);
   drawGroups(gg, S);
+  const taken = [];   /* what an arrow's label must not cover: the shapes' bodies, their name tags and the free texts */
+  for (const s of S.shapes) { if (s.layer) continue; const d = K.dims(s); taken.push({ x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2 }); if (s.shape !== 'text' && !s.quiet) taken.push(K.tagBox(s)); }
   for (const e of S.edges) {
     const a = by.get(e.from), b = by.get(e.to); if (!a || !b) continue;
-    drawEdge(eg, e, a, b, S.edges.some(o => o !== e && o.from === e.to && o.to === e.from) ? 6 : 0);
+    drawEdge(eg, e, a, b, S.edges.some(o => o !== e && o.from === e.to && o.to === e.from) ? 6 : 0, taken);
   }
   for (const s of S.shapes) drawShape(sg, s);
   const n = S.shapes.length, m = S.edges.length;
