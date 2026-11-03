@@ -73,7 +73,7 @@ export function signals(result, si) {
     if (cls) { /* a value head: in the minimum of the probabilities only */ }
     else if (r.fill === "context") { ctx++; (detail.ctx || (detail.ctx = [])).push({ key: k, value: show(r.value) }); }
     else if (r.fill === "description") {
-      for (const k2 of RD.desc_keys) { const dl = headOf("desc:" + k2), pr = softmax(dl), bi = argmax(pr); if (bi !== 0 && r.span.includes(k2 + "=")) { dp.push(pr[bi]); const [x1, x2] = top2(pr); dm.push(x1 - x2); lower("desc", pr[bi], { key: k, desc: r.span }); } }
+      for (const k2 of (r.descPre === "desc2:" ? RD.desc2_keys : RD.desc_keys) || []) { const dl = headOf((r.descPre || "desc:") + k2), pr = softmax(dl), bi = argmax(pr); if (bi !== 0 && r.span.includes(k2 + "=")) { dp.push(pr[bi]); const [x1, x2] = top2(pr); dm.push(x1 - x2); lower("desc", pr[bi], { key: k, desc: r.span }); } }
     } else {
       const spans = (R.spans || {})[k] || [];
       for (const s of spans) for (const i of wordsOfSpan(s)) if (tagP[i]) { const bi = argmax(tagP[i]), [x1, x2] = top2(tagP[i]); tp.push(tagP[i][bi]); tm.push(x1 - x2); lower("tag", tagP[i][bi], { key: k, word: ws[i].w }); }

@@ -137,7 +137,7 @@ function features(a, R, si, node, msgCut, nUnits, msgWords) {
     else if (r.fill === "context") { h.push(["fill", fl.map(r3), argmax(fl)]); ctx++; }
     else if (r.fill === "description") {
       h.push(["fill", fl.map(r3), argmax(fl)]);
-      for (const k2 of RD.desc_keys) { const dl = headOf("desc:" + k2), pr = softmax(dl), bi = argmax(pr); if (bi !== 0 && r.span.includes(k2 + "=")) { h.push(["desc", dl.map(r3), bi]); dp.push(pr[bi]); const [x1, x2] = top2(pr); dm.push(x1 - x2); } }
+      for (const k2 of (r.descPre === "desc2:" ? RD.desc2_keys : RD.desc_keys) || []) { const dl = headOf((r.descPre || "desc:") + k2), pr = softmax(dl), bi = argmax(pr); if (bi !== 0 && r.span.includes(k2 + "=")) { h.push(["desc", dl.map(r3), bi]); dp.push(pr[bi]); const [x1, x2] = top2(pr); dm.push(x1 - x2); } }
     } else {
       const spans = R.spans[k] || [];
       for (const s of spans) for (const i of wordsOfSpan(s)) if (tagP[i]) { const bi = argmax(tagP[i]), [x1, x2] = top2(tagP[i]); h.push(["tag", tagL[i].map(r3), bi]); tp.push(tagP[i][bi]); tm.push(x1 - x2); }

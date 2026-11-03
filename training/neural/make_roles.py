@@ -11,7 +11,9 @@ The legend (docs/js/logic.js, read with node) decides how each gold key is learn
     "none" + the values that key takes in the training gold. No word alignment is needed: the head reads the whole request.
   - a key without values (kinds names, name, text, number: target, anchor, from, to, linked, name, label, count, distance) -> B-key /
     I-key tags on the words of the request that carry the gold value, found by aligning the value to the words:
-      * a name, a label text, a number written in digits: the same word sequence in the request (case-insensitive), first free occurrence;
+      * a name, a label text, a number written in digits: the same word sequence in the request, first free occurrence (find_part: the
+        parts of a list in their order, the gold's case before any case; a text such as a label is one value even with a comma in it;
+        the keys whose values are numbers are aligned last, so a number word never takes a name; a number with a unit glued on, "50px");
       * "$new" (a shape created earlier in the same message): the name that create gave it, when the request writes that name;
       * a number written as a word ("three"): learned by co-occurrence on the training rows (below);
       * a mention (mention(...)) or a name the request does not write ("it", "them"): not tagged; the filler-kind and description heads
@@ -81,7 +83,7 @@ def filler_kind(ws, v, created):
         if p == "$new": return any(find_seq(ws, [w[0].lower() for w in words(n)], set()) is not None for n in created)
         return find_seq(ws, [w[0].lower() for w in words(p)], set()) is not None
     return "written" if all(written(p) for p in ps) else "context"
-SPAN_KINDS = {"names", "name", "text", "number", "texts"}   # texts: a list of texts (items, items2, parents of a template, LEGEND_EXT.md): one B-/I- span per item, joined with "," by docs/js/neural.js
+SPAN_KINDS = {"names", "name", "text", "number", "texts", "point"}   # texts: a list of texts (items, items2, parents of a template, LEGEND_EXT.md): one B-/I- span per item, joined with "," by docs/js/neural.js; point (at "x,y"): one span per coordinate
 
 
 def legend():
@@ -89,7 +91,17 @@ def legend():
     js = ("const K=require(process.argv[1]);const L=K.createSystem().engine.legend;const o={};"
           "for(const [k,q] of L.questions)o[k]={kind:q.kind,values:q.values?Object.keys(q.values):null};console.log(JSON.stringify(o))")
     r = subprocess.run(["node", "-e", js, os.path.join(REPO, "docs", "js", "logic.js")], capture_output=True, text=True, check=True)
-    return json.loads(r.stdout)
+    L = json.loads(r.stdout)
+    for k, base in same_as().items():   # engine keys with the kind and values of a legend question (docs/js/neural.js SAME_AS)
+        if k not in L and base in L: L[k] = dict(L[base])
+    return L
+
+
+def same_as():
+    """docs/js/neural.js SAME_AS: {key: legend question it is read as} (position2, anchor2, region), read from that file so the two cannot drift"""
+    src = open(os.path.join(REPO, "docs", "js", "neural.js"), encoding="utf8").read()
+    m = re.search(r"const SAME_AS = \{([^}]*)\}", src)
+    return dict(re.findall(r"(\w+): '(\w+)'", m.group(1))) if m else {}
 
 
 def words(text):
@@ -108,14 +120,38 @@ def parts(v):
     return [p for p in out if p]
 
 
-def find_seq(ws, seq, taken):
-    """first start index where the lower-cased word sequence seq occurs in ws with none of its words taken"""
+def find_seq(ws, seq, taken, start=0):
+    """first start index >= start where the lower-cased word sequence seq occurs in ws with none of its words taken"""
     n = len(seq)
     if not n: return None
     low = [w[0].lower() for w in ws]
-    for i in range(len(ws) - n + 1):
+    for i in range(start, len(ws) - n + 1):
         if low[i:i + n] == seq and not any(j in taken for j in range(i, i + n)): return i
     return None
+
+
+def find_part(ws, exact, taken, after):
+    """where one part of a gold value is written (ROLES_ROUNDTRIP.md): the parts of a list are looked for in their order (from the end of
+    the previous part of the same key, so "Hook Choose into End? No, Begin to Choose, and Choose to End" tags the corrected Choose, and the
+    items "Training, Launch, Build" of "build a dawn of ..." do not take the verb), and the words as the gold writes them (case) before any
+    case; then anywhere (case first, then any case). exact: the part's words as written in the gold"""
+    seq = [w.lower() for w in exact]; n = len(seq)
+    if not n: return None
+    def exact_at(s):
+        for i in range(s, len(ws) - n + 1):
+            if [w[0] for w in ws[i:i + n]] == exact and not any(j in taken for j in range(i, i + n)): return i
+        return None
+    for i in (exact_at(after), find_seq(ws, seq, taken, after), exact_at(0), find_seq(ws, seq, taken, 0)):
+        if i is not None: return i
+    return None
+
+
+def num(s):
+    try: return float(s)
+    except ValueError: return None
+
+
+NUM_UNIT = re.compile(r"(\d+(?:\.\d+)?)[^\W\d_]*")   # a number with a unit glued to it ("50px"): docs/js/neural.js reads its first digit run
 
 
 SEG_JS = ("const K=require(process.argv[1]);const fs=require('fs');const ms=JSON.parse(fs.readFileSync(0,'utf8'));const sys=K.createSystem();"
@@ -223,6 +259,7 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--none-rows", action="store_true", help="comparison only: also the act \"none\" (segments of the rules' segmenter outside every span); the model cuts by itself now")
     ap.add_argument("--all", action="store_true", help="all data (ALL_DATA.md): no sample removed, no held-out (heldout.jsonl empty); eval_sample1000 is then a fit-on-train check")
+    ap.add_argument("--also", nargs="*", default=[], help="roles_roundtrip.py: more folders (relative to training/sketch) labelled with the training layout as also_<folder>.jsonl; not training data")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     LEG = legend()
@@ -245,6 +282,10 @@ def main():
             if "ask" in args: args["ask"] = ac
             rows.append((f"{s}-{i}", r["text"], r["type"], args, ac, []))
         sets["eval_" + s] = rows
+    # --also (training/neural/roles_roundtrip.py): folders that are not trained on (short3, fresh2), labelled with the SAME layout as
+    # also_<folder>.jsonl (not eval_*, so finetune_roles.py never reads them); the layout below is still built from the training rows only
+    for d in a.also:
+        sets["also_" + d.replace("/", "__")] = requests(MD.messages([d]), ACTS, skipped)
 
     # which keys are learned how: from the legend kind, for the keys the training gold uses
     train = sets["train"]; used = collections.Counter(k for x in train for k in x[3])
@@ -270,7 +311,15 @@ def main():
                     else: dunknown[dk] += 1
     if dunknown: print("description keys not in the legend (not learned):", dict(dunknown))
     desc_keys = sorted(dvals)
-    fill_classes = [["fill:" + k, FILL] for k in ref_keys] + [["desc:" + k, ["none"] + sorted(dvals[k])] for k in desc_keys]
+    # the SECOND described role of a request (REF key order; "move the triangles right of the gray rect": anchor, then target) has heads of
+    # its own, desc2:<key>; with one set of heads both roles were decoded with the first role's description (ROLES_ROUNDTRIP.md)
+    dvals2 = collections.defaultdict(set)
+    for x in train:
+        ds = [next(p for p in parts(x[3][k]) if p.startswith("mention(")) for k in ref_keys if k in x[3] and any(p.startswith("mention(") for p in parts(x[3][k]))]
+        for dk, dv in (mention_args(ds[1]).items() if len(ds) > 1 else []):
+            if dk.lower() in DKEY: dvals2[DKEY[dk.lower()]].add(dv)
+    desc2_keys = sorted(dvals2)
+    fill_classes = [["fill:" + k, FILL] for k in ref_keys] + [["desc:" + k, ["none"] + sorted(dvals[k])] for k in desc_keys] + [["desc2:" + k, ["none"] + sorted(dvals2[k])] for k in desc2_keys]
 
     # co-occurrence on the training rows: number words (count / distance written as a word) and, as evidence, every class key
     co = Cooc()
@@ -283,33 +332,40 @@ def main():
     def label(row, cov, numword):
         rid, sp, typ, args, act, created = row
         ws = words(sp); tag = ["O"] * len(ws); taken = {}
-        for k in span_keys:
+        for k in sorted(span_keys, key=lambda k: LEG[k]["kind"] == "number"):   # numbers last: a number word found by co-occurrence never takes a name ("Slide Day to the left")
             if k not in args: continue
-            for p in parts(args[k]):
+            after = 0   # the parts of a list are looked for in their order (find_part)
+            # a text (a label, a title) is one value even when it holds a comma ("label Persona 'Maria, 34'"); every other kind is a list
+            for p in ([str(args[k])] if str(args[k]) else []) if LEG[k]["kind"] == "text" else parts(args[k]):
                 c = cov[k]; c["values"] += 1
                 if p == "$new":
-                    seqs = [[w[0].lower() for w in words(n)] for n in reversed(created)]
-                    hit = next((s for s in seqs if find_seq(ws, s, taken) is not None), None)
+                    seqs = [[w[0] for w in words(n)] for n in reversed(created)]
+                    hit = next((s for s in seqs if find_part(ws, s, taken, after) is not None), None)
                     if hit is None: c["reference $new (no name written)"] += 1; continue
-                    seq, how = hit, "$new: name written"
+                    exact, how = hit, "$new: name written"
                 elif p.startswith("mention("): c["reference mention(...)"] += 1; continue
-                else: seq, how = [w[0].lower() for w in words(p)], "written"
-                i = find_seq(ws, seq, taken)
+                else: exact, how = [w[0] for w in words(p)], "written"
+                seq = [w.lower() for w in exact]
+                i = find_part(ws, exact, taken, after)
                 if i is None and LEG[k]["kind"] == "number":
                     i = co.align(ws, k, p, numvals[k], taken)
                     if i is not None: seq, how = [ws[i][0].lower()], "number word (co-occurrence)"; numword[ws[i][0].lower()][p] += 1
+                if i is None and LEG[k]["kind"] == "number":   # a number with its unit glued on ("50px"): the decoder reads its digits
+                    i = next((j for j, w in enumerate(ws) if j not in taken and NUM_UNIT.fullmatch(w[0]) and num(NUM_UNIT.fullmatch(w[0]).group(1)) == num(p) is not None), None)
+                    if i is not None: seq, how = [ws[i][0].lower()], "number with a unit"
                 if i is None:
                     low = {w[0].lower() for w in ws}
                     c["already tagged for another key" if seq and all(s in low for s in seq) else "not written in the request"] += 1; continue
                 c["aligned: " + how] += 1
                 for j in range(i, i + len(seq)): tag[j] = ("B-" if j == i else "I-") + k; taken[j] = k
-        classes = {k: str(args[k]) for k in class_keys if k in args}
+                after = i + len(seq)
+        classes ={k: str(args[k]) for k in class_keys if k in args}
         for k in ref_keys:
             if k in args: classes["fill:" + k] = filler_kind(ws, str(args[k]), created)
-        d = next((p for k in ref_keys if k in args for p in parts(args[k]) if p.startswith("mention(")), None)
-        if d is not None:
+        ds = [next(p for p in parts(args[k]) if p.startswith("mention(")) for k in ref_keys if k in args and any(p.startswith("mention(") for p in parts(args[k]))]
+        for pre, keys, d in zip(("desc:", "desc2:"), (desc_keys, desc2_keys), ds):   # the first described role -> desc:, the second -> desc2:
             for dk, dv in mention_args(d).items():
-                if DKEY.get(dk.lower()) in desc_keys: classes["desc:" + DKEY[dk.lower()]] = dv
+                if DKEY.get(dk.lower()) in keys: classes[pre + DKEY[dk.lower()]] = dv
         return {"id": rid, "text": sp, "words": [w[0] for w in ws], "tags": tag, "act": act, "classes": classes, "gold": args}
 
     def fillers(rows, out):
@@ -350,7 +406,7 @@ def main():
             ccov[k] = {"values": n, "one word expresses it (co-occurrence, both directions)": al, "top word->value": [f"{w}->{v} {c}" for (w, v), c in pairs.most_common(8)]}
         coverage[name] = {"span keys": {k: dict(v) for k, v in cov.items()}, "class keys": ccov, "rows": len(out), "fillers": fillers(rows, out)}
     number_words = {w: c.most_common(1)[0][0] for w, c in numword.items()}
-    reader = {"cut": {"tags": ["O", "B", "I"], "max_length": 512}, "acts": ACTS, "tags": tags, "span_keys": span_keys, "ref_keys": ref_keys, "desc_keys": desc_keys,
+    reader = {"cut": {"tags": ["O", "B", "I"], "max_length": 512}, "acts": ACTS, "tags": tags, "span_keys": span_keys, "ref_keys": ref_keys, "desc_keys": desc_keys, "desc2_keys": desc2_keys,
               "classes": [[k, ["none"] + values[k]] for k in class_keys] + fill_classes,
               "act_keys": act_keys, "number_words": number_words, "word_re": "[\\p{L}\\p{N}]+|[^\\s\\p{L}\\p{N}]", "max_length": 128}
     json.dump(reader, open(os.path.join(a.out, "reader.json"), "w"), indent=1)
