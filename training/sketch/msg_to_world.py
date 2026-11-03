@@ -215,7 +215,7 @@ def main():
           [f"| {x} | {n} |" for x, n in lost_why.most_common(40)] + ["", "| event | rows |", "|---|---|"] + [f"| {e} | {n} |" for e, n in by_ev.most_common()]
     open(os.path.join(out, "REAL_WORLD.md") if WEV else os.path.join(HERE, "llm_train", "REAL_WORLD.md"), "w").write("\n".join(rep) + "\n")
     print("\n".join(rep[:9]))
-    print(f"Switches: VAL_PREC={FR.val_prec()} VAL_SUB={FR.val_sub()} CREATE_COLOR={os.environ.get('CREATE_COLOR', '') or 'attr'} LEGEND_EXT={int(G.LEGEND_EXT)} "
+    print(f"Switches: VAL_PREC={FR.val_prec()} VAL_SUB={FR.val_sub()}{' VAL_PICK=' + FR.val_pick() if os.environ.get('VAL_PICK') else ''} CREATE_COLOR={os.environ.get('CREATE_COLOR', '') or 'attr'} LEGEND_EXT={int(G.LEGEND_EXT)} "
           f"DIAGRAM_OPS={os.environ.get('DIAGRAM_OPS', '') or '0'}; data folders {FR.train_dirs()}")
     print("Values left out per legend question kind: " + lost_kind_line(lost_kind))
 

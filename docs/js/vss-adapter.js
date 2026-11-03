@@ -47,7 +47,7 @@ export function readingFromWires(wires, verb, tokens = null) {
   }
   return { event: top.type, roles, verb: verb || top.value("_verb"), offered, tokens };
 }
-const ENTITY_ROLES = new Set(["object", "landmark", "landmark2", "landmark3", "source", "target", "edge"]);
+const ENTITY_ROLES = new Set(["object", "landmark", "landmark2", "landmark3", "source", "target", "edge", "linked"]);
 
 /** the gold frame of an eval row -> the same shape */
 export function readingFromGold(row, normalizedTokens, verbsOfEvent) {
@@ -214,6 +214,13 @@ export function toNodes(reading, info, ctx, seq) {
     if (xs.length) args[k] = xs.join(",");
   }
   if (R.title != null) args.title = textOf(typeof R.title === "string" ? R.title : R.title.head);
+  // the keys that had no role before 2026-11-03 (training/sketch/synth/CONVERT_FIX.md; worlds built with LEGEND_EXT=1): outline (a colour
+  // token, or no_outline = "none"), at = x,y (two number roles), linked (a shape), the count of undo / redo (role quantity)
+  if (R.outline != null) args.outline = R.outline === "no_outline" ? "none" : String(R.outline);
+  else if (args.color === "no_outline") { args.outline = "none"; delete args.color; }   // a value placed by what it IS (as region / relation above): no_outline is never a colour
+  if (R.x != null && R.y != null && /^\d+$/.test(String(R.x)) && /^\d+$/.test(String(R.y))) args.at = `${R.x},${R.y}`;
+  if (R.linked != null) args.linked = ref(R.linked);
+  if ((ev === "undo" || ev === "redo") && R.quantity != null && /^\d+$/.test(String(R.quantity))) args.count = +R.quantity;
   for (const k of Object.keys(args)) if (args[k] === undefined) delete args[k];
   nodes.push({ id: (type === "rule" ? "r" : "s") + (++seq.s), type, args });
   return { nodes, notes };

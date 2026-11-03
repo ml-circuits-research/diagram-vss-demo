@@ -19,6 +19,8 @@
 #   (front.py learn_values; ROUND2.md fix 4: "three" -> 3 instead of "add three" -> 3). Default: over every request. Recorded in BUILD.json.
 #   VAL_SUB=value: a longer value n-gram is blocked only by a sub-n-gram that explains it (front.py learn_values; ROUND2.md fix 3:
 #   "bottom left" -> bottom_left although "left" -> left_of). Default: any kept sub-n-gram blocks it. Recorded in BUILD.json.
+#   VAL_PICK=specific: a value n-gram stands for the most specific of the values that pass the bars, not the most frequent one (front.py
+#   learn_values; VSS_SYNTH_DIAGNOSIS.md: "circles" -> circles, not the quantifier all). Recorded in BUILD.json only when set.
 #   SHORT=1: the data also read llm_train/{sonnet,haiku}_short (front.py train_dirs). OPS=1: also llm_train/ops_groups, ops_positions
 #   (DIAGRAM_OPS.md section 7). DIAGRAM_OPS=1: groups and double positions in the conversion and the legend (llm_to_world.py; events
 #   group, ungroup, members, groupOf; roles relation2, landmark3). All three recorded in BUILD.json.
@@ -38,6 +40,7 @@ cd "$HERE"; export VSA_MIN_AVAILABLE_GB="${VSA_MIN_AVAILABLE_GB:-1.5}"
 export DATA="${DATA:-all}" QCOLOR="${QCOLOR:-1}" MARKER="${MARKER:-0}" CAL_FALLBACK="${CAL_FALLBACK:-train}" WORLD_EVENTS="$EVENTS" FRONT_ROWS="${FRONT_ROWS:-}"
 export EXTRA_DIRS="${EXTRA_DIRS:-}"   # extra annotated folders for every learned part (front.py extra_dirs; FEEDBACK_PLAN.md arms); recorded in BUILD.json
 export VAL_PREC="${VAL_PREC:-}" VAL_SUB="${VAL_SUB:-}" SHORT="${SHORT:-}" OPS="${OPS:-}" DIAGRAM_OPS="${DIAGRAM_OPS:-}"
+export VAL_PICK="${VAL_PICK:-}"   # VAL_PICK=specific: front.py learn_values picks the most specific value (VSS_SYNTH_DIAGNOSIS.md); recorded in BUILD.json when set
 export LEGEND_EXT="${LEGEND_EXT:-}"   # LEGEND_EXT=1: the forms of 2026-11-02 (help, layout ops, reverse, templates, free text, arrows; generate.py, TRAIN_PLAN_1103.md); recorded in BUILD.json
 KINDMAP="${KINDMAP-diagnosis_kinds/kinds_comb1.json}"; if [ -n "$KINDMAP" ]; then export KINDMAP; else unset KINDMAP; fi
 FRAC="${FRAC:-1.0}"; D="${D:-1024}"; EPOCHS="${EPOCHS:-10}"; SEED="${SEED:-0}"
@@ -57,7 +60,7 @@ rm -rf "$OUT"
 cp "$W/front.json" "$OUT/front.json"
 cat > "$OUT/BUILD.json" <<JSON
 {"world": "$WORLD", "events": "$EVENTS", "command": "training/sketch/train_micro.sh $WORLD $EVENTS", "DATA": "$DATA", "FRAC": "$FRAC", "QCOLOR": "$QCOLOR",
- "MARKER": "$MARKER", "ROW_SHAPE": "${ROW_SHAPE:-}", "FRONT_ROWS": "$FRONT_ROWS", "KINDMAP": "${KINDMAP:-}", "CAL_FALLBACK": "$CAL_FALLBACK", "D": $D, "EPOCHS": $EPOCHS, "SEED": $SEED, "N_EVAL": $N_EVAL, "EVAL_MODES": "$EVAL_MODES", "DEVICE": "$DEVICE", "HOLDOUT": "${HOLDOUT:-}", "CREATE_COLOR": "${CREATE_COLOR:-}", "N_CAL": "${N_CAL:-}", "VAL_PREC": "$VAL_PREC", "VAL_SUB": "$VAL_SUB", "SHORT": "$SHORT", "OPS": "$OPS", "DIAGRAM_OPS": "$DIAGRAM_OPS",${LEGEND_EXT:+ \"LEGEND_EXT\": \"$LEGEND_EXT\",} "EXTRA_DIRS": "$EXTRA_DIRS", "rows": $(grep -c . "$W/raw/sentences.txt"),
+ "MARKER": "$MARKER", "ROW_SHAPE": "${ROW_SHAPE:-}", "FRONT_ROWS": "$FRONT_ROWS", "KINDMAP": "${KINDMAP:-}", "CAL_FALLBACK": "$CAL_FALLBACK", "D": $D, "EPOCHS": $EPOCHS, "SEED": $SEED, "N_EVAL": $N_EVAL, "EVAL_MODES": "$EVAL_MODES", "DEVICE": "$DEVICE", "HOLDOUT": "${HOLDOUT:-}", "CREATE_COLOR": "${CREATE_COLOR:-}", "N_CAL": "${N_CAL:-}", "VAL_PREC": "$VAL_PREC", "VAL_SUB": "$VAL_SUB", "SHORT": "$SHORT", "OPS": "$OPS", "DIAGRAM_OPS": "$DIAGRAM_OPS",${LEGEND_EXT:+ \"LEGEND_EXT\": \"$LEGEND_EXT\",}${VAL_PICK:+ \"VAL_PICK\": \"$VAL_PICK\",} "EXTRA_DIRS": "$EXTRA_DIRS", "rows": $(grep -c . "$W/raw/sentences.txt"),
  "run_log": "training/sketch/runs/$RUN.log"}
 JSON
 echo "world $WORLD [$EVENTS] -> docs/model/micro/$WORLD ($(grep -c . "$W/raw/sentences.txt") rows); registry line:"

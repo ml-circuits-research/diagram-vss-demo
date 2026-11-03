@@ -75,7 +75,11 @@ if LEGEND_EXT:
               ("parents", "the parent of each item?"), ("title", "with which title?"), ("scheme", "in which colour scheme?"),
               ("width", "how wide?"), ("height", "how high?"), ("fill", "how filled?"), ("layer", "on which layer?"),
               ("property", "by which property?"), ("topic", "help about what?"), ("aspect", "what kind of help?"),
-              ("kind", "shapes, arrows or groups?"), ("quantifier", "all of them?")]
+              ("kind", "shapes, arrows or groups?"), ("quantifier", "all of them?"),
+              # CONVERT_FIX.md (2026-11-03): the gold keys that had no role in any world: outline (a colour or no_outline), at (x, y: two
+              # numbers, "at 600,100"), linked (a shape: "a square connected to Approve", "how many shapes are linked to Vcc")
+              ("outline", "with which outline colour?"), ("x", "at which x coordinate?"), ("y", "at which y coordinate?"),
+              ("linked", "connected to which shape?")]
 
 KINDS = {}
 for s, p in SHAPES.items(): KINDS[s] = "SHAPE"; KINDS[p] = "SHAPE"

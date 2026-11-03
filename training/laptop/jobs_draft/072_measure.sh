@@ -7,6 +7,9 @@
 #     wire with a "pending" key (17, no SOP Lang form yet) is left out whole: its other wires stay unscored rather than turn a reading of the
 #     pending span into an "extra". The filtered copy is written to $R/data/short3/batch_01.jsonl.
 # Steps:
+#   0. the conversion ceiling (training/sketch/convert_check.py --registry, CONVERT_FIX.md; CPU, ~1 min each): for the shipped worlds and the new
+#      ones, the share of the short3 / fresh2 requests whose world row (each world's own front.json and BUILD.json settings) reproduces the gold
+#      through the browser adapter: what a perfect reading of each world could reach. Tables in $R/ceiling_{G,ALL}.log;
 #   1. collectors (fresh2/collect_vss.mjs, collect_sop.mjs CUTS=own, collect_rules.mjs CUTS=own) for the 4 learned readers + the Rules, per situation;
 #   2. per situation, fit_report.mjs for the shipped pair (G) and the new pair (ALL), then verdicts.mjs (G = shipped, T = new: the same fit recipe,
 #      the cost-score threshold fitted out of fold on the situation's calibration part, int(sha256(id),16) % 3 == 0; 1000 paired resamples of the
@@ -43,6 +46,12 @@ print(f"short3: {len(rows)} messages, {len(rows) - len(keep)} left out (a pendin
 PY
 S3=$R/data/short3
 declare -A DATA=( [fresh2]="$F2" [short3]="$S3" )
+
+# ---- 0. the conversion ceiling of the shipped and of the new worlds (2026-11-03: the shipped worlds with their own fronts short3 41.9%, fresh2
+# 71.5%; job 070's settings with the fronts convert_check learns itself short3 60.6%, fresh2 72.0%); the new worlds were built with LEGEND_EXT=1 DIAGRAM_OPS=1
+python3 $SK/convert_check.py --registry docs/model/micro/registry.json --no-base --tests --json "$R/ceiling_G.json" > "$R/ceiling_G.log" 2>&1 || { tail -5 "$R/ceiling_G.log"; fail "convert_check shipped"; }
+LEGEND_EXT=1 DIAGRAM_OPS=1 python3 $SK/convert_check.py --registry "$REG_NEW" --no-base --tests --json "$R/ceiling_ALL.json" > "$R/ceiling_ALL.log" 2>&1 || { tail -5 "$R/ceiling_ALL.log"; fail "convert_check new"; }
+for x in G ALL; do echo "ceiling $x:"; grep "^|" "$R/ceiling_$x.log"; done | tee -a "$TL"
 
 # ---- 1. collectors: G = the shipped readers, ALL = the new ones (records dirs as fit_report.mjs / verdicts.mjs read them)
 for sit in fresh2 short3; do

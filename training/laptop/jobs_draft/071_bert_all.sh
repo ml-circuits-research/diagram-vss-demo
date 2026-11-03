@@ -6,6 +6,9 @@
 # kind, quantifier, property, direction, layout ..., span heads for items / items2 / parents (one span per item, make_roles.py SPAN_KINDS
 # "texts"), title, about, width / height. Same recipe as job 062; the model goes to docs/model/arms/ALL/neural/sop-bert-ALL, never to
 # docs/model/neural/sop-bert. The measurement is job 072.
+# The conversion switches of job 070 (LEGEND_EXT, VAL_PICK, DIAGRAM_OPS; training/sketch/synth/CONVERT_FIX.md) and its convert_check gate are
+# VSS-only: SOP-BERT reads the gold wires directly (make_roles.py, its acts and keys follow the legend), so it keeps the same EXTRA_DIRS as
+# job 070, synth_rules_ops included.
 # GPU: job 041/062 used 3-4 GB of the 3.73 GB card, so the fine-tuning takes EVERY slot of $HOME/vss-box/state/gpu (the VSS jobs take one per
 # world): it waits until no world is training, and no world starts while it trains. make_roles (CPU) runs before it without the lock.
 # Expected time (job 062: 31.7k request rows + 9.4k cut messages, 100 s per epoch on the RTX 3050 Ti): this data has 54.6k request rows + 24.7k

@@ -7,6 +7,38 @@ radial|organic`, `align direction=`, arrow restyle `set / resize from= to=` or `
 `label=""`, property=label of an arrow); create with a layout. Nothing here has been trained on the GPU yet; the numbers below are a dry
 build of the data and CPU smoke runs (EPOCHS=1, a few hundred rows), which show that the code paths work, not how well the readers read.
 
+## 0. Update 2026-11-03 morning: the conversion fix (training/sketch/synth/CONVERT_FIX.md, VSS_SYNTH_DIAGNOSIS.md)
+
+The diagnosis of arm VSS-G+S found that much of the gold never reached the worlds in a learnable form (31% of synth_rules requests became
+rows that cannot produce their gold; with LEGEND_EXT=1 alone, 4.1% of them became "every shape": "remove all the stars" -> delete
+mention(quantifier=all)). Job 070 now runs with three switches (each off by default; all off = every build byte-identical to before):
+
+| switch | what it changes |
+|---|---|
+| `VAL_PICK=specific` (front.py learn_values) | a value n-gram stands for the most specific value that passes the bars, not the most frequent one ("circles" -> circles, not the quantifier `all`); a longer n-gram that refines a kept one is kept ("not orange" -> not_orange although "not" -> all) |
+| `LEGEND_EXT=1` (llm_to_world.py, extended) | a description is never written broader than its gold (no shape word or a lost filter -> the role is left out, never "every shape"); new roles outline (a colour token or no_outline), x / y (at "x,y"), linked (a shape), the undo / redo count (quantity); generate.ROLES += outline, x, y, linked; docs/js/vss-adapter.js reads them |
+| `DIAGRAM_OPS=1` (existing) | groups (group, ungroup in manage; members, groupOf in questions: `worlds_micro/GROUPS_8ops.json`, `GROUPS_EVENTS_8ops.json`) and double positions (position2 / anchor2, a region with a relation) |
+
+Before training, 070 runs `training/sketch/convert_check.py` (the share of each folder's requests whose world row reproduces the gold through
+the browser adapter, the "every shape" share, the "no world" share) and stops if a trained folder's "every shape" share is above 1%.
+Round trip (share of requests), 070's data, fronts learned as msg_to_world learns them:
+
+| folder | requests | 070 as drafted (LEGEND_EXT=1) | 070 now (+ VAL_PICK, DIAGRAM_OPS, new roles) | every shape before -> now |
+|---|---|---|---|---|
+| base (DATA=spans, 9 folders) | 22702 | 80.0% | 80.3% | 0.3% -> 0.0% |
+| G folders (opus_train_a..d, opus_gen_1/2) | 6044 | 69.1-76.1% | 69.9-76.1% | 0.2-1.3% -> 0.0% |
+| synth_rules | 11707 | 72.5% | 79.3% | 4.1% -> 0.0% |
+| synth_rules_ops | 1470 | 35.4% (21.1% in no world) | 76.5% (0.0%) | 0 -> 0 |
+| synth_rules_ext | 3664 | 80.6% | 82.2% | 1.3% -> 0.0% |
+| ops_formulations | 733 | 59.1% | 62.1% | 4.5% -> 0.0% |
+| opus_ext_1 | 743 | 47.4% | 47.1% | 0.3% -> 0.0% |
+| synth_combo | 4521 | 72.2% | 79.0% | 4.2% -> 0.0% |
+| short3 (no pending; not trained) | 644 | 55.7% (shipped worlds: 41.9%) | 60.6% | 1.2% -> 0.0% |
+| fresh2 (not trained) | 1909 | 71.2% (shipped worlds: 71.5%) | 72.0% | 0.9% -> 0.0% |
+
+So synth_rules_ops stays in EXTRA_DIRS (most of it is now convertible). Sections 1-6 below are the plan as first drafted; where they say
+"GROUPS_8", "DIAGRAM_OPS stays off" or "groups are in no world", job 070 now uses GROUPS_8ops with DIAGRAM_OPS=1.
+
 ## 1. Decisions
 
 **One switch, `LEGEND_EXT=1`** (default off: every earlier build is byte-for-byte as before, as with DIAGRAM_OPS). It is set by the jobs and
@@ -33,7 +65,7 @@ position (8 of 272 confusions more). The layout world keeps position at 7 events
 those 8 cross-world cases, which the router's 3 candidate worlds read anyway. help is confused with no event in particular (164 test
 requests, 94.5% read as help; the rest spread over 8 events).
 
-**Not in any world**: group / ungroup / members / groupOf (310 requests of synth_rules_ops). DIAGRAM_OPS stays off, as in the shipped chain
+**Not in any world** (as first drafted; replaced by section 0: DIAGRAM_OPS=1, GROUPS_8ops): group / ungroup / members / groupOf (310 requests of synth_rules_ops). DIAGRAM_OPS stays off, as in the shipped chain
 (one change at a time); the world cutter and the event cutter leave out the 305 messages that hold them (a request with no B label; counted in
 the cutter file, `left_out_no_legend_event`). SOP-BERT reads them (its acts follow the legend).
 
@@ -117,9 +149,9 @@ step runs and passes the new forms through; the readers are untrained (1 epoch, 
 
 | job | what | after | expected time on the RTX 3050 Ti (3.7 GB) |
 |---|---|---|---|
-| 070_vss_all | 9 worlds (FAST=1 FAST_MEM_MB=256, LEGEND_EXT=1, WORLD_PAR=2, VSA_MEM_FRACTION 0.35, a failed world retried alone at 0.85), world cutter (SHORT=1, GROUPS_8) and event cutter (GROUPS_EVENTS_8) on CPU in parallel, registry_ALL.json, context filler, a smoke read; everything to docs/model/arms/ALL/ | - | worlds ~35 min (~55 min if shapes and links need the 0.85 retry, as in job 061/065), cutters ~25-30 min in parallel, context filler ~15-20 min: **~60-80 min** |
+| 070_vss_all | conversion gate (convert_check.py, stop above 1% "every shape"), 9 worlds of GROUPS_8ops (LEGEND_EXT=1 VAL_PICK=specific DIAGRAM_OPS=1, FAST=1 FAST_MEM_MB=256, WORLD_PAR=2, VSA_MEM_FRACTION 0.35, a failed world retried alone at 0.85), world cutter (SHORT=1, GROUPS_8ops) and event cutter (GROUPS_EVENTS_8ops) on CPU in parallel, registry_ALL.json, context filler, a smoke read; everything to docs/model/arms/ALL/ | - | worlds ~35 min (~55 min if shapes and links need the 0.85 retry, as in job 061/065), cutters ~25-30 min in parallel, context filler ~15-20 min: **~60-80 min** |
 | 071_bert_all | make_data / make_roles --all, finetune_roles.py (job 062 recipe: 8 epochs, lr 6e-5, bs 32, fp16) -> docs/model/arms/ALL/neural/sop-bert-ALL, node check | - (waits for every GPU slot: runs when no world trains) | ~190 s per epoch (062: 100 s on 31.7k rows + 9.4k messages; now 54.6k + 24.7k): **~30 min** + the wait |
-| 072_measure | collectors (shipped and new VSS, shipped and new SOP-BERT, Rules) on fresh2 and short3 (minus the 17 messages with a pending wire); fit_report per pair; verdicts.mjs --json (paired bootstrap, 1000 resamples); COMPARE.md (rows situations, columns readers, cost score); confidence3/refit.sh on the new readers, copies to docs/model/arms/ALL/confidence, shipped files restored | 070, 071 | **~20-25 min** (CPU) |
+| 072_measure | the conversion ceiling of the shipped and the new worlds on short3 / fresh2 (convert_check.py --registry); collectors (shipped and new VSS, shipped and new SOP-BERT, Rules) on fresh2 and short3 (minus the 17 messages with a pending wire); fit_report per pair; verdicts.mjs --json (paired bootstrap, 1000 resamples); COMPARE.md (rows situations, columns readers, cost score); confidence3/refit.sh on the new readers, copies to docs/model/arms/ALL/confidence, shipped files restored | 070, 071 | **~20-25 min** (CPU) |
 
 Scaling basis: job 065 world times (shapes7c 8047 rows 419 s alone at 0.85, links7 534 s, position7 357 s, questions7 / graphq7 ~207 s,
 manage7 75 s, history7 23 s), job 061 cutters (< 6 min on 6440 messages), job 065 context filler (284 s), job 062 SOP-BERT (100 s per
@@ -138,7 +170,12 @@ epoch). The whole chain with MAXJOBS=2: **~2-2.5 hours**.
    will mostly read arrange-with-template as arrange without a template.
 5. **Multi-word items** ("Build MVP", lower-case items) have no single VSS token: 100 item values lost in shapes; VSS writes the items it
    can bind, so a template's item list can come out short (a wrong request, not an ask) unless the confidence catches it.
-6. **Groups** (310 requests) are trained by SOP-BERT only; VSS has no group world (DIAGRAM_OPS off).
+6. **Groups** (310 requests): as first drafted, trained by SOP-BERT only. Now (section 0) DIAGRAM_OPS=1 puts them in manage / questions; the
+   shipped context filler knows nothing of group / ungroup (ROUND2.md: it asked about 5 of 741 such units), and the retrained filler of
+   070 learns them from the data.
+14. **The new roles of section 0** are learned from little data: outline 64 + 15 requests, at 98 + 8, linked 72 + 1 (synth_rules_ops +
+   short3); several short3 forms have no learned trigger ("outline start black", "start: red border", "go back three steps"), so their
+   rows have no event token (the round trip counts them as "no event token").
 7. **label=""** is a learned value (no_label): 40 of 146 not found in the spans (the remove phrase is the trigger).
 8. **Confidence**: the new readers' thresholds come from refit.sh on fresh2 + short3 calibration parts; few of those messages use the new forms,
    so the confidence of the new forms is fitted on little data. The confidence files are written to docs/model/arms/ALL/confidence and

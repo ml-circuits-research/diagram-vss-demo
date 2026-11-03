@@ -1,0 +1,72 @@
+{
+ "_about": "GROUPS_8ops (2026-11-03, training/sketch/synth/CONVERT_FIX.md; needs LEGEND_EXT=1 and DIAGRAM_OPS=1): GROUPS_8 plus the group events, placed as DIAGRAM_OPS.md section 5 and GROUPS_7r2.json place them: manage += group, ungroup; questions += members, groupOf. Everything else as GROUPS_8.json.",
+ "shapes": [
+  "create",
+  "set",
+  "resize",
+  "fact",
+  "rule"
+ ],
+ "links": [
+  "connect",
+  "disconnect",
+  "reverse"
+ ],
+ "position": [
+  "move",
+  "swap",
+  "arrange",
+  "align",
+  "distribute",
+  "toFront",
+  "toBack"
+ ],
+ "layout": [
+  "improve",
+  "respace",
+  "snap",
+  "fit",
+  "flip",
+  "sort",
+  "groupBy",
+  "equalize",
+  "straighten",
+  "untangle"
+ ],
+ "graphq": [
+  "check",
+  "connected",
+  "path",
+  "reachable",
+  "cycle",
+  "exists"
+ ],
+ "questions": [
+  "count",
+  "list",
+  "extreme",
+  "nearest",
+  "describe",
+  "neighbors",
+  "degree",
+  "property",
+  "members",
+  "groupOf"
+ ],
+ "manage": [
+  "delete",
+  "duplicate",
+  "rename",
+  "label",
+  "group",
+  "ungroup"
+ ],
+ "history": [
+  "undo",
+  "redo",
+  "forget"
+ ],
+ "help": [
+  "help"
+ ]
+}

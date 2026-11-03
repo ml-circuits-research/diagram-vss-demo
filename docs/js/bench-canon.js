@@ -64,10 +64,13 @@ export function canon(main, nodes) {
   }
   return finish(main.type, el);
 }
+/** a gold mention "mention(shape=diamond,color=yellow)" with its keys sorted, as canon writes a mention wire (its keys sorted): the gold
+ *  convention does not fix the order of a mention's keys, and 9 wires of llm_bench/short3 had them unsorted (VSS_SYNTH_DIAGNOSIS.md) */
+const sortMention = (x) => { const m = /^mention\((.*)\)$/.exec(x); return m ? "mention(" + m[1].split(",").sort().join(",") + ")" : x; };
 /** the gold side of the same form: the args of a gold wire (values string or array) -> key -> string, same order-free rule as canon */
 export function canonWant(type, args) {
   const el = {};
-  for (const [k, v] of Object.entries(args || {})) { if (SKIP.has(k)) continue; el[k] = (Array.isArray(v) ? v : parts(v)).map((x) => String(x).toLowerCase()); }   // the gold skips what canon skips (scale)
+  for (const [k, v] of Object.entries(args || {})) { if (SKIP.has(k)) continue; el[k] = (Array.isArray(v) ? v : parts(v)).map((x) => sortMention(String(x).toLowerCase())); }   // the gold skips what canon skips (scale)
   return finish(type, el);
 }
 /** score one formalizer output against a row (a row, or a wire of a `wires` row, holds its gold arguments in `gold` or `args`): { ok, per: {key: {got, want, ok}} }. A row with `wires` (a message of several clauses)

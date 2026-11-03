@@ -1,0 +1,156 @@
+{
+ "_about": "GROUPS_EVENTS_8ops (2026-11-03, CONVERT_FIX.md; needs LEGEND_EXT=1 and DIAGRAM_OPS=1): one world per legend event, exactly the events of GROUPS_8ops.json (GROUPS_EVENTS_8 + group, ungroup, members, groupOf).",
+ "create": [
+  "create"
+ ],
+ "set": [
+  "set"
+ ],
+ "resize": [
+  "resize"
+ ],
+ "fact": [
+  "fact"
+ ],
+ "rule": [
+  "rule"
+ ],
+ "connect": [
+  "connect"
+ ],
+ "disconnect": [
+  "disconnect"
+ ],
+ "reverse": [
+  "reverse"
+ ],
+ "move": [
+  "move"
+ ],
+ "swap": [
+  "swap"
+ ],
+ "arrange": [
+  "arrange"
+ ],
+ "align": [
+  "align"
+ ],
+ "distribute": [
+  "distribute"
+ ],
+ "toFront": [
+  "toFront"
+ ],
+ "toBack": [
+  "toBack"
+ ],
+ "improve": [
+  "improve"
+ ],
+ "respace": [
+  "respace"
+ ],
+ "snap": [
+  "snap"
+ ],
+ "fit": [
+  "fit"
+ ],
+ "flip": [
+  "flip"
+ ],
+ "sort": [
+  "sort"
+ ],
+ "groupBy": [
+  "groupBy"
+ ],
+ "equalize": [
+  "equalize"
+ ],
+ "straighten": [
+  "straighten"
+ ],
+ "untangle": [
+  "untangle"
+ ],
+ "check": [
+  "check"
+ ],
+ "connected": [
+  "connected"
+ ],
+ "path": [
+  "path"
+ ],
+ "reachable": [
+  "reachable"
+ ],
+ "cycle": [
+  "cycle"
+ ],
+ "exists": [
+  "exists"
+ ],
+ "count": [
+  "count"
+ ],
+ "list": [
+  "list"
+ ],
+ "extreme": [
+  "extreme"
+ ],
+ "nearest": [
+  "nearest"
+ ],
+ "describe": [
+  "describe"
+ ],
+ "neighbors": [
+  "neighbors"
+ ],
+ "degree": [
+  "degree"
+ ],
+ "property": [
+  "property"
+ ],
+ "delete": [
+  "delete"
+ ],
+ "duplicate": [
+  "duplicate"
+ ],
+ "rename": [
+  "rename"
+ ],
+ "label": [
+  "label"
+ ],
+ "undo": [
+  "undo"
+ ],
+ "redo": [
+  "redo"
+ ],
+ "forget": [
+  "forget"
+ ],
+ "help": [
+  "help"
+ ],
+ "group": [
+  "group"
+ ],
+ "ungroup": [
+  "ungroup"
+ ],
+ "members": [
+  "members"
+ ],
+ "groupOf": [
+  "groupOf"
+ ]
+}

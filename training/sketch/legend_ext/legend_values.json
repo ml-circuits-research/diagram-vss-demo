@@ -1,6 +1,6 @@
 {
  "about": "legend questions with values, exported from docs/js/logic.js by export_legend_values.mjs",
- "logic_sha256_16": "27a2145c4956ef03",
+ "logic_sha256_16": "aae68526b3b30b53",
  "questions": {
   "quantifier": {
    "kind": "enum",

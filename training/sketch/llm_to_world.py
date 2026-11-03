@@ -97,6 +97,15 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
             cands = ([PLURAL[sh], sh] if sh else ["shapes", "shape", "everything"]) if plural else ([sh] if sh else ["shape", "it"])
             # LEGEND_EXT: "the whole diagram", "all of them": the quantifier token itself is the head when no shape word / pronoun is there
             head = next((c for c in cands if c in T), None) or next((c for c in ("it", "them", "everything") + (("all",) if LEGEND_EXT and plural else ()) if c in T), None)
+            # LEGEND_EXT: a description is never written BROADER than its gold. When its shape word is missing (the front end made
+            # "stars" into `all`, a typo), a quantifier / pronoun head would read "remove all the stars" as every shape; when a filter
+            # (colour, not-colour, recency) has no token, the head alone reads every shape of the kind. Such a description is left
+            # out (counted "description filter lost"), so the row says nothing about the role instead of teaching the wrong set.
+            if LEGEND_EXT and head is not None and head not in ("it", "them"):
+                miss = (["shape"] if sh and head not in (PLURAL.get(sh, sh), sh) else []) + [k for k, t in (
+                    ("color", kv.get("color")), ("notcolor", kv.get("notcolor") and "not_" + kv["notcolor"]), ("recency", kv.get("recency"))) if t and t not in T]
+                if miss: head = None; lost.append("description filter lost: " + ",".join(miss))
+                if miss and not soft: raise Skip(f"description filter lost in {v}")
             if head is None:
                 if soft: lost.append(f"head of {v}"); return None, None
                 raise Skip(f"no head for {v}")
@@ -151,6 +160,15 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
                 else: lost.append(f"{k} word" if " " in p else f"{k} {p}")
             if mem: roles[k] = mem
         if a.get("title"): roles["title"] = need_text(a["title"])
+        # the keys that had no role (CONVERT_FIX.md, 2026-11-03): outline (its value token), at "x,y" (two number roles), linked (a shape),
+        # the count of undo / redo ("undo twice") as the role quantity, as for duplicate
+        if a.get("outline") not in (None, ""): roles["outline"] = need(FR.value_token("outline", a["outline"]))
+        if a.get("at") not in (None, ""):
+            xy = [p.strip() for p in str(a["at"]).split(",")]
+            if len(xy) == 2 and all(p.isdigit() for p in xy): roles["x"], roles["y"] = need(xy[0]), need(xy[1])
+            else: lost.append(f"at {a['at']}")
+        if a.get("linked") not in (None, ""): roles["linked"], _ = ent(str(a["linked"]).split(",")[0].strip()) if not str(a["linked"]).startswith("mention(") else ent(a["linked"])
+        if ev in ("undo", "redo") and a.get("count") is not None and str(a["count"]).isdigit(): roles["quantity"] = need(str(a["count"]))
         if ev == "create" and a.get("layout"): roles["layout"] = need({"circle": "ring"}.get(a["layout"], a["layout"]))
         if a.get("about"): lost.append("about")
     def place():
