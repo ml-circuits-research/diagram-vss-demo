@@ -2,8 +2,8 @@
 
 Training data for the learned readers (SOP-BERT, VSS): each scene is drawn step by step from plain English commands, so every step is a
 command a person would type, in a rich context of named shapes, relative positions, groups, colours, sizes, panels and z-order.
-Held-out scenes of the same kind: `../../llm_bench/scenes_test` (4 scenes). Three scenes are also demo examples: `docs/js/scenes-extra.js`
-(Space station = scene 03, Pump schematic = scene 06, Winter village = scene 17).
+Held-out scenes of the same kind: `../../llm_bench/scenes_test` (4 scenes). Every scene is also a demo example in the + menu's "Scenes": `docs/js/scenes-extra.js`
+(these 16, the 4 of `scenes_r3b` and the 4 test scenes, which stay test data).
 
 ## Files
 

@@ -171,6 +171,9 @@ svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-widt
 .zoomctl #zoom-pct { min-width: 38px; text-align: center; font-variant-numeric: tabular-nums; }
 .zoomctl .zfit { font-size: 12px; font-weight: 600; color: var(--muted); }
 .zoomctl .zfit.hint { color: var(--accent-ink); background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+/* the names switch (ui.js "Name tags"): a pill like the readout, filled when the names show */
+.namesbtn { font: inherit; font-size: 12px; font-weight: 600; color: var(--muted); background: var(--head); border: 0; padding: 3px 10px; border-radius: 999px; box-shadow: 0 1px 2px rgba(0, 0, 0, .1); cursor: pointer; text-decoration: line-through; }
+.namesbtn[aria-pressed="true"] { color: var(--ink); text-decoration: none; }
 .readout { font-size: 12px; color: var(--muted); background: var(--head); padding: 3px 9px; border-radius: 999px; font-variant-numeric: tabular-nums; box-shadow: 0 1px 2px rgba(0, 0, 0, .1); }
 
 .shp { cursor: grab; touch-action: none; }
@@ -289,6 +292,7 @@ h3.sub:first-child { margin-top: 0; }
 .sc .len { font-size: 12px; color: var(--muted); white-space: nowrap; }
 .sc p { margin: 0; color: var(--muted); font-size: 13px; }
 .sc .row2 { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.sc .tst { font-size: 11px; font-weight: 600; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 0 6px; margin-left: 4px; vertical-align: 2px; }
 .btn { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 5px 14px; cursor: pointer; font-size: 13.5px; color: var(--link); font-weight: 500; }
 .btn.solid { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
@@ -563,6 +567,7 @@ html.docs-open, html.docs-open body { overflow: hidden; }
           <button type="button" id="zoom-in" aria-label="Zoom in" title="Zoom in (+)">+</button>
           <button type="button" id="zoom-fit" class="zfit" aria-pressed="true" title="Fit the drawing to the view">fit</button>
         </div>
+        <button type="button" class="namesbtn" id="names-btn" aria-pressed="true" title="Hide the names above the shapes">names</button>
       </div>
       <div class="loadov" id="loadov" hidden></div>
       <div class="rpanel" id="rpanel" role="tabpanel" hidden></div>
@@ -608,6 +613,7 @@ html.docs-open, html.docs-open body { overflow: hidden; }
 <script src="js/auto-layout.js"></script>
 <script src="js/logic.js"></script>
 <script src="js/spell.js"></script>
+<script src="js/scenes-extra.js"></script>
 <script src="js/scenarios.js"></script>
 <script src="js/help.js"></script>
 <script src="js/docs-concepts.js"></script>

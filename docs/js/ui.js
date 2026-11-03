@@ -30,6 +30,28 @@ const history = []; let turnSeq = 0;               // every message with what ea
 let sub = 'drawing';                                // the active reader's subtab: 'drawing' | 'sop' | 'settings' (the same for every reader)
 // browser storage is a convenience only: every access is guarded and the page works without it
 const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { } } };
+/* Name tags (owner, 2026-11-03): every shape shows its name above it, which suits a diagram and covers a picture (the faces of the Cartoon
+   and of the scenes under "RoboEye"). The footer's "names" switch shows or hides them; the user's choice is kept in this browser (default on).
+   A scenario with names: false (scenarios.js: the Cartoon and every scene of scenes-extra.js) turns them off when it starts, without
+   changing the kept choice; any other scenario puts the kept choice back. Hidden tags still show on hover (the shape's <title>), and the
+   view's fit and the arrow labels stop leaving room for them. Also, always: a small shape that lies on a bigger one (its body's box inside
+   the other's, at most half its area; a panel does not count) shows no tag (tuckedNames), because it would sit on the bigger shape's body
+   (an eye on a head, a window on a house); its name is on hover and in the details. */
+const NAMES_KEY = 'sop.names.off';
+let namesPref = store.get(NAMES_KEY) !== '1', showNames = namesPref, tucked = new Set();
+/** the names of the shapes that lie on a bigger shape (see "Name tags") */
+function tuckedNames(shapes) {
+  const box = s => { const d = K.dims(s); return { x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2, a: d.w * d.h }; };
+  const solid = shapes.filter(s => !s.layer && s.shape !== 'text' && Number.isFinite(s.x) && Number.isFinite(s.y)).map(s => [s, box(s)]), out = new Set();
+  for (const [s, b] of solid) if (solid.some(([o, c]) => o !== s && b.a * 2 <= c.a && b.x1 >= c.x1 - 1 && b.x2 <= c.x2 + 1 && b.y1 >= c.y1 - 1 && b.y2 <= c.y2 + 1)) out.add(s.name);
+  return out;
+}
+/** does s show its name tag now */
+const tagShown = s => !s.layer && s.shape !== 'text' && !s.quiet && showNames && !tucked.has(s.name);
+function setShowNames(on, keep) {
+  showNames = !!on; if (keep) { namesPref = showNames; store.set(NAMES_KEY, showNames ? null : '1'); }
+  const b = document.getElementById('names-btn'); if (b) { b.setAttribute('aria-pressed', String(showNames)); b.title = showNames ? 'Hide the names above the shapes' : 'Show the names above the shapes'; }
+}
 const clock = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 // Collected requests (owner, 2026-11-03; docs/js/collect.js, training/sketch/COLLECT_FORMAT.md): every message the user sends (typed, spoken,
 // an example or a reply's button; not the opening message, not SOP Lang or the toolbar) is kept in this browser with the model versions and
@@ -484,8 +506,8 @@ function drawShape(g, s) {
   /* the name above the shape; a template's own shapes do not show it (their texts say what they are; the details list the names), nor does
      a panel (a background or a zone: its group's frame, its caption and the details name it, and its name shows on hover), so that no
      shape laid out on a zone sits under the zone's name */
-  if (s.layer === 'background' || s.layer === 'zone') el('title', {}, grp).textContent = s.name;
-  else if (!s.quiet) { const tag = el('text', { class: 'tag', x: 0, y: -h / 2 - (hl.shapes.has(s.name) ? 12 : 7), 'text-anchor': 'middle' }, grp); tag.textContent = s.name; }
+  if (s.layer === 'background' || s.layer === 'zone' || !tagShown(s)) el('title', {}, grp).textContent = s.name;
+  if (tagShown(s)) { const tag = el('text', { class: 'tag', x: 0, y: -h / 2 - (hl.shapes.has(s.name) ? 12 : 7), 'text-anchor': 'middle' }, grp); tag.textContent = s.name; }
   if (s.label) {
     const room = s.shape === 'rectangle' || s.shape === 'square' || s.shape === 'ellipse' || s.shape === 'circle' ? w * 0.84 : w * 0.56;
     let fs = s.w ? Math.max(10, Math.min(15, s.h / 2.8)) : Math.max(9, Math.min(14, s.size / 4.4)), txt = s.label;   // a box of its own size: the font follows its height
@@ -574,7 +596,7 @@ function contentExtent(shapes) {
   shapes = shapes.filter(s => Number.isFinite(s.x) && Number.isFinite(s.y));
   if (!shapes.length) return null;
   const boxes = shapes.map(s => { const d = K.dims(s); return { x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2 }; })
-    .concat(shapes.filter(s => !s.layer && s.shape !== 'text' && !s.quiet).map(s => K.tagBox(s)));
+    .concat(shapes.filter(tagShown).map(s => K.tagBox(s)));
   let x1 = Math.min(...boxes.map(b => b.x1)) - FIT_PAD, x2 = Math.max(...boxes.map(b => b.x2)) + FIT_PAD, y1 = Math.min(...boxes.map(b => b.y1)) - FIT_PAD, y2 = Math.max(...boxes.map(b => b.y2)) + FIT_PAD;
   if (x2 - x1 < FIT_MIN.w) { const m = (x1 + x2) / 2; x1 = m - FIT_MIN.w / 2; x2 = m + FIT_MIN.w / 2; }
   if (y2 - y1 < FIT_MIN.h) { const m = (y1 + y2) / 2; y1 = m - FIT_MIN.h / 2; y2 = m + FIT_MIN.h / 2; }
@@ -585,7 +607,7 @@ function stageExtent(shapes) {
   if (!panels.length) return null;
   const panel = panels.reduce((a, b) => (K.dims(b).w * K.dims(b).h > K.dims(a).w * K.dims(a).h ? b : a));
   const boxes = shapes.map(s => { const d = K.dims(s); return { x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2 }; })
-    .concat(shapes.filter(s => !s.layer && s.shape !== 'text' && !s.quiet).map(s => K.tagBox(s)));
+    .concat(shapes.filter(tagShown).map(s => K.tagBox(s)));
   const e = { x1: Math.min(...boxes.map(b => b.x1)), y1: Math.min(...boxes.map(b => b.y1)), x2: Math.max(...boxes.map(b => b.x2)), y2: Math.max(...boxes.map(b => b.y2)) };
   return Object.assign(e, { panel });
 }
@@ -600,6 +622,7 @@ function renderCanvas() {
   layer.textContent = ''; framesG.textContent = '';
   if (dockNames) dockNames(world.state.shapes.map(s => s.name).concat((world.state.groups || []).map(g => g.name)));
   const S = world.state, by = new Map(S.shapes.map(s => [s.name, s])), cells = cellsInUse();
+  tucked = tuckedNames(S.shapes);
   const narrow = svg.clientWidth > 0 && svg.clientWidth < 640;
   const focus = view === 'focus' || (view === 'auto' && narrow);
   if (focus) {
@@ -634,7 +657,7 @@ function renderCanvas() {
   const gg = el('g', {}, layer), pg = el('g', {}, layer), eg = el('g', {}, layer), sg = el('g', {}, layer);   // panels (background, zones) behind the arrows, so an arrow and its label are never under a zone
   drawGroups(gg, S);
   const taken = [];   /* what an arrow's label must not cover: the shapes' bodies, their name tags and the free texts */
-  for (const s of S.shapes) { if (s.layer) continue; const d = K.dims(s); taken.push({ x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2 }); if (s.shape !== 'text' && !s.quiet) taken.push(K.tagBox(s)); }
+  for (const s of S.shapes) { if (s.layer) continue; const d = K.dims(s); taken.push({ x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2 }); if (tagShown(s)) taken.push(K.tagBox(s)); }
   const routes = K.edgeRoutes ? K.edgeRoutes(S) : {};   /* bends round the shapes in the way, and label places (logic.js edgeRoutes) */
   for (const e of S.edges) {
     const a = by.get(e.from), b = by.get(e.to); if (!a || !b) continue;
@@ -819,6 +842,8 @@ svg.addEventListener('keydown', ev => {
 $('#zoom-in').addEventListener('click', () => zoomBy(ZSTEP));
 $('#zoom-out').addEventListener('click', () => zoomBy(1 / ZSTEP));
 $('#zoom-fit').addEventListener('click', () => zoomFit());
+$('#names-btn').addEventListener('click', () => { setShowNames(!showNames, true); renderCanvas(); });
+setShowNames(showNames);
 
 /* ---------------- chat ---------------- */
 const scrollDown = () => { msgs.scrollTop = msgs.scrollHeight; };
@@ -1497,13 +1522,18 @@ const QUICK = [
   'Describe the diagram',
   '@g1 command action=create shape=star color=gold name=Gem position=center'
 ];
+/** one scenario's card in the + menu (a scene marked test: llm_bench/scenes_test, shown here, never trained on) */
+const scCard = sc => `<article class="sc"><header><h4>${escH(sc.title)}${sc.test ? ' <span class="tst" title="A scene of the test set (training/sketch/llm_bench/scenes_test): shown in the demo, never trained on">test</span>' : ''}</h4><span class="len">${sc.size} · ${sc.turns.length} message${sc.turns.length === 1 ? '' : 's'}</span></header><p>${escH(sc.blurb)}</p><div class="row2"><button type="button" class="btn solid" data-sc="${sc.id}" data-how="play">Play</button><button type="button" class="btn" data-sc="${sc.id}" data-how="step">Step through</button><button type="button" class="btn" data-sc="${sc.id}" data-how="edit">Edit a copy</button></div></article>`;
 function renderExamples() {
   return `<h3 class="sub">Send one sentence</h3>
   <div class="quick">${QUICK.map(q => `<button type="button" data-quick="${escH(q)}">${escH(q.startsWith('@') ? 'SOP Lang: ' + q : q)}</button>`).join('')}</div>
   <h3 class="sub">Play a scenario</h3>
   <p class="intro">A scenario is a script of messages. It is drawn in a new area next to what is already on the canvas; nothing is erased.</p>
   <div class="opts"><label for="sc-delay">Pause between messages</label><select id="sc-delay"><option value="0">none</option><option value="400" selected>0.4 s</option><option value="1000">1 s</option><option value="2000">2 s</option></select></div>
-  <div class="sc-list">${SCENARIOS.map(sc => `<article class="sc"><header><h4>${escH(sc.title)}</h4><span class="len">${sc.size} · ${sc.turns.length} message${sc.turns.length === 1 ? '' : 's'}</span></header><p>${escH(sc.blurb)}</p><div class="row2"><button type="button" class="btn solid" data-sc="${sc.id}" data-how="play">Play</button><button type="button" class="btn" data-sc="${sc.id}" data-how="step">Step through</button><button type="button" class="btn" data-sc="${sc.id}" data-how="edit">Edit a copy</button></div></article>`).join('')}</div>
+  <div class="sc-list">${SCENARIOS.filter(sc => sc.kind !== 'scene').map(scCard).join('')}</div>
+  <h3 class="sub" id="scenes-head">Scenes</h3>
+  <p class="intro">Pictures drawn step by step, one plain English message at a time (scenes-extra.js): landscapes, technical drawings, plans, a chart, a poster, cards. Each starts with “Clear the canvas”; the names above the shapes are hidden while they play (the footer’s <b>names</b> shows them). The four marked <i>test</i> are the scenes’ test set: shown here, never trained on.</p>
+  <div class="sc-list scenes">${SCENARIOS.filter(sc => sc.kind === 'scene').map(scCard).join('')}</div>
   <h3 class="sub">Your own script</h3>
   <p class="intro">One message per line. Lines starting with <code>#</code> are comments; lines starting with <code>@</code> are SOP Lang, sent to the engine as they are.</p>
   <textarea id="sc-text" rows="7" spellcheck="false" placeholder="# My diagram&#10;Draw a blue circle named Hub in the center.&#10;Add a red square named Node1 left of Hub and connect Hub to it.&#10;What is connected to Hub?"></textarea>
@@ -1535,7 +1565,10 @@ async function playRest() {
   while (player.i < player.turns.length && !player.stop) { const t = player.turns[player.i++]; renderPlayer(); await submit(t, undefined, { via: 'script' }); await sleep(player.delay); }
   player.playing = false; renderPlayer();
 }
-async function startScript(name, turns, how) {
+/** play a script in a new area of every tab's drawing. opts.names: false hides the name tags (a scenario's names: false; see "Name tags"),
+ *  otherwise the user's kept choice comes back. The view switches to the scenario's own area (the 'focus' view, fitted to what it draws, the
+ *  zoom and pan reset), on desktop too, where the default view shows every area small; the view button still shows them all. */
+async function startScript(name, turns, how, opts) {
   if (!turns.length) return;
   player.delay = +(($('#sc-delay') || {}).value || 400);
   player.stop = true; await queue; player.playing = false;
@@ -1547,6 +1580,8 @@ async function startScript(name, turns, how) {
     else { w.state.frame = { x: 0, y: 0 }; w.state.frames = [{ x: 0, y: 0, title: name }]; }
     rd.focusCell = Object.assign({}, w.state.frame);
   }
+  setShowNames(opts && opts.names === false ? false : namesPref);
+  view = 'focus'; zv.k = 1; zv.dx = 0; zv.dy = 0;
   const ren = Object.entries(fixed.map).map(([a, b]) => `${a} → ${b}`);
   sysNote(`Scenario: ${name}` + (ren.length ? ` · renamed ${ren.join(', ')} to avoid clashes` : ''));
   renderCanvas();
@@ -1935,7 +1970,7 @@ sbody.addEventListener('click', async ev => {
   if (b) {
     const sc = SCENARIOS.find(x => x.id === b.dataset.sc);
     if (b.dataset.how === 'edit') { const t = $('#sc-text'); t.value = `# ${sc.title}\n` + sc.turns.join('\n'); t.focus(); t.scrollIntoView({ block: 'center' }); return; }
-    startScript(sc.title, sc.turns.slice(), b.dataset.how); return;
+    startScript(sc.title, sc.turns.slice(), b.dataset.how, { names: sc.names !== false }); return;
   }
   const o = ev.target.closest('[data-own]');
   if (o) { const v = $('#sc-text').value, turns = parseScript(v); if (!turns.length) { $('#sc-status').textContent = 'Write at least one line first.'; return; } startScript((v.match(/^\s*#\s*(.+)$/m) || [])[1] || 'Your script', turns, o.dataset.own); return; }
@@ -1982,7 +2017,7 @@ function chatSettingsHTML() {
 /** the spell checker's switch, in ⋮ › Settings (it acts before every reader, so it is not one reader's setting) */
 function spellHelpHTML() {
   const P = speller && speller.params;
-  const about = P ? `A word that no reader knows is replaced by the most similar known word when the similarity of their letter groups (VSA character n-grams, D ${P.D}) is at least ${P.threshold} and ${P.margin} above the next word. Known words: ${speller.size()} (the VSS worlds’ words, the legend’s values and cue words) and the names on the canvas; ${speller.keepSize()} more words of the training messages are left alone. Never changed: quoted text, numbers, words of one or two letters, the word after “named” or “called”, and capitalised names that are not on the canvas.`
+  const about = P ? `A word that no reader knows is replaced by the most similar known word when the similarity of their letter groups (VSA character n-grams, D ${P.D}) is at least ${P.threshold} and ${P.margin} above the next word. Known words: ${speller.size()} (the VSS worlds’ words, the legend’s values and cue words) and the names on the canvas; ${speller.keepSize()} more words of the training messages are left alone. Never changed: quoted text, numbers, words of one or two letters, the word after “named” or “called”, and capitalised names that are not on the canvas. A name the message introduces (“named RoboHand”, “call it Nose”, “Name: Kitchen”) counts as a canvas name for the rest of that message.`
     : 'The spell checker’s vocabulary is not loaded (yet).';
   return `<div class="help"><h3 class="sub">Spelling</h3>
   <label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:pointer"><input type="checkbox" id="spell-on" ${spellEnabled ? 'checked' : ''}> <span>Correct typos before the readers read a message (“gree circle” → “green circle”). Every reader reads the corrected text; your message shows what was changed, and <b>details</b> shows the typed and the corrected text.</span></label>
@@ -2106,4 +2141,30 @@ queue.then(() => { READERS.forEach(rd => { rd.world.undoStack = []; }); renderSo
 DocsKit.init({ env: helpEnv, say: t => submit(t, undefined, { via: 'help' }), onPlug: (name, on) => { setPlug(name, on); if (!sheet.hidden && sheetTab === 'plugins') sbody.innerHTML = renderPlugins(); } });
 ensureVSS();              // same site: no button, no question
 checkNeural();            // our neural model loads by itself (from the browser cache when it is there)
+/* a read-only summary for the browser tests and the console (training/sketch/test_scenes_menu.py): nothing here changes the page.
+   turn(): the number of messages so far; view(): 'auto' | 'focus' | 'all'; steps(after): per tab, the messages after turn `after` that it
+   did fully (executed every request it read, no engine error, nothing held), partly (executed something, held or failed something else) or
+   not at all; area(id): the shapes of that tab's current area (its focus cell) and those whose body leaves the area's 800 x 500 canvas */
+window.SketchpadInfo = Object.freeze({
+  turn: () => turnSeq, view: () => view, names: () => showNames,
+  steps(after) {
+    const out = {};
+    for (const rd of READERS) {
+      let done = 0, partly = 0, none = 0;
+      for (const rec of history.filter(x => x.id > after)) {
+        const r = rec.readers[rd.id], steps = r && r.result ? r.result.steps.filter(st => st.node.type !== 'mention') : [];
+        const ok = steps.filter(st => !st.error && !st.skipped).length, bad = steps.length - ok, held = r && r.gate ? r.gate.held.length : 0;
+        if (ok && !bad && !held) done++; else if (ok) partly++; else none++;
+      }
+      out[rd.id] = { done, partly, none };
+    }
+    return out;
+  },
+  area(id) {
+    const rd = RD[id], S = rd.world.state, f = rd.focusCell || S.frame || { x: 0, y: 0 };
+    const mine = S.shapes.filter(s => { const c = K.cellOf(s.x, s.y); return c.x === f.x && c.y === f.y; });
+    const off = mine.filter(s => { const d = K.dims(s); return s.x - d.w / 2 < f.x - 0.5 || s.y - d.h / 2 < f.y - 0.5 || s.x + d.w / 2 > f.x + 800.5 || s.y + d.h / 2 > f.y + 500.5; }).map(s => s.name);
+    return { cell: f, shapes: mine.length, edges: S.edges.length, off };
+  }
+});
 })();

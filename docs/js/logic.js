@@ -420,7 +420,8 @@ const NAME_KEYS = ['target', 'anchor', 'anchor2', 'linked', 'from', 'to', 'membe
 function need(W, n) {
   const s = W.find(n) || (W.findGroup && W.findGroup(n) ? null : byNameOrText(W, n));
   if (!s && W.findGroup && W.findGroup(n)) { const g = W.findGroup(n); throw new SOPError(`${g.name} is a group (${listing(g.members)}), not a shape; name one of its shapes.`); }
-  if (!s) { const all = W.state.shapes.map(x => x.name); throw new SOPError(`There is no shape named "${n}".` + (all.length ? ` Shapes on the canvas: ${all.join(', ')}.` : ' The canvas is empty.')); }
+  if (!s) { const all = W.state.shapes.map(x => x.name), few = all.length > SHORT_LIST + 1 ? closestNames(n, all, SHORT_LIST) : all;
+    throw new SOPError(`There is no shape named "${n}".` + (!all.length ? ' The canvas is empty.' : few.length < all.length ? ` The closest names on the canvas: ${few.join(', ')}, and ${all.length - few.length} others.` : ` Shapes on the canvas: ${all.join(', ')}.`)); }
   return s;
 }
 /* ---------- groups: the box around the members; a group used as an anchor is that box ---------- */
@@ -550,6 +551,17 @@ function relHolds(s, pos, anc) {
 const region = s => { const o = cellOf(s.x, s.y), X = s.x - o.x, Y = s.y - o.y; const c = X < 267 ? 'left' : X < 533 ? 'center' : 'right'; const r = Y < 167 ? 'top' : Y < 333 ? 'middle' : 'bottom'; return r === 'middle' ? (c === 'center' ? 'center' : 'middle ' + c) : r + (c === 'center' ? ' center' : ' ' + c); };
 const plural = (w, n) => n === 1 ? w : (w.endsWith('x') || w.endsWith('s') ? w + 'es' : w + 's');
 const listing = arr => arr.length <= 1 ? arr.join('') : arr.slice(0, -1).join(', ') + ' and ' + arr[arr.length - 1];
+/* Short errors (owner, 2026-11-03): an error that would list every item on a big canvas (a scene holds about 80 shapes) lists only a few:
+   the SHORT_LIST closest to what was asked (closestNames: by shared letter pairs, ties in canvas order), then "and N others". */
+const SHORT_LIST = 5;
+const pairsOf = w => { const s = String(w).toLowerCase(), out = new Set(); for (let i = 0; i + 1 < s.length; i++) out.add(s.slice(i, i + 2)); return out; };
+/** the items of arr most similar to ref (Dice coefficient of the letter pairs), at most k, best first */
+function closestNames(ref, arr, k) {
+  const q = pairsOf(ref), sim = n => { const p = pairsOf(n); let c = 0; for (const x of p) if (q.has(x)) c++; return p.size + q.size ? 2 * c / (p.size + q.size) : 0; };
+  return arr.map((n, i) => ({ n, i, s: sim(n) })).sort((a, b) => b.s - a.s || a.i - b.i).slice(0, k).map(x => x.n);
+}
+/** a list joined with sep, cut to the first SHORT_LIST items + "and N others" (items already in the order to show) */
+const shortList = (arr, sep, what) => arr.length <= SHORT_LIST + 1 ? arr.join(sep) : arr.slice(0, SHORT_LIST).join(sep) + `${sep.trim() === ';' ? ';' : ','} and ${arr.length - SHORT_LIST} other${arr.length - SHORT_LIST === 1 ? '' : 's'}${what ? ' ' + what : ''}`;
 const describeShape = s => s.shape === 'text' ? `${s.name} is a ${sizeName(s.size)} ${s.color} text “${s.label || ''}” in the ${region(s)}` : `${s.name} is a ${s.w ? `${s.w}×${s.h} px` : sizeName(s.size)} ${s.color} ${s.layer ? s.layer + ' ' : ''}${s.shape}${s.outline ? ' with a ' + s.outline + ' outline' : ''}${s.label ? ` labeled "${s.label}"` : ''} in the ${region(s)}`;
 const edgeText = e => `${e.from} ${e.arrow === 'forward' ? '→' : e.arrow === 'both' ? '↔' : '—'} ${e.to}${e.style !== 'solid' ? ' (' + e.style + ')' : ''}${e.label ? ` "${e.label}"` : ''}`;
 const edgeEnds = e => `${e.from} ${e.arrow === 'forward' ? '→' : e.arrow === 'both' ? '↔' : '—'} ${e.to}`;
@@ -562,7 +574,7 @@ function edgesNamed(W, a) {
   if (!es.length && F.length && T.length) es = fit(T, F);
   const what = F.length && T.length ? `between ${listing(F)} and ${listing(T)}` : F.length ? `from ${listing(F)}` : `into ${listing(T)}`;
   if (!F.length && !T.length) throw new SOPError('Which arrow? Name its two ends, e.g. "the arrow from Start to Done".');
-  if (!es.length) { const near = W.state.edges.filter(e => F.concat(T).some(n => e.from === n || e.to === n)); throw new SOPError(`There is no arrow ${what}.` + (near.length ? ` Arrows there: ${near.map(edgeText).join('; ')}.` : '')); }
+  if (!es.length) { const near = W.state.edges.filter(e => F.concat(T).some(n => e.from === n || e.to === n)); throw new SOPError(`There is no arrow ${what}.` + (near.length ? ` Arrows there: ${shortList(near.map(edgeText), '; ')}.` : '')); }
   return { es, what, both: F.length > 0 && T.length > 0 };
 }
 const adjacent = (W, a, b) => W.state.edges.some(e => (e.from === a && e.to === b) || (e.from === b && e.to === a));
@@ -1147,9 +1159,9 @@ function labelEdge(a, ctx) {
     const t = expandGroups(W, names(a.target)).map(n => need(W, n).name);
     es = t.length ? W.state.edges.filter(e => t.includes(e.from) || t.includes(e.to)) : W.state.edges.slice(); what = t.length ? `at ${listing(t)}` : 'on the canvas'; both = false;
     if (!es.length) throw new SOPError(`There are no arrows ${what}.`);
-    if (a.quantifier !== 'all' && !t.length && es.length > 1) throw new SOPError(`Which arrow? There are ${es.length}: ${es.map(edgeEnds).join('; ')}. Name its two ends, or say "all the arrows".`);
+    if (a.quantifier !== 'all' && !t.length && es.length > 1) throw new SOPError(`Which arrow? There are ${es.length}: ${shortList(es.map(edgeEnds), '; ')}. Name its two ends, or say "all the arrows".`);
   } else ({ es, what, both } = edgesNamed(W, a));
-  if (es.length > 1 && text != null && a.kind !== 'edge') throw new SOPError(`There are ${es.length} arrows ${what}: ${es.map(edgeEnds).join('; ')}. Which one? Name both ends, e.g. "label the arrow from ${es[0].from} to ${es[0].to} …".`);
+  if (es.length > 1 && text != null && a.kind !== 'edge') throw new SOPError(`There are ${es.length} arrows ${what}: ${shortList(es.map(edgeEnds), '; ')}. Which one? Name both ends, e.g. "label the arrow from ${es[0].from} to ${es[0].to} …".`);
   if (es.length > 1) {
     const ch = es.filter(e => (e.label || null) !== text);
     for (const e of ch) ctx.emit({ op: 'edgeSet', id: e.id, props: { label: text } });

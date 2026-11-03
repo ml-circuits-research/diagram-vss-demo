@@ -81,7 +81,7 @@ const SCENARIOS = [
     'How many connections are there?',
     'Describe Router.'
   ] },
-  { id: 'cartoon', title: 'Cartoon', size: 'long', blurb: 'A sunny meadow built part by part: a robot, a monkey on a tree, a girl waving hello, a bunny and a hippo in a pond, with the sun, clouds, hills and flowers. Every part is a shape at x, y; arms and legs are plain lines; each character becomes a group.', turns: [
+  { id: 'cartoon', title: 'Cartoon', size: 'long', names: false, blurb: 'A sunny meadow built part by part: a robot, a monkey on a tree, a girl waving hello, a bunny and a hippo in a pond, with the sun, clouds, hills and flowers. Every part is a shape at x, y; arms and legs are plain lines; each character becomes a group.', turns: [
     'Add a title "Sunny Meadow" at 400, 48.',
     'Add a huge gold star named Rays at 728, 88. Add a large yellow circle named Sun at 728, 88.',
     'Add a white circle named Puff at 196, 68. Add a small white circle called Puff3 at 230, 86. Add a small white circle named Puff2 at 162, 86.',
@@ -162,5 +162,8 @@ const SCENARIOS = [
     'Describe the diagram.'
   ] }
 ];
-if (typeof module !== 'undefined') module.exports = SCENARIOS;
+/* the step-by-step scenes of docs/js/scenes-extra.js (kind 'scene': the menu's "Scenes" heading) come after the scenarios: a browser global
+   (index.html loads scenes-extra.js before this file), or require in node */
+if (typeof module !== 'undefined') { SCENARIOS.push(...require('./scenes-extra.js')); module.exports = SCENARIOS; }
+else if (typeof SCENES_EXTRA !== 'undefined') SCENARIOS.push(...SCENES_EXTRA);
 /*SCENARIOS-END*/

@@ -88,7 +88,7 @@ costs as much as 10 right answers), and asks below it, saying why. The Rules hav
 <div class="tw"><table>
 <thead><tr><th>Part</th><th>Code</th><th>Models it loads</th><th class="num">Size</th></tr></thead>
 <tbody>
-<tr><td>Page, tabs, chat, canvas, help</td><td><code>docs/index.html</code>, <code>docs/js/ui.js</code>, <code>docs/js/help.js</code>, <code>docs/js/docs.js</code>, <code>docs/js/docs-concepts.js</code>, <code>docs/js/docs-arch.js</code>, <code>docs/js/scenarios.js</code></td><td>none</td><td class="num">—</td></tr>
+<tr><td>Page, tabs, chat, canvas, help</td><td><code>docs/index.html</code>, <code>docs/js/ui.js</code>, <code>docs/js/help.js</code>, <code>docs/js/docs.js</code>, <code>docs/js/docs-concepts.js</code>, <code>docs/js/docs-arch.js</code>, <code>docs/js/scenarios.js</code>, <code>docs/js/scenes-extra.js</code></td><td>none</td><td class="num">—</td></tr>
 <tr><td>Spell checker</td><td><code>docs/js/spell.js</code></td><td><code>docs/model/spell/vocab.json</code></td><td class="num">28.0 KB</td></tr>
 <tr><td>VSS-BERT: pairing and confidence</td><td><code>docs/js/combined-confidence.js</code></td><td><code>docs/model/confidence/combined.json</code></td><td class="num">(below)</td></tr>
 <tr><td>SOP-BERT reader (and the SOP-BERT cutter)</td><td><code>docs/js/neural.js</code> (transformers.js 3.8.1 from jsDelivr)</td><td><code>docs/model/neural/sop-bert/</code> (one DistilBERT, 8-bit)</td><td class="num">68.7 MB</td></tr>
