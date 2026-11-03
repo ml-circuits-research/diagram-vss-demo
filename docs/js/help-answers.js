@@ -8,7 +8,13 @@
 
    The wire: topic = an action value, a question (ask) value, a legend key, a value of any enum key (a colour, a shape kind, a template),
    a plugin name, or "general"; aspect = overview | how | can | values | example (default overview); about = the words of a help question
-   that name nothing in the legend ("can I add images?" -> about="images"). */
+   that name nothing in the legend ("can I add images?" -> about="images").
+
+   The words of the question (answer's third argument, the request's source text, and `about`) choose between the shape form and the
+   arrow form of a topic that has both: a word for arrows (the cue words of the legend value kind=edge: arrows, lines, links, ...) puts the
+   arrow form first ("how do I label an arrow?" -> labelling an arrow by its two ends; "how do I delete an arrow?" -> disconnect; "how do I
+   make an arrow red?" -> changing an arrow); without one, a label answer covers shapes and then arrows. "label" among the words of a
+   question about deleting or changing makes it a question about labels ("how do I delete an arrow's label?"). */
 (function (root) {
 'use strict';
 const words = v => String(v).replace(/([A-Z])/g, ' $1').toLowerCase().trim();
@@ -29,7 +35,9 @@ function contextFromEngine(engine, opts) {
     const hs = engine.handlers.filter(h => h.plugin === p), vals = (type, key) => [...new Set(hs.filter(h => h.type === type && h.when && h.when[key] != null).flatMap(h => [].concat(h.when[key])))];
     return { name: p.name, title: p.title, description: p.description || '', enabled: p.enabled !== false, locked: !!p.locked, actions: vals('command', 'action'), asks: vals('question', 'ask'), wireTypes: Object.keys(p.wireTypes || {}), keys: Object.keys(p.legend || {}) };
   });
-  return { legend, plugins, docs: opts.docs || null, templates: opts.templates || [] };
+  /* the actions the engine runs on arrows already drawn: a command handler with from= / to= or kind=edge in its when */
+  const edgeForms = [...new Set(engine.handlers.filter(h => h.type === 'command' && h.when && h.when.action && (h.when.from || h.when.to || h.when.kind === 'edge')).flatMap(h => [].concat(h.when.action)))];
+  return { legend, plugins, docs: opts.docs || null, templates: opts.templates || [], edgeForms };
 }
 
 /** every topic a help wire can name, with what it is: [{topic, senses: [{kind: action|ask|key|value|plugin|general, key?}]}] */
@@ -148,8 +156,40 @@ function generalPart(ctx) {
   return { text: `I draw and change diagrams from plain English, and I answer questions about them. What I can do: ${listing(caps)}.` + (tl.length ? ` Ready-made forms (templates): ${listing(tl)}.` : '') + (off.length ? ` Switched off now: ${listing(off.map(p => p.title))}.` : '') + ' Ask me “how do I …?”, “what colours can I use?”, “can I group things?”, or “how do I make a timeline?”.', examples: ex.slice(0, 4) };
 }
 
-/** answer(args, ctx) -> { text, examples, topic, aspect, senses, known }. args: the help wire's answers (topic, aspect, about). */
-function answer(args, ctx) {
+/* ---------------- the arrow form of a topic ---------------- */
+const firstSentences = (d, n) => (String(d || '').match(/[^.!?]+[.!?]+(?:\s|$)/g) || [String(d || '')]).slice(0, n).join('').trim();
+/** the words of a question, lower case (the source text and `about`) */
+const wordsOf = (said, about) => new Set(`${said || ''} ${about || ''}`.toLowerCase().replace(/['’]s\b/g, ' ').split(/[^a-z]+/).filter(Boolean));
+/** the words that name arrows: the cue words of the legend value kind=edge (and their singulars), and "edge" itself */
+function arrowWords(ctx) {
+  const q = ctx.legend.kind, cues = q && q.values && q.values.edge ? q.values.edge : null;
+  if (!cues) return new Set();
+  return new Set(cues.concat(['edge']).flatMap(c => [c.toLowerCase(), c.toLowerCase().replace(/s$/, '')]));
+}
+const said = (W, k) => [...W].some(w => w === k || w === k + 's' || (w.startsWith(k) && /^(?:ed|led|ing|ling)$/.test(w.slice(k.length))));
+/** a help-page item (t, d, ex) as an answer part; brief: its first two sentences and one example */
+function itemPart(x, aspect, brief, ps) {
+  const ex = (x.ex || []).map(exText).filter(Boolean);
+  if (brief) return { text: `${x.t}: ${firstSentences(x.d, 2)}${ex.length ? ` For example “${ex[0]}”.` : ''}`, examples: ex.slice(0, 1) };
+  const lead = aspect === 'can' ? `Yes: ${x.t.toLowerCase()}. ` : `${x.t}: `;
+  const tail = aspect === 'example' ? ` For example: ${ex.slice(0, 3).map(e => `“${e}”`).join('; ')}.` : ex.length ? ` For example “${ex[0]}”.` : '';
+  return { text: lead + x.d + tail + offNote(ps || []), examples: ex };
+}
+/** the arrow form of a label, a change or a removal; null when the engine has none (or no help-page prose for it) */
+function arrowPart(ctx, form, aspect, brief) {
+  const ps = ctx.plugins.filter(p => p.actions.includes(form === 'label' ? 'label' : form === 'style' ? 'set' : 'disconnect'));
+  if (form === 'label') { const x = ctx.docs && ctx.docs.EDGE_LABEL; return x && (ctx.edgeForms || []).includes('label') ? itemPart(x, aspect, brief, ps) : null; }
+  if (form === 'style') { const x = ctx.docs && ctx.docs.EDGE_STYLE; return x && (ctx.edgeForms || []).includes('set') ? itemPart(x, aspect, brief, ps) : null; }
+  if (form === 'remove') { if (!ctx.legend.action || !ctx.legend.action.values || !('disconnect' in ctx.legend.action.values)) return null; const x = doc(ctx, 'ACTIONS', 'disconnect'); return x ? itemPart(x, aspect, brief, ps) : actionPart(ctx, 'disconnect', aspect); }
+  return null;
+}
+const SHAPE_LABEL_KEYS = new Set(['label']);                    /* topics that are a label */
+const CHANGE_TOPICS = new Set(['set', 'resize', 'color', 'style', 'arrow', 'size', 'outline']);   /* topics whose arrow form is a change of the arrow */
+const REMOVE_TOPICS = new Set(['delete']);                      /* topics whose arrow form is a disconnect */
+
+/** answer(args, ctx, text) -> { text, examples, topic, aspect, senses, known }. args: the help wire's answers (topic, aspect, about);
+ *  text: the question as written (optional), whose words choose the arrow form of a topic (see the head of the file). */
+function answer(args, ctx, text) {
   args = args || {};
   const aspect = ASPECTS.includes(args.aspect) ? args.aspect : 'overview', topic = args.topic != null ? String(args.topic) : null;
   if (!topic || topic === 'general') {
@@ -167,9 +207,23 @@ function answer(args, ctx) {
   const parts = (main.length ? main : senses).slice().sort((a, b) => (order[a.kind] - order[b.kind]) || 0).map(s =>
     s.kind === 'action' ? actionPart(ctx, topic, aspect) : s.kind === 'ask' ? askPart(ctx, topic, aspect) : s.kind === 'key' ? keyPart(ctx, topic, aspect)
       : s.kind === 'value' ? valuePart(ctx, topic, s.key, aspect) : s.kind === 'plugin' ? pluginPart(ctx, topic, aspect) : generalPart(ctx));
+  /* the arrow form (see the head of the file): with a word for arrows it comes first and the shape form is said briefly; a label answer
+     without one ends with the arrow form, briefly */
+  const W = wordsOf(text, args.about), arrows = [...arrowWords(ctx)].some(w => W.has(w)), lab = SHAPE_LABEL_KEYS.has(topic) || (said(W, 'label') && (REMOVE_TOPICS.has(topic) || CHANGE_TOPICS.has(topic) || topic === 'rename'));
+  let all = parts, form = lab ? 'label' : arrows && CHANGE_TOPICS.has(topic) ? 'style' : arrows && REMOVE_TOPICS.has(topic) ? 'remove' : null;
+  const arrowFull = form && arrows ? arrowPart(ctx, form, aspect, false) : null;
+  if (form === 'label' && !arrows) {
+    /* a label of a shape: the label action's answer (when the topic was delete / set: the label topic instead), then the arrow form briefly */
+    const shape = SHAPE_LABEL_KEYS.has(topic) ? parts : [actionPart(ctx, 'label', aspect)], brief = arrowPart(ctx, 'label', aspect, true);
+    all = shape.slice(0, 2).concat(brief ? [brief] : []);
+  } else if (arrowFull) {
+    const shapeBrief = form === 'label' && doc(ctx, 'ACTIONS', 'label') ? itemPart(doc(ctx, 'ACTIONS', 'label'), aspect, true) : null;
+    const own = doc(ctx, 'ACTIONS', topic), other = own && senses.some(x => x.kind === 'action') ? itemPart(own, aspect, true) : parts[0];   /* the shape form, briefly when it is an action */
+    all = [arrowFull].concat(form === 'label' ? (shapeBrief ? [shapeBrief] : []) : other ? [other] : []);
+  }
   const texts = [], examples = [];
-  for (const p of parts) { if (!texts.includes(p.text)) texts.push(p.text); for (const e of p.examples) if (!examples.includes(e)) examples.push(e); }
-  return { text: texts.slice(0, 3).join(' '), examples: examples.slice(0, 4), topic, aspect, senses, known: true };
+  for (const p of all) { if (!texts.includes(p.text)) texts.push(p.text); for (const e of p.examples) if (!examples.includes(e)) examples.push(e); }
+  return { text: texts.slice(0, 3).join(' '), examples: examples.slice(0, 4), topic, aspect, senses, known: true, form: arrowFull ? 'arrow' : null };
 }
 
 /** the legend questions of the help wire (the help plugin's legend). The topic values are every topic of the legend, so it is built after

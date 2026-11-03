@@ -1,0 +1,175 @@
+# annotation of texts/texts_02.jsonl (same format as annot_01.txt)
+@or2-0101
+rename Coach1 to Juniors | rename | c rename target=Coach1; name=Juniors | rename Coach1 to Juniors
+Coach2 to Seniors | Coach2 | c rename target=Coach2; name=Seniors | rename Coach2 to Seniors
+@or2-0102
+Kit green | green | c set target=Kit; color=green | make Kit green
+Physio white | white | c set target=Physio; color=white | make Physio white
+Director gold | gold | c set target=Director; color=gold | make Director gold
+@or2-0103
+move Kit left of Director | move | c move target=Kit; position=leftOf; anchor=Director | move Kit to the left of Director
+Physio right of it | right of | c move target=Physio; position=rightOf; anchor=Director | move Physio to the right of Director
+@or2-0104
+connect Director to Coach1, and Coach1 to Kit | connect | c connect from=Director,Coach1,Kit; pairing=chain | connect Director, Coach1 and Kit in a chain
+@or2-0105
+make Fern dark green, oh wait no, just green | make | c set target=Fern; color=green | make Fern green
+@or2-0106
+Rose a star? no, a circle | star | c set target=Rose; shape=circle | make Rose a circle
+pink | pink | c set target=Rose; color=pink | make Rose pink
+@or2-0107
+Pond should be blue and big | should be | c set target=Pond; color=blue; size=large | make Pond blue and big
+Moss small | small | c set target=Moss; size=small | make Moss small
+@or2-0108
+put Ivy next to Pond | put | c move target=Ivy; position=near; anchor=Pond | put Ivy next to Pond
+@or2-0109
+swap Fern and Rose | swap | c swap target=Fern,Rose | swap Fern and Rose
+undo that | undo | c undo | undo
+@or2-0110
+Flour → Mix, Eggs → Mix | → | c connect from=Flour,Eggs; to=Mix | -
+@or2-0111
+Mix to Bake, Bake to Cool, all one chain | to | c connect from=Mix,Bake,Cool; pairing=chain | connect Mix, Bake and Cool in a chain
+@or2-0112
+Bake orange | orange | c set target=Bake; color=orange | make Bake orange
+Cool light blue... well, cyan | blue | c set target=Cool; color=cyan | make Cool cyan
+@or2-0113
+undo | undo | c undo | undo
+@or2-0114
+label the arrow Mix to Bake "20 min" | label | c label from=Mix; to=Bake; label=20 min | label the arrow from Mix to Bake "20 min"
+@or2-0115
+Ingest Parse Clean Load in a row | in a row | c arrange target=Ingest,Parse,Clean,Load; layout=row | arrange Ingest, Parse, Clean and Load in a row
+@or2-0116
+Warehouse an ellipse, navy | ellipse | c set target=Warehouse; shape=ellipse; color=navy | make Warehouse a navy ellipse
+@or2-0117
+Clean twice as big | twice as big | c resize target=Clean; scale=2 | make Clean twice as big
+@or2-0118
+Load → Warehouse, dotted | → | c connect from=Load; to=Warehouse; style=dotted | connect Load to Warehouse with a dotted arrow
+@or2-0119
+remove the outline on Warehouse | remove the outline | c set target=Warehouse; outline=none | -
+make it gray | make | c set target=Warehouse; color=gray | make Warehouse gray
+@or2-0120
+go back 3 steps | go back | c undo count=3 | undo 3 times
+@or2-0121
+Castle top | top | c move target=Castle; position=top | move Castle to the top
+Village bottom | bottom | c move target=Village; position=bottom | move Village to the bottom
+@or2-0122
+Cave a triangle, brown, small | triangle | c set target=Cave; shape=triangle; color=brown; size=small | make Cave a small brown triangle
+@or2-0123
+Forest to Cave and Forest to Tower | to | c connect from=Forest; to=Cave,Tower | connect Forest to Cave and Tower
+@or2-0124
+Tower: purple outline | outline | c set target=Tower; outline=purple | give Tower a purple outline
+@or2-0125
+what's connected to Forest? | connected to | q neighbors target=Forest | what is connected to Forest
+@or2-0126
+Village bigger | bigger | c resize target=Village | make Village bigger
+Castle bigger too | bigger | c resize target=Castle | make Castle bigger
+@or2-0127
+Math blue | blue | c set target=Math; color=blue | make Math blue
+Physics blue | blue | c set target=Physics; color=blue | make Physics blue
+Biology green | green | c set target=Biology; color=green | make Biology green
+@or2-0128
+put Lab between Physics and Biology | put | c move target=Lab; position=between; anchor=Physics,Biology | put Lab between Physics and Biology
+@or2-0129
+Library: a hexagon. hmm, a rectangle actually | hexagon | c set target=Library; shape=rectangle | make Library a rectangle
+@or2-0130
+Math to Physics two-way | to | c connect from=Math; to=Physics; arrow=both | connect Math to Physics with a two-way arrow
+Physics to Lab one way | to | c connect from=Physics; to=Lab | connect Physics to Lab
+@or2-0131
+make Library teal | make | c set target=Library; color=teal | make Library teal
+@or2-0132
+Header top | top | c move target=Header; position=top | move Header to the top
+Footer bottom | bottom | c move target=Footer; position=bottom | move Footer to the bottom
+Sidebar left | left | c move target=Sidebar; position=left | put Sidebar on the left
+@or2-0133
+Modal in front | in front | c toFront target=Modal | bring Modal to the front
+@or2-0134
+Content big, white, with a black border | big | c set target=Content; size=large; color=white; outline=black | -
+@or2-0135
+just send it to the back | send | c toBack target=Modal | send Modal to the back
+@or2-0136 EXCLUDE "how many shapes have a border?": counting by outline is not a filter of the legend's count question
+@or2-0137 EXCLUDE "Rb behind Qb": behind may mean below or the drawing order (to back); not certain
+@or2-0138
+Qb → Wr1 dashed | → | c connect from=Qb; to=Wr1; style=dashed | connect Qb to Wr1 with a dashed arrow
+Qb → Te dashed | → | c connect from=Qb; to=Te; style=dashed | connect Qb to Te with a dashed arrow
+@or2-0139
+Qb red | red | c set target=Qb; color=red | make Qb red
+everyone else blue | blue | c set target=Wr1,Wr2,Rb,Te; color=blue | make Wr1, Wr2, Rb and Te blue
+@or2-0140
+undo that last arrow | undo | c undo | undo
+@or2-0141
+Scene1 to Scene2 to Scene3 to Scene4 | to | c connect from=Scene1,Scene2,Scene3,Scene4; pairing=chain | connect Scene1, Scene2, Scene3 and Scene4 in a chain
+@or2-0142
+Ending a star, gold | star | c set target=Ending; shape=star; color=gold | make Ending a gold star
+@or2-0143
+Scene3 → Ending, label it "twist" | → | c connect from=Scene3; to=Ending; label=twist | connect Scene3 to Ending labelled "twist"
+@or2-0144
+Scene2 should be yellow — no, orange | should be | c set target=Scene2; color=orange | make Scene2 orange
+@or2-0145
+line them all up horizontally | line | c align target=mention(quantifier=all); axis=horizontal | align all shapes horizontally
+@or2-0146
+Kitchen next to Living | next to | c move target=Kitchen; position=near; anchor=Living | put Kitchen next to Living
+@or2-0147
+Bed1 and Bed2 the same size as Living | same size as | c equalize target=Bed1,Bed2; property=size; anchor=Living | make Bed1 and Bed2 the same size as Living
+@or2-0148
+Bath small, light gray | small | c set target=Bath; size=small; color=gray | make Bath small and gray
+@or2-0149
+Bed2 under Bed1 | under | c move target=Bed2; position=below; anchor=Bed1 | put Bed2 under Bed1
+@or2-0150
+is Bath left of Kitchen? | is | q check target=Bath; position=leftOf; anchor=Kitchen | is Bath left of Kitchen
+@or2-0151
+make start green | make | c set target=Start; color=green | make Start green
+done red | red | c set target=Done; color=red | make Done red
+undo the red one | undo | c undo | undo
+@or2-0152
+process → diamond | → | c set target=Process; shape=diamond | make Process a diamond
+check → hexagon | → | c set target=Check; shape=hexagon | make Check a hexagon
+@or2-0153
+check yellow | yellow | c set target=Check; color=yellow | make Check yellow
+also smaller | smaller | c resize target=Check | make Check smaller
+@or2-0154
+done, bigger | bigger | c resize target=Done | make Done bigger
+@or2-0155
+Start & Done: circles | circles | c set target=Start,Done; shape=circle | make Start and Done circles
+@or2-0156
+outline check in red | outline | c set target=Check; outline=red | give Check a red outline
+done in blue | blue | c set target=Done; outline=blue | give Done a blue outline
+@or2-0157
+no outline on any of them | no outline | c set target=mention(quantifier=all); outline=none | -
+@or2-0158
+the arrow check to done, make it red | make | c set from=Check; to=Done; color=red | make the arrow from Check to Done red
+@or2-0159
+redo. no wait, redo twice | redo | c redo count=2 | redo twice
+@or2-0160
+back 2 | back | c undo count=2 | undo twice
+@or2-0161
+a circle called X at 100,100 | circle | c create shape=circle; name=X; at=100,100 | add a circle called X at 100,100
+@or2-0162
+Done at 500,300 | at | c move target=Done; at=500,300 | move Done to 500,300
+@or2-0163
+timeline: Start, Process, Check, Done | timeline | c arrange template=timeline; target=Start,Process,Check,Done | -
+@or2-0164
+title "Onboarding" on top | title | c create shape=text; label=Onboarding; position=top | put a title "Onboarding" at the top
+@or2-0165
+check is connected to what? | connected to what | q neighbors target=Check | what is connected to Check
+@or2-0166
+are start and done linked | are | q connected target=Start; anchor=Done | are Start and Done connected
+@or2-0167
+biggest shape? | biggest | q extreme superlative=biggest | what is the biggest shape
+@or2-0168
+Begin instead of Start | instead of | c rename target=Start; name=Begin | rename Start to Begin
+Finish instead of Done | instead of | c rename target=Done; name=Finish | rename Done to Finish
+@or2-0169
+make the arrows not cross | not cross | c untangle | untangle the arrows
+@or2-0170
+tidy? | tidy | c improve | tidy up
+@or2-0171
+Isp1 and Isp2 gray | gray | c set target=Isp1,Isp2; color=gray | make Isp1 and Isp2 gray
+@or2-0172
+Edge → Core → Nas | → | c connect from=Edge,Core,Nas; pairing=chain | connect Edge, Core and Nas in a chain
+@or2-0173
+Isp1 to Edge, Isp2 to Edge | to | c connect from=Isp1,Isp2; to=Edge | -
+@or2-0174
+Nas a cylinder... we don't have that, ok an ellipse then | ellipse | c set target=Nas; shape=ellipse | make Nas an ellipse
+@or2-0175
+just make it dashed | make | c set from=Core; to=Nas; style=dashed | make the arrow from Core to Nas dashed
+@or2-0176
+how many arrows go out of Core | how many | q degree target=Core | -

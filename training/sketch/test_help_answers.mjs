@@ -70,6 +70,33 @@ const runText = (S, text) => { const f = read(S, text); if (!f.nodes.length) ret
   ok("with Help switched off, ask=help is refused like any switched-off capability", /switched off/.test((S.engine.run(K.parse("@h question ask=help")).errors[0] || { error: {} }).error.message || ""));
 }
 
+// ---------- 2b. the arrow form of a topic: the words of the question choose it (help-answers.js, head of the file) ----------
+{
+  const S = fresh(), ctx = HA.contextFromEngine(S.engine, { docs: HK, templates: TK.catalogue() });
+  const lab = HA.answer({ topic: "label", aspect: "how" }, ctx);
+  ok("topic=label without the question's words: shapes first, then arrows", /^Label: Write text inside a shape/.test(lab.text) && /Label an arrow: .*two ends/.test(lab.text) && lab.examples.some(e => /arrow between Process and Check/.test(e)), lab.text);
+  const arr = HA.answer({ topic: "label", aspect: "how" }, ctx, "how do I label an arrow?");
+  ok("\"how do I label an arrow?\": the arrow form first (two ends), the shape form briefly", /^Label an arrow: .*two ends/.test(arr.text) && /inside a shape/.test(arr.text) && /arrow/.test(arr.examples[0]) && arr.form === "arrow", arr.text);
+  ok("\"label a line\" and \"label a connection\" are arrows too", ["how can I label a line", "how do I put text on a connection"].every(q => /^Label an arrow/.test(HA.answer({ topic: "label", aspect: "how" }, ctx, q).text)));
+  const del = HA.answer({ topic: "delete", aspect: "how" }, ctx, "how do I delete an arrow's label?");
+  ok("\"how do I delete an arrow's label?\" (topic=delete): removing the label of an arrow", /^Label an arrow: Write, change or remove/.test(del.text) && del.examples.some(e => /^Remove the label of the arrow/.test(e)), del.text);
+  const delS = HA.answer({ topic: "delete", aspect: "how" }, ctx, "how do I delete a label?");
+  ok("\"how do I delete a label?\" (topic=delete): the label of a shape, then arrows", /^Label: Write text inside a shape/.test(delS.text) && /Remove the label/.test(delS.text) && /Label an arrow/.test(delS.text), delS.text);
+  const delA = HA.answer({ topic: "delete", aspect: "how" }, ctx, "how do I delete an arrow?");
+  ok("\"how do I delete an arrow?\": disconnect first, then delete (shapes) briefly", /^Disconnect: /.test(delA.text) && /Delete: Remove shapes/.test(delA.text) && delA.examples[0] === "Disconnect Start from Process", delA.text);
+  ok("\"how do I delete a shape?\" stays delete", /^Delete: /.test(HA.answer({ topic: "delete", aspect: "how" }, ctx, "how do I delete a shape?").text));
+  const col = HA.answer({ topic: "color", aspect: "how" }, ctx, "how do I change the color of an arrow?");
+  ok("\"how do I change the color of an arrow?\" (topic=color): changing an arrow by its two ends, then the colours", /^Change an arrow: .*two ends/.test(col.text) && /Color answers/.test(col.text) && col.examples[0] === "Make the arrow from Start to Process red", col.text);
+  ok("\"make an arrow thicker\" (topic=resize): changing an arrow", /^Change an arrow/.test(HA.answer({ topic: "resize", aspect: "how" }, ctx, "how do I make an arrow thicker?").text));
+  ok("\"what colours can I use?\" stays the colours", /^Color answers/.test(HA.answer({ topic: "color", aspect: "values" }, ctx, "what colours can I use?").text));
+  // through the engine: the Rules reader's wire keeps the question (src), SOP-BERT's request has it as unit.src; a typed wire has neither
+  const viaRules = runText(fresh(), "how do I label an arrow?");
+  ok("Rules + engine: \"how do I label an arrow?\" is answered with the arrow form", /^Label an arrow/.test(viaRules.r.steps[0].answer), viaRules.r.steps[0].answer);
+  const node = K.parse("@s1 question ask=help topic=label aspect=how")[0]; Object.defineProperty(node, "unit", { value: { src: "how do I label an arrow?" }, enumerable: false });
+  ok("a wire with the question as unit.src (SOP-BERT): the arrow form", /^Label an arrow/.test(fresh().engine.run([node]).steps[0].answer));
+  ok("a typed wire (no question words): shapes and arrows", /^Label: .*Label an arrow/.test(fresh().engine.run(K.parse("@s1 question ask=help topic=label aspect=how")).steps[0].answer));
+}
+
 // ---------- 3. the Rules reader on help questions (the owner's six and their kin), and what must stay a request ----------
 {
   const S = fresh(), w = t => read(S, t).nodes.map(K.serialize).join(" ; ");

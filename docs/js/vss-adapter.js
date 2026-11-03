@@ -48,6 +48,8 @@ export function readingFromWires(wires, verb, tokens = null) {
   return { event: top.type, roles, verb: verb || top.value("_verb"), offered, tokens };
 }
 const ENTITY_ROLES = new Set(["object", "landmark", "landmark2", "landmark3", "source", "target", "edge", "linked"]);
+// the SOP args that name shapes (what ref() returns: a name, {ref: id} of a shape made earlier in the message, a mention, or a list of these)
+const SHAPE_ARGS = ["target", "from", "to", "anchor", "anchor2", "linked"];
 
 /** the gold frame of an eval row -> the same shape */
 export function readingFromGold(row, normalizedTokens, verbsOfEvent) {
@@ -65,11 +67,15 @@ export function toNodes(reading, info, ctx, seq) {
   const plainName = (tok) => { const raw = (info.names && info.names[tok]) || tok.replace(/^n_/, ""); return names.get(String(raw).toLowerCase()) || raw; };
   const textOf = (tok) => (info.texts && info.texts[tok]) || (info.names && info.names[tok]) || String(tok).replace(/^[tn]_/, "").replace(/_/g, " ");   // labelled Rocks: an unquoted label is a name token
   const R = reading.roles || {}; let negUsed = false;
+  // a shape's identity in the args: a name (any case) or the id of a shape made earlier in the message; usedName counts how many times
+  // ref() turned a name word of the request into an argument value (the one-to-one rule on the request, below)
+  const shapeKey = (v) => (typeof v === "string" ? "n:" + v.toLowerCase() : v && typeof v === "object" && !Array.isArray(v) && v.ref ? "r:" + v.ref : null);
+  const usedName = new Map();
   const ref = (en) => {
     if (en == null) return undefined;
     if (typeof en === "string") en = { head: en };
     const h = en.head || "";
-    if (h.startsWith("n_")) return nameOf(h);
+    if (h.startsWith("n_")) { const v = nameOf(h), k = shapeKey(v); if (k) usedName.set(k, (usedName.get(k) || 0) + 1); return v; }   // usedName: the one-to-one rule below
     if (h === "it" || h === "them") {
       const last = ctx.last || [];
       if (!last.length) { notes.push(`couldn't tell what “${h}” refers to`); return undefined; }
@@ -114,6 +120,10 @@ export function toNodes(reading, info, ctx, seq) {
   if (type === "question") args.ask = ev;
   const obj = R.object;
   const shapeOf = (en) => (en && typeof en === "object" && SHAPES[en.head]) || undefined;
+  // the role `shape` holds the world's value token, which can be a plural ("make A and B squares" -> shape=squares, VAL_PICK=specific):
+  // the same table SHAPES as for a head gives the legend value (2026-11-03, training/sketch/combine/VSS_FROM_TO.md; before, shape=squares
+  // reached the engine and the scorer as "squares")
+  const shapeValue = (v) => (Object.hasOwn(SHAPES, v) ? SHAPES[v] : v);
   const withMembers = () => { if (R.members && !["connect", "disconnect", "path", "reverse"].includes(ev)) args.target = list(R.members); };
   // an existing arrow named by its ends (set / resize / label / property, LEGEND_EXT): the roles source / target -> from / to
   const ends = () => { if (R.source) args.from = ref(R.source); if (R.target) args.to = ref(R.target); };
@@ -137,7 +147,7 @@ export function toNodes(reading, info, ctx, seq) {
       break;
     }
     case "set": {
-      args.target = ref(obj); if (R.color) args.color = R.color; if (R.shape) args.shape = R.shape; ends(); arrowArgs();
+      args.target = ref(obj); if (R.color) args.color = R.color; if (R.shape) args.shape = shapeValue(R.shape); ends(); arrowArgs();
       if (R.size === "bigger" || R.size === "smaller") { args.action = "resize"; args.scale = R.size === "bigger" ? 1.5 : 0.67; }
       else if (R.size) args.size = R.size;
       break;
@@ -183,7 +193,7 @@ export function toNodes(reading, info, ctx, seq) {
       place(args); break;
     }
     case "check": case "fact": {
-      args.target = ref(obj); if (R.color) args.color = R.color; if (R.size) args.size = R.size; if (R.shape) args.shape = R.shape;
+      args.target = ref(obj); if (R.color) args.color = R.color; if (R.size) args.size = R.size; if (R.shape) args.shape = shapeValue(R.shape);
       if (R.notcolor && !negUsed) args.notColor = String(R.notcolor).replace(/^not_/, "");
       if (R.comparison) { args.comparison = R.comparison; if (R.landmark) args.anchor = ref(R.landmark); }
       else place(args);
@@ -221,6 +231,25 @@ export function toNodes(reading, info, ctx, seq) {
   if (R.x != null && R.y != null && /^\d+$/.test(String(R.x)) && /^\d+$/.test(String(R.y))) args.at = `${R.x},${R.y}`;
   if (R.linked != null) args.linked = ref(R.linked);
   if ((ev === "undo" || ev === "redo") && R.quantity != null && /^\d+$/.test(String(R.quantity))) args.count = +R.quantity;
+  // the one-to-one rule on the request (2026-11-03, training/sketch/combine/VSS_FROM_TO.md): a name word of the request fills one argument.
+  // When ref() turned the same name word into two argument values (more often than the name occurs among the request's tokens) and one
+  // of them is an element of a list argument (from / to / target, read from the set roles members / targets) while the other is a
+  // single-valued argument, the list drops it. The worlds read a set role beside the single roles and put every name of the request
+  // into it ("Modem goes to Router": source = Modem, target = Router, members = {Modem, Router}, so from = Modem, Router and to = Router;
+  // the engine then draws Modem -> Router and stops on "Router can't connect to itself"). The rule runs after the set roles have replaced
+  // their own single role (members -> from or target, targets -> to), so a set is never checked against the role it stands for. A value
+  // that came from a reference ("it", "them") is not a name word and is never counted; two lists that share a name are left as they are.
+  {
+    const occ = new Map();
+    for (const t of reading.tokens || []) if (String(t).startsWith("n_")) { const k = shapeKey(nameOf(t)); if (k) occ.set(k, (occ.get(k) || 0) + 1); }
+    const single = new Set(SHAPE_ARGS.filter((k) => args[k] != null && !Array.isArray(args[k])).map((k) => shapeKey(args[k])).filter((k) => k));
+    const twice = (key) => key && single.has(key) && (usedName.get(key) || 0) > Math.max(1, occ.get(key) || 0);
+    for (const k of SHAPE_ARGS) {
+      if (!Array.isArray(args[k])) continue;
+      const kept = args[k].filter((v) => !twice(shapeKey(v)));
+      if (kept.length < args[k].length) { if (kept.length) args[k] = kept; else delete args[k]; }
+    }
+  }
   for (const k of Object.keys(args)) if (args[k] === undefined) delete args[k];
   nodes.push({ id: (type === "rule" ? "r" : "s") + (++seq.s), type, args });
   return { nodes, notes };

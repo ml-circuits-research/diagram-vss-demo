@@ -336,7 +336,8 @@ function runVariant(v) {
   const test = cands.filter((x) => x.test).map((x) => item(x, F.conf(x)));
   const sh = {};
   SHS.forEach((H, i) => { const sc = BS[i][v.mk.key]; if (F.setOther) for (const x of sc) if (x.from === "sop") x.f.other_conf = x.partner < 0 ? 0 : PM.all.score({ f: demoF(H.S.I.vss_bert[x.partner]), w: H.S.I.vss_bert[x.partner].w }); sh[H.name] = sc.map((x) => item(x, F.conf(x))); });
-  const T = { 5: chooseT(cal, M.Gcal, 5, v.perType), 10: chooseT(cal, M.Gcal, 10, v.perType), 20: chooseT(cal, M.Gcal, 20, v.perType) };
+  // the cost levels of the setting: one confident mistake = 1, 2, 5, 10 (the default) or 20 right answers (owner, 2026-11-02 22:12; 1 and 2 added 2026-11-03 09:30)
+  const T = Object.fromEntries([1, 2, 5, 10, 20].map((k) => [k, chooseT(cal, M.Gcal, k, v.perType)]));
   const r = { ...v, F, cal, test, sh, T, t: T[10] };
   restat(r);
   r.auc = auroc(cal.map((x) => ({ c: x.c, ok: x.o === "right" })));
@@ -502,6 +503,25 @@ for (const col of ["VSS", "SOP-BERT", "VSS-BERT"]) {
 }
 { const c = CHOSEN["3-vote"], a = CURRENT["VSS-BERT"], d = bootDiff(c, a, "test"), v = d.ci[0] > 0 ? "**better**" : d.ci[1] < 0 ? "**worse**" : "not shown"; VERD["3-vote"] = v;
   log(`| 3-vote vs VSS-BERT (a) | ${c.name} (${s1(c.calScore)}) | ${s1(a.calScore)} | ${s1(scoreOf(c.testSt))} · ${s1(scoreOf(a.testSt))} | ${s1(d.point)} ${ci(d.ci)} | ${v} |`); }
+{ /* the default level of the "3 readers" tab (owner: execute only what you are sure of): the weight-free 3/3 vote (engine-true agreement, as
+     the page) against the chosen fitted vote, by how often each is confidently wrong; paired bootstrap over messages of the difference */
+  const A = b3("engine"), F = CHOSEN["3-vote"];
+  log(`\n### The "3 readers" tab: the weight-free vote 3/3 (+ d1, as the page) against the fitted vote (${F.name})\n`);
+  log(`Confidently wrong = (wrong + extras executed) / executed. Difference = 3/3 − fitted, in points of the confidently-wrong rate (positive: the fitted vote is wrong less often), and in cost score; 95% paired bootstrap over messages (${BOOT} resamples, seed ${SEED}).\n`);
+  log(`| part | 3/3: executed · wrong + extras · confidently wrong % · score | fitted: executed · wrong + extras · confidently wrong % · score | confidently wrong, 3/3 − fitted [95% CI] | score, fitted − 3/3 [95% CI] |`); log(`|---|---|---|---|---|`);
+  /* the short commands (short3, ids s3-…) apart from the long messages (fresh2): the 3/3 default was chosen when the fitted vote had seen long
+     messages only (RESULT.md); the calibration part now holds short3 too */
+  const isShort = (id) => String(id).startsWith("s3-");
+  for (const [part, sub, label] of [["cal", null, "calibration (oof)"], ["test", null, "test part"], ["cal", false, "calibration (oof), fresh2 only"], ["cal", true, "calibration (oof), short3 only"], ["test", false, "test part, fresh2 only"], ["test", true, "test part, short3 only"]]) {
+    const keep = (x) => sub == null || isShort(x.id) === sub, ia = partItems(A, part).filter(keep), iF = partItems(F, part).filter(keep);
+    const ids = M.ids.filter((id) => (part === "cal" ? isCal(id) : !isCal(id)) && (sub == null || isShort(id) === sub)), G = ids.reduce((g, id) => g + M.NG.get(id), 0);
+    const per = (items, T) => { const m = new Map(ids.map((id) => [id, { g: M.NG.get(id), r: 0, bad: 0 }])); for (const x of items) if (x.c >= tOf(T, x)) { const e = m.get(x.id); if (x.o === "right") e.r++; else e.bad++; } return ids.map((id) => m.get(id)); };
+    const a = per(ia, A.t), f = per(iF, F.t), rand = rng(SEED), d = [], dsc = [];
+    for (let b = 0; b < BOOT; b++) { let g = 0, ra = 0, ba = 0, rf = 0, bf = 0; for (let i = 0; i < a.length; i++) { const j = Math.floor(rand() * a.length); g += a[j].g; ra += a[j].r; ba += a[j].bad; rf += f[j].r; bf += f[j].bad; } d.push((ba / (ra + ba || 1) - bf / (rf + bf || 1)) * 100); dsc.push(((rf - COST * bf) - (ra - COST * ba)) / g * 100); }
+    const sa = stats(ia, G, A.t), sf = stats(iF, G, F.t);
+    log(`| ${label} (${ids.length} messages, ${G} requested) | ${sa.n} · ${sa.w + sa.e} · ${pc(sa.conf_wrong)} · ${s1(scoreOf(sa))} | ${sf.n} · ${sf.w + sf.e} · ${pc(sf.conf_wrong)} · ${s1(scoreOf(sf))} | ${s1((sa.conf_wrong - sf.conf_wrong) * 100)} ${ci([q(d, 0.025), q(d, 0.975)])} | ${s1(scoreOf(sf) - scoreOf(sa))} ${ci([q(dsc, 0.025), q(dsc, 0.975)])} |`);
+  }
+}
 methodTable("The chosen variant of each column (the selection rule)", [rulesCol, ...COLS.map((c) => CHOSEN[c])]);
 log(`\nThe chosen variants, cost 5 / 10 / 20 thresholds (cal oof): ${COLS.map((c) => `${c} ${CHOSEN[c].name}: ${[5, 10, 20].map((k) => thrTxt(CHOSEN[c].T[k])).join(" / ")}`).join("; ")}.`);
 log(`\nSelection optimism: the chosen variant is the best of ${RES.filter((r) => r.col === "VSS").length}-${RES.filter((r) => r.col === "3-vote").length} on 195 messages; its calibration score is optimistic, the test part is the check.`);
@@ -528,5 +548,5 @@ console.error(`wrote ${OUT}`);
 // ================================================================== EXPORT
 if (process.env.EXPORT === "1") {
   const { exportVote } = await import("./export3.mjs");
-  exportVote({ REPO, CHOSEN, CURRENT, VERD, M, SHS, ROW, BUILT, thrTxt, scoreOf, VSS_NAMES, SOP_NAMES, KIND, PM, demoF });
+  exportVote({ REPO, CHOSEN, CURRENT, VERD, M, SHS, ROW, BUILT, thrTxt, scoreOf, stats, VSS_NAMES, SOP_NAMES, KIND, PM, demoF });
 }

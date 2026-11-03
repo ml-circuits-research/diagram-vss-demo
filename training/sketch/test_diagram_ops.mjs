@@ -382,6 +382,21 @@ const base = () => { const S = K.createSystem(); run(S, `@a command action=creat
     ["write \"Decisions\" in big bold letters", [], "command action=create label=decisions shape=text size=large"],
     ["write \"START HERE\" above Room1", ["Room1"], "command action=create anchor=room1 label=start here position=above shape=text"],
     ["write \"x\" on Room1", ["Room1"], "command action=label label=x target=room1"],
+    // a free text without quotes: the words after a text noun are the text (unquotedText in logic.js)
+    ["add a big title Roadmap", [], "command action=create label=roadmap shape=text size=large"],
+    ["add a title Roadmap", [], "command action=create label=roadmap shape=text"],
+    ["add a heading Q3 plan at the top", [], "command action=create label=q3 plan position=top shape=text"],
+    ["add a caption Draft under Done", ["Done"], "command action=create anchor=done label=draft position=below shape=text"],
+    ["add big text Hello", [], "command action=create label=hello shape=text size=large"],
+    ["add a note saying check later", ["Check"], "command action=create label=check later shape=text"],
+    ["add a red title: Sales and Marketing", [], "command action=create color=red label=sales and marketing shape=text"],
+    ["add a caption Draft on Done", ["Done"], "command action=label label=draft target=done"],
+    ["add the text Cargo to the Barge", ["Barge"], "command action=label label=cargo target=barge"],
+    ["add a title to Process", ["Process"], "command action=label target=process"],
+    ["make the title bigger", [], "command action=resize"],
+    ["Put Title right of Logo", ["Title", "Logo"], "command action=move anchor=logo position=rightof target=title"],
+    ["tidy this up and add a big title Services", [], "command action=improve target=mention(quantifier=all) ; command action=create label=services shape=text size=large"],
+    ["make the heading red", [], "command action=set color=red"],
     ["clear arrow label check done", ["Start", "Check", "Done"], "command action=label from=check label= to=done"],
     ["sketch a sunrise of Autumn, Design and Support thanks", [], "command action=create items=autumn,design,support template=sunrise"],
     ["flip Cat and Dog", ["Cat", "Dog"], "command action=swap target=cat,dog"],
@@ -425,6 +440,23 @@ const base = () => { const S = K.createSystem(); run(S, `@a command action=creat
   eq("align R and T (one above the other) in a row: one y, pushed apart, no overlap", [S.world.find("R").y === S.world.find("T").y, overlaps(S)], [true, []]);
   S = K.createSystem(); run(S, "@a command action=create count=8 shape=rectangle size=large layout=grid"); r = run(S, "@s command action=align axis=horizontal target=" + S.world.state.shapes.map((s) => s.name).join(","));
   eq("align 8 large boxes in one row (too wide for the canvas): the reply says they do not fit", /do not all fit/.test(r.steps[0].answer || ""), true);
+}
+
+// ---------- replies count in the right number: "1 arrow", "2 arrows" (the plural helper of logic.js) ----------
+{
+  const mk = () => { const S = K.createSystem(); run(S, `@a command action=create shape=circle name=P at=110,100
+@b command action=create shape=circle name=Q at=300,100
+@c command action=create shape=circle name=R at=500,100
+@d command action=connect from=P to=Q label=yes
+@e command action=connect from=Q to=R`); return S; };
+  let S = mk(), r = run(S, "@s command action=label kind=edge label= quantifier=all");
+  eq("remove every arrow label when one arrow has a label: singular reply", r.steps[0].answer, "Removed the label of 1 arrow.");
+  S = mk(); r = run(S, '@s command action=label kind=edge label=go quantifier=all');
+  eq("label every arrow: plural reply", r.steps[0].answer, "2 arrows now say “go”.");
+  S = mk(); run(S, "@s command action=label kind=edge label=go quantifier=all"); run(S, '@s command action=label from=P to=Q label=stop'); r = run(S, "@s command action=label kind=edge label=go quantifier=all");
+  eq("label every arrow when only one differs: singular reply", r.steps[0].answer, "1 arrow now says “go”.");
+  S = mk(); run(S, "@s command action=label kind=edge label=go quantifier=all"); r = run(S, "@s command action=label kind=edge label= quantifier=all");
+  eq("remove two arrow labels: plural reply", r.steps[0].answer, "Removed the labels of 2 arrows.");
 }
 console.log(`\n${n - fail}/${n} passed`);
 process.exit(fail ? 1 : 0);

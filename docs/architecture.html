@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="How the SOP Sketchpad works inside, on one page: the three readers, the shared cut, SOP Lang, the engine, the VSS composer and its worlds, SOP-BERT, the models, the data, the training and the measurements.">
+<meta name="description" content="How the SOP Sketchpad works inside, on one page: VSS-BERT and its two readers (SOP-BERT and the VSS composer), the Rules as a comparison, the shared cut, SOP Lang, the engine, the models, the data, the training and the measurements.">
 <title>SOP Sketchpad architecture</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="help/docs.css">
 <style>
 /* This page shows the "How it works inside" pages of the demo's Help (docs/js/docs-arch.js) one after another, for reading, printing and
-   searching in one place. It has no text of its own: change the pages in docs/js/docs-arch.js. Colours: the tokens of docs/index.html. */
+   searching in one place. It has no text of its own besides the credit line (the same as help.js CREDIT): change the pages in docs/js/docs-arch.js. Colours: the tokens of docs/index.html. */
 :root {
   --app: #DADFE3; --head: #F0F2F5; --mine: #D9FDD3; --ink: #111B21; --muted: #667781; --faint: #8C9AA3; --line: #D1D7DB;
   --accent: #00A884; --accent-ink: #FFFFFF; --link: #027EB5; --err: #C1392B; --warn-soft: #FFF3D6; --canvas: #FFFFFF; --frame: #C8D0D6;
@@ -48,6 +48,8 @@ main { max-width: 920px; margin: 0 auto; padding: 8px 16px 48px; }
 .toc { padding-left: 22px; columns: 2 260px; column-gap: 28px; }
 .toc li { break-inside: avoid; margin: 3px 0; }
 .sheet .doc-pn { display: none; }
+.top .credit a { color: inherit; }
+.foot { max-width: 920px; margin: 0 auto; padding: 0 16px 36px; font-size: 13px; color: var(--muted); }
 @media (max-width: 560px) {
   main { padding: 4px 10px 40px; }
   .sheet { padding: 16px 14px 18px; border-radius: 8px; }
@@ -59,17 +61,22 @@ main { max-width: 920px; margin: 0 auto; padding: 8px 16px 48px; }
 <body>
 <header class="top"><div class="in">
   <div class="avatar" aria-hidden="true">S</div>
-  <div class="who"><b>SOP Sketchpad: how it works inside</b><span id="asof">Architecture</span></div>
+  <div class="who"><b>SOP Sketchpad: how it works inside</b><span id="asof">Architecture</span><span class="credit">Research by <a href="https://www.axiologic.net">Axiologic Research</a>, part of the <a href="https://www.achilles-project.eu/">Achilles project</a></span></div>
   <div class="links"><a href="index.html">Open the demo</a><a href="index.html#help/architecture">These pages in the demo’s Help</a></div>
 </div></header>
 <main id="main">
 <div class="sheet doc"><h1>Architecture of the SOP Sketchpad</h1>
-<p class="lead">The “How it works inside” pages of the demo’s Help, on one page. The ideas behind them are in the Help’s
-<a href="index.html#help/research-question">Concepts</a>.</p>
+<p class="lead">The “How it works inside” pages of the demo’s Help, on one page. What the demo is for is in the Help’s
+<a href="index.html#help/start">Start here</a>; why the editor is built this way (a reader that does what it is sure of and asks about the rest)
+is in <a href="index.html#help/research-question">Why VSS-BERT</a>.</p>
+<p class="callout">This is research by <a href="https://www.axiologic.net">Axiologic Research</a>, part of the
+<a href="https://www.achilles-project.eu/">Achilles project</a>.</p>
 <nav aria-label="Contents"><ol class="toc" id="toc"></ol></nav>
 <noscript><p>This page is built from <code>js/docs-arch.js</code> and needs JavaScript.</p></noscript>
 </div>
 </main>
+<footer class="foot"><p>This is research by <a href="https://www.axiologic.net">Axiologic Research</a>, part of the
+<a href="https://www.achilles-project.eu/">Achilles project</a>. <a href="index.html">Open the demo</a>.</p></footer>
 <script src="js/docs-arch.js"></script>
 <script>
 /* One section per page of docs/js/docs-arch.js, in order. Links "#help/<page>[/<anchor>]" point to this page's own sections when the page

@@ -14,10 +14,13 @@ the app's CSS rule for the drawing's svg #canvas, became position:absolute; inse
   4. Back, close (Esc), an example sentence, reopen, browser Back / Forward: the overlay is shown or hidden as the URL says, the app behind
      it is inert exactly while it is open, and the sidebar still takes clicks afterwards;
   5. phone width: the Pages menu opens and each of its entries can be clicked;
-  6. a section link #help/<page>/<anchor> scrolls to the section inside the page.
+  6. a section link #help/<page>/<anchor> scrolls to the section inside the page; a section of the old Start here (#help/start/replies, ...)
+     opens that section of Using the demo (docs.js ALIASES, 2026-11-03);
+  7. no broken anchors: every link #help/<page>[/<anchor>] inside a help page, and every data-help button of the app, names a page of the
+     sidebar (a removed page's id only through docs.js ALIASES, for the app's buttons) and, when it has one, an id inside that page.
 Exit code 0 when everything passes.
 """
-import functools, http.server, os, socketserver, sys, threading, time
+import functools, http.server, os, re, socketserver, sys, threading, time
 
 os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", "/opt/pw-browsers")
 from playwright.sync_api import sync_playwright  # noqa: E402
@@ -50,7 +53,9 @@ PAGE_STATE = """() => {
     const r = a.getBoundingClientRect(), top = document.elementsFromPoint(r.x + r.width / 2, r.y + r.height / 2)[0];
     if (!top || top.closest('a') !== a) blocked.push(a.getAttribute('href') + ' -> ' + (top ? top.tagName + (top.id ? '#' + top.id : '') : 'nothing'));
   }
-  return { title: (document.querySelector('#docs-title') || {}).textContent, dup, blocked };
+  const ids = [...page.querySelectorAll('[id]')].map(e => e.id);
+  const links = [...page.querySelectorAll('a[href^="#help"], [data-help]')].map(a => a.getAttribute('href') || '#help/' + a.dataset.help);
+  return { title: (document.querySelector('#docs-title') || {}).textContent, dup, blocked, ids, links };
 }"""
 LINK_AT = """h => { const a = document.querySelector(`#docs-nav a[href="${h}"]`); a.scrollIntoView({ block: 'nearest' }); const r = a.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2, t: a.textContent }; }"""
 STATE = """() => { const d = document.querySelector('#docs'), app = document.querySelector('.app'); return { url: location.href, hash: location.hash, open: !!d && !d.hidden, appInert: !!app && app.inert, docsInert: !!d && !!d.closest('[inert]') }; }"""
@@ -77,11 +82,11 @@ def main():
         pg.add_init_script(INIT)
         pg.goto(base, wait_until="domcontentloaded")
         pg.click("#help-btn")   # at once, while the models load
-        hrefs = pg.eval_on_selector_all("#docs-nav a", "as => as.map(a => a.getAttribute('href'))")
+        hrefs = pg.eval_on_selector_all("#docs-nav a[href^='#help']", "as => as.map(a => a.getAttribute('href'))")
         check(f"the sidebar lists the help pages ({len(hrefs)})", len(hrefs) >= 15)
 
         # 1, 2, 3: every page, reached by a mouse click on its sidebar entry
-        dups, blocked, missed, slow = {}, {}, [], []
+        dups, blocked, missed, slow, ids_of, links_of = {}, {}, [], [], {}, {}
         for h in hrefs:
             ok, ms = click_link(pg, h)
             if not ok: missed.append(h)
@@ -89,12 +94,29 @@ def main():
             s = pg.evaluate(PAGE_STATE)
             if s["dup"]: dups[h] = s["dup"]
             if s["blocked"]: blocked[h] = s["blocked"][:3]
+            ids_of[h.split("/")[1]] = set(s["ids"]); links_of[h] = s["links"]
         check("every page: its ids are unique in the document", not dups, str(dups))
         check("every page: every sidebar link takes the click at its centre", not blocked, str(blocked))
         ok, _ = click_link(pg, "#help/where"); pg.evaluate("() => { document.querySelector('#docs-nav').scrollTop = 0; }"); ok2, _ = click_link(pg, "#help/draw")
         check("from the page \"Where things go\", a click on \"What you can draw\" (higher in the sidebar) shows it", ok and ok2)
         check(f"clicking each of the {len(hrefs)} sidebar entries shows its page", not missed, "not shown: " + ", ".join(missed))
         print(f"     click -> page shown: median {sorted(slow)[len(slow) // 2]:.0f} ms, max {max(slow):.0f} ms")
+
+        # 7: no broken anchors (links inside the pages; the app's data-help buttons, which may name a removed page through docs.js ALIASES)
+        def broken(link, aliases=None):
+            parts = (link.split("/") + [None, None])[1:3]
+            pid, anchor = parts[0], parts[1]
+            if pid not in ids_of and aliases and pid in aliases:
+                pid, anchor = aliases[pid][0], anchor or (aliases[pid][1] if len(aliases[pid]) > 1 else None)
+            if pid not in ids_of: return "no such page"
+            return None if not anchor or anchor in ids_of[pid] else "no such section"
+        bad = [f"{h} -> {l}: {why}" for h, ls in links_of.items() for l in ls for why in [broken(l)] if why]
+        check(f"no broken anchors: every #help link inside the pages names a page and a section of it ({sum(len(v) for v in links_of.values())} links)", not bad, "; ".join(bad[:12]))
+        aliases = pg.evaluate("() => (window.DocsKit && window.DocsKit.aliases) || {}")
+        src = "".join(open(os.path.join(DOCS, f), encoding="utf-8").read() for f in ("index.html", "js/ui.js"))
+        app_help = sorted(set(re.findall(r'data-help="([\w-]+)"', src)) | set(pg.eval_on_selector_all("[data-help]", "es => es.filter(e => !e.closest('#docs')).map(e => e.dataset.help)")))
+        bad_app = [h + ": " + why for h in app_help for why in [broken("#help/" + h, aliases)] if why]
+        check(f"the app's help buttons (index.html, ui.js: {len(app_help)}) open a page", not bad_app, ", ".join(bad_app))
 
         # 4: Back, close, an example sentence, reopen, browser Back / Forward
         for _ in range(3): pg.click("#docs-back")
@@ -119,6 +141,16 @@ def main():
         top = pg.evaluate("() => { const h = document.querySelector('#docs-page [id=\"canvas-parts\"]'), m = document.querySelector('#docs-main'); return h ? Math.round(h.getBoundingClientRect().top - m.getBoundingClientRect().top) : null; }")
         check("#help/where/canvas-parts scrolls to that section", top is not None and abs(top) < 40, f"section top relative to the page: {top}")
         pg.keyboard.press("Escape"); pg.wait_for_timeout(600)
+        # 6b: a section of the old Start here (moved to Using the demo on 2026-11-03) through docs.js ALIASES
+        moved = [k for k in aliases if k.startswith("start/")]
+        bad_moved = []
+        for k in moved:
+            pg.evaluate("h => { location.hash = h; }", "#help/" + k); pg.wait_for_timeout(400)
+            r = pg.evaluate("a => { const t = (document.querySelector('#docs-title') || {}).textContent, h = document.querySelector(`#docs-page [id=\"${a}\"]`), m = document.querySelector('#docs-main'); return { t, top: h ? Math.round(h.getBoundingClientRect().top - m.getBoundingClientRect().top) : null, end: m.scrollTop + m.clientHeight >= m.scrollHeight - 2 }; }", aliases[k][1])
+            # the last section cannot reach the top of the pane: then the page is scrolled to its end and the section is in view
+            if r["t"] != "Using the demo" or r["top"] is None or not (abs(r["top"]) <= 40 or (r["end"] and 0 <= r["top"] < 700)): bad_moved.append(f"{k}: {r}")
+            pg.keyboard.press("Escape"); pg.wait_for_timeout(500)
+        check(f"the old Start here sections (#help/start/<section>, {len(moved)}) open that section of Using the demo", moved and not bad_moved, "; ".join(bad_moved))
 
         # 5: phone width
         pg.set_viewport_size({"width": 390, "height": 800}); pg.click("#help-btn"); pg.wait_for_timeout(200)

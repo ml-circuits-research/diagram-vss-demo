@@ -26,6 +26,8 @@ AND trigger rules) is learned ONLY from the world's own rows: the spans of the r
 outside the spans and no request of another event (front.learn keep=...), so a trigger rule's precision is counted inside the world.
 The names of every wire still count as names; the kinds (lexicon) do not change. front.json gets a field "front_rows". Default (unset or
 FRONT_ROWS=all): the front end learned from all messages, exactly as before.
+FRONT_NEG=1 (round 2, off by default; with FRONT_ROWS=world): the rules are still learned from the world's own rows, but their precision is
+also counted over the requests of every other event (front.py learn_values / learn_triggers `neg`). VAL_GUARD=1: front.py's value guard.
 HOLDOUT=<word,...> (off by default; experiments only): the messages containing these words are left out (see main).
 Run: python3 msg_to_world.py [--frac 0.8] [--freq 8]"""
 import argparse, collections, datetime, json, os, sys
@@ -74,7 +76,8 @@ def main():
         if not wev: raise SystemExit("FRONT_ROWS=world needs WORLD_EVENTS")
         ev_of = lambda w: w["args"].get("action") if w["type"] == "command" else QUESTION_EVENT.get(w["args"].get("ask")) if w["type"] == "question" else w["type"]
         keep = lambda w: ev_of(w) in wev and (not shp or shape_is(shp, w["args"]))
-        F = FR.learn(msgs, P, keep=keep)
+        # FRONT_NEG=1 (round 2, off by default; front.py): the other worlds' requests are negative evidence for this world's rules
+        F = FR.learn(msgs, P, keep=keep, neg=FR.neg_labels(wev, ev_of))
         F["front_rows"] = {"rows": "world", "events": sorted(wev), "row_shape": shp, "requests": len([r for r in FR.requests(msgs)[0] if keep(r[1])])}
         F["about"] = F["about"] + f"; FRONT_ROWS=world: values and triggers from the {F['front_rows']['requests']} requests of {','.join(sorted(wev))} only"
     if HOLDOUT: F["holdout"] = HOLDOUT; F["about"] = F["about"] + f"; HOLDOUT={','.join(HOLDOUT)}: messages with these words left out (experiment)"
@@ -215,7 +218,8 @@ def main():
           [f"| {x} | {n} |" for x, n in lost_why.most_common(40)] + ["", "| event | rows |", "|---|---|"] + [f"| {e} | {n} |" for e, n in by_ev.most_common()]
     open(os.path.join(out, "REAL_WORLD.md") if WEV else os.path.join(HERE, "llm_train", "REAL_WORLD.md"), "w").write("\n".join(rep) + "\n")
     print("\n".join(rep[:9]))
-    print(f"Switches: VAL_PREC={FR.val_prec()} VAL_SUB={FR.val_sub()}{' VAL_PICK=' + FR.val_pick() if os.environ.get('VAL_PICK') else ''} CREATE_COLOR={os.environ.get('CREATE_COLOR', '') or 'attr'} LEGEND_EXT={int(G.LEGEND_EXT)} "
+    print(f"Switches: VAL_PREC={FR.val_prec()} VAL_SUB={FR.val_sub()}{' VAL_PICK=' + FR.val_pick() if os.environ.get('VAL_PICK') else ''}"
+          f"{''.join(f' {k}=' + os.environ[k] for k in ('FRONT_NEG', 'VAL_GUARD', 'NEW_DISTINCT') if os.environ.get(k))} CREATE_COLOR={os.environ.get('CREATE_COLOR', '') or 'attr'} LEGEND_EXT={int(G.LEGEND_EXT)} "
           f"DIAGRAM_OPS={os.environ.get('DIAGRAM_OPS', '') or '0'}; data folders {FR.train_dirs()}")
     print("Values left out per legend question kind: " + lost_kind_line(lost_kind))
 

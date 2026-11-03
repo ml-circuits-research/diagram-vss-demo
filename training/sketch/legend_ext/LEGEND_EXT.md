@@ -231,6 +231,11 @@ red octagon" stays a label); a create also needs a text noun (text, title, headi
 headline, caption, subtitle, banner, note, words). Examples: "add a title "Q3" at the top in big red letters", "write "Draft" in the
 bottom right", "title the diagram "Order flow"", "add a red text "hello"". The cues of `shape=text` are kept out of the shape nouns of
 descriptions, so "the title" is not a mention and "what text does Done have" reads as before.
+Without quotes (2026-11-03, `unquotedText` in the clause reader): after a text noun that is the object of a verb of creation ("add a big
+title Roadmap", "add a heading Q3 plan at the top", "add a note saying check later", "put a caption Draft under Done"), the words up to a
+place or the end of the clause are the text, as if quoted; the rule above then decides between a free text and a label ("add a caption Draft
+on Done" labels Done). Not after "make / turn the …" (the title already drawn), nor when the words start with a preposition, an article, a
+pronoun, a shape, arrow, colour, size or place word, a comparative or a verb, nor (without "saying" / "reading" / ":") with a known name.
 
 **Templates** (`templateOf`, before the clause's own reading; the sentence splitter keeps a template's list of items in one piece):
 a template cue that is the object of a verb of making, as the first verb of the clause (draw, make, create, build, add, sketch, lay out,

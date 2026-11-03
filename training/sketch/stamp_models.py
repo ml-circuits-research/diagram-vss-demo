@@ -6,6 +6,7 @@ Version = first 10 hex digits of the sha256 over the model's files (relative pat
 is left out). Folder models: a folder with manifest.json (VSS) or, under neural/, with config.json (a transformers.js model).
 File models: docs/model/micro/*.json (cutters; not registry*.json), docs/model/context/*.json, docs/model/spell/*.json (the spell checker's vocabulary, docs/js/spell.js)
 and docs/model/confidence/*.json (the readers' confidence models and thresholds, docs/js/vss-confidence.js; vss.json = a copy of training/sketch/precision_thresholds.json).
+docs/model/arms/ (arms trained on the GPU machine, not loaded by the demo) is skipped.
 Writes docs/model/versions.json {"files": {path relative to docs/model: version}} for everything (plus "sizes": {"neural/<folder>":
 {file path in the folder: bytes}} for the transformers.js models, which the browser shows before downloading), and the same versions as
 fields in docs/model/micro/registry.json ("version" per world, "cutter_version", "event_cutter_version", "context_version",
@@ -66,6 +67,7 @@ def main():
         dn.sort()
         rel = os.path.relpath(dp, root).replace(os.sep, "/")
         if rel == ".": continue
+        if rel == "arms" or rel.startswith("arms/"): dn[:] = []; continue   # docs/model/arms/<arm>/: trained arms waiting for a decision, not loaded by the demo
         if "manifest.json" in fn or (rel.startswith("neural/") and rel.count("/") == 1 and "config.json" in fn):
             vers[rel] = folder_version(dp)
             if rel.startswith("neural/"): sizes[rel] = folder_sizes(dp)

@@ -2,7 +2,11 @@
 // pair, the one that exists otherwise; its confidence: a logistic over the executing reader's own signals + agreement + the other reader's
 // confidence), fitted on the fresh2 calibration part out of fold, for the BERT cut and the VSS cut; the report; EXPORT=1 also writes the demo's
 // model docs/model/confidence/combined.json and the parity fixture training/sketch/combine/combined_parity.json.
-//   [EXPORT=1] node training/sketch/combine/combined_report.mjs <records dir> <out.md> <data dir> [<data dir> ...]
+//   [EXPORT=1] [VARIANT=d2] node training/sketch/combine/combined_report.mjs <records dir> <out.md> <data dir> [<data dir> ...]
+//   VARIANT=d2: the combined reader's two logistic parts without their prior input (no act_prior in the 'sop' part, no world_prior in the
+//   'vss' part): variant "(a) + d2 no prior" of confidence3/PLAN.md, the one the selection rule of fit3.mjs chose for the VSS-BERT column in
+//   the refit of 2026-11-03 (calibration out-of-fold cost score 39.9 vs 38.1 for the plain recipe). Default: the plain recipe (a).
+//   The readers alone (SOP-BERT, VSS: the checks against their shipped files) and other_conf (vss.json's recipe) keep their priors.
 //   <records dir>: sop_own.jsonl, vss_own.jsonl, vss_bert.jsonl, sop_vss.jsonl of combine/collect_pair.mjs. <data dir>: fresh2/opus_a .. opus_d.
 // The recipe and the statistics are copies of combine/combine_report.mjs (= fresh2/fit_report.mjs: percentile maps, prior, L2 grid by
 // out-of-fold AUROC, 5 folds by message, the cost-score threshold on the out-of-fold calibration confidences, a tie keeps the higher
@@ -17,6 +21,9 @@ import * as VC from "../../../docs/js/vss-confidence.js";
 const [RECDIR, OUT, ...DATADIRS] = process.argv.slice(2);
 if (!RECDIR || !OUT || !DATADIRS.length) { console.error("usage: combined_report.mjs <records dir> <out.md> <data dir>..."); process.exit(2); }
 const REPO = new URL("../../../", import.meta.url).pathname;
+// the cost levels of the setting (owner, 2026-11-02 22:12 and 2026-11-03 09:30): one confident mistake counts as 1, 2, 5, 10 (the default) or 20
+// right answers; the key of a level is "cost<k>", except the default's, "cost"
+const COSTS = [1, 2, 5, 10, 20], levelKey = (k) => (k === 10 ? "cost" : `cost${k}`);
 const COST = 10, BOOT = 1000, SEED = 1, FOLDS = 5, LAMS = [0.01, 0.1, 1, 10], NPARITY = 200;
 const readJ = (f) => readFileSync(f, "utf8").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l));
 const out = []; const log = (s = "") => out.push(s);
@@ -103,6 +110,10 @@ const SOP_NAMES = [["act_p", 1], ["act_margin", 1], ["act_negent", 1], ["act_pri
   ["tag_p_min", 1], ["tag_margin_min", 1], ["tag_all_min", 1], ["tag_stray", -1], ["desc_p_min", 1], ["desc_margin_min", 1], ["cut_start", 1], ["cut_end", 1], ["cut_inner_min", 1],
   ["unk_share", -1], ["split_share", -1], ["n_words", 1], ["n_roles", 1], ["n_units", 1]];
 const COMB = [["agree", 1], ["agree_share", 1], ["other_conf", 1]];   // the combined reader's added inputs (COMBINED_READER.md 4)
+const VARIANT = process.env.VARIANT || "a";
+if (!["a", "d2"].includes(VARIANT)) throw new Error(`VARIANT=${VARIANT}: expected a (the plain recipe) or d2 (no prior input)`);
+const noPrior = (names) => (VARIANT === "d2" ? names.filter(([n]) => n !== "act_prior" && n !== "world_prior") : names);   // the combined reader's parts only
+const VARIANT_NAME = VARIANT === "d2" ? "(a) + d2 no prior" : "(a)";
 const KIND = { vss: { prior: "world_prior", key: (x) => x.w || "none" }, sop: { prior: "act_prior", key: (x) => x.act } };
 function fitModel(rows, spec, lam) {
   const K = KIND[spec.kind], names = spec.names, overall = rows.filter((x) => x.ok).length / rows.length, ar = {};
@@ -193,7 +204,7 @@ function combinedOn(cut, S, V) {
   const all = sI.concat(vI);
   for (const [id, ii] of byMsg(all)) { const res = outcomesOf(id, ii.map((i) => all[i])); ii.forEach((i, q) => { all[i].o = res[q]; all[i].ok = res[q] === "right"; }); }
   const setOther = (k) => { for (const x of sI) x.f.other_conf = x.partner < 0 ? 0 : k < 0 ? vssShipped(V[x.partner]) : PARTNER[k].score({ f: demoF(V[x.partner]), w: V[x.partner].w }); };
-  const specS = { kind: "sop", names: SOP_NAMES.concat(COMB) }, specV = { kind: "vss", names: VSS_NAMES };
+  const specS = { kind: "sop", names: noPrior(SOP_NAMES.concat(COMB)) }, specV = { kind: "vss", names: noPrior(VSS_NAMES) };
   const sCal = sI.filter((x) => x.cal), vCal = vI.filter((x) => x.cal);
   const fitS = fitReader(sCal, specS, setOther), fitV = fitReader(vCal, specV);   // setOther(-1) last: the shipped vss.json for the final fit and the test part
   const calItems = sCal.map((x, i) => ({ c: fitS.oof[i], o: x.o, id: x.id, from: "sop", paired: x.partner >= 0, agree: x.f.agree })).concat(vCal.map((x, i) => ({ c: fitV.oof[i], o: x.o, id: x.id, from: "vss", paired: false, agree: 0 })));
@@ -241,6 +252,7 @@ const ci = (a) => `[${s1(a[0])}, ${s1(a[1])}]`;
 
 // ------------------------------------------------------------------ report
 const nCal = ids.filter(isCal).length, nTest = ids.length - nCal;
+log(`Variant of the combined reader: ${VARIANT_NAME}${VARIANT === "d2" ? " (both parts without their prior input; confidence3/PLAN.md d2)" : " (the plain recipe)"}.`);
 log(`Records: ${RECDIR} (combine/collect_pair.mjs, four passes). Calibration part ${nCal} messages / ${Gcal} requested actions; test part ${nTest} messages / ${Gtest} requested actions.`);
 log(`Cost score = (right − ${COST} × (executed wrong + extras executed)) per 100 requested actions. "cal (oof)" = calibration part, out-of-fold confidences (everything fitted and chosen there). "test (already read; exploratory)" = the test part, scored once, never used to choose.`);
 log(`Checks: outcomes recomputed from the records = the recorded ones; vss.json's recipe refitted on the whole calibration part vs the shipped file: max |confidence difference| ${vssRefitDiff.toExponential(2)}.\n`);
@@ -305,9 +317,9 @@ function costAt(c, cost) {
     }
     log("");
   }
-  log(`## The cost score's weight: the operating point at cost 5, 10 and 20 (threshold chosen on cal oof at that cost; the demo keeps cost 10)\n`);
-  log(`| situation | ${[BEST, SOP].flatMap((c) => [5, 10, 20].map((k) => `${c.label}, cost ${k}`)).join(" | ")} |`); log(`|---|${[BEST, SOP].flatMap(() => [5, 10, 20]).map(() => "---").join("|")}|`);
-  const P = [BEST, SOP].flatMap((c) => [5, 10, 20].map((k) => costAt(c, k)));
+  log(`## The cost score's weight: the operating point at cost ${COSTS.join(", ")} (threshold chosen on cal oof at that cost; the demo's default is cost 10)\n`);
+  log(`| situation | ${[BEST, SOP].flatMap((c) => COSTS.map((k) => `${c.label}, cost ${k}`)).join(" | ")} |`); log(`|---|${[BEST, SOP].flatMap(() => COSTS).map(() => "---").join("|")}|`);
+  const P = [BEST, SOP].flatMap((c) => COSTS.map((k) => costAt(c, k)));
   log(`| threshold | ${P.map((x) => (Number.isFinite(x.t) ? x.t.toFixed(4) : String(x.t))).join(" | ")} |`);
   for (const [part, tag] of [["cal", "cal (oof)"], ["test", "test (already read; exploratory)"]]) {
     log(`| done right % (${tag}) | ${P.map((x) => pc(x[part].cov)).join(" | ")} |`);
@@ -326,21 +338,26 @@ if (process.env.EXPORT === "1") {
   const lvl = (c) => ({ threshold: Number.isFinite(c.t) ? c.t : null, kind: c.ct.kind, cost: COST,
     calibration_oof: { score: scoreOf(c.calSt), score_ci95: bootScore(c, "cal"), confidently_wrong: c.calSt.conf_wrong, done_right: c.calSt.cov, asked: c.calSt.asked, executed: c.calSt.n, produced: c.calItems.length, extras_executed: c.calSt.e, auroc: c.auc },
     test_already_read_exploratory: { score: scoreOf(c.testSt), score_ci95: bootScore(c, "test"), confidently_wrong: c.testSt.conf_wrong, done_right: c.testSt.cov, asked: c.testSt.asked, executed: c.testSt.n, produced: c.tItems.length, extras_executed: c.testSt.e, auroc: c.aucT } });
-  // the levels of the setting (owner, 2026-11-02 22:12): the cost-score optimum at cost 5 ("bolder"), 10 (the default) and 20 ("more careful"),
-  // each chosen on the calibration out-of-fold confidences exactly as the default
+  // the levels of the setting (owner, 2026-11-02 22:12; 2026-11-03 09:30 added cost 2 and cost 1): the cost-score optimum at cost 1 and 2
+  // ("boldest", "very bold"), 5 ("bolder"), 10 (the default) and 20 ("more careful"), each chosen on the calibration out-of-fold confidences
+  // exactly as the default
   const costLevel = (c, cost) => { const x = costAt(c, cost), sc = (st) => ((st.r - cost * (st.w + st.e)) / st.G) * 100;
     return { threshold: Number.isFinite(x.t) ? x.t : null, kind: x.kind, cost, heldout_oof_score: x.score, heldout_oof_precision: x.cal.n ? 1 - x.cal.conf_wrong : null, heldout_oof_coverage: x.cal.cov,
       heldout_oof_asked: x.cal.asked, heldout_oof_executed: x.cal.n, heldout_produced: c.calItems.length, test_score: sc(x.test), test_confidently_wrong: x.test.n ? x.test.conf_wrong : null,
       test_done_right: x.test.cov, test_asked: x.test.asked, test_executed: x.test.n }; };
-  const cutSpec = (c) => Object.assign({ levels: { cost5: costLevel(c, 5), cost: costLevel(c, COST), cost20: costLevel(c, 20) }, sop: part(c.fitS.model, "sop"), vss: Object.assign(part(c.fitV.model, "vss"), { cut_signals: c.cut === "bert" ? "the SOP-BERT cut head at the unit's edges (cut_start = P(B) of its first word; cut_end = 1 - P(I) of the word after its last, 1 at the end of the text)" : "the VSS world cutter's (vss-composer.js unit.signals)" }) }, lvl(c));
+  // "execute all" (no gate) on the same calibration part, for the setting's table
+  const allLevel = (c) => { const st = stats(c.calItems, Gcal, -Infinity);
+    return { heldout_oof_precision: st.n ? 1 - st.conf_wrong : null, heldout_oof_coverage: st.cov, heldout_oof_asked: st.asked, heldout_oof_executed: st.n, heldout_produced: c.calItems.length }; };
+  const cutSpec = (c) => Object.assign({ levels: Object.fromEntries(COSTS.map((k) => [levelKey(k), costLevel(c, k)])), execute_all: allLevel(c), sop: part(c.fitS.model, "sop"), vss: Object.assign(part(c.fitV.model, "vss"), { cut_signals: c.cut === "bert" ? "the SOP-BERT cut head at the unit's edges (cut_start = P(B) of its first word; cut_end = 1 - P(I) of the word after its last, 1 at the end of the text)" : "the VSS world cutter's (vss-composer.js unit.signals)" }) }, lvl(c));
   const vv = JSON.parse(readFileSync(`${REPO}docs/model/versions.json`, "utf8")).files["confidence/vss.json"];
   const file = {
-    about: "The combined reader's confidence (VSS + Neural, COMBINED_READER.md): SOP-BERT and VSS read the same cut, their requests are paired (layer_common.mjs pairValue, as COMBINE.md); on a pair SOP-BERT's reading is executed, otherwise the one that exists. Two logistic models: 'sop' (SOP-BERT executes: its 24 signals with the act prior, plus agree, agree_share, other_conf) and 'vss' (a VSS request nothing was paired with: VSS's 14 signals with the world prior). Fitted on the fresh2 calibration part out of fold by training/sketch/combine/combined_report.mjs (EXPORT=1); browser code docs/js/combined-confidence.js (training/sketch/test_combined_confidence.mjs checks it). A refit replaces this file only; training/sketch/stamp_models.py gives it a new version.",
-    protocol: "COMBINED_READER.md: calibration part only (195 messages, 596 requested actions); 5 folds by message; percentile maps, prior and L2 (0.01, 0.1, 1, 10 by out-of-fold AUROC) per model; one threshold over all the combined requests, the cost-score optimum (one confident mistake = 10 right answers) on the out-of-fold confidences; inside the folds other_conf came from vss.json's recipe refitted on the training folds. The test part (405 messages) was already read (FEEDBACK_PLAN.md, COMBINE.md): its numbers are exploratory. The clean confirmation needs a fresh set (fresh3).",
+    about: `The combined reader's confidence (VSS + Neural, COMBINED_READER.md): SOP-BERT and VSS read the same cut, their requests are paired (layer_common.mjs pairValue, as COMBINE.md); on a pair SOP-BERT's reading is executed, otherwise the one that exists. Two logistic models: 'sop' (SOP-BERT executes: ${VARIANT === "d2" ? "its 23 signals without the act prior" : "its 24 signals with the act prior"}, plus agree, agree_share, other_conf) and 'vss' (a VSS request nothing was paired with: ${VARIANT === "d2" ? "VSS's 13 signals without the world prior" : "VSS's 14 signals with the world prior"}). Fitted on the fresh2 calibration part out of fold by training/sketch/combine/combined_report.mjs (EXPORT=1); browser code docs/js/combined-confidence.js (training/sketch/test_combined_confidence.mjs checks it). A refit replaces this file only; training/sketch/stamp_models.py gives it a new version.`,
+    variant: VARIANT_NAME, variant_note: VARIANT === "d2" ? "Variant (a) + d2 of confidence3/PLAN.md: neither part reads its prior (act_prior / world_prior are not among the features; the prior tables are kept in the file but unused), chosen for the VSS-BERT column by the selection rule of confidence3/fit3.mjs (the highest calibration out-of-fold cost score) in the refit of 2026-11-03; exported with VARIANT=d2." : "The plain recipe (a): each part reads its prior.",
+    protocol: `COMBINED_READER.md: calibration part only (${nCal} messages, ${Gcal} requested actions); 5 folds by message; percentile maps, prior and L2 (0.01, 0.1, 1, 10 by out-of-fold AUROC) per model; one threshold over all the combined requests, the cost-score optimum (one confident mistake = 10 right answers) on the out-of-fold confidences; inside the folds other_conf came from vss.json's recipe refitted on the training folds. The test part (${nTest} messages) is scored once, never used to choose: its numbers are exploratory. The clean confirmation needs a fresh set (fresh3).`,
     how_to: "Per cut: pair the requests (SOP-BERT produced side, VSS gold side of pairValue); agree_share = keys with equal canonical values / union of keys (action, ask excluded; empty union 1), agree = agree_share == 1; other_conf = vss.json's confidence of the paired VSS request on the VSS signals as the demo has them (0 when unpaired). confidence = 1/(1+exp(-(intercept + sum weight * percentile))) of the part that executes, percentile as vss-confidence.js (null -> 1). Execute when confidence >= threshold.",
     partner: { file: "confidence/vss.json", version: vv || null, note: "other_conf is computed with this file; a refit of vss.json needs a refit of this file" },
-    cost: COST, best_cut: BEST.cut, levels: ["cost5", "cost", "cost20", "all"], default_level: "cost",
-    levels_note: "Per cut, levels.cost (the default, = threshold) is the threshold that maximises the cost score with one confident mistake = 10 right answers on the calibration part's out-of-fold confidences; cost5 ('bolder': one mistake = 5 right answers) and cost20 ('more careful': = 20), chosen the same way. heldout_oof_*: the calibration part at that threshold; test_*: the test part (already read; exploratory).",
+    cost: COST, best_cut: BEST.cut, levels: COSTS.map(levelKey).concat(["all"]), default_level: "cost",
+    levels_note: "Per cut, levels.cost (the default, = threshold) is the threshold that maximises the cost score with one confident mistake = 10 right answers on the calibration part's out-of-fold confidences; cost1, cost2, cost5 (bolder: one mistake = 1, 2 or 5 right answers) and cost20 ('more careful': = 20), chosen the same way. heldout_oof_*: the calibration part at that threshold; test_*: the test part (already read; exploratory).",
     cuts: { bert: cutSpec(CB), vss: cutSpec(CV) },
     readers_alone: Object.fromEntries([SOP, VSS].map((c) => [c.id, { label: c.label, threshold: c.t, calibration_oof_score: scoreOf(c.calSt), test_score: scoreOf(c.testSt) }])),
     comparison_calibration_oof: { vs_sop_bert: bootDiff(BEST, SOP, "cal"), vs_vss: bootDiff(BEST, VSS, "cal") },
@@ -352,9 +369,12 @@ if (process.env.EXPORT === "1") {
   if (VJ.readers.vss_combined.levels.cost.threshold !== VSS.t || BJ.levels_out_of_fold.cost.threshold !== SOP.t || vssRefitDiff > 1e-12)
     throw new Error(`the readers alone do not reproduce their shipped files: VSS ${VSS.t} vs ${VJ.readers.vss_combined.levels.cost.threshold}, SOP-BERT ${SOP.t} vs ${BJ.levels_out_of_fold.cost.threshold}`);
   const note = " Levels cost5 ('bolder': one confident mistake counts as 5 right answers) and cost20 ('more careful': as 20): the cost-score optimum at that cost on the same out-of-fold calibration confidences (added 2026-11-02 by training/sketch/combine/combined_report.mjs EXPORT=1; the weights are unchanged).";
-  for (const [J, L, c] of [[VJ, VJ.readers.vss_combined.levels, VSS], [BJ, BJ.levels_out_of_fold, SOP]]) { L.cost5 = costLevel(c, 5); L.cost20 = costLevel(c, 20); }
+  const note2 = " Levels cost1 and cost2 (bolder still: one confident mistake counts as 1 or 2 right answers), chosen the same way (added 2026-11-03).";
+  for (const [J, L, c] of [[VJ, VJ.readers.vss_combined.levels, VSS], [BJ, BJ.levels_out_of_fold, SOP]]) for (const k of COSTS) if (k !== COST) L[levelKey(k)] = costLevel(c, k);
   if (!VJ.readers.vss_combined.levels_note.includes("cost5")) VJ.readers.vss_combined.levels_note += note;
   if (!BJ.levels_note.includes("cost5")) BJ.levels_note += note;
+  if (!VJ.readers.vss_combined.levels_note.includes("cost1")) VJ.readers.vss_combined.levels_note += note2;
+  if (!BJ.levels_note.includes("cost1")) BJ.levels_note += note2;
   writeFileSync(`${REPO}docs/model/confidence/vss.json`, JSON.stringify(VJ, null, 1) + "\n");
   writeFileSync(`${REPO}docs/model/confidence/sop-bert.json`, JSON.stringify(BJ, null, 1) + "\n");
   // the parity fixture: per cut, the first messages of the test part (data order) until NPARITY combined requests; the inputs as the

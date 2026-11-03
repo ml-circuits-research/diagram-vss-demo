@@ -1,11 +1,15 @@
 {
- "about": "Default composer (2026-11-02 21:24, owner's decision): arm VSS-G of FEEDBACK_PLAN.md (FEEDBACK_RESULT.md): the same chain as before (CandidateRouter on 7 worlds, cutter_worlds7s, cutter_events with the event hint H1, the context filler; each world with the settings of its BUILD.json) retrained on the base data + the Opus messages of EXTRA_DIRS (all learned parts). Stars generated in the browser (vss-web-3, SHRINK.md). fresh2 test part, cost score at the cost-score threshold of docs/model/confidence/vss.json: 12.9 [9.2, 16.5] (the previous worlds: 4.0).",
+ "about": "Default composer (2026-11-03): arm VSS-ALL of training/sketch/TRAIN_PLAN_1103.md, the VSS chain retrained on the base data + every EXTRA_DIRS folder below (all learned parts): 9 worlds of worlds_micro/GROUPS_8ops.json with LEGEND_EXT=1 VAL_PICK=specific DIAGRAM_OPS=1 (the 7 earlier worlds, reverse in links, group / ungroup in manage, members / groupOf in questions, and the new worlds layout and help), cutter_worlds8s (9 worlds, SHORT=1), cutter_events8 (51 events) with the event hint H1, the context filler retrained on the same data. Stars generated in the browser (vss-web-3, SHRINK.md). Trained on the GPU machine, jobs 070 / 072 (branch gpu-runs, results/072_measure). Test part of fresh2 + short3 (745 messages), cost score at the threshold chosen on the calibration part, VSS with its best recipe (confidence3_report.md): 22.9 (the previous worlds of arm VSS-G: 20.7). The previous worlds (arm VSS-G, 7 worlds) are in git history.",
  "router": "cutter",
- "cutter": "micro/cutter_worlds7s.json",
+ "cutter": "micro/cutter_worlds8s.json",
  "context": "context/weights.json",
- "event_cutter": "micro/cutter_events.json",
+ "event_cutter": "micro/cutter_events8.json",
  "event_hint": "H1",
- "EXTRA_DIRS": "llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_gen_1 llm_train/opus_gen_2",
+ "EXTRA_DIRS": "llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_gen_1 llm_train/opus_gen_2 llm_train/synth_rules llm_train/synth_rules_ops llm_train/synth_rules_ext llm_train/ops_formulations llm_train/opus_ext_1 llm_train/synth_combo",
+ "LEGEND_EXT": 1,
+ "VAL_PICK": "specific",
+ "DIAGRAM_OPS": 1,
+ "grouping": "worlds_micro/GROUPS_8ops.json",
  "worlds": [
   {
    "world": "shapes",
@@ -16,17 +20,18 @@
     "fact",
     "rule"
    ],
-   "model": "micro/shapes7c",
-   "version": "8ed97b25b1"
+   "model": "micro/shapes8",
+   "version": "52dac7648e"
   },
   {
    "world": "links",
    "events": [
     "connect",
-    "disconnect"
+    "disconnect",
+    "reverse"
    ],
-   "model": "micro/links7",
-   "version": "1977b44ce1"
+   "model": "micro/links8",
+   "version": "a06e092204"
   },
   {
    "world": "position",
@@ -39,8 +44,25 @@
     "toFront",
     "toBack"
    ],
-   "model": "micro/position7",
-   "version": "aba60e3d75"
+   "model": "micro/position8",
+   "version": "6b5a5738cb"
+  },
+  {
+   "world": "layout",
+   "events": [
+    "improve",
+    "respace",
+    "snap",
+    "fit",
+    "flip",
+    "sort",
+    "groupBy",
+    "equalize",
+    "straighten",
+    "untangle"
+   ],
+   "model": "micro/layout8",
+   "version": "6a564736f7"
   },
   {
    "world": "graphq",
@@ -52,8 +74,8 @@
     "cycle",
     "exists"
    ],
-   "model": "micro/graphq7",
-   "version": "d771449db6"
+   "model": "micro/graphq8",
+   "version": "909343b27c"
   },
   {
    "world": "questions",
@@ -65,10 +87,12 @@
     "describe",
     "neighbors",
     "degree",
-    "property"
+    "property",
+    "members",
+    "groupOf"
    ],
-   "model": "micro/questions7",
-   "version": "d77e6c05b2"
+   "model": "micro/questions8",
+   "version": "df78cc694b"
   },
   {
    "world": "manage",
@@ -76,10 +100,12 @@
     "delete",
     "duplicate",
     "rename",
-    "label"
+    "label",
+    "group",
+    "ungroup"
    ],
-   "model": "micro/manage7",
-   "version": "b1423ee7f7"
+   "model": "micro/manage8",
+   "version": "e702bf0dc7"
   },
   {
    "world": "history",
@@ -88,11 +114,19 @@
     "redo",
     "forget"
    ],
-   "model": "micro/history7",
-   "version": "9e05acedac"
+   "model": "micro/history8",
+   "version": "1d77b10fcd"
+  },
+  {
+   "world": "help",
+   "events": [
+    "help"
+   ],
+   "model": "micro/help8",
+   "version": "754dfb3cd0"
   }
  ],
- "cutter_version": "14f47a02a1",
- "event_cutter_version": "af1589b3fe",
- "context_version": "ee4fcc6ab9"
+ "cutter_version": "9380481c25",
+ "event_cutter_version": "8a3bf78f4c",
+ "context_version": "b6ec783039"
 }

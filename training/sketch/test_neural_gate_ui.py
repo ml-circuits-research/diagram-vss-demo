@@ -3,24 +3,27 @@
 fitted confidence (docs/js/neural-confidence.js, docs/model/confidence/sop-bert.json, PRECISION_BERT.md), computed in the page from the
 head logits of its own model calls, clears the threshold of the chosen level (default: the file's "cost" level, the safety threshold).
 With VSS loaded the confidence includes the votes of VSS and the Rules (docs/js/vote-confidence.js columnSop, docs/model/confidence/vote3.json;
-checked by test_vote_ui.py); here VSS is blocked, so SOP-BERT falls back to its own confidence alone (sop-bert.json) and the details say so.
+checked by test_vote_confidence.mjs); here VSS is blocked, so SOP-BERT falls back to its own confidence alone (sop-bert.json) and the details say so.
 
 Run:  python3 training/sketch/test_neural_gate_ui.py [screenshot dir]      (PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers in this sandbox)
 It serves docs/ on a free local port and loads the neural model (docs/model/neural/sop-bert, about 68 MB, run in WASM). The VSS model files
 (docs/model/micro, docs/model/context) are blocked (memory), so VSS is "not available" here. transformers.js is the demo's version
 (@huggingface/transformers@3.8.1), served from training/laptop/node_modules in place of cdn.jsdelivr.net (this sandbox cannot reach the CDN;
-`npm install` in training/laptop). The cut is set to the BERT cutter (localStorage sop.cut) before the page loads. On the SOP-BERT tab:
+`npm install` in training/laptop). The cut is set to the BERT cutter (localStorage sop.cut) and the chat to SOP-BERT's replies (localStorage
+sop.chat.tabs; the default is VSS-BERT's only) before the page loads. On the SOP-BERT tab:
   1. "Move Done below Start."                       one request the confidence clears: executed, no "Do it anyway";
-  2. "Make Process green and connect it to Done."  the first request executed, the second not ("not sure which shape 'it' means"),
-                                                   with its confidence, the threshold and one button;
+  2. "Make Process green and connect it to Done."  the first request executed, the second not: "“it” was taken to mean Process", the
+                                                   clearer command "Connect Process to Done.", Do it anyway and Edit; no numbers in the
+                                                   chat (the confidence and the threshold are in the details);
   3. click "Do it anyway": the link Process -> Done appears in the SOP-BERT drawing, the button is disabled; "undo" takes exactly that back;
   4. the details of message 2: "SOP-BERT gate: safety threshold (it acts from confidence <the file's cost threshold>)", the confidences;
-  5. SOP-BERT > Settings: bolder = cost5, cost (checked), more careful = cost20, execute all, with the thresholds of vote3.json (commands,
-     questions); choosing one is kept in localStorage, choosing the default removes it;
+  5. SOP-BERT > Settings: a table of the levels boldest = cost1, very bold = cost2, bolder = cost5, cost (checked), more careful = cost20,
+     execute all, with the thresholds of vote3.json (commands, questions) and each level's numbers on the calibration part (done right,
+     confidently wrong, asked: vote3.json level_stats); choosing one is kept in localStorage, choosing the default removes it;
   6. with the Rules segmenter as the cut (other cut than the BERT cutter): the gate still works; the details say the cut head ran once more.
 Screenshots of each step go to the directory (default: a temporary folder). Exit code 0 when everything passes.
 """
-import functools, http.server, json, mimetypes, os, socketserver, sys, tempfile, threading
+import functools, http.server, json, mimetypes, os, re, socketserver, sys, tempfile, threading
 
 os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", "/opt/pw-browsers")
 from playwright.sync_api import sync_playwright  # noqa: E402
@@ -34,7 +37,8 @@ os.makedirs(OUT, exist_ok=True)
 SPEC = json.load(open(os.path.join(DOCS, "model", "confidence", "sop-bert.json")))
 LV = SPEC["levels_out_of_fold"]
 T_COST = LV["cost"]["threshold"]
-VOTE = json.load(open(os.path.join(DOCS, "model", "confidence", "vote3.json")))["columns"]["sop"]["levels"]
+VCOL = json.load(open(os.path.join(DOCS, "model", "confidence", "vote3.json")))["columns"]["sop"]
+VOTE, VSTAT = VCOL["levels"], VCOL["level_stats"]
 fails = []
 def check(name, ok, detail=""):
     print(("ok   " if ok else "FAIL ") + name + ("" if ok or not detail else f"\n     {detail}"))
@@ -61,9 +65,9 @@ def cdn(route):
 # the last bot bubble's Neural line: its text, the requests not done (src, reason) and their buttons
 LINE = """() => {
   const bs = [...document.querySelectorAll('#msgs .b.bot')], b = bs[bs.length - 1]; if (!b) return null;
-  const rl = [...b.querySelectorAll('.rl')].find(x => /^SOP-BERT[ :]/.test((x.querySelector('b') || {}).textContent || ''));
+  const rl = b.querySelector('.rl[data-reader=neural]');
   if (!rl) return { text: b.textContent, held: [] };
-  return { text: rl.querySelector('.t').textContent, held: [...rl.querySelectorAll('.held li')].map(li => ({ src: li.querySelector('.src').textContent, why: li.querySelector('.why').textContent, button: !!li.querySelector('button.anyway') })) };
+  return { text: rl.querySelector('.t').textContent, head: (rl.querySelector('.hhead') || {}).textContent || null, all: rl.textContent, held: [...rl.querySelectorAll('.held > li')].map(li => ({ src: li.querySelector('.src').textContent, why: li.querySelector('.why').textContent, how: (li.querySelector('.how') || {}).textContent || '', button: !!li.querySelector('button.anyway'), edit: !!li.querySelector('button.edit') })) };
 }"""
 LINKS = """() => +(((document.querySelector('#readout') || {}).textContent || '').match(/(\\d+) links?/) || [0, -1])[1]"""
 
@@ -84,7 +88,7 @@ with sync_playwright() as p:
     pg = b.new_page(viewport={"width": 1280, "height": 860})
     errors = []
     pg.on("pageerror", lambda e: errors.append(str(e)))
-    pg.add_init_script("try { if (!sessionStorage.getItem('t0')) { localStorage.clear(); localStorage.setItem('sop.cut', 'bert'); sessionStorage.setItem('t0', '1'); } } catch (e) {}")
+    pg.add_init_script("try { if (!sessionStorage.getItem('t0')) { localStorage.clear(); localStorage.setItem('sop.cut', 'bert'); localStorage.setItem('sop.chat.tabs', 'neural'); sessionStorage.setItem('t0', '1'); } } catch (e) {}")
     pg.route("**/model/micro/**", lambda r: r.abort())
     pg.route("**/model/context/**", lambda r: r.abort())
     pg.route(LIB + "**", cdn)
@@ -102,11 +106,13 @@ with sync_playwright() as p:
 
     r2 = send(pg, "Make Process green and connect it to Done.")
     pg.screenshot(path=f"{OUT}/2_asked.png")
-    ok2 = r2 is not None and len(r2["held"]) == 1 and r2["held"][0]["button"] and "connect it to Done" in r2["held"][0]["src"] and "Not sure about 1 of the 2 requests" in r2["text"]
+    ok2 = r2 is not None and len(r2["held"]) == 1 and r2["held"][0]["button"] and "connect it to Done" in r2["held"][0]["src"] and r2["head"] == "Not done, because I am not sure what you meant:"
     check("2. one request executed, the other not done with a reason and a button", ok2, str(r2))
     why = r2["held"][0]["why"] if r2 and r2["held"] else ""
-    check("2. the reason is in plain words (which shape 'it' means)", "not sure which shape ‘it’ means" in why, why)
-    check(f"2. the reason shows the confidence and the threshold ({T_COST:.2f})", f"it acts from {T_COST:.2f}" in why and "confidence 0." in why, why)
+    check("2. the reason is in plain words (the shape 'it' was taken to mean, the name not written)", bool(re.search(r"“it” was taken to mean \w+; the name was not written|was taken from the conversation; the name was not written", why)), why)
+    all2 = r2["all"] if r2 else ""
+    check("2. no numbers and no reader names in the chat (they are in the details)", not re.search(r"\b\d", all2) and not re.search(r"SOP-BERT|VSS|Rules", all2), all2)
+    check("2. the clearer command writes the name instead of 'it', with an Edit button", bool(r2 and r2["held"] and re.search(r"Connect Process to Done\.", r2["held"][0]["how"]) and r2["held"][0]["edit"]), str(r2))
 
     w0 = pg.evaluate(LINKS)
     n0 = pg.evaluate("() => document.querySelectorAll('#msgs .b.bot').length")
@@ -128,7 +134,7 @@ with sync_playwright() as p:
     pg.screenshot(path=f"{OUT}/5_details.png")
     check("4. details show the SOP-BERT gate, its level and threshold", f"SOP-BERT gate: safety threshold (it acts from confidence {T_COST:.4f})" in det and "executed 1 of 2 requests" in det and "not executed" in det, det[:600])
     check("4. the cut head was not run again with the BERT cutter", "run once more" not in det, "")
-    check("4. the details say SOP-BERT used its own confidence alone (VSS did not read the message)", "VSS did not read this message, so SOP-BERT used its own confidence alone (confidence/sop-bert.json)" in det, det[det.find("SOP-BERT gate"):][:400])
+    check("4. the details say SOP-BERT used its own confidence alone because VSS is not available, and a held request's reason says so first", "VSS is not available, so SOP-BERT used its own confidence alone (confidence/sop-bert.json)" in det and "not executed: VSS is not available, so SOP-BERT decided alone and is not sure" in det, det[det.find("SOP-BERT gate"):][:400])
     pg.keyboard.press("Escape"); pg.wait_for_timeout(300)
 
     pg.click("[data-sub=settings]"); pg.wait_for_timeout(300)
@@ -136,11 +142,16 @@ with sync_playwright() as p:
     levels = pg.evaluate("() => [...document.querySelectorAll('#rpanel input[name=neural-gate]')].map(x => [x.value, x.checked, x.disabled])")
     pg.locator("#rpanel input[name=neural-gate]").first.scroll_into_view_if_needed()
     pg.screenshot(path=f"{OUT}/6_settings.png")
-    want = [[l, l == "cost", False] for l in ["cost5", "cost", "cost20", "all"]]   # bolder (one confident mistake = 5 right answers), the default (10), more careful (20), execute all
-    check("5. settings: bolder, safety threshold, more careful and execute all, cost checked", levels == want, f"{levels} vs {want}")
+    COSTL = ["cost1", "cost2", "cost5", "cost", "cost20"]
+    want = [[l, l == "cost", False] for l in COSTL + ["all"]]   # one confident mistake = 1, 2, 5 right answers (bolder), the default (10), more careful (20), execute all
+    check("5. settings: boldest, very bold, bolder, safety threshold, more careful and execute all, cost checked", levels == want, f"{levels} vs {want}")
     lab = pg.evaluate("() => [...document.querySelectorAll('#rpanel input[name=neural-gate]')].map(x => x.parentElement.textContent)")
-    check("5. bolder and more careful say what they mean in plain words", any("bolder" in t and "one confident mistake counts as 5 right answers" in t for t in lab) and any("more careful" in t and "counts as 20 right answers" in t for t in lab), str(lab[:3]))
-    check("5. each cost level shows the thresholds of vote3.json for commands and questions", all(f"{VOTE[l]['command']:.4f}" in t and f"{VOTE[l]['question']:.4f}" in t for l, t in zip(["cost5", "cost", "cost20"], lab)), str(lab[:3]))
+    check("5. the levels say what they mean in plain words", all(n in t and f"one confident mistake counts as {c} right answer" in t for n, c, t in zip(["Boldest", "Very bold", "Bolder", "Safety threshold", "More careful"], [1, 2, 5, 10, 20], lab)), str(lab))
+    check("5. each cost level shows the thresholds of vote3.json for commands and questions", all(f"{VOTE[l]['command']:.4f}" in t and f"{VOTE[l]['question']:.4f}" in t for l, t in zip(COSTL, lab)), str(lab))
+    rows = pg.evaluate("() => [...document.querySelectorAll('#rpanel .lvt tbody tr')].map(tr => [...tr.querySelectorAll('td')].slice(1).map(td => td.textContent.trim()))")
+    pc = lambda v: f"{v * 100:.1f}%"
+    wantRows = [[pc(VSTAT[l]["calibration_oof"]["done_right"]), pc(VSTAT[l]["calibration_oof"]["confidently_wrong"]), pc(VSTAT[l]["calibration_oof"]["asked"])] for l in COSTL + ["all"]]
+    check("5. the table shows each level's numbers on the calibration part (done right, confidently wrong, asked, with % signs)", rows == wantRows, f"{rows} vs {wantRows}")
     pg.check("#rpanel input[name=neural-gate][value='cost20']"); pg.wait_for_timeout(200)
     kept20 = pg.evaluate("() => { try { return localStorage.getItem('sop.neural.gate'); } catch (e) { return 'no storage'; } }")
     check("5. more careful is kept in localStorage", kept20 == "cost20", str(kept20))
@@ -158,7 +169,7 @@ with sync_playwright() as p:
     pg.keyboard.press("Escape"); pg.wait_for_timeout(300)
     r6 = send(pg, "Make Check orange and move it a bit.")
     pg.screenshot(path=f"{OUT}/7_rules_cut.png")
-    check("6. with the Rules cut: one executed, one not done with its reason", r6 is not None and len(r6["held"]) == 1 and r6["held"][0]["button"] and "Not sure about 1 of the 2 requests" in r6["text"], str(r6))
+    check("6. with the Rules cut: one executed, one not done with its reason", r6 is not None and len(r6["held"]) == 1 and r6["held"][0]["button"] and r6["head"] == "Not done, because I am not sure what you meant:", str(r6))
     det6 = details(pg, 1)
     check("6. the details say the cut head ran once more for the confidence", "run once more over the message" in det6 and "cut by: Rules segmenter" in det6, det6[:600])
     pg.screenshot(path=f"{OUT}/8_rules_cut_details.png")

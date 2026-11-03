@@ -95,6 +95,19 @@
    "toFront",
    "toBack",
    "arrange",
+   "group",
+   "ungroup",
+   "improve",
+   "respace",
+   "snap",
+   "fit",
+   "flip",
+   "sort",
+   "groupBy",
+   "equalize",
+   "straighten",
+   "untangle",
+   "reverse",
    "undo",
    "redo",
    "forget",
@@ -113,41 +126,73 @@
    "reachable",
    "cycle",
    "rules",
+   "members",
+   "groupOf",
+   "help",
    "fact",
    "rule"
   ],
   "tags": [
    "O",
+   "B-about",
+   "I-about",
    "B-anchor",
    "I-anchor",
+   "B-anchor2",
+   "I-anchor2",
+   "B-at",
+   "I-at",
    "B-count",
    "I-count",
    "B-distance",
    "I-distance",
    "B-from",
    "I-from",
+   "B-items",
+   "I-items",
+   "B-items2",
+   "I-items2",
    "B-label",
    "I-label",
+   "B-linked",
+   "I-linked",
    "B-name",
    "I-name",
+   "B-parents",
+   "I-parents",
+   "B-scale",
+   "I-scale",
    "B-target",
    "I-target",
+   "B-title",
+   "I-title",
    "B-to",
    "I-to"
   ],
   "span_keys": [
+   "about",
    "anchor",
+   "anchor2",
+   "at",
    "count",
    "distance",
    "from",
+   "items",
+   "items2",
    "label",
+   "linked",
    "name",
+   "parents",
+   "scale",
    "target",
+   "title",
    "to"
   ],
   "ref_keys": [
    "anchor",
+   "anchor2",
    "from",
+   "linked",
    "target",
    "to"
   ],
@@ -158,13 +203,31 @@
    "recency",
    "shape"
   ],
+  "desc2_keys": [
+   "color",
+   "quantifier",
+   "recency",
+   "shape"
+  ],
   "classes": [
    [
     "arrow",
     [
      "none",
      "both",
+     "forward",
      "none"
+    ]
+   ],
+   [
+    "aspect",
+    [
+     "none",
+     "can",
+     "example",
+     "how",
+     "overview",
+     "values"
     ]
    ],
    [
@@ -218,10 +281,26 @@
     ]
    ],
    [
+    "fill",
+    [
+     "none",
+     "light"
+    ]
+   ],
+   [
     "kind",
     [
      "none",
-     "edge"
+     "edge",
+     "group"
+    ]
+   ],
+   [
+    "layer",
+    [
+     "none",
+     "background",
+     "zone"
     ]
    ],
    [
@@ -231,7 +310,11 @@
      "circle",
      "column",
      "grid",
-     "row"
+     "layers",
+     "organic",
+     "radial",
+     "row",
+     "tree"
     ]
    ],
    [
@@ -249,6 +332,30 @@
      "lime",
      "magenta",
      "navy",
+     "orange",
+     "pink",
+     "purple",
+     "red",
+     "teal",
+     "white",
+     "yellow"
+    ]
+   ],
+   [
+    "outline",
+    [
+     "none",
+     "black",
+     "blue",
+     "brown",
+     "cyan",
+     "gray",
+     "green",
+     "indigo",
+     "lime",
+     "magenta",
+     "navy",
+     "none",
      "orange",
      "pink",
      "purple",
@@ -289,14 +396,63 @@
     ]
    ],
    [
+    "position2",
+    [
+     "none",
+     "above",
+     "below",
+     "leftOf",
+     "rightOf"
+    ]
+   ],
+   [
     "property",
     [
      "none",
      "color",
      "label",
+     "name",
+     "outline",
      "position",
      "shape",
      "size"
+    ]
+   ],
+   [
+    "quantifier",
+    [
+     "none",
+     "all"
+    ]
+   ],
+   [
+    "region",
+    [
+     "none",
+     "bottom",
+     "bottomLeft",
+     "bottomRight",
+     "top",
+     "topLeft",
+     "topRight"
+    ]
+   ],
+   [
+    "scheme",
+    [
+     "none",
+     "bold",
+     "calm",
+     "classic",
+     "cool",
+     "earth",
+     "forest",
+     "love",
+     "mono",
+     "ocean",
+     "rainbow",
+     "sunset",
+     "warm"
     ]
    ],
    [
@@ -310,6 +466,7 @@
      "rectangle",
      "square",
      "star",
+     "text",
      "triangle"
     ]
    ],
@@ -329,7 +486,8 @@
     [
      "none",
      "dashed",
-     "dotted"
+     "dotted",
+     "solid"
     ]
    ],
    [
@@ -349,6 +507,151 @@
     ]
    ],
    [
+    "template",
+    [
+     "none",
+     "balance",
+     "bridge",
+     "burst",
+     "cycle",
+     "funnel",
+     "heart",
+     "hierarchy",
+     "hourglass",
+     "hub",
+     "list",
+     "matrix",
+     "mountain",
+     "pillars",
+     "process",
+     "pyramid",
+     "road",
+     "spiral",
+     "steps",
+     "sunrise",
+     "target",
+     "timeline",
+     "tree",
+     "venn",
+     "wave"
+    ]
+   ],
+   [
+    "topic",
+    [
+     "none",
+     "align",
+     "arrange",
+     "balance",
+     "black",
+     "blue",
+     "bridge",
+     "brown",
+     "burst",
+     "check",
+     "circle",
+     "color",
+     "connect",
+     "connected",
+     "connections",
+     "count",
+     "create",
+     "cyan",
+     "cycle",
+     "dashed",
+     "delete",
+     "describe",
+     "diamond",
+     "disconnect",
+     "distribute",
+     "dotted",
+     "duplicate",
+     "ellipse",
+     "equalize",
+     "fill",
+     "fit",
+     "flip",
+     "forget",
+     "funnel",
+     "gold",
+     "gray",
+     "green",
+     "group",
+     "groups",
+     "heart",
+     "hexagon",
+     "hierarchy",
+     "history",
+     "horizontal",
+     "hourglass",
+     "hub",
+     "improve",
+     "indigo",
+     "label",
+     "layer",
+     "layers",
+     "layout",
+     "lime",
+     "list",
+     "magenta",
+     "matrix",
+     "mountain",
+     "move",
+     "navy",
+     "nearest",
+     "neighbors",
+     "orange",
+     "outline",
+     "pillars",
+     "pink",
+     "position",
+     "process",
+     "purple",
+     "pyramid",
+     "queries",
+     "reachable",
+     "rectangle",
+     "red",
+     "redo",
+     "rename",
+     "resize",
+     "respace",
+     "reverse",
+     "road",
+     "rules",
+     "scheme",
+     "set",
+     "shape",
+     "size",
+     "snap",
+     "sort",
+     "spiral",
+     "square",
+     "star",
+     "steps",
+     "straighten",
+     "style",
+     "sunrise",
+     "swap",
+     "target",
+     "teal",
+     "template",
+     "text",
+     "timeline",
+     "toFront",
+     "tree",
+     "triangle",
+     "undo",
+     "ungroup",
+     "untangle",
+     "venn",
+     "wave",
+     "white",
+     "yellow",
+     "zone"
+    ]
+   ],
+   [
     "fill:anchor",
     [
      "none",
@@ -358,7 +661,25 @@
     ]
    ],
    [
+    "fill:anchor2",
+    [
+     "none",
+     "written",
+     "context",
+     "description"
+    ]
+   ],
+   [
     "fill:from",
+    [
+     "none",
+     "written",
+     "context",
+     "description"
+    ]
+   ],
+   [
+    "fill:linked",
     [
      "none",
      "written",
@@ -395,7 +716,10 @@
      "gold",
      "gray",
      "green",
+     "indigo",
      "lime",
+     "magenta",
+     "navy",
      "orange",
      "pink",
      "purple",
@@ -416,7 +740,9 @@
      "gold",
      "gray",
      "green",
+     "indigo",
      "lime",
+     "magenta",
      "navy",
      "orange",
      "pink",
@@ -455,45 +781,134 @@
      "star",
      "triangle"
     ]
+   ],
+   [
+    "desc2:color",
+    [
+     "none",
+     "black",
+     "blue",
+     "brown",
+     "cyan",
+     "gold",
+     "gray",
+     "green",
+     "indigo",
+     "lime",
+     "magenta",
+     "navy",
+     "orange",
+     "pink",
+     "purple",
+     "red",
+     "teal",
+     "white",
+     "yellow"
+    ]
+   ],
+   [
+    "desc2:quantifier",
+    [
+     "none",
+     "all"
+    ]
+   ],
+   [
+    "desc2:recency",
+    [
+     "none",
+     "newest",
+     "oldest"
+    ]
+   ],
+   [
+    "desc2:shape",
+    [
+     "none",
+     "circle",
+     "diamond",
+     "ellipse",
+     "hexagon",
+     "rectangle",
+     "square",
+     "star",
+     "triangle"
+    ]
    ]
   ],
   "act_keys": {
    "create": [
     "anchor",
+    "anchor2",
+    "at",
+    "axis",
     "color",
     "count",
+    "fill",
+    "items",
+    "items2",
     "label",
+    "layer",
+    "layout",
+    "linked",
     "name",
+    "outline",
+    "parents",
     "position",
+    "position2",
+    "region",
+    "scheme",
     "shape",
-    "size"
+    "size",
+    "template",
+    "title"
    ],
    "delete": [
     "target"
    ],
    "move": [
     "anchor",
+    "anchor2",
+    "at",
     "direction",
     "distance",
     "position",
+    "position2",
+    "region",
     "target"
    ],
    "set": [
+    "arrow",
     "color",
+    "fill",
+    "from",
+    "kind",
+    "outline",
+    "quantifier",
     "shape",
     "size",
-    "target"
+    "style",
+    "target",
+    "to"
    ],
    "resize": [
-    "target"
+    "from",
+    "kind",
+    "quantifier",
+    "target",
+    "to"
    ],
    "rename": [
     "name",
     "target"
    ],
    "label": [
+    "from",
+    "kind",
     "label",
-    "target"
+    "quantifier",
+    "target",
+    "to"
    ],
    "duplicate": [
     "count",
@@ -513,10 +928,12 @@
    ],
    "disconnect": [
     "from",
+    "quantifier",
     "to"
    ],
    "align": [
     "axis",
+    "direction",
     "target"
    ],
    "distribute": [
@@ -530,13 +947,93 @@
     "target"
    ],
    "arrange": [
+    "anchor",
+    "axis",
+    "direction",
     "layout",
+    "target",
+    "template",
+    "title"
+   ],
+   "group": [
+    "name",
     "target"
+   ],
+   "ungroup": [
+    "target"
+   ],
+   "improve": [
+    "target"
+   ],
+   "respace": [
+    "comparison",
+    "distance",
+    "scale",
+    "target"
+   ],
+   "snap": [
+    "distance",
+    "target"
+   ],
+   "fit": [
+    "position",
+    "target"
+   ],
+   "flip": [
+    "axis",
+    "target"
+   ],
+   "sort": [
+    "layout",
+    "property",
+    "superlative",
+    "target"
+   ],
+   "groupBy": [
+    "property",
+    "target"
+   ],
+   "equalize": [
+    "anchor",
+    "property",
+    "target"
+   ],
+   "straighten": [
+    "target"
+   ],
+   "untangle": [
+    "target"
+   ],
+   "reverse": [
+    "from",
+    "quantifier",
+    "target",
+    "to"
    ],
    "undo": [],
    "redo": [],
    "forget": [],
    "count": [
+    "anchor",
+    "anchor2",
+    "color",
+    "kind",
+    "linked",
+    "notColor",
+    "position",
+    "position2",
+    "shape"
+   ],
+   "list": [
+    "anchor",
+    "color",
+    "kind",
+    "notColor",
+    "position",
+    "region",
+    "shape"
+   ],
+   "exists": [
     "anchor",
     "color",
     "kind",
@@ -544,30 +1041,20 @@
     "position",
     "shape"
    ],
-   "list": [
-    "anchor",
-    "color",
-    "notColor",
-    "position",
-    "shape"
-   ],
-   "exists": [
-    "anchor",
-    "color",
-    "notColor",
-    "position",
-    "shape"
-   ],
    "property": [
+    "from",
     "property",
-    "target"
+    "target",
+    "to"
    ],
    "check": [
     "anchor",
+    "anchor2",
     "color",
     "comparison",
     "notColor",
     "position",
+    "position2",
     "shape",
     "size",
     "target"
@@ -592,6 +1079,7 @@
     "superlative"
    ],
    "extreme": [
+    "shape",
     "superlative"
    ],
    "path": [
@@ -603,10 +1091,24 @@
    ],
    "cycle": [],
    "rules": [],
+   "members": [
+    "target"
+   ],
+   "groupOf": [
+    "target"
+   ],
+   "help": [
+    "about",
+    "aspect",
+    "topic"
+   ],
    "fact": [
     "anchor",
+    "anchor2",
     "color",
+    "linked",
     "position",
+    "position2",
     "shape",
     "size",
     "target"
@@ -624,15 +1126,35 @@
    "four": "4",
    "two": "2",
    "five": "5",
-   "below": "2",
    "ten": "10",
-   "nudge": "20",
-   "30px": "30",
+   "lights": "2",
+   "100px": "100",
+   "bit": "1.25",
+   "halve": "0.5",
+   "increase": "1.25",
+   "lot": "2",
+   "less": "0.5",
    "20px": "20",
-   "box3": "50",
-   "down": "50",
+   "25px": "25",
+   "30px": "30",
    "six": "6",
-   "day": "100",
+   "twelve": "12",
+   "250px": "250",
+   "seven": "7",
+   "nine": "9",
+   "eight": "8",
+   "couple": "2",
+   "eleven": "11",
+   "pair": "2",
+   "150px": "150",
+   "60px": "60",
+   "5px": "5",
+   "75px": "75",
+   "50px": "50",
+   "200px": "200",
+   "10px": "10",
+   "circles": "2",
+   "120px": "120",
    "90px": "90"
   },
   "word_re": "[\\p{L}\\p{N}]+|[^\\s\\p{L}\\p{N}]",

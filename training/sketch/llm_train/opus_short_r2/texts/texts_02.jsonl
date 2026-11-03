@@ -1,0 +1,76 @@
+{"id": "or2-0101", "domain": "football club", "names": ["Director", "Coach1", "Coach2", "Kit", "Physio"], "text": "rename Coach1 to Juniors and Coach2 to Seniors"}
+{"id": "or2-0102", "domain": "football club", "names": ["Director", "Coach1", "Coach2", "Kit", "Physio"], "text": "Kit green, Physio white, Director gold"}
+{"id": "or2-0103", "domain": "football club", "names": ["Director", "Coach1", "Coach2", "Kit", "Physio"], "text": "move Kit left of Director and Physio right of it"}
+{"id": "or2-0104", "domain": "football club", "names": ["Director", "Coach1", "Coach2", "Kit", "Physio"], "text": "connect Director to Coach1, and Coach1 to Kit"}
+{"id": "or2-0105", "domain": "garden plan", "names": ["Fern", "Moss", "Ivy", "Rose", "Pond"], "text": "make Fern dark green, oh wait no, just green"}
+{"id": "or2-0106", "domain": "garden plan", "names": ["Fern", "Moss", "Ivy", "Rose", "Pond"], "text": "Rose a star? no, a circle. pink"}
+{"id": "or2-0107", "domain": "garden plan", "names": ["Fern", "Moss", "Ivy", "Rose", "Pond"], "text": "Pond should be blue and big, Moss small"}
+{"id": "or2-0108", "domain": "garden plan", "names": ["Fern", "Moss", "Ivy", "Rose", "Pond"], "text": "ok the pond is done. now put Ivy next to Pond pls"}
+{"id": "or2-0109", "domain": "garden plan", "names": ["Fern", "Moss", "Ivy", "Rose", "Pond"], "text": "swap Fern and Rose, then undo that, I changed my mind"}
+{"id": "or2-0110", "domain": "recipe", "names": ["Flour", "Eggs", "Mix", "Bake", "Cool"], "text": "Flour → Mix, Eggs → Mix"}
+{"id": "or2-0111", "domain": "recipe", "names": ["Flour", "Eggs", "Mix", "Bake", "Cool"], "text": "Mix to Bake, Bake to Cool, all one chain"}
+{"id": "or2-0112", "domain": "recipe", "names": ["Flour", "Eggs", "Mix", "Bake", "Cool"], "text": "Bake orange. Cool light blue... well, cyan"}
+{"id": "or2-0113", "domain": "recipe", "names": ["Flour", "Eggs", "Mix", "Bake", "Cool"], "text": "I accidentally deleted Sugar, can you undo"}
+{"id": "or2-0114", "domain": "recipe", "names": ["Flour", "Eggs", "Mix", "Bake", "Cool"], "text": "label the arrow Mix to Bake \"20 min\""}
+{"id": "or2-0115", "domain": "pipeline", "names": ["Ingest", "Parse", "Clean", "Load", "Warehouse"], "text": "Ingest Parse Clean Load in a row"}
+{"id": "or2-0116", "domain": "pipeline", "names": ["Ingest", "Parse", "Clean", "Load", "Warehouse"], "text": "Warehouse an ellipse, navy"}
+{"id": "or2-0117", "domain": "pipeline", "names": ["Ingest", "Parse", "Clean", "Load", "Warehouse"], "text": "Clean twice as big"}
+{"id": "or2-0118", "domain": "pipeline", "names": ["Ingest", "Parse", "Clean", "Load", "Warehouse"], "text": "Load → Warehouse, dotted"}
+{"id": "or2-0119", "domain": "pipeline", "names": ["Ingest", "Parse", "Clean", "Load", "Warehouse"], "text": "remove the outline on Warehouse and make it gray"}
+{"id": "or2-0120", "domain": "pipeline", "names": ["Ingest", "Parse", "Clean", "Load", "Warehouse"], "text": "nope, that's wrong. go back 3 steps"}
+{"id": "or2-0121", "domain": "game map", "names": ["Castle", "Forest", "Cave", "Village", "Tower"], "text": "Castle top, Village bottom"}
+{"id": "or2-0122", "domain": "game map", "names": ["Castle", "Forest", "Cave", "Village", "Tower"], "text": "Cave a triangle, brown, small"}
+{"id": "or2-0123", "domain": "game map", "names": ["Castle", "Forest", "Cave", "Village", "Tower"], "text": "Forest to Cave and Forest to Tower"}
+{"id": "or2-0124", "domain": "game map", "names": ["Castle", "Forest", "Cave", "Village", "Tower"], "text": "Tower: purple outline"}
+{"id": "or2-0125", "domain": "game map", "names": ["Castle", "Forest", "Cave", "Village", "Tower"], "text": "what's connected to Forest?"}
+{"id": "or2-0126", "domain": "game map", "names": ["Castle", "Forest", "Cave", "Village", "Tower"], "text": "Village bigger, Castle bigger too"}
+{"id": "or2-0127", "domain": "school diagram", "names": ["Math", "Physics", "Biology", "Lab", "Library"], "text": "Math blue, Physics blue, Biology green"}
+{"id": "or2-0128", "domain": "school diagram", "names": ["Math", "Physics", "Biology", "Lab", "Library"], "text": "put Lab between Physics and Biology"}
+{"id": "or2-0129", "domain": "school diagram", "names": ["Math", "Physics", "Biology", "Lab", "Library"], "text": "Library: a hexagon. hmm, a rectangle actually"}
+{"id": "or2-0130", "domain": "school diagram", "names": ["Math", "Physics", "Biology", "Lab", "Library"], "text": "Math to Physics two-way, Physics to Lab one way"}
+{"id": "or2-0131", "domain": "school diagram", "names": ["Math", "Physics", "Biology", "Lab", "Library"], "text": "did that work? whatever, make Library teal"}
+{"id": "or2-0132", "domain": "ui wireframe", "names": ["Header", "Sidebar", "Content", "Footer", "Modal"], "text": "Header top, Footer bottom, Sidebar left"}
+{"id": "or2-0133", "domain": "ui wireframe", "names": ["Header", "Sidebar", "Content", "Footer", "Modal"], "text": "Modal in front"}
+{"id": "or2-0134", "domain": "ui wireframe", "names": ["Header", "Sidebar", "Content", "Footer", "Modal"], "text": "Content big, white, with a black border"}
+{"id": "or2-0135", "domain": "ui wireframe", "names": ["Header", "Sidebar", "Content", "Footer", "Modal"], "text": "remove Modal. actually no, keep it, just send it to the back"}
+{"id": "or2-0136", "domain": "ui wireframe", "names": ["Header", "Sidebar", "Content", "Footer", "Modal"], "text": "how many shapes have a border?"}
+{"id": "or2-0137", "domain": "sports play", "names": ["Qb", "Wr1", "Wr2", "Rb", "Te"], "text": "Wr1 left, Wr2 right, Rb behind Qb"}
+{"id": "or2-0138", "domain": "sports play", "names": ["Qb", "Wr1", "Wr2", "Rb", "Te"], "text": "Qb → Wr1 dashed, Qb → Te dashed"}
+{"id": "or2-0139", "domain": "sports play", "names": ["Qb", "Wr1", "Wr2", "Rb", "Te"], "text": "Qb red, everyone else blue"}
+{"id": "or2-0140", "domain": "sports play", "names": ["Qb", "Wr1", "Wr2", "Rb", "Te"], "text": "undo that last arrow please"}
+{"id": "or2-0141", "domain": "story board", "names": ["Scene1", "Scene2", "Scene3", "Scene4", "Ending"], "text": "Scene1 to Scene2 to Scene3 to Scene4"}
+{"id": "or2-0142", "domain": "story board", "names": ["Scene1", "Scene2", "Scene3", "Scene4", "Ending"], "text": "Ending a star, gold"}
+{"id": "or2-0143", "domain": "story board", "names": ["Scene1", "Scene2", "Scene3", "Scene4", "Ending"], "text": "Scene3 → Ending, label it \"twist\""}
+{"id": "or2-0144", "domain": "story board", "names": ["Scene1", "Scene2", "Scene3", "Scene4", "Ending"], "text": "Scene2 should be yellow — no, orange"}
+{"id": "or2-0145", "domain": "story board", "names": ["Scene1", "Scene2", "Scene3", "Scene4", "Ending"], "text": "line them all up horizontally"}
+{"id": "or2-0146", "domain": "floor plan", "names": ["Kitchen", "Living", "Bath", "Bed1", "Bed2"], "text": "Kitchen next to Living"}
+{"id": "or2-0147", "domain": "floor plan", "names": ["Kitchen", "Living", "Bath", "Bed1", "Bed2"], "text": "Bed1 and Bed2 the same size as Living"}
+{"id": "or2-0148", "domain": "floor plan", "names": ["Kitchen", "Living", "Bath", "Bed1", "Bed2"], "text": "Bath small, light gray"}
+{"id": "or2-0149", "domain": "floor plan", "names": ["Kitchen", "Living", "Bath", "Bed1", "Bed2"], "text": "Bed2 under Bed1 please"}
+{"id": "or2-0150", "domain": "floor plan", "names": ["Kitchen", "Living", "Bath", "Bed1", "Bed2"], "text": "is Bath left of Kitchen?"}
+{"id": "or2-0151", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "ok so first make start green, then done red, then undo the red one"}
+{"id": "or2-0152", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "process → diamond, check → hexagon"}
+{"id": "or2-0153", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "check yellow, also smaller"}
+{"id": "or2-0154", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "done, bigger"}
+{"id": "or2-0155", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "Start & Done: circles"}
+{"id": "or2-0156", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "outline check in red and done in blue"}
+{"id": "or2-0157", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "no outline on any of them"}
+{"id": "or2-0158", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "the arrow check to done, make it red"}
+{"id": "or2-0159", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "redo. no wait, redo twice"}
+{"id": "or2-0160", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "hmm I don't like it. back 2"}
+{"id": "or2-0161", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "a circle called X at 100,100"}
+{"id": "or2-0162", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "Done at 500,300"}
+{"id": "or2-0163", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "timeline: Start, Process, Check, Done"}
+{"id": "or2-0164", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "title \"Onboarding\" on top"}
+{"id": "or2-0165", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "check is connected to what?"}
+{"id": "or2-0166", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "are start and done linked"}
+{"id": "or2-0167", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "biggest shape?"}
+{"id": "or2-0168", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "Begin instead of Start please, and Finish instead of Done"}
+{"id": "or2-0169", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "make the arrows not cross"}
+{"id": "or2-0170", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "tidy?"}
+{"id": "or2-0171", "domain": "lab network", "names": ["Isp1", "Isp2", "Edge", "Core", "Nas"], "text": "Isp1 and Isp2 gray"}
+{"id": "or2-0172", "domain": "lab network", "names": ["Isp1", "Isp2", "Edge", "Core", "Nas"], "text": "Edge → Core → Nas"}
+{"id": "or2-0173", "domain": "lab network", "names": ["Isp1", "Isp2", "Edge", "Core", "Nas"], "text": "Isp1 to Edge, Isp2 to Edge"}
+{"id": "or2-0174", "domain": "lab network", "names": ["Isp1", "Isp2", "Edge", "Core", "Nas"], "text": "Nas a cylinder... we don't have that, ok an ellipse then"}
+{"id": "or2-0175", "domain": "lab network", "names": ["Isp1", "Isp2", "Edge", "Core", "Nas"], "text": "remove the arrow Core → Nas. no wait, just make it dashed"}
+{"id": "or2-0176", "domain": "lab network", "names": ["Isp1", "Isp2", "Edge", "Core", "Nas"], "text": "how many arrows go out of Core"}

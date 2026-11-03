@@ -393,9 +393,48 @@ def value_kind(v, _vk={}):
 def val_prec(): return os.environ.get("VAL_PREC", "") or "all"
 def val_sub(): return os.environ.get("VAL_SUB", "") or "any"
 def val_pick(): return os.environ.get("VAL_PICK", "") or "frequent"
+# Round 2 (TRAIN_PLAN_R2.md; both off by default: unset = every front.json byte-identical to before):
+# FRONT_NEG=1 | <grouping.json> (with FRONT_ROWS=world): the precision of a world's value n-grams and trigger rules is also counted over the
+#   requests of the OTHER worlds (negative evidence; =1: pooled, the other worlds together weigh as much as this world; =<grouping>: each other
+#   world of the grouping weighs as much as this world, and a rule must fire at least as often per request here as in any of them); the
+#   candidates are still learned from the world's own rows only. Measured 2026-11-03 (TRAIN_PLAN_R2.md 2.1): no net gain; off in the jobs. Before, a rule was checked only
+#   inside its world, so a common word of another world became this world's action ("make" -> duplicate in manage, "which" -> all, "is
+#   there" -> help, "bigger" -> respace; VSS_FROM_TO.md section 5, cause 1: 41 units).
+# VAL_GUARD=1: a value n-gram never takes in its request's trigger (the MASK rule of FRONT_V2, alone: "add three" -> 3 swallowed the verb),
+#   and a trigger rule keeps a value token of its phrase only when that value is in the gold of at least trig_min_count of the requests the
+#   rule was learned from, the count a rule needs to exist at all ("line up" -> align kept "up" as the direction up although no align
+#   request has a direction up; "clean it up", "hook it up", "break up"; VSS_FROM_TO.md 5, value cause 2). VAL_GUARD=mask / keep: one part.
+def front_neg(): return bool(os.environ.get("FRONT_NEG"))
 
 
-def learn_values(reqs, min_count, min_prec):
+def neg_labels(wev, ev_of):
+    """FRONT_NEG -> None (off) or a function wire -> None (a request of this world, events wev) or the label of the other world it belongs to.
+    FRONT_NEG=1: every other request has the one label "other" (pooled); FRONT_NEG=<grouping.json> (worlds_micro/GROUPS_8ops.json): the label
+    is the world of the request's event in that grouping (an event in none of its worlds: "other")."""
+    v = os.environ.get("FRONT_NEG", "")
+    if not v: return None
+    if v == "1": grp = {}
+    else:
+        f = v if os.path.isabs(v) else os.path.join(HERE, v)
+        grp = {e: w for w, es in json.load(open(f)).items() if not w.startswith("_") for e in es}
+    return lambda w: None if ev_of(w) in wev else grp.get(ev_of(w), "other")
+
+
+def neg_rate(neg):
+    """FRONT_NEG: (labelled other requests) -> {label: number of requests}"""
+    return collections.Counter(g for _, g in neg)
+def val_guard(part="keep"):
+    """VAL_GUARD: "1" = both parts, "keep" = the trigger rules' kept value tokens only, "mask" = the value n-grams' trigger mask only"""
+    v = os.environ.get("VAL_GUARD", "")
+    if v not in ("", "1", "keep", "mask"): raise SystemExit(f"VAL_GUARD={v!r}: expected 1, keep or mask")
+    return v in ("1", part)
+
+
+def grams_of(toks):
+    return {" ".join(toks[i:i + n]) for n in (1, 2, 3) for i in range(len(toks) - n + 1) if all(is_word(x) for x in toks[i:i + n])}
+
+
+def learn_values(reqs, min_count, min_prec, neg=None):
     """VAL_PREC=event (off by default; ROUND2.md fix 4, BETWEEN.md "the count of a new group"): the precision of n-gram -> value v is
     counted only over the requests of the events that carry v's kind (an event carries a kind when the gold values of at least one of
     its requests in `reqs` have that kind: the same rule as the legend's roles, which come from the rows). Default (all): over every
@@ -412,8 +451,13 @@ def learn_values(reqs, min_count, min_prec):
     and the n-gram is dropped when that one value fails the bars. A plural description's gold carries two values, the plural shape token
     and the quantifier `all`, so a word seen only in descriptions ("circles", "navy" in "the navy ones") tied with `all` and became `all`:
     "delete all the circles" was normalized to "delete all the all", and the shape was gone before the world read it. The same rule for
-    every kind."""
-    mask = v2(); per_event = val_prec() == "event"; specific = val_pick() == "specific"
+    every kind.
+    neg (FRONT_NEG=1; default None: as before): the requests of the other worlds. An n-gram's precision for a value v becomes
+    (own requests with v + s x other requests with v) / (own occurrences + s x other occurrences), s = own requests / other requests:
+    the other worlds together weigh as much as this world (a balanced precision, as the presence thresholds' balanced accuracy); the count
+    bar and the candidate values stay the world's own."""
+    mask = v2() or val_guard("mask"); per_event = val_prec() == "event"; specific = val_pick() == "specific"
+    if neg is not None and per_event: raise SystemExit("FRONT_NEG=1 is not combined with VAL_PREC=event")
     if val_prec() not in ("all", "event"): raise SystemExit(f"VAL_PREC={val_prec()!r}: expected all or event")
     if val_sub() not in ("any", "value"): raise SystemExit(f"VAL_SUB={val_sub()!r}: expected any or value")
     if val_pick() not in ("frequent", "specific"): raise SystemExit(f"VAL_PICK={val_pick()!r}: expected frequent or specific")
@@ -443,6 +487,31 @@ def learn_values(reqs, min_count, min_prec):
             if g not in ok: continue
             for v in sorted(gv):   # sorted: a tie between two values is broken the same way in every run (gv is a set: its order follows the string hash)
                 if not v.isdigit() or not g.isdigit(): co[g][v] += 1
+    occ_n, co_n = collections.Counter(), collections.defaultdict(collections.Counter)   # FRONT_NEG=1: the other worlds' requests (empty otherwise)
+    pooled = bool(neg) and set(g for _, g in neg) == {"other"}
+    sc = len(reqs) / len(neg) if neg and pooled else 0   # FRONT_NEG=1: the other worlds together weigh as much as this world (balanced, as fit_threshold)
+    occ_g, co_g, N_g = collections.defaultdict(collections.Counter), collections.defaultdict(collections.Counter), neg_rate(neg or ())   # FRONT_NEG=<grouping>
+    for (m, w, sp, names), lab in (neg or ()):
+        toks = [x[0] for x in tokenize(sp, names)[0]]; gv = gold_values(w); grams = grams_of(toks) & co.keys(); ok = grams
+        if mask:
+            reg = trigger_region(w, toks, names)
+            if reg:
+                ok = {" ".join(toks[i:i + n]) for n in (1, 2, 3) for i in range(len(toks) - n + 1) if all(is_word(x) for x in toks[i:i + n])
+                      and not (i < reg[1] and i + n > reg[0] and not (i >= reg[0] and i + n <= reg[1]))}
+        for g in grams:
+            if pooled: occ_n[g] += 1
+            else: occ_g[lab][g] += 1
+            if g in ok:
+                for v in gv:
+                    if not v.isdigit() or not g.isdigit():
+                        if pooled: co_n[g][v] += 1
+                        else: co_g[lab][(g, v)] += 1
+    N_own = len(reqs)
+    def foreign_ok(g, v):
+        """FRONT_NEG=<grouping>: g -> v is kept only when it reads v in this world's requests at least as often (per request) as it would
+        write v where it is wrong in any other world's requests (per request of that world): co[g][v] / N_own >= (occurrences of g in
+        world w's requests whose gold lacks v) / N_w for every other world w. No threshold: each world weighs the same."""
+        return all(co[g][v] * N_g[lab] >= (occ_g[lab][g] - co_g[lab][(g, v)]) * N_own for lab in N_g) if N_g and not pooled else True
     V = {}
     same = val_sub() == "value"
     def refines(g, v, kept):
@@ -454,32 +523,36 @@ def learn_values(reqs, min_count, min_prec):
         if not kept or any(V[s] == v for s in kept): return False
         imp = lambda u: tot[v] and both[(v, u)] / tot[v] >= min_prec and tot[v] < tot[u]
         if not any(imp(V[s]) for s in kept): return False
-        return all(imp(V[s]) or not (dn(V[s]) and co[g][V[s]] / dn(V[s]) >= min_prec) for s in kept)
+        return all(imp(V[s]) or not (dn(V[s]) and (co[g][V[s]] + sc * co_n[g][V[s]]) / dn(V[s]) >= min_prec) for s in kept)
     for n in (1, 2, 3):
         for g, c in co.items():
             if len(g.split()) != n: continue
             if specific:   # VAL_PICK=specific: the most specific of the values that pass the bars
-                den_of = lambda u: occ_k[g][value_kind(u)] if per_event else occ[g]
-                ok = [u for u, k in c.items() if k >= min_count and den_of(u) and k / den_of(u) >= min_prec]
+                den_of = lambda u: occ_k[g][value_kind(u)] if per_event else occ[g] + sc * occ_n[g]
+                ok = [u for u, k in c.items() if k >= min_count and den_of(u) and (k + sc * co_n[g][u]) / den_of(u) >= min_prec and foreign_ok(g, u)]
                 if not ok: continue
                 v = min(ok, key=lambda u: (tot[u], u))
             else:
                 v, k = c.most_common(1)[0]
-                den = occ_k[g][value_kind(v)] if per_event else occ[g]
-                if k < min_count or k / den < min_prec: continue
+                den = occ_k[g][value_kind(v)] if per_event else occ[g] + sc * occ_n[g]
+                if k < min_count or (k + sc * co_n[g][v]) / den < min_prec or not foreign_ok(g, v): continue
             ws = g.split()
             subs = [" ".join(ws[i:i + j]) for j in range(1, n) for i in range(n - j + 1)]
-            dn = lambda u: occ_k[g][value_kind(u)] if per_event else occ[g]
+            dn = lambda u: occ_k[g][value_kind(u)] if per_event else occ[g] + sc * occ_n[g]
             # a shorter n-gram already explains it (VAL_SUB=value: when it gives the same value, or when its own value is still read
             # right inside g, with the same precision bar: "circles near" -> circles must not swallow "near" -> next_to)
             if specific and refines(g, v, [s for s in subs if s in V]): V[g] = v; continue
-            if any(s in V and (not same or V[s] == v or (dn(V[s]) and c[V[s]] / dn(V[s]) >= min_prec)) for s in subs): continue
+            if any(s in V and (not same or V[s] == v or (dn(V[s]) and (c[V[s]] + sc * co_n[g][V[s]]) / dn(V[s]) >= min_prec)) for s in subs): continue
             V[g] = v
     return V
 
 
-def learn_triggers(reqs, chatter, V, min_count, share, min_prec, value_tokens):
+def learn_triggers(reqs, chatter, V, min_count, share, min_prec, value_tokens, neg=None):
+    """neg (FRONT_NEG=1; default None: as before): the requests of the other worlds; every occurrence of a rule's phrase in their spans, in
+    the rule's context, is a false positive of the rule (it would put this world's action token into another world's request), weighed
+    by own requests / other requests (the other worlds together count as much as this world; learn_values)."""
     new = v2()   # CTX2 (second token to the left) and NAMEPH (name-initial pattern rules), see the docstring
+    guard = val_guard("keep"); kvc = collections.defaultdict(collections.Counter)   # VAL_GUARD=1: key -> value token -> requests whose gold carries it
     tp = collections.defaultdict(collections.Counter); phrases = set(); spans = []
     def keys(ph, toks, pos, L):
         p = ctx(toks[pos - 1] if pos > 0 else None); n = ctx(toks[pos + L] if pos + L < len(toks) else None)
@@ -496,7 +569,11 @@ def learn_triggers(reqs, chatter, V, min_count, share, min_prec, value_tokens):
             pos = next((k for k in range(len(toks) - len(tt) + 1) if tt and toks[k:k + len(tt)] == tt), None)
             if pos is not None:
                 own = tt; ph = " ".join(tt); phrases.add(ph); region = (pos, pos + len(tt))
-                for key in keys(ph, toks, pos, len(tt)): tp[key][tok] += 1
+                gv = gold_values(w) if guard else ()
+                for key in keys(ph, toks, pos, len(tt)):
+                    tp[key][tok] += 1
+                    for x in tt:
+                        if x in gv: kvc[key][x] += 1
         spans.append((toks, tok, own, region))
     chat = [apply_values([x[0] for x in tokenize(s, names)[0]], V) for s, names in chatter]
     if new: chat = [pform(t) for t in chat]
@@ -514,17 +591,32 @@ def learn_triggers(reqs, chatter, V, min_count, share, min_prec, value_tokens):
                         if redundant and region and "NAME" in pt and not (region[0] <= i < region[1]): occ_red[(key, ev)] += 1
     for toks, ev, own, region in spans: scan(toks, lambda key: occ[key].update([ev]), own, region, ev)
     for toks in chat: scan(toks, lambda key: occ_c.update([key]))
+    occ_n = collections.Counter()   # FRONT_NEG=1: occurrences in the other worlds' requests (phrases indexed by their first word)
+    pooled = bool(neg) and set(g for _, g in neg) == {"other"}
+    sc = len(reqs) / len(neg) if neg and pooled else 0   # weighed so that the other worlds together count as much as this world (as learn_values)
+    occ_g, N_g, N_own = collections.defaultdict(collections.Counter), neg_rate(neg or ()), len(reqs)   # FRONT_NEG=<grouping>: per other world
+    if neg:
+        by_first = collections.defaultdict(list)
+        for ph in phrases: by_first[ph.split()[0]].append(ph.split())
+        for (m, w, sp, names), lab in neg:
+            toks = apply_values([x[0] for x in tokenize(sp, names)[0]], V)
+            if new: toks = pform(toks)
+            for i, t in enumerate(toks):
+                for pt in by_first.get(t, ()):
+                    if toks[i:i + len(pt)] == pt: (occ_n if pooled else occ_g[lab]).update(keys(" ".join(pt), toks, i, len(pt)))
     rules = []
     for key, c in tp.items():
         n = sum(c.values()); tok, k = c.most_common(1)[0]
-        fp = occ_c[key] + sum(v for e, v in occ[key].items() if e != tok) + occ_red[(key, tok)]   # REDUNDANT: pattern rules also lose where a span already has its own trigger
+        fp = occ_c[key] + sum(v for e, v in occ[key].items() if e != tok) + occ_red[(key, tok)] + sc * occ_n[key]   # REDUNDANT: pattern rules also lose where a span already has its own trigger
         prec = n / (n + fp)
-        if n >= min_count and k / n >= share and prec >= min_prec:
+        # FRONT_NEG=<grouping>: the rule fires for its event in this world's requests at least as often (per request) as it fires in any
+        # other world's requests (per request of that world); each world weighs the same, no threshold
+        if n >= min_count and k / n >= share and prec >= min_prec and all(k * N_g[lab] >= occ_g[lab][key] * N_own for lab in N_g if not pooled):
             e = {"p": key[0], "prev": key[1], "next": key[2], "tok": tok, "n": n, "prec": round(prec, 3)}
             if key[3] != "*": e["prev2"] = key[3]
             if "NAME" in key[0].split(): e["ins"] = True
             else:
-                kv = [x for x in key[0].split() if x in value_tokens]
+                kv = [x for x in key[0].split() if x in value_tokens and (not guard or kvc[key][x] >= min_count)]
                 if kv: e["keep"] = kv
             rules.append(e)
     spec = lambda e: (e["prev"] != "*") + (e["next"] != "*") + (e.get("prev2", "*") != "*")
@@ -535,24 +627,29 @@ def learn_triggers(reqs, chatter, V, min_count, share, min_prec, value_tokens):
 DEFAULTS = {"seg_epochs": 5, "val_min_count": 2, "val_min_prec": 0.7, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}
 
 
-def learn(msgs, params=None, keep=None):
+def learn(msgs, params=None, keep=None, neg=None):
     """keep (default None: every request and the text outside the spans, exactly as before): a function wire -> bool. With it the value
     n-grams and the trigger rules are learned ONLY from the requests it keeps (a micro-world's own rows, msg_to_world.py FRONT_ROWS=world):
     the text outside the spans and the requests of other events are not read, so a rule's precision is counted inside those rows only.
     The names of every wire of the message still count as names (the tokenization of the rows is the same either way)."""
     P = dict(DEFAULTS, **(params or {}))
     reqs, chatter = requests(msgs)
-    if keep is not None: reqs, chatter = [r for r in reqs if keep(r[1])], []
-    V = learn_values(reqs, P["val_min_count"], P["val_min_prec"])
+    negr = None
+    if keep is not None:
+        if neg is not None: negr = [(r, neg(r[1])) for r in reqs if not keep(r[1]) and neg(r[1]) is not None]   # FRONT_NEG: the other worlds' requests, labelled
+        reqs, chatter = [r for r in reqs if keep(r[1])], []
+    V = learn_values(reqs, P["val_min_count"], P["val_min_prec"], neg=negr)
     vt = set(value_kinds())
-    T = learn_triggers(reqs, chatter, V, P["trig_min_count"], P["trig_share"], P["trig_min_prec"], vt)
+    T = learn_triggers(reqs, chatter, V, P["trig_min_count"], P["trig_share"], P["trig_min_prec"], vt, neg=negr)
     # the BIO tagger (train_segmenter) is NOT part of the pipeline (owner's decision, 2026-10-31); it is trained only on request, as a
     # labelled reference: FRONT_TAGGER=1
     S = train_segmenter(msgs, P["seg_epochs"]) if os.environ.get("FRONT_TAGGER") == "1" else {}
     return {"about": "front.json: the learned front end of the VSS world `real` (training/sketch/front.py); learned from " + str(len(msgs)) + " training messages",
             "params": P, "values": dict(sorted(V.items())), "triggers": T, "segmenter": dict(sorted(S.items())), **({"v2": ["MASK", "CTX2", "NAMEPH"]} if v2() else {}),
             **({"value_learning": {k: os.environ[k] for k in ("VAL_PREC", "VAL_SUB", "VAL_PICK") if os.environ.get(k)}}
-               if any(os.environ.get(k) for k in ("VAL_PREC", "VAL_SUB", "VAL_PICK")) else {})}
+               if any(os.environ.get(k) for k in ("VAL_PREC", "VAL_SUB", "VAL_PICK")) else {}),
+            **({"round2": {k: os.environ[k] for k in ("FRONT_NEG", "VAL_GUARD") if os.environ.get(k)}, **({"negative_requests": len(negr)} if negr is not None else {})}
+               if any(os.environ.get(k) for k in ("FRONT_NEG", "VAL_GUARD")) else {})}
 
 
 # The training folders, in one place. DATA=old (or unset): the first two (exactly the original behaviour); DATA=all: all five.

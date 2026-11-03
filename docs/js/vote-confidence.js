@@ -9,14 +9,15 @@
 //     confidence from two logistic parts ("sop" when SOP-BERT's reading is executed, "vss" otherwise);
 //   - the level "vote3_rule": no weights, execute when all three agree.
 // The model is docs/model/confidence/vote3.json (written by training/sketch/confidence3/fit3.mjs EXPORT=1); training/sketch/
-// test_vote_confidence.mjs checks this code against the script. The demo (docs/js/ui.js) uses columnVss for the VSS tab, columnSop for the
-// SOP-BERT tab and vote3 for the "3 readers" tab, always with opts.agreement = "engine" (RESULT.md section 5: the engine-true equivalence
+// test_vote_confidence.mjs checks this code against the script. The demo (docs/js/ui.js) uses columnVss for the VSS tab and columnSop for the
+// SOP-BERT tab (vote3 is not used by the page since the "3 readers" tab was removed, owner 2026-11-03 09:30: VSS-BERT measured better; it
+// stays here for the parity test of the file's vote3 column), always with opts.agreement = "engine" (RESULT.md section 5: the engine-true equivalence
 // everywhere; it is what logic.js does, and on the calibration part it changes no pair). The parity test calls them without opts (the
 // file's own agreement). agreementWords() and ownSpec() give the plain-words reasons of a request that is not executed.
 import { pairValue, percentile, bertEdges } from "./combined-confidence.js";
 
 export const FILE = "confidence/vote3.json";
-export const LEVELS = ["cost5", "cost", "cost20"], DEFAULT_LEVEL = "cost";
+export const LEVELS = ["cost1", "cost2", "cost5", "cost", "cost20"], DEFAULT_LEVEL = "cost";   // one confident mistake = 1, 2, 5, 10, 20 right answers
 
 /** the requests whose target list logic.js takes as a set of shapes, where no target = every shape (alRun): arrange (not with a template:
  *  a template, and a tree / radial of shapes without links, uses the order given), distribute, align with a direction, and the whole-drawing

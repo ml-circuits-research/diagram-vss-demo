@@ -355,11 +355,11 @@ export class Composer {
 
 // ---------------------------------------------------------------- the cut shared by the three readers (owner's decision 2026-11-02)
 /** The cutting strategies of the demo's setting: every reader (Rules, VSS, Neural) reads the units of ONE cut.
- *  rules: the rules' segmenter (logic.js rulesCut, the pieces located in the text); vss: the world cutter (cutter_worlds7s.json, the
+ *  rules: the rules' segmenter (logic.js rulesCut, the pieces located in the text); vss: the world cutter (cutter_worlds8s.json, the
  *  composer's cutter); bert: the span head of the joint neural model (neural.js NeuralKit.cut), only when the loaded model has one. */
 export const CUT_STRATEGIES = [
   { id: "rules", label: "Rules segmenter", about: "hand-written: sentences, then a comma or “and” before a verb, coordinated names, one clause per created object (docs/js/logic.js)" },
-  { id: "vss", label: "VSS cutter", about: "a learned token tagger B-<world> / I / O trained on the annotated request spans (docs/model/micro/cutter_worlds7s.json); it also names each request’s candidate worlds" },
+  { id: "vss", label: "VSS cutter", about: "a learned token tagger B-<world> / I / O trained on the annotated request spans (docs/model/micro/cutter_worlds8s.json); it also names each request’s candidate worlds" },
   { id: "bert", label: "BERT cutter", about: "the span head of the joint neural model: B / I / O per word over the whole message (training/neural/finetune_roles.py)" },
 ];
 /** The default cut: the strategy with the best measured scores (training/sketch/cut_bench.mjs, 2026-11-02, right / wrong / not done % +extra).

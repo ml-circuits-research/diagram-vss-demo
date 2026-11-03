@@ -1,0 +1,121 @@
+# annotation of texts/texts_04.jsonl (same format as annot_01.txt)
+@or2-0301
+undo | undo | c undo | undo
+Grass to Sheep, Sheep to Wolf, as a chain | to | c connect from=Grass,Sheep,Wolf; pairing=chain | connect Grass, Sheep and Wolf in a chain
+@or2-0302
+I want a dashed line between Farmer and Sheep | line between | c connect from=Farmer; to=Sheep; style=dashed; arrow=none | draw a dashed line between Farmer and Sheep
+Sheep white | white | c set target=Sheep; color=white | make Sheep white
+Wolf gray | gray | c set target=Wolf; color=gray | make Wolf gray
+@or2-0303
+Grass should be lime not green | should be | c set target=Grass; color=lime | make Grass lime
+and smaller | smaller | c resize target=Grass | make Grass smaller
+@or2-0304
+Order to Bake, Bake to Pack, Pack to Ship | to | c connect from=Order,Bake,Pack,Ship; pairing=chain | connect Order, Bake, Pack and Ship in a chain
+Invoice goes off Order too | goes off | c connect from=Order; to=Invoice | connect Order to Invoice
+@or2-0305
+make it orange | make | c set target=Pack; color=orange | make Pack orange
+@or2-0306
+Ship should sit at the far right | should sit | c move target=Ship; position=right | put Ship on the right
+Invoice under Order | under | c move target=Invoice; position=below; anchor=Order | put Invoice under Order
+@or2-0307
+Undo that | Undo | c undo | undo
+label the arrow from Order to Invoice "bill" | label | c label from=Order; to=Invoice; label=bill | label the arrow from Order to Invoice "bill"
+@or2-0308
+make it red and big | make | c set target=Results; color=red; size=large | make Results red and big
+@or2-0309
+just put it at the bottom left | put | c move target=Refs; position=bottomLeft | put Refs at the bottom left
+Methods teal | teal | c set target=Methods; color=teal | make Methods teal
+Intro teal | teal | c set target=Intro; color=teal | make Intro teal
+@or2-0310
+Intro to Methods to Results to Discussion, one after another | to | c connect from=Intro,Methods,Results,Discussion; pairing=chain | connect Intro, Methods, Results and Discussion in a chain
+How many arrows is that now? | How many | q count kind=edge | how many arrows are there
+@or2-0311
+I want Discussion bigger. No, bigger than that. ok whatever, make it huge | I want | c set target=Discussion; size=huge | make Discussion huge
+@or2-0312
+Pi a small green circle | circle | c set target=Pi; size=small; color=green; shape=circle | make Pi a small green circle
+Connect it to Switch | Connect | c connect from=Pi; to=Switch | connect Pi to Switch
+@or2-0313
+Router → Switch, Switch → Nas | → | c connect from=Router,Switch,Nas; pairing=chain | connect Router, Switch and Nas in a chain
+Switch → Laptop. dotted for the Laptop one | → | c connect from=Switch; to=Laptop; style=dotted | connect Switch to Laptop with a dotted arrow
+@or2-0314
+Move it right of Switch | Move | c move target=Nas; position=rightOf; anchor=Switch | move Nas to the right of Switch
+is Nas bigger than Pi? | is | q check target=Nas; comparison=bigger; anchor=Pi | is Nas bigger than Pi
+@or2-0315
+Reverse it | Reverse | c reverse from=Switch; to=Laptop | reverse the arrow from Switch to Laptop
+Router blue | blue | c set target=Router; color=blue | make Router blue
+@or2-0316
+Budget in the middle | in the middle | c move target=Budget; position=center | move Budget to the center
+gold | gold | c set target=Budget; color=gold | make Budget gold
+Everything else around it | around | c arrange target=Venue,Catering,Music,Guests; layout=circle; anchor=Budget | arrange Venue, Catering, Music and Guests in a circle around Budget
+@or2-0317
+Guests to Budget with a two-way arrow and label it "headcount" | to | c connect from=Guests; to=Budget; arrow=both; label=headcount | connect Guests to Budget with a two-way arrow labelled "headcount"
+@or2-0318
+Music purple | purple | c set target=Music; color=purple | make Music purple
+Catering orange | orange | c set target=Catering; color=orange | make Catering orange
+Venue... pink? yes pink | pink | c set target=Venue; color=pink | make Venue pink
+@or2-0319
+just make it small | make | c set target=Music; size=small | make Music small
+@or2-0320
+Triage is a decision so diamond | diamond | c set target=Triage; shape=diamond | make Triage a diamond
+L1 and L2 rectangles, blue | rectangles | c set target=L1,L2; shape=rectangle; color=blue | -
+Close green circle | circle | c set target=Close; color=green; shape=circle | make Close a green circle
+@or2-0321
+Ticket to Triage | to | c connect from=Ticket; to=Triage | connect Ticket to Triage
+Triage to L1 and Triage to L2 | to | c connect from=Triage; to=L1,L2 | connect Triage to L1 and L2
+Both L1 and L2 to Close | to | c connect from=L1,L2; to=Close | -
+@or2-0322
+the arrow from Triage to L2 should be dashed | should be | c set from=Triage; to=L2; style=dashed | make the arrow from Triage to L2 dashed
+@or2-0323
+can I add notes to arrows? like a label? | can I | q help aspect=can; topic=label | can I label arrows?
+@or2-0324
+L2 under L1 | under | c move target=L2; position=below; anchor=L1 | put L2 under L1
+and Close at the bottom | at the bottom | c move target=Close; position=bottom | move Close to the bottom
+tidy up after | tidy up | c improve | tidy up
+@or2-0325
+Sun big yellow circle | circle | c set target=Sun; size=large; color=yellow; shape=circle | make Sun a big yellow circle
+the planets small | small | c set target=Mercury,Venus,Earth,Mars; size=small | make Mercury, Venus, Earth and Mars small
+Earth blue | blue | c set target=Earth; color=blue | make Earth blue
+Mars red | red | c set target=Mars; color=red | make Mars red
+@or2-0326
+put them in a row from Sun to Mars | in a row | c arrange target=Sun,Mercury,Venus,Earth,Mars; layout=row | arrange Sun, Mercury, Venus, Earth and Mars in a row
+@or2-0327
+Venus orange... no, more like gold | orange | c set target=Venus; color=gold | make Venus gold
+Mercury gray | gray | c set target=Mercury; color=gray | make Mercury gray
+@or2-0328
+is Earth right of Venus? | is | q check target=Earth; position=rightOf; anchor=Venus | is Earth right of Venus
+which one is the biggest? | biggest | q extreme superlative=biggest | which one is the biggest
+@or2-0329
+Player green | green | c set target=Player; color=green | make Player green
+Enemy red | red | c set target=Enemy; color=red | make Enemy red
+Boss dark red... well just red, and huge | red | c set target=Boss; color=red; size=huge | make Boss red and huge
+@or2-0330
+Player to Shop, Player to Item | to | c connect from=Player; to=Shop,Item | connect Player to Shop and Item
+Enemy to Player dashed | to | c connect from=Enemy; to=Player; style=dashed | connect Enemy to Player with a dashed arrow
+@or2-0331
+Shop top right | top right | c move target=Shop; position=topRight | move Shop to the top right
+Item next to Shop | next to | c move target=Item; position=near; anchor=Shop | put Item next to Shop
+Boss bottom | bottom | c move target=Boss; position=bottom | move Boss to the bottom
+@or2-0332
+remove the one from Enemy to Player | remove | c disconnect from=Enemy; to=Player | remove the arrow from Enemy to Player
+@or2-0333
+make start green? | make | c set target=Start; color=green | make Start green
+done red | red | c set target=Done; color=red | make Done red
+@or2-0334
+connect done back to start, dashed | connect | c connect from=Done; to=Start; style=dashed | connect Done to Start with a dashed arrow
+@or2-0335
+undo | undo | c undo | undo
+make the arrow from check to done thicker | make | c resize from=Check; to=Done | make the line between Check and Done thicker
+@or2-0336
+Check should be the diamond | should be | c set target=Check; shape=diamond | make Check a diamond
+@or2-0337
+redo the last thing I undid | redo | c redo | redo
+make everything bigger | make | c resize target=mention(quantifier=all) | make everything bigger
+@or2-0338
+bring them closer | closer | c respace comparison=smaller; target=mention(quantifier=all) | move everything closer together
+align them vertically | align | c align axis=vertical; target=mention(quantifier=all) | align all shapes vertically
+@or2-0339
+where's check? | where's | q property target=Check; property=position | where is Check
+what colour is it? | what colour | q property target=Check; property=color | what color is Check
+@or2-0340
+outline on process: red | outline | c set target=Process; outline=red | give Process a red outline
+outline on done: none | outline | c set target=Done; outline=none | -

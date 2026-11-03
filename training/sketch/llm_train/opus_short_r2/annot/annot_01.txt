@@ -1,0 +1,177 @@
+# annotation of texts/texts_01.jsonl. One line per request: span | trigger | c|q|r|f <action/ask> key=value; key=value | paraphrase the Rules read (or -)
+@or2-0001
+Draft blue | blue | c set target=Draft; color=blue | make Draft blue
+@or2-0002
+start big | big | c set target=Start; size=large | make Start big
+@or2-0003
+Process a diamond | diamond | c set target=Process; shape=diamond | make Process a diamond
+@or2-0004
+check: hexagon | hexagon | c set target=Check; shape=hexagon | make Check a hexagon
+@or2-0005
+Done → gold | → | c set target=Done; color=gold | make Done gold
+@or2-0006
+Check below Start | below | c move target=Check; position=below; anchor=Start | move Check below Start
+@or2-0007
+process to the right of check | to the right of | c move target=Process; position=rightOf; anchor=Check | move Process to the right of Check
+@or2-0008
+start purple | purple | c set target=Start; color=purple | make Start purple
+done orange | orange | c set target=Done; color=orange | make Done orange
+@or2-0009
+start left | left | c move target=Start; position=left | put Start on the left
+process center | center | c move target=Process; position=center | move Process to the center
+done right | right | c move target=Done; position=right | put Done on the right
+@or2-0010
+Done tiny | tiny | c set target=Done; size=tiny | make Done tiny
+@or2-0011
+red. no wait, orange | red | c set color=orange | -
+@or2-0012
+make check red. no wait, make it orange | make | c set target=Check; color=orange | make Check orange
+@or2-0013
+start a circle, actually no, a square | circle | c set target=Start; shape=square | make Start a square
+@or2-0014
+Done in navy... no, teal | navy | c set target=Done; color=teal | make Done teal
+@or2-0015
+process bigger. hmm no, smaller | bigger | c resize target=Process | make Process smaller
+@or2-0016
+undo | undo | c undo | undo
+@or2-0017
+undo | undo | c undo | undo
+@or2-0018
+go back two steps | go back | c undo count=2 | undo twice
+@or2-0019
+no border on Check | no border | c set target=Check; outline=none | -
+@or2-0020
+take the outline off done | take the outline off | c set target=Done; outline=none | -
+@or2-0021
+process: thick black outline | outline | c set target=Process; outline=black | give Process a black outline
+@or2-0022
+the outline of start should be green | should be | c set target=Start; outline=green | give Start a green outline
+@or2-0023
+how many arrows? | how many | q count kind=edge | how many arrows are there
+@or2-0024
+number of lines on the canvas | number of | q count kind=edge | how many lines are there
+@or2-0025
+call the arrow from check to done approved | call | c label from=Check; to=Done; label=approved | label the arrow from Check to Done "approved"
+@or2-0026
+the start to process arrow should say go | should say | c label from=Start; to=Process; label=go | label the arrow from Start to Process "go"
+@or2-0027
+hexagon at 400,120 called Gate | hexagon | c create shape=hexagon; name=Gate; at=400,120 | -
+@or2-0028
+Check → Done | → | c connect from=Check; to=Done | connect Check to Done
+@or2-0029
+start to process, process to check | to | c connect from=Start,Process,Check; pairing=chain | connect Start, Process and Check in a chain
+@or2-0030
+dashed line check to start | line | c connect from=Check; to=Start; style=dashed; arrow=none | draw a dashed line from Check to Start
+@or2-0031
+Router teal | teal | c set target=Router; color=teal | make Router teal
+Switch1 gray | gray | c set target=Switch1; color=gray | make Switch1 gray
+@or2-0032
+Firewall: red, big | red | c set target=Firewall; color=red; size=large | make Firewall red and big
+@or2-0033
+Modem → Router, Router → Switch1 | → | c connect from=Modem,Router,Switch1; pairing=chain | connect Modem, Router and Switch1 in a chain
+@or2-0034
+Wan above Router | above | c move target=Wan; position=above; anchor=Router | move Wan above Router
+@or2-0035
+make Lan green. wait no, lime | make | c set target=Lan; color=lime | make Lan lime
+@or2-0036
+rename Lan to Office | rename | c rename target=Lan; name=Office | rename Lan to Office
+Wan to Internet | Wan | c rename target=Wan; name=Internet | rename Wan to Internet
+@or2-0037
+connect Firewall to Router | connect | c connect from=Firewall; to=Router | connect Firewall to Router
+@or2-0038
+make it a hexagon | make | c set target=Firewall; shape=hexagon | make Firewall a hexagon
+@or2-0039
+Cache yellow | yellow | c set target=Cache; color=yellow | make Cache yellow
+Queue orange | orange | c set target=Queue; color=orange | make Queue orange
+Worker purple | purple | c set target=Worker; color=purple | make Worker purple
+@or2-0040
+Api → Cache → Db | → | c connect from=Api,Cache,Db; pairing=chain | connect Api, Cache and Db in a chain
+@or2-0041
+Worker below Queue | below | c move target=Worker; position=below; anchor=Queue | move Worker below Queue
+Cdn top left | top left | c move target=Cdn; position=topLeft | move Cdn to the top left
+@or2-0042
+just make it small | make | c set target=Cdn; size=small | make Cdn small
+@or2-0043
+undo twice | undo | c undo count=2 | undo twice
+@or2-0044
+remove the border from Queue | remove the border | c set target=Queue; outline=none | -
+@or2-0045
+what's the outline colour of Db? | what's | q property target=Db; property=outline | what is the outline of Db
+@or2-0046
+the arrow Api to Db: label it "reads" | label | c label from=Api; to=Db; label=reads | label the arrow from Api to Db "reads"
+@or2-0047
+arrows from Worker to Queue should be dotted | should be | c set from=Worker; to=Queue; style=dotted | make the arrow from Worker to Queue dotted
+@or2-0048
+Approve green | green | c set target=Approve; color=green | make Approve green
+Reject red | red | c set target=Reject; color=red | make Reject red
+Finish gray | gray | c set target=Finish; color=gray | make Finish gray
+@or2-0049
+Review a diamond, yellow | diamond | c set target=Review; shape=diamond; color=yellow | make Review a yellow diamond
+@or2-0050
+Begin → Review | → | c connect from=Begin; to=Review | connect Begin to Review
+Review → Approve and Review → Reject | → | c connect from=Review; to=Approve,Reject | connect Review to Approve and Reject
+@or2-0051
+Reject left of Approve | left of | c move target=Reject; position=leftOf; anchor=Approve | move Reject to the left of Approve
+@or2-0052
+I want Finish at the bottom | I want | c move target=Finish; position=bottom | move Finish to the bottom
+@or2-0053
+Begin round please, like a circle | round | c set target=Begin; shape=circle | make Begin a circle
+@or2-0054
+Ceo on top | on top | c move target=Ceo; position=top | move Ceo to the top
+Cfo and Cto below it | below | c move target=Cfo,Cto; position=below; anchor=Ceo | -
+@or2-0055
+Hr pink | pink | c set target=Hr; color=pink | make Hr pink
+Legal pink too | pink | c set target=Legal; color=pink | make Legal pink
+@or2-0056
+Sales to Revenue | to | c rename target=Sales; name=Revenue | rename Sales to Revenue
+@or2-0057
+change Legal into a square. sorry, a rectangle | change | c set target=Legal; shape=rectangle | make Legal a rectangle
+@or2-0058
+the Cto box bigger | bigger | c resize target=Cto | make Cto bigger
+@or2-0059
+Mom and Dad side by side | side by side | c arrange target=Mom,Dad; layout=row | -
+@or2-0060
+Alice small | small | c set target=Alice; size=small | make Alice small
+Bob small | small | c set target=Bob; size=small | make Bob small
+@or2-0061
+Grandma to Mom, Grandpa to Mom | to | c connect from=Grandma,Grandpa; to=Mom | -
+@or2-0062
+make Bob blue | make | c set target=Bob; color=blue | make Bob blue
+@or2-0063
+undo the last 3 things | undo | c undo count=3 | undo 3 times
+@or2-0064
+Idle gray | gray | c set target=Idle; color=gray | make Idle gray
+Error red | red | c set target=Error; color=red | make Error red
+Running green | green | c set target=Running; color=green | make Running green
+@or2-0065
+Paused → Running two-way | → | c connect from=Paused; to=Running; arrow=both | connect Paused to Running with a two-way arrow
+@or2-0066
+Error at the bottom right | at the bottom right | c move target=Error; position=bottomRight | move Error to the bottom right
+@or2-0067
+Stopped: octagon... ok no octagon, so a hexagon | hexagon | c set target=Stopped; shape=hexagon | make Stopped a hexagon
+@or2-0068
+label the Idle to Running arrow "start" | label | c label from=Idle; to=Running; label=start | label the arrow from Idle to Running "start"
+@or2-0069
+Idea in the middle | in the middle | c move target=Idea; position=center | move Idea to the center
+big | big | c set target=Idea; size=large | make Idea big
+@or2-0070
+Goals, Budget and Team all orange | orange | c set target=Goals,Budget,Team; color=orange | make Goals, Budget and Team orange
+@or2-0071
+Idea to Goals, Idea to Risks, Idea to Vision | to | c connect from=Idea; to=Goals,Risks,Vision | connect Idea to Goals, Risks and Vision
+@or2-0072
+Risks: red border | border | c set target=Risks; outline=red | give Risks a red border
+@or2-0073 EXCLUDE "Vision instead of Idea": Vision is already a shape on this canvas, so neither rename nor any other reading is certain
+@or2-0074
+Blocked red | red | c set target=Blocked; color=red | make Blocked red
+Deployed green | green | c set target=Deployed; color=green | make Deployed green
+@or2-0075
+Backlog left | left | c move target=Backlog; position=left | put Backlog on the left
+Deployed right | right | c move target=Deployed; position=right | put Deployed on the right
+@or2-0076
+Todo to Doing to Testing to Deployed | to | c connect from=Todo,Doing,Testing,Deployed; pairing=chain | connect Todo, Doing, Testing and Deployed in a chain
+@or2-0077
+put Blocked under Doing | put | c move target=Blocked; position=below; anchor=Doing | put Blocked under Doing
+@or2-0078
+make Doing purple | make | c set target=Doing; color=purple | make Doing purple
+@or2-0079
+how many lines are there right now? | how many | q count kind=edge | how many lines are there

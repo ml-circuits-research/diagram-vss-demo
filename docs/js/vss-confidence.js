@@ -1,8 +1,8 @@
 // vss-confidence.js: the VSS combined confidence of one produced request, the gate that executes a request only when its confidence clears
 // the threshold of a precision level, and the plain-words reasons of a request below it. Browser-ready ES module, no imports.
 //
-// The model is docs/model/confidence/vss.json: the confidence of the VSS worlds of arm VSS-G (FEEDBACK_RESULT.md), fitted on the fresh2
-// calibration part by training/sketch/fresh2/fit_report.mjs and written by fresh2/export_confidence.mjs, with the thresholds per level as
+// The model is docs/model/confidence/vss.json: the confidence of the VSS worlds of arm VSS-ALL (TRAIN_PLAN_1103.md), fitted on the fresh2 +
+// short3 calibration part by training/sketch/fresh2/fit_report.mjs (job 072, confidence3/refit.sh) and written by fresh2/export_confidence.mjs, with the thresholds per level as
 // data (readers.vss_combined.levels[L].threshold). The default level is "cost" (owner, 2026-11-02 21:24: execute only what it is sure of):
 // the threshold that maximises the cost score (one confident mistake = 10 right answers, AGENTS.md) on the out-of-fold calibration
 // confidences; its entry may instead say kind "executes everything" (threshold null: no gate is better) or "asks everything". The levels
@@ -22,11 +22,12 @@
 // every group with a pull of at least REASON_MIN (in logit units), at most REASON_MAX, and always the first one. These two numbers only
 // choose how many sentences the reply shows; they do not change any decision.
 export const REASON_MIN = 0.1, REASON_MAX = 3;
-/** the levels of the setting: "cost" (the cost-score threshold, one confident mistake = 10 right answers, the default), "cost5" (bolder:
- *  = 5) and "cost20" (more careful: = 20), chosen the same way and stored in the file (owner, 2026-11-02 22:12), the precision levels of the
+/** the levels of the setting: "cost" (the cost-score threshold, one confident mistake = 10 right answers, the default), "cost1", "cost2",
+ *  "cost5" (bolder: = 1, 2, 5; owner 2026-11-03 09:30 for 1 and 2) and "cost20" (more careful: = 20), chosen the same way and stored in the
+ *  file (owner, 2026-11-02 22:12), the precision levels of the
  *  model file, and "all" (execute everything, no gate; never the default) */
-export const LEVELS = ["cost5", "cost", "cost20", "95", "97", "99", "all"];
-export const COST_LEVELS = ["cost5", "cost", "cost20"];
+export const LEVELS = ["cost1", "cost2", "cost5", "cost", "cost20", "95", "97", "99", "all"];
+export const COST_LEVELS = ["cost1", "cost2", "cost5", "cost", "cost20"];
 export const DEFAULT_LEVEL = "cost";
 
 /** the reader's part of the model file (the file itself, or its readers.vss_combined) */
@@ -56,7 +57,7 @@ export function reachedLevels(model) {
   const lv = specOf(model).levels || {};
   return Object.keys(lv).filter((k) => /^\d+$/.test(k) && lv[k] && Number.isFinite(lv[k].threshold)).map(Number).sort((a, b) => a - b);
 }
-/** a cost level of the model file ("cost", "cost5", "cost20"), or null when the file has none */
+/** a cost level of the model file ("cost", "cost1", "cost2", "cost5", "cost20"), or null when the file has none */
 const costOf = (model, key = "cost") => { const L = (specOf(model).levels || {})[key]; return L && (Number.isFinite(L.threshold) || L.kind === "executes everything" || L.kind === "asks everything") ? L : null; };
 /** the level the gate uses for a chosen level: "all" stays "all"; "cost" stays when the file has it; a reached precision level stays; a
  *  precision level the model does not reach -> the highest reached level below it, else "cost"; else null (every request is asked) */

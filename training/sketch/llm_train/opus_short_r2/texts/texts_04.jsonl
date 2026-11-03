@@ -1,0 +1,40 @@
+{"id": "or2-0301", "domain": "food chain", "names": ["Grass", "Sheep", "Wolf", "Farmer"], "text": "Ugh I clicked something and Wolf turned into a star. undo pls. Then Grass to Sheep, Sheep to Wolf, as a chain."}
+{"id": "or2-0302", "domain": "food chain", "names": ["Grass", "Sheep", "Wolf", "Farmer"], "text": "Farmer protects the sheep so I want a dashed line between Farmer and Sheep. Sheep white, Wolf gray."}
+{"id": "or2-0303", "domain": "food chain", "names": ["Grass", "Sheep", "Wolf", "Farmer"], "text": "ok this looks good. hm, actually Grass should be lime not green. and smaller."}
+{"id": "or2-0304", "domain": "bakery", "names": ["Order", "Bake", "Pack", "Ship", "Invoice"], "text": "Our bakery flow, finally. Order to Bake, Bake to Pack, Pack to Ship. Invoice goes off Order too."}
+{"id": "or2-0305", "domain": "bakery", "names": ["Order", "Bake", "Pack", "Ship", "Invoice"], "text": "I don't like Pack being a square, make it a hexagon. Wait, keep the square but make it orange."}
+{"id": "or2-0306", "domain": "bakery", "names": ["Order", "Bake", "Pack", "Ship", "Invoice"], "text": "Ship should sit at the far right. Invoice under Order. thanks a lot!"}
+{"id": "or2-0307", "domain": "bakery", "names": ["Order", "Bake", "Pack", "Ship", "Invoice"], "text": "Deleted Bake by accident lol. Undo that. And label the arrow from Order to Invoice \"bill\"."}
+{"id": "or2-0308", "domain": "thesis", "names": ["Intro", "Methods", "Results", "Discussion", "Refs"], "text": "Supervisor said the structure is fine. Results needs to stand out though, make it red and big."}
+{"id": "or2-0309", "domain": "thesis", "names": ["Intro", "Methods", "Results", "Discussion", "Refs"], "text": "Refs isn't really part of the flow, just put it at the bottom left. Methods teal, Intro teal."}
+{"id": "or2-0310", "domain": "thesis", "names": ["Intro", "Methods", "Results", "Discussion", "Refs"], "text": "Intro to Methods to Results to Discussion, one after another. How many arrows is that now?"}
+{"id": "or2-0311", "domain": "thesis", "names": ["Intro", "Methods", "Results", "Discussion", "Refs"], "text": "I want Discussion bigger. No, bigger than that. ok whatever, make it huge."}
+{"id": "or2-0312", "domain": "home lab", "names": ["Pi", "Nas", "Switch", "Router", "Laptop"], "text": "Got a new Pi for the home lab. Pi a small green circle please. Connect it to Switch."}
+{"id": "or2-0313", "domain": "home lab", "names": ["Pi", "Nas", "Switch", "Router", "Laptop"], "text": "Router → Switch, Switch → Nas, Switch → Laptop. dotted for the Laptop one."}
+{"id": "or2-0314", "domain": "home lab", "names": ["Pi", "Nas", "Switch", "Router", "Laptop"], "text": "Hmm Nas is in a weird spot. Move it right of Switch. Also is Nas bigger than Pi?"}
+{"id": "or2-0315", "domain": "home lab", "names": ["Pi", "Nas", "Switch", "Router", "Laptop"], "text": "The Laptop arrow is wrong way round. Reverse it. Router blue btw."}
+{"id": "or2-0316", "domain": "wedding plan", "names": ["Venue", "Catering", "Music", "Guests", "Budget"], "text": "So many things. Budget in the middle, gold. Everything else around it."}
+{"id": "or2-0317", "domain": "wedding plan", "names": ["Venue", "Catering", "Music", "Guests", "Budget"], "text": "Guests to Budget with a two-way arrow and label it \"headcount\"."}
+{"id": "or2-0318", "domain": "wedding plan", "names": ["Venue", "Catering", "Music", "Guests", "Budget"], "text": "Music purple, Catering orange. Venue... pink? yes pink."}
+{"id": "or2-0319", "domain": "wedding plan", "names": ["Venue", "Catering", "Music", "Guests", "Budget"], "text": "remove Music, we're using a playlist. no wait, keep it, just make it small."}
+{"id": "or2-0320", "domain": "support flow", "names": ["Ticket", "Triage", "L1", "L2", "Close"], "text": "Triage is a decision so diamond. L1 and L2 rectangles, blue. Close green circle."}
+{"id": "or2-0321", "domain": "support flow", "names": ["Ticket", "Triage", "L1", "L2", "Close"], "text": "Ticket to Triage, then Triage to L1 and Triage to L2. Both L1 and L2 to Close."}
+{"id": "or2-0322", "domain": "support flow", "names": ["Ticket", "Triage", "L1", "L2", "Close"], "text": "the arrow from Triage to L2 should be dashed, escalations are rare."}
+{"id": "or2-0323", "domain": "support flow", "names": ["Ticket", "Triage", "L1", "L2", "Close"], "text": "can I add notes to arrows? like a label?"}
+{"id": "or2-0324", "domain": "support flow", "names": ["Ticket", "Triage", "L1", "L2", "Close"], "text": "L2 under L1. and Close at the bottom. tidy up after."}
+{"id": "or2-0325", "domain": "solar system", "names": ["Sun", "Mercury", "Venus", "Earth", "Mars"], "text": "Sun big yellow circle. the planets small. Earth blue, Mars red."}
+{"id": "or2-0326", "domain": "solar system", "names": ["Sun", "Mercury", "Venus", "Earth", "Mars"], "text": "put them in a row from Sun to Mars please, left to right"}
+{"id": "or2-0327", "domain": "solar system", "names": ["Sun", "Mercury", "Venus", "Earth", "Mars"], "text": "Venus orange... no, more like gold. Mercury gray."}
+{"id": "or2-0328", "domain": "solar system", "names": ["Sun", "Mercury", "Venus", "Earth", "Mars"], "text": "is Earth right of Venus? and which one is the biggest?"}
+{"id": "or2-0329", "domain": "game design", "names": ["Player", "Enemy", "Boss", "Item", "Shop"], "text": "Player green, Enemy red, Boss dark red... well just red, and huge."}
+{"id": "or2-0330", "domain": "game design", "names": ["Player", "Enemy", "Boss", "Item", "Shop"], "text": "Player to Shop, Player to Item. Enemy to Player dashed."}
+{"id": "or2-0331", "domain": "game design", "names": ["Player", "Enemy", "Boss", "Item", "Shop"], "text": "Shop top right. Item next to Shop. Boss bottom."}
+{"id": "or2-0332", "domain": "game design", "names": ["Player", "Enemy", "Boss", "Item", "Shop"], "text": "that's too many arrows honestly. remove the one from Enemy to Player."}
+{"id": "or2-0333", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "ok trying this tool for the first time. make start green? and done red."}
+{"id": "or2-0334", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "nice. now connect done back to start, dashed"}
+{"id": "or2-0335", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "wait that's ugly. undo. make the arrow from check to done thicker instead"}
+{"id": "or2-0336", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "I'd like Process to be a diamond. no actually Check should be the diamond, Process stays."}
+{"id": "or2-0337", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "redo the last thing I undid, then make everything bigger"}
+{"id": "or2-0338", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "everything is too spread out, bring them closer. and align them vertically"}
+{"id": "or2-0339", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "where's check? and what colour is it?"}
+{"id": "or2-0340", "domain": "default drawing", "names": ["Start", "Process", "Check", "Done"], "text": "outline on process: red. outline on done: none"}

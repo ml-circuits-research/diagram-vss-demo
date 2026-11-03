@@ -97,7 +97,8 @@ def rules_score(path, cost=10):   # the Rules execute everything: (right - cost 
         if cal(x["id"]): continue
         g += x["gold"]; r += sum(p["o"] == "right" for p in x["rules"]); bad += sum(p["o"] != "right" for p in x["rules"])
     return 100 * (r - cost * bad) / g if g else float("nan"), 100 * r / g if g else float("nan")
-f = lambda x: f"{x:.1f}"; ci = lambda c: f"[{f(c[0])}, {f(c[1])}]"
+f = lambda x: "-" if x is None else f"{x:.1f}"; ci = lambda c: f"[{f(c[0])}, {f(c[1])}]"
+pct = lambda x: "-" if x is None else f"{100 * x:.1f}%"
 print("# TRAIN_PLAN_1103.md: new (arm ALL) vs shipped readers, cost score on the test part\n")
 print("Cost score = (requests done right - 10 x (executed wrong + extras executed)) per 100 requested actions; each learned reader executes only")
 print("above its own cost-score threshold, fitted out of fold on the situation's calibration part (int(sha256(id),16) % 3 == 0); 95% intervals")
@@ -107,7 +108,7 @@ print("|---|---|---|---|---|---|---|---|")
 for sit in ("fresh2", "short3"):
     V = json.load(open(f"{R}/{sit}/verdicts.json")); a = V["arms"]
     rs, rr = rules_score(f"{R}/{sit}/G/records/rules_own.jsonl")
-    cell = lambda k: f"{f(a[k]['score'])} {ci(a[k]['ci'])}<br>right {f(100 * a[k]['done_right'])}%, conf. wrong {f(100 * a[k]['conf_wrong'])}%"
+    cell = lambda k: f"{f(a[k]['score'])} {ci(a[k]['ci'])}<br>right {pct(a[k]['done_right'])}, conf. wrong {pct(a[k]['conf_wrong'])}" + (" (asks everything)" if a[k].get('threshold') == "asks everything" else "")
     print(f"| {sit} ({V['test_messages']} / {V['test_requests']}) | {cell('VSS-G')} | {cell('VSS-T')} | {cell('BERT-G')} | {cell('BERT-T')} | {f(rs)}<br>right {f(rr)}% | "
           f"{'+' if V['diff']['vss']['point'] >= 0 else ''}{f(V['diff']['vss']['point'])} {ci(V['diff']['vss']['ci'])} | {'+' if V['diff']['bert']['point'] >= 0 else ''}{f(V['diff']['bert']['point'])} {ci(V['diff']['bert']['ci'])} |")
 print("\nA difference whose interval lies above 0 is a gain shown; an interval below 0 is a loss shown; otherwise not shown either way.")
