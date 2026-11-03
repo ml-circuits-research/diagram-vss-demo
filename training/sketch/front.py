@@ -38,9 +38,29 @@ KEY_KIND = {"shape": "SHAPE", "color": "COLOR", "notColor": "NOTCOLOR", "size": 
             "style": "STYLE", "arrow": "ARROW", "axis": "AXIS", "layout": "LAYOUT", "pairing": "PAIR", "superlative": "SUPER", "recency": "RECENT"}
 NUM_KEYS = ("count", "distance")
 
+# LEGEND_EXT=1 (off by default; generate.py LEGEND_EXT, TRAIN_PLAN_1103.md): the value tables of the keys added on 2026-11-02, read from the
+# legend itself (legend_ext/legend_values.json, exported from docs/js/logic.js by legend_ext/export_legend_values.mjs). The tokens of the
+# new enum keys carry a prefix (PREFIX), because their values are words that other keys or events already use (template tree / layout
+# tree, topic connect / the verb connect, topic red / the colour red, fill none / arrow none); a camel-case value is written with "_"
+# before the capital (topic toFront -> tp_to_front; docs/js/vss-adapter.js extValue is the inverse). shape gains `text` (plural texts),
+# layout tree / layers / radial / organic, arrow forward; width / height are numbers; label="" (remove a label) is the token no_label.
+LEGEND_EXT = os.environ.get("LEGEND_EXT") == "1"
+PREFIX = {"template": "tpl_", "scheme": "sch_", "fill": "fill_", "layer": "layer_", "topic": "tp_", "aspect": "asp_", "property": "prop_", "kind": "kind_"}
+if LEGEND_EXT:
+    SHAPES = dict(SHAPES, text="texts")
+    KEY_KIND = dict(KEY_KIND, template="TEMPLATE", scheme="SCHEME", fill="FILL", layer="LAYER", topic="TOPIC", aspect="ASPECT", property="PROP", kind="KIND")
+    NUM_KEYS = NUM_KEYS + ("width", "height")
+    _LV = json.load(open(os.path.join(HERE, "legend_ext", "legend_values.json")))["questions"]
+
+
+def ext_token(key, v):
+    """LEGEND_EXT: the world token of a value of a new enum key (PREFIX + the value, camel case as _x)"""
+    return PREFIX[key] + re.sub(r"([A-Z])", lambda m: "_" + m.group(1).lower(), str(v))
+
 
 def value_token(key, v, plural=False):
     v = str(v)
+    if LEGEND_EXT and key in PREFIX: return ext_token(key, v)
     if key == "shape": return SHAPES.get(v, v) if plural else v
     if key == "notColor": return "not_" + v
     if key == "position": return REL.get(v) or REGION.get(v) or v
@@ -59,12 +79,18 @@ def value_kinds():
             "direction": ["left", "right", "up", "down"], "style": ["dashed", "dotted", "solid"], "arrow": ["both", "none"], "axis": ["horizontal", "vertical"],
             "layout": ["row", "column", "grid", "circle"], "pairing": ["chain", "next", "all"], "recency": ["newest", "oldest"],
             "superlative": ["biggest", "smallest", "leftmost", "rightmost", "topmost", "bottommost", "mostConnected", "leastConnected", "closest", "farthest"]}
+    if LEGEND_EXT:   # the legend's own values of the new keys and the new values of old keys (legend_values.json)
+        vals["shape"] = vals["shape"] + ["text"]
+        vals["layout"] = vals["layout"] + [v for v in _LV["layout"]["values"] if v not in vals["layout"]]
+        vals["arrow"] = vals["arrow"] + [v for v in _LV["arrow"]["values"] if v not in vals["arrow"]]
+        for k in PREFIX: vals[k] = list(_LV[k]["values"])
     out = {}
     for k, vs in vals.items():
         for v in vs:
             out.setdefault(value_token(k, v), KEY_KIND[k])
             if k == "shape": out.setdefault(value_token(k, v, True), "SHAPE")
     out["all"] = "QUANT"   # the legend's quantifier=all (mentions: "every square", "all the boxes")
+    if LEGEND_EXT: out["no_label"] = "NOLABEL"   # label="" (remove a label: LABEL_CONVENTIONS.md, arrow labels)
     return out
 
 
@@ -292,7 +318,10 @@ def mention_kv(v):
 def gold_values(w):
     a = w["args"]; out = set()
     plural = (w["type"] == "question" and a.get("ask") in ("count", "list", "exists")) or bool(a.get("count") and str(a.get("count")) != "1")
+    if LEGEND_EXT and a.get("label") == "": out.add("no_label")
+    if LEGEND_EXT and a.get("quantifier") == "all": out.add("all")   # every arrow (quantifier=all outside a mention)
     for k, v in a.items():
+        if LEGEND_EXT and k == "property" and w["type"] == "question": continue   # the property question's key is read by its pseudo-verb (what_color ...)
         if k in KEY_KIND and v not in (None, ""):
             if k == "position" and v not in REL and v not in REGION: continue
             out.add(value_token(k, v, plural and k == "shape"))

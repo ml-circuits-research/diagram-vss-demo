@@ -1,0 +1,68 @@
+{
+ "_about": "GROUPS_8 (2026-11-03, TRAIN_PLAN_1103.md; needs LEGEND_EXT=1, which makes the new events legend events): GROUPS_7 plus the forms of 2026-11-02. help: a new world (one event, the help question; it answers, it never draws): its leads (how do I, can I, what kinds of) precede words of every other world, so it is told apart by the question form, not by the topic. layout: a new world of the ten whole-diagram operations of HIGH_LEVEL_OPS.md (improve, respace, snap, fit, flip, sort, groupBy, equalize, straighten, untangle), which share their roles (a target that is mostly everything + one value: axis, comparison, property, distance, superlative). reverse joins links (an arrow named by its ends, the roles of disconnect). Templates and free text are values of create (shapes) and arrange (position); arrow restyle (set / resize from= to= or kind=edge) stays in shapes, arrow labels (label from= to=, label=\"\") in manage, property=label of an arrow in questions. Measured with action_confusion.py on the new folders (synth_rules*, ops_formulations, opus_ext_1, synth_combo; 4716 test requests, 51 events): the ops are confused with set / resize (equalize/set 5, equalize/resize 3, straighten/set 3) and among themselves (improve/fit, improve/untangle, snap/fit) more than with the position events (4 in all); confusions inside one group: this grouping 57.7%, ops inside position 60.7% (8 of 272 more). The new world keeps position at 7 events (a smaller world fits its data better, MICRO_ROUND1.md) at the cost of those 8 cross-world cases, which the router's top-3 candidates read anyway. group / ungroup / members / groupOf (synth_rules_ops) stay in no world (DIAGRAM_OPS is off, as in the shipped chain).",
+ "shapes": [
+  "create",
+  "set",
+  "resize",
+  "fact",
+  "rule"
+ ],
+ "links": [
+  "connect",
+  "disconnect",
+  "reverse"
+ ],
+ "position": [
+  "move",
+  "swap",
+  "arrange",
+  "align",
+  "distribute",
+  "toFront",
+  "toBack"
+ ],
+ "layout": [
+  "improve",
+  "respace",
+  "snap",
+  "fit",
+  "flip",
+  "sort",
+  "groupBy",
+  "equalize",
+  "straighten",
+  "untangle"
+ ],
+ "graphq": [
+  "check",
+  "connected",
+  "path",
+  "reachable",
+  "cycle",
+  "exists"
+ ],
+ "questions": [
+  "count",
+  "list",
+  "extreme",
+  "nearest",
+  "describe",
+  "neighbors",
+  "degree",
+  "property"
+ ],
+ "manage": [
+  "delete",
+  "duplicate",
+  "rename",
+  "label"
+ ],
+ "history": [
+  "undo",
+  "redo",
+  "forget"
+ ],
+ "help": [
+  "help"
+ ]
+}

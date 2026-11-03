@@ -22,6 +22,8 @@
 #   SHORT=1: the data also read llm_train/{sonnet,haiku}_short (front.py train_dirs). OPS=1: also llm_train/ops_groups, ops_positions
 #   (DIAGRAM_OPS.md section 7). DIAGRAM_OPS=1: groups and double positions in the conversion and the legend (llm_to_world.py; events
 #   group, ungroup, members, groupOf; roles relation2, landmark3). All three recorded in BUILD.json.
+#   LEGEND_EXT=1: the forms of 2026-11-02 as legend events / roles / values (generate.py, front.py, llm_to_world.py; worlds of
+#   worlds_micro/GROUPS_8.json; TRAIN_PLAN_1103.md). Recorded in BUILD.json only when set (an unset switch leaves BUILD.json as before).
 #   DRY=1: build the world's data only (msg_to_world.py + sop check, full report), then stop: no training, docs/model untouched.
 #   DEVICE=cpu: the torch device of sop train (cuda on a machine with an NVIDIA card: training/laptop/README.md). Recorded in BUILD.json.
 #   KINDMAP= (empty) -> the own-kind rule "seen >= --freq times". SOP_PYTHON: the Python with torch (sop train).
@@ -36,6 +38,7 @@ cd "$HERE"; export VSA_MIN_AVAILABLE_GB="${VSA_MIN_AVAILABLE_GB:-1.5}"
 export DATA="${DATA:-all}" QCOLOR="${QCOLOR:-1}" MARKER="${MARKER:-0}" CAL_FALLBACK="${CAL_FALLBACK:-train}" WORLD_EVENTS="$EVENTS" FRONT_ROWS="${FRONT_ROWS:-}"
 export EXTRA_DIRS="${EXTRA_DIRS:-}"   # extra annotated folders for every learned part (front.py extra_dirs; FEEDBACK_PLAN.md arms); recorded in BUILD.json
 export VAL_PREC="${VAL_PREC:-}" VAL_SUB="${VAL_SUB:-}" SHORT="${SHORT:-}" OPS="${OPS:-}" DIAGRAM_OPS="${DIAGRAM_OPS:-}"
+export LEGEND_EXT="${LEGEND_EXT:-}"   # LEGEND_EXT=1: the forms of 2026-11-02 (help, layout ops, reverse, templates, free text, arrows; generate.py, TRAIN_PLAN_1103.md); recorded in BUILD.json
 KINDMAP="${KINDMAP-diagnosis_kinds/kinds_comb1.json}"; if [ -n "$KINDMAP" ]; then export KINDMAP; else unset KINDMAP; fi
 FRAC="${FRAC:-1.0}"; D="${D:-1024}"; EPOCHS="${EPOCHS:-10}"; SEED="${SEED:-0}"
 if [ "${DRY:-0}" = "1" ]; then
@@ -54,7 +57,7 @@ rm -rf "$OUT"
 cp "$W/front.json" "$OUT/front.json"
 cat > "$OUT/BUILD.json" <<JSON
 {"world": "$WORLD", "events": "$EVENTS", "command": "training/sketch/train_micro.sh $WORLD $EVENTS", "DATA": "$DATA", "FRAC": "$FRAC", "QCOLOR": "$QCOLOR",
- "MARKER": "$MARKER", "ROW_SHAPE": "${ROW_SHAPE:-}", "FRONT_ROWS": "$FRONT_ROWS", "KINDMAP": "${KINDMAP:-}", "CAL_FALLBACK": "$CAL_FALLBACK", "D": $D, "EPOCHS": $EPOCHS, "SEED": $SEED, "N_EVAL": $N_EVAL, "EVAL_MODES": "$EVAL_MODES", "DEVICE": "$DEVICE", "HOLDOUT": "${HOLDOUT:-}", "CREATE_COLOR": "${CREATE_COLOR:-}", "N_CAL": "${N_CAL:-}", "VAL_PREC": "$VAL_PREC", "VAL_SUB": "$VAL_SUB", "SHORT": "$SHORT", "OPS": "$OPS", "DIAGRAM_OPS": "$DIAGRAM_OPS", "EXTRA_DIRS": "$EXTRA_DIRS", "rows": $(grep -c . "$W/raw/sentences.txt"),
+ "MARKER": "$MARKER", "ROW_SHAPE": "${ROW_SHAPE:-}", "FRONT_ROWS": "$FRONT_ROWS", "KINDMAP": "${KINDMAP:-}", "CAL_FALLBACK": "$CAL_FALLBACK", "D": $D, "EPOCHS": $EPOCHS, "SEED": $SEED, "N_EVAL": $N_EVAL, "EVAL_MODES": "$EVAL_MODES", "DEVICE": "$DEVICE", "HOLDOUT": "${HOLDOUT:-}", "CREATE_COLOR": "${CREATE_COLOR:-}", "N_CAL": "${N_CAL:-}", "VAL_PREC": "$VAL_PREC", "VAL_SUB": "$VAL_SUB", "SHORT": "$SHORT", "OPS": "$OPS", "DIAGRAM_OPS": "$DIAGRAM_OPS",${LEGEND_EXT:+ \"LEGEND_EXT\": \"$LEGEND_EXT\",} "EXTRA_DIRS": "$EXTRA_DIRS", "rows": $(grep -c . "$W/raw/sentences.txt"),
  "run_log": "training/sketch/runs/$RUN.log"}
 JSON
 echo "world $WORLD [$EVENTS] -> docs/model/micro/$WORLD ($(grep -c . "$W/raw/sentences.txt") rows); registry line:"

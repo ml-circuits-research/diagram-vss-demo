@@ -5,7 +5,7 @@ reads only what the sentence carries), otherwise the clause is set aside and cou
 Run after generate.py: python3 llm_to_world.py"""
 import collections, glob, json, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from generate import LEXICON, EVENTS, ROLES, SHAPES, wires_for, sha256_file, soplang
+from generate import LEXICON, EVENTS, ROLES, SHAPES, LEGEND_EXT, wires_for, sha256_file, soplang
 from normalize import normalize, slug
 
 PLURAL = dict(SHAPES) | {"shape": "shapes"}
@@ -36,6 +36,30 @@ if OPS:
     for _r, _q in (("landmark3", "relative to which other shape?"), ("relation2", "and where else, relative to another shape?")):
         if _r not in dict(ROLES): ROLES.insert([x for x, _ in ROLES].index("landmark2") + 1, (_r, _q))
     QUESTION_EVENT.update({"members": "members", "groupOf": "groupOf"})
+
+# LEGEND_EXT=1 (off by default; generate.py LEGEND_EXT adds the events and roles, front.py the value tables; TRAIN_PLAN_1103.md section 2):
+# the converter reads the forms of 2026-11-02 (LABEL_CONVENTIONS.md, last section):
+#   help             -> event help, roles topic / aspect (value tokens tp_* / asp_*); `about` (words the legend does not know) is not a role
+#                       of a VSS world (an unknown word has no kind to bind): left out and counted ("about");
+#   templates        -> create / arrange with the value role `template` (tpl_*), the set roles `items` / `items2` / `parents` (one member per
+#                       item: its name token n_* or quoted text t_*; an item of several words has no single token and is left out, counted
+#                       "items word"), `title` (a text or name token, as a label), `scheme` (sch_*), and the old roles (count -> quantity,
+#                       axis, colour, size, place); a template create has no `object` (no shape word);
+#   free text        -> create with the shape word `text` (shape=text; plural texts), the label as `text`; panels: width / height (numbers),
+#                       fill / layer (fill_* / layer_*); a create with a layout (4 dots in a ring) -> the role `layout`;
+#   layout ops       -> events improve ... untangle: target as for arrange (object / members), axis, comparison, distance -> amount, place
+#                       (fit position=center -> region), property (prop_*), superlative, layout, anchor -> landmark;
+#                       arrange: layout tree / layers / radial / organic, direction, anchor (the root) -> landmark; align: direction;
+#   arrows           -> an existing arrow named by its ends (set / resize / label / property / reverse with from / to) -> source / target (a
+#                       list keeps its first shape, counted); the arrows (kind=edge) -> the value role `kind` (kind_edge: the edge word is
+#                       learned as a value, so a trigger "how many arrows" keeps it), every arrow (quantifier=all) -> the value role
+#                       `quantifier` (all); count / list / exists kind=edge the same;
+#                       set / resize: style, arrow (two_way / plain / forward), colour, size; label="" -> the value token no_label.
+EXT_SETS = ("items", "items2", "parents")          # set roles of texts (msg_to_world.py adds them to the legend's reader.set_roles)
+OPS_EVENTS = ("improve", "respace", "snap", "fit", "flip", "sort", "groupBy", "equalize", "straighten", "untangle")
+if LEGEND_EXT:
+    PLURAL["text"] = "texts"
+    QUESTION_EVENT["help"] = "help"
 
 
 def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
@@ -71,7 +95,8 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
             plural = kv.get("quantifier") == "all"
             sh = kv.get("shape")
             cands = ([PLURAL[sh], sh] if sh else ["shapes", "shape", "everything"]) if plural else ([sh] if sh else ["shape", "it"])
-            head = next((c for c in cands if c in T), None) or next((c for c in ("it", "them", "everything") if c in T), None)
+            # LEGEND_EXT: "the whole diagram", "all of them": the quantifier token itself is the head when no shape word / pronoun is there
+            head = next((c for c in cands if c in T), None) or next((c for c in ("it", "them", "everything") + (("all",) if LEGEND_EXT and plural else ()) if c in T), None)
             if head is None:
                 if soft: lost.append(f"head of {v}"); return None, None
                 raise Skip(f"no head for {v}")
@@ -87,6 +112,47 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
         if soft: lost.append(f"name {v}"); return None, None
         raise Skip(f"name not in the clause: {v}")
     roles, neg = {}, None
+    def edge_role():   # LEGEND_EXT: the arrows / every arrow: kind=edge -> the value role kind (kind_edge), quantifier=all -> the value role quantifier (all)
+        import front as FR
+        if a.get("kind") in ("edge", "group"): roles["kind"] = need(FR.value_token("kind", a["kind"]))
+        if a.get("quantifier") == "all": roles["quantifier"] = need("all")
+    def ext_args(ev):   # LEGEND_EXT, the events of the generic branch: arrows by their ends, every arrow, directions, the ops' own roles
+        if ev in ("set", "resize", "label", "property") and (a.get("from") is not None or a.get("to") is not None):
+            for k, r in (("from", "source"), ("to", "target")):
+                if a.get(k) is None: continue
+                xs = [x.strip() for x in str(a[k]).split(",") if x.strip()] if not str(a[k]).startswith("mention(") else [a[k]]
+                if len(xs) > 1: lost.append("several ends (first kept)")
+                roles[r], _ = ent(xs[0])
+        if ev in ("set", "resize", "label") and (a.get("kind") == "edge" or (a.get("quantifier") == "all" and a.get("target") is None)): edge_role()
+        if ev in ("set", "resize"):
+            if a.get("style"): roles["style"] = need(a["style"])
+            if a.get("arrow"): roles["arrow"] = need({"both": "two_way", "none": "plain"}.get(a["arrow"], a["arrow"]))
+            if ev == "resize" and a.get("size"): roles["size"] = need(a["size"])
+        if ev in ("arrange", "align", "flip") and a.get("direction"): roles["direction"] = need(a["direction"])
+        if ev in ("arrange", "equalize", "sort", "groupBy") and a.get("anchor") and not a.get("position"): roles["landmark"], _ = ent(str(a["anchor"]).split(",")[0].strip())
+        if ev in OPS_EVENTS:
+            if a.get("comparison"): roles["comparison"] = need(a["comparison"])
+            if a.get("distance") is not None and str(a["distance"]).isdigit(): roles["amount"] = need(str(a["distance"]))
+            if a.get("superlative"): roles["superlative"] = need(SUPER.get(a["superlative"], "?"))
+            if a.get("position"): place()
+    def ext_values(ev):   # LEGEND_EXT, every event: the new value keys, numbers, lists of texts, the title; `about` is not a role (counted)
+        import front as FR
+        for k in ("template", "scheme", "fill", "layer", "topic", "aspect"):
+            if a.get(k) not in (None, ""): roles[k] = need(FR.value_token(k, a[k]))
+        if a.get("property") not in (None, "") and ev != "property": roles["property"] = need(FR.value_token("property", a["property"]))
+        for k in ("width", "height"):
+            if a.get(k) is not None: roles[k] = need(str(a[k]))
+        for k in EXT_SETS:
+            if not a.get(k): continue
+            mem = []
+            for p in [x.strip() for x in str(a[k]).split(",") if x.strip()]:
+                s = slug(p); h = "n_" + s if "n_" + s in T else "t_" + s if "t_" + s in T else None
+                if h: mem.append({"head": h})
+                else: lost.append(f"{k} word" if " " in p else f"{k} {p}")
+            if mem: roles[k] = mem
+        if a.get("title"): roles["title"] = need_text(a["title"])
+        if ev == "create" and a.get("layout"): roles["layout"] = need({"circle": "ring"}.get(a["layout"], a["layout"]))
+        if a.get("about"): lost.append("about")
     def place():
         if OPS: return place_ops()
         if "position" not in a: return
@@ -132,9 +198,10 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
             else: lost.append(f"region {regs[0]}")
     if ev == "create":
         sh = a.get("shape", "circle"); cnt = a.get("count")
-        head = next((c for c in ([PLURAL[sh], sh] if cnt else [sh]) if c in T), None)
-        if head is None and not soft: raise Skip(f"no shape word {sh}")
-        if head is None: lost.append(f"shape word {sh}")
+        tpl = LEGEND_EXT and a.get("template")     # LEGEND_EXT: a template create names no shape (no object role)
+        head = None if tpl else next((c for c in ([PLURAL[sh], sh] if cnt else [sh]) if c in T), None)
+        if head is None and not soft and not tpl: raise Skip(f"no shape word {sh}")
+        if head is None and not tpl: lost.append(f"shape word {sh}")
         e = {"head": head}
         # CREATE_COLOR=role (off by default; PLAN_B.md, HOLD: CREATE_COLOR.md): the colour of the new shape fills the event role `color`,
         # as its size fills `size` here and as a colour set on a shape does in set / fact / rule. Default: the attribute of the shape word,
@@ -143,14 +210,15 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
         if a.get("color"):
             if os.environ.get("CREATE_COLOR") == "role": roles["color"] = need(a["color"])
             else: e["attr"] = need(a["color"])
-        roles["object"] = e
+        if not tpl: roles["object"] = e
+        elif a.get("color"): roles["color"] = e.get("attr") or roles.get("color")   # a template's one colour: the event role (no shape word to carry it)
         if a.get("size"): roles["size"] = need(a["size"])
         if cnt: roles["quantity"] = need(str(cnt))
         if a.get("name"): roles["name"] = need("n_" + slug(a["name"]))
         if a.get("label"): roles["text"] = need_text(a["label"])
         place()
     elif ev in ("delete", "duplicate", "neighbors", "describe", "property", "degree", "toFront", "toBack", "resize", "rename", "label", "set", "align", "arrange", "distribute", "move", "check", "fact", "connected",
-                "group", "ungroup", "members", "groupOf"):   # the last four exist only with DIAGRAM_OPS=1 (EVENTS)
+                "group", "ungroup", "members", "groupOf") + OPS_EVENTS:   # group ... groupOf exist only with DIAGRAM_OPS=1, OPS_EVENTS only with LEGEND_EXT=1 (EVENTS)
         if a.get("target") is not None:
             tg = [x.strip() for x in str(a["target"]).split(",") if x.strip()] if not str(a["target"]).startswith("mention(") else [a["target"]]
             if LISTS and len(tg) > 1: roles["members"] = [ent(x)[0] for x in tg]
@@ -160,7 +228,9 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
         if ev == "duplicate" and a.get("count"): roles["quantity"] = need(str(a["count"]))
         if ev == "rename": roles["name"] = need("n_" + slug(a.get("name", "")))
         if ev == "group" and a.get("name"): roles["name"] = need("n_" + slug(a["name"]))   # a group without a name has no name role
-        if ev == "label": roles["text"] = need_text(a.get("label", ""))
+        if ev == "label":
+            if LEGEND_EXT and a.get("label") == "": roles["text"] = need("no_label")   # remove a label (LABEL_CONVENTIONS.md, arrow labels)
+            else: roles["text"] = need_text(a.get("label", ""))
         if ev in ("set", "check", "fact"):
             if a.get("color"): roles["color"] = need(a["color"])
             if a.get("shape"): roles["shape"] = need(a["shape"])
@@ -173,8 +243,9 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
             if a.get("comparison"): roles["comparison"] = need(a["comparison"]); roles["landmark"], _ = ent(a.get("anchor", ""))
             else: place()
         if ev == "connected": roles["landmark"], _ = ent(a.get("anchor", ""))
-        if ev in ("align", "distribute") and a.get("axis"): roles["axis"] = need({"horizontal": "horizontally", "vertical": "vertically"}[a["axis"]])
-        if ev == "arrange" and a.get("layout"): roles["layout"] = need({"circle": "ring"}.get(a["layout"], a["layout"]))
+        if ev in ("align", "distribute") + (("flip",) if LEGEND_EXT else ()) and a.get("axis"): roles["axis"] = need({"horizontal": "horizontally", "vertical": "vertically"}[a["axis"]])
+        if ev in ("arrange",) + (("sort",) if LEGEND_EXT else ()) and a.get("layout"): roles["layout"] = need({"circle": "ring"}.get(a["layout"], a["layout"]))
+        if LEGEND_EXT: ext_args(ev)
     elif ev == "swap":
         x = [s.strip() for s in str(a.get("target", "")).split(",")]
         if len(x) != 2:
@@ -182,7 +253,7 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
             lost.append("swap needs two")
         roles["object"], _ = ent(x[0])
         if len(x) > 1: roles["target"], _ = ent(x[1])
-    elif ev in ("connect", "disconnect", "path", "reachable"):
+    elif ev in ("connect", "disconnect", "path", "reachable") + (("reverse",) if LEGEND_EXT else ()):
         if a.get("from") is not None:
             fr = [x.strip() for x in str(a["from"]).split(",")] if not str(a["from"]).startswith("mention(") else [a["from"]]
             if len(fr) > 1:
@@ -209,8 +280,12 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
             elif edge and (a.get("arrow") == "none" or edge != "arrow" or a.get("style")): roles["edge"] = {"head": edge}
             if a.get("label"): roles["text"] = need_text(a["label"])
             if a.get("pairing"): roles["pairing"] = need({"all": "each_other"}.get(a["pairing"], a["pairing"]))
+        if LEGEND_EXT and ev in ("disconnect", "reverse"):
+            if a.get("target") is not None and a.get("from") is None and a.get("to") is None: roles["object"], _ = ent(str(a["target"]).split(",")[0].strip())
+            if a.get("quantifier") == "all" or a.get("kind") == "edge": edge_role()
     elif ev in ("count", "exists", "list", "extreme", "nearest", "rule"):
         if a.get("ask") == "rules": roles["object"] = {"head": need("rules")}
+        elif LEGEND_EXT and a.get("kind") in ("edge", "group") and ev in ("count", "exists", "list"): edge_role()   # "how many arrows": kind_edge, no shape
         elif OPS and a.get("kind") == "group" and ev in ("count", "exists", "list"):   # DIAGRAM_OPS.md 6.4: no other filter
             roles["object"] = {"head": "groups" if "groups" in T else "group" if "group" in T else need("groups")}
         else:
@@ -235,6 +310,7 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
             elif ev in ("count", "exists", "list"): place()
     elif ev in ("undo", "redo", "forget", "cycle"):
         pass
+    if LEGEND_EXT: ext_values(ev)
     if neg: roles["notcolor"] = need("not_" + neg)
     clean = {}
     for r, v in roles.items():
@@ -242,7 +318,7 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
         if isinstance(v, list):   # a set role: its members, each a bare name entity (sets carry heads only)
             v = [{"head": x["head"]} for x in v if x and x.get("head")]
             if not v: continue
-            if len(v) == 1:   # only one member found in the clause: the ordinary single role
+            if len(v) == 1 and r not in EXT_SETS:   # only one member found in the clause: the ordinary single role (a list of texts stays a set)
                 v = v[0]; r = "target" if r == "targets" else ("source" if ev in ("connect", "disconnect", "path") else "object")
         elif isinstance(v, dict):
             if v.get("head") is None: continue

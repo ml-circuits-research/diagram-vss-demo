@@ -29,7 +29,21 @@ const ACTION = {
   distribute: ['The user wants to space shapes evenly.', ['distribute the circles evenly', 'space the boxes out horizontally']],
   toFront: ['The user wants to bring a shape to the front.', ['bring Start to the front', 'move A on top of the others']],
   toBack: ['The user wants to send a shape to the back.', ['send Done to the back', 'put A behind the others']],
-  arrange: ['The user wants to arrange shapes in a layout.', ['arrange everything in a grid', 'tidy up the diagram', 'put all shapes in a circle']],
+  arrange: ['The user wants to arrange shapes in a layout.', ['arrange everything in a grid', 'lay them out as a tree', 'put all shapes in a circle']],
+  group: ['The user wants to group shapes together.', ['group A and B', 'put Start and Done in a group called Ends']],
+  ungroup: ['The user wants to dissolve a group.', ['ungroup Ends', 'break up the group']],
+  /* the layout operations of training/sketch/ops/HIGH_LEVEL_OPS.md and reverse */
+  improve: ['The user wants the layout of the diagram improved.', ['tidy up the diagram', 'clean this up', 'make it look better']],
+  respace: ['The user wants more or less space between the shapes.', ['spread everything further apart', 'compact the diagram', 'less space between them']],
+  snap: ['The user wants the shapes snapped to the grid.', ['snap everything to the grid', 'snap to a 40 px grid']],
+  fit: ['The user wants the drawing moved onto the canvas or centred.', ['fit everything on the canvas', 'center the drawing']],
+  flip: ['The user wants the positions mirrored.', ['flip the diagram horizontally', 'mirror it upside down']],
+  sort: ['The user wants the shapes sorted.', ['sort the shapes by name', 'order them by size, biggest first']],
+  groupBy: ['The user wants the shapes clustered by a property.', ['cluster the shapes by colour', 'put the same shapes together']],
+  equalize: ['The user wants the shapes made the same in some property.', ['make them all the same size', 'give everything the colour of Start']],
+  straighten: ['The user wants nearly straight arrows made straight.', ['straighten the lines', 'make the arrows straight']],
+  untangle: ['The user wants the crossing arrows untangled.', ['untangle the diagram', 'remove the crossings']],
+  reverse: ['The user wants arrows turned around.', ['reverse the arrow from A to B', 'flip all the arrows']],
   undo: ['The user wants to undo the last change.', ['undo', 'take that back', 'revert the last step']],
   redo: ['The user wants to redo a change that was undone.', ['redo', 'do that again']],
   forget: ['The user wants to remove the default rules.', ['forget the rules', 'clear all defaults']]
@@ -49,7 +63,10 @@ const ASK = {
   path: ['The user wants to know whether there is a path between two shapes.', ['is there a path from A to B?', 'can I get from Start to Done?']],
   reachable: ['The user wants to know what can be reached from a shape.', ['what can be reached from A?', 'what comes after Start?']],
   cycle: ['The user wants to know whether the arrows form a cycle.', ['are there any cycles?', 'is there a loop?']],
-  rules: ['The user wants to know which default rules are active.', ['what rules are active?', 'list the defaults']]
+  rules: ['The user wants to know which default rules are active.', ['what rules are active?', 'list the defaults']],
+  members: ['The user wants to know what a group contains.', ['what is in the group Ends?', 'which shapes are in Intake?']],
+  groupOf: ['The user wants to know which group a shape belongs to.', ['which group is Start in?']],
+  help: ['The user asks how the editor works or what it can do.', ['how do I connect two shapes?', 'what colours can I use?', 'can I add images?']]
 };
 
 /* Which legend questions each kind of sentence answers (its frame). */
@@ -224,6 +241,7 @@ function create(engine, rulesFormalize) {
       if (found.length) out.value = found.length === 1 ? found[0] : found;
     } else if (!sp.length) return out;
     else if (kind === 'name' || kind === 'text') out.value = sp[0].text;
+    else if (kind === 'texts') out.value = sp.map(s => s.text).join(',');   // items / items2 / parents of a template: one span per item, in order
     else if (kind === 'number') {
       const t = sp[0].text, d = t.match(/\d+(?:\.\d+)?/), w = (st.models.reader.number_words || {})[t.toLowerCase()];
       const n = d ? +d[0] : w != null ? +w : null;
@@ -287,7 +305,7 @@ function create(engine, rulesFormalize) {
       }
       if (args.notColor && args.color === args.notColor) delete args.color;
       if (args.position && !['center', 'top', 'bottom', 'left', 'right', 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'].includes(args.position) && args.anchor == null) delete args.position;
-      if (args.anchor != null && !args.position && !['nearest', 'connected', 'check'].includes(act)) delete args.anchor;
+      if (args.anchor != null && !args.position && !['nearest', 'connected', 'check', 'arrange', 'equalize'].includes(act)) delete args.anchor;   // arrange: the root of a tree; equalize: the model (HIGH_LEVEL_OPS.md)
       const used = new Set(); for (const v of Object.values(args)) [].concat(v).forEach(x => { if (K.isRef(x)) used.add(x.ref); });
       const node = { id, type, args };
       Object.defineProperty(node, 'span', { value: [seg.c0, seg.c1], enumerable: false, configurable: true });
@@ -350,7 +368,7 @@ function create(engine, rulesFormalize) {
       }
       if (args.notColor && args.color === args.notColor) delete args.color;
       if (args.position && !['center', 'top', 'bottom', 'left', 'right', 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'].includes(args.position) && args.anchor == null) delete args.position;
-      if (args.anchor != null && !args.position && !['nearest', 'connected', 'check'].includes(act)) delete args.anchor;
+      if (args.anchor != null && !args.position && !['nearest', 'connected', 'check', 'arrange', 'equalize'].includes(act)) delete args.anchor;   // arrange: the root of a tree; equalize: the model (HIGH_LEVEL_OPS.md)
       const id = rn.id;
       const node = { id, type, args };
       for (const v of Object.values(args)) [].concat(v).forEach(x => { if (K.isRef(x) && mentionById.has(x.ref)) used.add(x.ref); });

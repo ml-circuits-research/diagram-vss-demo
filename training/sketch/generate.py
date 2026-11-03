@@ -60,6 +60,22 @@ ROLES = [("object", "which shape or shapes?"), ("shape", "which kind of shape?")
          ("arrow", "which way does the line point?"), ("edge", "with which line?"), ("pairing", "connected how among themselves?"),
          ("notcolor", "which colour must they not have?"), ("depth", "to the front or to the back?"),
          ("superlative", "which extreme?"), ("comparison", "bigger or smaller than the other?")]
+# LEGEND_EXT=1 (off by default; training/sketch/TRAIN_PLAN_1103.md): the forms of 2026-11-02 become legend events and roles of the VSS
+# worlds: the help question (event `help`, pseudo-verb help_q, like how_many), the high-level layout operations (HIGH_LEVEL_OPS.md: one
+# event each, the verb token is the action's own lower-cased name) and reverse; the roles of templates, free text, panels and help
+# (LEGEND_EXT.md section 7: template / scheme / fill / layer / topic / aspect / property values, width / height numbers, items / items2 /
+# parents set roles of texts, title a text). Updated IN PLACE here so that every consumer (msg_to_world.py legend and kinds, wires_for role
+# order, train_cutter.py --worlds, front.py event_token) sees the same events; with the switch off nothing changes.
+LEGEND_EXT = os.environ.get("LEGEND_EXT") == "1"
+if LEGEND_EXT:
+    EVENTS.update({"help": ["help_q"], "improve": ["improve"], "respace": ["respace"], "snap": ["snap"], "fit": ["fit"], "flip": ["flip"],
+                   "sort": ["sort"], "groupBy": ["group_by"], "equalize": ["equalize"], "straighten": ["straighten"], "untangle": ["untangle"],
+                   "reverse": ["reverse"]})
+    ROLES += [("template", "which form (template)?"), ("items", "which texts, in order?"), ("items2", "which second list of texts?"),
+              ("parents", "the parent of each item?"), ("title", "with which title?"), ("scheme", "in which colour scheme?"),
+              ("width", "how wide?"), ("height", "how high?"), ("fill", "how filled?"), ("layer", "on which layer?"),
+              ("property", "by which property?"), ("topic", "help about what?"), ("aspect", "what kind of help?"),
+              ("kind", "shapes, arrows or groups?"), ("quantifier", "all of them?")]
 
 KINDS = {}
 for s, p in SHAPES.items(): KINDS[s] = "SHAPE"; KINDS[p] = "SHAPE"

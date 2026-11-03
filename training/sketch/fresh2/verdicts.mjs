@@ -7,6 +7,9 @@
 //     row label     the row of the cost-score table of that report.md to compare with (default: the first row starting "VSS" / "SOP-BERT")
 //   <data dir>: the annotated writer folders, as for fit_report.mjs (training/sketch/llm_bench/fresh2/opus_{a,b,c,d}).
 //   --standin     the records are NOT the arms (a code test): numbers are printed, the verdict lines are replaced by "n/a (stand-in records)".
+//   --json <file> (TRAIN_PLAN_1103.md, job 072: G = the shipped readers, T = the retrained ones) also writes, per arm, the test score with its
+//                 interval, the share done right and confidently wrong, and the paired differences VSS-T - VSS-G and BERT-T - BERT-G
+//                 (same resamples) as JSON. Without it the output is exactly as before.
 // The fit of each arm is fit_report.mjs's, copied unchanged (same split, same percentile maps / prior / L2 grid / 5 folds, same out-of-fold
 // cost-score threshold on the fresh2 calibration part only, no CAL_FOLDERS); each arm's test score is checked against its report.md.
 // Bootstrap: BOOT resamples (default 1000) of the test messages, seed SEED (default 1), the SAME index draws for every arm (paired), the same
@@ -22,7 +25,7 @@ for (let i = 0; i < A.length; i++) {
   const a = A[i];
   if (a === "--standin") ARG.standin = true;
   else if (a === "--data") ARG.data.push(A[++i]);
-  else if (/^--(out|vss-g|vss-t|bert-g|bert-t)$/.test(a)) ARG[a.slice(2)] = A[++i];
+  else if (/^--(out|vss-g|vss-t|bert-g|bert-t|json)$/.test(a)) ARG[a.slice(2)] = A[++i];
   else { console.error(`unknown argument ${a}`); process.exit(2); }
 }
 for (const k of ["out", "vss-g", "vss-t", "bert-g", "bert-t"]) if (!ARG[k] || !ARG.data.length) { console.error("usage: verdicts.mjs --out <md> --data <dir>.. --vss-g <arm> --vss-t <arm> --bert-g <arm> --bert-t <arm> [--standin]"); process.exit(2); }
@@ -278,5 +281,13 @@ log(`| 2 | (VSS-T - VSS-G) - (BERT-T - BERT-G) | ${sg(V3.d2pt)} | ${iv(V3.c2)} |
 log(`| 3 | VSS-T vs the 95% CI of BERT-T | VSS-T ${sc1(V3.vt)} | BERT-T ${iv(V3.bertCI)} | ${word(V3.h3, "within", "outside")} |`);
 log("\nA miss on any line is a negative result; no second try with the same test part (FEEDBACK_PLAN.md).");
 writeFileSync(ARG.out, out.join("\n") + "\n");
+if (ARG.json) {   // --json (see the head of the file): the numbers of the tables above, and both readers' paired differences T - G
+  const dB = diffArr((b) => ARMS["BERT-T"].bScore[b] - ARMS["BERT-G"].bScore[b]), dV = diffArr((b) => ARMS["VSS-T"].bScore[b] - ARMS["VSS-G"].bScore[b]);
+  const arm = (R) => ({ records: `${R.dir}/${R.file}.jsonl`, threshold: R.ct.kind === "threshold" ? R.t : R.ct.kind, score: R.score, ci: ciOf(R.bScore),
+    done_right: R.st.cov, conf_wrong: R.st.conf_wrong, executed: R.st.n, extras_executed: R.st.e, all_right: R.stAll.cov, all_wrong: R.stAll.wrong_all, done_right_at_3pct: R.cur3 });
+  writeFileSync(ARG.json, JSON.stringify({ data: ARG.data, boot: BOOT, seed: SEED, cost: COST, test_messages: N, test_requests: R0.G.test, cal_messages: R0.nMsg.cal,
+    arms: Object.fromEntries(AL.map((R) => [R.name, arm(R)])),
+    diff: { vss: { point: ARMS["VSS-T"].score - ARMS["VSS-G"].score, ci: ciOf(dV) }, bert: { point: ARMS["BERT-T"].score - ARMS["BERT-G"].score, ci: ciOf(dB) } } }, null, 1) + "\n");
+}
 console.log(out.join("\n"));
 if (CHECKS.some((c) => c.row && !c.ok)) { console.error("CHECK FAILED: an arm's score differs from its report.md"); process.exit(1); }

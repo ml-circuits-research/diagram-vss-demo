@@ -48,6 +48,7 @@ if os.environ.get("SHORT") == "1":  # pre-registered in SHORT.md section 5: add 
 if os.environ.get("OPS") == "1":  # ROUND2.md: add the messages of the new operations (DIAGRAM_OPS.md section 7; same folders as front.py train_dirs OPS=1)
     DIRS = DIRS + ["llm_train/ops_groups", "llm_train/ops_positions"]
 DIRS = DIRS + FR.extra_dirs()   # EXTRA_DIRS (FEEDBACK_PLAN.md arms; default: none), the same folders as front.py train_dirs
+# LEGEND_EXT=1: the events help, improve ... untangle, reverse are legend events (generate.EVENTS, updated in place by generate.py itself)
 if os.environ.get("DIAGRAM_OPS") == "1":  # the new events group / ungroup / members / groupOf become legend events (generate.EVENTS, updated in place by llm_to_world.py)
     import llm_to_world  # noqa: F401  (side effect only)
 
@@ -84,6 +85,14 @@ def main():
         bad = sorted(set(ev_world) - set(G.EVENTS))
         if bad: raise SystemExit(f"--worlds: not legend events: {bad} (a question ask=rules is the event list)")
         free = sorted(set(G.EVENTS) - set(ev_world))
+        # a request whose event is no legend event (e.g. group / ungroup / members / groupOf of llm_train/synth_rules_ops while DIAGRAM_OPS is
+        # off, or the events of LEGEND_EXT while it is off) has no B label: its message is left out, as a message with a missing span, and
+        # counted (before: its B-fallback label was trained but never decoded). With no such request nothing changes.
+        noev = collections.Counter(event(w) for m in msgs for w in m["wires"] if event(w) not in G.EVENTS)
+        if noev:
+            n0 = len(msgs); msgs = [m for m in msgs if all(event(w) in G.EVENTS for w in m["wires"])]
+            print(f"left out: {n0 - len(msgs)} messages with a request whose event is no legend event {dict(noev.most_common())}")
+            ntok = sum(len(FR.tokenize(m["text"], m.get("names") or [])[0]) for m in msgs)
         WORLDS = RW + (["fallback"] if free else []); LABELS = tuple("B-" + w for w in WORLDS) + ("I", "O")
         S = FR.train_segmenter(msgs, P["seg_epochs"], labels_set=LABELS, b_label=lambda w: "B-" + ev_world.get(event(w), "fallback"))
         nb = collections.Counter(ev_world.get(event(w), "fallback") for m in msgs for w in m["wires"])
@@ -95,6 +104,7 @@ def main():
                "command": f"python3 training/sketch/train_cutter.py --worlds {rel}" + ("" if os.path.basename(a.out) == "cutter_worlds.json" else f" --out {os.path.relpath(os.path.abspath(a.out), os.path.join(HERE, '..', '..'))}"),
                "data": data, "messages": len(msgs), "tokens": ntok, "params": {"seg_epochs": P["seg_epochs"]},
                "grouping_file": rel, "grouping": grouping, "events_of_no_world": free, "worlds": WORLDS, "labels": list(LABELS),
+               **({"left_out_no_legend_event": dict(noev.most_common()), "LEGEND_EXT": 1} if noev or G.LEGEND_EXT else {}),
                "requests_per_world": dict(nb.most_common()), "segmenter": dict(sorted(S.items()))}
         print("requests per world label: " + ", ".join(f"{w} {n}" for w, n in nb.most_common()))
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
