@@ -1,0 +1,124 @@
+# annotation of texts/texts_02.jsonl. One line per request: span | trigger | c|q|r|f <action/ask> key=value; key=value | paraphrase the Rules read (or -)
+# mention(layer=...) and mention(label=...) are the forms proposed in llm_bench/../collected/SESSION_1_ANALYSIS.md: the Rules do not read them (paraphrase -)
+@or3g-0079
+delete the background boxes | delete | c delete target=mention(layer=background,quantifier=all,shape=rectangle) | -
+@or3g-0080
+remove the zones | remove | c delete target=mention(layer=zone,quantifier=all) | -
+@or3g-0081
+make the background panels lighter | make | c set target=mention(layer=background,quantifier=all); fill=light | -
+@or3g-0082
+color the zones yellow | color | c set target=mention(layer=zone,quantifier=all); color=yellow | -
+@or3g-0083
+make the background boxes bigger | make | c resize target=mention(layer=background,quantifier=all,shape=rectangle) | -
+@or3g-0084
+send the zones to the back | send | c toBack target=mention(layer=zone,quantifier=all) | -
+@or3g-0085
+delete the backdrop | delete | c delete target=Backdrop | delete Backdrop
+@or3g-0086
+delete all the panels | delete | c delete target=mention(layer=zone,quantifier=all) | -
+@or3g-0087
+make the lanes gray | make | c set target=mention(layer=zone,quantifier=all); color=gray | -
+@or3g-0088
+hide the background boxes, i mean delete them | delete | c delete target=mention(layer=background,quantifier=all,shape=rectangle) | -
+@or3g-0089
+move the zones down by 40 | move | c move target=mention(layer=zone,quantifier=all); direction=down; distance=40 | -
+@or3g-0090
+remove the background shapes | remove | c delete target=mention(layer=background,quantifier=all) | -
+@or3g-0091
+change the color of the zones to pink | change | c set target=mention(layer=zone,quantifier=all); color=pink | -
+@or3g-0092
+delete the background boxes, not Process | delete | c delete target=mention(layer=background,quantifier=all,shape=rectangle) | -
+@or3g-0093
+make the panels blue | make | c set target=mention(layer=zone,quantifier=all); color=blue | -
+the backdrop navy | backdrop | c set target=Backdrop; color=navy | make Backdrop navy
+@or3g-0094
+put the zones behind everything | put | c toBack target=mention(layer=zone,quantifier=all) | -
+@or3g-0095
+make the zones a bit smaller | make | c resize target=mention(layer=zone,quantifier=all) | -
+@or3g-0096
+the background rectangles should go, delete them | delete | c delete target=mention(layer=background,quantifier=all,shape=rectangle) | -
+@or3g-0097
+join Start and Done | join | c connect from=Start; to=Done | connect Start and Done
+@or3g-0098
+join Web1 to Db | join | c connect from=Web1; to=Db | connect Web1 to Db
+@or3g-0099
+unite Hero and Castle with a dashed line | unite | c connect from=Hero; to=Castle; style=dashed; arrow=none | connect Hero and Castle with a dashed line
+@or3g-0100
+make Done blue | make | c set target=Done; color=blue | make Done blue
+@or3g-0101
+add a circle named Bin near Sink | add | c create shape=circle; name=Bin; position=near; anchor=Sink | add a circle named Bin near Sink
+@or3g-0102
+join Venue with Band | join | c connect from=Venue; to=Band | connect Venue to Band
+@or3g-0103
+join Math to Physics with an arrow | join | c connect from=Math; to=Physics | connect Math to Physics
+@or3g-0104
+delete Check | delete | c delete target=Check | delete Check
+@or3g-0105
+join Firewall and Router with a two way arrow | join | c connect from=Firewall; to=Router; arrow=both | connect Firewall to Router with a two-way arrow
+@or3g-0106
+unite Forest and Dragon | unite | c connect from=Forest; to=Dragon | connect Forest and Dragon
+@or3g-0107
+delete the Order flow title | delete | c delete target=mention(label=order flow) | -
+@or3g-0108
+make Order flow red | make | c set target=mention(label=order flow); color=red | -
+@or3g-0109
+remove the text Order flow | remove | c delete target=mention(label=order flow) | -
+@or3g-0110
+change "Internet edge" to blue | change | c set target=mention(label=internet edge); color=blue | -
+@or3g-0111
+delete Save the date | delete | c delete target=mention(label=save the date) | -
+@or3g-0112
+move the Thank you text below Budget | move | c move target=mention(label=thank you); position=below; anchor=Budget | -
+@or3g-0113
+make Weekly plan bigger | make | c resize target=mention(label=weekly plan) | -
+@or3g-0114
+rename Order flow to Order process | rename | c label target=mention(label=order flow); label=Order process | -
+@or3g-0115
+delete the text that says Level 1 | delete | c delete target=mention(label=level 1) | -
+@or3g-0116
+move Phase 1 to the top right | move | c move target=mention(label=phase 1); position=topRight | -
+@or3g-0117
+remove the title Order flow | remove | c delete target=mention(label=order flow) | -
+@or3g-0118
+delete "Do not touch" | delete | c delete target=mention(label=do not touch) | -
+@or3g-0119
+make the Order flow text smaller | make | c resize target=mention(label=order flow) | -
+@or3g-0120
+place the elements in a circle | place | c arrange target=mention(quantifier=all); layout=circle | arrange everything in a circle
+@or3g-0121
+I wanted a text element saying Hello | wanted | c create shape=text; label=Hello | add a text "Hello"
+@or3g-0122
+make Done green | make | c set target=Done; color=green | make Done green
+@or3g-0123
+I wanted Router to be red | red | c set target=Router; color=red | make Router red
+@or3g-0124
+undo that | undo | c undo | undo
+delete only the zones | delete | c delete target=mention(layer=zone,quantifier=all) | -
+@or3g-0125
+move the Fridge | move | c move target=Fridge | move Fridge
+@or3g-0126
+make me a triangle | make | c create shape=triangle | draw a triangle
+@or3g-0127
+I wanted them in a row | row | c arrange layout=row | -
+@or3g-0128
+make Check yellow | make | c set target=Check; color=yellow | make Check yellow
+@or3g-0129
+delete Gym | delete | c delete target=Gym | delete Gym
+@or3g-0130
+circle layout | layout | c arrange layout=circle | -
+@or3g-0131
+I asked for a text box that says Menu | asked | c create shape=text; label=Menu | add a text "Menu"
+@or3g-0132
+delete the text Order flow | delete | c delete target=mention(label=order flow) | -
+@or3g-0133
+connect Web1 to Db | connect | c connect from=Web1; to=Db | connect Web1 to Db
+@or3g-0134
+improve the layout | improve | c improve | improve the layout
+@or3g-0135
+I needed a text element | needed | c create shape=text | -
+@or3g-0136
+place all elements in the form of a row | place | c arrange target=mention(quantifier=all); layout=row | arrange everything in a row
+@or3g-0137
+I asked for a text element that says Pantry | asked | c create shape=text; label=Pantry | add a text "Pantry"
+@or3g-0138
+delete the background boxes | delete | c delete target=mention(layer=background,quantifier=all,shape=rectangle) | -

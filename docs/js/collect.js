@@ -1,13 +1,15 @@
 // collect.js: the collected requests (owner, 2026-11-03: "request collection to improve the test data"). Every message the user sends to
-// the demo is kept in this browser's localStorage, with what each reader read, what VSS-BERT executed or held, and what the user did about it
-// later (Do it anyway, Edit, superseded, undo right after). Nothing leaves the browser unless the user downloads the file (⋮ › Settings ›
+// the demo is kept in this browser's localStorage, with what VSS-BERT executed or held, and what the user did about it later (Do it anyway,
+// Edit, superseded, undo right after). Format 2 (owner, 2026-11-03): no reader's full reading is stored, since the text, the names on the
+// drawing and the model versions reproduce every reading locally; only VSS-BERT's decision per request (its words, executed or held, its
+// confidence) and the user's actions, which are the labels of whether a reading was right. Nothing leaves the browser unless the user downloads the file (⋮ › Settings ›
 // Collected requests › Download). The file is JSON Lines, one entry per message; its format is training/sketch/COLLECT_FORMAT.md, and
 // training/sketch/collect_to_bench.py turns it into an un-annotated llm_bench folder.
 //
 // Two parts:
 //   - createStore(opts): the storage (cap, quota, JSONL, events). Pure, no DOM: node tests (training/sketch/test_collect.mjs) run it with a fake
 //     localStorage.
-//   - buildEntry(rec, env): one entry from a turn of docs/js/ui.js (its `rec` object), also pure.
+//   - buildEntry(rec, env): one entry from a turn of docs/js/ui.js (its `rec` object), and modelVersions(files): the model stamps; also pure.
 //   - mountSettings(...) / settingsHTML(): the section "Collected requests" of ⋮ › Settings (browser only).
 // Browser storage is a convenience: every access is guarded, and without it the entries live in memory for this page only (the section says so).
 (function (root, factory) {
@@ -15,9 +17,8 @@
   else root.CollectKit = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
-  const FORMAT = 'sop-collect/1';
+  const FORMAT = 'sop-collect/2';
   const KEY = 'sop.collect.v1', ON_KEY = 'sop.collect.off', CAP = 5000;
-  const READER_IDS = ['rules', 'vss', 'neural', 'combined'];
 
   const isQuota = e => !!e && (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || e.code === 22 || e.code === 1014);
   const pad = n => String(n).padStart(2, '0');
@@ -94,80 +95,49 @@
   function safeLocalStorage() { try { const s = typeof localStorage !== 'undefined' ? localStorage : null; if (s) s.getItem('x'); return s; } catch (e) { return null; } }
 
   /* ---------------- one entry from a turn ---------------- */
-  /** a node's argument value written as in the fresh2 / short3 gold: a mention wire -> "mention(k=v,...)" (keys sorted), a reference to
-   *  another wire of the message -> "$new", a list -> comma-joined, anything else as a string (case kept, as the gold writes names) */
-  function argValue(v, byId) {
-    if (v == null) return null;
-    if (Array.isArray(v)) { const xs = v.map(x => argValue(x, byId)).filter(x => x != null); return xs.length ? xs.join(',') : null; }
-    if (typeof v === 'object' && typeof v.ref === 'string') {
-      const m = byId.get(v.ref);
-      if (m && m.type === 'mention') return 'mention(' + Object.keys(m.args || {}).sort().map(k => `${k}=${argValue(m.args[k], byId)}`).join(',') + ')';
-      return '$new';
-    }
-    if (typeof v === 'object') return JSON.stringify(v);
-    return String(v);
-  }
-  /** SOP nodes -> wires in the fresh2 format: [{span?, type, args}], the mention wires folded into their users (as the gold) */
-  function wiresOf(nodes, spanOf) {
-    nodes = nodes || [];
-    const byId = new Map(nodes.map(n => [n.id, n]));
-    return nodes.filter(n => n && n.type !== 'mention').map(n => {
-      const args = {};
-      for (const [k, v] of Object.entries(n.args || {})) { const s = argValue(v, byId); if (s != null && s !== '') args[k] = s; }
-      const w = {}; const sp = spanOf ? spanOf(n) : null; if (sp) w.span = sp;
-      w.type = n.type; w.args = args; return w;
-    });
-  }
   const num = x => typeof x === 'number' && isFinite(x) ? Math.round(x * 10000) / 10000 : null;
-  /** a threshold as stored: a number, or {key: number} (commands / questions), else null */
-  function thr(t) {
-    if (typeof t === 'number') return num(t);
-    if (t && typeof t === 'object') { const o = {}; for (const [k, v] of Object.entries(t)) if (typeof v === 'number') o[k] = num(v); return Object.keys(o).length ? o : null; }
-    return null;
-  }
+  /** the reply as kept: at most REPLY_MAX characters (an ellipsis when cut) */
+  const REPLY_MAX = 280;
+  const shortText = t => { t = String(t || '').replace(/\s+/g, ' ').trim(); return t.length > REPLY_MAX ? t.slice(0, REPLY_MAX - 1) + '…' : t; };
   /**
-   * One entry from a turn of docs/js/ui.js.
-   * rec: ui.js's turn record {id, text (read, after spelling), typed (as sent), spell, cut, readers: {id: {nodes, allNodes, gate, notes, ms,
-   *      error, names}}, off: {id: text}, ran}
-   * env: {session, serialize(node) -> SOP Lang line, names (the drawing of the tab the chat speaks for, before the message), labels: {id:
-   *      label}, source: {via, lang, original, translation}, reply: the text of VSS-BERT's line in the chat, tab: the active tab}
-   * -> the entry (no id / time: createStore().add sets them); the format is training/sketch/COLLECT_FORMAT.md
+   * The model versions of an entry, from docs/model/versions.json ("files": {path: content version}): `combined` (VSS-BERT's confidence
+   * model), `neural` (SOP-BERT), `micro` (one short digest of the registry's nine worlds and two cutters: every micro/ stamp), and `all`
+   * (a digest of every stamp: the exact set, matched against versions.json in the repository history to recompute with the same models).
+   */
+  function modelVersions(files) {
+    if (!files || typeof files !== 'object') return null;
+    const keys = Object.keys(files).sort(), dig = ks => fnv(ks.map(k => `${k}=${files[k]}`).join('\n'));
+    const o = { all: dig(keys) };
+    const micro = keys.filter(k => k.startsWith('micro/')); if (micro.length) o.micro = dig(micro);
+    if (files['neural/sop-bert']) o.neural = String(files['neural/sop-bert']);
+    if (files['confidence/combined.json']) o.combined = String(files['confidence/combined.json']);
+    return o;
+  }
+  /** FNV-1a 32 bits, as 8 hex digits: a short, stable digest (not a security hash) */
+  function fnv(str) { let h = 0x811c9dc5; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); }
+  /**
+   * One entry from a turn of docs/js/ui.js (format 2: training/sketch/COLLECT_FORMAT.md).
+   * rec: ui.js's turn record {id, text (read, after spelling), typed (as sent), readers: {combined: {gate: {units: [{index, src, conf,
+   *      execute}]}, error}}, off: {id: text}}
+   * env: {session, names (the drawing of the tab the chat speaks for, before the message), source: {via, lang, original, translation},
+   *      models (modelVersions(versions.json files)), reply: the text of the line that answered in the chat, tab: the active tab}
+   * -> the entry (no id / time: createStore().add sets them). The readings themselves are not kept: text + names + models reproduce them.
    */
   function buildEntry(rec, env) {
     env = env || {};
-    const readings = {};
-    for (const id of READER_IDS) {
-      const r = rec.readers ? rec.readers[id] : null;
-      if (!r) { readings[id] = { status: 'off', note: (rec.off && rec.off[id]) || 'did not read this' }; continue; }
-      const all = r.allNodes || r.nodes || [];
-      const g = r.gate || null;
-      const unitOf = new Map(); if (g && g.units) g.units.forEach(u => (u.nodes || []).forEach(n => unitOf.set(n, u)));
-      const o = { status: r.error && r.error.message !== 'No wires.' ? 'error' : 'read' };
-      if (r.error && o.status === 'error') o.error = String(r.error.message || r.error);
-      if (typeof r.ms === 'number') o.ms = num(r.ms);
-      let sop = '';
-      if (env.serialize) { try { sop = all.map(n => env.serialize(n)).join('\n'); } catch (e) { sop = ''; } }
-      o.sop = sop;
-      o.wires = wiresOf(all, n => { const u = unitOf.get(n); return u && u.src ? String(u.src) : null; });
-      if (g) {
-        o.gate = { level: g.level != null ? String(g.level) : null, threshold: thr(g.threshold) };
-        o.units = (g.units || []).map(u => {
-          const x = { index: u.index, src: u.src != null ? String(u.src) : '', conf: num(u.conf), execute: !!u.execute };
-          const ws = wiresOf(u.nodes || []); if (ws.length) x.wires = ws.map(w => ({ type: w.type, args: w.args }));
-          const rs = (u.reasons || []).map(z => z && z.text).filter(Boolean); if (rs.length && !u.execute) x.reasons = rs.slice(0, 4);
-          return x;
-        });
-        o.executed = o.units.filter(u => u.execute).map(u => u.index);
-        o.held = o.units.filter(u => !u.execute).map(u => u.index);
-      }
-      if (r.names && env.names && r.names.join('\u0000') !== env.names.join('\u0000')) o.names = r.names.slice();
-      readings[id] = o;
-    }
     const src = env.source || {};
     const source = { via: src.via || 'typed' };
     if (src.lang) source.lang = String(src.lang);
     if (src.original != null && src.original !== '') source.original = String(src.original);
-    if (src.translation) source.translation = Object.assign({}, src.translation);
+    if (src.translation) { const t = src.translation; source.translation = { by: t.by != null ? String(t.by) : 'none', edited: !!t.edited }; }
+    const r = rec.readers ? rec.readers.combined : null;
+    let decision;
+    if (!r) decision = { status: 'off', note: (rec.off && rec.off.combined) || 'did not read this' };
+    else if (r.error && r.error.message !== 'No wires.') decision = { status: 'error', error: String(r.error.message || r.error) };
+    else {
+      const units = (r.gate && r.gate.units) || [];
+      decision = { status: 'read', units: units.map(u => ({ index: u.index, src: u.src != null ? String(u.src) : '', execute: !!u.execute, conf: num(u.conf) })) };
+    }
     const e = {
       format: FORMAT,
       session: env.session || null,
@@ -176,34 +146,41 @@
       names: (env.names || []).slice(),
       text: String(rec.typed != null ? rec.typed : rec.text),
       source,
-      readings,
+      models: env.models || null,
+      decision,
       events: [],
       wires: []
     };
-    if (rec.text != null && rec.typed != null && rec.text !== rec.typed) e.read = String(rec.text);
-    if (rec.spell && rec.spell.fixes && rec.spell.fixes.length) e.spell = rec.spell.fixes.map(f => ({ from: f.from, to: f.to }));
-    if (rec.cut && rec.cut.units) e.cut = { by: rec.cut.strategy || null, units: rec.cut.units.map(u => String(u.src)) };
     if (env.tab) e.tab = env.tab;
-    if (env.reply) e.reply = String(env.reply);
+    if (env.reply) e.reply = shortText(env.reply);
     return e;
   }
 
   /* ---------------- Settings › Collected requests (browser only) ---------------- */
   const escH = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const EVENT_WORDS = { anyway: 'done anyway', edit: 'Edit used', 'edit-sent': 'edited and sent', superseded: 'superseded', 'undo-next': 'undone right after' };
+  /** what VSS-BERT did with an entry's message, in words (format 2: `decision`; format 1: `readings.combined`) */
+  function decisionWords(e) {
+    const d = e.decision || (e.readings && e.readings.combined && Object.assign({}, e.readings.combined, e.readings.combined.units ? {} : { units: null }));
+    if (!d) return '';
+    if (d.status === 'off') return 'VSS-BERT did not read it';
+    if (d.status === 'error') return 'VSS-BERT could not read it';
+    if (d.units) { const x = d.units.filter(u => u.execute).length; return `VSS-BERT executed ${x}, held ${d.units.length - x}`; }
+    return d.wires ? `VSS-BERT read ${d.wires.length} request${d.wires.length === 1 ? '' : 's'}` : '';
+  }
   /** the section's inner HTML for a store `S`; confirm: the Clear confirmation is open */
   function sectionHTML(S, confirm, note) {
     const n = S.count(), st = S.status(), on = S.enabled();
     const prev = S.last(5).map(e => {
-      const c = e.readings && e.readings.combined, did = c && c.units ? `VSS-BERT executed ${c.executed.length}, held ${c.held.length}` : c && c.status === 'off' ? 'VSS-BERT did not read it' : c && c.wires ? `VSS-BERT read ${c.wires.length} request${c.wires.length === 1 ? '' : 's'}` : '';
+      const did = decisionWords(e);
       const ev = [...new Set((e.events || []).map(x => EVENT_WORDS[x.kind] || x.kind))].join(', ');
       const t = new Date(e.time); const when = isNaN(t) ? '' : t.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
       return `<li><div class="ct">${escH(e.text)}</div>${e.source && e.source.original ? `<div class="co">${escH(e.source.lang || '')}: ${escH(e.source.original)}</div>` : ''}<div class="cm">${escH([when, did, ev].filter(Boolean).join(' · '))}</div></li>`;
     }).join('');
     const where = st.persistent ? `kept in this browser (localStorage), at most the last ${S.cap}` : `kept in this page only: this browser’s storage is not available${st.error ? ` (${escH(st.error)})` : ''}, so they are lost when the page closes`;
     return `<h3 class="sub">Collected requests</h3>
-  <label class="collect-switch"><input type="checkbox" data-collect="toggle" ${on ? 'checked' : ''}> <span>Keep every message I send here, with what each reader read and what VSS-BERT did, to improve the test data (on by default)</span></label>
-  <p class="note"><b>Nothing leaves your browser unless you download the file.</b> The entries are ${where}${st.dropped ? `; ${st.dropped} older entr${st.dropped === 1 ? 'y was' : 'ies were'} dropped to make room` : ''}. Each entry has the time, your text (and the original words and language when it came through voice or translation), the names on the drawing, what Rules, VSS, SOP-BERT and VSS-BERT read, what VSS-BERT executed or held with its confidence, and what you did next (Do it anyway, Edit, a later command that replaced it, undo).</p>
+  <label class="collect-switch"><input type="checkbox" data-collect="toggle" ${on ? 'checked' : ''}> <span>Keep every message I send here, with what VSS-BERT did, to improve the test data (on by default)</span></label>
+  <p class="note"><b>Nothing leaves your browser unless you download the file.</b> The entries are ${where}${st.dropped ? `; ${st.dropped} older entr${st.dropped === 1 ? 'y was' : 'ies were'} dropped to make room` : ''}. Each entry has the time, your text (and the original words and language when it came through voice or translation), the names on the drawing, the versions of the models (with these, every reader’s reading can be recomputed, so it is not stored), the reply, what VSS-BERT executed or held with its confidence, and what you did next (Do it anyway, Edit, a later command that replaced it, undo).</p>
   <div class="collect-row"><b class="collect-n" data-collect-count>${n}</b> <span>collected request${n === 1 ? '' : 's'}</span>
     <button type="button" class="btn" data-collect="download" ${n ? '' : 'disabled'}>Download as JSONL</button>
     <button type="button" class="btn" data-collect="clear" ${n ? '' : 'disabled'} aria-expanded="${confirm ? 'true' : 'false'}">Clear…</button></div>
@@ -248,5 +225,5 @@
     };
   }
 
-  return { FORMAT, KEY, ON_KEY, CAP, READER_IDS, createStore, buildEntry, wiresOf, argValue, fileName, isQuota, sectionHTML, mountSettings };
+  return { FORMAT, KEY, ON_KEY, CAP, REPLY_MAX, createStore, buildEntry, modelVersions, fnv, decisionWords, fileName, isQuota, sectionHTML, mountSettings };
 });

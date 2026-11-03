@@ -1,0 +1,40 @@
+{"id": "sc3-17-001", "domain": "winter village scene", "text": "Winter village at night! Background: a navy rectangle, 780 by 480, in the center, background layer, named NightSky."}
+{"id": "sc3-17-002", "domain": "winter village scene", "text": "snowy ground: a white rectangle zone, 780 by 140, at the bottom, called Snow"}
+{"id": "sc3-17-003", "domain": "winter village scene", "text": "Moon in the top left, a medium white circle, Moon"}
+{"id": "sc3-17-004", "domain": "winter village scene", "text": "first house: a medium red square named House1 in the bottom left"}
+{"id": "sc3-17-005", "domain": "winter village scene", "text": "its roof, a medium brown triangle named Roof1, 2 px above House1"}
+{"id": "sc3-17-006", "domain": "winter village scene", "text": "second house to the right of House1, 100 px away: medium blue square, House2"}
+{"id": "sc3-17-007", "domain": "winter village scene", "text": "and Roof2 on top of it, a brown triangle 2 px above House2"}
+{"id": "sc3-17-008", "domain": "winter village scene", "text": "a third one, House3, green square right of House2 with the same 100 px gap"}
+{"id": "sc3-17-009", "domain": "winter village scene", "text": "Roof3: brown triangle with a 2 px gap above House3"}
+{"id": "sc3-17-010", "domain": "winter village scene", "text": "group House1 and Roof1 as Home1"}
+{"id": "sc3-17-011", "domain": "winter village scene", "text": "then House2 with Roof2 as Home2, and House3 with Roof3 as Home3"}
+{"id": "sc3-17-012", "domain": "winter village scene", "text": "Snowman! Bottom ball: a large white circle at 640,410, named Base"}
+{"id": "sc3-17-013", "domain": "winter village scene", "text": "middle ball: medium white circle at 640,338, Belly"}
+{"id": "sc3-17-014", "domain": "winter village scene", "text": "head: small white circle at 640,288, named Noggin"}
+{"id": "sc3-17-015", "domain": "winter village scene", "text": "tiny orange triangle for the nose at 662,288, Carrot"}
+{"id": "sc3-17-016", "domain": "winter village scene", "text": "group Base, Belly, Noggin and Carrot as Snowman"}
+{"id": "sc3-17-017", "domain": "winter village scene", "text": "two pine trees: green triangles, Pine1 right of Home3 and a green triangle Pine2 between Home1 and Home2"}
+{"id": "sc3-17-018", "domain": "winter village scene", "text": "make the pines large"}
+{"id": "sc3-17-019", "domain": "winter village scene", "text": "oops, too big, undo"}
+{"id": "sc3-17-020", "domain": "winter village scene", "text": "Eight tiny white stars in a grid in the top right for snowflakes"}
+{"id": "sc3-17-021", "domain": "winter village scene", "text": "are there more stars than circles? how many stars are there?"}
+{"id": "sc3-17-022", "domain": "winter village scene", "text": "make the snowflakes cyan"}
+{"id": "sc3-17-023", "domain": "winter village scene", "text": "Smoke from the first chimney: three tiny gray circles in a column above Roof1"}
+{"id": "sc3-17-024", "domain": "winter village scene", "text": "Write \"Merry Winter\" at the top in gold, large"}
+{"id": "sc3-17-025", "domain": "winter village scene", "text": "Is Base right of House3?"}
+{"id": "sc3-17-026", "domain": "winter village scene", "text": "Which group is Carrot in?"}
+{"id": "sc3-17-027", "domain": "winter village scene", "text": "Sled: a small brown rectangle left of the snowman, 20 px gap, named Sled"}
+{"id": "sc3-17-028", "domain": "winter village scene", "text": "tie the sled to the snowman's base with a dotted line"}
+{"id": "sc3-17-029", "domain": "winter village scene", "text": "put a yellow light in each window: tiny yellow squares on House1, House2 and House3... just one for now, a tiny yellow square above Snow? no, never mind"}
+{"id": "sc3-17-030", "domain": "winter village scene", "text": "Is the moon above Home1?"}
+{"id": "sc3-17-031", "domain": "winter village scene", "text": "move the moon a bit to the right"}
+{"id": "sc3-17-032", "domain": "winter village scene", "text": "Which shape is closest to the moon now that it moved?"}
+{"id": "sc3-17-033", "domain": "winter village scene", "text": "make House2 purple"}
+{"id": "sc3-17-034", "domain": "winter village scene", "text": "Snowman goes in front of everything"}
+{"id": "sc3-17-035", "domain": "winter village scene", "text": "what is the color of Roof3?"}
+{"id": "sc3-17-036", "domain": "winter village scene", "text": "paint all the roofs gray, they're covered in snow"}
+{"id": "sc3-17-037", "domain": "winter village scene", "text": "undo that, the brown looked cosier"}
+{"id": "sc3-17-038", "domain": "winter village scene", "text": "how many squares are there, houses only I think?"}
+{"id": "sc3-17-039", "domain": "winter village scene", "text": "Describe Snowman's head, Noggin."}
+{"id": "sc3-17-040", "domain": "winter village scene", "text": "Lovely, the village is done."}

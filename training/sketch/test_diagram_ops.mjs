@@ -458,5 +458,49 @@ const base = () => { const S = K.createSystem(); run(S, `@a command action=creat
   S = mk(); run(S, "@s command action=label kind=edge label=go quantifier=all"); r = run(S, "@s command action=label kind=edge label= quantifier=all");
   eq("remove two arrow labels: plural reply", r.steps[0].answer, "Removed the labels of 2 arrows.");
 }
+// ---------- items named by the text they show (owner's session 2026-11-03: "delete Order flow", the title MainTitle says "Order flow") ----------
+{
+  const SD = createRequire(import.meta.url)("../../docs/js/start-diagram.js");
+  const open = () => { const S = K.createSystem(); run(S, SD.SOP); return S; };
+  const removed = r => r.steps.flatMap(s => s.patches).filter(p => p.op === "remove").map(p => p.name);
+  for (const [what, sop] of [["the whole text", 'target="Order flow"'], ["any case", 'target="order FLOW"'], ["the words as two names", "target=Order,flow"],
+    ["without the space", "target=Orderflow"], ["one word of two", "target=Order"], ["one letter off", 'target="Ordr flow"']]) {
+    const S = open(), r = run(S, `@d command action=delete ${sop}`);
+    eq(`delete by its text (${what}: ${sop}) deletes MainTitle`, [r.ok, removed(r)], [true, ["MainTitle"]]);
+  }
+  { const S = open(), r = run(S, "@d command action=move target=Validate direction=left distance=20");
+    eq("a shape's label names it: move Validate -> Process moves", [r.ok, r.steps[0].patches[0] && r.steps[0].patches[0].name], [true, "Process"]); }
+  { const S = open(), r = run(S, '@c command action=connect from=Start to="ok?"');
+    eq("connect Start to \"ok?\" (Check's label) -> Start → Check", [r.ok, S.world.state.edges.some(e => e.from === "Start" && e.to === "Check")], [true, true]); }
+  { const S = open(), r = run(S, '@m mention label="order flow"\n@d command action=delete target=$m');
+    eq("a mention by its text (label=) resolves to MainTitle", [r.ok, removed(r)], [true, ["MainTitle"]]); }
+  { const S = open(), r = run(S, "@d command action=delete target=review");
+    eq("a name wins over a text: 'review' is the group Review (not the caption '2 · review')", removed(r).includes("ReviewZone"), true); }
+  { const S = open(); run(S, '@a command action=create shape=circle name=A label="flow"\n@b command action=create shape=circle name=B label="Flow"');
+    const r = run(S, "@d command action=delete target=flow");
+    eq("two items show the same text: it asks which one, nothing is deleted", [r.ok, /^Which one\? "flow" could be A \("flow"\) and B \("Flow"\)/.test(r.error.message), removed(r)], [false, true, []]); }
+  { const S = open(), r = run(S, "@d command action=delete target=Payment");
+    eq("a reference no item shows: the usual answer", /There is no shape named "Payment"/.test(r.error.message), true); }
+  { const S = open(); run(S, '@a command action=create shape=circle name=A label="Make the payment and ship it"'); const r = run(S, "@d command action=delete target=Make");
+    eq("one word of a long text is not a match ('Make' is not 'Make the payment and ship it')", r.ok, false); }
+  { const S = open(), r = run(S, "@n command action=create shape=circle name=Flow");
+    eq("a new shape may take a name that is also a word of a text (names are not resolved by text on create)", [r.ok, !!S.world.find("Flow"), !!S.world.find("MainTitle")], [true, true, true]); }
+}
+// ---------- descriptions and panels: layer= and label= in a mention (owner's session 2026-11-03: "Delete background boxes" deleted Process) ----------
+{
+  const SD = createRequire(import.meta.url)("../../docs/js/start-diagram.js");
+  const open = () => { const S = K.createSystem(); run(S, SD.SOP); return S; };
+  const del = (desc) => { const S = open(), r = run(S, `@m mention ${desc}\n@d command action=delete target=$m`); return { r, gone: r.steps.flatMap(s => s.patches).filter(p => p.op === "remove").map(p => p.name) }; };
+  eq("'the boxes' (shape=rectangle, all): the ordinary rectangles only, never the panels", del("quantifier=all shape=rectangle").gone, ["Process"]);
+  eq("'the background boxes' (layer=background): the background only", del("quantifier=all shape=rectangle layer=background").gone, ["Backdrop"]);
+  eq("'the zones' (layer=zone): both zones", del("quantifier=all layer=zone").gone, ["IntakeZone", "ReviewZone"]);
+  eq("layer=item with a kind: the ordinary items of that kind", del("quantifier=all layer=item shape=rectangle").gone, ["Process"]);
+  eq("'the text Order flow' (shape=text label=...): the title", del('shape=text label="Order flow"').gone, ["MainTitle"]);
+  eq("'everything' (no kind, no layer) still means everything, panels included", del("quantifier=all").gone.length, 10);
+  { const S = open(); run(S, "@d command action=delete target=Process"); const r = run(S, "@m mention quantifier=all shape=rectangle\n@d command action=delete target=$m");
+    eq("no ordinary rectangle left: it says the panels are left out and how to mean them, deletes nothing", [r.ok, /background and the zones are left out/.test(r.error.message), S.world.state.shapes.length], [false, true, 9]); }
+  { const S = open(); eq("count rectangles: the panels are not counted", ask(S, "@q question ask=count shape=rectangle"), 1); eq("count zones", ask(S, "@q question ask=count layer=zone"), 2);
+    eq("is there a text saying 'order flow'?", ask(S, '@q question ask=exists shape=text label="order flow"'), true); }
+}
 console.log(`\n${n - fail}/${n} passed`);
 process.exit(fail ? 1 : 0);

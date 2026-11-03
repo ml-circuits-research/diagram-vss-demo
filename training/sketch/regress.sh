@@ -9,7 +9,7 @@
 #                 templates, so they favour the Rules reader
 #   short: llm_short   3000 one-line commands written by LLM agents, with spans (llm_train/{sonnet,haiku}_short): realistic; the VSS cutter
 #                 was trained on them
-#   rules sets    score_rules.mjs (the demo Benchmark's per-row score, Rules only): hand 38/40 ... in the line "rules sets"
+#   rules sets    score_rules.mjs (bench-canon.js's per-row score, as the former Benchmark tab of the demo; Rules only): hand 38/40 ... in the line "rules sets"
 #   tests         test_diagram_ops.mjs, test_editor_history.mjs (pass / fail)
 #   VSS gated     the same three sets, VSS executing a request only when its combined confidence clears the demo's default threshold
 #                 (GATE=cost of llm_score.mjs / short_bench.mjs: the cost-score threshold of docs/model/confidence/vss.json, as the demo): precision of execution,

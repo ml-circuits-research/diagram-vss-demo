@@ -1,0 +1,43 @@
+{"id": "sc3-10-001", "domain": "town map", "text": "I'm making a little map of our town, Riverton. Background: a faint lime rectangle covering the canvas, 780 by 480, at 400,250, called Land."}
+{"id": "sc3-10-002", "domain": "town map", "text": "Town hall goes in the middle: a large gray square named Hall, labelled \"Town Hall\"."}
+{"id": "sc3-10-003", "domain": "town map", "text": "Put the market on its left, a yellow diamond named Market."}
+{"id": "sc3-10-004", "domain": "town map", "text": "School is to the right of Hall, about 120 px away, medium blue rectangle, name School"}
+{"id": "sc3-10-005", "domain": "town map", "text": "Library: purple square just above the school"}
+{"id": "sc3-10-006", "domain": "town map", "text": "and the hospital under the town hall, a red rectangle called Hospital"}
+{"id": "sc3-10-007", "domain": "town map", "text": "Station in the bottom left corner, medium orange hexagon, named Station"}
+{"id": "sc3-10-008", "domain": "town map", "text": "roads now: connect Hall to Market, School and Hospital with plain gray lines"}
+{"id": "sc3-10-009", "domain": "town map", "text": "School to Library as well, same gray line"}
+{"id": "sc3-10-010", "domain": "town map", "text": "a dotted black line from Station to Market for the railway"}
+{"id": "sc3-10-011", "domain": "town map", "text": "Is there a path from Station to Library?"}
+{"id": "sc3-10-012", "domain": "town map", "text": "Park: light green ellipse zone, 200 by 120, in the top left, named Park"}
+{"id": "sc3-10-013", "domain": "town map", "text": "Four tiny green circles in a grid in the top left, those are the trees in the park"}
+{"id": "sc3-10-014", "domain": "town map", "text": "the lake: light blue ellipse zone in the bottom right, 180 x 90, call it Lake"}
+{"id": "sc3-10-015", "domain": "town map", "text": "three small brown squares in a row below Library for houses"}
+{"id": "sc3-10-016", "domain": "town map", "text": "What's next to Hall?"}
+{"id": "sc3-10-017", "domain": "town map", "text": "group Hall, School and Library together and call it Downtown"}
+{"id": "sc3-10-018", "domain": "town map", "text": "Which group holds School?"}
+{"id": "sc3-10-019", "domain": "town map", "text": "Compass: a small black star in the top right, label it \"N\""}
+{"id": "sc3-10-020", "domain": "town map", "text": "make the compass smaller"}
+{"id": "sc3-10-021", "domain": "town map", "text": "Put a title \"Riverton\" at the top"}
+{"id": "sc3-10-022", "domain": "town map", "text": "make it navy and huge"}
+{"id": "sc3-10-023", "domain": "town map", "text": "Is School right of Hall?"}
+{"id": "sc3-10-024", "domain": "town map", "text": "the market should be the same size as the library"}
+{"id": "sc3-10-025", "domain": "town map", "text": "make the hospital bigger, it's the main one"}
+{"id": "sc3-10-026", "domain": "town map", "text": "Draw a red arrow from Station to Hospital labelled \"ambulance\""}
+{"id": "sc3-10-027", "domain": "town map", "text": "how many squares are on the map?"}
+{"id": "sc3-10-028", "domain": "town map", "text": "small brown rectangle between Hall and Lake for the bridge, call it Bridge"}
+{"id": "sc3-10-029", "domain": "town map", "text": "connect Bridge to Lake and to Hall with gray lines"}
+{"id": "sc3-10-030", "domain": "town map", "text": "What is connected to Hall?"}
+{"id": "sc3-10-031", "domain": "town map", "text": "Which shape is closest to Station?"}
+{"id": "sc3-10-032", "domain": "town map", "text": "move Station a bit up"}
+{"id": "sc3-10-033", "domain": "town map", "text": "rename Market to Bazaar, that's what locals call it"}
+{"id": "sc3-10-034", "domain": "town map", "text": "Is Bazaar left of Hall?"}
+{"id": "sc3-10-035", "domain": "town map", "text": "Swap Library and School"}
+{"id": "sc3-10-036", "domain": "town map", "text": "oops, swap them back"}
+{"id": "sc3-10-037", "domain": "town map", "text": "paint the houses orange"}
+{"id": "sc3-10-038", "domain": "town map", "text": "Which shapes are orange?"}
+{"id": "sc3-10-039", "domain": "town map", "text": "Is there any star on the map?"}
+{"id": "sc3-10-040", "domain": "town map", "text": "bring the title to the front"}
+{"id": "sc3-10-041", "domain": "town map", "text": "How many connections does Hall have?"}
+{"id": "sc3-10-042", "domain": "town map", "text": "Describe the map."}
+{"id": "sc3-10-043", "domain": "town map", "text": "That's Riverton!"}

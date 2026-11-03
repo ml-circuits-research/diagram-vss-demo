@@ -10,6 +10,14 @@ The research question (owner, 2026-11-02): **a reader that says clearly where it
 the rest**, not one that approximates well; for approximation there are LLMs. In a drawing a confident mistake costs one undo; where a wrong
 action has serious consequences it is what matters most. The diagram editor is the test bench.
 
+What it is for: a reader that knows when it does not know is valuable where mistakes are very expensive: highly regulated industries, and
+research, where it can filter material and bring people less work, more reliably and more trustworthily than an LLM, which tends to answer
+confidently even when it is wrong. The value is caution by design: do what it is sure of, hand the rest to a person with the reasons, and keep
+a symbolic layer that executes only known actions. In the demo one confident mistake costs as much as 10 right answers; VSS-BERT (SOP-BERT
+paired with VSS) is confidently wrong in 1.8% of what it executes and says why it holds the rest; the models never act directly, the engine
+does. VSS alone has the same property: its confidence is built from its own named steps. Where a capable LLM would be too expensive or too
+slow, these readers are also small enough to run in a browser tab.
+
 - **Main metric: precision of execution.** Of everything a reader executes (requested actions and extras nobody asked for), the share done
   right. It is reported with the share of requests done right at that precision; readers are compared by the share of requests done right
   **at equal precision** (the risk-coverage curve), with the AUROC of their confidence beside it.
@@ -26,7 +34,7 @@ action has serious consequences it is what matters most. The diagram editor is t
 | reader | what it is | model |
 |---|---|---|
 | **Rules** | hand-written extractors keyed on the legend's cue words, with spelling correction and mention resolution | none (code) |
-| **VSS** | a composer of 7 small VSS worlds (VSA route book, no transformer) trained on this demo's legend with the `sop` tool of [vss-demo](https://github.com/ml-circuits-research/vss-demo): a cutter cuts the message into units, the worlds read them, a context filler fills references | `docs/model/micro/` (the worlds, the cutter, `registry.json`), `docs/model/context/` |
+| **VSS** | a composer of 9 small VSS worlds (VSA route book, no transformer) trained on this demo's legend with the `sop` tool of [vss-demo](https://github.com/ml-circuits-research/vss-demo): a cutter cuts the message into units, the worlds read them, a context filler fills references | `docs/model/micro/` (the worlds, the cutter, `registry.json`), `docs/model/context/` |
 | **Neural** | SOP-BERT: one DistilBERT fine-tuned on the annotated requests, run in the browser by Transformers.js; it cuts the message (the BERT cutter) and reads, per request, the act, the value of each legend key, who fills each role and the written names, labels and numbers, without the Rules reader. (Until 2026-11-02: an act classifier plus a ready-made QA model, removed.) | `docs/model/neural/sop-bert/` (hosted on this site, versioned) |
 
 The **Benchmark** (menu ⋮ › Benchmark) runs the readers on the same labelled sentences in the browser and shows accuracy per test set, the model
@@ -43,7 +51,7 @@ Help: the ? button above the drawing opens it full screen (deep links such as `i
 | path | content |
 |---|---|
 | `docs/index.html`, `docs/js/` | the application: `logic.js` (SOP Lang, legend, engine, plugins, rules formalizer, Datalog reasoner), `ui.js`, `scenarios.js`, `neural.js` (Transformers.js formalizer), `vss-formalizer.js` + `vss-composer.js` + `vss-context.js` + `vss-adapter.js` + `front.js` (the VSS pipeline), `vss.js` + `vss/` (the browser VSS reader, copied from vss-demo `app/src`), `bench-canon.js` (benchmark scoring) |
-| `docs/model/micro/` | the 7 exported VSS worlds (each: `model.json`, `routebook.bin`, `stars.json` (word vectors generated in the browser), `manifest.json`, `front.json`), the cutters and `registry.json` |
+| `docs/model/micro/` | the 9 exported VSS worlds (each: `model.json`, `routebook.bin`, `stars.json` (word vectors generated in the browser), `manifest.json`, `front.json`), the cutters and `registry.json` |
 | `docs/bench/` | the benchmark sets (labelled sentences with their gold wires) |
 | `training/sketch/` | the VSS worlds: legend and sentence generator, world and cutter training (`train_micro.sh`, `train_cutter.py`), scoring (`llm_score.mjs`, `score_rules.mjs`), benchmark builder, the experiment records (`*.md`), run logs |
 

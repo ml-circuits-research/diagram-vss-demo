@@ -30,7 +30,8 @@ const CLEAR = 4;                                          // the clearance overl
 const PALETTE = ['red', 'orange', 'yellow', 'gold', 'lime', 'green', 'teal', 'cyan', 'blue', 'navy', 'indigo', 'purple', 'magenta', 'pink', 'brown', 'gray', 'black', 'white'];   // logic.js COLOR_VALUES order
 const SHAPE_ORDER = ['circle', 'square', 'rectangle', 'triangle', 'diamond', 'ellipse', 'hexagon', 'star'];                                                                       // logic.js SHAPE_VALUES order
 const LAYOUTS = ['row', 'column', 'grid', 'circle', 'tree', 'layers', 'radial', 'organic', 'auto'];
-const WEIGHTS = { overlap: 30, crossing: 20, through: 15, outside: 10, length: 7, align: 6, spacing: 6, flow: 6 };   // sum 100
+const WEIGHTS = { overlap: 28, crossing: 16, through: 14, outside: 10, labels: 4, length: 6, align: 6, spacing: 9, flow: 7 };   // sum 100
+const LINKED_KINDS = ['tree', 'layers', 'radial', 'organic'];
 
 /* ---------------------------------------------------------------- small helpers ---------------------------------------------------------------- */
 const cmpStr = (a, b) => a < b ? -1 : a > b ? 1 : 0;
@@ -41,6 +42,7 @@ const mean = a => a.length ? a.reduce((s, v) => s + v, 0) / a.length : 0;
 const median = a => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y); return s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2; };
 const cv = a => { if (a.length < 2) return 0; const m = mean(a); if (m <= 0) return 0; return Math.sqrt(mean(a.map(v => (v - m) ** 2))) / m; };
 const r1 = v => Math.round(v * 10) / 10;
+const listing0 = a => a.length <= 1 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
 const canvasOf = o => Object.assign({}, DEFAULT_CANVAS, (o && o.canvas) || {});
 const innerOf = c => ({ x1: c.x + MARGIN.l, y1: c.y + MARGIN.t, x2: c.x + c.w - MARGIN.r, y2: c.y + c.h - MARGIN.b });
 const box = n => ({ x1: n.x - n.w / 2, y1: n.y - n.h / 2, x2: n.x + n.w / 2, y2: n.y + n.h / 2 });
@@ -84,7 +86,7 @@ function graphOf(ns, links) {
     const directed = l.arrow == null || l.arrow === 'forward';
     const k = directed ? a + '>' + b : (a < b ? a + '-' + b : b + '-' + a);
     if (seen.has(k)) continue; seen.add(k);
-    E.push({ a, b, directed });
+    E.push({ a, b, directed, label: l.label || null });
   }
   const und = ns.map(() => []), out = ns.map(() => []), inn = ns.map(() => []);
   E.forEach((e, k) => { und[e.a].push(e.b); und[e.b].push(e.a); if (e.directed) { out[e.a].push(e.b); inn[e.b].push(e.a); } });
@@ -173,8 +175,12 @@ function segThroughBox(p, q, n) {
      align     shapes whose centre shares no x and no y (within 2 px) with another shape term = share of such shapes
      spacing   variation of the distance from each shape to its nearest neighbour        term = min(1, cv)
      flow      arrows that do not point the way most arrows point (down, up, left, right) term = share of the directed links
-   Weights (WEIGHTS): overlap 30, crossing 20, through 15, outside 10, length 7, align 6, spacing 6, flow 6. Overlaps make a diagram
-   unreadable; among the drawing aesthetics, crossings affect understanding most (Purchase 1997, see HIGH_LEVEL_OPS.md). */
+     labels    an arrow's label that has no free place beside the middle of its straight line (a shape's box on both sides)
+                                                                                         term = share of the labelled links
+   Weights (WEIGHTS): overlap 28, crossing 16, through 14, outside 10, labels 4, length 6, align 6, spacing 9, flow 7 (2026-11-03: spacing
+   evenness and the labels added weight after the owner's session, where shapes bunched up and lines went through shapes). Overlaps make
+   a diagram unreadable; among the drawing aesthetics, crossings affect understanding most (Purchase 1997, see HIGH_LEVEL_OPS.md).
+   `through` counts the STRAIGHT line between the two centres: the layout objective. What is drawn may bend around a shape (routeEdges). */
 function scoreNodes(ns, G, canvas) {
   const n = ns.length, m = G.E.length;
   const P = ns.map(x => ({ x: x.x, y: x.y }));
@@ -205,10 +211,16 @@ function scoreNodes(ns, G, canvas) {
   const dirs = { down: 0, up: 0, left: 0, right: 0 }; let directed = 0;
   for (const e of G.E) { if (!e.directed) continue; const dx = P[e.b].x - P[e.a].x, dy = P[e.b].y - P[e.a].y; if (!dx && !dy) continue; directed++; dirs[Math.abs(dy) >= Math.abs(dx) ? (dy > 0 ? 'down' : 'up') : (dx > 0 ? 'right' : 'left')]++; }
   const against = directed ? directed - Math.max(...Object.values(dirs)) : 0;
-  const metrics = { shapes: n, links: m, overlaps, crossings, through, outside, lengthCV: r1(cv(lengths) * 100) / 100, unaligned, spacingCV: r1(cv(nn) * 100) / 100, against };
+  let labelled = 0, labelHits = 0;
+  for (const e of G.E) { if (!e.label) continue; labelled++;
+    const p = P[e.a], q = P[e.b], L = Math.hypot(q.x - p.x, q.y - p.y) || 1, ux = (q.x - p.x) / L, uy = (q.y - p.y) / L, lw = String(e.label).length * 6.8 + 4;
+    const free = side => { const off = side * (12 + Math.abs(uy) * lw / 2), cx = (p.x + q.x) / 2 - uy * off, cy = (p.y + q.y) / 2 + ux * off, b = { x: cx, y: cy, w: lw, h: 16 };
+      return !ns.some(s => boxesOverlap(b, s, 0)); };
+    if (!free(1) && !free(-1)) labelHits++; }
+  const metrics = { shapes: n, links: m, overlaps, crossings, through, outside, lengthCV: r1(cv(lengths) * 100) / 100, unaligned, spacingCV: r1(cv(nn) * 100) / 100, against, labelHits };
   const terms = {
     overlap: n ? Math.min(1, 2 * overlaps / n) : 0, crossing: m ? Math.min(1, crossings / m) : 0, through: m ? Math.min(1, 2 * through / m) : 0,
-    outside: n ? outside / n : 0, length: Math.min(1, cv(lengths)), align: n >= 2 ? unaligned / n : 0, spacing: Math.min(1, cv(nn)), flow: directed ? against / directed : 0
+    outside: n ? outside / n : 0, labels: labelled ? labelHits / labelled : 0, length: Math.min(1, cv(lengths)), align: n >= 2 ? unaligned / n : 0, spacing: Math.min(1, cv(nn)), flow: directed ? against / directed : 0
   };
   let pen = 0; for (const k of Object.keys(WEIGHTS)) pen += WEIGHTS[k] * terms[k];
   return { score: r1(100 - pen), metrics, terms };
@@ -272,7 +284,7 @@ function context(shapes, links, opts, collapse) {
     if (blocks.length) {
       work = work.filter(n => !inBlock.has(n.name)).concat(blocks);
       const map = x => inBlock.get(String(x)) || String(x);
-      wlinks = wlinks.map(l => ({ from: map(l.from), to: map(l.to), arrow: l.arrow })).filter(l => l.from !== l.to);
+      wlinks = wlinks.map(l => ({ from: map(l.from), to: map(l.to), arrow: l.arrow, label: l.label })).filter(l => l.from !== l.to);
     }
   }
   const obstacles = all.filter(n => !movable.has(n.name));
@@ -345,17 +357,44 @@ function lineLayout(list, vertical) {
   let c = 0;
   for (const n of list) { const s = vertical ? n.h : n.w; if (vertical) { n.x = 0; n.y = c + s / 2; } else { n.y = 0; n.x = c + s / 2; } c += s + GAP; }
 }
-function gridLayout(list, inner) {
-  const n = list.length, cw = Math.max(...list.map(x => x.w)) + GAP, ch = Math.max(...list.map(x => x.h)) + GAP;
-  let cols = Math.max(1, Math.ceil(Math.sqrt(n)));
-  const W = inner.x2 - inner.x1, H = inner.y2 - inner.y1;
-  while (cols < n && Math.ceil(n / cols) * ch - GAP > H && (cols + 1) * cw - GAP <= W) cols++;   // too tall for the canvas: wider rows
-  list.forEach((x, i) => { x.x = (i % cols) * cw; x.y = Math.floor(i / cols) * ch; });
+/** a grid that fits the canvas: the number of columns whose block fits the inner area with the widest gaps (GAP at most, MIN_CELL_GAP at
+ *  least), the block's shape closest to the canvas's; snake = true: every second row runs right to left, so that shapes next to each other
+ *  in the order (linked shapes, circleOrder) stay neighbours at the end of a row */
+const MIN_CELL_GAP = 14;
+function gridShape(n, cw0, ch0, W, H) {
+  let best = null;
+  for (let cols = 1; cols <= n; cols++) {
+    const rows = Math.ceil(n / cols);
+    if (cols > 1 && Math.ceil(n / (cols - 1)) === rows) continue;   // the same rows with fewer columns: keep the narrower one
+    const gx = cols > 1 ? Math.min(GAP, (W - cols * cw0) / (cols - 1)) : GAP, gy = rows > 1 ? Math.min(GAP, (H - rows * ch0) / (rows - 1)) : GAP;
+    const fits = (cols * cw0 + (cols - 1) * MIN_CELL_GAP <= W + 0.5) && (rows * ch0 + (rows - 1) * MIN_CELL_GAP <= H + 0.5);
+    const bw = cols * cw0 + (cols - 1) * Math.max(MIN_CELL_GAP, gx), bh = rows * ch0 + (rows - 1) * Math.max(MIN_CELL_GAP, gy);
+    const f = Math.min(1, W / bw, H / bh), shape = Math.abs(Math.log((bw / bh) / (W / H)));
+    const key = [fits ? 0 : 1, -f, shape + 0.15 * (rows * cols - n) / n];
+    if (!best || key[0] < best.key[0] || (key[0] === best.key[0] && (key[1] < best.key[1] - 1e-9 || (Math.abs(key[1] - best.key[1]) <= 1e-9 && key[2] < best.key[2])))) best = { cols, rows, gx: Math.max(MIN_CELL_GAP, gx), gy: Math.max(MIN_CELL_GAP, gy), key };
+  }
+  return best;
 }
-function circleLayout(list) {
+function gridLayout(list, inner, snake) {
+  const n = list.length, cw0 = Math.max(...list.map(x => x.w)), ch0 = Math.max(...list.map(x => x.h));
+  const g = gridShape(n, cw0, ch0, inner.x2 - inner.x1, inner.y2 - inner.y1);
+  list.forEach((x, i) => { const r = Math.floor(i / g.cols), c0 = i % g.cols, c = snake && r % 2 ? g.cols - 1 - c0 : c0; x.x = c * (cw0 + g.gx); x.y = r * (ch0 + g.gy); });
+}
+/** a circle; when the circle the shapes need is taller (or wider) than the canvas, an ellipse that fills the canvas instead (the shapes stay
+ *  an equal angle apart; the ellipse is only used when its closest neighbours still clear each other) */
+function circleLayout(list, inner) {
   const n = list.length; if (n === 1) { list[0].x = 0; list[0].y = 0; return; }
-  const big = Math.max(...list.map(x => Math.max(x.w, x.h))), r = Math.max(big + 20, (big + 28) * n / (2 * Math.PI));
-  list.forEach((x, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; x.x = Math.cos(a) * r; x.y = Math.sin(a) * r; });
+  const bw = Math.max(...list.map(x => x.w)), bh = Math.max(...list.map(x => x.h)), big = Math.max(bw, bh), r = Math.max(big + 20, (big + 28) * n / (2 * Math.PI));
+  let rx = r, ry = r;
+  if (inner) {
+    const W = inner.x2 - inner.x1, H = inner.y2 - inner.y1, mx = (W - bw) / 2, my = (H - bh) / 2;
+    if ((2 * r + bh > H || 2 * r + bw > W) && mx > 0 && my > 0) {
+      const ex = Math.min(mx, r * 1.6), ey = Math.min(my, r);   // the largest ellipse inside the canvas, no wider than the circle needs
+      const P = list.map((x, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; return { x: Math.cos(a) * ex, y: Math.sin(a) * ey, w: x.w, h: x.h }; });
+      if (!overlapPairs(P, 12).length) { rx = ex; ry = ey; }
+    }
+  }
+  list.forEach((x, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; x.x = Math.cos(a) * rx; x.y = Math.sin(a) * ry; });
 }
 /** the circle order when there are links: a depth-first walk (neighbours in reading order) so linked shapes sit next to each other */
 function circleOrder(list, G) {
@@ -573,6 +612,7 @@ function organicLayout(ctx) {
 function autoKind(ctx) {
   const list = ctx.work, G = graphOf(list, ctx.wlinks);
   if (!G.E.length) return 'grid';
+  if (list.length >= 3 && 2 * list.filter((_, i) => !G.und[i].length).length > list.length) return 'grid';   // most shapes unlinked: a tree of them says nothing
   const ro = readingOrder(list), C = componentsOf(G, ro.map(n => list.indexOf(n)));
   const forest = G.E.length === G.n - C.comps.length, multi = list.some((_, i) => G.inn[i].length > 1);
   if (forest && !multi) return 'tree';
@@ -596,21 +636,83 @@ function layout(kind, shapes, links, opts) {
   const ctx = context(shapes, links, o, true);
   if (!ctx.work.length) throw new LayoutError('empty', 'There is nothing to arrange: the canvas is empty.');
   let k = kind, extra = {};
-  if (k === 'auto') { k = autoKind(ctx); ctx.notes.push(`${k} layout (it fits the links)`); }
-  const dir = o.direction || ((k === 'tree' || k === 'layers') && kind === 'auto' ? currentDirection(ctx.work, ctx.wlinks) : 'down');
-  if (ctx.work.length === 1 && !['tree', 'layers', 'radial'].includes(k)) { ctx.work[0].x = 0; ctx.work[0].y = 0; return Object.assign(finish(ctx, k), { layout: k }); }
-  switch (k) {
-    case 'row': lineLayout(orderOf(ctx), false); break;
-    case 'column': lineLayout(orderOf(ctx), true); break;
-    case 'grid': gridLayout(orderOf(ctx), ctx.inner); break;
-    case 'circle': { const G = graphOf(ctx.work, ctx.wlinks); circleLayout(o.order && o.order.length || !G.E.length ? orderOf(ctx) : (readingOrder(ctx.work), circleOrder(ctx.work, G))); break; }
-    case 'tree': extra = treeLayout(ctx, dir); break;
-    case 'layers': extra = layersLayout(ctx, dir); break;
-    case 'radial': extra = radialLayout(ctx); break;
-    case 'organic': extra = organicLayout(ctx); break;
+  if (k === 'auto') {
+    k = autoKind(ctx);
+    const G = graphOf(ctx.work, ctx.wlinks), iso = ctx.work.filter((_, i) => !G.und[i].length).length;
+    ctx.notes.push(k === 'grid' && G.E.length ? `grid layout (${iso} of the ${ctx.work.length} shapes have no links, so there is no tree or flow to follow)` : `${k} layout (it fits the links)`);
+    if (k === 'grid' && G.E.length) ctx.why = `${iso} of the ${ctx.work.length} shapes have no links, so a tree of them would say nothing; linked shapes stay side by side.`;
   }
-  const r = finish(ctx, k);
-  return Object.assign(r, { layout: k, direction: ['tree', 'layers'].includes(k) ? dir : undefined }, extra);
+  if (ctx.work.length === 1 && !['tree', 'layers', 'radial'].includes(k)) { ctx.work[0].x = 0; ctx.work[0].y = 0; return Object.assign(finish(ctx, k), { layout: k }); }
+  // a tree / layers without an asked direction: the direction (down, or left to right) whose drawing fits the canvas better; ties: the
+  // direction the arrows point now
+  let dir = o.direction || 'down';
+  if ((k === 'tree' || k === 'layers') && !o.direction) {
+    const cur = kind === 'auto' ? currentDirection(ctx.work, ctx.wlinks) : 'down', other = cur === 'right' ? 'down' : 'right';
+    const f1 = fitOf(ctx, () => rawLayout(ctx, k, cur, o)), f2 = fitOf(ctx, () => rawLayout(ctx, k, other, o));
+    dir = f2 > f1 + 0.02 ? other : cur;
+  }
+  extra = rawLayout(ctx, k, dir, o);
+  let r = Object.assign(finish(ctx, k), { layout: k, direction: ['tree', 'layers'].includes(k) ? dir : undefined, why: ctx.why }, extra);
+  // it does not fit without shapes touching: a grid that fits the canvas, in the order of the links (linked shapes side by side), and say so
+  if (r.crowded && k !== 'grid' && !o.noFallback) {
+    const c2 = context(shapes, links, o, true), G = graphOf(c2.work, c2.wlinks);
+    if (c2.work.length > 1) {
+      gridLayout(G.E.length && !(o.order && o.order.length) ? (readingOrder(c2.work), circleOrder(c2.work, G)) : orderOf(c2), c2.inner, true);
+      const r2 = finish(c2, 'grid');
+      if (!r2.crowded) { r2.notes.unshift(`as a ${k} they do not fit on the canvas without touching, so I made a grid in the order of the links instead`); r = Object.assign(r2, { layout: 'grid', fellBack: k, why: `As a ${k} they do not fit on the canvas without touching, so I made a grid that keeps linked shapes side by side.` }); }
+    }
+  }
+  return r;
+}
+/** the raw coordinates of layout k (in any frame) on ctx.work; the shapes without any link are left out of a tree / layers / radial /
+ *  organic layout and packed as a compact grid beside the linked part (to the right or below, whichever fits the canvas better) */
+function rawLayout(ctx, k, dir, o) {
+  const G = graphOf(ctx.work, ctx.wlinks), lone = LINKED_KINDS.includes(k) ? ctx.work.filter((_, i) => !G.und[i].length) : [];
+  if (lone.length && lone.length < ctx.work.length) {
+    const all = ctx.work; ctx.work = all.filter(n => !lone.includes(n));
+    let extra; try { extra = rawLayout(ctx, k, dir, o); } finally { ctx.work = all; }
+    packBeside(ctx.work.filter(n => !lone.includes(n)), readingOrder(lone), ctx.inner);
+    ctx.why = `${listing0(lone.map(n => n.name))} ${lone.length === 1 ? 'has' : 'have'} no links, so ${lone.length === 1 ? 'it stands' : 'they stand'} beside the ${k === 'tree' ? 'tree' : 'others'}.`;
+    ctx.notes.push(`${lone.length === 1 ? 'one shape has' : lone.length + ' shapes have'} no links: ${lone.length === 1 ? 'it is' : 'they are'} set beside the ${k === 'tree' ? 'tree' : 'linked shapes'}`);
+    return extra;
+  }
+  switch (k) {
+    case 'row': lineLayout(orderOf(ctx), false); return {};
+    case 'column': lineLayout(orderOf(ctx), true); return {};
+    case 'grid': { const lk = G.E.length && !(o.order && o.order.length); gridLayout(lk ? (readingOrder(ctx.work), circleOrder(ctx.work, G)) : orderOf(ctx), ctx.inner, lk); return {}; }
+    case 'circle': circleLayout(o.order && o.order.length || !G.E.length ? orderOf(ctx) : (readingOrder(ctx.work), circleOrder(ctx.work, G)), ctx.inner); return {};
+    case 'tree': return treeLayout(ctx, dir);
+    case 'layers': return layersLayout(ctx, dir);
+    case 'radial': return radialLayout(ctx);
+    case 'organic': return organicLayout(ctx);
+  }
+  return {};
+}
+/** how well the raw layout fits the canvas: 1 = it fits, less = the factor its centres must be pulled together by (finish compresses) */
+function fitOf(ctx, fn) {
+  const save = ctx.work.map(n => [n.x, n.y]), notes = ctx.notes.length;
+  try { fn(); } catch (e) { ctx.work.forEach((n, i) => { [n.x, n.y] = save[i]; }); ctx.notes.length = notes; if (e && e.name === 'LayoutError') return -1; throw e; }
+  const b = bboxOf(ctx.work), A = { w: ctx.inner.x2 - ctx.inner.x1, h: ctx.inner.y2 - ctx.inner.y1 };
+  const f = ax => { const ext = ax === 'x' ? b.w : b.h, len = ax === 'x' ? A.w : A.h, big = Math.max(...ctx.work.map(n => ax === 'x' ? n.w : n.h)); return ext <= len ? 1 : Math.max(0, (len - big) / Math.max(1, ext - big)); };
+  const v = Math.min(f('x'), f('y'));
+  ctx.work.forEach((n, i) => { [n.x, n.y] = save[i]; }); ctx.notes.length = notes;
+  return v;
+}
+/** the shapes `lone` as a compact grid block beside the block of `main` (raw coordinates): to its right or below it, whichever leaves the
+ *  whole closer to the canvas's proportions */
+function packBeside(main, lone, inner) {
+  const B = bboxOf(main), cw = Math.max(...lone.map(n => n.w)), ch = Math.max(...lone.map(n => n.h)), W = inner.x2 - inner.x1, H = inner.y2 - inner.y1, n = lone.length;
+  const opt = side => {
+    let cols, rows;
+    if (side === 'right') { rows = Math.max(1, Math.min(n, Math.floor((Math.max(B.h, ch) + GAP) / (ch + GAP)))); cols = Math.ceil(n / rows); }
+    else { cols = Math.max(1, Math.min(n, Math.floor((Math.max(B.w, cw) + GAP) / (cw + GAP)))); rows = Math.ceil(n / cols); }
+    const x0 = side === 'right' ? B.x2 + GAP * 1.5 + cw / 2 : B.x1 + cw / 2, y0 = side === 'right' ? B.y1 + ch / 2 : B.y2 + GAP * 1.5 + ch / 2;
+    const pos = lone.map((_, i) => ({ x: x0 + (i % cols) * (cw + GAP), y: y0 + Math.floor(i / cols) * (ch + GAP) }));
+    const all = bboxOf(main.concat(pos.map((p, i) => ({ x: p.x, y: p.y, w: lone[i].w, h: lone[i].h }))));
+    return { pos, f: Math.min(1, W / all.w, H / all.h) };
+  };
+  const r = opt('right'), d = opt('below'), best = d.f > r.f + 0.01 ? d : r;
+  lone.forEach((x, i) => { x.x = best.pos[i].x; x.y = best.pos[i].y; });
 }
 
 /* ---------------------------------------------------------------- operations on the current positions ---------------------------------------------------------------- */
@@ -918,6 +1020,7 @@ function improve(shapes, links, opts) {
   else if (kind === 'circle' || kind === 'organic') push(evalRes(kind, () => layout(kind, shapes, links, o)));
   else push(evalRes('grid', () => layout('grid', shapes, links, o)));
   if (G0.E.length && all.length >= 4 && kind !== 'organic') push(evalRes('organic', () => layout('organic', shapes, links, o)));
+  if (kind !== 'grid' && ctx.work.length >= 3) push(evalRes('grid', () => layout('grid', shapes, links, o)));   // a grid in the order of the links: fits any canvas
   let best = null; for (const c of cands) if (!best || c.score > best.score) best = c;
   if (best) { const lessDisruptive = cands.find(c => c.score >= best.score - 1 && c.score > before.score + minGain); if (lessDisruptive) best = lessDisruptive; }
   const candidates = cands.map(c => ({ name: c.name, score: c.score }));
@@ -936,9 +1039,73 @@ function improve(shapes, links, opts) {
     message: `I ${what}: the score went from ${before.score} to ${best.score}/100${gains.length ? ' (' + gains.join(', ') + ')' : ''}.` });
 }
 
+/* ---------------------------------------------------------------- routing the links around shapes ----------------------------------------------------------------
+   routeEdges(shapes, links, opts): what to draw for each link. A link whose straight line between the two centres passes through no other
+   box is drawn straight (no points). Otherwise the shortest of a few simple paths that pass no box (kept PAD px away): one bend (an L along
+   the two axes), two bends (a Z or a U whose middle leg runs along a free line next to a box in the way, or midway), or a detour round a
+   corner of the box in the way. Cost = length + BEND_COST per bend. When none is free, the one through fewest boxes. The points are the
+   bends only (the ends are the two shapes; the renderer clips the first and last legs at the shapes' outlines); every bend lies outside
+   both end boxes. Labelled links also get a label place: beside the longest leg, the first spot (middle, then further along, either
+   side) that no box and no earlier label covers.
+   shapes: [{name, x, y, w, h}] (centres; the boxes to avoid: shapes with their name tags, free texts); opts.obstacles: [{x1, y1, x2, y2}]
+   more boxes to avoid (name tags drawn apart from the shape); links: [{id?, from, to, label?}].
+   -> {routes: {id (or 'from>to'): {points: [{x, y}], label: {x, y} | null}}, blocked: number of links that still pass through a box}
+   Cheap: only the links that are blocked are routed, and only the boxes near the link are candidates. */
+const PAD = 8, BEND_COST = 24;
+function routeEdges(shapes, links, opts) {
+  const o = opts || {}, ns = nodesOf(shapes), byName = new Map(ns.map(n => [n.name, n]));
+  const boxes = ns.map(n => ({ x1: n.x - n.w / 2, y1: n.y - n.h / 2, x2: n.x + n.w / 2, y2: n.y + n.h / 2, name: n.name })).concat((o.obstacles || []).map(b => Object.assign({}, b, { name: b.name || null, of: b.of || null })));
+  const segHits = (p, q, skip) => { let c = 0; const x1 = Math.min(p.x, q.x), x2 = Math.max(p.x, q.x), y1 = Math.min(p.y, q.y), y2 = Math.max(p.y, q.y);
+    for (const b of boxes) { if (skip(b)) continue; if (b.x2 + PAD < x1 || b.x1 - PAD > x2 || b.y2 + PAD < y1 || b.y1 - PAD > y2) continue;
+      if (segThroughBox(p, q, { x: (b.x1 + b.x2) / 2, y: (b.y1 + b.y2) / 2, w: b.x2 - b.x1 + 2 * PAD + 4, h: b.y2 - b.y1 + 2 * PAD + 4 })) c++; }
+    return c; };
+  const inBox = (pt, n, pad) => Math.abs(pt.x - n.x) < n.w / 2 + pad && Math.abs(pt.y - n.y) < n.h / 2 + pad;
+  const routes = {}, labels = []; let blocked = 0;
+  for (const l of links || []) {
+    const a = byName.get(String(l.from)), z = byName.get(String(l.to)), id = l.id != null ? String(l.id) : `${l.from}>${l.to}`;
+    if (!a || !z || a === z) continue;
+    // the first leg may cross its own start's box (and name tag), the last its end's; a middle leg neither end's
+    const isOf = (b, x) => b.name === x.name || b.of === x.name;
+    const legsHit = pts => { let c = 0; for (let i = 0; i + 1 < pts.length; i++) { const first = i === 0, last = i + 2 === pts.length; c += segHits(pts[i], pts[i + 1], b => (first && isOf(b, a)) || (last && isOf(b, z))); } return c; };
+    const straight = [{ x: a.x, y: a.y }, { x: z.x, y: z.y }];
+    let best = { pts: straight, hits: segHits(straight[0], straight[1], b => isOf(b, a) || isOf(b, z)), cost: Math.hypot(z.x - a.x, z.y - a.y) };
+    if (best.hits) {
+      const near = boxes.filter(b => b.x2 + 150 >= Math.min(a.x, z.x) && b.x1 - 150 <= Math.max(a.x, z.x) && b.y2 + 150 >= Math.min(a.y, z.y) && b.y1 - 150 <= Math.max(a.y, z.y));
+      const xs = new Set([(a.x + z.x) / 2]), ys = new Set([(a.y + z.y) / 2]);
+      for (const b of near.concat([{ x1: a.x - a.w / 2, x2: a.x + a.w / 2, y1: a.y - a.h / 2, y2: a.y + a.h / 2 }, { x1: z.x - z.w / 2, x2: z.x + z.w / 2, y1: z.y - z.h / 2, y2: z.y + z.h / 2 }])) {
+        xs.add(b.x1 - PAD - 6); xs.add(b.x2 + PAD + 6); ys.add(b.y1 - PAD - 6); ys.add(b.y2 + PAD + 6); }
+      const cands = [[{ x: a.x, y: z.y }], [{ x: z.x, y: a.y }]];
+      for (const x of xs) cands.push([{ x, y: a.y }, { x, y: z.y }]);
+      for (const y of ys) cands.push([{ x: a.x, y }, { x: z.x, y }]);
+      for (const b of near) for (const cx of [b.x1 - PAD - 6, b.x2 + PAD + 6]) for (const cy of [b.y1 - PAD - 6, b.y2 + PAD + 6]) cands.push([{ x: cx, y: cy }]);
+      for (const mid of cands) {
+        if (mid.some(p => inBox(p, a, 6) || inBox(p, z, 6))) continue;
+        const pts = [straight[0]].concat(mid, [straight[1]]);
+        let len = 0; for (let i = 0; i + 1 < pts.length; i++) len += Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+        const hits = legsHit(pts), cost = len + BEND_COST * mid.length;
+        if (hits < best.hits || (hits === best.hits && cost < best.cost - 1e-6)) best = { pts, hits, cost };
+      }
+      if (best.hits) blocked++;
+    }
+    const points = best.pts.slice(1, -1).map(p => ({ x: Math.round(p.x), y: Math.round(p.y) }));
+    let label = null;
+    if (l.label) {
+      const lw = String(l.label).length * 6.8 + 4, P = best.pts; let k = 0, kl = -1;
+      for (let i = 0; i + 1 < P.length; i++) { const d = Math.hypot(P[i + 1].x - P[i].x, P[i + 1].y - P[i].y); if (d > kl) { kl = d; k = i; } }
+      const p = P[k], q = P[k + 1], L = kl || 1, ux = (q.x - p.x) / L, uy = (q.y - p.y) / L;
+      const free = (cx, cy) => { const b = { x1: cx - lw / 2, x2: cx + lw / 2, y1: cy - 8, y2: cy + 8 }; return !boxes.concat(labels).some(o2 => Math.min(o2.x2, b.x2) - Math.max(o2.x1, b.x1) > 0.5 && Math.min(o2.y2, b.y2) - Math.max(o2.y1, b.y1) > 0.5); };
+      const spots = []; for (const f of [0.5, 0.38, 0.62, 0.26, 0.74]) for (const side of [1, -1]) { const off = side * (12 + Math.abs(uy) * lw / 2); spots.push([p.x + (q.x - p.x) * f - uy * off, p.y + (q.y - p.y) * f + ux * off]); }
+      const [lx, ly] = spots.find(([cx, cy]) => free(cx, cy)) || spots[0];
+      label = { x: Math.round(lx), y: Math.round(ly) }; labels.push({ x1: lx - lw / 2, x2: lx + lw / 2, y1: ly - 8, y2: ly + 8 });
+    }
+    routes[id] = { points, label };
+  }
+  return { routes, blocked };
+}
+
 /** apply(shapes, result): the shapes with the result's positions (a convenience for tests and callers) */
 function apply(shapes, res) { return shapes.map(s => Object.assign({}, s, (res && res.positions && res.positions[String(s.name)]) || {})); }
 
-const AutoLayout = { LayoutError, LAYOUTS, WEIGHTS, analyse, score, layout, improve, align, distribute, spacing, snap, flip, fit, sort, cluster, equalize, straighten, untangle, separate, apply, readingOrderNames: shapes => readingOrder(nodesOf(shapes)).map(n => n.name) };
+const AutoLayout = { LayoutError, LAYOUTS, WEIGHTS, analyse, score, layout, improve, routeEdges, align, distribute, spacing, snap, flip, fit, sort, cluster, equalize, straighten, untangle, separate, apply, readingOrderNames: shapes => readingOrder(nodesOf(shapes)).map(n => n.name) };
 if (typeof module !== 'undefined' && module.exports) module.exports = AutoLayout; else root.AutoLayout = AutoLayout;
 })(typeof window !== 'undefined' ? window : this);

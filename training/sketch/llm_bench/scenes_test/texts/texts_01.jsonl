@@ -1,0 +1,40 @@
+{"id": "sc3-05-001", "domain": "living room interior", "text": "I'm drawing my living room. Wall first: a faint orange rectangle in the background, 780 by 330, at 400,175, named Wall."}
+{"id": "sc3-05-002", "domain": "living room interior", "text": "Floor: light brown rectangle zone, 780 x 150, centered at 400,415. Call it Floor."}
+{"id": "sc3-05-003", "domain": "living room interior", "text": "Window on the left wall, a light cyan rectangle 160 by 110 at 150,140 with a white outline, named Window"}
+{"id": "sc3-05-004", "domain": "living room interior", "text": "the sofa: big green rectangle, 220 wide and 70 tall, at 330,380 - Sofa"}
+{"id": "sc3-05-005", "domain": "living room interior", "text": "armrests please: green rectangles 30 by 60, ArmL at 190,385 and another green 30 by 60 rectangle ArmR at 470,385"}
+{"id": "sc3-05-006", "domain": "living room interior", "text": "Put Sofa, ArmL and ArmR together in a group called Couch."}
+{"id": "sc3-05-007", "domain": "living room interior", "text": "Hang a clock: medium white circle at 520,110, label it \"12\", name Clock"}
+{"id": "sc3-05-008", "domain": "living room interior", "text": "Picture frame next to the clock, a gold rectangle 90 by 70 at 360,130, Frame"}
+{"id": "sc3-05-009", "domain": "living room interior", "text": "is the frame left of the clock?"}
+{"id": "sc3-05-010", "domain": "living room interior", "text": "Floor lamp: brown rectangle, 10 wide 150 tall, at 580,340, name LampPole"}
+{"id": "sc3-05-011", "domain": "living room interior", "text": "yellow triangle for the shade, small, at 580,252, LampShade"}
+{"id": "sc3-05-012", "domain": "living room interior", "text": "lamp group = LampPole + LampShade, call it FloorLamp"}
+{"id": "sc3-05-013", "domain": "living room interior", "text": "TV: black rectangle 150 by 90 at 700,300, named Tv"}
+{"id": "sc3-05-014", "domain": "living room interior", "text": "a brown stand under it: rectangle 100 by 40 at 700,385, TvStand"}
+{"id": "sc3-05-015", "domain": "living room interior", "text": "oval rug on the floor, light red, 260 by 50, at 330,455, name it Rug"}
+{"id": "sc3-05-016", "domain": "living room interior", "text": "little gray cat on the floor: small gray oval at 525,445, CatBody"}
+{"id": "sc3-05-017", "domain": "living room interior", "text": "its head is a tiny gray circle at 568,432, called CatHead"}
+{"id": "sc3-05-018", "domain": "living room interior", "text": "group the cat: CatBody and CatHead as Whiskers"}
+{"id": "sc3-05-019", "domain": "living room interior", "text": "Potted plant in the corner: small brown square at 60,420 named Pot"}
+{"id": "sc3-05-020", "domain": "living room interior", "text": "and a medium green star 6 px above the pot for the leaves, Leaves"}
+{"id": "sc3-05-021", "domain": "living room interior", "text": "How many rectangles do I have?"}
+{"id": "sc3-05-022", "domain": "living room interior", "text": "make the TV navy, black is too harsh"}
+{"id": "sc3-05-023", "domain": "living room interior", "text": "What's the color of the Tv now?"}
+{"id": "sc3-05-024", "domain": "living room interior", "text": "Write \"Home sweet home\" on the wall at 300,50"}
+{"id": "sc3-05-025", "domain": "living room interior", "text": "Make that text purple and large."}
+{"id": "sc3-05-026", "domain": "living room interior", "text": "Bring Couch to the front."}
+{"id": "sc3-05-027", "domain": "living room interior", "text": "Is there anything between Couch and Tv?"}
+{"id": "sc3-05-028", "domain": "living room interior", "text": "Turn the clock into a hexagon"}
+{"id": "sc3-05-029", "domain": "living room interior", "text": "no wait, keep it round, undo"}
+{"id": "sc3-05-030", "domain": "living room interior", "text": "connect TvStand to Tv with a short plain line"}
+{"id": "sc3-05-031", "domain": "living room interior", "text": "Which shapes are in Whiskers?"}
+{"id": "sc3-05-032", "domain": "living room interior", "text": "nudge Whiskers 15 px left"}
+{"id": "sc3-05-033", "domain": "living room interior", "text": "shrink the plant leaves"}
+{"id": "sc3-05-034", "domain": "living room interior", "text": "Is Rug bigger than Clock?"}
+{"id": "sc3-05-035", "domain": "living room interior", "text": "Add a small yellow circle as a glow, 6 px right of LampShade"}
+{"id": "sc3-05-036", "domain": "living room interior", "text": "delete that glow, it looks weird"}
+{"id": "sc3-05-037", "domain": "living room interior", "text": "Which shape is the rightmost?"}
+{"id": "sc3-05-038", "domain": "living room interior", "text": "Describe Window."}
+{"id": "sc3-05-039", "domain": "living room interior", "text": "Is CatBody right of Sofa?"}
+{"id": "sc3-05-040", "domain": "living room interior", "text": "That's my living room!"}

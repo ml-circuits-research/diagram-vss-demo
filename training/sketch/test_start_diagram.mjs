@@ -158,10 +158,52 @@ const level = s => s.layer === "background" ? 0 : s.layer === "zone" ? 1 : s.sha
   { const { S, msg } = run7("distribute all vertically"), ps = ["Start", "Process", "Check", "Done"].map(n => S.world.find(n)).sort((a, b) => a.y - b.y);
     const gaps = ps.slice(1).map((s, i) => (s.y - K.dims(s).h / 2 - 22) - (ps[i].y + K.dims(ps[i]).h / 2));
     ok('"distribute all vertically": the four shapes one below the other, equal gaps (name tags included), no overlap', /Spaced 4 shapes evenly from top to bottom/.test(msg) && Math.max(...gaps) - Math.min(...gaps) <= 1 && Math.min(...gaps) >= 15 && !overlaps(S).length, `gaps ${gaps.map(Math.round)} | ${msg}`); }
-  { const { S } = run7("make it a tree"), y = n => S.world.find(n).y;
-    ok('"make it a tree": one tree, Start above Process above Check above Done', y("Start") < y("Process") && y("Process") < y("Check") && y("Check") < y("Done"), ["Start", "Process", "Check", "Done"].map(y).join(",")); }
+  { const { S } = run7("make it a tree"), y = n => S.world.find(n).y, x = n => S.world.find(n).x, ch = ["Start", "Process", "Check", "Done"];
+    // a chain of four is too tall for the canvas top-down without squeezing (shapes + name tags + level gaps > 466 px): the tree then goes
+    // left to right, the direction in which it fits (auto-layout.js layout: the direction is chosen by fit when none is asked)
+    const down = ch.every((n, i) => !i || y(ch[i - 1]) < y(n)), right = ch.every((n, i) => !i || x(ch[i - 1]) < x(n));
+    ok('"make it a tree": one tree, Start before Process before Check before Done (top-down, or left to right when that fits better)', down || right, ch.map(n => x(n) + "," + y(n)).join(" ")); }
   { const { S } = run7("align everything horizontally");
     ok('"align everything horizontally": the four shapes on one line', new Set(["Start", "Process", "Check", "Done"].map(n => S.world.find(n).y)).size === 1); }
+}
+// ---------- 8. the owner's session of 2026-11-03 (sop-requests-2026-11-03-1303.jsonl, spoken in Romanian, translated): its layout commands,
+// typed in English, on the opening drawing plus a triangle, a diamond and a circle. After every command: no shape, name tag or text
+// overlaps another, no arrow is drawn through a shape, a name tag or a text (logic.js edgeRoutes), everything is on the canvas; a
+// re-layout never ends below the score the drawing had before it was laid out, and "tidy up" never lowers it.
+{
+  const AL = require("../../docs/js/auto-layout.js");
+  const tagBox = s => { const d = K.dims(s), w = String(s.name).length * 6.7; return { x1: s.x - w / 2, x2: s.x + w / 2, y1: s.y - d.h / 2 - 23, y2: s.y - d.h / 2 - 4 }; };
+  const drawn = st => { const out = []; for (const s of st.shapes) { if (s.layer) continue; const d = K.dims(s); out.push({ n: s.name, x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2 }); if (s.shape !== "text" && !s.quiet) out.push(Object.assign({ n: "tag " + s.name, of: s.name }, tagBox(s))); } return out; };
+  const overlapsOf = st => { const b = drawn(st), bad = []; for (let i = 0; i < b.length; i++) for (let j = i + 1; j < b.length; j++) if (b[i].of !== b[j].n && b[j].of !== b[i].n && Math.min(b[i].x2, b[j].x2) - Math.max(b[i].x1, b[j].x1) > 0.5 && Math.min(b[i].y2, b[j].y2) - Math.max(b[i].y1, b[j].y1) > 0.5) bad.push(`${b[i].n} / ${b[j].n}`); return bad; };
+  // a drawn arrow (its route: centre, bends, centre) through a box that is not one of its ends (shrunk by 2 px, as the score counts it)
+  const through = st => { const R = K.edgeRoutes(st), bad = [], b = drawn(st);
+    const segHit = (p, q, o) => { const x1 = o.x1 + 2, x2 = o.x2 - 2, y1 = o.y1 + 2, y2 = o.y2 - 2; let t0 = 0, t1 = 1; const dx = q.x - p.x, dy = q.y - p.y;
+      for (const [pp, qq] of [[-dx, p.x - x1], [dx, x2 - p.x], [-dy, p.y - y1], [dy, y2 - p.y]]) { if (pp === 0) { if (qq < 0) return false; continue; } const r = qq / pp; if (pp < 0) { if (r > t1) return false; if (r > t0) t0 = r; } else { if (r < t0) return false; if (r < t1) t1 = r; } } return t0 < t1; };
+    for (const e of st.edges) { const a = st.shapes.find(s => s.name === e.from), z = st.shapes.find(s => s.name === e.to), pts = [a].concat((R[e.id] || {}).points || [], [z]);
+      for (let i = 0; i + 1 < pts.length; i++) for (const o of b) { const end = o.n === e.from || o.n === e.to || o.of === e.from || o.of === e.to; if (end && (i === 0 && (o.n === e.from || o.of === e.from) || i + 2 === pts.length && (o.n === e.to || o.of === e.to))) continue; if (end && pts.length === 2) continue; if (segHit(pts[i], pts[i + 1], o)) bad.push(`${e.from}→${e.to} through ${o.n}`); } }
+    return [...new Set(bad)]; };
+  const offCanvas = st => st.shapes.filter(s => !s.layer).filter(s => { const d = K.dims(s), t = s.shape !== "text" && !s.quiet ? 23 : 0; return s.x - d.w / 2 < 0 || s.x + d.w / 2 > 800 || s.y - d.h / 2 - t < 0 || s.y + d.h / 2 > 500; }).map(s => s.name);
+  const scoreOf = st => AL.score(st.shapes.filter(s => !s.layer).map(s => { const d = K.dims(s), t = s.shape !== "text" && !s.quiet ? 22 : 0; return { name: s.name, x: s.x, y: s.y - t / 2, w: d.w, h: d.h + t }; }), st.edges).score;
+  const S = fresh();
+  for (const c of ["draw a yellow triangle", "draw a diamond near Check", "draw a circle"]) say(S, c);
+  ok("session: the opening drawing plus a triangle, a diamond and a circle (10 items)", ["triangle1", "diamond1", "circle1"].every(n => S.world.find(n)));
+  const LAYOUT = new Set(["arrange all in a circle", "arrange all as a triangle", "tidy up", "layout", "improve layout"]);
+  let before = scoreOf(S.world.state);
+  for (const c of ["arrange all in a circle", "connect all items", "arrange all as a triangle", "tidy up", "layout", "improve layout"]) {
+    const s0 = scoreOf(S.world.state), x = say(S, c), st = S.world.state, s1 = scoreOf(st), msg = x.r.steps.map(q => q.answer || (q.error && q.error.message) || "").join(" ");
+    ok(`session "${c}": no shape, name tag or text overlaps another`, !overlapsOf(st).length, overlapsOf(st).join("; ") + " | " + msg);
+    ok(`session "${c}": no arrow drawn through a shape, a name tag or a text`, !through(st).length, through(st).join("; "));
+    ok(`session "${c}": everything on the canvas`, !offCanvas(st).length, offCanvas(st).join(", "));
+    ok(`session "${c}": does not say it is crowded`, !/do not all fit/.test(msg), msg);
+    if (c === "tidy up" || c === "improve layout") ok(`session "${c}": the score does not go down (${s0} -> ${s1})`, s1 >= s0 - 0.05, msg);
+    if (LAYOUT.has(c)) ok(`session "${c}": scores at least 90 (${s1})`, s1 >= 90, msg);
+    console.log(`     session "${c}": score ${s0} -> ${s1} | ${msg}`);
+  }
+  { const T = fresh(); for (const c of ["draw a yellow triangle", "draw a diamond near Check", "draw a circle"]) say(T, c);
+    const x = say(T, "layout"), msg = x.r.steps.map(q => q.answer || "").join(" ");
+    ok('session turn 9 ("change the layout" with 3 unlinked shapes): a tree of the linked four, the three set beside it, and the reply says so', /triangle1, diamond1 and circle1 have no links/.test(msg) && !overlapsOf(T.world.state).length && !offCanvas(T.world.state).length, msg); }
+  const z = S.world.find("IntakeZone"), zd = K.dims(z);
+  ok("session: after the re-layouts, IntakeZone is fitted round its own shapes, no longer covering the drawing", zd.w * zd.h < 330 * 330, `${zd.w}x${zd.h}`);
 }
 for (const f of fails) console.log("FAIL " + f);
 console.log(`\n${n - fail}/${n} passed`);

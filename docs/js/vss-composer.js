@@ -31,8 +31,8 @@
 //      mode "H2": also when the first reading is readable (ok, abstain) and its event differs from the hint.
 //   Each unit carries hint, hintApplies (the hint is an event of a candidate world), reread (readings replaced) and hintChanged (the unit's
 //   chosen reading, world and SOP text, or ignored, differs from the one the first readings give).
-// UNITS OF ANOTHER CUT (owner's decision 2026-11-02: the three readers read the same units; the cut is one setting of the demo, see
-// cutUnits below): formalize(text, ctx, {units: [{c0, c1}]}) reads those units instead of the cutter's. The world cutter is still decoded
+// UNITS OF ANOTHER CUT (since 2026-11-03 afternoon the demo's VSS tab reads its own cut; VSS reads the BERT cutter's units for SOP-BERT's
+// votes and VSS-BERT, see docs/js/ui.js crossReads and cutUnits below): formalize(text, ctx, {units: [{c0, c1}]}) reads those units instead of the cutter's. The world cutter is still decoded
 // once over the whole message, only for the candidate worlds: a unit's candidates are ranked by the SUM of each world's B-<world> score at
 // the cutter's own unit starts (segmentWorlds) that lie inside the unit, top ROUTER_K; a unit with no cutter start inside it ("no world
 // signal") is read by EVERY world of the cutter (ranked by their B-<world> score at the unit's first token, which only orders ties) and the
@@ -353,8 +353,8 @@ export class Composer {
   cutVss(text, ctx = {}) { return FRONT.segmentWorlds(text, ctx.names || [], this.cutter).map(({ c0, c1 }) => ({ c0, c1, src: text.slice(c0, c1) })); }
 }
 
-// ---------------------------------------------------------------- the cut shared by the three readers (owner's decision 2026-11-02)
-/** The cutting strategies of the demo's setting: every reader (Rules, VSS, Neural) reads the units of ONE cut.
+// ---------------------------------------------------------------- the cutters (the demo's tabs each read their own: docs/js/ui.js OWN_CUT)
+/** The cutting strategies: the cutter of each reader, and the units another reader is given to read (cut_bench.mjs, the demo's votes).
  *  rules: the rules' segmenter (logic.js rulesCut, the pieces located in the text); vss: the world cutter (cutter_worlds8s.json, the
  *  composer's cutter); bert: the span head of the joint neural model (neural.js NeuralKit.cut), only when the loaded model has one. */
 export const CUT_STRATEGIES = [

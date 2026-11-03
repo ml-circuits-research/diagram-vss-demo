@@ -51,8 +51,13 @@ side by side), generalised to shapes of different sizes and to any direction; th
   they stay where they are, the layout keeps off them where it can (they are obstacles), and a text a shape still lies on moves aside as
   little as it can; the reply says so ("I moved the text IntakeCaption aside to make room."). A zone (`layer=zone`) holds the shapes whose
   centre lies on it (the topmost zone there); the reply names the shapes the layout took off their zone ("Check and Done are no longer on
-  ReviewZone."). Zones and backgrounds do not move or grow: growing each zone around the members left on it makes zones overlap each other
-  as soon as shapes cross over (a circle of the four shapes of the opening drawing), so it is not done. Re-layouts in this sense: arrange
+  ReviewZone."). Backgrounds do not move or grow. **Zones follow their shapes (2026-11-03, after the owner's session, where empty zones
+  were left covering the drawing):** after a re-layout of the whole drawing each zone is fitted round its OWN shapes (the items of the group
+  the zone is in, else the items that were on it) and its caption moves with it (logic.js `fitZones`), but only when that is clean for all
+  zones at once: the fitted zones do not overlap one another, cover no other item or name tag, and no caption lands on an item or a text.
+  Otherwise the zones stay as they were and the reply names the shapes taken off their zone (a circle of all the shapes usually mixes the
+  zones' members, so it keeps the old behaviour; a tree, a row or a tidy-up usually fits). Laying out per zone instead was not chosen: the
+  user's "arrange all in a circle" is one circle (the rule above). Re-layouts in this sense: arrange
   (every layout), align, distribute, improve, respace, flip, sort, groupBy, straighten, untangle. Not: snap (local), equalize (not a
   layout), fit / centre (the drawing, texts included, moves as a whole). A group's name is written where no shape, name tag, text or other
   group name is (above its frame on the left, else the next free corner; `logic.js groupLabels`, drawn by ui.js), because a group's frame

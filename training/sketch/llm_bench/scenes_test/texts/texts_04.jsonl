@@ -1,0 +1,42 @@
+{"id": "sc3-20-001", "domain": "playground scene", "text": "Playground drawing for the school newsletter. Grass background: a light green rectangle, 780 by 480, centred, background layer, named Grass."}
+{"id": "sc3-20-002", "domain": "playground scene", "text": "sandbox: a light yellow rectangle zone, 200 by 110, in the bottom left, named Sandbox"}
+{"id": "sc3-20-003", "domain": "playground scene", "text": "Slide: a large red triangle in the center, named Slide"}
+{"id": "sc3-20-004", "domain": "playground scene", "text": "a ladder next to it: a thin gray rectangle, 14 by 90, left of Slide with a 16 px gap, called Ladder"}
+{"id": "sc3-20-005", "domain": "playground scene", "text": "group Slide and Ladder as SlideSet"}
+{"id": "sc3-20-006", "domain": "playground scene", "text": "Swings on the right: a brown rectangle 160 by 12 for the top bar, in the top right, named SwingBar"}
+{"id": "sc3-20-007", "domain": "playground scene", "text": "two small blue squares below SwingBar, those are the seats"}
+{"id": "sc3-20-008", "domain": "playground scene", "text": "hang the seats from the bar with plain lines"}
+{"id": "sc3-20-009", "domain": "playground scene", "text": "group SwingBar and both seats as Swings"}
+{"id": "sc3-20-010", "domain": "playground scene", "text": "a kid on the slide: small pink circle named Kid1 above Slide"}
+{"id": "sc3-20-011", "domain": "playground scene", "text": "another kid near the sandbox, small orange circle, Kid2"}
+{"id": "sc3-20-012", "domain": "playground scene", "text": "a ball: tiny red circle between Kid2 and Slide, named Ball"}
+{"id": "sc3-20-013", "domain": "playground scene", "text": "kite in the sky: a small purple diamond in the top left, named Kite"}
+{"id": "sc3-20-014", "domain": "playground scene", "text": "string from Kite to Kid2, dotted line"}
+{"id": "sc3-20-015", "domain": "playground scene", "text": "a large green circle named Crown left of SwingBar for a tree"}
+{"id": "sc3-20-016", "domain": "playground scene", "text": "and its trunk, a brown rectangle named Stem 2 px below Crown"}
+{"id": "sc3-20-017", "domain": "playground scene", "text": "Crown and Stem belong together: make them a group called Tree"}
+{"id": "sc3-20-018", "domain": "playground scene", "text": "bench: a brown rectangle, 120 by 24, at the bottom, named Bench"}
+{"id": "sc3-20-019", "domain": "playground scene", "text": "three tiny yellow stars in a row above Bench, flowers"}
+{"id": "sc3-20-020", "domain": "playground scene", "text": "how many circles are there on the playground?"}
+{"id": "sc3-20-021", "domain": "playground scene", "text": "Is Ball between Kid2 and Slide?"}
+{"id": "sc3-20-022", "domain": "playground scene", "text": "make the ball bigger, it's a beach ball"}
+{"id": "sc3-20-023", "domain": "playground scene", "text": "Title \"Recess!\" at the top, large, navy"}
+{"id": "sc3-20-024", "domain": "playground scene", "text": "Is Kite left of Tree?"}
+{"id": "sc3-20-025", "domain": "playground scene", "text": "move Kite a bit down"}
+{"id": "sc3-20-026", "domain": "playground scene", "text": "Which shapes are near Bench?"}
+{"id": "sc3-20-027", "domain": "playground scene", "text": "make the seats the same size as Ball"}
+{"id": "sc3-20-028", "domain": "playground scene", "text": "undo, the seats look too small"}
+{"id": "sc3-20-029", "domain": "playground scene", "text": "Make Kid1 yellow"}
+{"id": "sc3-20-030", "domain": "playground scene", "text": "the slide should be orange"}
+{"id": "sc3-20-031", "domain": "playground scene", "text": "What color is Slide?"}
+{"id": "sc3-20-032", "domain": "playground scene", "text": "fence: five tiny brown squares in a row in the bottom right"}
+{"id": "sc3-20-033", "domain": "playground scene", "text": "connect the fence posts in a chain with brown lines"}
+{"id": "sc3-20-034", "domain": "playground scene", "text": "how many squares are on the canvas?"}
+{"id": "sc3-20-035", "domain": "playground scene", "text": "which group is Stem in?"}
+{"id": "sc3-20-036", "domain": "playground scene", "text": "move Swings 30 px down"}
+{"id": "sc3-20-037", "domain": "playground scene", "text": "Is there a path from Kite to Kid2?"}
+{"id": "sc3-20-038", "domain": "playground scene", "text": "Which shape is farthest from the sandbox?"}
+{"id": "sc3-20-039", "domain": "playground scene", "text": "bring Kid1 to the front"}
+{"id": "sc3-20-040", "domain": "playground scene", "text": "delete one of the flowers, the last star"}
+{"id": "sc3-20-041", "domain": "playground scene", "text": "Describe Ball."}
+{"id": "sc3-20-042", "domain": "playground scene", "text": "Perfect for the newsletter."}
