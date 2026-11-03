@@ -1,8 +1,8 @@
 // vss-confidence.js: the VSS combined confidence of one produced request, the gate that executes a request only when its confidence clears
 // the threshold of a precision level, and the plain-words reasons of a request below it. Browser-ready ES module, no imports.
 //
-// The model is docs/model/confidence/vss.json: the confidence of the VSS worlds of arm VSS-G (FEEDBACK_RESULT.md), fitted on the fresh2
-// calibration part by training/sketch/fresh2/fit_report.mjs and written by fresh2/export_confidence.mjs, with the thresholds per level as
+// The model is docs/model/confidence/vss.json: the confidence of the VSS worlds of arm VSS-ALL (TRAIN_PLAN_1103.md), fitted on the fresh2 +
+// short3 calibration part by training/sketch/fresh2/fit_report.mjs (job 072, confidence3/refit.sh) and written by fresh2/export_confidence.mjs, with the thresholds per level as
 // data (readers.vss_combined.levels[L].threshold). The default level is "cost" (owner, 2026-11-02 21:24: execute only what it is sure of):
 // the threshold that maximises the cost score (one confident mistake = 10 right answers, AGENTS.md) on the out-of-fold calibration
 // confidences; its entry may instead say kind "executes everything" (threshold null: no gate is better) or "asks everything". The levels

@@ -6,7 +6,7 @@ docs/model/confidence/vote3.json; checked by test_vote_ui.py); here SOP-BERT is 
 (docs/js/vss-confidence.js, docs/model/confidence/vss.json) and the details say so.
 
 Run:  python3 training/sketch/test_vss_gate_ui.py [screenshot dir]      (PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers in this sandbox)
-It serves docs/ on a free local port and loads the VSS models (docs/model/micro, about 23 MB); the neural model files and the transformers.js
+It serves docs/ on a free local port and loads the VSS models (docs/model/micro, about 31 MB); the neural model files and the transformers.js
 library are blocked (memory). On the VSS tab, after the page's own start messages:
   1. "Move Done below Start."                          one request the confidence clears at the default level: executed, no "Do it anyway";
   2. "Make Process green and connect Start to Done."  the first request executed, the second not (VSS not sure: read in the links

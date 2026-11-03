@@ -1,10 +1,10 @@
 /* "How it works inside": the architecture pages of the Help overlay (docs/js/docs.js, #help/<id>) and of the standalone page
    docs/architecture.html, which renders these same pages one after another. This file is the only copy of the text: change a page here and
    both places change. Links between pages are written as href="#help/<id>" (or "#help/<id>/<anchor>"); architecture.html rewrites them to
-   its own anchors. Every number names the document or the command that produced it. State described: main at 1f3c806, 2026-11-02. */
+   its own anchors. Every number names the document or the command that produced it. State described: the models of arm ALL, 2026-11-03 (TRAIN_PLAN_1103.md). */
 (function (root) {
 'use strict';
-const AS_OF = '2026-11-02 (main at 1f3c806)';
+const AS_OF = '2026-11-03 (the readers of arm ALL, TRAIN_PLAN_1103.md)';
 const AH = '<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ahead" d="M0,0 L10,5 L0,10 z"/></marker></defs>';
 
 const pages = [];
@@ -47,15 +47,15 @@ ${AH}
 <rect class="acc" x="140" y="216" width="120" height="96" rx="8"/>
 <text class="t" x="200" y="235" text-anchor="middle">VSS</text>
 <text class="m" x="200" y="250" text-anchor="middle">vss-composer.js</text>
-<text x="200" y="268" text-anchor="middle">7 micro-worlds</text>
+<text x="200" y="268" text-anchor="middle">9 micro-worlds</text>
 <text x="200" y="283" text-anchor="middle">event hint</text>
 <text x="200" y="298" text-anchor="middle">context filler</text>
 <rect class="acc" x="272" y="216" width="120" height="96" rx="8"/>
 <text class="t" x="332" y="235" text-anchor="middle">SOP-BERT</text>
 <text class="m" x="332" y="250" text-anchor="middle">neural.js</text>
 <text x="332" y="268" text-anchor="middle">one DistilBERT</text>
-<text x="332" y="283" text-anchor="middle">one DistilBERT</text>
-<text x="332" y="298" text-anchor="middle">with small heads</text>
+<text x="332" y="283" text-anchor="middle">with small heads</text>
+<text x="332" y="298" text-anchor="middle">cut + read</text>
 <path class="ar" d="M68 312 V330 H160 V346"/>
 <path class="ar" d="M200 312 V346"/>
 <path class="ar" d="M332 312 V330 H240 V346"/>
@@ -89,8 +89,9 @@ each with <code>K.createSystem()</code>). The cut is described in <a href="#help
 <h2 id="judged">How the readers are judged</h2>
 <p>The main number of every reader is its <b>precision of execution</b>: of everything it executes, the share done right. Each reader is to
 execute a request only when its own confidence clears a threshold chosen on held-out data, and to ask below it, saying why; readers are
-compared by the share of requests they do right at equal precision (owner, 2026-11-02; AGENTS.md). In the demo described here no reader has
-such a threshold yet: that is in progress. <a href="#help/measurement">Measurement and current numbers</a>,
+compared by the share of requests they do right at equal precision (owner, 2026-11-02; AGENTS.md). In the demo every learned tab (VSS,
+SOP-BERT, VSS-BERT, 3 readers) has such a threshold, the one with the best cost score on the calibration messages (one confident mistake
+costs as much as 10 right answers); the Rules execute everything. <a href="#help/measurement">Measurement and current numbers</a>,
 <a href="#help/research-question">What this project measures</a>.</p>
 
 <h2 id="parts">The parts, their code and their models</h2>
@@ -101,18 +102,21 @@ such a threshold yet: that is in progress. <a href="#help/measurement">Measureme
 <tr><td>Spell checker</td><td><code>docs/js/spell.js</code></td><td><code>docs/model/spell/vocab.json</code></td><td class="num">28.0 KB</td></tr>
 <tr><td>Rules reader, SOP Lang, engine, plugins, Datalog</td><td><code>docs/js/logic.js</code></td><td>none</td><td class="num">—</td></tr>
 <tr><td>The shared cut</td><td><code>docs/js/vss-composer.js</code> (<code>cutUnits</code>, <code>CUT_STRATEGIES</code>, <code>DEFAULT_CUT</code>), <code>docs/js/vss-formalizer.js</code> (<code>cut</code>)</td><td>the cutter of the strategy chosen</td><td class="num">—</td></tr>
-<tr><td>VSS reader (composer)</td><td><code>docs/js/vss-formalizer.js</code>, <code>docs/js/vss-composer.js</code>, <code>docs/js/front.js</code>, <code>docs/js/vss.js</code> + <code>docs/js/vss/</code>, <code>docs/js/vss-context.js</code>, <code>docs/js/vss-adapter.js</code></td><td><code>docs/model/micro/registry.json</code> and what it names: 2 cutters, 7 worlds, <code>docs/model/context/weights.json</code></td><td class="num">19.4 MB</td></tr>
-<tr><td>SOP-BERT reader</td><td><code>docs/js/neural.js</code> (transformers.js 3.8.1 from jsDelivr)</td><td><code>docs/model/neural/sop-bert/</code> (one DistilBERT, 8-bit)</td><td class="num">68.5 MB</td></tr>
+<tr><td>VSS reader (composer)</td><td><code>docs/js/vss-formalizer.js</code>, <code>docs/js/vss-composer.js</code>, <code>docs/js/front.js</code>, <code>docs/js/vss.js</code> + <code>docs/js/vss/</code>, <code>docs/js/vss-context.js</code>, <code>docs/js/vss-adapter.js</code></td><td><code>docs/model/micro/registry.json</code> and what it names: 2 cutters, 9 worlds, <code>docs/model/context/weights.json</code></td><td class="num">31.4 MB</td></tr>
+<tr><td>SOP-BERT reader</td><td><code>docs/js/neural.js</code> (transformers.js 3.8.1 from jsDelivr)</td><td><code>docs/model/neural/sop-bert/</code> (one DistilBERT, 8-bit)</td><td class="num">68.7 MB</td></tr>
+<tr><td>Confidences of the learned tabs</td><td><code>docs/js/vss-confidence.js</code>, <code>neural-confidence.js</code>, <code>combined-confidence.js</code>, <code>vote-confidence.js</code></td><td><code>docs/model/confidence/</code>: <code>vss.json</code>, <code>sop-bert.json</code>, <code>combined.json</code>, <code>vote3.json</code></td><td class="num">0.72 MB</td></tr>
 <tr><td>Benchmark (scoring)</td><td><code>docs/js/bench-canon.js</code></td><td><code>docs/bench/</code> (6 sets)</td><td class="num">—</td></tr>
 </tbody></table></div>
-<p class="note">Sizes: <code>du -sb</code> and <code>versions.json</code> “sizes” on 2026-11-02, MB = 10<sup>6</sup> bytes. The VSS figure is the 7 world folders (35.6 MB), the two
-cutters the registry names (2.4 MB), the context weights and the registry.</p>
+<p class="note">Sizes: what the page downloads, measured with <code>du -b</code> on 2026-11-03, MB = 10<sup>6</sup> bytes. VSS: the 9 world folders
+(26.8 MB, <code>BUILD.json</code> left out: not loaded), the two cutters the registry names (4.6 MB), the context weights and the registry (the
+previous 7 worlds: 23.0 MB). SOP-BERT: <code>config.json</code>, the two tokenizer files and <code>onnx/model_quantized.onnx</code> (the previous
+model: 68.5 MB).</p>
 
 <h2 id="inside-pages">The pages of this part</h2>
 <ul class="pagelist">
 <li><a href="#help/engine">The engine and the legend</a>: wires, the legend, the plugins, Datalog.</li>
 <li><a href="#help/rules-reader">The Rules reader</a>: hand-written, and what it is good and bad at.</li>
-<li><a href="#help/vss-reader">The VSS reader</a>: the composer, its cutters, the 7 worlds, the context filler, the adapter.</li>
+<li><a href="#help/vss-reader">The VSS reader</a>: the composer, its cutters, the 9 worlds, the context filler, the adapter.</li>
 <li><a href="#help/neural-reader">The SOP-BERT reader</a>: SOP-BERT, one fine-tuned DistilBERT with small heads.</li>
 <li><a href="#help/cutting">One cut for all readers</a>: the three cutters and what they cost each reader.</li>
 <li><a href="#help/spelling">The spell checker</a>, <a href="#help/models">Models and versions</a>, <a href="#help/data">Data</a>,
@@ -241,16 +245,16 @@ ${AH}
 <path class="ar" d="M200 102 V114 H298 V128"/>
 <rect class="mod" x="8" y="130" width="188" height="104" rx="8"/>
 <text class="t" x="102" y="148" text-anchor="middle">(a) World cutter</text>
-<text class="m" x="102" y="163" text-anchor="middle">cutter_worlds7s.json</text>
+<text class="m" x="102" y="163" text-anchor="middle">cutter_worlds8s.json</text>
 <text x="102" y="181" text-anchor="middle">BIO tagger per token:</text>
-<text x="102" y="196" text-anchor="middle">B-&lt;world&gt; (7) · I · O</text>
+<text x="102" y="196" text-anchor="middle">B-&lt;world&gt; (9) · I · O</text>
 <text x="102" y="213" text-anchor="middle">→ the units, and each</text>
 <text x="102" y="227" text-anchor="middle">unit's top 3 worlds</text>
 <rect class="mod" x="204" y="130" width="188" height="104" rx="8"/>
 <text class="t" x="298" y="148" text-anchor="middle">(c) Event cutter</text>
-<text class="m" x="298" y="163" text-anchor="middle">cutter_events.json</text>
+<text class="m" x="298" y="163" text-anchor="middle">cutter_events8.json</text>
 <text x="298" y="181" text-anchor="middle">same tagger, labels</text>
-<text x="298" y="196" text-anchor="middle">B-&lt;event&gt; (35) · I · O</text>
+<text x="298" y="196" text-anchor="middle">B-&lt;event&gt; (51) · I · O</text>
 <text x="298" y="213" text-anchor="middle">→ hint: the best event</text>
 <text x="298" y="227" text-anchor="middle">at the unit's 1st token</text>
 <path class="ar" d="M102 234 V256"/>
@@ -295,22 +299,24 @@ arrow is the hint: it never cuts and never overrides a readable reading (H1 only
 </figure>
 
 <h2 id="vss-cutter">(a) The world cutter</h2>
-<p><code>docs/model/micro/cutter_worlds7s.json</code> (1.14 MB). A token tagger: a greedy averaged-perceptron BIO tagger (the segmenter of
+<p><code>docs/model/micro/cutter_worlds8s.json</code> (2.03 MB). A token tagger: a greedy averaged-perceptron BIO tagger (the segmenter of
 <code>training/sketch/front.py</code>, <code>train_segmenter</code>; JS twin <code>segmentWorlds</code> in <code>docs/js/front.js</code>). Each token gets
 <code>B-&lt;world&gt;</code> (the first token of a request, labelled with the world that holds its action), <code>I</code> (inside the request)
-or <code>O</code> (outside every request). 9 labels: 7 worlds, I, O. A unit runs from a B to the last I after it.</p>
+or <code>O</code> (outside every request). 11 labels: 9 worlds, I, O. A unit runs from a B to the last I after it.</p>
 <p>The unit’s <b>candidates</b> are the 3 worlds with the highest <code>B-&lt;world&gt;</code> score at its first token
 (<code>ROUTER_K = 3</code>: the smallest k whose recall of the gold world is at least 97%, measured 97.9% by
 <code>training/sketch/cutter_worlds_probe.py</code>).</p>
 <p><b>When another cutter cut the message</b> (<a href="#help/cutting">the shared cut</a>), the world cutter still runs once over the message,
 and only names worlds: a unit’s candidates are the 3 worlds with the highest summed <code>B-&lt;world&gt;</code> score inside the unit; a unit
-with no world signal is read by all 7 worlds, and the fewest words not understood decides (<code>CUT_SHARED.md</code>). With its own cut the
-outputs are identical to before the shared cut: 1000 of 1000 sample messages and 1128 of 1128 short ones.</p>
+with no world signal is read by all 9 worlds, and the fewest words not understood decides (<code>CUT_SHARED.md</code>). With its own cut the
+outputs are identical to the cutter path (<code>training/sketch/cut_bench.mjs</code>, line “identical”).</p>
 <p>Trained by <code>training/sketch/train_cutter.py --worlds</code> on the annotation spans (the span of each gold request gives its B and I
-tokens), <code>seg_epochs</code> 8, on 6640 messages / 224,724 tokens: the 3640 long messages with spans plus the 3000 short one-request
-commands (switch <code>SHORT=1</code>). The “s” in the name is that switch (SHORT.md). Training takes about 82 s on CPU.</p>
+tokens), <code>seg_epochs</code> 8, grouping <code>training/sketch/worlds_micro/GROUPS_8ops.json</code>, on 23,698 messages / 463,240 tokens:
+every annotated message with spans of the world data (below, <a href="#help/data">Data</a>) plus the 3000 short one-request commands (switch
+<code>SHORT=1</code>; the “s” in the name, SHORT.md). Requests per world in its data: shapes 15,286, position 9861, questions 7320, links 6163,
+graphq 5038, manage 4051, history 1069, help 857, layout 564. Trained on the GPU machine’s CPU in job 070.</p>
 
-<h2 id="worlds">(b) The 7 micro-worlds</h2>
+<h2 id="worlds">(b) The 9 micro-worlds</h2>
 <p>A <b>world</b> is one VSS model for a few actions (its <i>events</i>). Its legend lists only its own events. The model is a route book over
 <i>stars</i>: every word identity is a vector of D = 1024 unit-modulus complex numbers derived from a hash of its name (portable
 <code>star_version</code> 2, <code>docs/js/vss/stars.js</code>); the learned route book (<code>docs/js/vss/routebook.js</code>) gives each token
@@ -326,46 +332,58 @@ readers voting</a>). The margin behind <code>abstain</code> alone is a poor conf
 thresholds <code>val_min_count</code> 5, <code>val_min_prec</code> 0.8, <code>trig_min_count</code> 2, <code>trig_share</code> 0.75, <code>trig_min_prec</code> 0.6).
 Names are never in the lexicon: an unknown word becomes a name token, quoted text a text token.</p>
 <div class="tw"><table>
-<thead><tr><th>World</th><th>Events (actions and questions)</th><th>Folder</th><th class="num">Size</th><th class="num">Training rows</th><th class="num">Front: values / triggers</th></tr></thead>
+<thead><tr><th>World</th><th>Events (actions and questions)</th><th>Folder</th><th class="num">Size</th><th class="num">Training rows</th><th class="num">Front: values / triggers</th><th class="num">Right when it reads (calibration)</th></tr></thead>
 <tbody>
-<tr><td>shapes</td><td>create, set, resize, fact, rule</td><td><code>micro/shapes7c/</code></td><td class="num">7.3 MB</td><td class="num">6334</td><td class="num">88 / 658</td></tr>
-<tr><td>links</td><td>connect, disconnect</td><td><code>micro/links7/</code></td><td class="num">8.1 MB</td><td class="num">3596</td><td class="num">45 / 530</td></tr>
-<tr><td>position</td><td>move, swap, arrange, align, distribute, toFront, toBack</td><td><code>micro/position7/</code></td><td class="num">6.6 MB</td><td class="num">4375</td><td class="num">59 / 727</td></tr>
-<tr><td>graphq</td><td>check, connected, path, reachable, cycle, exists</td><td><code>micro/graphq7/</code></td><td class="num">5.1 MB</td><td class="num">2729</td><td class="num">31 / 429</td></tr>
-<tr><td>questions</td><td>count, list, extreme, nearest, describe, neighbors, degree, property</td><td><code>micro/questions7/</code></td><td class="num">4.2 MB</td><td class="num">3959</td><td class="num">79 / 844</td></tr>
-<tr><td>manage</td><td>delete, duplicate, rename, label</td><td><code>micro/manage7/</code></td><td class="num">3.1 MB</td><td class="num">1091</td><td class="num">17 / 138</td></tr>
-<tr><td>history</td><td>undo, redo, forget</td><td><code>micro/history7/</code></td><td class="num">1.2 MB</td><td class="num">536</td><td class="num">0 / 50</td></tr>
+<tr><td>shapes</td><td>create, set, resize, fact, rule</td><td><code>micro/shapes8/</code></td><td class="num">5.8 MB</td><td class="num">15,919</td><td class="num">490 / 1574</td><td class="num">63.6%</td></tr>
+<tr><td>links</td><td>connect, disconnect, reverse</td><td><code>micro/links8/</code></td><td class="num">4.4 MB</td><td class="num">6680</td><td class="num">107 / 909</td><td class="num">55.4%</td></tr>
+<tr><td>position</td><td>move, swap, arrange, align, distribute, toFront, toBack</td><td><code>micro/position8/</code></td><td class="num">4.2 MB</td><td class="num">10,143</td><td class="num">240 / 1335</td><td class="num">67.4%</td></tr>
+<tr><td>layout (new)</td><td>improve, respace, snap, fit, flip, sort, groupBy, equalize, straighten, untangle</td><td><code>micro/layout8/</code></td><td class="num">1.2 MB</td><td class="num">501</td><td class="num">45 / 224</td><td class="num">49.0%</td></tr>
+<tr><td>graphq</td><td>check, connected, path, reachable, cycle, exists</td><td><code>micro/graphq8/</code></td><td class="num">2.9 MB</td><td class="num">4905</td><td class="num">120 / 722</td><td class="num">81.4%</td></tr>
+<tr><td>questions</td><td>count, list, extreme, nearest, describe, neighbors, degree, property, members, groupOf</td><td><code>micro/questions8/</code></td><td class="num">3.4 MB</td><td class="num">7511</td><td class="num">150 / 1308</td><td class="num">87.9%</td></tr>
+<tr><td>manage</td><td>delete, duplicate, rename, label, group, ungroup</td><td><code>micro/manage8/</code></td><td class="num">2.4 MB</td><td class="num">3909</td><td class="num">127 / 487</td><td class="num">57.0%</td></tr>
+<tr><td>history</td><td>undo, redo, forget</td><td><code>micro/history8/</code></td><td class="num">0.8 MB</td><td class="num">901</td><td class="num">0 / 123</td><td class="num">78.7%</td></tr>
+<tr><td>help (new)</td><td>help (a question about the editor: <code>question ask=help topic=… aspect=…</code>)</td><td><code>micro/help8/</code></td><td class="num">1.7 MB</td><td class="num">847</td><td class="num">98 / 234</td><td class="num">52.7%</td></tr>
 </tbody></table></div>
-<p class="note">Folders under <code>docs/model/</code>. Rows from each folder’s <code>BUILD.json</code>; values / triggers counted in its <code>front.json</code>.
-All seven: D 1024, 10 epochs, seed 0, <code>DATA=spans</code>, trained on CPU here; <code>shapes7c</code> is the build with
-<code>CREATE_COLOR=role</code> (CREATE_COLOR.md). Each folder holds <code>model.json</code>, <code>routebook.bin</code>, <code>stars.json</code> (the word vectors are generated in the browser, SHRINK.md),
-<code>manifest.json</code> (sha256 of each file, format <code>vss-web-2</code>, 8-bit phases, sparse route book), <code>front.json</code> and
-<code>BUILD.json</code> (not loaded). The grouping of events into these 7 worlds is <code>training/sketch/worlds_micro/GROUPS_7.json</code>,
-chosen by measured cutter confusion (PLAN_B.md). The events group, ungroup, members and groupOf are in the engine, the Rules reader and the
-adapter, and in the round-2 worlds, but in no world of the default registry.</p>
-<p><b>Round 2</b> (<code>training/sketch/ROUND2.md</code>): the same 7 worlds retrained once with every measured fix (<code>micro/&lt;world&gt;7r2/</code>,
-with the group events in manage and questions), new cutters, and <code>docs/model/micro/registry_r2.json</code>. Trained on the GPU machine
-(commit 63274ae), <b>not the default</b>: on the sample 75.3 / 11.1 / 13.6 against 77.2 / 11.4 / 11.4 for the default; on the short sets
-62.5 / 11.0 / 26.6 against 61.1 / 11.1 / 27.7. Details in <a href="#help/measurement/round2">Measurement</a>.</p>
+<p class="note">Folders under <code>docs/model/</code>. Size: the files the page loads (<code>BUILD.json</code> left out). Rows from each folder’s
+<code>BUILD.json</code>; values / triggers counted in its <code>front.json</code>. Right when it reads: the world prior of
+<code>docs/model/confidence/vss.json</code>, the share of the requests read in that world that were right on the calibration messages (fresh2 +
+short3, 368 messages; shrunk toward the mean). All nine: arm VSS-ALL of <code>training/sketch/TRAIN_PLAN_1103.md</code>, D 1024, 10 epochs,
+seed 0, <code>DATA=spans</code> plus every folder of <code>EXTRA_DIRS</code> (<a href="#help/data">Data</a>), with the switches
+<code>LEGEND_EXT=1</code> (the forms of 2026-11-02: templates, free text, panels, help questions, the layout operations, arrow labels),
+<code>VAL_PICK=specific</code> (a value phrase stands for its most specific value, “circles” → circles, not “all”) and <code>DIAGRAM_OPS=1</code>
+(groups and double positions), <code>CREATE_COLOR=role</code>, <code>FAST=1</code>; trained on the GPU machine (job 070). Each folder holds
+<code>model.json</code>, <code>routebook.bin</code>, <code>stars.json</code> (the word vectors are generated in the browser, SHRINK.md),
+<code>manifest.json</code> (sha256 of each file, format <code>vss-web-3</code>, 8-bit phases, sparse route book), <code>front.json</code> and
+<code>BUILD.json</code> (not loaded). The grouping of events into these 9 worlds is <code>training/sketch/worlds_micro/GROUPS_8ops.json</code>:
+the 7 earlier worlds (chosen by measured cutter confusion, PLAN_B.md) with reverse in links, group / ungroup in manage, members / groupOf in
+questions, and two new worlds. <b>layout</b> holds the whole-diagram operations (“tidy up”, “untangle the arrows”, “make them the same
+size”): they are confused with set / resize and among themselves more than with the position events (TRAIN_PLAN_1103.md §1). <b>help</b>
+answers instead of drawing: “how do I …”, “can I …”, “what kinds of …” are told apart from every other world by the question form; the
+engine’s help plugin writes the answer from the legend, as for the Rules’ help wire.</p>
+<p class="note">Known gaps of these worlds (TRAIN_PLAN_1103.md §6): the <code>about</code> of a help question (“can I add <i>images</i>?”) is not
+read by VSS (its words are outside the legend; SOP-BERT reads it); a help question’s topic is sometimes lost to the aspect words; most
+<code>arrange template=</code> values are too rare for the value thresholds (144 of 200 lost), so an arrange with a template is read without it;
+an item of several words (“Build MVP”) has no single VSS token, so a template’s item list can come out short. The confidence is meant to hold
+such readings back.</p>
 
 <h2 id="event-hint">(c) The event cutter and the event hint H1</h2>
-<p><code>docs/model/micro/cutter_events.json</code> (1.24 MB): the same tagger and trainer, with one label per legend event
-(<code>B-&lt;event&gt;</code>, 35 events, plus I and O; grouping <code>training/sketch/worlds_micro/GROUPS_EVENTS.json</code>), trained on the
-3640 long messages (not on the short commands). It is decoded once over the whole message; it does not cut. A unit’s <b>hint</b> is the
+<p><code>docs/model/micro/cutter_events8.json</code> (2.58 MB): the same tagger and trainer, with one label per legend event
+(<code>B-&lt;event&gt;</code>, 51 events, plus I and O; grouping <code>training/sketch/worlds_micro/GROUPS_EVENTS_8ops.json</code>), trained on
+20,698 messages / 445,956 tokens: the world data without the short commands. It is decoded once over the whole message; it does not cut. A unit’s <b>hint</b> is the
 <code>B-&lt;event&gt;</code> label with the largest score at the unit’s first token.</p>
 <p>Why: inside a world with several events the reader decides the event only from a verb lemma; a request with no verb (“Post blue”,
 “Alpha to Beta”) gets <code>unknown-event</code>. <b>H1</b> (registry <code>"event_hint": "H1"</code>): only when a candidate world’s reading
 has status <code>unknown-event</code> and the hint is one of that world’s events, the world reads the unit again with that event given
 (<code>opts.event</code> in <code>reader.js</code>). Measured gain on the sample: right 69.6 → 73.2 (EVENT_HINT.md). H2 (overriding readable
-readings too) was measured and rejected.</p>
+readings too) was measured and rejected (both with the previous worlds).</p>
 
 <h2 id="context">(d) The context filler</h2>
-<p><code>docs/js/vss-context.js</code> with <code>docs/model/context/weights.json</code> (14.9 KB). It runs after VSS on the chosen reading and
+<p><code>docs/js/vss-context.js</code> with <code>docs/model/context/weights.json</code> (21.1 KB, retrained in job 070 on the same data as the worlds). It runs after VSS on the chosen reading and
 handles reference <b>gaps</b> in the entity roles (target, from, to, anchor): <code>pron</code> (“it”, “them”), <code>vague</code> (“the new
 one”), <code>desc</code> (“the blue one”: filled only by a context shape whose known attributes confirm it, otherwise left to the engine as a
 mention) and <code>empty</code> (a role the action needs but the reading left empty; the needs are learned from the gold args). Candidates are
 a closed set (shapes created or named earlier in the message, shapes on the canvas, names in the text, recent groups); hard filters (one vs
-several, description constraints, recency); a linear ranker with 155 features and a learned “nobody” candidate, trained by
+several, description constraints, recency); a linear ranker with 165 features and a learned “nobody” candidate, trained by
 <code>training/sketch/train_context.mjs</code> on the gold args of an 80% split. Decision today: fill with the best candidate when it beats the
 runner-up by the <code>margin</code>; the margin is <b>0</b>, so it asks only when “nobody” ranks first. A request with a gap it cannot fill
 becomes a question to the user, not an execution.</p>
@@ -379,7 +397,12 @@ request the same way). The filler still fills at margin 0; the VSS tab’s confi
 <p><code>docs/js/vss-adapter.js</code>: <code>readingFromWires</code> turns the reader’s wires into an event with roles; <code>toNodes</code> maps the
 roles to SOP Lang keys and values (a description in a role becomes a <code>mention</code> wire). Position values are placed by what they are: a
 relation (left_of, below, between, …) is a relation and a region (top_left, center, …) is a region, whichever of <code>relation</code>,
-<code>region</code>, <code>relation2</code> holds it (fix 1 of SHORT2.md, 2026-11-02: before, such a value was dropped silently).</p>
+<code>region</code>, <code>relation2</code> holds it (fix 1 of SHORT2.md, 2026-11-02: before, such a value was dropped silently). The forms of
+2026-11-02 (TRAIN_PLAN_1103.md §1): the help event becomes <code>question ask=help</code> with <code>topic</code> and <code>aspect</code>; the
+layout operations and reverse become commands with their target, axis, property, anchor; template, scheme, fill, layer, topic, aspect,
+property and kind are written in a world as prefixed value tokens (<code>tpl_timeline</code>, <code>asp_how</code>) that <code>extValue</code>
+decodes; items, items2 and parents are set roles joined with “,” in text order; <code>no_label</code> is <code>label=""</code>; a create that
+read a template, items or a title gets no default shape.</p>
 
 <h2 id="decide">How a unit is decided, and ties</h2>
 <ol>
@@ -399,7 +422,7 @@ the registry on 2026-11-02: it read 0 of 4643 requests on the sample and 0 of 87
 token router were removed the same day (the composer accepts only <code>"router": "cutter"</code>). The model folders are in git history (commit a76b4e3).</p>
 <p class="note">Also in the code, off by default: <code>need_read</code> (re-read an empty needed role with presence “all”; tested, not adopted,
 SHORT2.md §6).</p>
-`, 'A composer of seven small vector-symbolic models, two cutters, a context filler and an adapter to SOP Lang.');
+`, 'A composer of nine small vector-symbolic models, two cutters, a context filler and an adapter to SOP Lang.');
 
 /* ============================================================ neural */
 page('neural-reader', 'The SOP-BERT reader', `
@@ -456,14 +479,19 @@ other heads read all its requests in one batched call.</figcaption>
 </figure>
 <ul>
   <li><b>cut</b>: O / B / I per word over the whole message (read on each word’s first word piece). It is the <b>BERT cutter</b> of the shared cut.</li>
-  <li><b>act</b> (on the [CLS] vector): the action of a command, the ask of a question, <code>fact</code>, <code>rule</code>, or <code>none</code>
-  (the unit is not a request, “Thanks”: no wire, listed as “Ignored (not a request)”).</li>
-  <li><b>15 class heads, one per legend key with values</b> (arrow, axis, color, comparison, direction, kind, layout, notColor, pairing, position,
-  property, shape, size, style, superlative): <code>none</code> or one of the values the key takes in the training gold.</li>
-  <li><b>who fills each name-role</b> (<code>fill:&lt;key&gt;</code> for anchor, from, target, to): none / written / context / description;
-  and the <b>description’s own keys</b> (<code>desc:&lt;key&gt;</code>: quantifier, color, notColor, shape, recency). So it reads “the red square”
-  and “it” itself.</li>
-  <li><b>word tags</b> B / I / O for the keys whose answer is written in the request (target, anchor, from, to, name, label, count, distance).</li>
+  <li><b>act</b> (on the [CLS] vector, 52 classes): the action of a command (including the layout operations improve … untangle, reverse,
+  group, ungroup), the ask of a question (including members, groupOf and help), <code>fact</code>, <code>rule</code>, or <code>none</code> (the unit
+  is not a request, “Thanks”: no wire, listed as “Ignored (not a request)”).</li>
+  <li><b>25 class heads, one per legend key with values</b> (arrow, aspect, axis, color, comparison, direction, fill, kind, layer, layout,
+  notColor, outline, pairing, position, position2, property, quantifier, region, scheme, shape, size, style, superlative, template, topic):
+  <code>none</code> or one of the values the key takes in the training gold. A help question’s topic is one of the 109 topics seen in training
+  (the legend has 217).</li>
+  <li><b>who fills each name-role</b> (<code>fill:&lt;key&gt;</code> for anchor, anchor2, from, linked, target, to): none / written / context /
+  description; the <b>description’s own keys</b> (<code>desc:&lt;key&gt;</code>: quantifier, color, notColor, shape, recency), and for a second
+  described role in the same request its own heads (<code>desc2:&lt;key&gt;</code>). So it reads “the red square” and “it” itself.</li>
+  <li><b>word tags</b> B / I / O for the keys whose answer is written in the request (about, anchor, anchor2, at, count, distance, from, items,
+  items2, label, linked, name, parents, scale, target, title, to). The items of a template are one span each, joined with “,” in text order;
+  <code>about</code> is the part of a help question the legend does not know (“can I add <i>images</i>?”).</li>
 </ul>
 <p><b>Assembling the wires</b> is deterministic, by the legend: the wire type follows from the act; the keys read for an act are the keys its
 requests have in the training gold (<code>reader.act_keys</code>); a role read as “written” takes the tagged words (a name created earlier in
@@ -471,32 +499,39 @@ the message becomes a reference to that wire), “description” becomes a <code
 the engine, as the Rules and VSS mentions), and “context” takes the context rule every reader shares after each request (a copy of
 <code>nextContext</code> in <code>vss-composer.js</code>: “it” is the last shape created or named). <b>It never calls the Rules reader</b>
 (owner, 2026-11-02).</p>
-<p><b>Training</b>: the same data and split as the earlier act classifier (below) (the span-annotated messages minus the fixed 1000-message sample; 10%
-of the messages held out by message id, seed 0). Loss: the act plus the mean of the class heads plus the word tags (and the cut tags); AdamW,
-fp16 on cuda, early stop on the held-out share of requests read right; the best epoch is kept. Export: ONNX with dynamic 8-bit quantization;
-<code>config.json</code> carries the head layout (<code>"reader"</code>); <code>training/neural/check_roles_node.mjs</code> reads 50 held-out
-requests through the demo’s decoding code and compares them with torch.</p>
+<p><b>Training</b> (arm BERT-ALL of <code>training/sketch/TRAIN_PLAN_1103.md</code>, GPU job 071): <code>make_data.py --all</code> /
+<code>make_roles.py --all</code> on every span-annotated message the VSS worlds train on (<a href="#help/data">Data</a>): 24,698 messages,
+54,584 request spans, nothing held out (training/neural/ALL_DATA.md), so no early stop: 8 epochs, the last kept, lr 6e-5, batch 32, fp16 on
+cuda, seed 0. Loss: the act plus the mean of the class heads plus the word tags (and the cut tags); AdamW. Export: ONNX with dynamic 8-bit
+quantization; <code>config.json</code> carries the head layout (<code>"reader"</code>); <code>training/neural/check_roles_node.mjs</code> reads 50
+training requests through the demo’s decoding code and compares them with torch (ids, act, classes, tags 50/50, cut 19/20). It is tested only
+on messages it was not trained on: fresh2 and short3 (below).</p>
 <h2 id="sop-bert-measured">Measured</h2>
+<p>Test part of the new writer’s messages and of the short commands (fresh2 + short3: 745 messages, 1745 requested actions), each reader
+executing only above the threshold its confidence recipe chose on the calibration part (368 messages, out of fold); cost score = right − 10 ×
+(executed wrong + extras executed), per 100 requested actions (<code>results/072_measure/refit/records/confidence3_report.md</code> on branch
+<code>gpu-runs</code>).</p>
 <div class="tw"><table>
-<thead><tr><th>SOP-BERT</th><th class="num">Value</th><th>Source</th></tr></thead>
+<thead><tr><th>Situation</th><th class="num">SOP-BERT</th><th class="num">VSS</th><th class="num">VSS-BERT</th><th class="num">3 readers</th></tr></thead>
 <tbody>
-<tr><td>Fixed 1000-message sample, its own cut: right / wrong / not done (%)</td><td class="num"><b>80.8 / 16.5 / 2.8</b></td><td>commit 1f3c806</td></tr>
-<tr><td>Same run: extra requests; ms per message; calls to the Rules reader</td><td class="num">348; 22.6; 0</td><td>same</td></tr>
-<tr><td>For comparison, same sample: VSS (VSS cut) · Rules (Rules cut)</td><td class="num">77.2 / 11.4 / 11.4 · 67.9 / 16.8 / 15.3</td><td>CUT_SHARED.md</td></tr>
-<tr><td>Act accuracy: held-out 10% · sample</td><td class="num">0.989 · 0.988</td><td><code>docs/model/neural/sop-bert/README.md</code></td></tr>
-<tr><td>Requests whose act, every class key and every role are all read right: held-out · sample</td><td class="num">0.881 · 0.867</td><td>same</td></tr>
-<tr><td>Held-out name-roles by filler: written · context · description</td><td class="num">1611/1659 · 83/103 · 4/34</td><td>same</td></tr>
-<tr><td>Size of <code>onnx/model_quantized.onnx</code> (q8) · node vs torch on 50 held-out requests</td><td class="num">67.8 MB · tags 49/50, cut 19/20, rest 50/50</td><td>same</td></tr>
+<tr><td>Cost score, the previous readers (arms G)</td><td class="num">31.5</td><td class="num">20.7</td><td class="num">29.7</td><td class="num">32.6</td></tr>
+<tr><td>Cost score, these readers (arm ALL)</td><td class="num"><b>33.4</b></td><td class="num">22.9</td><td class="num"><b>34.8</b></td><td class="num">31.8</td></tr>
+<tr><td>Done right, of the requested actions (arm ALL)</td><td class="num">44.8%</td><td class="num">37.8%</td><td class="num">42.8%</td><td class="num">43.3%</td></tr>
+<tr><td>Confidently wrong, of what it executed (arm ALL)</td><td class="num">2.5%</td><td class="num">3.8%</td><td class="num">1.8%</td><td class="num">2.6%</td></tr>
+<tr><td>Asked, of the requested actions (arm ALL)</td><td class="num">49.3%</td><td class="num">39.1%</td><td class="num">52.6%</td><td class="num">52.0%</td></tr>
+<tr><td>AUROC of the confidence (calibration, out of fold)</td><td class="num">0.912</td><td class="num">0.911</td><td class="num">0.919</td><td class="num">0.935</td></tr>
 </tbody></table></div>
-<p>SOP-BERT gets more requests right than VSS on whole messages (80.8 vs 77.2) and also more wrong (16.5 vs 11.4): it almost never leaves a
-request undone (2.8%), so what it does not know it guesses. Descriptions in roles (“next to the orange hexagon”) are its weakest part: 4 of 34
-held-out. These are the earlier measure, every request executed. Under the main metric (precision of execution, owner 2026-11-02) SOP-BERT
-executes a request in the demo only when its confidence clears a threshold chosen on held-out data: a confidence fitted on 24 numbers of its
-own heads plus whether VSS and the Rules read the request the same way (<a href="#help/three-readers">Three readers voting</a>). Why the
-difference between guessing and stopping matters:
+<p>The same comparison with the confidence recipe of the previous release, on fresh2 alone (405 test messages, 1313 requested actions;
+<code>results/072_measure/COMPARE.md</code>): SOP-BERT 14.4 → <b>35.9</b>, +21.6 [9.7, 33.2] (95% interval of 1000 paired resamples): the new
+model is better, and the interval shows it. On short3 alone 0.2 → 4.2, +3.9 [−4.8, 13.8]: not shown either way. On its own training data (a fit,
+not a test) it reads the act of 99.98% of the sample’s requests right and 98.0% of the requests entirely right.</p>
+<p>Where it is weak: help questions (the act prior of ‘help’ is 34% right on the calibration messages; the topic head knows 109 of the 217
+topics), descriptions in roles, and the layout acts (arrange 55% right on the calibration messages). The confidence holds most of these back:
+it executes a request only when its confidence, fitted on 24 numbers of its own heads plus whether VSS and the Rules read the request the same
+way, clears the threshold (<a href="#help/three-readers">Three readers voting</a>). Why the difference between guessing and stopping matters:
 <a href="#help/knowing">Knowing what it does not know</a>.</p>
-<p class="note">Trained by <code>training/neural/finetune_roles.py</code> on the GPU machine: epochs ≤ 8, lr 6e-5, batch 32, fp16 on cuda, seed 0; 15,683
-request spans. The milliseconds are from the scoring run in node; the time of each message in the demo is in its reply.</p>
+<p class="note">Size of <code>onnx/model_quantized.onnx</code> (q8): 68.0 MB. The time of each message in the demo is in its reply.</p>
+
 <h2 id="pair">Before SOP-BERT: the act classifier and the QA model (removed)</h2>
 <p>Until 2026-11-02 the Neural reader was a pair: our classifier <code>act-distilbert</code> (DistilBERT fine-tuned on our requests to name the act:
 36 classes) and a ready-made extractive question-answering model, <code>Xenova/distilbert-base-cased-distilled-squad</code>, that answered each
@@ -528,7 +563,7 @@ setting (Settings › Cutting into requests), so the tabs differ only in how eac
 <thead><tr><th>Cutter</th><th>What it is</th><th>Code / model</th></tr></thead>
 <tbody>
 <tr><td><b>Rules segmenter</b></td><td>Hand-written: sentences, then a comma or “and” before a verb, coordinated names, one clause per created object.</td><td><code>docs/js/logic.js</code> (<code>rulesCut</code>)</td></tr>
-<tr><td><b>VSS cutter</b> (default)</td><td>A learned token tagger <code>B-&lt;world&gt;</code> / I / O trained on the annotated request spans; it also names each unit’s candidate worlds.</td><td><code>docs/model/micro/cutter_worlds7s.json</code></td></tr>
+<tr><td><b>VSS cutter</b> (default)</td><td>A learned token tagger <code>B-&lt;world&gt;</code> / I / O trained on the annotated request spans; it also names each unit’s candidate worlds.</td><td><code>docs/model/micro/cutter_worlds8s.json</code></td></tr>
 <tr><td><b>BERT cutter</b></td><td>The cut head of SOP-BERT: B / I / O per word over the whole message. Available once SOP-BERT has loaded.</td><td><code>NeuralKit.cut</code>, <code>training/neural/finetune_roles.py</code></td></tr>
 </tbody></table></div>
 <p><b>How.</b> <code>VSSFormalizer.cut(text, ctx, strategy, env)</code> returns <code>[{c0, c1, src}]</code> (character offsets); every reader
@@ -537,30 +572,30 @@ reads exactly those units (<code>rules.formalize(t, ctx, {units})</code>, <code>
 Rules segmenter for that message, and the details say so. The default is <code>DEFAULT_CUT</code> in <code>docs/js/vss-composer.js</code>.</p>
 
 <h2 id="cut-measured">What each cut costs each reader</h2>
-<p>Per gold request, right / wrong / not done (%) and extra; <code>node training/sketch/cut_bench.mjs</code>, <code>PAIR=value</code>
-(<code>training/sketch/CUT_SHARED.md</code>).</p>
+<p>Per gold request, right / wrong / not done (%) and extra, every request executed; <code>node training/sketch/cut_bench.mjs</code>,
+<code>PAIR=value</code>, with the 9 worlds of 2026-11-03 (method: <code>training/sketch/CUT_SHARED.md</code>).</p>
 <div class="tw"><table>
 <thead><tr><th>Set, reader</th><th class="num">Rules cut</th><th class="num">VSS cut</th></tr></thead>
 <tbody>
-<tr><td>Sample (4858), Rules</td><td class="num">67.9 / 16.8 / 15.3 +821</td><td class="num">73.6 / 11.9 / 14.5 +406</td></tr>
-<tr><td>Sample, VSS</td><td class="num">69.8 / 15.8 / 14.4 +833</td><td class="num"><b>77.2 / 11.4 / 11.4 +334</b></td></tr>
-<tr><td>Short sets (1140), Rules</td><td class="num"><b>97.5 / 0.5 / 1.9 +16</b></td><td class="num">87.7 / 1.8 / 10.4 +17</td></tr>
-<tr><td>Short sets, VSS</td><td class="num">58.6 / 13.7 / 27.7 +89</td><td class="num">61.1 / 11.1 / 27.7 +53</td></tr>
+<tr><td>Sample (4858), Rules</td><td class="num">69.1 / 15.5 / 15.4 +769</td><td class="num">74.5 / 11.8 / 13.7 +450</td></tr>
+<tr><td>Sample, VSS</td><td class="num">69.8 / 14.3 / 15.9 +1023</td><td class="num"><b>76.9 / 10.1 / 12.9 +471</b></td></tr>
+<tr><td>Short sets (1140), Rules</td><td class="num"><b>98.9 / 0.4 / 0.8 +4</b></td><td class="num">97.2 / 1.8 / 1.0 +5</td></tr>
+<tr><td>Short sets, VSS</td><td class="num">70.6 / 11.7 / 17.7 +93</td><td class="num">78.0 / 8.2 / 13.9 +69</td></tr>
 </tbody></table></div>
 <p>The cut against the gold spans:</p>
 <div class="tw"><table>
 <thead><tr><th>Set, cut</th><th class="num">Units / gold</th><th class="num">Lost / merged / split / extra units</th><th class="num">ms per message</th></tr></thead>
 <tbody>
-<tr><td>Sample, Rules</td><td class="num">6051 / 4858</td><td class="num">0 / 191 / 192 / 1202</td><td class="num">8.3</td></tr>
-<tr><td>Sample, VSS</td><td class="num">4853 / 4858</td><td class="num">147 / 53 / 56 / 136</td><td class="num">3.3</td></tr>
-<tr><td>Short, Rules</td><td class="num">1119 / 1118</td><td class="num">0 / 0 / 1 / 0</td><td class="num">1.1</td></tr>
-<tr><td>Short, VSS</td><td class="num">1024 / 1118</td><td class="num">96 / 0 / 2 / 0</td><td class="num">0.6</td></tr>
+<tr><td>Sample, Rules</td><td class="num">6059 / 4858</td><td class="num">1 / 180 / 180 / 1202</td><td class="num">10.9</td></tr>
+<tr><td>Sample, VSS</td><td class="num">4934 / 4858</td><td class="num">147 / 48 / 87 / 180</td><td class="num">3.5</td></tr>
+<tr><td>Short, Rules</td><td class="num">1118 / 1118</td><td class="num">0 / 0 / 0 / 0</td><td class="num">2.1</td></tr>
+<tr><td>Short, VSS</td><td class="num">1122 / 1118</td><td class="num">4 / 0 / 8 / 0</td><td class="num">0.5</td></tr>
 </tbody></table></div>
-<p><b>Reading.</b> On whole messages the VSS cut is better for both readers (wrong 11.9 vs 16.8 for Rules, extras halved): the Rules segmenter
-cuts text that is not a request into units (1202 extra units). On short one-line commands the Rules segmenter is better: the VSS cutter makes
-no unit for 96 of 1118 commands, so Rules with the VSS cut drops from 97.5 to 87.7 right. The default is the VSS cutter because real messages
-are whole messages. With its own cut (the BERT cutter) SOP-BERT reads the sample at 80.8 / 16.5 / 2.8 (commit 1f3c806); the BERT cut read by
-the Rules and VSS readers had no committed measurement when this page was written.</p>
+<p><b>Reading.</b> On whole messages the VSS cut is better for both readers (wrong 11.8 vs 15.5 for Rules, extras down from 769 to 450): the
+Rules segmenter cuts text that is not a request into units (1202 extra units). On short one-line commands the new world cutter loses only 4 of
+1118 commands (the previous one lost 96), so the Rules lose little with it (97.2 against 98.9 right) and VSS gains with it (78.0 against 70.6).
+The default is the VSS cutter because real messages are whole messages. The BERT cut is not in this script; VSS-BERT reads it, and its numbers
+are in <a href="#help/measurement/confidence-now">Measurement</a>.</p>
 <p class="note">The cutter is judged by the errors it causes in the readers (requested actions done wrong or not done, and extras), not by
 span-match scores (AGENTS.md).</p>
 `, 'One setting decides how every message is cut into requests; all three readers then read the same requests.');
@@ -583,7 +618,9 @@ at least <code>threshold</code> and at least <code>margin</code> above the secon
   <dt>Left alone</dt><dd>Known words, words of 1–2 letters, numbers and words with digits or apostrophes, quoted text, the word after
   named / called / titled / labeled, and capitalised words inside a sentence (names: corrected only toward a name on the canvas, “Strat” → “Start”).</dd>
 </dl>
-<p class="note"><code>vocab.json</code> names its sources: the 7 worlds of <code>registry.json</code> (lexicon, catalog, value and trigger phrases).</p>
+<p class="note"><code>vocab.json</code> names its sources: the 7 worlds of the previous registry (arm VSS-G: lexicon, catalog, value and trigger
+phrases). It was not rebuilt with the 9 worlds of 2026-11-03; their new words (“untangle”, “straighten”, “title”) are still targets through the
+legend’s cue words that the page adds at run time.</p>
 `, 'A VSA spell checker over character n-grams corrects near misses before any reader sees the message.');
 
 /* ============================================================ models */
@@ -591,49 +628,48 @@ page('models', 'Models and versions', `
 <figure>
 <div class="fig">
 <svg class="dg" viewBox="0 0 400 560" role="img" aria-labelledby="d4t">
-<title id="d4t">The docs/model folder: versions.json; micro with the two registries, four cutters, the seven worlds and their round-2 versions; context; spell; neural with sop-bert</title>
+<title id="d4t">The docs/model folder: versions.json; micro with the registry, two cutters and the nine worlds; context; confidence; spell; neural with sop-bert</title>
 <rect class="chipv" x="10" y="8" width="10" height="10" rx="2"/><text class="s" x="25" y="17">VSS loads</text>
 <rect class="chipn" x="98" y="8" width="10" height="10" rx="2"/><text class="s" x="113" y="17">SOP-BERT loads</text>
 <rect class="chipo" x="196" y="8" width="10" height="10" rx="2"/><text class="s" x="211" y="17">spell, versions</text>
 <rect class="chipx" x="300" y="8" width="10" height="10" rx="2"/><text class="s" x="315" y="17">not loaded</text>
-<text class="m" x="10" y="46" style="font-weight:600">docs/model/</text><text class="m" x="392" y="46" text-anchor="end">149.9 MB</text>
-<path class="tree" d="M16 52 V402 M16 66 H30 M16 88 H30 M16 360 H30 M16 380 H30 M16 402 H30"/>
+<text class="m" x="10" y="46" style="font-weight:600">docs/model/</text><text class="m" x="392" y="46" text-anchor="end">100.9 MB</text>
+<path class="tree" d="M16 52 V402 M16 66 H30 M16 88 H30 M16 340 H30 M16 360 H30 M16 380 H30 M16 402 H30"/>
 <rect class="chipo" x="34" y="58" width="9" height="9" rx="2"/><text class="m" x="48" y="66">versions.json</text><text class="m" x="392" y="66" text-anchor="end">1.1 KB</text>
-<text class="m" x="34" y="92" style="font-weight:600">micro/</text><text class="m" x="392" y="92" text-anchor="end">81.3 MB</text>
-<path class="tree" d="M40 98 V310 M40 114 H54 M40 136 H54 M40 158 H54 M40 180 H54 M40 202 H54 M40 224 H54 M40 246 H54 M40 288 H54"/>
-<rect class="chipv" x="58" y="106" width="9" height="9" rx="2"/><text class="m" x="72" y="114">registry.json (the default)</text><text class="m" x="392" y="114" text-anchor="end">1.9 KB</text>
-<rect class="chipx" x="58" y="128" width="9" height="9" rx="2"/><text class="m" x="72" y="136">registry_r2.json (round 2)</text><text class="m" x="392" y="136" text-anchor="end">1.9 KB</text>
-<rect class="chipv" x="58" y="150" width="9" height="9" rx="2"/><text class="m" x="72" y="158">cutter_worlds7s.json</text><text class="m" x="392" y="158" text-anchor="end">1.14 MB</text>
-<rect class="chipv" x="58" y="172" width="9" height="9" rx="2"/><text class="m" x="72" y="180">cutter_events.json</text><text class="m" x="392" y="180" text-anchor="end">1.24 MB</text>
-<rect class="chipx" x="58" y="194" width="9" height="9" rx="2"/><text class="m" x="72" y="202">cutter_worlds7r2.json</text><text class="m" x="392" y="202" text-anchor="end">1.24 MB</text>
-<rect class="chipx" x="58" y="216" width="9" height="9" rx="2"/><text class="m" x="72" y="224">cutter_events_r2.json</text><text class="m" x="392" y="224" text-anchor="end">1.67 MB</text>
-<rect class="chipv" x="58" y="238" width="9" height="9" rx="2"/><text class="m" x="72" y="246">shapes7c/ links7/ position7/</text><text class="m" x="392" y="246" text-anchor="end">35.6 MB</text>
-<text class="m" x="72" y="262">graphq7/ questions7/ manage7/ history7/</text>
-<rect class="chipx" x="58" y="280" width="9" height="9" rx="2"/><text class="m" x="72" y="288">the same seven, …7r2/</text><text class="m" x="392" y="288" text-anchor="end">40.5 MB</text>
-<text class="s" x="72" y="306">each world: model.json routebook.bin stars.json manifest.json front.json</text>
-<text class="s" x="72" y="320">(+ BUILD.json, not loaded)</text>
-<rect class="chipv" x="34" y="352" width="9" height="9" rx="2"/><text class="m" x="48" y="360">context/weights.json</text><text class="m" x="392" y="360" text-anchor="end">14.9 KB</text>
-<rect class="chipo" x="34" y="372" width="9" height="9" rx="2"/><text class="m" x="48" y="380">spell/vocab.json</text><text class="m" x="392" y="380" text-anchor="end">28.0 KB</text>
-<text class="m" x="34" y="406" style="font-weight:600">neural/</text><text class="m" x="392" y="406" text-anchor="end">68.5 MB</text>
+<text class="m" x="34" y="92" style="font-weight:600">micro/</text><text class="m" x="392" y="92" text-anchor="end">31.4 MB</text>
+<path class="tree" d="M40 98 V246 M40 114 H54 M40 136 H54 M40 158 H54 M40 180 H54"/>
+<rect class="chipv" x="58" y="106" width="9" height="9" rx="2"/><text class="m" x="72" y="114">registry.json (the default)</text><text class="m" x="392" y="114" text-anchor="end">3.3 KB</text>
+<rect class="chipv" x="58" y="128" width="9" height="9" rx="2"/><text class="m" x="72" y="136">cutter_worlds8s.json</text><text class="m" x="392" y="136" text-anchor="end">2.03 MB</text>
+<rect class="chipv" x="58" y="150" width="9" height="9" rx="2"/><text class="m" x="72" y="158">cutter_events8.json</text><text class="m" x="392" y="158" text-anchor="end">2.58 MB</text>
+<rect class="chipv" x="58" y="172" width="9" height="9" rx="2"/><text class="m" x="72" y="180">shapes8/ links8/ position8/ layout8/</text><text class="m" x="392" y="180" text-anchor="end">26.8 MB</text>
+<text class="m" x="72" y="196">graphq8/ questions8/ manage8/ history8/</text>
+<text class="m" x="72" y="212">help8/</text>
+<text class="s" x="72" y="232">each world: model.json routebook.bin stars.json manifest.json front.json</text>
+<text class="s" x="72" y="246">(+ BUILD.json, not loaded)</text>
+<rect class="chipv" x="34" y="332" width="9" height="9" rx="2"/><text class="m" x="48" y="340">context/weights.json</text><text class="m" x="392" y="340" text-anchor="end">21.1 KB</text>
+<rect class="chipv" x="34" y="352" width="9" height="9" rx="2"/><text class="m" x="48" y="360">confidence/ vss sop-bert combined vote3 .json</text><text class="m" x="392" y="360" text-anchor="end">0.72 MB</text>
+<rect class="chipo" x="34" y="372" width="9" height="9" rx="2"/><text class="m" x="48" y="380">spell/vocab.json</text><text class="m" x="392" y="380" text-anchor="end">26.8 KB</text>
+<text class="m" x="34" y="406" style="font-weight:600">neural/</text><text class="m" x="392" y="406" text-anchor="end">68.7 MB</text>
 <path class="tree" d="M40 412 V428 M40 428 H54"/>
 <rect class="chipn" x="58" y="420" width="9" height="9" rx="2"/><text class="m" x="72" y="428">sop-bert/</text><text class="s" x="392" y="428" text-anchor="end">one DistilBERT, 8-bit</text>
 <text class="s" x="72" y="448">config.json (with the head layout "reader")</text>
 <text class="s" x="72" y="464">tokenizer.json tokenizer_config.json</text>
 <text class="s" x="72" y="480">onnx/model_quantized.onnx (q8)</text>
 <rect class="box" x="8" y="502" width="384" height="52" rx="8"/>
-<text class="s" x="18" y="519">versions.json: "micro/links7": "7bdd38271f" → the loader asks for</text>
-<text class="m" x="18" y="534">micro/links7/routebook.bin?v=7bdd38271f</text>
+<text class="s" x="18" y="519">versions.json: "micro/links8": "a06e092204" → the loader asks for</text>
+<text class="m" x="18" y="534">micro/links8/routebook.bin?v=a06e092204</text>
 <text class="s" x="18" y="548">new content = new hash = new URL; unchanged = stays cached</text>
 </svg>
 </div>
-<figcaption>Figure 4. The model folder the page loads from (<code>du -sb</code>, 2026-11-02). VSS loads only what <code>registry.json</code> names;
+<figcaption>Figure 4. The model folder the page loads from (<code>du -sb</code>, 2026-11-03). VSS loads only what <code>registry.json</code> names;
 SOP-BERT loads <code>sop-bert/</code>; the size of each of its files is also in <code>versions.json</code> (“sizes”) and in SOP-BERT › Settings.</figcaption>
 </figure>
 
 <h2 id="versions">Versions: the browser never uses a stale model</h2>
 <p><code>training/sketch/stamp_models.py</code> computes a content version for every model: the first 10 hex digits of a sha256 over the model’s
 files (relative path + content, sorted; <code>BUILD.json</code> left out). Folder models are the VSS folders (with <code>manifest.json</code>) and the
-transformers.js folders under <code>neural/</code>; file models are the cutters, <code>context/*.json</code> and <code>spell/*.json</code>. It writes
+transformers.js folders under <code>neural/</code>; file models are the cutters, <code>context/*.json</code>, <code>spell/*.json</code> and
+<code>confidence/*.json</code>; <code>docs/model/arms/</code> (arms trained on the GPU machine, waiting for a decision) is skipped. It writes
 <code>docs/model/versions.json</code> (one entry per model; plus the file sizes of the neural folder, shown before download) and the same versions into
 the registries (<code>version</code> per world, <code>cutter_version</code>, <code>event_cutter_version</code>, <code>context_version</code>).
 It is idempotent and is run before every commit that changes a model.</p>
@@ -668,19 +704,30 @@ read, analysed and trained on; worlds are measured on the data they are trained 
 <tr><td><code>llm_bench/sonnet</code>, <code>llm_bench/haiku</code></td><td>the same bench texts without spans</td><td class="num">2 × 500</td><td>not read by training</td></tr>
 <tr><td><code>llm_train/sonnet</code>, <code>llm_train/haiku</code></td><td>short commands, one request per line (field <code>wire</code>, no span)</td><td class="num">2 × 1500</td><td>source of the next row</td></tr>
 <tr><td><code>llm_train/sonnet_short</code>, <code>llm_train/haiku_short</code></td><td>the same 3000 short commands with spans (texts byte-identical)</td><td class="num">2 × 1500</td><td>world cutter (<code>SHORT=1</code>); round 2</td></tr>
+<tr><td><code>llm_train/opus_train_a</code> … <code>opus_train_d</code>, <code>opus_gen_1</code>, <code>opus_gen_2</code></td><td>long messages by Opus (base and general), with spans</td><td class="num">6 × 300</td><td>the default worlds, cutters, context and SOP-BERT (since arms G)</td></tr>
+<tr><td><code>llm_train/synth_rules</code>, <code>synth_rules_ops</code>, <code>synth_rules_ext</code></td><td>short commands generated from the Rules’ grammar and cue words (every action, question, value and construction the Rules read; owner, 2026-11-02 22:04), the layout operations, the forms of 2026-11-02</td><td class="num">8404 + 1374 + 2783</td><td>the default worlds, cutters, context and SOP-BERT (arm ALL)</td></tr>
+<tr><td><code>llm_train/ops_formulations</code>, <code>opus_ext_1</code></td><td>realistic messages with the layout operations and with the new forms (templates, free text, help questions, arrow labels)</td><td class="num">700 + 500</td><td>same</td></tr>
+<tr><td><code>llm_train/synth_combo</code></td><td>several generated commands in one message</td><td class="num">1497</td><td>same</td></tr>
 <tr><td><code>llm_train/ops_groups</code></td><td>new operations: group, ungroup, members, groupOf (1693 requests)</td><td class="num">480</td><td>round 2 (<code>OPS=1</code>)</td></tr>
 <tr><td><code>llm_train/ops_positions</code></td><td>double positions: two relations, region + relation (1022 requests)</td><td class="num">464</td><td>round 2 (<code>OPS=1</code>)</td></tr>
 </tbody></table></div>
-<p class="note">Totals: the world data (<code>DATA=spans</code>, 9 folders) are 4640 messages with 22,702 requests; the event cutter’s data are 3640
-messages; the world cutter adds the 3000 short commands (6640); the round-2 cutters read 7584 messages. Message counts are lines of the
-<code>msg_*</code> / <code>batch_*</code> files; the request counts are from SHORT.md and the ops commit. SOP-BERT (and the act classifier before it) uses the span-annotated messages minus the fixed sample (<code>training/neural/make_data.py</code>, <code>make_roles.py</code>).</p>
+<p class="note">Totals for the default models (arm ALL, TRAIN_PLAN_1103.md): the world data are the 9 <code>DATA=spans</code> folders (4640 messages,
+22,702 requests) plus the 12 folders of <code>EXTRA_DIRS</code> above (17,058 messages): 21,698 messages, 51,584 requests with a span; the event
+cutter reads 20,698 messages, the world cutter adds the 3000 short commands (23,698). SOP-BERT reads the same messages plus the 3000 short commands
+with spans (<code>make_data.py --all</code>, <code>make_roles.py --all</code>): 24,698 messages, 54,584 request rows, nothing held out. Message counts
+are lines of the <code>msg_*</code> / <code>batch_*</code> files. <code>ops_groups</code> and <code>ops_positions</code> served the round-2 worlds
+(no longer shipped).</p>
 
 <h2 id="sets">The sets used for measurement</h2>
 <dl class="kv">
   <dt>The fixed 1000-message sample</dt><dd>1000 messages, 4858 gold requests, drawn from the 9 world-data folders (ids:
   <code>training/neural/sample1000_ids.txt</code>; the folder copy that <code>llm_score.mjs</code> reads is <code>data/sampleF/</code> on branch
   <code>gpu-runs</code>). Every composer number since PLAN_A uses it, so they are comparable. It is training data for the worlds (no hidden test
-  set); the neural models are the exception: they were never trained on it.</dd>
+  set), and since arm ALL also for SOP-BERT (<code>--all</code>): numbers on it are a fit, not a test.</dd>
+  <dt>fresh2 and short3: the test of the learned readers</dt><dd><code>training/sketch/llm_bench/fresh2</code> (600 messages by a writer
+  not in the training data, 1909 requests) and <code>training/sketch/llm_bench/short3</code> (530 short commands, 513 used, 644 requests), read
+  by no training. One third of each (by <code>sha256(id) % 3 == 0</code>: 368 messages) fits each reader’s confidence and threshold; the other
+  745 messages (1745 requested actions) are the test part every number of the readers is reported on.</dd>
   <dt>The demo’s short sets</dt><dd><code>docs/bench/*.json</code> (index <code>docs/bench/index.json</code>): hand 40, blind 60, broad 128 rows
   (140 requests), and three sets generated from templates, seen, new_identities and heldout_formulations, 300 each: 1128 rows, 1140 requests,
   median 6 words. Built by <code>training/sketch/make_bench.mjs</code>. The Benchmark in Settings and <code>training/sketch/short_bench/</code> score them.</dd>
@@ -694,18 +741,16 @@ page('training', 'Training and the GPU runner', `
 <div class="tw"><table>
 <thead><tr><th>What</th><th>Script</th><th>Where</th><th>Time measured</th></tr></thead>
 <tbody>
-<tr><td>One VSS world</td><td><code>training/sketch/train_micro.sh &lt;world&gt; &lt;events&gt;</code> → <code>msg_to_world.py</code>, <code>sop check</code>, <code>sop train</code>, <code>sop export-web --bits 8 --sparse</code></td><td>CPU here, or GPU (<code>DEVICE=cuda</code>)</td><td>CPU: 403 s (history7) to 13,554 s (links7) for the training step; GPU: 265–375 s (shapes7c, 3 seeds)</td></tr>
-<tr><td>Round 2 (7 worlds)</td><td>the same script with the switches of ROUND2.md §4</td><td>GPU</td><td>—</td></tr>
-<tr><td>A cutter</td><td><code>training/sketch/train_cutter.py --worlds &lt;grouping&gt;</code></td><td>CPU</td><td>82 s (cutter_worlds7s)</td></tr>
+<tr><td>One VSS world</td><td><code>training/sketch/train_micro.sh &lt;world&gt; &lt;events&gt;</code> → <code>msg_to_world.py</code>, <code>sop check</code>, <code>sop train</code>, <code>sop export-web --bits 8 --sparse</code></td><td>CPU here, or GPU (<code>DEVICE=cuda</code>)</td><td>the 9 worlds of the default registry, the two cutters (CPU, in parallel) and the context filler: 3273 s in all on the GPU machine (job 070, <code>FAST=1</code>, two worlds at once)</td></tr>
+<tr><td>A cutter</td><td><code>training/sketch/train_cutter.py --worlds &lt;grouping&gt;</code></td><td>CPU</td><td>in job 070, beside the worlds</td></tr>
 <tr><td>Context filler weights</td><td><code>training/sketch/train_context.mjs</code></td><td>CPU (node)</td><td>—</td></tr>
 <tr><td>Neural act classifier (removed)</td><td><code>training/neural/make_data.py</code>, <code>training/neural/finetune.py</code> (ONNX export + 8-bit quantization, <code>check_node.mjs</code>)</td><td>GPU</td><td>245 s for 8 epochs (DistilBERT); 326 s for 7 epochs (DeBERTa-v3 xsmall, early stop)</td></tr>
-<tr><td>SOP-BERT</td><td><code>training/neural/make_roles.py</code>, <code>training/neural/finetune_roles.py --name sop-bert</code>, <code>check_roles_node.mjs</code>, <code>cut_node.mjs</code></td><td>GPU (the owner’s machine)</td><td>—</td></tr>
+<tr><td>SOP-BERT</td><td><code>training/neural/make_roles.py</code>, <code>training/neural/finetune_roles.py --name sop-bert</code>, <code>check_roles_node.mjs</code>, <code>cut_node.mjs</code></td><td>GPU (the owner’s machine)</td><td>1209 s for 8 epochs on 54,584 request rows (job 071)</td></tr>
 <tr><td>Spell vocabulary</td><td><code>training/sketch/spell/build_spell.mjs</code></td><td>CPU (node)</td><td>—</td></tr>
 <tr><td>Versions</td><td><code>training/sketch/stamp_models.py</code></td><td>CPU</td><td>seconds</td></tr>
 </tbody></table></div>
-<p class="note">CPU times: the <code>end:</code> line of <code>training/sketch/runs/micro_*.log</code> (training step only; the trainer’s own evaluation and the export
-come on top: PLAN_B.md gives 3.77 h for links7 and about 4.2 h for shapes7 in all). GPU times: the run logs of jobs 003–005 and 011 on branch
-<code>gpu-runs</code>, a 4 GB card with <code>VSA_MEM_FRACTION=0.45</code>. “—”: no time in a committed document.</p>
+<p class="note">Times: the logs of jobs 070 and 071 on branch <code>gpu-runs</code> (<code>results/070_vss_all.log</code>, <code>071_bert_all.log</code>),
+an RTX 3050 Ti with 4 GB. “—”: no time in a committed document.</p>
 
 <h2 id="switches">The switches of <code>train_micro.sh</code></h2>
 <p>Every switch is off by default and the default reproduces the old build byte for byte; every switch is recorded in the world’s
@@ -713,13 +758,16 @@ come on top: PLAN_B.md gives 3.77 h for links7 and about 4.2 h for shapes7 in al
 <div class="tw"><table>
 <thead><tr><th>Switch</th><th>Effect</th><th>Why (document)</th></tr></thead>
 <tbody>
-<tr><td><code>CREATE_COLOR=role</code></td><td>The colour of a new shape fills the event role <code>color</code>, as for every other colour (<code>llm_to_world.py</code>).</td><td>CREATE_COLOR.md; in <code>shapes7c</code></td></tr>
+<tr><td><code>CREATE_COLOR=role</code></td><td>The colour of a new shape fills the event role <code>color</code>, as for every other colour (<code>llm_to_world.py</code>).</td><td>CREATE_COLOR.md; in every world of the default registry</td></tr>
 <tr><td><code>N_CAL=&lt;n&gt;</code></td><td>Training rows sampled to fit the presence thresholds (<code>sop train --n_cal</code>, default 400; 100000 = all rows).</td><td>BETWEEN.md</td></tr>
 <tr><td><code>VAL_PREC=event</code></td><td>A value n-gram’s precision counted only over requests of events that carry its kind (“three” → 3 instead of “add three” → 3).</td><td>ROUND2.md fix 4</td></tr>
 <tr><td><code>VAL_SUB=value</code></td><td>A longer value n-gram is blocked only by a sub-n-gram that explains it (“bottom left” kept although “left” is kept).</td><td>ROUND2.md fix 3</td></tr>
 <tr><td><code>SHORT=1</code></td><td>Also read <code>llm_train/{sonnet,haiku}_short</code>.</td><td>SHORT.md</td></tr>
 <tr><td><code>OPS=1</code></td><td>Also read <code>llm_train/ops_groups</code>, <code>ops_positions</code>.</td><td>DIAGRAM_OPS.md §7</td></tr>
 <tr><td><code>DIAGRAM_OPS=1</code></td><td>Groups and double positions in the conversion and the legend (events group, ungroup, members, groupOf; roles relation2, landmark3).</td><td>DIAGRAM_OPS.md §4–6</td></tr>
+<tr><td><code>LEGEND_EXT=1</code></td><td>The forms of 2026-11-02 (templates, free text, panels, help questions, the layout operations, arrow labels): events, roles and value tables of the extended legend; a description is never written broader than its gold.</td><td>TRAIN_PLAN_1103.md §0–1, LEGEND_EXT.md; in the default registry</td></tr>
+<tr><td><code>VAL_PICK=specific</code></td><td>A value n-gram stands for the most specific value that passes the bars, not the most frequent one (“circles” → circles, not the quantifier all).</td><td>synth/CONVERT_FIX.md; in the default registry</td></tr>
+<tr><td><code>FAST=1</code></td><td>The trainer’s memory-bounded steps on the GPU (<code>FAST_MEM_MB</code>).</td><td>job 070</td></tr>
 <tr><td><code>DRY=1</code></td><td>Build the world’s data and stop: no training, <code>docs/model</code> untouched.</td><td>ROUND2.md §3</td></tr>
 </tbody></table></div>
 <p class="note">Other settings: <code>DATA</code> (<code>spans</code> for every world in use), <code>FRONT_ROWS=world</code>, <code>D</code> 1024,
@@ -827,46 +875,51 @@ written down and shown. No knobs turned on the fly; one change at a time; a miss
 root-cause analysis of the misses, each classified by the first cause that explains it and <i>where</i> it sits (data, front end, our code,
 calibration, model); fixes go where the cause is.</div>
 
-<h2 id="confidence-now">How well each confidence knows when it is unsure</h2>
+<h2 id="confidence-now">Current numbers: each reader at its own threshold</h2>
+<p>The test part of fresh2 + short3 (745 messages, 1745 requested actions; <a href="#help/data/sets">the sets</a>). Each reader executes a
+request only when its confidence clears the threshold chosen on the calibration part (368 messages, out of fold), with the confidence recipe
+that scored best there; cost score = right − 10 × (executed wrong + extras executed), per 100 requested actions, asking scores 0
+(<code>results/072_measure/refit/records/confidence3_report.md</code>, branch <code>gpu-runs</code>). The Rules execute everything: −288.4.</p>
 <div class="tw"><table>
-<thead><tr><th>Confidence</th><th class="num">AUROC: sample · held-out · short held-out</th><th>Source</th></tr></thead>
+<thead><tr><th>Situation</th><th class="num">VSS</th><th class="num">SOP-BERT</th><th class="num">VSS-BERT</th><th class="num">3 readers</th></tr></thead>
 <tbody>
-<tr><td>VSS margin (the number behind <code>abstain</code>)</td><td class="num">0.59 · 0.58 · 0.57</td><td>RISK_COVERAGE.md</td></tr>
-<tr><td>VSS, every step of the chain combined</td><td class="num">0.81 · 0.82 · 0.84</td><td>VSS_CONFIDENCE.md</td></tr>
-<tr><td>SOP-BERT, smallest probability of its heads</td><td class="num">0.72 · 0.73 · 0.82</td><td>RISK_COVERAGE.md</td></tr>
+<tr><td>Cost score, the previous readers (arms G, 2026-11-02)</td><td class="num">20.7</td><td class="num">31.5</td><td class="num">29.7</td><td class="num">32.6</td></tr>
+<tr><td>Cost score, the readers of the demo (arm ALL, 2026-11-03)</td><td class="num">22.9</td><td class="num">33.4</td><td class="num"><b>34.8</b></td><td class="num">31.8</td></tr>
+<tr><td>Cost score of what the demo’s tab runs by default</td><td class="num">22.9</td><td class="num">33.4</td><td class="num">32.6</td><td class="num">26.8</td></tr>
+<tr><td>95% interval of the new score</td><td class="num">[16.6, 29.5]</td><td class="num">[27.2, 39.0]</td><td class="num">[29.8, 39.5]</td><td class="num">[26.0, 37.8]</td></tr>
+<tr><td>Done right, of the requested actions</td><td class="num">37.8%</td><td class="num">44.8%</td><td class="num">42.8%</td><td class="num">43.3%</td></tr>
+<tr><td>Confidently wrong, of what it executed</td><td class="num">3.8%</td><td class="num">2.5%</td><td class="num">1.8%</td><td class="num">2.6%</td></tr>
+<tr><td>Asked, of the requested actions</td><td class="num">39.1%</td><td class="num">49.3%</td><td class="num">52.6%</td><td class="num">52.0%</td></tr>
+<tr><td>AUROC of the confidence (calibration, out of fold)</td><td class="num">0.911</td><td class="num">0.912</td><td class="num">0.919</td><td class="num">0.935</td></tr>
+<tr><td>Recipe chosen on the calibration part</td><td>votes as inputs, no world prior, a threshold for commands and one for questions</td><td>votes as inputs, a threshold for commands and one for questions</td><td>its own confidence, no act prior</td><td>votes as inputs, act prior shrunk with k = 50, two thresholds</td></tr>
 </tbody></table></div>
-<p class="note">Sample: the fixed 1000 messages (4858 requests); held-out: the 585 messages of SOP-BERT’s held-out split (for the combined VSS
-confidence, which is fitted there, the out-of-fold value of 5 folds by message); short held-out: 299 one-line commands. The VSS worlds were trained on the sample, SOP-BERT never saw it (<a href="#help/chain-vs-one/fairness">fairness</a>).
-Neither confidence decides anything in the demo yet.</p>
+<p>What the tabs run: VSS and SOP-BERT use the chosen recipes (<code>vote3.json</code>, columns <code>vss</code> and <code>sop</code>); VSS-BERT
+uses <code>combined.json</code>, which holds the recipe without the variants (its act prior kept: 32.6 on the test part; the chosen variant
+without the prior scored 34.8 and is not exported); 3 readers acts by default only when all three read a request the same (no fitted weight:
+26.8), and its “bolder” level is the fitted vote (31.8).</p>
+<p>With the confidence recipe of the previous release, on fresh2 alone (405 test messages; <code>results/072_measure/COMPARE.md</code>, paired
+bootstrap, 1000 resamples): SOP-BERT 14.4 → <b>35.9</b>, +21.6 [9.7, 33.2], a gain the interval shows; VSS 12.1 → 10.1, −2.0 [−8.9, 4.9],
+not shown either way. On short3 alone: SOP-BERT 0.2 → 4.2, +3.9 [−4.8, 13.8]; VSS 6.2 → 0.0 (with its own confidence alone it asks
+everything there), −6.2 [−12.5, 1.6]. Neither short3 difference is shown. The test part had been read for earlier studies, so its numbers
+are exploratory; the clean confirmation needs a fresh set (fresh3).</p>
+<p class="note">VSS without SOP-BERT (while SOP-BERT is still loading, or in <code>regress.sh</code>) uses its own confidence alone
+(<code>docs/model/confidence/vss.json</code>, one threshold 0.8718): AUROC 0.779, cost score 4.8 on the test part. It asks about most requests
+then, help questions included.</p>
 
-<h2 id="now">Current numbers per reader (earlier measure, every request executed)</h2>
+<h2 id="now">Every request executed: the regression sets (<code>training/sketch/regress.sh</code>)</h2>
+<p>Per gold request: right / wrong / not done (%) + extra, every request executed (no confidence), each reader with its own cut (Rules: the
+Rules segmenter, VSS: the VSS cutter); 2026-11-03. The sample and
+the llm_short commands are training data of both VSS arms; the templates are written from the Rules’ own templates.</p>
 <div class="tw"><table>
-<thead><tr><th>Reader</th><th>Data, cut</th><th class="num">Right / wrong / not done (%)</th><th class="num">Extra</th><th>Source</th></tr></thead>
+<thead><tr><th>Set</th><th class="num">Rules</th><th class="num">VSS, previous worlds (7)</th><th class="num">VSS, the 9 worlds of the demo</th></tr></thead>
 <tbody>
-<tr><td>VSS (default registry)</td><td>sample (4858), VSS cut</td><td class="num"><b>77.2 / 11.4 / 11.4</b></td><td class="num">334</td><td>SHORT2.md §6, CUT_SHARED.md</td></tr>
-<tr><td>VSS</td><td>short sets (1140), VSS cut</td><td class="num">61.1 / 11.1 / 27.7</td><td class="num">53</td><td>SHORT2.md §6</td></tr>
-<tr><td>VSS</td><td>short sets written by hand (240)</td><td class="num">75.0 / 9.6 / 15.4</td><td class="num">—</td><td>SHORT2.md §6</td></tr>
-<tr><td>Rules</td><td>sample, VSS cut (the default)</td><td class="num">73.6 / 11.9 / 14.5</td><td class="num">406</td><td>CUT_SHARED.md</td></tr>
-<tr><td>Rules</td><td>sample, Rules cut</td><td class="num">67.9 / 16.8 / 15.3</td><td class="num">821</td><td>CUT_SHARED.md</td></tr>
-<tr><td>Rules</td><td>short sets, Rules cut / by hand</td><td class="num">97.5 / 0.5 / 1.9 · 92.1 / 1.7 / 6.2</td><td class="num">16 · —</td><td>CUT_SHARED.md, SHORT.md §1</td></tr>
-<tr><td>Neural: SOP-BERT</td><td>sample, its own cut (BERT)</td><td class="num"><b>80.8 / 16.5 / 2.8</b></td><td class="num">348</td><td>commit 1f3c806</td></tr>
-<tr><td>Neural before SOP-BERT (act + QA pair, removed)</td><td>sample, Rules cut</td><td class="num">30.2 / 64.3 / 5.5</td><td class="num">1387</td><td><a href="#help/neural-reader/pair">The Neural reader</a></td></tr>
+<tr><td>Fixed sample (1000 messages, 4858 requests)</td><td class="num">69.1 / 15.5 / 15.4 +769</td><td class="num">77.8 / 10.0 / 12.2 +309</td><td class="num">76.9 / 10.1 / 12.9 +471</td></tr>
+<tr><td>Short: templates (1140)</td><td class="num">98.9 / 0.4 / 0.8 +4</td><td class="num">59.5 / 11.8 / 28.7 +76</td><td class="num"><b>78.0 / 8.2 / 13.9 +69</b></td></tr>
+<tr><td>Short: llm_short (3000)</td><td class="num">72.4 / 5.6 / 22.0 +375</td><td class="num">67.0 / 9.3 / 23.7 +400</td><td class="num">70.8 / 8.9 / 20.3 +442</td></tr>
 </tbody></table></div>
-<p class="note">How VSS got there on the sample, 2026-11-01/02: 16 worlds with a shared front end 67.7 / 12.7 / 19.7 → 16 worlds with their own
-front ends 72.8 / 11.5 / 15.7 (PLAN_A.md) · 7 worlds G7 69.6 / 14.3 / 16.1 (PLAN_B.md) → event hint H1 73.2 / 14.8 / 12.1 → plus shapes7c 74.9 /
-13.1 / 12.0 (COMBINED.md) → cutter_worlds7s 75.5 / 13.1 / 11.3 (SHORT.md) → adapter fix 77.2 / 11.4 / 11.4 (SHORT2.md). The <code>about</code> text
-inside <code>registry.json</code> still quotes 75.5 / 13.1 / 11.3, the figure before the adapter fix.</p>
-
-<h2 id="round2">Round 2 of the worlds (trained, not the default)</h2>
-<div class="tw"><table>
-<thead><tr><th>Measure (ROUND2.md §6)</th><th class="num">Round 2</th><th class="num">Default today</th><th>Threshold “it worked” / regression</th></tr></thead>
-<tbody>
-<tr><td>B. Composer on the sample</td><td class="num">75.3 / 11.1 / 13.6</td><td class="num">77.2 / 11.4 / 11.4</td><td>right ≥ 76.5 and wrong ≤ 13.1 / right &lt; 75.0 or wrong &gt; 13.6</td></tr>
-<tr><td>C. The six short sets</td><td class="num">62.5 / 11.0 / 26.6</td><td class="num">61.1 / 11.1 / 27.7</td><td>right ≥ 61.5 and wrong ≤ 12.4 / right &lt; 60.0 or wrong &gt; 12.9</td></tr>
-</tbody></table></div>
-<p>From commit 63274ae. On the sample, round 2 is below the “it worked” line (75.3 &lt; 76.5) but not a regression (≥ 75.0, wrong 11.1); on the
-short sets it meets it. It is not the demo’s default; the per-component measures (A per event, D new operations) and their analysis were still
-running when this page was written. The thresholds in ROUND2.md were set against an older baseline (75.5 / 13.1 / 11.3).</p>
+<p>The new worlds read the Rules’ short commands far better (78.0 right against 59.5: they were trained on commands generated from the Rules’
+grammar), read slightly more of llm_short, and produce more extras on whole messages (471 against 309). SOP-BERT is not in
+<code>regress.sh</code>; its numbers are the test part above.</p>
 `, 'The main metric (precision of execution, readers compared at equal precision), the per-request counts under it, the scripts that compute them, and every reader’s current numbers with their source.');
 
 /* ============================================================ repository */
@@ -907,6 +960,8 @@ page('repository', 'Repository map', `
 <tr><td><code>RISK_COVERAGE.md</code></td><td>Does each reader know when it does not know? AUROC VSS margin 0.59, SOP-BERT 0.72 on the sample; risk-coverage curves; thresholds for SOP-BERT chosen on held-out.</td></tr>
 <tr><td><code>VSS_CONFIDENCE.md</code></td><td>A VSS confidence from every step of the chain: AUROC 0.81 on the sample, 0.84 on short held-out commands; each weight named.</td></tr>
 <tr><td><code>PRECISION.md</code></td><td>Precision of execution of each reader at a threshold fixed on held-out; at 97% only VSS with its combined confidence qualifies (35.5% done right on the sample, 52.2% asked).</td></tr>
+<tr><td><code>TRAIN_PLAN_1103.md</code></td><td>2026-11-03: one set of GPU jobs (070 VSS, 071 SOP-BERT, 072 measure) that teaches both learned readers the forms of 2026-11-02 on all the data; the 9 worlds (GROUPS_8ops), the switches LEGEND_EXT, VAL_PICK, DIAGRAM_OPS; its models are the demo’s since 2026-11-03.</td></tr>
+<tr><td><code>confidence3/RESULT.md</code>, <code>combine/COMBINED_READER.md</code></td><td>The three readers’ votes as inputs of each confidence, and the combined reader VSS-BERT; refitted for the new readers in job 072 (<code>results/072_measure/refit/records/confidence3_report.md</code> on <code>gpu-runs</code>).</td></tr>
 </tbody></table></div>
 <p class="note">Older documents in the same folder: <code>VSS_READER_SPEC.md</code> (what is given and learned), <code>ROUTER_V2.md</code> (the router),
 <code>CUTTER.md</code>, <code>PLAN_A.md</code> (16 worlds), <code>LABEL_CONVENTIONS.md</code>, <code>ERROR_ANALYSIS.md</code>, <code>COMPOSER_ERRORS.md</code>,
@@ -918,19 +973,15 @@ each says from which commit to restore them.</p>
 page('planned', 'In progress', `
 <p class="callout warn">Everything on this page is work in progress or a plan. None of it is used by the published demo today.</p>
 <ul>
-  <li><b>The confidence gate for VSS and SOP-BERT in the demo</b> (in progress; owner, 2026-11-02): each reader executes a request only when
-  its confidence clears a threshold chosen on held-out data by a protocol written before the run, and below it asks, saying why (which words,
-  which step). It replaces, for VSS, executing <code>abstain</code> readings and filling a gap whenever a candidate ranks first. The confidences
-  measured so far: for VSS the one from every step of the chain (VSS_CONFIDENCE.md), for SOP-BERT the smallest probability of its heads
-  (RISK_COVERAGE.md); the precision of every reader is measured (PRECISION.md): VSS’s threshold is fixed, a fitted confidence for
-  SOP-BERT is being measured (PRECISION_BERT.md).</li>
-  <li><b>A fresh test set neither reader has seen</b> (planned): realistic messages written and annotated after the models, read by no training.
-  Today the sample is VSS training data and SOP-BERT never saw it, so neither the old measure nor precision compares them on equal footing
-  (<a href="#help/chain-vs-one/fairness">Is the comparison fair?</a>).</li>
+  <li><b>A fresh test set neither reader has seen</b> (fresh3, planned): the test part of fresh2 + short3 had been read for earlier studies, so
+  the numbers of 2026-11-03 are exploratory; the clean confirmation of the new readers and of their confidences needs messages written after
+  the models (<a href="#help/chain-vs-one/fairness">Is the comparison fair?</a>).</li>
+  <li><b>The spell checker’s vocabulary</b> is still built from the 7 previous worlds; rebuilding it from the 9 worlds
+  (<code>training/sketch/spell/build_spell.mjs</code>) is one change with its own measure.</li>
+  <li><b>The VSS help world</b>: the topic of a help question is often lost to the aspect words, and <code>about</code> is not read
+  (TRAIN_PLAN_1103.md §6); data or a front-end fix where the cause is.</li>
   <li><b>SOP-BERT, further measures</b>: the short sets, the BERT cut read by the other readers (<code>cut_bench.mjs</code>) and the root-cause
   analysis of its misses. The risk-coverage comparison with VSS is done (<a href="#help/knowing/experiment">Knowing what it does not know</a>).</li>
-  <li><b>Round 2 of the VSS worlds</b>: trained (<code>registry_r2.json</code>), not the default (<a href="#help/measurement/round2">numbers</a>); the
-  per-event and new-operation measures of ROUND2.md §6 and their root-cause analysis decide what is adopted, per world.</li>
   <li><b>Data for descriptions in roles</b> (SHORT2.md §3): annotated messages where descriptions (“the red circle”, “every gray square”, “the last
   star”, “not blue”) fill the entity roles, which today they almost never do (0–3.5% per role).</li>
   <li><b>The shared context rule holds one shape</b>: “them” after a list of names cannot be filled by any reader that uses it

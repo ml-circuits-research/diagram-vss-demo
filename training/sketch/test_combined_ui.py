@@ -3,7 +3,7 @@
 (docs/js/combined-confidence.js, docs/model/confidence/combined.json; training/sketch/combine/COMBINED_READER.md).
 
 Run:  python3 training/sketch/test_combined_ui.py [screenshot dir]      (PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers in this sandbox)
-It serves docs/ on a free local port and loads both readers it combines: VSS (docs/model/micro, about 23 MB) and SOP-BERT
+It serves docs/ on a free local port and loads both readers it combines: VSS (docs/model/micro, about 31 MB) and SOP-BERT
 (docs/model/neural/sop-bert, about 68 MB, WASM; transformers.js 3.8.1 from training/laptop/node_modules in place of cdn.jsdelivr.net). Nothing
 is blocked except huggingface.co (never used). Checks:
   1. the tabs read Rules, VSS, SOP-BERT, VSS-BERT, 3 readers (the neural tab is labelled SOP-BERT; 3 readers: test_vote_ui.py); VSS-BERT has its own drawing and the subtabs

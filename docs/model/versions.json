@@ -1,30 +1,32 @@
 {
  "about": "Content versions of the model folders and files the demo loads (training/sketch/stamp_models.py). The loader appends ?v=<version>.",
  "files": {
-  "confidence/combined.json": "f1458ccce2",
-  "confidence/sop-bert.json": "93bd402b17",
-  "confidence/vote3.json": "89a02d93bf",
-  "confidence/vss.json": "3606432fe7",
-  "context/weights.json": "ee4fcc6ab9",
-  "micro/cutter_events.json": "af1589b3fe",
-  "micro/cutter_worlds7s.json": "14f47a02a1",
-  "micro/graphq7": "d771449db6",
-  "micro/history7": "9e05acedac",
-  "micro/links7": "1977b44ce1",
-  "micro/manage7": "b1423ee7f7",
-  "micro/position7": "aba60e3d75",
-  "micro/questions7": "d77e6c05b2",
-  "micro/shapes7c": "8ed97b25b1",
-  "neural/sop-bert": "868837b882",
+  "confidence/combined.json": "f713151dfd",
+  "confidence/sop-bert.json": "5cf55e09dd",
+  "confidence/vote3.json": "481030b1eb",
+  "confidence/vss.json": "a04a20d678",
+  "context/weights.json": "b6ec783039",
+  "micro/cutter_events8.json": "8a3bf78f4c",
+  "micro/cutter_worlds8s.json": "9380481c25",
+  "micro/graphq8": "909343b27c",
+  "micro/help8": "754dfb3cd0",
+  "micro/history8": "1d77b10fcd",
+  "micro/layout8": "6a564736f7",
+  "micro/links8": "a06e092204",
+  "micro/manage8": "e702bf0dc7",
+  "micro/position8": "6b5a5738cb",
+  "micro/questions8": "df78cc694b",
+  "micro/shapes8": "52dac7648e",
+  "neural/sop-bert": "fd69a08c3b",
   "spell/vocab.json": "34accc6565"
  },
  "sizes": {
   "neural/sop-bert": {
-   "README.md": 3447,
-   "config.json": 8727,
+   "README.md": 4093,
+   "config.json": 15636,
    "tokenizer.json": 711551,
    "tokenizer_config.json": 1227,
-   "onnx/model_quantized.onnx": 67771471
+   "onnx/model_quantized.onnx": 67990593
   }
  }
 }

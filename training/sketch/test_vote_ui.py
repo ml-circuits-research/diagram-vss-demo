@@ -3,7 +3,7 @@
 (docs/js/vote-confidence.js, docs/model/confidence/vote3.json; training/sketch/confidence3/RESULT.md).
 
 Run:  python3 training/sketch/test_vote_ui.py [screenshot dir]      (PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers in this sandbox)
-It serves docs/ on a free local port and loads VSS (docs/model/micro, about 23 MB) and SOP-BERT (docs/model/neural/sop-bert, about 68 MB, WASM;
+It serves docs/ on a free local port and loads VSS (docs/model/micro, about 31 MB) and SOP-BERT (docs/model/neural/sop-bert, about 68 MB, WASM;
 transformers.js 3.8.1 from training/laptop/node_modules in place of cdn.jsdelivr.net, as test_combined_ui.py). Checks:
   1. the tabs read Rules, VSS, SOP-BERT, VSS-BERT, 3 readers; 3 readers has its own drawing and the subtabs Drawing / SOP Lang / Settings;
      every reply has a "3 readers · <ms>" line;
