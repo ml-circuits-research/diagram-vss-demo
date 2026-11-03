@@ -1,42 +1,46 @@
 [splits] written to /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_position8_r2_D1024_e10_s0/splits.json before training: calibration_heldout_formulations 443, heldout_formulations 461, train 9282
 [schema] roles ['object', 'relation', 'landmark', 'landmark2', 'relation2', 'landmark3', 'region', 'direction', 'amount', 'axis', 'layout', 'target', 'template', 'title', 'x', 'y', 'members'] (core []), max depth 0, event negation False
-[guard] cuda allocator capped at 85% of 4 GB; watchdog: exit if MemAvailable < 1.5 GB or after 4.0 h
+[guard] cuda allocator capped at 35% of 4 GB; watchdog: exit if MemAvailable < 1.5 GB or after 4.0 h
 [train] seed 0: 9282 training rows x 10 epoch(s) -> 92820 steps' sentences; D=1024; kinds 68; vocab 4722; predicate lemma not found in 4490 targets
-[train] phase table: 3730 of 14185 rows reached by the training sentences, held and trained; the other 10455 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.93 GB (peak 1.02 GB) | torch alloc 0.10 GB reserved 0.12 GB | MemAvailable 8.5 GB
+[train] phase table: 3730 of 14185 rows reached by the training sentences, held and trained; the other 10455 keep their initial values (gradient exactly 0) and are redrawn for the route book | RSS 0.93 GB (peak 1.03 GB) | torch alloc 0.10 GB reserved 0.12 GB | MemAvailable 7.2 GB
 [trace] text: move n_coil to 80 , 30
 [trace] tokens/kinds: move/VERB n_coil/NAME to/to 80/NUM ,/None 30/NUM
 [trace] gold frame: {"event": "move", "lemma": "move", "neg": false, "roles": {"object": ["entity", "n_coil", null, null], "x": ["word", "80"], "y": ["word", "30"]}, "scope": null, "shape": "ok", "speakers": []}
 [trace] target |S_world| = 64.73 (sqrt(D) per unit term = 32.0); initial gates all 0.12 (closed start)
 [fast] FAST=1: training loop with the rows encoded once (9282 rows, targets 145 MB on cuda), chain pieces packed (V8.states_packed), held rows per batch computed before training, the loss read only at the log lines
 [fast] FAST_MEM_MB=256: a batch whose chain terms would need more is computed in micro-batches of rows of similar length (fast_micro_groups; the gradients summed: equal up to float order on those steps only)
-[train seed 0] start: RSS 1.17 GB (peak 1.19 GB) | torch alloc 0.26 GB reserved 0.28 GB | MemAvailable 8.4 GB
-[train seed 0] step 500 sent 4000/92820 loss -0.779 (7s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.8 GB
-[train seed 0] step 1000 sent 8000/92820 loss -0.784 (13s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.9 GB
-[train seed 0] step 1500 sent 12000/92820 loss -0.775 (19s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.9 GB
-[train seed 0] step 2000 sent 16000/92820 loss -0.832 (25s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.9 GB
-[train seed 0] step 2500 sent 20000/92820 loss -0.833 (31s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.9 GB
-[train seed 0] step 3000 sent 24000/92820 loss -0.828 (38s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.9 GB
-[train seed 0] step 3500 sent 28000/92820 loss -0.868 (44s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.9 GB
-[train seed 0] step 4000 sent 32000/92820 loss -0.884 (50s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.9 GB
-[train seed 0] step 4500 sent 36000/92820 loss -0.888 (56s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.9 GB
-[train seed 0] step 5000 sent 40000/92820 loss -0.872 (63s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.8 GB
-[train seed 0] step 5500 sent 44000/92820 loss -0.860 (69s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.8 GB
-[train seed 0] step 6000 sent 48000/92820 loss -0.886 (75s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.8 GB
-[train seed 0] step 6500 sent 52000/92820 loss -0.878 (81s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.9 GB
-[train seed 0] step 7000 sent 56000/92820 loss -0.908 (87s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.8 GB
-[train seed 0] step 7500 sent 60000/92820 loss -0.805 (93s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.8 GB
-[train seed 0] step 8000 sent 64000/92820 loss -0.909 (99s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.8 GB
-[train seed 0] step 8500 sent 68000/92820 loss -0.908 (106s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.8 GB
-[train seed 0] step 9000 sent 72000/92820 loss -0.885 (112s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.8 GB
-[train seed 0] step 9500 sent 76000/92820 loss -0.926 (118s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.8 GB
-[train seed 0] step 10000 sent 80000/92820 loss -0.922 (125s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.7 GB
-[train seed 0] step 10500 sent 84000/92820 loss -0.869 (131s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.8 GB
-[train seed 0] step 11000 sent 88000/92820 loss -0.889 (137s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.8 GB
-[train seed 0] step 11500 sent 92000/92820 loss -0.920 (143s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 7.7 GB
-[train seed 0] end: RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.39 GB | MemAvailable 7.7 GB (145s)
+[train seed 0] start: RSS 1.17 GB (peak 1.19 GB) | torch alloc 0.26 GB reserved 0.28 GB | MemAvailable 6.7 GB
+[train seed 0] step 500 sent 4000/92820 loss -0.779 (7s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 6.0 GB
+[train seed 0] step 1000 sent 8000/92820 loss -0.784 (15s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.3 GB
+[train seed 0] step 1500 sent 12000/92820 loss -0.775 (26s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.3 GB
+[train seed 0] step 2000 sent 16000/92820 loss -0.832 (38s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.4 GB
+[train seed 0] step 2500 sent 20000/92820 loss -0.833 (49s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.3 GB
+[train seed 0] step 3000 sent 24000/92820 loss -0.828 (60s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.4 GB
+[train seed 0] step 3500 sent 28000/92820 loss -0.868 (72s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.4 GB
+[train seed 0] step 4000 sent 32000/92820 loss -0.884 (84s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.4 GB
+[train seed 0] step 4500 sent 36000/92820 loss -0.888 (95s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.4 GB
+[train seed 0] step 5000 sent 40000/92820 loss -0.872 (107s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.3 GB
+[train seed 0] step 5500 sent 44000/92820 loss -0.860 (118s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.4 GB
+[train seed 0] step 6000 sent 48000/92820 loss -0.886 (129s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.3 GB
+[train seed 0] step 6500 sent 52000/92820 loss -0.878 (141s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.6 GB
+[train seed 0] step 7000 sent 56000/92820 loss -0.908 (153s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.5 GB
+[train seed 0] step 7500 sent 60000/92820 loss -0.805 (164s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.5 GB
+[train seed 0] step 8000 sent 64000/92820 loss -0.909 (176s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.5 GB
+[train seed 0] step 8500 sent 68000/92820 loss -0.908 (187s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.5 GB
+[train seed 0] step 9000 sent 72000/92820 loss -0.885 (199s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.5 GB
+[train seed 0] step 9500 sent 76000/92820 loss -0.926 (211s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.5 GB
+[train seed 0] step 10000 sent 80000/92820 loss -0.922 (222s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.5 GB
+[train seed 0] step 10500 sent 84000/92820 loss -0.869 (234s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.5 GB
+[train seed 0] step 11000 sent 88000/92820 loss -0.889 (245s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.5 GB
+[train seed 0] step 11500 sent 92000/92820 loss -0.920 (257s) | RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.57 GB | MemAvailable 5.6 GB
+[train seed 0] end: RSS 1.79 GB (peak 1.79 GB) | torch alloc 0.35 GB reserved 0.39 GB | MemAvailable 5.5 GB (259s)
 [fast] FAST_MEM_MB: 110 of 11603 steps computed in micro-batches
-[export] route book written | RSS 1.79 GB (peak 1.91 GB) | torch alloc 0.26 GB reserved 0.39 GB | MemAvailable 7.7 GB
+[export] route book written | RSS 1.79 GB (peak 1.91 GB) | torch alloc 0.26 GB reserved 0.39 GB | MemAvailable 5.5 GB
 [export] numpy reader vs torch states: max relative difference 5.95e-08 (float32 phases in the route book)
-[fast] FAST=1: calibration reads in 8 processes, each row read once, cleanups shared by its two reads
-
-[guard] MemAvailable 1.3 GB < 1.5 GB: exiting to keep the machine alive
+[fast] FAST=1: calibration reads in 2 processes, each row read once, cleanups shared by its two reads
+[fast] calibration: 925 rows read, 400 background rows formalized in 38.0s
+[eval] seed 0 heldout_formulations: FULL catalog candidates 0.707 | residual 0.142
+[eval] seed 0 train (sample): FULL catalog candidates 0.800 | residual 0.113
+[mem] after seed 0: RSS 2.30 GB (peak 2.53 GB) | torch alloc 0.00 GB reserved 0.39 GB | MemAvailable 4.9 GB
+[done] model written to /home/claude/vss-box/diagram-vss-demo/training/sketch/worlds_micro/position8_r2/model; REPORT.md and metrics.json there; run log /home/claude/vss-box/diagram-vss-demo/training/sketch/runs/micro_position8_r2_D1024_e10_s0/train.log
+checklist: [x] addresses from the world [x] shared identities [x] chance printed [x] seen/unseen axes separated [x] margin [ ] >=3 seeds [x] trivial control (lexical order baseline) [x] calibration (18) [x] memory logged (21) [x] thresholds on calibration rows (25) [x] given vs learned stated (20)

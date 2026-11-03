@@ -1,0 +1,121 @@
+{
+ "about": "Arm VSS-R2 of TRAIN_PLAN_R2.md: the VSS chain of arm ALL (9 worlds of worlds_micro/GROUPS_8ops.json with LEGEND_EXT=1 VAL_PICK=specific DIAGRAM_OPS=1, cutter_worlds8s, cutter_events8 with the event hint H1, the context filler) retrained with NEW_DISTINCT=1 on base + EXTRA_DIRS = llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_gen_1 llm_train/opus_gen_2 llm_train/synth_rules_dd llm_train/synth_rules_ops_dd llm_train/synth_rules_ext_dd llm_train/ops_formulations llm_train/opus_ext_1 llm_train/synth_combo_dd llm_train/synth_short_r2 llm_train/opus_short_r2 (all learned parts; *_dd = frame-deduplicated copies, data_repetition.py).",
+ "router": "cutter",
+ "cutter": "arms/R2/cutter_worlds8s.json",
+ "context": "arms/R2/context/weights.json",
+ "event_cutter": "arms/R2/cutter_events8.json",
+ "event_hint": "H1",
+ "EXTRA_DIRS": "llm_train/opus_train_a llm_train/opus_train_b llm_train/opus_train_c llm_train/opus_train_d llm_train/opus_gen_1 llm_train/opus_gen_2 llm_train/synth_rules_dd llm_train/synth_rules_ops_dd llm_train/synth_rules_ext_dd llm_train/ops_formulations llm_train/opus_ext_1 llm_train/synth_combo_dd llm_train/synth_short_r2 llm_train/opus_short_r2",
+ "LEGEND_EXT": 1,
+ "VAL_PICK": "specific",
+ "DIAGRAM_OPS": 1,
+ "NEW_DISTINCT": 1,
+ "grouping": "worlds_micro/GROUPS_8ops.json",
+ "worlds": [
+  {
+   "world": "shapes",
+   "events": [
+    "create",
+    "set",
+    "resize",
+    "fact",
+    "rule"
+   ],
+   "model": "arms/R2/micro/shapes8"
+  },
+  {
+   "world": "links",
+   "events": [
+    "connect",
+    "disconnect",
+    "reverse"
+   ],
+   "model": "arms/R2/micro/links8"
+  },
+  {
+   "world": "position",
+   "events": [
+    "move",
+    "swap",
+    "arrange",
+    "align",
+    "distribute",
+    "toFront",
+    "toBack"
+   ],
+   "model": "arms/R2/micro/position8"
+  },
+  {
+   "world": "layout",
+   "events": [
+    "improve",
+    "respace",
+    "snap",
+    "fit",
+    "flip",
+    "sort",
+    "groupBy",
+    "equalize",
+    "straighten",
+    "untangle"
+   ],
+   "model": "arms/R2/micro/layout8"
+  },
+  {
+   "world": "graphq",
+   "events": [
+    "check",
+    "connected",
+    "path",
+    "reachable",
+    "cycle",
+    "exists"
+   ],
+   "model": "arms/R2/micro/graphq8"
+  },
+  {
+   "world": "questions",
+   "events": [
+    "count",
+    "list",
+    "extreme",
+    "nearest",
+    "describe",
+    "neighbors",
+    "degree",
+    "property",
+    "members",
+    "groupOf"
+   ],
+   "model": "arms/R2/micro/questions8"
+  },
+  {
+   "world": "manage",
+   "events": [
+    "delete",
+    "duplicate",
+    "rename",
+    "label",
+    "group",
+    "ungroup"
+   ],
+   "model": "arms/R2/micro/manage8"
+  },
+  {
+   "world": "history",
+   "events": [
+    "undo",
+    "redo",
+    "forget"
+   ],
+   "model": "arms/R2/micro/history8"
+  },
+  {
+   "world": "help",
+   "events": [
+    "help"
+   ],
+   "model": "arms/R2/micro/help8"
+  }
+ ]
+}

@@ -1,0 +1,609 @@
+{
+ "switches": "LEGEND_EXT=1 DIAGRAM_OPS=1 VAL_PICK=specific NEW_DISTINCT=1",
+ "groups": "worlds_micro/GROUPS_8ops.json",
+ "results": [
+  {
+   "folder": "base (DATA=spans: 9 folders)",
+   "trained": true,
+   "requests": 22702,
+   "counts": {
+    "differs": 2508,
+    "ok": 19063,
+    "no event token": 1047,
+    "every shape": 84
+   },
+   "bad_keys": {
+    "target": 1014,
+    "position": 345,
+    "anchor": 339,
+    "from": 319,
+    "to": 193,
+    "label": 153,
+    "ask": 137,
+    "pairing": 130,
+    "shape": 122,
+    "notColor": 78
+   },
+   "lost": {
+    "name": 1704,
+    "verb": 1301,
+    "chain": 578,
+    "rules": 137,
+    "head of mention": 93,
+    "left_side": 85,
+    "right_side": 80,
+    "$new": 79,
+    "right_of": 51,
+    "next_to": 48
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_train/opus_train_a",
+   "trained": true,
+   "requests": 994,
+   "counts": {
+    "ok": 759,
+    "no event token": 102,
+    "differs": 131,
+    "every shape": 2
+   },
+   "bad_keys": {
+    "target": 72,
+    "anchor": 11,
+    "to": 10,
+    "position": 9,
+    "shape": 6,
+    "from": 6,
+    "count": 5,
+    "superlative": 5,
+    "style": 4,
+    "kind": 3
+   },
+   "lost": {
+    "verb": 124,
+    "name": 25,
+    "chain": 19,
+    "$new": 9,
+    "head of mention": 5,
+    "right_of": 4,
+    "kind_edge": 3,
+    "2": 3,
+    "dotted": 3,
+    "rules": 3
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_train/opus_train_b",
+   "trained": true,
+   "requests": 891,
+   "counts": {
+    "ok": 650,
+    "differs": 180,
+    "no event token": 58,
+    "every shape": 3
+   },
+   "bad_keys": {
+    "target": 108,
+    "position": 22,
+    "from": 14,
+    "anchor": 12,
+    "to": 10,
+    "shape": 10,
+    "color": 8,
+    "count": 4,
+    "ask": 4,
+    "kind": 3
+   },
+   "lost": {
+    "name": 102,
+    "verb": 75,
+    "chain": 17,
+    "right_side": 7,
+    "$new": 5,
+    "left_side": 5,
+    "head of mention": 5,
+    "circle": 4,
+    "right_of": 4,
+    "rules": 4
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_train/opus_train_c",
+   "trained": true,
+   "requests": 1059,
+   "counts": {
+    "ok": 812,
+    "differs": 161,
+    "no event token": 84,
+    "every shape": 2
+   },
+   "bad_keys": {
+    "target": 93,
+    "from": 21,
+    "to": 13,
+    "position": 11,
+    "anchor": 10,
+    "color": 9,
+    "shape": 7,
+    "count": 3,
+    "arrow": 3,
+    "pairing": 2
+   },
+   "lost": {
+    "name": 102,
+    "verb": 95,
+    "chain": 21,
+    "edge": 6,
+    "right_of": 3,
+    "diamond": 3,
+    "$new": 3,
+    "gold": 3,
+    "3": 2,
+    "hexagon": 2
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_train/opus_train_d",
+   "trained": true,
+   "requests": 1015,
+   "counts": {
+    "ok": 741,
+    "differs": 222,
+    "every shape": 5,
+    "no event token": 47
+   },
+   "bad_keys": {
+    "target": 156,
+    "anchor": 24,
+    "shape": 16,
+    "from": 16,
+    "position": 13,
+    "to": 6,
+    "pairing": 5,
+    "notColor": 4,
+    "color": 4,
+    "superlative": 3
+   },
+   "lost": {
+    "name": 138,
+    "verb": 68,
+    "chain": 16,
+    "$new": 7,
+    "right_of": 5,
+    "square": 5,
+    "shape": 4,
+    "description": 3,
+    "head of mention": 3,
+    "top_right": 3
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_train/opus_gen_1",
+   "trained": true,
+   "requests": 991,
+   "counts": {
+    "ok": 764,
+    "differs": 143,
+    "no event token": 79,
+    "every shape": 5
+   },
+   "bad_keys": {
+    "target": 89,
+    "anchor": 15,
+    "position": 13,
+    "to": 9,
+    "from": 7,
+    "shape": 7,
+    "notColor": 6,
+    "color": 5,
+    "count": 4,
+    "axis": 3
+   },
+   "lost": {
+    "verb": 88,
+    "name": 65,
+    "chain": 25,
+    "$new": 5,
+    "right_of": 4,
+    "3": 3,
+    "edge": 3,
+    "head of mention": 3,
+    "next_to": 2,
+    "shape": 2
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_train/opus_gen_2",
+   "trained": true,
+   "requests": 1094,
+   "counts": {
+    "ok": 867,
+    "differs": 146,
+    "no event token": 78,
+    "every shape": 3
+   },
+   "bad_keys": {
+    "target": 79,
+    "position": 17,
+    "from": 11,
+    "anchor": 11,
+    "shape": 9,
+    "color": 8,
+    "to": 8,
+    "superlative": 4,
+    "count": 4,
+    "kind": 3
+   },
+   "lost": {
+    "name": 120,
+    "verb": 88,
+    "chain": 21,
+    "edge": 7,
+    "right_of": 6,
+    "left_side": 4,
+    "bottom_right": 4,
+    "2": 3,
+    "kind_edge": 3,
+    "diamond": 3
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_train/synth_rules_dd",
+   "trained": true,
+   "requests": 10468,
+   "counts": {
+    "ok": 8383,
+    "differs": 1629,
+    "no event token": 453,
+    "every shape": 3
+   },
+   "bad_keys": {
+    "target": 672,
+    "anchor": 257,
+    "position": 191,
+    "axis": 151,
+    "shape": 99,
+    "color": 78,
+    "ask": 48,
+    "notColor": 47,
+    "count": 43,
+    "layout": 37
+   },
+   "lost": {
+    "verb": 535,
+    "head of mention": 516,
+    "name": 269,
+    "shape": 86,
+    "horizontally": 78,
+    "vertically": 73,
+    "description": 71,
+    "$new": 63,
+    "chain": 50,
+    "rules": 48
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_train/synth_rules_ops_dd",
+   "trained": true,
+   "requests": 1057,
+   "counts": {
+    "ok": 756,
+    "no event token": 99,
+    "differs": 202
+   },
+   "bad_keys": {
+    "position": 50,
+    "anchor": 38,
+    "anchor2": 35,
+    "position2": 34,
+    "region": 28,
+    "from": 24,
+    "shape": 16,
+    "size": 14,
+    "count": 14,
+    "layout": 13
+   },
+   "lost": {
+    "verb": 119,
+    "name": 31,
+    "left_of": 25,
+    "right_of": 25,
+    "shape": 16,
+    "large": 14,
+    "center": 11,
+    "no_label": 9,
+    "bottom_left": 8,
+    "ring": 8
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_train/synth_rules_ext_dd",
+   "trained": true,
+   "requests": 3451,
+   "counts": {
+    "ok": 2834,
+    "differs": 564,
+    "no event token": 53
+   },
+   "bad_keys": {
+    "template": 167,
+    "about": 97,
+    "topic": 88,
+    "aspect": 77,
+    "target": 35,
+    "scheme": 30,
+    "anchor": 22,
+    "position": 18,
+    "shape": 15,
+    "color": 12
+   },
+   "lost": {
+    "about": 97,
+    "asp_can": 77,
+    "verb": 56,
+    "head of mention": 35,
+    "name": 28,
+    "tpl_matrix": 21,
+    "sch_mono": 13,
+    "tpl_hierarchy": 12,
+    "tpl_burst": 12,
+    "tpl_target": 11
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_train/ops_formulations",
+   "trained": true,
+   "requests": 733,
+   "counts": {
+    "ok": 478,
+    "no event token": 135,
+    "differs": 118,
+    "every shape": 2
+   },
+   "bad_keys": {
+    "direction": 29,
+    "target": 26,
+    "layout": 25,
+    "comparison": 18,
+    "property": 9,
+    "from": 8,
+    "axis": 7,
+    "to": 7,
+    "arrow": 5,
+    "position": 4
+   },
+   "lost": {
+    "verb": 162,
+    "name": 16,
+    "down": 14,
+    "right": 9,
+    "bigger": 9,
+    "smaller": 9,
+    "radial": 7,
+    "organic": 7,
+    "head of mention": 6,
+    "up": 5
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_train/opus_ext_1",
+   "trained": true,
+   "requests": 743,
+   "counts": {
+    "ok": 366,
+    "differs": 326,
+    "no event token": 50,
+    "every shape": 1
+   },
+   "bad_keys": {
+    "topic": 89,
+    "items": 50,
+    "aspect": 42,
+    "from": 41,
+    "to": 34,
+    "target": 31,
+    "template": 21,
+    "position": 20,
+    "anchor": 14,
+    "shape": 12
+   },
+   "lost": {
+    "verb": 125,
+    "items": 100,
+    "name": 42,
+    "asp_values": 24,
+    "about": 17,
+    "several": 17,
+    "asp_overview": 16,
+    "asp_can": 14,
+    "tp_text": 11,
+    "shape": 11
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_train/synth_combo_dd",
+   "trained": true,
+   "requests": 4489,
+   "counts": {
+    "no event token": 152,
+    "differs": 754,
+    "ok": 3580,
+    "every shape": 3
+   },
+   "bad_keys": {
+    "target": 451,
+    "position": 85,
+    "anchor": 77,
+    "ask": 34,
+    "from": 29,
+    "axis": 27,
+    "notColor": 21,
+    "color": 17,
+    "shape": 15,
+    "layout": 14
+   },
+   "lost": {
+    "head of mention": 279,
+    "verb": 189,
+    "name": 74,
+    "chain": 36,
+    "rules": 34,
+    "newest": 22,
+    "next_to": 18,
+    "description": 17,
+    "vertically": 16,
+    "edge": 15
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_train/synth_short_r2",
+   "trained": true,
+   "requests": 1997,
+   "counts": {
+    "ok": 1819,
+    "differs": 159,
+    "no event token": 19
+   },
+   "bad_keys": {
+    "property": 73,
+    "target": 55,
+    "size": 17,
+    "count": 9,
+    "kind": 4,
+    "template": 1,
+    "shape": 1
+   },
+   "lost": {
+    "verb": 60,
+    "all": 26,
+    "head of mention": 8,
+    "2": 4,
+    "kind_edge": 4,
+    "3": 2,
+    "5": 2,
+    "4": 1,
+    "tpl_timeline": 1
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_train/opus_short_r2",
+   "trained": true,
+   "requests": 345,
+   "counts": {
+    "no event token": 87,
+    "ok": 196,
+    "differs": 62
+   },
+   "bad_keys": {
+    "target": 29,
+    "position": 6,
+    "outline": 4,
+    "kind": 4,
+    "layout": 4,
+    "label": 3,
+    "from": 3,
+    "count": 2,
+    "shape": 2,
+    "name": 2
+   },
+   "lost": {
+    "verb": 103,
+    "name": 22,
+    "chain": 9,
+    "no_outline": 4,
+    "kind_edge": 4,
+    "left_side": 3,
+    "right_side": 2,
+    "row": 2,
+    "smaller": 2,
+    "ring": 2
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_bench/short3 (no pending)",
+   "trained": false,
+   "requests": 644,
+   "counts": {
+    "ok": 411,
+    "differs": 146,
+    "no event token": 87
+   },
+   "bad_keys": {
+    "target": 26,
+    "shape": 19,
+    "label": 15,
+    "position": 14,
+    "topic": 12,
+    "count": 11,
+    "from": 11,
+    "to": 11,
+    "aspect": 10,
+    "layout": 10
+   },
+   "lost": {
+    "verb": 116,
+    "name": 23,
+    "shape": 14,
+    "head of mention": 7,
+    "items": 7,
+    "$new": 5,
+    "asp_can": 5,
+    "left_side": 5,
+    "asp_values": 5,
+    "tp_connections": 4
+   },
+   "examples": {}
+  },
+  {
+   "folder": "llm_bench/fresh2 (opus_a..d)",
+   "trained": false,
+   "requests": 1909,
+   "counts": {
+    "ok": 1461,
+    "differs": 295,
+    "no event token": 148,
+    "every shape": 5
+   },
+   "bad_keys": {
+    "target": 157,
+    "anchor": 49,
+    "position": 39,
+    "shape": 29,
+    "to": 21,
+    "from": 19,
+    "color": 9,
+    "count": 8,
+    "ask": 8,
+    "kind": 6
+   },
+   "lost": {
+    "verb": 188,
+    "name": 177,
+    "chain": 45,
+    "right_of": 19,
+    "$new": 17,
+    "shape": 10,
+    "rules": 8,
+    "head of mention": 8,
+    "circle": 7,
+    "description": 7
+   },
+   "examples": {}
+  }
+ ]
+}

@@ -1,0 +1,10 @@
+# World `real`: built from 22267 training messages (52029 requests with a span)
+
+WORLD_EVENTS=align,arrange,distribute,move,swap,toBack,toFront: only the rows of these events; the legend lists only these events.
+
+FRONT_ROWS=world: the front end below is learned only from the 10211 requests of this world's events.
+
+Front end learned from the same messages: 240 value n-grams, 1341 trigger rules, 0 segmenter weights; params {"seg_epochs": 8, "val_min_count": 5, "val_min_prec": 0.8, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}.
+2/2 files OK against legend(s) position8_r2 sha256:7a59a021179d…
+world position8_r2 [move,swap,arrange,align,distribute,toFront,toBack] -> docs/model/micro/position8_r2 (10186 rows); registry line:
+{"world": "position8_r2", "events": ["move", "swap", "arrange", "align", "distribute", "toFront", "toBack"], "model": "micro/position8_r2"}
