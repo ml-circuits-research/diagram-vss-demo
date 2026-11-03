@@ -1,6 +1,6 @@
 // short_bench.mjs (SHORT.md): rules vs VSS composer (registry default, as the demo: comp.formalize(text, {names, last: []}), context rule
 // nextContext) on docs/bench/*.json. Scoring per gold request with llm_score.mjs's scoreMessage (LLM_SCORE_LIB=1, PAIR=value), each bench
-// row turned into one gold wire (or its `wires`); also the demo Benchmark's bench-canon score().ok.
+// row turned into one gold wire (or its `wires`); also bench-canon.js score().ok (the score of the former Benchmark tab of the demo).
 // Cause of every VSS gold request not right: first stage that explains it, from the composer's units.
 // Two groups of sets (the output rows carry `group`):
 //   templates: hand, blind, broad, seen, new_identities, heldout_formulations (docs/bench/*.json). WRITTEN OR GENERATED FROM THE RULES' OWN

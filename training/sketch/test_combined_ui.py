@@ -12,8 +12,11 @@ is blocked except huggingface.co (never used). Checks:
   7. ⋮ › Settings › Replies in the chat: one checkbox per tab in the order of the tabs, VSS-BERT checked; checking the others shows their
      lines too (in the order of the tabs, each with its prefix); the choice is kept in localStorage and after a reload; the last checked
      one cannot be unchecked; back to VSS-BERT only removes the key;
-  2. with the default cut (VSS cutter) VSS-BERT reads the BERT cutter's requests itself (details: "read here", 2 SOP-BERT model calls);
-     with the BERT cutter as the shared cut it reuses the two tabs' readings (details: "reused");
+  2. each tab reads its own cutter (owner, 2026-11-03 afternoon; no cut setting): the details say "cut by: BERT cutter" for VSS-BERT and
+     SOP-BERT, "VSS cutter" for VSS, "Rules segmenter" for the Rules; they list the requests of the VSS cut (also read by SOP-BERT and the
+     Rules for VSS's votes) and of the BERT cut (also read by VSS and the Rules for SOP-BERT's votes and VSS-BERT); VSS-BERT reuses SOP-BERT's
+     reading and that VSS reading ("reused, no model call"); ⋮ › Settings has no cut setting and no Benchmark tab, and nothing is stored
+     under the old key sop.cut;
   3. a message with a request the two readers read the same is executed; a request below the combined threshold is not done, its reason
      is one of the plain sentences of docs/js/clarify.js (the readers read a value differently / only one reader found it / ...), with no
      numbers and no reader names in the chat, and a "Do it anyway" button; clicking it runs that reading in the VSS-BERT drawing; undo
@@ -25,6 +28,11 @@ is blocked except huggingface.co (never used). Checks:
      and after a reload, the default removes it;
   4b. the VSS and SOP-BERT tabs use the confidence with the votes of the other readers: their details show vote3.json's thresholds per type
      (the check of the removed test_vote_ui.py);
+  0. the loading overlay: present at start over the drawing area, saying why ("Loading the readers. VSS-BERT answers once both are
+     ready."), one row per step (VSS, SOP-BERT, the confidence files, the first check); it disappears by itself after the load and the check;
+  9. zoom and pan: + / − change the viewBox (1.25x, the zoom %), fit restores it, the zoom is shared by the tabs, dragging the empty canvas
+     pans, dragging a shape still moves the shape and not the view, Ctrl+wheel zooms, arrow keys pan, after a message with shapes outside
+     the view the fit button is a highlighted hint and the view does not jump; at phone width the buttons are inside the drawing and work;
   6. no page error.
 Screenshots at phone width (390 x 844) too.
 Screenshots go to the directory (default: a temporary folder). Exit code 0 when everything passes.
@@ -115,7 +123,12 @@ with sync_playwright() as p:
     first = pg.evaluate("() => (document.querySelector('#rtabs [aria-selected=true]') || {}).dataset.rtab")
     check("1. the page opens on the VSS-BERT tab", first == "combined", str(first))
     pg.screenshot(path=f"{OUT}/0_loading.png")
+    ov = pg.evaluate("() => { const o = document.querySelector('#loadov'), b = document.querySelector('.board').getBoundingClientRect(), r = o.getBoundingClientRect(); return { shown: !o.hidden, text: o.textContent, rows: [...o.querySelectorAll('.lo-row')].map(x => x.dataset.step), covers: Math.abs(r.width - b.width) < 2 && Math.abs(r.height - b.height) < 2, card: o.querySelector('.lo-card') ? o.querySelector('.lo-card').getBoundingClientRect().width : 0 }; }")
+    check("0. the loading overlay is there at start, over the whole drawing area, and says why", ov["shown"] and ov["covers"] and "Loading the readers. VSS-BERT answers once both are ready." in ov["text"] and ov["card"] >= 420, str(ov)[:300])
+    check("0. one row per step: VSS, SOP-BERT, the confidence files, the first check", ov["rows"] == ["VSS", "SOP-BERT", "Confidence files", "The first check"], str(ov["rows"]))
     pg.wait_for_function("() => { const t = document.querySelector('[data-rtab=combined]'); return t && !t.classList.contains('off'); }", timeout=900000)
+    pg.wait_for_function("() => document.querySelector('#loadov').hidden", timeout=120000)
+    check("0. the overlay disappears by itself once everything has loaded and the first check passed", pg.evaluate("() => document.querySelector('#loadov').hidden"), "")
     pg.wait_for_function("() => document.querySelectorAll('#msgs .b.bot').length >= 1 + (window.StartDiagram ? StartDiagram.MESSAGES.length : 3) && !document.querySelector('#msgs .typing')", timeout=180000)
     tabs = pg.evaluate("() => [...document.querySelectorAll('#rtabs [data-rtab]')].map(x => x.textContent.trim())")
     check("1. the tabs are VSS-BERT, Rules, VSS, SOP-BERT (no 3 readers tab)", tabs == ["VSS-BERT", "Rules", "VSS", "SOP-BERT"] and not pg.query_selector("[data-rtab=vote3]"), str(tabs))
@@ -124,14 +137,20 @@ with sync_playwright() as p:
     check("1. VSS-BERT has the subtabs Drawing / SOP Lang / Settings", subs == ["drawing", "sop", "settings"] and of == "VSS-BERT reader", f"{subs} {of}")
     pg.screenshot(path=f"{OUT}/0_start.png")
 
-    # 1 + 2 + 3: the default cut (VSS cutter): VSS-BERT reads the BERT cut itself; the chat shows its line only, without a prefix
+    # 1 + 2 + 3: each tab's own cutter; VSS-BERT reuses the readings of the BERT cut; the chat shows its line only, without a prefix
     r1 = send(pg, "Move Done below Start.")
     pg.screenshot(path=f"{OUT}/1_agree.png")
     check("1. the default chat shows only VSS-BERT's reply", bool(r1 and r1["readers"] == ["combined"]), str(r1))
     check("1. one line without the 'VSS-BERT · ms:' prefix; 'VSS-BERT · <ms>' is a quiet tag beside the time", bool(r1 and r1["prefix"] is None and r1["who"] and re.match(r"VSS-BERT · [\d.]+ ms$", r1["who"])), str(r1))
     check("3. a request both readers read the same is executed", bool(r1 and not r1["held"] and "Moved" in r1["text"]), str(r1))
     det1 = details(pg, 1)
-    check("2. default cut: VSS-BERT read the BERT cutter's requests itself (2 SOP-BERT model calls)", "VSS-BERT: read here on the BERT cutter" in det1 and "2 SOP-BERT model calls" in det1, det1[det1.find("VSS-BERT:"):][:300])
+    check("2. VSS-BERT reuses SOP-BERT's reading and VSS's reading of the BERT cutter's requests (no model call)", "VSS-BERT: the BERT cutter’s requests: the SOP-BERT tab’s reading and VSS’s reading of the same requests" in det1 and "reused, no model call" in det1, det1[det1.find("VSS-BERT:"):][:300])
+    heads = pg.evaluate("() => [...document.querySelectorAll('#sbody .minihead')].map(h => h.textContent)")
+    by = {h.split(' ')[0]: (re.search(r"cut by: ([^·]+)", h) or [None, None])[1] for h in heads}
+    by = {k: (v or '').strip() for k, v in by.items()}
+    check("2. each tab's own cutter: VSS-BERT and SOP-BERT the BERT cutter, VSS the VSS cutter, the Rules the Rules segmenter", by.get("VSS-BERT") == "BERT cutter" and by.get("SOP-BERT") == "BERT cutter" and by.get("VSS") == "VSS cutter" and by.get("Rules") == "Rules segmenter", str(heads))
+    check("2. the details list the VSS cut's requests, also read by SOP-BERT and the Rules for VSS's votes", "VSS cutter, 1 request, also read by SOP-BERT and the Rules for VSS’s votes" in det1, det1[:700])
+    check("2. ... and the BERT cut's requests, also read by VSS and the Rules for SOP-BERT's votes and VSS-BERT", "BERT cutter, 1 request, also read by VSS and the Rules for SOP-BERT’s votes and VSS-BERT" in det1, det1[:700])
     VC = json.load(open(os.path.join(DOCS, "model", "confidence", "vote3.json")))["columns"]
     vt = lambda c: f"(it acts from confidence {VC[c]['levels']['cost']['command']:.4f} for commands and {VC[c]['levels']['cost']['question']:.4f} for questions, with the votes of the other two readers)"
     check("4. the VSS and SOP-BERT tabs use the confidence with the votes (vote3.json's thresholds per type in the details)", f"VSS gate: safety threshold {vt('vss')}" in det1 and f"SOP-BERT gate: safety threshold {vt('sop')}" in det1, det1[det1.find("VSS gate"):][:300])
@@ -189,16 +208,19 @@ with sync_playwright() as p:
     r4b = send(pg, "What is connected to Check?")
     check("7. only Rules checked: the chat shows the Rules' line alone, without a prefix", bool(r4b and r4b["readers"] == ["rules"] and r4b["prefix"] is None and r4b["who"] and r4b["who"].startswith("Rules")), str(r4b))
 
-    # 2: the BERT cutter as the shared cut: the readings of the two tabs are reused
+    # 2: no cut setting and no Benchmark tab
     open_settings(pg)
     pg.check("#sbody input[data-chat=combined]"); pg.uncheck("#sbody input[data-chat=rules]"); pg.wait_for_timeout(200)
     kept = pg.evaluate(STORED, "sop.chat.tabs")
     check("7. back to VSS-BERT only: nothing stored", kept is None, str(kept))
-    pg.check("#sbody input[name=cut-strategy][value='bert']"); pg.wait_for_timeout(200)
+    sett = pg.evaluate("() => document.querySelector('#sbody').textContent")
+    check("2. ⋮ › Settings has no cut setting", pg.locator("#sbody input[name=cut-strategy]").count() == 0 and "Cutting into requests" not in sett and "Each tab’s cutter" in sett, sett[:300])
+    stabs = pg.evaluate("() => [...document.querySelectorAll('#stabs [data-stab]')].map(x => x.dataset.stab)")
+    check("2. ⋮ › Settings has no Benchmark tab", stabs == ["settings", "plugins"], str(stabs))
+    pg.screenshot(path=f"{OUT}/2_settings_sheet.png")
     pg.keyboard.press("Escape"); pg.wait_for_timeout(300)
     r5 = send(pg, "Make Check orange.")
-    det5 = details(pg, 1)
-    check("2. BERT cutter shared: VSS-BERT reuses the readings of the VSS and SOP-BERT tabs", "VSS-BERT: the readings of the VSS and SOP-BERT tabs on the BERT cutter" in det5 and "reused" in det5, det5[det5.find("VSS-BERT:"):][:300])
+    check("2. nothing is stored under the old cut key", pg.evaluate(STORED, "sop.cut") is None, str(pg.evaluate(STORED, "sop.cut")))
     check("1. its time is VSS + SOP-BERT + combining", bool(r5 and r5["who"] and re.match(r"VSS-BERT · [\d.]+ ms$", r5["who"])), str(r5))
     pg.keyboard.press("Escape"); pg.wait_for_timeout(300)
 
@@ -230,8 +252,53 @@ with sync_playwright() as p:
     check("1. SOP Lang subtab shows the VSS-BERT drawing", "The VSS-BERT reader’s drawing" in txt, txt[:200])
     pg.click("[data-sub=drawing]"); pg.wait_for_timeout(200)
 
+    # 9: zoom and pan (a pure view transform on the viewBox)
+    VB = "() => document.querySelector('#canvas').getAttribute('viewBox').split(' ').map(Number)"
+    PCT = "() => document.querySelector('#zoom-pct').textContent"
+    vb0 = pg.evaluate(VB)
+    pg.click("#zoom-in"); vb1 = pg.evaluate(VB)
+    check("9. + zooms in: the viewBox is 1.25 times smaller, around the same centre; 125%", abs(vb1[2] - vb0[2] / 1.25) < 0.05 and abs((vb1[0] + vb1[2] / 2) - (vb0[0] + vb0[2] / 2)) < 0.05 and pg.evaluate(PCT) == "125%", f"{vb0} -> {vb1} {pg.evaluate(PCT)}")
+    pg.click("#zoom-out"); pg.click("#zoom-out"); vb2 = pg.evaluate(VB)
+    check("9. − zooms out: 80%, a larger viewBox", abs(vb2[2] - vb0[2] / 0.8) < 0.05 and pg.evaluate(PCT) == "80%", f"{vb2} {pg.evaluate(PCT)}")
+    pg.click("#zoom-fit")
+    check("9. fit restores the automatic viewBox and 100%", pg.evaluate(VB) == vb0 and pg.evaluate(PCT) == "100%", f"{pg.evaluate(VB)} vs {vb0}")
+    tabs_vb = []
+    pg.click("#zoom-in"); pg.click("[data-rtab=rules]"); pg.wait_for_timeout(200); tabs_vb.append(pg.evaluate(PCT)); pg.click("[data-rtab=combined]"); pg.wait_for_timeout(200)
+    check("9. the zoom is shared by the tabs", tabs_vb == ["125%"] and pg.evaluate(PCT) == "125%", str(tabs_vb))
+    bd = pg.evaluate("() => { const r = document.querySelector('.board').getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; }")
+    # an empty spot of the canvas: no shape under it (the background panel counts as empty: it never moves)
+    spot = pg.evaluate("""b => { for (let fy = 0.15; fy < 0.9; fy += 0.05) for (let fx = 0.05; fx < 0.95; fx += 0.05) { const x = b[0] + b[2] * fx, y = b[1] + b[3] * fy, e = document.elementFromPoint(x, y), g = e && e.closest('.shp');
+      if (e && e.closest('#canvas') && (!g || g.classList.contains('bg') || /background/.test(g.getAttribute('class') || '') || g.dataset.name === 'Backdrop')) return [x, y]; } return null; }""", bd)
+    vb3 = pg.evaluate(VB)
+    pg.mouse.move(spot[0], spot[1]); pg.mouse.down(); pg.mouse.move(spot[0] + 50, spot[1] + 20, steps=4); pg.mouse.move(spot[0] + 100, spot[1] + 40, steps=4); pg.mouse.up()
+    vb4 = pg.evaluate(VB)
+    check("9. dragging the empty canvas pans: the view moves against the drag, same size", vb4[0] < vb3[0] - 10 and vb4[1] < vb3[1] - 3 and abs(vb4[2] - vb3[2]) < 0.01, f"{vb3} -> {vb4} (at {spot})")
+    pg.screenshot(path=f"{OUT}/9_zoom_pan.png")
+    # a shape drag still moves the shape, not the view
+    sh = pg.evaluate("() => { const g = document.querySelector('#layer .shp[data-name=Start]'); const r = g.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }")
+    pg.mouse.move(sh[0], sh[1]); pg.mouse.down(); pg.mouse.move(sh[0] + 30, sh[1] + 10, steps=5); pg.mouse.up(); pg.wait_for_timeout(200)
+    sh2 = pg.evaluate("() => { const g = document.querySelector('#layer .shp[data-name=Start]'); const r = g.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }")
+    check("9. dragging a shape still moves the shape, and the view stays", pg.evaluate(VB) == vb4 and sh2[0] > sh[0] + 15, f"{sh} -> {sh2}, {pg.evaluate(VB)}")
+    # Ctrl+wheel around the pointer; arrow keys pan
+    pg.mouse.move(spot[0], spot[1]); pg.keyboard.down("Control"); pg.mouse.wheel(0, -200); pg.keyboard.up("Control"); pg.wait_for_timeout(100)
+    check("9. Ctrl+wheel zooms in", int(pg.evaluate(PCT).rstrip("%")) > 125, pg.evaluate(PCT))
+    pg.focus("#canvas"); vb5 = pg.evaluate(VB); pg.keyboard.press("ArrowRight"); vb6 = pg.evaluate(VB)
+    check("9. an arrow key pans when the canvas has focus", vb6[0] > vb5[0] and vb6[1] == vb5[1], f"{vb5} -> {vb6}")
+    # shapes outside the view after a message: the fit button is a highlighted hint; the view does not jump
+    for _ in range(25): pg.keyboard.press("ArrowRight")
+    vb7 = pg.evaluate(VB); send(pg, "Make Process yellow.")
+    check("9. after a message with shapes outside the view, fit is highlighted and the view does not jump", pg.evaluate("() => document.querySelector('#zoom-fit').classList.contains('hint')") and pg.evaluate(VB) == vb7, str(pg.evaluate(VB)))
+    pg.screenshot(path=f"{OUT}/9_fit_hint.png")
+    pg.click("#zoom-fit")
+    check("9. fit: back to the automatic view, the hint gone", pg.evaluate(PCT) == "100%" and not pg.evaluate("() => document.querySelector('#zoom-fit').classList.contains('hint')"), "")
+
     # phone width
     pg.set_viewport_size({"width": 390, "height": 844}); pg.wait_for_timeout(500)
+    vbp = pg.evaluate(VB); pg.click("#zoom-in"); vbq = pg.evaluate(VB)
+    foot = pg.evaluate("() => { const f = document.querySelector('#cfoot').getBoundingClientRect(), b = document.querySelector('.board').getBoundingClientRect(); return f.left >= b.left && f.right <= b.right && f.bottom <= b.bottom + 0.5; }")
+    check("9. phone width: the zoom buttons inside the drawing area and working", foot and abs(vbq[2] - vbp[2] / 1.25) < 0.05, f"{foot} {vbp} -> {vbq}")
+    pg.screenshot(path=f"{OUT}/9_phone_zoom.png")
+    pg.click("#zoom-fit")
     pg.screenshot(path=f"{OUT}/8_phone_chat.png")
     pg.click("[data-sub=settings]"); pg.wait_for_timeout(400)
     pg.evaluate("() => { const r = document.querySelector('#rpanel'), t = document.querySelector('#rpanel .lvt'); r.scrollTop += t.getBoundingClientRect().top - r.getBoundingClientRect().top - 40; }")

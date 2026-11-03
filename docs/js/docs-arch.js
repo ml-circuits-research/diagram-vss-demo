@@ -74,8 +74,8 @@ ${AH}
 </svg>
 </div>
 <figcaption>Figure 1. VSS-BERT in the browser (<code>docs/js/ui.js</code>, <code>READERS</code>, each tab with its own <code>K.createSystem()</code>).
-The tabs Rules, VSS and SOP-BERT show each reader alone, with its own drawing; they read the cut chosen in Settings
-(<a href="#help/cutting">One cut for all readers</a>).</figcaption>
+The tabs Rules, VSS and SOP-BERT show each reader alone, with its own drawing; each reads the requests of its own cutter
+(<a href="#help/cutting">Each tab’s cutter</a>).</figcaption>
 </figure>
 
 <h2 id="judged">How the readers are judged</h2>
@@ -94,9 +94,9 @@ costs as much as 10 right answers), and asks below it, saying why. The Rules hav
 <tr><td>SOP-BERT reader (and the SOP-BERT cutter)</td><td><code>docs/js/neural.js</code> (transformers.js 3.8.1 from jsDelivr)</td><td><code>docs/model/neural/sop-bert/</code> (one DistilBERT, 8-bit)</td><td class="num">68.7 MB</td></tr>
 <tr><td>VSS reader (composer)</td><td><code>docs/js/vss-formalizer.js</code>, <code>docs/js/vss-composer.js</code>, <code>docs/js/front.js</code>, <code>docs/js/vss.js</code> + <code>docs/js/vss/</code>, <code>docs/js/vss-context.js</code>, <code>docs/js/vss-adapter.js</code></td><td><code>docs/model/micro/registry.json</code> and what it names: 2 cutters, 9 worlds, <code>docs/model/context/weights.json</code></td><td class="num">31.4 MB</td></tr>
 <tr><td>Rules reader, SOP Lang, engine, plugins, Datalog</td><td><code>docs/js/logic.js</code></td><td>none</td><td class="num">—</td></tr>
-<tr><td>The cut of the other tabs</td><td><code>docs/js/vss-composer.js</code> (<code>cutUnits</code>, <code>CUT_STRATEGIES</code>, <code>DEFAULT_CUT</code>), <code>docs/js/vss-formalizer.js</code> (<code>cut</code>)</td><td>the cutter of the strategy chosen</td><td class="num">—</td></tr>
+<tr><td>Each tab’s cutter, the other readers’ readings for the votes</td><td><code>docs/js/ui.js</code> (<code>OWN_CUT</code>, <code>crossReads</code>), <code>docs/js/vss-composer.js</code> (<code>cutUnits</code>, <code>CUT_STRATEGIES</code>), <code>docs/js/vss-formalizer.js</code> (<code>cut</code>)</td><td>the cutters above (no model of its own)</td><td class="num">—</td></tr>
 <tr><td>Confidences of the VSS and SOP-BERT tabs</td><td><code>docs/js/vss-confidence.js</code>, <code>neural-confidence.js</code>, <code>vote-confidence.js</code></td><td><code>docs/model/confidence/</code>: <code>vss.json</code>, <code>sop-bert.json</code>, <code>vote3.json</code> (with <code>combined.json</code>)</td><td class="num">0.72 MB</td></tr>
-<tr><td>Benchmark (scoring)</td><td><code>docs/js/bench-canon.js</code></td><td><code>docs/bench/</code> (6 sets)</td><td class="num">—</td></tr>
+<tr><td>Canonical readings (the votes’ agreement; the scripts’ scoring)</td><td><code>docs/js/bench-canon.js</code></td><td>none (the scripts score <code>docs/bench/</code>, 6 sets)</td><td class="num">—</td></tr>
 </tbody></table></div>
 <p class="note">Sizes: what the page downloads, measured with <code>du -b</code> on 2026-11-03, MB = 10<sup>6</sup> bytes. VSS: the 9 world folders
 (26.8 MB, <code>BUILD.json</code> left out: not loaded), the two cutters the registry names (4.6 MB), the context weights and the registry.
@@ -108,7 +108,7 @@ SOP-BERT: <code>config.json</code>, the two tokenizer files and <code>onnx/model
 <li><a href="#help/vss-reader">The VSS reader</a>: the composer, its cutters, the 9 worlds, the context filler, the adapter.</li>
 <li><a href="#help/engine">The engine and the legend</a>: wires, the legend, the plugins, Datalog.</li>
 <li><a href="#help/rules-reader">The Rules reader</a>: hand-written, the comparison.</li>
-<li><a href="#help/cutting">One cut for all readers</a>: the three cutters and what they cost each reader.</li>
+<li><a href="#help/cutting">Each tab’s cutter</a>: the three cutters, which tab reads which, and what each cut costs each reader.</li>
 <li><a href="#help/spelling">The spell checker</a>, <a href="#help/models">Models and versions</a>, <a href="#help/data">Data</a>,
 <a href="#help/training">Training and the GPU runner</a>, <a href="#help/measurement">Measurement</a>,
 <a href="#help/repository">Repository map</a>, <a href="#help/planned">In progress</a>.</li>
@@ -183,9 +183,9 @@ page('rules-reader', 'The Rules reader', `
 <ol>
   <li><b>Spelling:</b> a word close (OSA edit distance 1, or 2 for words of 7+ letters) to a legend cue word or a canvas name is replaced; names
   introduced by “named / called” and quoted text are left alone. (This runs in addition to the VSA <a href="#help/spelling">spell checker</a>.)</li>
-  <li><b>Cut:</b> when the Rules segmenter is the chosen cut: sentences are split at <code>. ! ? ;</code>; a sentence is split again at a comma or
-  an “and” that stands right before a verb cue (<code>SPLIT_VERB</code>), coordinated names, one clause per created object. With another cut,
-  the Rules reader reads the units it is given (<code>formalize(text, ctx, {units})</code>). See <a href="#help/cutting">One cut for all readers</a>.</li>
+  <li><b>Cut:</b> the Rules segmenter, the Rules tab’s own cut: sentences are split at <code>. ! ? ;</code>; a sentence is split again at a comma or
+  an “and” that stands right before a verb cue (<code>SPLIT_VERB</code>), coordinated names, one clause per created object. For the votes of
+  VSS and SOP-BERT, the Rules reader also reads the units it is given (<code>formalize(text, ctx, {units})</code>). See <a href="#help/cutting">Each tab’s cutter</a>.</li>
   <li><b>Reading:</b> regular expressions over the legend’s cue words (shapes, colours, sizes, actions, positions) and their order. The cue
   words are the hand-written cues of the legend’s values (<code>SHAPE_VALUES</code>, <code>COLOR_VALUES</code>, … in <code>docs/js/logic.js</code>).</li>
 </ol>
@@ -301,7 +301,7 @@ or <code>O</code> (outside every request). 11 labels: 9 worlds, I, O. A unit run
 <p>The unit’s <b>candidates</b> are the 3 worlds with the highest <code>B-&lt;world&gt;</code> score at its first token
 (<code>ROUTER_K = 3</code>: the smallest k whose recall of the gold world is at least 97%, measured 97.9% by
 <code>training/sketch/cutter_worlds_probe.py</code>).</p>
-<p><b>When another cutter cut the message</b> (<a href="#help/cutting">the shared cut</a>), the world cutter still runs once over the message,
+<p><b>When another cutter cut the message</b> (the BERT cutter’s requests, read for SOP-BERT’s votes and VSS-BERT: <a href="#help/cutting">Each tab’s cutter</a>), the world cutter still runs once over the message,
 and only names worlds: a unit’s candidates are the 3 worlds with the highest summed <code>B-&lt;world&gt;</code> score inside the unit; a unit
 with no world signal is read by all 9 worlds, and the fewest words not understood decides (<code>CUT_SHARED.md</code>). With its own cut the
 outputs are identical to the cutter path (<code>training/sketch/cut_bench.mjs</code>, line “identical”).</p>
@@ -474,7 +474,7 @@ ${AH}
 other heads read all its requests in one batched call.</figcaption>
 </figure>
 <ul>
-  <li><b>cut</b>: O / B / I per word over the whole message (read on each word’s first word piece). It is the <b>BERT cutter</b> of the shared cut.</li>
+  <li><b>cut</b>: O / B / I per word over the whole message (read on each word’s first word piece). It is the <b>BERT cutter</b>: the cut of the SOP-BERT and VSS-BERT tabs.</li>
   <li><b>act</b> (on the [CLS] vector, 52 classes): the action of a command (including the layout operations improve … untangle, reverse,
   group, ungroup), the ask of a question (including members, groupOf and help), <code>fact</code>, <code>rule</code>, or <code>none</code> (the unit
   is not a request, “Thanks”: no wire, listed as “Ignored (not a request)”).</li>
@@ -525,23 +525,38 @@ models before SOP-BERT (an act classifier and a ready-made question-answering mo
 `, 'SOP-BERT: one fine-tuned DistilBERT that cuts a message and reads every request itself.');
 
 /* ============================================================ cutting */
-page('cutting', 'One cut for all readers', `
-<p><b>Owner’s decision, 2026-11-02.</b> The readers read the <b>same units</b> of a message, so they differ only in how each reads a request,
-never in how the message was split. VSS-BERT always reads the requests of the <b>BERT cutter</b> (the cut its confidence was fitted on; when the
-message was already cut by it, the readings of the VSS and SOP-BERT tabs are reused). The tabs Rules, VSS and SOP-BERT read the cut chosen in
-Settings › Cutting into requests.
-<b>details</b> under a reply lists the units and how long the cut took.</p>
+page('cutting', 'Each tab’s cutter', `
+<p><b>Owner’s decision, 2026-11-03</b> (it replaces the one cut for all readers of 2026-11-02 and its setting). Each tab reads the requests
+of <b>its own cutter</b>, the cut its confidence was fitted on. There is nothing to choose. <b>details</b> under a reply lists the requests of
+each cut and who read them.</p>
+<div class="tw"><table>
+<thead><tr><th>Tab</th><th>Its cutter</th><th>Its confidence was fitted on</th></tr></thead>
+<tbody>
+<tr><td>VSS-BERT</td><td>BERT cutter</td><td>the BERT cut (<code>combined.json</code>: <code>best_cut</code> = <code>bert</code>)</td></tr>
+<tr><td>Rules</td><td>Rules segmenter</td><td>no confidence: it executes everything; <code>regress.sh</code> measures it on its own cut</td></tr>
+<tr><td>VSS</td><td>VSS cutter</td><td>the VSS cut (<code>vote3.json</code> column <code>vss</code>; <code>vss.json</code>)</td></tr>
+<tr><td>SOP-BERT</td><td>BERT cutter</td><td>the BERT cut (<code>vote3.json</code> column <code>sop</code>; <code>sop-bert.json</code>)</td></tr>
+</tbody></table></div>
 <div class="tw"><table>
 <thead><tr><th>Cutter</th><th>What it is</th><th>Code / model</th></tr></thead>
 <tbody>
 <tr><td><b>Rules segmenter</b></td><td>Hand-written: sentences, then a comma or “and” before a verb, coordinated names, one clause per created object.</td><td><code>docs/js/logic.js</code> (<code>rulesCut</code>)</td></tr>
-<tr><td><b>VSS cutter</b> (default)</td><td>A learned token tagger <code>B-&lt;world&gt;</code> / I / O trained on the annotated request spans; it also names each unit’s candidate worlds.</td><td><code>docs/model/micro/cutter_worlds8s.json</code></td></tr>
-<tr><td><b>BERT cutter</b></td><td>The cut head of SOP-BERT: B / I / O per word over the whole message. Available once SOP-BERT has loaded.</td><td><code>NeuralKit.cut</code>, <code>training/neural/finetune_roles.py</code></td></tr>
+<tr><td><b>VSS cutter</b></td><td>A learned token tagger <code>B-&lt;world&gt;</code> / I / O trained on the annotated request spans; it also names each unit’s candidate worlds.</td><td><code>docs/model/micro/cutter_worlds8s.json</code></td></tr>
+<tr><td><b>BERT cutter</b></td><td>The cut head of SOP-BERT: B / I / O per word over the whole message.</td><td><code>NeuralKit.cut</code>, <code>training/neural/finetune_roles.py</code></td></tr>
 </tbody></table></div>
-<p><b>How.</b> <code>VSSFormalizer.cut(text, ctx, strategy, env)</code> returns <code>[{c0, c1, src}]</code> (character offsets); every reader
-reads exactly those units (<code>rules.formalize(t, ctx, {units})</code>, <code>VSSFormalizer.formalize(t, ctx, _, {units})</code>,
-<code>neural.formalize(t, ctx, {units})</code>). A cutter that is not available yet (VSS or SOP-BERT still loading) is replaced by the
-Rules segmenter for that message, and the details say so. The default is <code>DEFAULT_CUT</code> in <code>docs/js/vss-composer.js</code>.</p>
+<p><b>The votes read the same requests.</b> The confidence of the VSS and SOP-BERT tabs includes whether the other two readers read a request
+the same way, and each column of <code>vote3.json</code> was fitted with the three readers on one cut (<code>training/sketch/confidence3/fit3.mjs</code>,
+<code>build</code>): column <code>vss</code> on the VSS cut (VSS on its own cut; SOP-BERT and the Rules reading the VSS cutter’s units), column
+<code>sop</code> on the BERT cut (SOP-BERT on its own cut; VSS and the Rules reading the BERT cutter’s units). The page does the same
+(<code>crossReads</code> in <code>docs/js/ui.js</code>), once per message, after every tab has read:</p>
+<ul>
+  <li>the VSS cutter’s units (no model call) are read by SOP-BERT (one model call: all the units at once) and by the Rules;</li>
+  <li>the units of SOP-BERT’s own reading (no model call) are read by VSS and by the Rules. VSS-BERT reuses this VSS reading and SOP-BERT’s own
+  reading, so the BERT cutter runs once per message and nothing is read twice.</li>
+</ul>
+<p>Each reader reads with its own tab’s drawing (the names on it). The readers read units they are given with
+<code>rules.formalize(t, ctx, {units})</code>, <code>VSSFormalizer.formalize(t, ctx, _, {units})</code> and <code>neural.formalize(t, ctx, {units})</code>;
+<code>VSSFormalizer.cut(text, ctx, "vss")</code> returns the VSS cutter’s <code>[{c0, c1, src}]</code>.</p>
 
 <h2 id="cut-measured">What each cut costs each reader</h2>
 <p>Per gold request, right / wrong / not done (%) and extra, every request executed; <code>node training/sketch/cut_bench.mjs</code>,
@@ -566,11 +581,11 @@ Rules segmenter for that message, and the details say so. The default is <code>D
 <p><b>Reading.</b> On whole messages the VSS cut is better for both readers (wrong 11.8 vs 15.5 for Rules, extras down from 769 to 450): the
 Rules segmenter cuts text that is not a request into units (1202 extra units). On short one-line commands the new world cutter loses only 4 of
 1118 commands (the previous one lost 96), so the Rules lose little with it (97.2 against 98.9 right) and VSS gains with it (78.0 against 70.6).
-The default is the VSS cutter because real messages are whole messages. The BERT cut is not in this script; VSS-BERT reads it, and its numbers
-are in <a href="#help/measurement/confidence-now">Measurement</a>.</p>
+VSS therefore reads its own cut; the Rules tab reads its own segmenter, as the comparison it is. The BERT cut is not in this script; SOP-BERT
+and VSS-BERT read it, and their numbers are in <a href="#help/measurement/confidence-now">Measurement</a>.</p>
 <p class="note">The cutter is judged by the errors it causes in the readers (requested actions done wrong or not done, and extras), not by
 span-match scores (AGENTS.md).</p>
-`, 'Every message is cut into requests once, and the readers read the same requests: VSS-BERT the BERT cutter’s, the other tabs the cut chosen in Settings.');
+`, 'Each tab reads the requests of its own cutter, the cut its confidence was fitted on; for the votes, the other readers read the same requests.');
 
 /* ============================================================ spelling */
 page('spelling', 'The spell checker', `
@@ -707,7 +722,7 @@ are lines of the <code>msg_*</code> / <code>batch_*</code> files. <code>ops_grou
   745 messages (1745 requested actions) are the test part every number of the readers is reported on.</dd>
   <dt>The demo’s short sets</dt><dd><code>docs/bench/*.json</code> (index <code>docs/bench/index.json</code>): hand 40, blind 60, broad 128 rows
   (140 requests), and three sets generated from templates, seen, new_identities and heldout_formulations, 300 each: 1128 rows, 1140 requests,
-  median 6 words. Built by <code>training/sketch/make_bench.mjs</code>. The Benchmark in Settings and <code>training/sketch/short_bench/</code> score them.</dd>
+  median 6 words. Built by <code>training/sketch/make_bench.mjs</code>. <code>training/sketch/short_bench/</code> and <code>regress.sh</code> score them.</dd>
   <dt>Per-event gold</dt><dd>One gold file per event (requests read from their annotated span, no cut), used with <code>SEG=gold</code> to measure
   one world alone (PLAN_B.md). These folders are in the coordinator’s scratch, not in the repository.</dd>
 </dl>
@@ -875,7 +890,7 @@ regression checks run before every commit that touches a reader, not a test of t
   <dt><code>training/sketch/combine/combined_report.mjs</code></dt><dd>VSS-BERT: pairing, agreement and its confidence (<code>COMBINED_READER.md</code>).</dd>
   <dt><code>training/sketch/llm_score.mjs</code></dt><dd>Scores a reader on folders of annotated messages (<code>SEG=composer</code> whole messages,
   <code>SEG=gold</code> one world on gold spans; <code>PAIR=value</code> pairs produced and gold requests by their values). Also scores the Rules.</dd>
-  <dt><code>training/sketch/cut_bench.mjs</code></dt><dd>Every cut with every reader on the same gold (<a href="#help/cutting">One cut for all readers</a>).</dd>
+  <dt><code>training/sketch/cut_bench.mjs</code></dt><dd>Every cut with every reader on the same gold (<a href="#help/cutting">Each tab’s cutter</a>).</dd>
   <dt><code>training/sketch/short_bench/</code>, <code>error_analysis.mjs</code></dt><dd>The demo’s short sets, and the root cause of each miss
   (no unit, wrong world, unknown event, role values, …).</dd>
   <dt><code>training/sketch/confidence3/audit_new_forms.mjs</code></dt><dd>Checks that two readings counted as the same make the engine do the same
@@ -921,7 +936,7 @@ page('repository', 'Repository map', `
 <tr><td><code>FRESH2_CAUSES.md</code>, <code>llm_train/OPUS_DATA.md</code>, <code>llm_train/synth_rules/README.md</code></td><td>The data: why the readers lose on a new writer (its style, not message length); the messages written by Opus; the short commands generated from the Rules (<a href="#help/reliability/r-synthetic">The data is synthetic</a>).</td></tr>
 <tr><td><code>FRESH2_RESULT.md</code>, <code>FEEDBACK_RESULT.md</code>, <code>feedback/DATA_NEEDS.md</code></td><td>The new writer (fresh2): every reader scored lower on its style; a data set written from VSS’s own list of needs lowered its score (−4.3), a negative result about that data.</td></tr>
 <tr><td><code>RISK_COVERAGE.md</code>, <code>VSS_CONFIDENCE.md</code>, <code>PRECISION.md</code></td><td>The first confidence studies (2026-11-02): VSS from every step of its chain AUROC 0.81, above SOP-BERT’s 0.72; the VSS margin alone 0.59.</td></tr>
-<tr><td><code>CUT_SHARED.md</code></td><td>One cut for all readers: the VSS cut is better on whole messages, the Rules segmenter on one-line commands.</td></tr>
+<tr><td><code>CUT_SHARED.md</code></td><td>The one cut for all readers of 2026-11-02 (replaced on 2026-11-03 by each tab’s own cutter): the VSS cut is better on whole messages, the Rules segmenter on one-line commands.</td></tr>
 <tr><td><code>PLAN_A.md</code>, <code>PLAN_B.md</code>, <code>EVENT_HINT.md</code>, <code>CREATE_COLOR.md</code>, <code>SHORT.md</code>, <code>SHORT2.md</code>, <code>BETWEEN.md</code>, <code>HOLDOUT_PURPLE.md</code></td><td>How the VSS worlds were grouped and fixed (<a href="#help/history/h-vss">How we got here</a>).</td></tr>
 <tr><td><code>DIAGRAM_OPS.md</code>, <code>legend_ext/LEGEND_EXT.md</code></td><td>Groups, double positions and the forms of 2026-11-02 (templates, free text, help questions, layout operations, arrow labels).</td></tr>
 </tbody></table></div>

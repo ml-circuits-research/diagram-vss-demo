@@ -12,7 +12,8 @@
 //    staying on: which errors stop listening for real, the restart backoff;
 // 5. spoken commands: the whole utterance or its end, in the dictation language and in English, never in the middle; the command words are
 //    not part of the message; a joining "and" / "și" and punctuation dropped; diacritics optional; one table per language, a new language
-//    is one more table.
+//    is one more table;
+// 6. the dock's note (one row since 2026-11-03: the English is in the message box): a status, or "no translation" with what to do.
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const V = require("../../docs/js/voice.js");
@@ -180,6 +181,15 @@ const run = async () => {
   delete V.COMMANDS.fr;
   eq("5. the commands said in the popover, in the dictation language", V.commandHelp("ro-RO").map(h => h.say), ["trimite", "șterge", "oprește", "fă-o oricum", "editează"]);
   check("5. every language table has only known keys", Object.values(V.COMMANDS).every(t => Object.keys(t).every(k => k === "tail" || V.COMMAND_KEYS.includes(k))));
+
+  // 6. the dock's one row: a status or "no translation" is a note at the end of it (the English is edited in the message box)
+  eq("6. no note when nothing is to be said (the English is in the message box)", V.dockNote({ lang: "ro-RO" }), null);
+  eq("6. a status is the note", V.dockNote({ lang: "ro-RO", status: { kind: "busy", text: "Translating…" } }), { text: "Translating…", kind: "busy" });
+  eq("6. a status without a kind is a plain note", V.dockNote({ lang: "ro-RO", status: { text: "x" } }), { text: "x", kind: "note" });
+  const nt = V.dockNote({ lang: "fr-FR", noTranslation: true });
+  check("6. no translation: an error note that says to write the English in the message box", nt && nt.kind === "err" && /^No translation on this device for French → English: write the English in the message box/.test(nt.text), JSON.stringify(nt));
+  eq("6. English needs no translation: no note", V.dockNote({ lang: "en-US", noTranslation: true }), null);
+  check("6. the microphone's error, as a status, wins over 'no translation'", V.dockNote({ lang: "fr-FR", noTranslation: true, status: { kind: "err", text: V.recognitionError("not-allowed") } }).text.startsWith("The browser did not allow the microphone"));
 
   console.log(`\n${n - fails}/${n} passed`);
   process.exit(fails ? 1 : 0);

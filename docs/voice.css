@@ -1,7 +1,7 @@
 /* voice.css: the dictation dock (docs/js/voice.js), the original text under a message, and the "Collected requests" section of Settings
    (docs/js/collect.js). It uses the page's colour tokens (index.html :root), with fallbacks. */
 
-/* ---------- the dictation dock: two rows under the drawing, level with the message box ---------- */
+/* ---------- the dictation dock: one row under the drawing, level with the message box (the English goes into the message box) ---------- */
 .dock { grid-area: dock; position: relative; min-width: 0; display: flex; align-items: center; gap: 10px; background: var(--head, #F0F2F5);
   border-top: 1px solid var(--line, #D1D7DB); padding: 5px 12px max(5px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
 .dock.listening { box-shadow: inset 0 2px 0 var(--accent, #00A884); }   /* steady while the mic is meant to be on: no flicker on restarts */
@@ -13,32 +13,31 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #00A884) 22%, transparent); }
 .vd-mic.on.paused { background: var(--pill, #fff); color: var(--accent, #00A884); border-style: dashed; box-shadow: none; }
 .vd-mic:disabled { opacity: .45; cursor: not-allowed; }
-.vd-rows { flex: 1; min-width: 0; display: grid; gap: 1px; }
-.vd-row { display: flex; align-items: center; gap: 8px; min-width: 0; height: 25px; }
-.vd-lang, .vd-code.vd-en { flex: none; width: 46px; height: 22px; font-family: var(--font, sans-serif); font-size: 12px; font-weight: 700; letter-spacing: .04em; }
+.vd-row { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; height: 30px; }
+.vd-lang { flex: none; width: 46px; height: 24px; font-family: var(--font, sans-serif); font-size: 12px; font-weight: 700; letter-spacing: .04em; }
 .vd-lang { display: inline-flex; align-items: center; justify-content: center; gap: 3px; padding: 0; cursor: pointer; border-radius: 6px;
   border: 1px solid var(--line, #D1D7DB); background: var(--pill, #fff); color: var(--ink, #111B21); }
 .vd-lang:hover, .vd-lang[aria-expanded="true"] { border-color: var(--accent, #00A884); }
 .vd-caret { width: 9px; height: 9px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; color: var(--muted, #667781); }
-.vd-code.vd-en { display: inline-flex; align-items: center; justify-content: center; color: var(--faint, #8C9AA3); }
-/* both rows are editable in place: row 1 in the dictation language, row 2 in English (what is sent); a status or a hint is row 2's placeholder */
-.vd-src, .vd-out { flex: 1; min-width: 0; height: 25px; border: 0; border-bottom: 1px dashed transparent; border-radius: 0; background: transparent; padding: 0 2px;
+/* the transcript, editable in place, in the dictation language */
+.vd-src { flex: 1; min-width: 0; height: 26px; border: 0; border-bottom: 1px dashed transparent; border-radius: 0; background: transparent; padding: 0 2px;
   font-size: 15px; color: var(--ink, #111B21); text-overflow: ellipsis; }
-.vd-src::placeholder, .vd-out::placeholder { color: var(--faint, #8C9AA3); opacity: 1; }
-.vd-src:hover, .vd-out:not([readonly]):hover { border-bottom-color: var(--line, #D1D7DB); }
-.vd-src:focus, .vd-out:focus { outline: none; border-bottom: 1px solid var(--accent, #00A884); }
-.vd-out.note::placeholder { color: var(--muted, #667781); }
-.vd-out.busy::placeholder { color: var(--muted, #667781); font-style: italic; }
-.vd-out.err::placeholder { color: var(--err, #C1392B); }
-.vd-out[readonly] { cursor: default; }
-.vd-out.err:placeholder-shown { font-size: 13px; }
+.vd-src::placeholder { color: var(--faint, #8C9AA3); opacity: 1; }
+.vd-src:hover { border-bottom-color: var(--line, #D1D7DB); }
+.vd-src:focus { outline: none; border-bottom: 1px solid var(--accent, #00A884); }
+/* the note at the end of the row (voice.js dockNote): translating, no translation, the microphone not allowed; at most two short lines */
+.vd-st { flex: 0 1 auto; max-width: 46%; font-size: 12px; line-height: 1.25; color: var(--muted, #667781); overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+.vd-st:empty { display: none; }
+.vd-st.busy { font-style: italic; }
+.vd-st.err { color: var(--err, #C1392B); }
 .vd-link { border: 0; background: none; padding: 0; color: var(--link, #027EB5); text-decoration: underline; cursor: pointer; font: inherit; }
 .vd-aside { flex: none; display: flex; align-items: center; }
 .vd-aside .vd-resume + .vd-resume { margin-left: 6px; }
 .vd-resume { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--accent, #00A884); background: var(--pill, #fff); color: var(--accent, #00A884);
   border-radius: 999px; padding: 4px 12px 4px 9px; cursor: pointer; font-size: 13px; font-weight: 600; white-space: nowrap; }
 .vd-resume svg.i { width: 16px; height: 16px; }
-/* a recognised command, briefly, just above the dock's right end (it covers neither row) */
+/* a recognised command, briefly, just above the dock's right end (it does not cover the row) */
 .vd-toast { position: absolute; right: 12px; bottom: calc(100% + 6px); z-index: 6; pointer-events: none; opacity: 0; transition: opacity .15s;
   background: var(--sheet, #fff); color: var(--ink, #111B21); border: 1px solid var(--line, #D1D7DB); border-radius: 999px; padding: 3px 11px;
   font-size: 12.5px; box-shadow: 0 2px 8px rgba(0, 0, 0, .12); max-width: calc(100% - 24px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -66,9 +65,9 @@
 @media (max-width: 860px) {
   .dock { border-top: 1px solid var(--line, #D1D7DB); padding-top: 4px; padding-bottom: 4px; gap: 8px; }
   .vd-mic { width: 36px; height: 36px; }
-  .vd-lang, .vd-code.vd-en { width: 40px; }
-  .vd-src, .vd-out { font-size: 14.5px; }
-  .vd-out.err:placeholder-shown { font-size: 12.5px; }
+  .vd-lang { width: 40px; }
+  .vd-src { font-size: 14.5px; }
+  .vd-st { max-width: 52%; font-size: 11.5px; }
   .vd-pop { left: 8px; }
 }
 

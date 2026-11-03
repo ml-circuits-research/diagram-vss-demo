@@ -116,7 +116,7 @@ function cosine(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] 
    the browser (Transformers.js) and in tests (mocks).
    Strategy 'finetuned' (the demo's only one), with SOP-BERT, our joint model (training/neural/finetune_roles.py; makeReader below). It
    does not call the Rules reader at all (owner, 2026-11-02): formalizeJoint below
-     1. cuts the message: the units given by the caller (opts.units: the demo's shared cut), else the model's own span head (models.cut);
+     1. cuts the message: the units given by the caller (opts.units: another reader's cut, for the demo's votes), else the model's own span head (models.cut);
      2. reads all the units in ONE batched call: the act, the value of every legend key with values (a class head each), a B / I / O tag
         per word for the keys whose answer is written (names, a new name, a label, a number), and per name-role (target, from, to,
         anchor: reader.ref_keys) WHO fills it (head fill:<key>: none / written / context / description) and the description's own keys
@@ -330,7 +330,9 @@ function create(engine, rulesFormalize) {
     /* joint: what the fitted confidence reads (docs/js/neural-confidence.js signals): reads[i] is the read of analyses[i] (its head logits
        in reads[i].logits), cut the cut head's probabilities per word of the message (null: not available), the head layout and [UNK] */
     const joint = { text, reads, cut: cutP, cutFrom, reader: st.models.reader, unk: st.models.unk };
-    return { nodes, notes, rulesNodes: [], analyses, cutBy, joint, ms: Date.now() - t0, calls: st.calls };
+    // units: the units read, as character offsets (the BERT cutter's when cutBy is 'model'): the demo gives them to the other readers for
+    // SOP-BERT's votes and VSS-BERT (ui.js crossReads), as vss-composer.js cutUnits "bert" would (c1 > c0), without another call
+    return { nodes, notes, rulesNodes: [], analyses, cutBy, joint, units: units.filter(u => u.c1 > u.c0).map(u => ({ c0: u.c0, c1: u.c1, src: text.slice(u.c0, u.c1) })), ms: Date.now() - t0, calls: st.calls };
   }
 
   async function formalize(input, ctx, opts) {

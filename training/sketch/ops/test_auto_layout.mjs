@@ -187,6 +187,46 @@ ok("align one shape: 'too-few'", throwsCode(() => AL.align([S("A", 1, 1)], [], {
   console.log("times (ms) on 200 shapes:", JSON.stringify(times), "improve:", ti);
 }
 
+// ---------- 9b. fitting the canvas, shapes without links, routing (owner's session 2026-11-03: "they do not all fit on the canvas without
+// touching", a tree of unlinked shapes, lines through shapes) ----------
+{
+  const T = 22;   // the name tag on top of each box, as logic.js passes it
+  const big = (name, x, y) => S(name, x, y, { w: 88, h: 88 + T });
+  const sum = Object.values(AL.WEIGHTS).reduce((a, b) => a + b, 0);
+  ok(`the weights sum to 100 (${sum}) and include labels`, sum === 100 && AL.WEIGHTS.labels > 0);
+  // a chain of 10 large shapes: as a tree or layers it must fit (direction chosen by fit, else a grid in link order), no overlap, inside
+  const chain = { shapes: Array.from({ length: 10 }, (_, i) => big("C" + i, 60 + (i % 5) * 150, 80 + Math.floor(i / 5) * 200)), links: Array.from({ length: 9 }, (_, i) => L("C" + i, "C" + (i + 1))) };
+  for (const kind of ["auto", "tree", "layers", "circle", "grid", "row", "organic"]) {
+    const r = AL.layout(kind, chain.shapes, chain.links, { canvas: CANVAS }), after = at(chain.shapes, r);
+    ok(`chain of 10 large shapes, ${kind}: fits (not crowded), no overlaps, inside the canvas${r.fellBack ? " (fell back to " + r.layout + ")" : ""}`, !r.crowded && !overlaps(after).length && !outside(after).length, { crowded: r.crowded, ov: overlaps(after), out: outside(after), notes: r.notes });
+  }
+  // most shapes unlinked: auto is a grid, and says why; an asked tree packs the unlinked shapes beside the tree
+  const mostly = { shapes: ["A", "B", "C", "D", "E", "F", "G"].map((n, i) => S(n, 100 + i * 90, 100 + (i % 3) * 120)), links: [L("A", "B"), L("B", "C")] };
+  const ra = AL.layout("auto", mostly.shapes, mostly.links, { canvas: CANVAS });
+  ok(`auto with 4 of 7 shapes unlinked: a grid, with the reason (${ra.why})`, ra.layout === "grid" && /no links/.test(ra.why || ""));
+  const lessly = { shapes: mostly.shapes, links: [L("A", "B"), L("B", "C"), L("C", "D"), L("D", "E")] };
+  const rt = AL.layout("tree", lessly.shapes, lessly.links, { canvas: CANVAS }), aft = at(lessly.shapes, rt), y = n => aft.find(s => s.name === n);
+  ok(`tree with F and G unlinked: they stand beside the tree, not in its first level (${rt.why})`, /F and G have no links/.test(rt.why || "") && !overlaps(aft).length && (y("F").y !== y("A").y || y("F").x > Math.max(...["A", "B", "C", "D", "E"].map(n => y(n).x))), aft.map(s => `${s.name}@${s.x},${s.y}`).join(" "));
+  // a circle of 12 large shapes: an ellipse that fills the canvas instead of a squeezed circle
+  const twelve = Array.from({ length: 12 }, (_, i) => big("R" + i, 400 + Math.cos(i) * 200, 250 + Math.sin(i) * 150));
+  const rc = AL.layout("circle", twelve, [], { canvas: CANVAS }), ac = at(twelve, rc);
+  ok("circle of 12 large shapes: not crowded, no overlaps, inside the canvas", !rc.crowded && !overlaps(ac).length && !outside(ac).length, { crowded: rc.crowded, ov: overlaps(ac).length });
+  // routing: a link whose straight line passes through a shape bends around it; a clear link stays straight; labels avoid the boxes
+  const row3 = [S("A", 100, 200), S("B", 300, 200), S("C", 500, 200), S("D", 300, 400)];
+  const rr = AL.routeEdges(row3, [{ id: "e1", from: "A", to: "C", label: "long label" }, { id: "e2", from: "A", to: "B" }, { id: "e3", from: "B", to: "D", label: "x" }]);
+  ok("routeEdges: A -> C (B in the way) bends round B; A -> B stays straight; nothing blocked", rr.routes.e1.points.length > 0 && rr.routes.e2.points.length === 0 && rr.blocked === 0, rr);
+  const lb = rr.routes.e1.label, lw = "long label".length * 6.8 + 4;
+  ok("routeEdges: the label of A -> C lies on no shape", lb && !row3.some(s => Math.abs(lb.x - s.x) < (lw + s.w) / 2 && Math.abs(lb.y - s.y) < (16 + s.h) / 2), lb);
+  const pts = [row3[0]].concat(rr.routes.e1.points, [row3[2]]);
+  ok("routeEdges: no leg of A -> C passes through B", !pts.slice(1).some((q, i) => { const p = pts[i]; return AL.score([Object.assign({}, row3[1]), { name: "p", x: p.x, y: p.y, w: 1, h: 1 }, { name: "q", x: q.x, y: q.y, w: 1, h: 1 }], [L("p", "q")]).metrics.through > 0; }), pts);
+  // the score counts label collisions: a label between two touching-close shapes has no free place
+  const tight = [S("A", 100, 100), S("B", 170, 100), S("X", 135, 60, { w: 200, h: 30 }), S("Y", 135, 140, { w: 200, h: 30 })];
+  ok("score: a label with no free place beside its link counts (labelHits)", AL.score(tight, [{ from: "A", to: "B", label: "a long label here" }]).metrics.labelHits === 1);
+  // improve never lowers the score, on random diagrams of 6 to 14 shapes
+  let worse = 0; for (let k = 0; k < 20; k++) { const g = randomGraph(6 + (k % 9), 4 + k % 10), r = AL.improve(g.shapes, g.links, { canvas: CANVAS }); if (r.after.score < r.before.score) worse++; }
+  ok(`improve never lowers the score (20 random diagrams; ${worse} worse)`, worse === 0);
+}
+
 // ---------- 10. end to end through a PATCHED logic.js (optional): LOGIC=<patched logic.js> node test_auto_layout.mjs ----------
 // The patch (docs/js/ops-integration.md, apply_ops_patch.mjs) is applied to a copy; this section checks sentence -> Rules -> engine -> world.
 if (process.env.LOGIC) {

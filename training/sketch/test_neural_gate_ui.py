@@ -9,8 +9,8 @@ Run:  python3 training/sketch/test_neural_gate_ui.py [screenshot dir]      (PLAY
 It serves docs/ on a free local port and loads the neural model (docs/model/neural/sop-bert, about 68 MB, run in WASM). The VSS model files
 (docs/model/micro, docs/model/context) are blocked (memory), so VSS is "not available" here. transformers.js is the demo's version
 (@huggingface/transformers@3.8.1), served from training/laptop/node_modules in place of cdn.jsdelivr.net (this sandbox cannot reach the CDN;
-`npm install` in training/laptop). The cut is set to the BERT cutter (localStorage sop.cut) and the chat to SOP-BERT's replies (localStorage
-sop.chat.tabs; the default is VSS-BERT's only) before the page loads. On the SOP-BERT tab:
+`npm install` in training/laptop). The chat is set to SOP-BERT's replies (localStorage sop.chat.tabs; the default is VSS-BERT's only) before
+the page loads. The SOP-BERT tab reads its own cut, the BERT cutter (there is no cut setting since 2026-11-03). On the SOP-BERT tab:
   1. "Move Done below Start."                       one request the confidence clears: executed, no "Do it anyway";
   2. "Make Process green and connect it to Done."  the first request executed, the second not: "“it” was taken to mean Process", the
                                                    clearer command "Connect Process to Done.", Do it anyway and Edit; no numbers in the
@@ -20,7 +20,10 @@ sop.chat.tabs; the default is VSS-BERT's only) before the page loads. On the SOP
   5. SOP-BERT > Settings: a table of the levels boldest = cost1, very bold = cost2, bolder = cost5, cost (checked), more careful = cost20,
      execute all, with the thresholds of vote3.json (commands, questions) and each level's numbers on the calibration part (done right,
      confidently wrong, asked: vote3.json level_stats); choosing one is kept in localStorage, choosing the default removes it;
-  6. with the Rules segmenter as the cut (other cut than the BERT cutter): the gate still works; the details say the cut head ran once more.
+  6. another message: one request executed, one held; the details say "cut by: BERT cutter" (its own cut, the cut head not run again) and
+     list the BERT cutter's requests, also read by the Rules for SOP-BERT's votes; ⋮ › Settings has no cut setting.
+Before that, the loading overlay with a failed step (VSS blocked): VSS's row failed with its reason, SOP-BERT's ready, a "Continue with
+Rules only" button; at phone width in dark mode the card fits and is dark; the button closes it for good and opens the Rules tab.
 Screenshots of each step go to the directory (default: a temporary folder). Exit code 0 when everything passes.
 """
 import functools, http.server, json, mimetypes, os, re, socketserver, sys, tempfile, threading
@@ -88,7 +91,7 @@ with sync_playwright() as p:
     pg = b.new_page(viewport={"width": 1280, "height": 860})
     errors = []
     pg.on("pageerror", lambda e: errors.append(str(e)))
-    pg.add_init_script("try { if (!sessionStorage.getItem('t0')) { localStorage.clear(); localStorage.setItem('sop.cut', 'bert'); localStorage.setItem('sop.chat.tabs', 'neural'); sessionStorage.setItem('t0', '1'); } } catch (e) {}")
+    pg.add_init_script("try { if (!sessionStorage.getItem('t0')) { localStorage.clear(); localStorage.setItem('sop.chat.tabs', 'neural'); sessionStorage.setItem('t0', '1'); } } catch (e) {}")
     pg.route("**/model/micro/**", lambda r: r.abort())
     pg.route("**/model/context/**", lambda r: r.abort())
     pg.route(LIB + "**", cdn)
@@ -98,6 +101,22 @@ with sync_playwright() as p:
     pg.wait_for_function("() => { const t = document.querySelector('[data-rtab=neural]'); return t && !t.classList.contains('off'); }", timeout=600000)
     pg.wait_for_function("() => document.querySelectorAll('#msgs .b.bot').length >= 1 + (window.StartDiagram ? StartDiagram.MESSAGES.length : 3) && !document.querySelector('#msgs .typing')", timeout=120000)
     pg.wait_for_function("() => [...document.querySelectorAll('#msgs .sys')].some(x => /SOP-BERT reader ready/.test(x.textContent))", timeout=600000)
+    # the loading overlay with a step that failed (VSS is blocked): the reason and "Continue with Rules only"; phone width and dark mode
+    pg.wait_for_function("() => document.querySelector('#loadov .lo-card.failed')", timeout=120000)
+    ov = pg.evaluate("() => { const o = document.querySelector('#loadov'); return { shown: !o.hidden, vss: (o.querySelector('[data-step=VSS]') || {}).className, err: (o.querySelector('[data-step=VSS] .lo-err') || {}).textContent, btn: !!o.querySelector('[data-lo=rules]'), sop: (o.querySelector('[data-step=SOP-BERT]') || {}).className }; }")
+    check("0. the loading overlay stays when a step fails: VSS failed, with the reason, and a 'Continue with Rules only' button", ov["shown"] and "failed" in (ov["vss"] or "") and bool(ov["err"]) and ov["btn"], str(ov))
+    check("0. ... SOP-BERT ready in it", "ready" in (ov["sop"] or ""), str(ov))
+    pg.screenshot(path=f"{OUT}/0_overlay_failed.png")
+    pg.set_viewport_size({"width": 390, "height": 844}); pg.emulate_media(color_scheme="dark"); pg.wait_for_timeout(300)
+    fit = pg.evaluate("() => { const c = document.querySelector('#loadov .lo-card').getBoundingClientRect(); const bt = document.querySelector('[data-lo=rules]').getBoundingClientRect(), bd = document.querySelector('.board').getBoundingClientRect(); return { l: c.left, r: c.right, sw: document.documentElement.scrollWidth, bg: getComputedStyle(document.querySelector('#loadov .lo-card')).backgroundColor, btn: bt.bottom <= bd.bottom + 0.5 && bt.top >= bd.top }; }")
+    check("0. phone width, dark mode: the card inside the screen, no sideways scroll, a dark card, the button visible", fit["l"] >= 0 and fit["r"] <= 390 and fit["sw"] <= 390 and fit["bg"] != "rgb(255, 255, 255)" and fit["btn"], str(fit))
+    pg.screenshot(path=f"{OUT}/0_overlay_failed_phone_dark.png")
+    pg.set_viewport_size({"width": 1280, "height": 860}); pg.emulate_media(color_scheme="light"); pg.wait_for_timeout(200)
+    pg.click("[data-lo=rules]"); pg.wait_for_timeout(300)
+    after = pg.evaluate("() => ({ hidden: document.querySelector('#loadov').hidden, tab: (document.querySelector('#rtabs [aria-selected=true]') || {}).dataset.rtab })")
+    check("0. 'Continue with Rules only' closes it and opens the Rules tab", after["hidden"] and after["tab"] == "rules", str(after))
+    pg.click("[data-rtab=combined]"); pg.wait_for_timeout(200)
+    check("0. it does not come back on the VSS-BERT tab", pg.evaluate("() => document.querySelector('#loadov').hidden"), "")
     pg.click("[data-rtab=neural]"); pg.wait_for_timeout(300)
 
     r1 = send(pg, "Move Done below Start.")
@@ -163,16 +182,17 @@ with sync_playwright() as p:
     check("5. choosing the default removes it", kept is None, str(kept))
     pg.click("[data-sub=drawing]"); pg.wait_for_timeout(200)
 
-    # another cut: the Rules segmenter (⋮ > Settings > Cutting)
+    # its own cut (no cut setting)
     pg.click("#open-settings"); pg.wait_for_timeout(400)
-    pg.check("#sbody input[name=cut-strategy][value='rules']"); pg.wait_for_timeout(200)
+    check("6. ⋮ › Settings has no cut setting", pg.locator("#sbody input[name=cut-strategy]").count() == 0, "")
     pg.keyboard.press("Escape"); pg.wait_for_timeout(300)
     r6 = send(pg, "Make Check orange and move it a bit.")
-    pg.screenshot(path=f"{OUT}/7_rules_cut.png")
-    check("6. with the Rules cut: one executed, one not done with its reason", r6 is not None and len(r6["held"]) == 1 and r6["held"][0]["button"] and r6["head"] == "Not done, because I am not sure what you meant:", str(r6))
+    pg.screenshot(path=f"{OUT}/7_own_cut.png")
+    check("6. one executed, one not done with its reason", r6 is not None and len(r6["held"]) == 1 and r6["held"][0]["button"] and r6["head"] == "Not done, because I am not sure what you meant:", str(r6))
     det6 = details(pg, 1)
-    check("6. the details say the cut head ran once more for the confidence", "run once more over the message" in det6 and "cut by: Rules segmenter" in det6, det6[:600])
-    pg.screenshot(path=f"{OUT}/8_rules_cut_details.png")
+    check("6. the details: SOP-BERT cut by its own cutter, the BERT cutter; the cut head not run again", "cut by: BERT cutter" in det6 and "run once more" not in det6, det6[:600])
+    check("6. the details list the BERT cutter's requests, also read by the Rules for SOP-BERT's votes", "BERT cutter, 2 requests, also read by the Rules for SOP-BERT’s votes" in det6, det6[:900])
+    pg.screenshot(path=f"{OUT}/8_own_cut_details.png")
     pg.keyboard.press("Escape"); pg.wait_for_timeout(300)
     check("no page error", not errors, "; ".join(errors[:3]))
     b.close()

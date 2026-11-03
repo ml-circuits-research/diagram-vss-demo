@@ -453,6 +453,7 @@ clears its own threshold; below it, it asks, as VSS-BERT does.</p>
 <tbody>
 <tr><th>What it is</th><td>9 small vector-symbolic models, one per family of actions, with two cutters and a context filler (<a href="#help/vss-worlds">What a VSS world is</a>)</td><td>one fine-tuned DistilBERT with small heads (<a href="#help/bert">SOP-BERT</a>)</td></tr>
 <tr><th>Size</th><td>31.4 MB</td><td>68.7 MB</td></tr>
+<tr><th>The requests it reads</th><td>those of its own cutter, the VSS cutter (the cut its confidence was fitted on; <a href="#help/cutting">Each tab’s cutter</a>)</td><td>those of its own cut head, the BERT cutter, as VSS-BERT</td></tr>
 <tr><th>Its part in VSS-BERT</th><td>the second reading, to agree or disagree, and its own confidence, built from its named steps</td><td>the cut, and the reading that is executed</td></tr>
 <tr><th>When unsure</th><td colspan="2">does not do the request; says why, shows the clearer command to write, and offers Do it anyway and Edit</td></tr>
 </tbody></table></div>

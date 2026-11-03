@@ -1,9 +1,12 @@
 // voice.js: speak or type in your own language (owner, 2026-11-03). A slim dictation dock at the bottom of the drawing column, level with
-// the message box (12:22: "only 2 rows ... a settings popup that must not stay and take my space ... control everything by words"):
-//   - row 1: what the browser's speech recognition understands, in the dictation language, live and editable in place;
-//     row 2: its English translation, which also goes straight into the chat's message box as soon as it is translated;
-//     left: the microphone toggle and the language code (e.g. "RO"); the code opens a small settings popover (language, send after a pause,
-//     read replies aloud, the opt-in online translation, what this browser supports), closed by a click outside it or Escape.
+// the message box (12:22: "only 2 rows ... a settings popup that must not stay and take my space ... control everything by words"; one row
+// since 2026-11-03 afternoon: "the English translation already appears in the chat's message box", so the English row was dropped):
+//   - one row: the microphone toggle, the language code (e.g. "RO") and what the browser's speech recognition understands, in the
+//     dictation language, live and editable in place. Its English translation goes straight into the chat's message box as soon as it is
+//     translated; the English is edited there. A status (translating, no translation, the microphone not allowed, a download to start)
+//     is a small note at the end of the row (dockNote); a recognised command is a toast above the dock. The code opens a small settings
+//     popover (language, send after a pause, read replies aloud, the opt-in online translation, what this browser supports), closed by a
+//     click outside it or Escape.
 //   - speech to text: the browser's Web Speech API (SpeechRecognition / webkitSpeechRecognition). Once the mic is on it stays on (12:22):
 //     Chrome ends a session on silence, after about a minute, on no-speech / network / aborted errors and when the tab is hidden; the dock
 //     starts a new session after a short backoff, keeps the text gathered so far, and its "listening" indicator does not flicker. It stops
@@ -14,8 +17,9 @@
 //     "make Done red"). "undo" is not a dock command: it is a normal message to the readers.
 //   - translation to English when the language is not English: the browser's built-in on-device Translator API (Chrome's `Translator`, or
 //     the older `translation` / `ai.translator`), feature-detected, its availability checked per language pair, its model download shown;
-//     translated as soon as a transcript is final, and after a short pause for interim text. Without it the dock says plainly that this
-//     browser has no built-in translation and the text goes to the message box as it is. An online fallback (MyMemory, free and keyless) is
+//     translated as soon as a transcript is final, and after a short pause for interim text. Without it the dock's note says plainly that
+//     there is no translation, nothing goes to the message box, and nothing is sent until the user writes the English in the message box
+//     (untranslated text is never sent: the readers would misread it). An online fallback (MyMemory, free and keyless) is
 //     used only when the user turns it on (off by default; the popover says what is sent).
 //   - what reaches the chat: the English text in the message box, as a normal message (every reader reads English); the original goes along
 //     as `meta` and the chat shows it under the message in small text; docs/js/collect.js stores both.
@@ -217,6 +221,21 @@
     return { sr: `Speech recognition: ${sr}`, tr: isEnglish(s.lang) ? 'Translation: not needed (English)' : `Translation ${L} → English: ${tr}`, tts: `Speech synthesis: ${tts}` };
   }
 
+  /* ---------------- the dock's note ---------------- */
+  /** the words "no translation" for a language (the note at the end of the dock's row, and its title) */
+  const noTranslationText = lang => `No translation on this device for ${shortName(lang)} → English: write the English in the message box, or turn on online translation in the dock settings`;
+  /**
+   * The small note at the end of the dock's row (pure: tests). s: {status: {text, kind} | null (a status of the dock: translating,
+   * downloading, the microphone stopped), lang, noTranslation: the last text could not be translated and the message box holds no English
+   * from the user} -> {text, kind: 'note' | 'busy' | 'err'} | null (no note: the English is in the message box, or there is no text).
+   */
+  function dockNote(s) {
+    s = s || {};
+    if (s.status && s.status.text) return { text: s.status.text, kind: s.status.kind || 'note' };
+    if (s.noTranslation && !isEnglish(s.lang)) return { text: noTranslationText(s.lang), kind: 'err' };
+    return null;
+  }
+
   /* ---------------- spoken commands ---------------- */
   /**
    * The spoken commands, one table per language (its primary subtag). A command is looked up in the table of the dictation language and in
@@ -302,10 +321,7 @@
     const el = opts.dock;
     el.classList.add('vd');
     el.innerHTML = `<button type="button" class="vd-mic" data-vd="mic" aria-pressed="false">${MIC}</button>
-<div class="vd-rows">
-  <div class="vd-row"><button type="button" class="vd-lang" data-vd="lang" aria-haspopup="dialog" aria-expanded="false" aria-controls="vd-pop"><span class="vd-code"></span>${CARET}</button><input class="vd-src" id="vd-src" type="text" autocomplete="off" spellcheck="false" enterkeyhint="send"></div>
-  <div class="vd-row"><span class="vd-code vd-en" aria-hidden="true">EN</span><input class="vd-out" id="vd-en" type="text" autocomplete="off" spellcheck="false" enterkeyhint="send" aria-label="In English: what is sent (you can edit it)"></div>
-</div>
+<div class="vd-row"><button type="button" class="vd-lang" data-vd="lang" aria-haspopup="dialog" aria-expanded="false" aria-controls="vd-pop"><span class="vd-code"></span>${CARET}</button><input class="vd-src" id="vd-src" type="text" autocomplete="off" spellcheck="false" enterkeyhint="send"><span class="vd-st" role="status" aria-live="polite"></span></div>
 <div class="vd-aside"><button type="button" class="vd-resume" data-vd="resume" hidden>${MIC}<span>Resume listening</span></button><button type="button" class="vd-resume" data-vd="download" hidden><span>Download</span></button><span class="vd-toast" role="status" aria-live="polite"></span></div>
 <div class="vd-pop" id="vd-pop" role="dialog" aria-label="Dictation settings" hidden>
   <div class="vd-pl"><label for="vd-lang">Language</label><select id="vd-lang"></select></div>
@@ -319,7 +335,7 @@
   <p class="vd-note">Speech recognition is the browser’s: Chrome may send the audio to its vendor’s servers (Google). Translation runs on this device.</p></details>
 </div>`;
     const $ = s => el.querySelector(s);
-    const micBtn = $('[data-vd="mic"]'), langBtn = $('[data-vd="lang"]'), src = $('#vd-src'), out = $('#vd-en'), pop = $('#vd-pop');
+    const micBtn = $('[data-vd="mic"]'), langBtn = $('[data-vd="lang"]'), src = $('#vd-src'), noteEl = $('.vd-st'), pop = $('#vd-pop');
     const sel = $('#vd-lang'), tagIn = $('#vd-tag'), toastEl = $('.vd-toast'), resumeBtn = $('[data-vd="resume"]'), downloadBtn = $('[data-vd="download"]');
 
     const lang = () => prefs.lang;
@@ -327,10 +343,10 @@
     // what the recognition gathered: base (the text before this session) + finals (this session's final results) + interim (not final yet)
     let base = '', finals = '', interim = '', heard = false;
     let wantOn = false, paused = false, rec = null, fails = 0, gotResult = false, restartT = null;
-    // enText: row 2, the English text; userEn: the user wrote it there; putInBox: the last text the dock put in the message box
-    let lastTr = null, trSeq = 0, trT = null, pauseT = null, toastT = null, putInBox = '', status = null, enText = '', userEn = false;
+    // putInBox: the last text the dock put in the message box (a box holding something else holds the user's own English)
+    let lastTr = null, trSeq = 0, trT = null, pauseT = null, toastT = null, putInBox = '', status = null;
 
-    /* ---- rows ---- */
+    /* ---- the row ---- */
     const gathered = withInterim => { const t = base + finals; return withInterim && interim ? (t && !/\s$/.test(t) ? t + ' ' : t) + interim : t; };
     function render() {
       const v = gathered(true).trim();
@@ -342,17 +358,13 @@
       src.placeholder = !SR ? `Type in ${n} here (this browser cannot listen)` : wantOn ? (paused ? 'Paused while the reply is read aloud…' : `Listening… speak ${n}`) : `Tap the mic and speak ${n}, or type here`;
       src.setAttribute('aria-label', `What you said, in ${n} (you can edit it)`);
     }
-    const noTranslation = () => `No translation on this device for ${shortName(lang())} → English: write it in English, or turn on online translation in the dock settings`;
-    /** row 2: the English text (editable: what the user writes there is what is sent), with a status or a hint as its placeholder */
+    /** the user's own English in the message box: something the dock did not put there */
+    const ownEnglish = () => !!(ta && ta.value.trim() && ta.value !== putInBox);
+    /** the note at the end of the row (dockNote): a status, or "no translation" while the box holds no English of the user's */
     function showOut() {
-      let ph, kind = 'hint';
-      if (status) { ph = status.text; kind = status.kind || 'note'; }
-      else if (english()) ph = 'English: no translation needed; the words go to the message box as they are';
-      else if (lastTr && lastTr.by === 'none' && !enText) { ph = noTranslation(); kind = 'err'; }
-      else ph = 'English translation, straight into the message box (you can edit it)';
-      out.placeholder = ph; out.title = ph; out.className = 'vd-out ' + kind;
-      out.readOnly = english();
-      if (out.value !== enText && doc.activeElement !== out) out.value = enText;
+      const n = dockNote({ status, lang: lang(), noTranslation: !!(lastTr && lastTr.by === 'none' && gathered(false).trim() && !ownEnglish()) });
+      noteEl.textContent = n ? n.text : ''; noteEl.title = n ? n.text : ''; noteEl.className = 'vd-st' + (n ? ' ' + n.kind : '');
+      el.classList.toggle('has-note', !!n);
       downloadBtn.hidden = !(status && status.download);
     }
     const setStatus = s => { status = s; showOut(); };
@@ -370,25 +382,25 @@
 
     /* ---- translation ---- */
     // Never send untranslated text to the readers (owner, 2026-11-03): when there is no translation, the dock keeps the text, puts nothing in
-    // the message box, says so in row 2, and sends only what the user writes in English (in row 2 or in the message box).
+    // the message box, says so in the note at the end of its row, and sends only what the user writes in English in the message box.
     async function translateNow(o) {
       o = o || {};
       const text = (o.text != null ? o.text : stripCommand(gathered(true))).trim(), seq = ++trSeq;
-      if (english()) { lastTr = { src: text, text, by: 'not-needed' }; enText = ''; putBox(text); setStatus(null); return lastTr; }
-      if (!text) { lastTr = null; if (!userEn) { enText = ''; putBox(''); } setStatus(null); return null; }
+      if (english()) { lastTr = { src: text, text, by: 'not-needed' }; putBox(text); setStatus(null); return lastTr; }
+      if (!text) { lastTr = null; putBox(''); setStatus(null); return null; }
       const c = await tr.check(lang(), 'en');
       if (c.state === 'downloadable' && !o.gesture && !tr.cached(lang(), 'en')) {
         setStatus({ kind: 'note', text: `The ${shortName(lang())} → English model downloads once to this device: press Download`, download: true });
         return null;
       }
       if (c.state === 'downloadable' || c.state === 'downloading') setStatus({ kind: 'busy', text: 'Downloading the language model…' });
-      else if (!lastTr && !enText) setStatus({ kind: 'busy', text: 'Translating…' });
+      else if (!lastTr) setStatus({ kind: 'busy', text: 'Translating…' });
       const r = await tr.translate(text, lang(), 'en', { onProgress: p => { if (seq === trSeq && p != null) setStatus({ kind: 'busy', text: `Downloading the language model… ${Math.round(p * 100)}%` }); } });
       const res = r.by === 'none' ? { src: text, text: '', by: 'none', error: r.error } : { src: text, text: r.text, by: r.by };
       if (seq !== trSeq) return res;   // a newer text is being translated: this one is still the right answer for its own text
       lastTr = res; status = null;
-      if (res.by === 'none') { if (!userEn) { enText = ''; if (ta && ta.value === putInBox) putBox(''); } }
-      else { enText = res.text; userEn = false; putBox(res.text); }
+      if (res.by === 'none') { if (ta && ta.value === putInBox) putBox(''); }
+      else putBox(res.text);
       showOut();
       if (o.gesture && r.by === 'builtin' && c.state !== 'available') support();
       return res;
@@ -473,12 +485,12 @@
     /* ---- the commands ---- */
     function resetDock() {
       clearTimeout(pauseT); clearTimeout(trT); trSeq++;
-      base = ''; finals = ''; interim = ''; heard = false; lastTr = null; status = null; putInBox = ''; enText = ''; userEn = false;
+      base = ''; finals = ''; interim = ''; heard = false; lastTr = null; status = null; putInBox = '';
       render(); showOut(); micUI();
     }
     /**
      * What may be sent for the dock's text s, with the message box holding box: {meta} or {refuse: why}. The English is the dock's
-     * translation (by: builtin | online), the user's own English when there was no translation (by: user; in row 2 or in the box), or the
+     * translation (by: builtin | online), the user's own English when there was no translation (by: user; written in the message box), or the
      * words themselves when the dictation language is English. Without any English, nothing is sent.
      */
     function decide(s, box, r) {
@@ -491,7 +503,7 @@
       if (box.trim() && box.trim() !== s.trim()) { meta.translation = { by: 'user', edited: true }; return { meta }; }
       return { refuse: 'Not sent: no English text yet' };
     }
-    function refuse(why) { if (lastTr && lastTr.by === 'none') showOut(); toast(why, 'err'); }
+    function refuse(why) { showOut(); toast(why, 'err'); }
     let sending = false;
     async function sendNow(how) {
       if (sending) return false;
@@ -507,7 +519,7 @@
         let r = lastTr && lastTr.src === s ? lastTr : null;
         if (!r && !english()) r = await translateNow({ text: s, gesture: true });
         if (english()) { putBox(s); r = { src: s, text: s, by: 'not-needed' }; }
-        else if (r && r.by !== 'none' && !userEn) putBox(r.text);
+        else if (r && r.by !== 'none') putBox(r.text);
         const d = decide(s, ta ? ta.value : '', r);
         if (d.refuse) { refuse(d.refuse); return false; }
         resetDock();
@@ -604,11 +616,8 @@
       el.classList.toggle('has-text', !!src.value.trim()); micUI();
       if (english()) translateNow(); else translateSoon(500);
     });
-    out.addEventListener('input', () => {
-      // English written by the user in row 2: it is what is sent (mirrored into the message box)
-      enText = out.value; userEn = !!out.value.trim(); putBox(out.value, true); showOut();
-    });
-    out.addEventListener('keydown', ev => { if (ev.key === 'Enter' && !ev.isComposing) { ev.preventDefault(); sendNow('enter'); } });
+    // English the user writes in the message box is what is sent: the "no translation" note goes away while the box holds it
+    if (ta) ta.addEventListener('input', () => { if (lastTr && lastTr.by === 'none') showOut(); });
     src.addEventListener('keydown', ev => { if (ev.key === 'Enter' && !ev.isComposing) { ev.preventDefault(); sendNow('enter'); } else if (ev.key === 'Escape' && src.value) { ev.preventDefault(); clearAll(); } });
     if (synth && typeof synth.addEventListener === 'function') synth.addEventListener('voiceschanged', () => { if (!pop.hidden) popContent(); });
 
@@ -641,14 +650,14 @@
       } catch (e) { paused = false; micUI(); return null; }
     }
 
-    // start: the language code, the rows, the one-tap resume when the mic was on before a reload (the browser needs a click to listen)
+    // start: the language code, the row, the one-tap resume when the mic was on before a reload (the browser needs a click to listen)
     $('.vd-code').textContent = code(lang()); langBtn.title = `${langName(lang())}: dictation settings`; langBtn.setAttribute('aria-label', langBtn.title);
     render(); showOut(); micUI();
     return { consume, onReply, setMic, command, prefs, el, translation: tr,
-      state: () => ({ on: wantOn, paused, session: !!rec, text: gathered(true), english: lastTr ? lastTr.text : '', fails }) };
+      state: () => ({ on: wantOn, paused, session: !!rec, text: gathered(true), english: lastTr ? lastTr.text : '', note: noteEl.textContent, fails }) };
   }
 
   return { PREFS_KEY, FIRST, COMMON, DEFAULT_PREFS, ONLINE, normTag, primary, isEnglish, langName, shortName, languageList, loadPrefs, savePrefs,
-    builtinTranslator, normState, createTranslation, recognitionCtor, recognitionError, voicesFor, pickVoice, supportLines,
+    builtinTranslator, normState, createTranslation, recognitionCtor, recognitionError, voicesFor, pickVoice, supportLines, noTranslationText, dockNote,
     COMMANDS, COMMAND_KEYS, parseCommand, commandHelp, FATAL, restartDelay, mount };
 });

@@ -176,6 +176,7 @@ class Engine {
         if (!this.wireTypes.has(node.type)) throw new SOPError(`Unknown wire type "${node.type}". Known: ${[...this.wireTypes.keys()].join(', ')}`);
         if (!this.wireTypes.get(node.type).plugin.enabled) throw new SOPError(`Wire type "${node.type}" belongs to the "${this.wireTypes.get(node.type).plugin.title}" plugin, which is switched off.`);
         const args = {}; for (const [k, v] of Object.entries(node.args)) args[k] = this.resolve(v, env);
+        if (node.type !== 'mention' && this.world.canonical) for (const k of Object.keys(args)) args[k] = this.world.canonical(k, args[k]);   // names by the text an item shows
         const h = this.match(node.type, args); step.plugin = h.plugin.name;
         const ctx = { world: this.world, engine: this, node, env, undo: hist.undo, redo: hist.redo, emit: p => { this.world.apply(p); step.patches.push(p); changed = true; } };
         const out = h.run(args, ctx) || {};
@@ -278,6 +279,8 @@ class DiagramWorld {
     }
     return S.frame;
   }
+  /** an argument with the names the user may have given by an item's shown text made canonical (canonicalNames); other keys unchanged */
+  canonical(key, v) { if (v == null || !NAME_KEYS.includes(key)) return v; const ns = names(v); if (!ns.length) return v; const c = canonicalNames(this, ns); return c.join('\u0000') === ns.join('\u0000') ? v : c; }
   find(name) { if (name == null) return null; const l = String(name).toLowerCase(); return this.state.shapes.find(s => s.name.toLowerCase() === l) || null; }
   findGroup(name) { if (name == null) return null; const l = String(name).toLowerCase(); return (this.state.groups || []).find(g => g.name.toLowerCase() === l) || null; }
   groupOf(shapeName) { return (this.state.groups || []).find(g => g.members.includes(shapeName)) || null; }
@@ -354,8 +357,66 @@ function relSpot0(W, w, h, pos, anchors, dist, ignore) {
   }
   const [x, y] = calc(order[0]); return nearFree(W, x, y, w, h, ignore);
 }
+/* ---------- items referred to by the text they show (a free text's words, a shape's label) ----------
+   People name what they see: "delete Order flow" means the title MainTitle, which says "Order flow". A reference that is the name of no shape
+   and no group is looked up among the items' texts; the first tier that matches decides:
+     1. the whole text, ignoring case, repeated spaces, quotes and punctuation at the ends ("order flow", "Order  flow!", "ok" for "ok?");
+     2. the same with no spaces or punctuation at all ("Orderflow");
+     3. a near match: every word of the reference is a word of the text and covers at least half of its words ("Order" or "flow" for
+        "Order flow"; not "Make" for "Make the payment and ship it"), or the squashed forms differ by one letter (6+ letters: "Ordr flow").
+   Only exactly one item in that tier is a match; two or more -> the caller asks which one. The readers pass names; the engine resolves
+   them here for every wire (Engine.run canonicalNames), so every reader gets this. */
+const normText = t => String(t == null ? '' : t).toLowerCase().replace(/[‘’“”"'`]/g, '').replace(/\s+/g, ' ').trim().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
+const squashText = t => normText(t).replace(/[^\p{L}\p{N}]+/gu, '');
+const textWords = t => normText(t).split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+function oneEdit(a, b) {   /* at most one insertion, deletion or substitution */
+  if (a === b) return true; if (Math.abs(a.length - b.length) > 1) return false;
+  let i = 0; while (i < a.length && i < b.length && a[i] === b[i]) i++;
+  return a.slice(i + (a.length >= b.length ? 1 : 0)) === b.slice(i + (b.length >= a.length ? 1 : 0));
+}
+/** the items whose shown text matches ref: {tier (1..3, 0 = none), list} */
+function itemsByText(W, ref) {
+  const items = W.state.shapes.filter(s => s.label != null && String(s.label).trim() !== ''), r = normText(ref), q = squashText(ref), rw = textWords(ref);
+  if (!r) return { tier: 0, list: [] };
+  const t1 = items.filter(s => normText(s.label) === r); if (t1.length) return { tier: 1, list: t1 };
+  const t2 = q ? items.filter(s => squashText(s.label) === q) : []; if (t2.length) return { tier: 2, list: t2 };
+  const t3 = items.filter(s => { const lw = textWords(s.label);
+    if (rw.length && rw.every(w => w.length >= 2 && lw.includes(w)) && rw.length * 2 >= lw.length) return true;
+    const sq = squashText(s.label); return q.length >= 6 && sq.length >= 6 && oneEdit(q, sq); });
+  return { tier: t3.length ? 3 : 0, list: t3 };
+}
+const textAmbiguity = (ref, list) => new SOPError(`Which one? "${ref}" could be ${listing(list.map(s => `${s.name} ("${s.label}")`))}. Name it, e.g. "${list[0].name}".`);
+/** a reference -> the shape it names, or the one item that shows that text; null when nothing matches; throws when two or more do */
+function byNameOrText(W, n) {
+  const s = W.find(n); if (s) return s;
+  if (W.findGroup && W.findGroup(n)) return null;
+  const m = itemsByText(W, n);
+  if (m.list.length > 1) throw textAmbiguity(n, m.list);
+  return m.list[0] || null;
+}
+/** the names of one argument (target, anchor, from, to, ...) made canonical: a name of a shape or group stays; an unknown one becomes the
+ *  name of the item that shows it. Several unknown words in a row are first tried together ("Order", "flow" -> the text "Order flow");
+ *  an item found twice that way is listed once. Unknown references that match nothing stay as they are (the handler says so). */
+function canonicalNames(W, list) {
+  const known = n => !!(W.find(n) || (W.findGroup && W.findGroup(n))), out = [], fromText = new Set();
+  for (let i = 0; i < list.length; i++) {
+    const n = String(list[i]);
+    if (known(n)) { out.push(n); continue; }
+    let j = i; while (j + 1 < list.length && !known(String(list[j + 1]))) j++;
+    let took = false;
+    for (let k = j; k > i && !took; k--) {
+      const m = itemsByText(W, list.slice(i, k + 1).join(' '));
+      if (m.list.length === 1 && m.tier <= 2) { const nm = m.list[0].name; if (!fromText.has(nm)) { out.push(nm); fromText.add(nm); } i = k; took = true; }
+    }
+    if (took) continue;
+    const s = byNameOrText(W, n);
+    if (s) { if (!fromText.has(s.name)) { out.push(s.name); fromText.add(s.name); } } else out.push(n);
+  }
+  return out;
+}
+const NAME_KEYS = ['target', 'anchor', 'anchor2', 'linked', 'from', 'to', 'members'];
 function need(W, n) {
-  const s = W.find(n);
+  const s = W.find(n) || (W.findGroup && W.findGroup(n) ? null : byNameOrText(W, n));
   if (!s && W.findGroup && W.findGroup(n)) { const g = W.findGroup(n); throw new SOPError(`${g.name} is a group (${listing(g.members)}), not a shape; name one of its shapes.`); }
   if (!s) { const all = W.state.shapes.map(x => x.name); throw new SOPError(`There is no shape named "${n}".` + (all.length ? ` Shapes on the canvas: ${all.join(', ')}.` : ' The canvas is empty.')); }
   return s;
@@ -498,8 +559,16 @@ const adjacent = (W, a, b) => W.state.edges.some(e => (e.from === a && e.to === 
 const degree = (W, n) => W.state.edges.filter(e => e.from === n || e.to === n).length;
 const POS_WORDS = { leftOf: 'left of', rightOf: 'right of', above: 'above', below: 'below', near: 'near', between: 'between' };
 
+/* panels in descriptions: a background or a zone (isPanel) is part of a description only when it says so (layer=background | zone, the
+   words background, backdrop, zone, panel, lane); a description by kind ("the boxes", "every rectangle", "all shapes") means the ordinary
+   items, so "delete the boxes" never deletes the zones under them (owner's session 2026-11-03: "Delete background boxes" deleted Backdrop,
+   both zones and Process). layer=item: the ordinary items only. A description with no kind and no layer ("everything") keeps them all. */
+const PANEL_WORDS = 'the background or the zones';
 function filterShapes(W, a, base) {
   let list = base ? base.map(n => need(W, n)) : W.state.shapes.slice();
+  if (a.layer === 'background' || a.layer === 'zone') list = list.filter(s => s.layer === a.layer);
+  else if (a.layer === 'item' || (!base && a.shape)) list = list.filter(s => !isPanel(s));
+  if (a.label != null && String(a.label) !== '') { const m = itemsByText(W, a.label).list; list = list.filter(s => m.includes(s)); }   /* named by its shown text */
   if (a.shape && a.shape !== 'any') list = list.filter(s => s.shape === a.shape);
   if (a.color) list = list.filter(s => s.color === a.color);
   if (a.size) list = list.filter(s => sizeName(s.size) === a.size);
@@ -515,7 +584,7 @@ function filterShapes(W, a, base) {
   return list;
 }
 function phraseOf(a, n) {
-  const noun = a.shape && a.shape !== 'any' ? a.shape : 'shape';
+  const noun = a.layer === 'zone' ? 'zone' : a.layer === 'background' ? 'background panel' : a.shape && a.shape !== 'any' ? a.shape : 'shape';
   let p = [a.size, a.color].filter(Boolean).concat(plural(noun, n)).join(' ');
   if (a.outline) p += ` with a ${a.outline} outline`;
   if (a.notColor) p += ` that ${n === 1 ? 'is' : 'are'} not ${a.notColor}`;
@@ -605,10 +674,12 @@ const corePlugin = {
   },
   handlers: [{
     type: 'mention', run(a, ctx) {
-      const W = ctx.world, list = filterShapes(W, a, null), n = list.length;
-      const phrase = phraseOf(a, a.quantifier === 'all' ? 2 : 1);
-      if (a.quantifier === 'all') { if (!n) throw new SOPError(`There are no ${phrase} on the canvas.`); return { value: list.map(s => s.name), notes: ['matched ' + list.map(s => s.name).join(', ')] }; }
-      if (!n) throw new SOPError(`I can't find a ${phrase} on the canvas.`);
+      const W = ctx.world, list = filterShapes(W, a, null), n = list.length;   /* label= : "the text Order flow" (itemsByText); layer= : panels */
+      const phrase = phraseOf(a, a.quantifier === 'all' ? 2 : 1) + (a.label != null && String(a.label) !== '' ? ` showing "${a.label}"` : '');
+      /* nothing among the items, but a panel would match: say so (a description by kind leaves the panels out, filterShapes) */
+      const panelHint = !n && a.shape && !a.layer && filterShapes(W, Object.assign({}, a, { layer: 'background' }), null).concat(filterShapes(W, Object.assign({}, a, { layer: 'zone' }), null)).length ? ` (the background and the zones are left out; say "${PANEL_WORDS}" to mean them)` : '';
+      if (a.quantifier === 'all') { if (!n) throw new SOPError(`There are no ${phrase} on the canvas${panelHint}.`); return { value: list.map(s => s.name), notes: ['matched ' + list.map(s => s.name).join(', ')] }; }
+      if (!n) throw new SOPError(`I can't find a ${phrase} on the canvas${panelHint}.`);
       if (a.recency && n > 1) { const pick = list.slice().sort((p, q) => p.order - q.order)[a.recency === 'oldest' ? 0 : n - 1]; return { value: [pick.name], notes: [`the ${a.recency === 'oldest' ? 'first' : 'most recent'} ${phrase}: ${pick.name}`] }; }
       if (n > 1) throw new Clarify(`Which ${phrase}? ${listing(list.map(s => `${s.name} (${region(s)})`))}. Reply with a name.`, { wire: ctx.node.id, candidates: list.map(s => s.name) });
       return { value: [list[0].name], notes: ['resolved to ' + list[0].name] };
@@ -921,7 +992,10 @@ const connectionsPlugin = {
     { type: 'command', when: { action: 'connect' }, run(a, ctx) {
       const W = ctx.world, notes = []; let from = names(a.from), to = names(a.to);
       if (a.pairing || (!to.length && from.length > 1)) {
-        const seen = new Set(), list = from.concat(to).map(n => need(W, n)).filter(x => !seen.has(x) && seen.add(x));   // the order the text gives
+        const seen = new Set(), all = from.concat(to).map(n => need(W, n)).filter(x => !seen.has(x) && seen.add(x));   // the order the text gives
+        /* arrows join shapes: a free text or a panel (background, zone) in the list is left out of the chain ("connect all items") */
+        const list = all.filter(x => x.shape !== 'text' && !isPanel(x)), skipped = all.filter(x => !list.includes(x));
+        if (skipped.length && list.length >= 2) notes.push(`left out ${listing(skipped.map(x => x.name))}: arrows join shapes, not texts or zones`);
         if (list.length < 2) throw new SOPError('Pairing needs at least two shapes, e.g. "connect the circles in a chain".');
         const pairs = a.pairing === 'all' ? list.flatMap((x, i) => list.slice(i + 1).map(y => [x, y])) : list.slice(1).map((y, i) => [list[i], y]);
         for (const [x, y] of pairs) {
@@ -1009,12 +1083,12 @@ const hasTag = s => s.shape !== 'text' && !s.quiet && !isPanel(s);
 /** the shapes of the drawing's cell as AutoLayout input (background panels and zones are left out: shapes may sit on them; with panels =
  *  true they are in, for a layout of panels only). dy = how far the box's centre lies above the shape's own centre (its name tag) */
 const alShapes = (W, panels, noTags) => W.state.shapes.filter(s => (panels || !isPanel(s)) && inThisCell(s)).map(s => { const d = dims(s), t = hasTag(s) && !noTags ? TAG_PX : 0; return { name: s.name, x: s.x, y: s.y - t / 2, w: d.w, h: d.h + t, dy: t / 2, color: s.color, shape: s.shape, size: s.size, label: s.label, outline: s.outline }; });
-const alLinks = (W, shapes) => { const here = new Set(shapes.map(s => s.name)); return W.state.edges.filter(e => here.has(e.from) && here.has(e.to)).map(e => ({ from: e.from, to: e.to, arrow: e.arrow })); };
+const alLinks = (W, shapes) => { const here = new Set(shapes.map(s => s.name)); return W.state.edges.filter(e => here.has(e.from) && here.has(e.to)).map(e => ({ from: e.from, to: e.to, arrow: e.arrow, label: e.label || undefined })); };
 /* ---------- zones and free texts in a re-layout (design: training/sketch/ops/HIGH_LEVEL_OPS.md section 2, "Zones and free texts") ----------
    A re-layout lays out the shapes it is given as ONE set, whatever zone they are on: "arrange all in a circle" is one circle. On the whole
    drawing (no target, "all", "everything") the free texts (titles, captions) are not part of the set: they stay where they are, the layout
    keeps off them where it can, and a text a shape still lies on moves aside, as little as it can. A zone (layer=zone) holds the shapes whose centre lies on it (the topmost zone
-   there); the reply names the shapes the layout took off their zone. The zones themselves do not move or grow. */
+   there); the reply names the shapes the layout took off their zone, unless the zones were fitted round their own shapes (fitZones). */
 const zoneBox = z => { const d = dims(z); return { x: z.x - d.w / 2, y: z.y - d.h / 2, w: d.w, h: d.h }; };
 const zonesHere = W => W.state.shapes.filter(s => s.layer === 'zone' && inThisCell(s));
 /** the zone a point (a shape's centre) lies on: the topmost one, or null */
@@ -1047,16 +1121,73 @@ function alRun(W, a, ctx, fn, how) {
     }
     for (const [n, p] of Object.entries(r.positions || {}).concat(moves)) { const s = W.find(n), y = p.y + (dy.get(n) || 0); if (s && (s.x !== p.x || s.y !== y)) ctx.emit({ op: 'set', name: s.name, props: { x: p.x, y } }); }
     if (t.length > targets.length) r.notes = (r.notes || []).concat([`${t.length - targets.length} of the shapes ${t.length - targets.length === 1 ? 'is' : 'are'} in another drawing and stayed where ${t.length - targets.length === 1 ? 'it was' : 'they were'}`]);
+    /* the zones follow their shapes: after a re-layout of the whole drawing, each zone is fitted round its own shapes (fitZones), so that
+       a zone does not stay behind, empty, under shapes that are not its own */
+    const fitted = relayout && whole && !panelsOnly && zones.length ? fitZones(W, ctx, zones, homes, aside) : null;
     /* the reply: the shapes this layout took off the zone they were on (the patches are applied as they are emitted: W holds the new
        positions), and the texts it moved aside */
     const off = new Map();
-    for (const [n, z] of homes) if (z && !aside.includes(n) && homeOf(n) !== z) { if (!off.has(z.name)) off.set(z.name, []); off.get(z.name).push(n); }
+    for (const [n, z] of homes) if (z && !aside.includes(n) && homeOf(n) !== z && !(fitted && fitted.zones.length)) {   /* zones fitted: they follow their own shapes */ if (!off.has(z.name)) off.set(z.name, []); off.get(z.name).push(n); }
     const says = [...off].map(([z, ns]) => `${listing(ns)} ${ns.length === 1 ? 'is' : 'are'} no longer on ${z}.`);
     if (aside.length) says.push(`I moved the text${aside.length === 1 ? '' : 's'} ${listing(aside)} aside to make room.`);
+    if (fitted && fitted.zones.length) says.push(`I fitted ${listing(fitted.zones)} to ${fitted.zones.length === 1 ? 'its' : 'their'} shapes${fitted.captions.length ? ` and moved the text${fitted.captions.length === 1 ? '' : 's'} ${listing(fitted.captions)} aside with ${fitted.zones.length === 1 ? 'it' : 'them'}` : ''}.`);
     if (says.length) r.zoneNote = says.join(' ');
     return r;
   };
   return first ? inCell(first.x, first.y, go) : go();
+}
+/** fitZones: after a re-layout of the whole drawing, every zone is fitted round its own shapes, and its caption moves with it (same place
+ *  above the shapes as before). A zone's own shapes: the items of the group the zone is in (the opening drawing: IntakeZone with Start and
+ *  Process), else the items that were on it before the layout; its caption: the free text of that group, else the text that lay in its top
+ *  band. Done only when it is clean for every zone at once: the fitted zones do not overlap one another, cover no other item (body or name
+ *  tag), stay on the canvas, and no caption lands on an item or a text; otherwise the zones stay as they were (the reply then names the
+ *  shapes taken off their zone). A zone with no shape of its own left is not changed. Decision (2026-11-03, owner's session): a re-layout
+ *  of the whole drawing is ONE layout of the items across the zones (an asked circle is one circle); the zones then follow the items
+ *  rather than the items being kept inside the zones, so no empty zone is left covering the drawing. -> {zones, captions} fitted, or null */
+function fitZones(W, ctx, zones, homes, aside) {
+  const items = W.state.shapes.filter(s => !isPanel(s) && s.shape !== 'text' && inThisCell(s)), texts = W.state.shapes.filter(s => s.shape === 'text' && inThisCell(s));
+  const boxOf = s => { const d = dims(s), t = hasTag(s) ? TAG_PX : 0; return { x1: s.x - d.w / 2, y1: s.y - d.h / 2 - t, x2: s.x + d.w / 2, y2: s.y + d.h / 2 }; };
+  const hit = (p, q, pad) => Math.min(p.x2, q.x2) - Math.max(p.x1, q.x1) > -(pad || 0) && Math.min(p.y2, q.y2) - Math.max(p.y1, q.y1) > -(pad || 0);
+  const PAD = 18, plan = [];
+  for (const z of zones) {
+    const g = W.groupOf(z.name), zb0 = zoneBox(z);
+    const own = g ? items.filter(s => g.members.includes(s.name)) : items.filter(s => homes.get(s.name) === z);
+    if (!own.length) continue;
+    const cap = (g ? texts.filter(t => g.members.includes(t.name)) : texts.filter(t => t.x >= zb0.x && t.x <= zb0.x + zb0.w && t.y >= zb0.y && t.y <= zb0.y + 40))[0] || null;
+    const bs = own.map(boxOf), b = { x1: Math.min(...bs.map(q => q.x1)), y1: Math.min(...bs.map(q => q.y1)), x2: Math.max(...bs.map(q => q.x2)), y2: Math.max(...bs.map(q => q.y2)) };
+    const top = cap ? dims(cap).h + 10 : 0, capW = cap ? dims(cap).w : 0;
+    let x1 = b.x1 - PAD, x2 = b.x2 + PAD; if (x2 - x1 < capW + 16) { const m = (x1 + x2) / 2; x1 = m - (capW + 16) / 2; x2 = m + (capW + 16) / 2; }
+    const nb = { x1, y1: b.y1 - PAD - top, x2, y2: b.y2 + PAD };
+    const capAt = cap ? { x: Math.round((nb.x1 + nb.x2) / 2), y: Math.round(nb.y1 + PAD / 2 + dims(cap).h / 2 + 2) } : null;
+    plan.push({ z, own, cap, nb, capAt });
+  }
+  if (!plan.length) return null;
+  const C = { x1: FR.x, y1: FR.y, x2: FR.x + CANVAS.W, y2: FR.y + CANVAS.H }, why = () => null;   /* the reason is kept in the call for reading the code */
+  for (const p of plan) {
+    p.nb = { x1: Math.max(C.x1 + 2, p.nb.x1), y1: Math.max(C.y1 + 2, p.nb.y1), x2: Math.min(C.x2 - 2, p.nb.x2), y2: Math.min(C.y2 - 2, p.nb.y2) };   /* the padding gives way at the canvas edge */
+    if (p.cap) p.capAt = { x: Math.round((p.nb.x1 + p.nb.x2) / 2), y: p.capAt.y };
+    if (plan.some(q => q !== p && hit(p.nb, q.nb, 4))) return why('zones overlap ' + p.z.name);
+    if (items.some(s => !p.own.includes(s) && hit(boxOf(s), p.nb, 2))) return why('covers ' + items.filter(s => !p.own.includes(s) && hit(boxOf(s), p.nb, 2)).map(s => s.name) + ' ' + p.z.name);
+    if (p.cap) { const d = dims(p.cap), cb = { x1: p.capAt.x - d.w / 2, y1: p.capAt.y - d.h / 2, x2: p.capAt.x + d.w / 2, y2: p.capAt.y + d.h / 2 };
+      if (items.some(s => hit(boxOf(s), cb, 2)) || texts.some(t => t !== p.cap && !plan.some(q => q.cap === t) && hit(boxOf(t), cb, 2))) return why('caption ' + p.cap.name); }
+  }
+  const out = { zones: [], captions: [] };
+  for (const p of plan) {
+    const w = Math.round(p.nb.x2 - p.nb.x1), h = Math.round(p.nb.y2 - p.nb.y1), x = Math.round((p.nb.x1 + p.nb.x2) / 2), y = Math.round((p.nb.y1 + p.nb.y2) / 2), d = dims(p.z);
+    if (p.z.x !== x || p.z.y !== y || d.w !== w || d.h !== h) { ctx.emit({ op: 'set', name: p.z.name, props: { x, y, w, h } }); out.zones.push(p.z.name); }
+    if (p.cap && (p.cap.x !== p.capAt.x || p.cap.y !== p.capAt.y)) { ctx.emit({ op: 'set', name: p.cap.name, props: { x: p.capAt.x, y: p.capAt.y } }); out.captions.push(p.cap.name); }
+  }
+  return out;
+}
+/** edgeRoutes(state): how ui.js should draw each arrow so that it passes through no shape, name tag or free text (AutoLayout.routeEdges):
+ *  {edgeId: {points: [{x, y}] (the bends; [] = straight), label: {x, y} | null (the centre of its label, where no box or earlier label
+ *  is)}}. Computed from the state on every render (nothing stored: a route can never be stale after a move). Panels (background, zones)
+ *  are not obstacles. Without auto-layout.js loaded: {} (ui.js then draws straight lines, as before). */
+function edgeRoutes(state) {
+  const AL = autoLayout(); if (!AL || !AL.routeEdges || !state.edges.length) return {};
+  const items = state.shapes.filter(s => !isPanel(s)), shapes = items.map(s => { const d = dims(s); return { name: s.name, x: s.x, y: s.y, w: d.w, h: d.h }; });
+  const tags = items.filter(hasTag).map(s => Object.assign({ of: s.name }, tagBox(s)));
+  try { return AL.routeEdges(shapes, state.edges.map(e => ({ id: e.id, from: e.from, to: e.to, label: e.label })), { obstacles: tags }).routes; } catch (e) { return {}; }
 }
 const alSays = (r, what) => what + (r.crowded ? ' They do not all fit on the canvas without touching.' : '') + (r.zoneNote ? ' ' + r.zoneNote : '');
 /** the existing arrows a restyle / reverse wire names: from= / to= (edgesNamed), else the arrows touching target=, else every arrow */
@@ -1216,7 +1347,7 @@ const layoutPlugin = {
           return AL.layout(kind || 'auto', sh, ln, Object.assign(o, { direction: a.direction, root, order }));
         }, { relayout: true });
         const dirW = r.direction && r.direction !== 'down' ? `, ${({ up: 'growing upwards', left: 'right to left', right: 'left to right' })[r.direction]}` : '';
-        return { value: Object.keys(r.positions), notes: (r.notes || []).concat([`${r.layout} layout`]), answer: alSays(r, `Arranged ${Object.keys(r.positions).length} ${plural('shape', Object.keys(r.positions).length)} as a ${({ layers: 'layered flow', grid: 'grid', row: 'row', column: 'column', circle: 'circle', tree: 'tree', radial: 'radial layout', organic: 'free (organic) layout' })[r.layout]}${dirW}.`) };
+        return { value: Object.keys(r.positions), notes: (r.notes || []).concat([`${r.layout} layout`]), answer: alSays(r, `Arranged ${Object.keys(r.positions).length} ${plural('shape', Object.keys(r.positions).length)} as a ${({ layers: 'layered flow', grid: 'grid', row: 'row', column: 'column', circle: 'circle', tree: 'tree', radial: 'radial layout', organic: 'free (organic) layout' })[r.layout]}${dirW}.${r.why ? ' ' + r.why : ''}`) };
       } catch (e) {
         /* a tree / radial layout of shapes that are not linked: the hierarchy / hub template's form, in the order given (templates.js) */
         const TK = templateKit();
@@ -1224,6 +1355,13 @@ const layoutPlugin = {
           const h = ctx.engine.match('command', Object.assign({}, a, { template: kind === 'tree' ? 'hierarchy' : 'hub', layout: undefined }));
           const out = h.run(Object.assign({}, a, { template: kind === 'tree' ? 'hierarchy' : 'hub', layout: undefined }), ctx) || {};
           return Object.assign(out, { answer: `There are no links between them, so I used the ${kind === 'tree' ? 'hierarchy' : 'hub'} form in the order given. ${out.answer || ''}`.trim() });
+        }
+        /* the whole drawing as a tree / layers / radial layout, with no links at all: a tree of unlinked shapes says nothing, so a grid
+           that fits the canvas, and the reply says why */
+        if (e instanceof Clarify && e.code === 'no-links' && ['tree', 'layers', 'radial'].includes(kind) && !names(a.target).length) {
+          const r = alRun(W, a, ctx, (AL, sh, ln, o) => AL.layout('grid', sh, ln, o), { relayout: true });
+          const n = Object.keys(r.positions).length;
+          return { value: Object.keys(r.positions), notes: (r.notes || []).concat(['grid layout (no links)']), answer: alSays(r, `There are no arrows or lines between the shapes, so there is no ${kind === 'layers' ? 'flow' : kind === 'radial' ? 'centre' : 'tree'} to follow: I arranged the ${n} ${plural('shape', n)} in a grid instead.`) };
         }
         throw e;
       }
@@ -1411,6 +1549,8 @@ const logicPlugin = {
     { type: 'question', when: { ask: ['count', 'list', 'exists'] }, run(a, ctx) {
       const W = ctx.world;
       if ((a.kind && a.kind !== 'shape') || a.target != null) return ctx.engine.fallback('question', a, ctx, this);
+      /* layer= / label=, or a kind while panels are on the canvas (a description by kind leaves them out): the JS handlers (filterShapes) */
+      if (a.layer || (a.label != null && a.label !== '') || (a.shape && W.state.shapes.some(isPanel))) return ctx.engine.fallback('question', a, ctx, this);
       const body = [['shape', '?X', '?K']].concat(conditions(a));
       const { db, text } = logicProgram(W, body);
       const xs = [...new Set(db.all(body).map(b => b['?X']))], n = xs.length;
@@ -2795,7 +2935,7 @@ function createSystem(opts = {}) {
   return { world, engine, formalize, cut: (input, ctx) => rulesCut(formalize, input, ctx) };
 }
 
-return { createSystem, CELL, cellOf, parse, serialize, fmtValue, isRef, names, SOPError, Clarify, CANVAS, COLOR_HEX, PALETTE, PALETTE_ARROW, PALETTE_TINT, SIZE_PX, FONT_PX, fontOf, dims, sizeName, region, edgeText, groupBox, groupLabels, tagBox, worldNodes, worldSOP };
+return { createSystem, CELL, cellOf, parse, serialize, fmtValue, isRef, names, SOPError, Clarify, CANVAS, COLOR_HEX, PALETTE, PALETTE_ARROW, PALETTE_TINT, SIZE_PX, FONT_PX, fontOf, dims, sizeName, region, edgeText, groupBox, groupLabels, tagBox, edgeRoutes, worldNodes, worldSOP };
 })();
 if (typeof module !== 'undefined') module.exports = SOPKit;
 /*LOGIC-END*/
