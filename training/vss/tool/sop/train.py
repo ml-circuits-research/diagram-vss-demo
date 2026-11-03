@@ -461,6 +461,59 @@ def fast_map(fn, items, memo=True):
     finally: _FAST_FN, _FAST_ITEMS = None, None
 
 
+# ------------------------------------------------------------------ VSA_CORR=phase (off by default; future-experiments.md, "The Rules and VSS in
+# one space", item 2): a learned world-level correction of the chart before decoding. Unset: nothing below runs, the build is as before.
+CORR = os.environ.get("VSA_CORR", "")
+if CORR not in ("", "phase"): raise SystemExit(f"VSA_CORR={CORR!r}: expected unset or 'phase'")
+CORR_BITS = 8          # the stored phases are on the 8-bit grid of export_web.quantize: Python's calibration and the browser read one rotation
+
+
+def fit_corr(rd, rows, train, chart_of, model_dir):
+    """VSA_CORR=phase: one phase vector c (D,) per world, applied by the reader as Sn -> exp(i c) * Sn (one element-wise rotation, a bind
+    with a learned vector) before every cleanup. Fitted AFTER the route book, the route book frozen, on the trainer's own loss over the
+    training rows: maximise mean_r Re<T_r, exp(i c) * S_r> / (|S_r| |T_r|), S_r = the reader's chart of row r (chart_of: the centre's state
+    for a centre world), T_r = the compiled gold state (negative rows: minus it, as the trainer's target). |exp(i c_d)| = 1 keeps |S_r|, so
+    the objective is sum_d Re(exp(i c_d) z_d) with z_d = sum_r S_rd conj(T_rd) / (|S_r| |T_r|): separable per dimension, maximised exactly
+    by c_d = -arg z_d (no gradient steps, no learning rate). The phases are then put on the 8-bit grid (CORR_BITS). No regulariser: each
+    c_d averages every training row. Writes model_dir/corr.npz, sets the reader's correction, returns the config.json record with the
+    trainer's mean cosine before / after on the training rows (fitted in sample) and on every other split (not used by the fit)."""
+    from .export_web import quantize, dequantize
+    t0 = time.time(); D = rd.D
+    def contrib(row):
+        cs = chart_of(row)
+        if cs is None or row["frame"]["shape"] == "unknown": return None
+        S = cs[0]; T = rd.comp.wire(row["wire"], row["by"], row["tokens"]) * (-1.0 if row.get("negative") else 1.0)
+        nS, nT = np.linalg.norm(S), np.linalg.norm(T)
+        return None if nS < 1e-9 or nT < 1e-9 else S * np.conj(T) / (nS * nT)
+    groups = collections.OrderedDict([("train (fit)", train)])
+    tid = {id(r) for r in train}
+    for r in rows:
+        if id(r) not in tid and r["frame"]["shape"] != "unknown": groups.setdefault(r.get("split") or "?", []).append(r)
+    per = {}
+    for g, rs in groups.items():
+        out = fast_map(contrib, rs, memo=False) if FAST else [contrib(r) for r in rs]
+        per[g] = np.array([x for x in out if x is not None]).reshape(-1, D)
+    z = per["train (fit)"].sum(0)
+    if not len(per["train (fit)"]): raise SystemExit("VSA_CORR=phase: no training row has a chart and a target")
+    phase = dequantize(quantize(-np.angle(z), CORR_BITS), CORR_BITS, D)
+    np.savez(os.path.join(model_dir, "corr.npz"), corr=phase)
+    rd.set_corr(phase); c = np.exp(1j * phase)
+    rep = {}
+    for g, W in per.items():
+        if not len(W): continue
+        b, a = np.real(W.sum(1)), np.real(W @ c)
+        rep[g] = {"n": int(len(W)), "mean_cos_before": round(float(b.mean()), 5), "mean_cos_after": round(float(a.mean()), 5),
+                  "rows_better": int((a > b).sum())}
+    rec = {"kind": "phase", "switch": "VSA_CORR=phase", "file": "corr.npz", "bits": CORR_BITS, "D": int(D),
+           "fit": "closed form, route book frozen: c_d = -arg sum_r S_rd conj(T_rd) / (|S_r| |T_r|) over the training rows (the trainer's loss), "
+                  "put on the 8-bit grid", "applied": "infer.Reader.read: Sn = exp(i c) * S / |S| before every cleanup; residual (compiled): the same",
+           "mean_abs_phase": round(float(np.mean(np.abs(phase))), 4), "coherence": round(float(np.abs(z).sum() / max(1, len(per["train (fit)"]))), 5),
+           "cosine": rep, "t_fit_s": round(time.time() - t0, 1)}
+    print(f"[corr] VSA_CORR=phase: fitted on {rep['train (fit)']['n']} training rows in {rec['t_fit_s']}s; trainer's mean cosine before -> after: "
+          + "; ".join(f"{g} {v['mean_cos_before']:.4f} -> {v['mean_cos_after']:.4f} (n {v['n']})" for g, v in rep.items()), flush=True)
+    return rec
+
+
 # ------------------------------------------------------------------ memory-bounded training (the model, the batches)
 STREAM_ROWS = 1024       # rows of the phase table drawn per chunk when it is regenerated (8 MB at D = 1024)
 
@@ -907,6 +960,7 @@ def calibrate_and_finish(a, legend, rows, schema, seed, model_dir, run_dir, cfg,
     centre reader passes the state of the centre matched to the row in its message)"""
     from .infer import Reader
     chart_of = chart_of or (lambda row: (rd.chart(row["tokens"])[0], row["tokens"]))
+    if CORR: cfg["correction"] = fit_corr(rd, rows, train, chart_of, model_dir)     # VSA_CORR=phase: before the calibration, which reads through it
     # calibration rows (rule 25): a sample of the TRAINING split, never the scored rows
     pos = [r for r in train if not r.get("negative")]      # calibration rows: never a negative example
     cal_rows = [pos[i] for i in sorted(np.random.default_rng(1234 + seed).choice(len(pos), min(a.n_cal, len(pos)), replace=False))]

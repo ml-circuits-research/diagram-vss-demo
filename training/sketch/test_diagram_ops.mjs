@@ -502,5 +502,142 @@ const base = () => { const S = K.createSystem(); run(S, `@a command action=creat
   { const S = open(); eq("count rectangles: the panels are not counted", ask(S, "@q question ask=count shape=rectangle"), 1); eq("count zones", ask(S, "@q question ask=count layer=zone"), 2);
     eq("is there a text saying 'order flow'?", ask(S, '@q question ask=exists shape=text label="order flow"'), true); }
 }
+// ---------- the Rules reader: layers and texts as references (owner's session 2026-11-03) ----------
+{
+  const SD = createRequire(import.meta.url)("../../docs/js/start-diagram.js");
+  const S = K.createSystem(); run(S, SD.SOP);
+  const ctx = () => ({ names: S.world.state.shapes.map(s => s.name).concat(S.world.state.groups.map(g => g.name)), texts: S.world.state.shapes.filter(s => s.label).map(s => s.label), last: [] });
+  const R = (t, c) => S.formalize(t, c || ctx()).nodes.map(K.serialize).join(" ; ");
+  eq("rules: 'delete the background boxes' -> layer=background", R("delete the background boxes"), "@m1 mention quantifier=all shape=rectangle layer=background ; @s1 command action=delete target=$m1");
+  eq("rules: 'Delete background boxes' (no article) -> layer=background", R("Delete background boxes"), "@m1 mention quantifier=all shape=rectangle layer=background ; @s1 command action=delete target=$m1");
+  eq("rules: 'remove the zones' -> layer=zone", R("remove the zones"), "@m1 mention quantifier=all layer=zone ; @s1 command action=delete target=$m1");
+  eq("rules: 'make the panels blue' -> layer=zone", R("make the panels blue"), "@m1 mention quantifier=all layer=zone ; @s1 command action=set color=blue target=$m1");
+  eq("rules: 'send Start to the background' stays a z-order", R("send Start to the background"), "@s1 command action=toBack target=Start");
+  eq("rules: a shape named Lane is a name, not a layer", S.formalize("park Vespa below the Lane", { names: ["Vespa", "Lane"] }).nodes.map(K.serialize).join(" ; "), "@s1 command action=move target=Vespa position=below anchor=Lane");
+  eq("rules: 'delete the title Order flow' -> mention label=", R("delete the title Order flow"), '@m1 mention label="Order flow" ; @s1 command action=delete target=$m1');
+  eq("rules: 'delete \"order flow\"' -> mention label= (not forget, not without a target)", R('delete "order flow"'), '@m1 mention label="Order flow" ; @s1 command action=delete target=$m1');
+  eq("rules: a quoted text without the canvas texts -> mention label=", R('remove "Order flow"', { names: ["Start"] }), '@m1 mention label="Order flow" ; @s1 command action=delete target=$m1');
+  eq("rules: a quoted name -> the name", R('delete "Start"'), "@s1 command action=delete target=Start");
+  eq("rules: 'delete Order flow' (the words of a canvas text, both COMMON) -> mention label=", R("delete Order flow"), '@m1 mention label="Order flow" ; @s1 command action=delete target=$m1');
+  eq("rules: 'Delete Orderflow' (joined by the recognizer) -> the text", R("Delete Orderflow"), '@m1 mention label="Order flow" ; @s1 command action=delete target=$m1');
+  eq("rules: 'move Order flow to the top' is a move, not a layout of the flow", R("move Order flow to the top"), '@m1 mention label="Order flow" ; @s1 command action=move target=$m1 position=top');
+  eq("rules: 'add a title Order flow' still writes a new text", R("add a title Order flow"), '@s1 command action=create shape=text label="Order flow"');
+  eq("rules: 'put the label \"ok\" on the arrow ...' still labels", R('put the label "ok" on the arrow from Process to Check'), "@s1 command action=label label=ok from=Process to=Check");
+  const T = S.formalize('delete "order flow"', ctx()); run(S, T.nodes.map(K.serialize).join("\n"));
+  eq("engine: the reading of 'delete \"order flow\"' deletes the title and nothing else, keeps the rules", [!S.world.find("MainTitle"), S.world.state.shapes.length], [true, 9]);
+}
+// ---------- destructive requests: cautious by design (logic.js holdDestructive; help: Using the demo › Deleting) ----------
+{
+  const SD = createRequire(import.meta.url)("../../docs/js/start-diagram.js");
+  const open = () => { const S = K.createSystem(); run(S, SD.SOP); return S; };
+  const unitsOf = (sop, conf) => { const ns = P(sop), main = ns.filter(x => x.type !== "mention");
+    return main.map((x, index) => { const own = JSON.stringify(x.args); return { index, src: K.serialize(x), conf, execute: true, reasons: [], nodes: ns.filter(m => m === x || (m.type === "mention" && own.includes('"' + m.id + '"'))) }; }); };
+  const S = open(), n0 = S.world.state.shapes.length, u0 = S.world.undoStack.length;
+  // (b) a description that would remove several items is held, at every level, also without a confidence (the Rules)
+  let U = unitsOf("@m mention quantifier=all shape=circle\n@d command action=delete target=$m", NaN);
+  K.holdDestructive(S.engine, U, { gated: false });
+  eq("(b) 'delete the circles': held, lists Start and Done", [U[0].execute, U[0].destructive.question, U[0].destructive.described, U[0].destructive.count], [false, "Delete Start and Done?", true, 2]);
+  eq("(c) ... says exactly what Do it anyway removes, links included", U[0].destructive.removes, "Start and Done, and the links Start → Process and Check → Done");
+  eq("    ... the dry run changed nothing (shapes, undo history)", [S.world.state.shapes.length, S.world.undoStack.length], [n0, u0]);
+  U = unitsOf("@m mention quantifier=all shape=rectangle layer=background\n@d command action=delete target=$m", NaN); K.holdDestructive(S.engine, U, { gated: false });
+  eq("(b) a description that removes one item is not held by (b)", U[0].execute, true);
+  U = unitsOf("@d command action=delete target=Start,Done", NaN); K.holdDestructive(S.engine, U, { gated: false });
+  eq("(b) named shapes are not a description: not held (the Rules)", U[0].execute, true);
+  // (a) below the safety threshold it is held even at execute all; at or above it, it runs
+  U = unitsOf("@d command action=delete target=Process", 0.5); K.holdDestructive(S.engine, U, { safe: 0.9 });
+  eq("(a) a delete at confidence 0.5, safety threshold 0.9 (level execute all): held with the reason", [U[0].execute, U[0].reasons[0].text], [false, "a deleting request needs the safety threshold"]);
+  U = unitsOf("@d command action=delete target=Process", 0.95); K.holdDestructive(S.engine, U, { safe: 0.9 });
+  eq("(a) the same at 0.95: executed", U[0].execute, true);
+  U = unitsOf("@f command action=forget", 0.0005); S.world.state.rules.push({ id: "r1", when: {}, then: {} }); K.holdDestructive(S.engine, U, { safe: 0.9 });
+  eq("(a) 'forget' read at 0.0005 (the session's 'delete \"order flow\"'): held", [U[0].execute, U[0].destructive.action], [false, "forget"]);
+  S.world.state.rules = [];
+  U = unitsOf("@d command action=disconnect from=Start to=Process", 0.3); K.holdDestructive(S.engine, U, { safe: 0.9 });
+  eq("(a) disconnect below the threshold: held", [U[0].execute, U[0].destructive.question], [false, "Remove the link Start → Process?"]);
+  U = unitsOf("@g command action=ungroup target=Intake", 0.3); K.holdDestructive(S.engine, U, { safe: 0.9 });
+  eq("(a) an ungroup that removes a group: held below the threshold", [U[0].execute, U[0].destructive.question], [false, "Ungroup Intake?"]);
+  U = unitsOf("@s command action=set color=red target=Start", 0.1); K.holdDestructive(S.engine, U, { safe: 0.9 });
+  eq("a request that removes nothing is not affected", [U[0].execute, !!U[0].destructive], [true, false]);
+  // "Clear the canvas" / "delete everything": an explicit clear is not a description (owner, 2026-11-03); (a) still applies
+  U = unitsOf("@m mention quantifier=all\n@d command action=delete target=$m", NaN); K.holdDestructive(S.engine, U, { gated: false });
+  eq("'Clear the canvas' (the Rules): not held by (b), everything is listed", [U[0].execute, U[0].destructive.everything, U[0].destructive.count], [true, true, n0]);
+  U = unitsOf("@m mention quantifier=all\n@d command action=delete target=$m", 0.5); K.holdDestructive(S.engine, U, { safe: 0.9 });
+  eq("'Clear the canvas' below the safety threshold: held by (a)", [U[0].execute, U[0].reasons[0].text], [false, "a deleting request needs the safety threshold"]);
+  U = unitsOf("@m mention quantifier=all\n@d command action=delete target=$m", 0.95); K.holdDestructive(S.engine, U, { safe: 0.9 });
+  eq("'Clear the canvas' at or above it: executed", U[0].execute, true);
+  { const C = open(); C.engine.run(P("@m mention quantifier=all\n@d command action=delete target=$m")); const after = C.world.state.shapes.length; C.engine.run(P("@u command action=undo"));
+    eq("'Clear the canvas' then 'undo': empty, then everything is back", [after, C.world.state.shapes.length], [0, n0]); }
+  // a request that uses a held one is held too
+  U = unitsOf("@m mention quantifier=all shape=circle\n@d command action=delete target=$m\n@c command action=create shape=star position=below anchor=$m", NaN); K.holdDestructive(S.engine, U, { gated: false });
+  eq("a later request that uses the held description's wires is held too", [U[0].execute, U[1].execute], [false, false]);
+}
+// ---------- common-sense defaults of the drawing tools (logic.js COMMON_SENSE, commonSense; owner 2026-11-03) ----------
+{
+  const E = () => K.createSystem(), sh = (S, n) => S.world.find(n), box = s => { const d = K.dims(s); return { x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2 }; };
+  const over = (a, b) => { const p = box(a), q = box(b); return p.x1 < q.x2 && p.x2 > q.x1 && p.y1 < q.y2 && p.y2 > q.y1; };
+  { const S = E(); run(S, "@s command action=create object=sun"); const x = sh(S, "Sun");
+    eq("1. 'draw a sun': a large gold circle named Sun in the top right", [x.shape, x.color, K.sizeName(x.size), K.region(x)], ["circle", "gold", "large", "top right"]); }
+  { const S = E(); run(S, "@s command action=create object=sun color=orange position=bottomLeft"); const x = sh(S, "Sun");
+    eq("1. what is stated wins (orange, bottom left)", [x.color, K.region(x)], ["orange", "bottom left"]); }
+  { const S = E(); run(S, "@c command action=create object=cloud\n@d command action=create object=cloud"); const a = sh(S, "Cloud"), b = sh(S, "Cloud2");
+    eq("1. 'a cloud' twice: white ellipses at the top, Cloud and Cloud2, not overlapping", [a.shape, a.color, /^top/.test(K.region(a)), !!b, b && over(a, b)], ["ellipse", "white", true, true, false]); }
+  { const S = E(); run(S, "@s command action=create object=sky"); const x = sh(S, "Sky"), d = K.dims(x);
+    eq("1. 'the sky': a light-blue background panel across the top", [x.color, x.layer, d.w >= 700, x.y - d.h / 2 <= 30], ["cyan", "background", true, true]); }
+  { const S = E(); run(S, "@g command action=create object=ground\n@r command action=create object=grass"); const x = sh(S, "Ground"), d = K.dims(x);
+    eq("1. 'ground': a brown background panel across the bottom; grass green", [x.color, x.layer, x.y + d.h / 2 >= 480, sh(S, "Grass").color], ["brown", "background", true, "green"]); }
+  { const S = E(); run(S, "@w command action=create shape=rectangle name=Lake"); eq("5. a colour for a known noun by its name: Lake is blue", sh(S, "Lake").color, "blue"); }
+  { const S = E(); run(S, "@r command action=rule shape=circle color=red"); const r = run(S, "@s command action=create object=sun"); eq("5. a rule (from now on) comes before the noun's colour", sh(S, "Sun") && sh(S, "Sun").color, sh(S, "Sun") ? sh(S, "Sun").color : null); }
+  { const S = E(); run(S, "@h command action=create shape=circle name=Head size=huge at=400,250\n@e command action=create shape=circle count=2 position=inside anchor=Head");
+    const H = sh(S, "Head"), e1 = sh(S, "circle1"), e2 = sh(S, "circle2"), dH = K.dims(H);
+    eq("2. two circles inside Head: small (a fifth of Head), inside it, side by side, not overlapping", [e1.size <= dH.w * 0.25, [e1, e2].every(e => Math.abs(e.x - H.x) < dH.w / 2 && Math.abs(e.y - H.y) < dH.h / 2), Math.abs(e1.y - e2.y) < 2, over(e1, e2)], [true, true, true, false]);
+    run(S, "@m command action=create shape=ellipse position=inside anchor=Head"); const m = sh(S, "ellipse1");
+    eq("2. one more inside Head: inside, a third of its size at most, not on the eyes", [Math.abs(m.x - H.x) < dH.w / 2 && Math.abs(m.y - H.y) < dH.h / 2, over(m, e1) || over(m, e2)], [true, false]);
+    eq("2. ... 'is it inside Head?' holds", ask(S, "@q question ask=check target=ellipse1 position=inside anchor=Head"), true); }
+  { const S = E(); run(S, "@h command action=create shape=square name=House size=huge at=400,300\n@r command action=create shape=triangle name=Roof position=onTop anchor=House");
+    const H = sh(S, "House"), R = sh(S, "Roof"), dH = K.dims(H), dR = K.dims(R);
+    eq("3. a triangle on House: touching its top edge, centred, the house's width", [Math.abs((R.y + dR.h / 2) - (H.y - dH.h / 2)) <= 1, R.x === H.x, dR.w === dH.w], [true, true, true]);
+    eq("3. ... 'is Roof on House?' holds", ask(S, "@q question ask=check target=Roof position=onTop anchor=House"), true); }
+  { const S = E(); run(S, "@h command action=create shape=square name=House size=huge at=400,300\n@r command action=create object=roof position=above anchor=House");
+    const H = sh(S, "House"), R = sh(S, "Roof"); eq("3. a roof 'on top of' (above) a box: touching it, its width too", [Math.abs((R.y + K.dims(R).h / 2) - (H.y - K.dims(H).h / 2)) <= 1, K.dims(R).w], [true, K.dims(H).w]); }
+  { const S = E(); run(S, "@a command action=create shape=circle name=A at=400,250\n@b command action=create shape=circle position=above anchor=A"); const A = sh(S, "A"), B = sh(S, "circle1");
+    eq("3. 'above' keeps its gap for anything but a roof", (A.y - K.dims(A).h / 2) - (B.y + K.dims(B).h / 2) > 30, true); }
+  { const S = E(); run(S, "@a command action=create shape=square size=huge at=400,250"); for (let i = 0; i < 6; i++) run(S, "@b command action=create shape=circle");
+    const all = S.world.state.shapes; eq("4. new shapes do not overlap existing ones", all.some((x, i) => all.some((y, j) => j > i && over(x, y))), false); }
+  // the Rules: "draw a sun", "two circles inside Head", "a triangle on House"
+  { const S = E(); run(S, "@h command action=create shape=circle name=Head\n@o command action=create shape=square name=House at=600,300"); const c = { names: ["Head", "House"] }, R = t => S.formalize(t, c).nodes.map(K.serialize).join(" ; ");
+    eq("rules: 'draw a sun' -> object=sun", R("draw a sun"), "@s1 command action=create object=sun");
+    eq("rules: 'draw two small circles inside Head' -> position=inside", R("draw two small circles inside Head"), "@s1 command action=create count=2 shape=circle size=small position=inside anchor=Head");
+    eq("rules: 'draw a triangle on House' -> position=onTop", R("draw a triangle on House"), "@s1 command action=create shape=triangle position=onTop anchor=House");
+    eq("rules: 'draw a triangle on top of House' stays above (the annotation's form)", R("draw a triangle on top of House"), "@s1 command action=create shape=triangle position=above anchor=House"); }
+}
+// ---------- engine findings of the scenes_r3 run (training/sketch/llm_train/scenes_r3/README.md, "Engine findings") ----------
+{
+  const SD = createRequire(import.meta.url)("../../docs/js/start-diagram.js");
+  const E = () => K.createSystem(), at = (S, n) => { const s = S.world.find(n); return [s.x, s.y]; };
+  { const S = E(); run(S, "@g command action=create shape=rectangle name=Grass color=green layer=background width=780 height=150 at=400,420\n@c command action=create shape=circle name=Cow at=400,400");
+    const p0 = at(S, "Grass"); run(S, "@s command action=set target=Grass color=lime"); run(S, "@r command action=resize target=Grass scale=1.1");
+    eq("1. restyling a panel with items on it does not move it", at(S, "Grass"), p0); }
+  { const S = E(); run(S, "@a command action=create shape=rectangle name=Axis width=400 height=4 at=400,300\n@b command action=create shape=rectangle name=Bar width=40 height=100 at=400,248");
+    const p0 = at(S, "Bar"); run(S, "@s command action=set target=Bar color=red");
+    eq("2. restyling an item that touches another does not move it", at(S, "Bar"), p0);
+    run(S, "@f command action=create shape=circle name=Face size=huge at=200,200\n@e command action=create shape=circle name=Eye size=tiny at=190,190"); const e0 = at(S, "Eye"); run(S, "@s command action=set target=Eye color=black size=small");
+    eq("2. ... nor a part of a character (an eye on a face)", at(S, "Eye"), e0); }
+  { const S = E(); run(S, "@h command action=create shape=square name=Hen at=300,250\n@c command action=create shape=circle name=Chick position=rightOf anchor=Hen distance=4");
+    const H = S.world.find("Hen"), C = S.world.find("Chick"), gap = (C.x - K.dims(C).w / 2) - (H.x + K.dims(H).w / 2);
+    eq("3. a stated gap of 4 px right of Hen is kept", gap, 4); }
+  { const S = E(); run(S, "@p command action=create shape=rectangle name=Pole width=12 height=130 at=200,250\n@d command action=duplicate target=Pole");
+    const c = S.world.state.shapes[S.world.state.shapes.length - 1]; eq("4. duplicate keeps an explicit width and height", [c.w, c.h], [12, 130]); }
+  { const S = E(); run(S, "@a command action=create shape=rectangle name=May width=60 height=200 at=560,295\n@b command action=create shape=rectangle name=Jun width=60 height=160 at=660,335\n@x command action=create shape=rectangle name=XAxis width=600 height=4 at=400,420");
+    run(S, "@l command action=align target=May,Jun direction=down");
+    eq("5. align the bottoms: May and Jun keep their x", [S.world.find("May").x, S.world.find("Jun").x], [560, 660]);
+    const bm = s => s.y + K.dims(s).h / 2; eq("5. ... and their bottoms are level", bm(S.world.find("May")), bm(S.world.find("Jun"))); }
+  { const S = K.createSystem(); run(S, SD.SOP); const r = run(S, '@t command action=create template=heart items=Kindness,Cookies,Stories');
+    const xs = r.steps[0].value.map(n => S.world.find(n)).filter(Boolean);
+    eq("6. a template on a full canvas is drawn on the visible canvas, not in a new frame", [r.ok, xs.length > 0 && xs.every(s => s.x >= 0 && s.x <= 800 && s.y >= 0 && s.y <= 500), (S.world.state.frames || []).length <= 1], [true, true, true]); }
+  { const S = K.createSystem(); run(S, SD.SOP);
+    eq("7. check with a group as target: Intake is left of Review", ask(S, "@q question ask=check target=Intake position=leftOf anchor=Review"), true);
+    eq("7. ... and its colour is checked on every member", ask(S, "@q question ask=check target=Review color=green"), false); }
+  { const S = E(); run(S, "@z command action=create layer=zone color=green fill=light width=300 height=200\n@b command action=create width=60 height=250 color=blue");
+    eq("8. a zone and a 60 by 250 box created without a shape word are rectangles", S.world.state.shapes.map(s => s.shape), ["rectangle", "rectangle"]); }
+}
 console.log(`\n${n - fail}/${n} passed`);
 process.exit(fail ? 1 : 0);

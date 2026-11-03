@@ -1,6 +1,6 @@
 # scenes_test: 4 held-out step-by-step scenes (test set)
 
-Test data: keep out of training. `training/sketch/synth/gen_rules_cover.py test_texts` lists `llm_bench/scenes_test` (batches and saved
+Test data: keep out of training. The 4 scenes are shown in the demo (+ menu, "Scenes", marked test; `docs/js/scenes-extra.js`); that does not make them training data. `training/sketch/synth/gen_rules_cover.py test_texts` lists `llm_bench/scenes_test` (batches and saved
 texts), so every builder that removes test overlaps removes these texts from training folders. The training scenes of the same kind are
 `../../llm_train/scenes_r3` (16 scenes, same writer, same conventions); its README has the method, the gold decisions, the engine findings
 and the list of text changes (scenes 05, 10, 14, 20 are these four).

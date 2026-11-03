@@ -79,6 +79,12 @@ class Routebook:
         # <name>_rowmap (K x K) gives the stored row of every kind pair, -1 = absent (never trained: its value was the initial random one).
         # An absent row contributes nothing. None = dense (every row stored), as a trained model's routebook.npz
         self.bg_rowmap = self.A_rowmap = self.L_rowmap = None
+        # VSA_CORR=phase (sop train; future-experiments.md "The Rules and VSS in one space", item 2; off by default): the world's learned
+        # correction, a phase vector (D,) stored beside the route book in corr.npz (the 8-bit grid values, so the browser reads the same
+        # rotation). None = no correction: every reading is exactly as before. Reader.read multiplies the normalized chart by exp(i corr)
+        self.corr = None
+        cp = os.path.join(os.path.dirname(path), "corr.npz")
+        if os.path.exists(cp): self.corr = np.load(cp)["corr"].astype(float)
 
     def pair_rows(self, name, i, j):
         """the phases of table bg / A / L at the kind pairs (i, j) (index arrays of one shape) as float64, and the presence mask of those
@@ -236,6 +242,13 @@ class Reader:
         self._table = None
         self.centres = bool(rr.get("centres"))           # the centre reader (legend reader.centres, chosen by the world): read_message
         if self.centres and self.rb.centre_kinds is None: raise ModelError("legend reader.centres is set but the route book has no centre arrays")
+        self.set_corr(getattr(self.rb, "corr", None))
+
+    def set_corr(self, phase):
+        """the world-level correction (VSA_CORR=phase; Routebook.corr): phase (D,) or None. corr_e = exp(i phase), the element-wise rotation
+        every decoding reads the chart through (read, residual); None = off (the reader as before)"""
+        self.rb.corr = None if phase is None else np.asarray(phase, dtype=float)
+        self.corr_e = None if phase is None else E(self.rb.corr)
 
     # ---------------- words
     def kind(self, tok):
@@ -465,6 +478,7 @@ class Reader:
         f = {"speakers": [], "neg": False, "event": None, "roles": {}, "shape": "ok", "lemma": None, "margins": {}, "presence": {}}
         if nS < 1e-9: f["shape"] = "unknown"; return f
         Sn = S / nS; sch = self.schema; rep = np.conj(self.st.op("says.scope")); nott = np.conj(self.st.op("not"))
+        if self.corr_e is not None: Sn = Sn * self.corr_e      # VSA_CORR=phase: the corrected state (unit phases: the norm is unchanged)
         negs = [False, True] if sch["neg_event"] else [False]
         dmax = sch["max_depth"] + 1 if "says" in self.legend.operators else 0      # no reporting operator in the legend: depth 0 only
         hyps = [(d, n) for d in range(dmax + 1) for n in negs]
@@ -714,6 +728,7 @@ class Reader:
 
     def residual(self, S, wires, tokens):
         by = {w.id: w for w in wires}; rec = self.comp.wire(wires[0], by, tokens)
+        if self.corr_e is not None: S = S * self.corr_e         # VSA_CORR=phase: the compiled frame is compared with the corrected state
         nS, nr = np.linalg.norm(S), np.linalg.norm(rec)
         if nS < 1e-9 or nr < 1e-9: return 1.0
         Sn, rn = S / nS, rec / nr; a = max(0.0, float(np.real(np.vdot(rn, Sn))))
@@ -731,7 +746,9 @@ class Reader:
         (fillers of decoded roles, speakers, the event lemma, and every token whose kind is not a content kind: cue words, openers,
         punctuation); residual' = ||S_n - a rec'_n||. When every token is explained rec' = S and the residual is 0 by construction; an
         unplaced content word, or a word of the kind `unknown`, contributes its share of the state. The compiled residual (`residual`)
-        compares S with the compiler's state of the frame, which lacks the routes' deposits and therefore grows with the sentence length."""
+        compares S with the compiler's state of the frame, which lacks the routes' deposits and therefore grows with the sentence length.
+        VSA_CORR=phase leaves it as is: S and rec' are both charts of this reader, and one unit-phase rotation of both changes neither norm
+        nor their inner product."""
         if not kept: return 1.0
         ex = [j for j, i in enumerate(kept) if self.kind(tokens[i]) not in self.content_kinds and self.kind(tokens[i]) != UNKNOWN_KIND
               or tokens[i] in placed or self.lemma(tokens[i]) in placed]

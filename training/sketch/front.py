@@ -624,6 +624,55 @@ def learn_triggers(reqs, chatter, V, min_count, share, min_prec, value_tokens, n
     return rules
 
 
+def val_shadow(): return os.environ.get("VAL_SHADOW") == "1"
+
+
+def applied_spans(toks, V):
+    """the token spans [s, e) that apply_values replaces (the same greedy longest-first walk)"""
+    out, i = [], 0
+    while i < len(toks):
+        for n in (3, 2, 1):
+            g = toks[i:i + n]
+            if len(g) == n and all(is_word(x) for x in g) and " ".join(g) in V: out.append((i, i + n)); i += n; break
+        else: i += 1
+    return out
+
+
+def shadow_pass(reqs, V, min_count, min_prec):
+    """VAL_SHADOW=1 (off by default; scenes_r3/ROOT_CAUSES.md, 2026-11-03): a second pass over the n-grams that failed the precision bar. An
+    occurrence of an n-gram that a kept LONGER or EARLIER-starting n-gram consumes when the front end is applied (apply_values, longest
+    first, left to right) never reaches the reader as that n-gram, so it is not evidence against it: "right of" -> right_of failed with
+    precision 0.78 because 49 of its 279 occurrences in the shapes world are inside "bottom right of" / "top right of", which "bottom right"
+    / "top right" already turn into bottom_right / top_right. Here precision and count are counted over the occurrences that are NOT
+    overlapped by an applied n-gram of the first pass that is not inside the candidate; the bars (min_count, min_prec) are the same, the
+    value is the most frequent co-occurring one (ties: alphabetical), and a candidate whose sub-n-gram already gives that value is not
+    added. The first pass's n-grams are kept as they are.
+    RESULT (convert_check, EXTRA_DIRS = the shipped 12 folders + scenes_r3, GAP_ROLE=1): scenes_r3 61.6 -> 62.7%, scenes_test 65.0 -> 66.9%,
+    but fresh2 74.4 -> 72.7%, synth_rules 79.8 -> 76.8%, synth_combo 79.5 -> 76.4% (position / anchor / target rows got worse): it lowers
+    folders, so it is NOT used (kept off, for the record; ROOT_CAUSES.md)."""
+    occ, co = collections.Counter(), collections.defaultdict(collections.Counter)
+    for m, w, sp, names in reqs:
+        toks = [x[0] for x in tokenize(sp, names)[0]]; gv = gold_values(w); cov = applied_spans(toks, V)
+        for n in (1, 2, 3):
+            for i in range(len(toks) - n + 1):
+                g = toks[i:i + n]
+                if not all(is_word(x) for x in g): continue
+                key = " ".join(g)
+                if key in V: continue
+                if any(s < i + n and e > i and not (s >= i and e <= i + n) for s, e in cov): continue   # consumed by another applied n-gram
+                occ[key] += 1
+                for v in gv:
+                    if not v.isdigit() or not key.isdigit(): co[key][v] += 1
+    add = {}
+    for key, c in co.items():
+        v, k = sorted(c.items(), key=lambda x: (-x[1], x[0]))[0]
+        if k < min_count or k / occ[key] < min_prec: continue
+        ws = key.split(); subs = [" ".join(ws[i:i + j]) for j in range(1, len(ws)) for i in range(len(ws) - j + 1)]
+        if any(V.get(x) == v or add.get(x) == v for x in subs): continue
+        add[key] = v
+    return dict(V, **add)
+
+
 DEFAULTS = {"seg_epochs": 5, "val_min_count": 2, "val_min_prec": 0.7, "trig_min_count": 2, "trig_share": 0.75, "trig_min_prec": 0.6}
 
 
@@ -639,6 +688,7 @@ def learn(msgs, params=None, keep=None, neg=None):
         if neg is not None: negr = [(r, neg(r[1])) for r in reqs if not keep(r[1]) and neg(r[1]) is not None]   # FRONT_NEG: the other worlds' requests, labelled
         reqs, chatter = [r for r in reqs if keep(r[1])], []
     V = learn_values(reqs, P["val_min_count"], P["val_min_prec"], neg=negr)
+    if val_shadow(): V = shadow_pass(reqs, V, P["val_min_count"], P["val_min_prec"])
     vt = set(value_kinds())
     T = learn_triggers(reqs, chatter, V, P["trig_min_count"], P["trig_share"], P["trig_min_prec"], vt, neg=negr)
     # the BIO tagger (train_segmenter) is NOT part of the pipeline (owner's decision, 2026-10-31); it is trained only on request, as a
@@ -646,8 +696,8 @@ def learn(msgs, params=None, keep=None, neg=None):
     S = train_segmenter(msgs, P["seg_epochs"]) if os.environ.get("FRONT_TAGGER") == "1" else {}
     return {"about": "front.json: the learned front end of the VSS world `real` (training/sketch/front.py); learned from " + str(len(msgs)) + " training messages",
             "params": P, "values": dict(sorted(V.items())), "triggers": T, "segmenter": dict(sorted(S.items())), **({"v2": ["MASK", "CTX2", "NAMEPH"]} if v2() else {}),
-            **({"value_learning": {k: os.environ[k] for k in ("VAL_PREC", "VAL_SUB", "VAL_PICK") if os.environ.get(k)}}
-               if any(os.environ.get(k) for k in ("VAL_PREC", "VAL_SUB", "VAL_PICK")) else {}),
+            **({"value_learning": {k: os.environ[k] for k in ("VAL_PREC", "VAL_SUB", "VAL_PICK", "VAL_SHADOW") if os.environ.get(k)}}
+               if any(os.environ.get(k) for k in ("VAL_PREC", "VAL_SUB", "VAL_PICK", "VAL_SHADOW")) else {}),
             **({"round2": {k: os.environ[k] for k in ("FRONT_NEG", "VAL_GUARD") if os.environ.get(k)}, **({"negative_requests": len(negr)} if negr is not None else {})}
                if any(os.environ.get(k) for k in ("FRONT_NEG", "VAL_GUARD")) else {})}
 

@@ -1,0 +1,24 @@
+{"id": "sc3b-22-001", "domain": "kitchen plan scene", "text": "Kitchen time. Floor first: a pale yellow rectangle in the background, 780 wide and 480 tall, at 400, 250, named Floor."}
+{"id": "sc3b-22-002", "domain": "kitchen plan scene", "text": "Counter along the top: a gray rectangle 500 wide and 50 tall at 330, 60, called Counter."}
+{"id": "sc3b-22-003", "domain": "kitchen plan scene", "text": "Sink: a pale blue square named Sink at 650, 60."}
+{"id": "sc3b-22-004", "domain": "kitchen plan scene", "text": "Stove, a black square, 70 by 70, at 520, 170, name it Stove."}
+{"id": "sc3b-22-005", "domain": "kitchen plan scene", "text": "Fridge: white rectangle 60 wide, 110 tall, at 740, 190, named Fridge"}
+{"id": "sc3b-22-006", "domain": "kitchen plan scene", "text": "The table goes in the middle: a large brown circle named Table at 330, 290."}
+{"id": "sc3b-22-007", "domain": "kitchen plan scene", "text": "Chair1: a small orange square 20 px left of Table."}
+{"id": "sc3b-22-008", "domain": "kitchen plan scene", "text": "Chair2, another small orange square, twenty px right of Table"}
+{"id": "sc3b-22-009", "domain": "kitchen plan scene", "text": "Chair3: small orange square 16 px below Table"}
+{"id": "sc3b-22-010", "domain": "kitchen plan scene", "text": "group Table, Chair1, Chair2 and Chair3 as Dining"}
+{"id": "sc3b-22-011", "domain": "kitchen plan scene", "text": "how many squares are in the kitchen?"}
+{"id": "sc3b-22-012", "domain": "kitchen plan scene", "text": "Window on the left wall: a light cyan rectangle 30 wide and 150 tall at 40, 250, called Window"}
+{"id": "sc3b-22-013", "domain": "kitchen plan scene", "text": "Is Stove above Table?"}
+{"id": "sc3b-22-014", "domain": "kitchen plan scene", "text": "make the fridge gray, white looks odd on the floor"}
+{"id": "sc3b-22-015", "domain": "kitchen plan scene", "text": "Put a tiny green circle named Plant at (80, 450)."}
+{"id": "sc3b-22-016", "domain": "kitchen plan scene", "text": "and a second tiny green circle, Plant2, 30 px right of Plant"}
+{"id": "sc3b-22-017", "domain": "kitchen plan scene", "text": "Rename Plant2 to Herb."}
+{"id": "sc3b-22-018", "domain": "kitchen plan scene", "text": "Which shape is largest here?"}
+{"id": "sc3b-22-019", "domain": "kitchen plan scene", "text": "Draw a 120 x 40 gray rectangle named Shelf at 160, 170."}
+{"id": "sc3b-22-020", "domain": "kitchen plan scene", "text": "Connect Sink to Stove with an arrow labelled \"pot\"."}
+{"id": "sc3b-22-021", "domain": "kitchen plan scene", "text": "delete Herb"}
+{"id": "sc3b-22-022", "domain": "kitchen plan scene", "text": "undo that, I want the herb back"}
+{"id": "sc3b-22-023", "domain": "kitchen plan scene", "text": "Are Sink and Stove connected?"}
+{"id": "sc3b-22-024", "domain": "kitchen plan scene", "text": "Done, nice kitchen."}

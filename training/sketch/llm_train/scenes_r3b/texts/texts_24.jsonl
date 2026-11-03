@@ -1,0 +1,23 @@
+{"id": "sc3b-24-001", "domain": "garden plan scene", "text": "Garden plan. A light green rectangle zone, 780 wide, 480 tall, at 400, 250, named Lawn."}
+{"id": "sc3b-24-002", "domain": "garden plan scene", "text": "Draw a brown rectangle named Bed1 at (150, 110), 160 by 60."}
+{"id": "sc3b-24-003", "domain": "garden plan scene", "text": "Bed2: a brown rectangle 160 by 60, 40 px right of Bed1."}
+{"id": "sc3b-24-004", "domain": "garden plan scene", "text": "and Bed3 the same way, a brown rectangle 160 by 60 forty px right of Bed2"}
+{"id": "sc3b-24-005", "domain": "garden plan scene", "text": "Four tiny red circles in a row below Bed1."}
+{"id": "sc3b-24-006", "domain": "garden plan scene", "text": "Pond: a blue ellipse 140 wide and 80 tall at 600, 330, named Pond."}
+{"id": "sc3b-24-007", "domain": "garden plan scene", "text": "Put a medium gray hexagon named Bench at 250, 400."}
+{"id": "sc3b-24-008", "domain": "garden plan scene", "text": "A small green triangle named Bush 20 px left of Pond."}
+{"id": "sc3b-24-009", "domain": "garden plan scene", "text": "another small green triangle Bush2 20 px right of Pond"}
+{"id": "sc3b-24-010", "domain": "garden plan scene", "text": "Group Bush and Bush2 as Hedge."}
+{"id": "sc3b-24-011", "domain": "garden plan scene", "text": "How many triangles do I have in the garden?"}
+{"id": "sc3b-24-012", "domain": "garden plan scene", "text": "Path: connect Bench to Pond with a dashed line."}
+{"id": "sc3b-24-013", "domain": "garden plan scene", "text": "Make Bed2 orange."}
+{"id": "sc3b-24-014", "domain": "garden plan scene", "text": "Is Bed3 right of Bed2?"}
+{"id": "sc3b-24-015", "domain": "garden plan scene", "text": "a tiny yellow star named Flower at (420, 250)"}
+{"id": "sc3b-24-016", "domain": "garden plan scene", "text": "move Flower ten px down"}
+{"id": "sc3b-24-017", "domain": "garden plan scene", "text": "What color is the pond?"}
+{"id": "sc3b-24-018", "domain": "garden plan scene", "text": "Delete Flower, it looks lonely."}
+{"id": "sc3b-24-019", "domain": "garden plan scene", "text": "a small white square named Shed in the bottom left"}
+{"id": "sc3b-24-020", "domain": "garden plan scene", "text": "Write \"My garden\" at 400, 30 in large letters"}
+{"id": "sc3b-24-021", "domain": "garden plan scene", "text": "Which shape is nearest to Shed?"}
+{"id": "sc3b-24-022", "domain": "garden plan scene", "text": "Pond goes on top of everything."}
+{"id": "sc3b-24-023", "domain": "garden plan scene", "text": "That's it for today."}

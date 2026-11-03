@@ -308,7 +308,9 @@ export class Reader {
     this.sentTokens = tokens ? [...tokens] : [];
     const nS = cnorm(S), f = { speakers: [], neg: false, event: null, roles: {}, shape: "ok", lemma: null, margins: {}, presence: {} };
     if (nS < 1e-9) { f.shape = "unknown"; return f; }
-    const Sn = cscale(S, 1 / nS), sch = this.schema, rep = cconj(this.st.op("says.scope")), nott = cconj(this.st.op("not"));
+    let Sn = cscale(S, 1 / nS);
+    if (this.rb.corr) Sn = cmul(Sn, this.rb.corr);      // VSA_CORR=phase (routebook.js corr; infer.Reader.read): the corrected state
+    const sch = this.schema, rep = cconj(this.st.op("says.scope")), nott = cconj(this.st.op("not"));
     const negs = sch.neg_event ? [false, true] : [false], dmax = this.legend.operators.includes("says") ? sch.max_depth + 1 : 0;
     const Kof = (d, n) => { let K = cpow(rep, d); if (n) K = cmul(K, nott); return K; };
     const scores = new Map(), hk = (d, n) => `${d}|${n}`, hyps = [];
@@ -542,6 +544,7 @@ export class Reader {
   }
   residual(S, wires, tokens) {
     const by = new Map(wires.map((w) => [w.id, w])), rec = this.compileWire(wires[0], by, tokens, new Set());
+    if (this.rb.corr) S = cmul(S, this.rb.corr);        // VSA_CORR=phase: the compiled frame against the corrected state (infer.Reader.residual)
     const nS = cnorm(S), nr = cnorm(rec);
     if (nS < 1e-9 || nr < 1e-9) return 1.0;
     const Sn = cscale(S, 1 / nS), rn = cscale(rec, 1 / nr), a = Math.max(0, cdotRe(rn, Sn));

@@ -55,6 +55,11 @@ if OPS:
 #                       learned as a value, so a trigger "how many arrows" keeps it), every arrow (quantifier=all) -> the value role
 #                       `quantifier` (all); count / list / exists kind=edge the same;
 #                       set / resize: style, arrow (two_way / plain / forward), colour, size; label="" -> the value token no_label.
+# GAP_ROLE=1 (off by default; training/sketch/scenes_r3/ROOT_CAUSES.md, 2026-11-03): a gap written with a relation ("6 px above Pot", "a
+# brown triangle 2 px above House2", "left of Heart with a 60 px gap": distance + position + anchor) fills the role `amount`, as the gap of a
+# move with a direction already does. Before, place() / place_ops() never carried `distance`, so no world row had it (scenes: 0 / 38 gold
+# gaps with a relation reach a row) and the reader could not learn it; docs/js/vss-adapter.js place() reads `amount` beside a relation.
+GAP_ROLE = os.environ.get("GAP_ROLE") == "1"
 EXT_SETS = ("items", "items2", "parents")          # set roles of texts (msg_to_world.py adds them to the legend's reader.set_roles)
 OPS_EVENTS = ("improve", "respace", "snap", "fit", "flip", "sort", "groupBy", "equalize", "straighten", "untangle")
 if LEGEND_EXT:
@@ -111,9 +116,13 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
             # "stars" into `all`, a typo), a quantifier / pronoun head would read "remove all the stars" as every shape; when a filter
             # (colour, not-colour, recency) has no token, the head alone reads every shape of the kind. Such a description is left
             # out (counted "description filter lost"), so the row says nothing about the role instead of teaching the wrong set.
+            # The same holds for a filter key that a world row cannot carry at all (2026-11-03, TRAIN_PLAN_R3.md A.5: layer and label from
+            # opus_r3_gaps, "delete all the panels" = mention(layer=zone,quantifier=all) was written as delete every shape; size in a
+            # description): the entity holds only a head, a colour and a determiner, so such a description is left out the same way.
             if LEGEND_EXT and head is not None and head not in ("it", "them"):
                 miss = (["shape"] if sh and head not in (PLURAL.get(sh, sh), sh) else []) + [k for k, t in (
-                    ("color", kv.get("color")), ("notcolor", kv.get("notcolor") and "not_" + kv["notcolor"]), ("recency", kv.get("recency"))) if t and t not in T]
+                    ("color", kv.get("color")), ("notcolor", kv.get("notcolor") and "not_" + kv["notcolor"]), ("recency", kv.get("recency"))) if t and t not in T] \
+                    + sorted(k for k in kv if k not in ("quantifier", "shape", "color", "notcolor", "recency"))
                 if miss: head = None; lost.append("description filter lost: " + ",".join(miss))
                 if miss and not soft: raise Skip(f"description filter lost in {v}")
             if head is None:
@@ -181,6 +190,8 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
         if ev in ("undo", "redo") and a.get("count") is not None and str(a["count"]).isdigit(): roles["quantity"] = need(str(a["count"]))
         if ev == "create" and a.get("layout"): roles["layout"] = need({"circle": "ring"}.get(a["layout"], a["layout"]))
         if a.get("about"): lost.append("about")
+    def gap():   # GAP_ROLE=1: the gap of a relation (distance in digits) -> the role amount (a number token of the clause)
+        if GAP_ROLE and a.get("distance") is not None and str(a["distance"]).isdigit(): roles["amount"] = need(str(a["distance"]))
     def place():
         if OPS: return place_ops()
         if "position" not in a: return
@@ -193,6 +204,7 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
         anc = [x.strip() for x in str(a.get("anchor", "")).split(",") if x.strip()]
         if anc: roles["landmark"], _ = ent(anc[0])
         if len(anc) > 1: roles["landmark2"], _ = ent(anc[1])
+        gap()
     def place_ops():   # DIAGRAM_OPS.md 6.5: one relation and no region -> exactly the roles of place()
         p, p2, rg = a.get("position"), a.get("position2"), a.get("region")
         if p is None and p2 is None and rg is None: return
@@ -215,6 +227,7 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
             lost.append("two betweens (second dropped)"); rels = rels[:1]
         r1, anc1 = rels[0]
         roles["relation"] = need(REL[r1])
+        gap()
         if anc1: roles["landmark"], _ = ent(anc1[0])
         if len(anc1) > 1: roles["landmark2"], _ = ent(anc1[1])
         if len(rels) == 2:

@@ -344,6 +344,8 @@ function relSpot(W, w, h, pos, anchors, dist, ignore) { return inCell(anchors[0]
 function relSpot0(W, w, h, pos, anchors, dist, ignore) {
   const a = anchors[0], ad = dims(a), gap = dist != null ? +dist : 56;
   if (pos === 'between') { const b = anchors[1] || a; return nearFree(W, (a.x + b.x) / 2, (a.y + b.y) / 2, w, h, ignore); }
+  if (pos === 'inside') return { x: a.x, y: a.y };   /* in the anchor's middle (create: commonSense places several and avoids what is there) */
+  if (pos === 'onTop') return { x: a.x, y: Math.round(a.y - ad.h / 2 - h / 2) };   /* touching its top edge */
   const calc = p => ({ leftOf: [a.x - ad.w / 2 - gap - w / 2, a.y, -1, 0], rightOf: [a.x + ad.w / 2 + gap + w / 2, a.y, 1, 0], above: [a.x, a.y - ad.h / 2 - gap - 16 - h / 2, 0, -1], below: [a.x, a.y + ad.h / 2 + gap + 16 + h / 2, 0, 1] })[p];
   const order = pos === 'near' ? ['rightOf', 'below', 'leftOf', 'above'] : [pos];
   for (const p of order) {
@@ -351,7 +353,7 @@ function relSpot0(W, w, h, pos, anchors, dist, ignore) {
     for (let i = 0; i < 6; i++) {
       const q = clampPt(x, y, w, h);
       const inBounds = Math.abs(q.x - x) < 2 && Math.abs(q.y - y) < 2;
-      if (inBounds && !hits(W, boxAt(q.x, q.y, w, h), ignore)) return q;
+      if (inBounds && !hits(W, boxAt(q.x, q.y, w, h), ignore, dist != null ? Math.max(0, Math.min(14, +dist - 1)) : 14)) return q;   /* a stated gap under 14 px is kept (scenes_r3 engine finding 3) */
       x += dx * (w + 24); y += dy * (h + 24);
     }
   }
@@ -418,7 +420,8 @@ const NAME_KEYS = ['target', 'anchor', 'anchor2', 'linked', 'from', 'to', 'membe
 function need(W, n) {
   const s = W.find(n) || (W.findGroup && W.findGroup(n) ? null : byNameOrText(W, n));
   if (!s && W.findGroup && W.findGroup(n)) { const g = W.findGroup(n); throw new SOPError(`${g.name} is a group (${listing(g.members)}), not a shape; name one of its shapes.`); }
-  if (!s) { const all = W.state.shapes.map(x => x.name); throw new SOPError(`There is no shape named "${n}".` + (all.length ? ` Shapes on the canvas: ${all.join(', ')}.` : ' The canvas is empty.')); }
+  if (!s) { const all = W.state.shapes.map(x => x.name), few = all.length > SHORT_LIST + 1 ? closestNames(n, all, SHORT_LIST) : all;
+    throw new SOPError(`There is no shape named "${n}".` + (!all.length ? ' The canvas is empty.' : few.length < all.length ? ` The closest names on the canvas: ${few.join(', ')}, and ${all.length - few.length} others.` : ` Shapes on the canvas: ${all.join(', ')}.`)); }
   return s;
 }
 /* ---------- groups: the box around the members; a group used as an anchor is that box ---------- */
@@ -513,8 +516,14 @@ function placeMulti(W, a, w, h, ignore) {
 /** the answer a command gives when some constraints of its position could not hold */
 const unmetText = (name, p) => p && p.unmet && p.unmet.length ? `I couldn't also put ${name} ${listing(p.unmet)}: no free spot satisfies every constraint, so I placed it where most of them hold.` : null;
 
+/** an at= value -> [x, y] numbers, or null: [400, 182], "400,182", "400, 182", ["400", "182"] are read; anything else (one number, words) is
+ *  null (owner's session 2026-11-03: a learned reader's at="400, 182" became a shape at NaN, NaN, and the view's viewBox NaN broke the zoom) */
+function atXY(v) {
+  const xs = [].concat(v).flatMap(x => typeof x === 'string' ? x.split(/[\s,;]+/) : [x]).filter(x => x !== '' && x != null).map(Number);
+  return xs.length === 2 && xs.every(Number.isFinite) ? xs : null;
+}
 function placeFor(W, a, w, h, ignore) {
-  if (a.at) { const [x, y] = [].concat(a.at).map(Number); return clampPt(x + FR.x, y + FR.y, w, h); }
+  if (a.at) { const xy = atXY(a.at); if (xy) return clampPt(xy[0] + FR.x, xy[1] + FR.y, w, h); }   // an x,y the reader wrote badly ("400, 182" as one string, one number): placed as if not given
   if (isMulti(a)) return placeMulti(W, a, w, h, ignore);
   if (a.position) {
     if (SPOTS[a.position]) return nearFree(W, ...spot(a.position), w, h, ignore);
@@ -533,6 +542,8 @@ function relHolds(s, pos, anc) {
     case 'above': return s.y < a.y - 20;
     case 'below': return s.y > a.y + 20;
     case 'near': return Math.hypot(s.x - a.x, s.y - a.y) < 170;
+    case 'inside': { const d = dims(a); return Math.abs(s.x - a.x) <= d.w / 2 && Math.abs(s.y - a.y) <= d.h / 2; }
+    case 'onTop': { const d = dims(a), e = dims(s); return Math.abs((s.y + e.h / 2) - (a.y - d.h / 2)) <= 8 && Math.abs(s.x - a.x) <= d.w / 2; }
     case 'between': { const b = anc[1] || a; const vx = b.x - a.x, vy = b.y - a.y, L = vx * vx + vy * vy || 1; const t = ((s.x - a.x) * vx + (s.y - a.y) * vy) / L; const px = a.x + t * vx, py = a.y + t * vy; return t > 0.05 && t < 0.95 && Math.hypot(s.x - px, s.y - py) < 70; }
     default: return false;
   }
@@ -540,6 +551,17 @@ function relHolds(s, pos, anc) {
 const region = s => { const o = cellOf(s.x, s.y), X = s.x - o.x, Y = s.y - o.y; const c = X < 267 ? 'left' : X < 533 ? 'center' : 'right'; const r = Y < 167 ? 'top' : Y < 333 ? 'middle' : 'bottom'; return r === 'middle' ? (c === 'center' ? 'center' : 'middle ' + c) : r + (c === 'center' ? ' center' : ' ' + c); };
 const plural = (w, n) => n === 1 ? w : (w.endsWith('x') || w.endsWith('s') ? w + 'es' : w + 's');
 const listing = arr => arr.length <= 1 ? arr.join('') : arr.slice(0, -1).join(', ') + ' and ' + arr[arr.length - 1];
+/* Short errors (owner, 2026-11-03): an error that would list every item on a big canvas (a scene holds about 80 shapes) lists only a few:
+   the SHORT_LIST closest to what was asked (closestNames: by shared letter pairs, ties in canvas order), then "and N others". */
+const SHORT_LIST = 5;
+const pairsOf = w => { const s = String(w).toLowerCase(), out = new Set(); for (let i = 0; i + 1 < s.length; i++) out.add(s.slice(i, i + 2)); return out; };
+/** the items of arr most similar to ref (Dice coefficient of the letter pairs), at most k, best first */
+function closestNames(ref, arr, k) {
+  const q = pairsOf(ref), sim = n => { const p = pairsOf(n); let c = 0; for (const x of p) if (q.has(x)) c++; return p.size + q.size ? 2 * c / (p.size + q.size) : 0; };
+  return arr.map((n, i) => ({ n, i, s: sim(n) })).sort((a, b) => b.s - a.s || a.i - b.i).slice(0, k).map(x => x.n);
+}
+/** a list joined with sep, cut to the first SHORT_LIST items + "and N others" (items already in the order to show) */
+const shortList = (arr, sep, what) => arr.length <= SHORT_LIST + 1 ? arr.join(sep) : arr.slice(0, SHORT_LIST).join(sep) + `${sep.trim() === ';' ? ';' : ','} and ${arr.length - SHORT_LIST} other${arr.length - SHORT_LIST === 1 ? '' : 's'}${what ? ' ' + what : ''}`;
 const describeShape = s => s.shape === 'text' ? `${s.name} is a ${sizeName(s.size)} ${s.color} text “${s.label || ''}” in the ${region(s)}` : `${s.name} is a ${s.w ? `${s.w}×${s.h} px` : sizeName(s.size)} ${s.color} ${s.layer ? s.layer + ' ' : ''}${s.shape}${s.outline ? ' with a ' + s.outline + ' outline' : ''}${s.label ? ` labeled "${s.label}"` : ''} in the ${region(s)}`;
 const edgeText = e => `${e.from} ${e.arrow === 'forward' ? '→' : e.arrow === 'both' ? '↔' : '—'} ${e.to}${e.style !== 'solid' ? ' (' + e.style + ')' : ''}${e.label ? ` "${e.label}"` : ''}`;
 const edgeEnds = e => `${e.from} ${e.arrow === 'forward' ? '→' : e.arrow === 'both' ? '↔' : '—'} ${e.to}`;
@@ -552,12 +574,12 @@ function edgesNamed(W, a) {
   if (!es.length && F.length && T.length) es = fit(T, F);
   const what = F.length && T.length ? `between ${listing(F)} and ${listing(T)}` : F.length ? `from ${listing(F)}` : `into ${listing(T)}`;
   if (!F.length && !T.length) throw new SOPError('Which arrow? Name its two ends, e.g. "the arrow from Start to Done".');
-  if (!es.length) { const near = W.state.edges.filter(e => F.concat(T).some(n => e.from === n || e.to === n)); throw new SOPError(`There is no arrow ${what}.` + (near.length ? ` Arrows there: ${near.map(edgeText).join('; ')}.` : '')); }
+  if (!es.length) { const near = W.state.edges.filter(e => F.concat(T).some(n => e.from === n || e.to === n)); throw new SOPError(`There is no arrow ${what}.` + (near.length ? ` Arrows there: ${shortList(near.map(edgeText), '; ')}.` : '')); }
   return { es, what, both: F.length > 0 && T.length > 0 };
 }
 const adjacent = (W, a, b) => W.state.edges.some(e => (e.from === a && e.to === b) || (e.from === b && e.to === a));
 const degree = (W, n) => W.state.edges.filter(e => e.from === n || e.to === n).length;
-const POS_WORDS = { leftOf: 'left of', rightOf: 'right of', above: 'above', below: 'below', near: 'near', between: 'between' };
+const POS_WORDS = { leftOf: 'left of', rightOf: 'right of', above: 'above', below: 'below', near: 'near', between: 'between', inside: 'inside', onTop: 'on' };
 
 /* panels in descriptions: a background or a zone (isPanel) is part of a description only when it says so (layer=background | zone, the
    words background, backdrop, zone, panel, lane); a description by kind ("the boxes", "every rectangle", "all shapes") means the ordinary
@@ -765,6 +787,87 @@ function createText(a, ctx) {
   return { value: [name], answer };
 }
 
+/* ---------- common-sense defaults of the drawing tools (owner, 2026-11-03: "the tools that draw must choose better defaults, have common
+   sense beyond what the person states explicitly") ----------
+   Applied by create ONLY to what the request does not state (a stated shape, colour, size, place or box always wins; then the rules of
+   "from now on ..."; then these). Each rule has a test in test_diagram_ops.mjs ("common-sense defaults").
+     1. what the shape depicts (object=, or its name or label: "Sun", "Cloud2", "a circle named Roof") -> its kind, colour, size and place
+        (COMMON_SENSE below): a sun is a large gold circle in the top right, a cloud a white ellipse at the top, grass green, water blue;
+        a sky is a light-blue background panel across the top, the ground and grass a panel across the bottom (layer=background: never an
+        obstacle, drawn behind the items);
+     2. inside X (position=inside): a size relative to X (a third of X's smaller side for one shape, a fifth each for several: the eyes in a
+        head are small), centred in X, several in a row across its upper middle, a free spot inside X when something is already there;
+     3. on X (position=onTop: "on House", "onto House"): touching X's top edge, centred on it; a roof (a triangle, or object roof) on a box
+        gets the box's width, also when it is said "above X" / "on top of X";
+     4. a new shape never overlaps an existing item unless it is placed inside one (the free-spot search of placeFor, as before);
+     5. colours of known nouns when no colour is stated (rule 1's table): sun gold, grass and trees green, sky light blue (cyan), water blue. */
+const COMMON_SENSE = {
+  sun: { shape: 'circle', color: 'gold', size: 'large', spot: 'topRight' },
+  moon: { shape: 'circle', color: 'yellow', size: 'medium', spot: 'topRight' },
+  cloud: { shape: 'ellipse', color: 'white', size: 'large', spot: 'top' },
+  sky: { shape: 'rectangle', color: 'cyan', fill: 'light', panel: 'top' },
+  ground: { shape: 'rectangle', color: 'brown', panel: 'bottom' },
+  grass: { shape: 'rectangle', color: 'green', panel: 'bottom' },
+  water: { color: 'blue' }, sea: { shape: 'rectangle', color: 'blue', panel: 'bottom' }, lake: { shape: 'ellipse', color: 'blue' }, river: { shape: 'rectangle', color: 'blue' }, pond: { shape: 'ellipse', color: 'blue' },
+  tree: { shape: 'circle', color: 'green', size: 'large' }, trunk: { shape: 'rectangle', color: 'brown', size: 'small' }, leaf: { shape: 'ellipse', color: 'green', size: 'small' },
+  roof: { shape: 'triangle', color: 'red' }, house: { shape: 'square', size: 'huge' }, wall: { shape: 'square' }, walls: { shape: 'square' },
+  door: { shape: 'rectangle', color: 'brown' }, window: { shape: 'square', color: 'cyan', size: 'small' },
+  head: { shape: 'circle', size: 'huge' }, face: { shape: 'circle', color: 'yellow', size: 'huge' }, eye: { shape: 'circle', color: 'white' }, nose: { shape: 'triangle' }, mouth: { shape: 'ellipse', color: 'red' },
+  flower: { shape: 'star', color: 'pink' }, fire: { shape: 'triangle', color: 'orange' }, snow: { shape: 'circle', color: 'white' }, apple: { shape: 'circle', color: 'red' }
+};
+const OBJECT_VALUES = Object.fromEntries(Object.keys(COMMON_SENSE).map(k => [k, k === 'leaf' ? ['leaves'] : /s$/.test(k) ? [] : [k + 's']]));   /* the legend's values of object=, with their plural */
+/** the noun a create depicts: object=, else its name without trailing digits ("Cloud2"), else its label; -> a key of COMMON_SENSE | null */
+function depicted(a) {
+  for (const v of [a.object, a.name != null ? String(a.name).replace(/\d+$/, '') : null, a.label]) {
+    const k = v == null ? '' : String(v).toLowerCase().trim(); if (COMMON_SENSE[k]) return k;
+    if (/s$/.test(k) && COMMON_SENSE[k.replace(/(?:es|s)$/, '')]) return k.replace(/(?:es|s)$/, '');
+  }
+  return null;
+}
+const isBox = s => s && (s.shape === 'square' || s.shape === 'rectangle');
+/** the stated request plus the common-sense defaults (rules 1-3 above) -> {a: the request with the defaults filled in, sizePx: a size in px
+ *  (rule 2), box: {w, h} (rule 3, a roof), place(i, w, h): the spot of the i-th new shape (rules 2, 3) | null, notes} */
+function commonSense(W, a, n, stated) {
+  const out = Object.assign({}, a), notes = [], k = depicted(a), C = k ? COMMON_SENSE[k] : null;
+  let sizePx = null, box = null, place = null;
+  const placed = a.at != null || a.position != null || a.region != null;
+  if (C) {
+    if (!out.shape || out.shape === 'any') out.shape = C.shape || out.shape;
+    if (!stated.color && C.color) out.color = C.color;
+    if (!out.size && C.size && !C.panel) out.size = C.size;
+    if (C.panel && !placed && a.width == null && a.height == null && !out.layer) {   // a band across the top or the bottom of the drawing
+      const h = C.panel === 'top' ? 200 : 120, w = CANVAS.W - 20;
+      out.layer = 'background'; out.width = w; out.height = h; if (C.fill && !out.fill) out.fill = C.fill;
+      out.at = [CANVAS.W / 2, C.panel === 'top' ? 10 + h / 2 : CANVAS.H - 10 - h / 2];
+    } else if (C.spot && !placed) out.position = C.spot;
+    if (!a.name && a.object) { const base = k[0].toUpperCase() + k.slice(1); let nm = base, i = 1; while (W.find(nm) || W.findGroup(nm)) nm = base + (++i); out.name = nm; }
+    notes.push(`common sense for a ${k}`);
+  }
+  const anc = names(a.anchor).length ? (() => { try { return needAnchor(W, names(a.anchor)[0]); } catch (e) { return null; } })() : null;
+  if (anc && a.position === 'inside') {
+    const d = dims(anc), busy = W.state.shapes.some(s => s !== anc && !isPanel(s) && Math.abs(s.x - anc.x) < d.w / 2 && Math.abs(s.y - anc.y) < d.h / 2), frac = n > 1 ? 0.2 : busy ? 0.26 : 0.3;
+    if (!a.size && a.width == null && a.height == null) { sizePx = Math.max(10, Math.round(Math.min(d.w, d.h) * frac)); delete out.size; }   // relative to X, before a noun's usual size
+    place = (i, w, h) => {
+      if (k === 'door' && n === 1) return { x: anc.x, y: Math.round(anc.y + d.h / 2 - h / 2) };   /* a door stands on the bottom edge */
+      if (n > 1) { const span = d.w * 0.4, x = anc.x - span / 2 + (n === 1 ? span / 2 : span * i / (n - 1)); return { x: Math.round(x), y: Math.round(anc.y - d.h * 0.12) }; }
+      const inside = W.state.shapes.filter(s => s !== anc && !isPanel(s) && Math.abs(s.x - anc.x) < d.w / 2 && Math.abs(s.y - anc.y) < d.h / 2);
+      const free = (x, y) => !inside.some(s => { const e = dims(s); return Math.abs(s.x - x) < (e.w + w) / 2 + 4 && Math.abs(s.y - y) < (e.h + h) / 2 + 4; });
+      if (free(anc.x, anc.y)) return { x: anc.x, y: anc.y };
+      let best = null;
+      for (let fy = -0.35; fy <= 0.351; fy += 0.05) for (let fx = -0.35; fx <= 0.351; fx += 0.05) { const x = anc.x + fx * d.w, y = anc.y + fy * d.h;
+        if (Math.abs(x - anc.x) + w / 2 > d.w / 2 || Math.abs(y - anc.y) + h / 2 > d.h / 2 || !free(x, y)) continue;
+        const c = Math.hypot(fx, fy); if (!best || c < best.c) best = { x: Math.round(x), y: Math.round(y), c }; }
+      return best ? { x: best.x, y: best.y } : { x: anc.x, y: anc.y };
+    };
+  }
+  const roof = (out.shape === 'triangle' || k === 'roof') && isBox(anc);
+  if (anc && (a.position === 'onTop' || (a.position === 'above' && roof && (k === 'roof' || a.position === 'onTop')))) {
+    const d = dims(anc);
+    if (roof && !out.size && a.width == null && a.height == null) box = { w: d.w, h: Math.round(d.w * 0.6) };
+    place = (i, w, h) => inCell(anc.x, anc.y, () => clampPt(anc.x + (n > 1 ? (i - (n - 1) / 2) * (w + 6) : 0), anc.y - d.h / 2 - h / 2, w, h));   /* kept on the canvas: it overlaps X rather than leave the drawing */
+  }
+  return { a: out, sizePx, box, place, notes };
+}
 const shapesPlugin = {
   name: 'shapes', title: 'Shapes',
   description: 'Create, delete, move, restyle, rename, label, duplicate and swap shapes.',
@@ -776,8 +879,9 @@ const shapesPlugin = {
     size: { ask: 'How big is it?', kind: 'enum', values: { tiny: ['minuscule'], small: ['little'], medium: ['normal', 'regular', 'average'], large: ['big'], huge: ['giant', 'enormous', 'massive'] } },
     scale: { ask: 'By what factor does its size change?', kind: 'number' },
     label: { ask: 'What text is written on it?', kind: 'text' },
-    position: { ask: 'Where is it, relative to the anchor or the canvas?', kind: 'enum', values: { leftOf: ['left of'], rightOf: ['right of'], above: ['above', 'over', 'on top of'], below: ['below', 'under', 'beneath'], near: ['next to', 'near', 'beside'], between: ['between'], center: ['center', 'middle'], top: ['at the top'], bottom: ['at the bottom'], left: ['on the left'], right: ['on the right'], topLeft: ['top left'], topRight: ['top right'], bottomLeft: ['bottom left'], bottomRight: ['bottom right'] } },
+    position: { ask: 'Where is it, relative to the anchor or the canvas?', kind: 'enum', values: { leftOf: ['left of'], rightOf: ['right of'], above: ['above', 'over', 'on top of'], inside: ['inside', 'within', 'into'], onTop: ['onto'], below: ['below', 'under', 'beneath'], near: ['next to', 'near', 'beside'], between: ['between'], center: ['center', 'middle'], top: ['at the top'], bottom: ['at the bottom'], left: ['on the left'], right: ['on the right'], topLeft: ['top left'], topRight: ['top right'], bottomLeft: ['bottom left'], bottomRight: ['bottom right'] } },
     anchor: { ask: 'Relative to which shape?', kind: 'names' },
+    object: { ask: 'What does the shape depict?', kind: 'enum', values: OBJECT_VALUES },
     at: { ask: 'At which x,y coordinates?', kind: 'point' },
     direction: { ask: 'In which direction does it move?', kind: 'enum', values: { left: [], right: [], up: ['upwards'], down: ['downwards'] } },
     distance: { ask: 'How far, in pixels?', kind: 'number' },
@@ -789,9 +893,17 @@ const shapesPlugin = {
   },
   handlers: [
     { type: 'command', when: { action: 'create', shape: 'text' }, run: createText },
-    { type: 'command', when: { action: 'create' }, run(a, ctx) {
+    { type: 'command', when: { action: 'create' }, run(a0, ctx) {
       const W = ctx.world, notes = [];
-      const shape = a.shape && a.shape !== 'any' ? a.shape : 'circle';
+      // the stated request, then the rules ("from now on ..."), then the common-sense defaults (commonSense) for what is still open
+      const pre = { color: a0.color, size: a0.size, outline: a0.outline }, shape0 = a0.shape && a0.shape !== 'any' ? a0.shape : (depicted(a0) && COMMON_SENSE[depicted(a0)].shape) || 'circle';
+      const rp0 = ctx.engine.plugin('rules');
+      if (rp0 && rp0.enabled) for (const r of W.state.rules) { if (r.shape && r.shape !== shape0) continue; for (const k of ['color', 'size', 'outline']) if (pre[k] == null && r[k] != null) pre[k] = r[k]; }
+      const nn = Math.max(1, Math.min(12, Math.round(+a0.count || 1)));
+      const CS = commonSense(W, a0, nn, { color: pre.color != null, size: pre.size != null }), a = CS.a; notes.push(...CS.notes);
+      /* no kind stated: a panel (zone, background) or a box given as width by height is a rectangle, not a circle (scenes_r3 engine finding 8) */
+      const boxy = (a.layer === 'zone' || a.layer === 'background') || (a.width != null && a.height != null && +a.width !== +a.height);
+      const shape = a.shape && a.shape !== 'any' ? a.shape : boxy ? 'rectangle' : 'circle';
       const props = { color: a.color, size: a.size, outline: a.outline };
       const rp = ctx.engine.plugin('rules');
       if (rp && rp.enabled) for (const r of W.state.rules) { if (r.shape && r.shape !== shape) continue; for (const k of ['color', 'size', 'outline']) if (props[k] == null && r[k] != null) { props[k] = r[k]; notes.push(`rule ${r.id} filled in ${k}=${r[k]}`); } }
@@ -807,9 +919,10 @@ const shapesPlugin = {
         if (!/^[A-Za-z_][\w-]*$/.test(name)) throw new SOPError(`"${name}" can't be a name: use letters, digits, - or _ and start with a letter.`);
         if (W.find(name)) throw new SOPError(`There is already a shape named "${W.find(name).name}".`);
         if (W.findGroup(name)) throw new SOPError(`"${W.findGroup(name).name}" is already the name of a group.`);
-        const size = SIZE_PX[props.size || 'medium'], box = boxArgs(a, shape), d = dims(Object.assign({ shape, size }, box));
+        const size = CS.sizePx && !props.size ? CS.sizePx : SIZE_PX[props.size || 'medium'], box = Object.assign(boxArgs(a, shape), CS.box || {}), d = dims(Object.assign({ shape, size }, box));
         let p;
         if (block) p = block[i];
+        else if (CS.place) p = CS.place(i, d.w, d.h);
         else if (i > 0) { const chain = a.position === 'leftOf' ? 'leftOf' : a.position === 'above' ? 'above' : a.position === 'below' && !a.anchor ? 'rightOf' : 'rightOf'; p = relSpot(W, d.w, d.h, a.position === 'below' || a.position === 'above' ? 'rightOf' : chain, [prev], null, []); }
         else { p = placeFor(W, a, d.w, d.h, []); const u = unmetText(name, p); if (u) answer = u; }
         ctx.emit({ op: 'add', shape: Object.assign({ name, shape, size, color: props.color || 'white', outline: props.outline && props.outline !== 'none' ? props.outline : null, label: a.label != null ? String(a.label) : null, x: p.x, y: p.y }, box) });
@@ -858,9 +971,7 @@ const shapesPlugin = {
         if (scale != null) { p.size = Math.round(Math.min(160, Math.max(22, s.size * scale))); if (s.w) { p.w = Math.round(Math.min(1600, Math.max(10, s.w * scale))); p.h = Math.round(Math.min(1000, Math.max(10, s.h * scale))); } }
         else if (a.size && s.w && s.shape !== 'text') { p.w = null; p.h = null; }   /* a size name replaces an explicit box */
         if (a.width != null || a.height != null) { const d0 = dims(s); p.w = Math.max(10, Math.round(+(a.width != null ? a.width : d0.w))); p.h = Math.max(10, Math.round(+(a.height != null ? a.height : d0.h))); }
-        ctx.emit({ op: 'set', name: s.name, props: p });
-        inCell(s.x, s.y, () => { const d = dims(s), c = clampPt(s.x, s.y, d.w, d.h);
-          if (c.x !== s.x || c.y !== s.y || hits(W, boxAt(c.x, c.y, d.w, d.h), [s.name], 6)) { const q = nearFree(W, c.x, c.y, d.w, d.h, [s.name]); if (q.x !== s.x || q.y !== s.y) ctx.emit({ op: 'set', name: s.name, props: { x: q.x, y: q.y } }); } });
+        ctx.emit({ op: 'set', name: s.name, props: p });   /* a restyle never moves anything (scenes_r3 engine findings 1-2: a recoloured panel or a part of a character used to jump away from what it touched) */
       }
       return { value: t };
     } },
@@ -896,7 +1007,7 @@ const shapesPlugin = {
           const name = a.name != null ? String(a.name) + (made.length ? String(made.length + 1) : '') : W.nextName(s.shape);
           if (W.find(name)) throw new SOPError(`There is already a shape named "${name}".`);
           const d = dims(s), p = a.position && i === 0 ? placeFor(W, a, d.w, d.h, []) : relSpot(W, d.w, d.h, 'rightOf', [prev], 40, []);
-          ctx.emit({ op: 'add', shape: { name, shape: s.shape, size: s.size, color: a.color || s.color, outline: s.outline, label: s.label, x: p.x, y: p.y } });
+          ctx.emit({ op: 'add', shape: Object.assign({ name, shape: s.shape, size: s.size, color: a.color || s.color, outline: s.outline, label: s.label, x: p.x, y: p.y }, s.w && s.h ? { w: s.w, h: s.h } : {}, s.fill ? { fill: s.fill } : {}, s.layer ? { layer: s.layer } : {}, s.font ? { font: s.font } : {}) });   /* the copy keeps the explicit box, fill and layer (scenes_r3 engine finding 4) */
           made.push(name); prev = W.find(name);
         }
       }
@@ -1048,9 +1159,9 @@ function labelEdge(a, ctx) {
     const t = expandGroups(W, names(a.target)).map(n => need(W, n).name);
     es = t.length ? W.state.edges.filter(e => t.includes(e.from) || t.includes(e.to)) : W.state.edges.slice(); what = t.length ? `at ${listing(t)}` : 'on the canvas'; both = false;
     if (!es.length) throw new SOPError(`There are no arrows ${what}.`);
-    if (a.quantifier !== 'all' && !t.length && es.length > 1) throw new SOPError(`Which arrow? There are ${es.length}: ${es.map(edgeEnds).join('; ')}. Name its two ends, or say "all the arrows".`);
+    if (a.quantifier !== 'all' && !t.length && es.length > 1) throw new SOPError(`Which arrow? There are ${es.length}: ${shortList(es.map(edgeEnds), '; ')}. Name its two ends, or say "all the arrows".`);
   } else ({ es, what, both } = edgesNamed(W, a));
-  if (es.length > 1 && text != null && a.kind !== 'edge') throw new SOPError(`There are ${es.length} arrows ${what}: ${es.map(edgeEnds).join('; ')}. Which one? Name both ends, e.g. "label the arrow from ${es[0].from} to ${es[0].to} …".`);
+  if (es.length > 1 && text != null && a.kind !== 'edge') throw new SOPError(`There are ${es.length} arrows ${what}: ${shortList(es.map(edgeEnds), '; ')}. Which one? Name both ends, e.g. "label the arrow from ${es[0].from} to ${es[0].to} …".`);
   if (es.length > 1) {
     const ch = es.filter(e => (e.label || null) !== text);
     for (const e of ch) ctx.emit({ op: 'edgeSet', id: e.id, props: { label: text } });
@@ -1411,15 +1522,23 @@ const queriesPlugin = {
       return { value: parts, answer: parts.join('; ') + '.', highlight: { shapes: t.map(n => need(W, n).name) } };
     } },
     { type: 'question', when: { ask: 'check' }, run(a, ctx) {
-      const W = ctx.world, s = need(W, needTargets(a, 'check')[0]), checks = [];
+      /* a group as the target (scenes_r3 engine finding 7): its box for positions, regions and sizes compared, every member for colour, kind and size */
+      const W = ctx.world, t0 = needTargets(a, 'check')[0], grp = !W.find(t0) && W.findGroup && W.findGroup(t0), s = grp ? needAnchor(W, t0) : need(W, t0), checks = [];
+      if (grp) {
+        const ms = grp.members.map(n => W.find(n)).filter(Boolean), all = (f, v) => ms.length && ms.every(m => f(m) === v), odd = (f, v) => ms.filter(m => f(m) !== v).map(m => m.name);
+        if (a.color) checks.push([all(m => m.color, a.color), all(m => m.color, a.color) ? `every shape of ${s.name} is ${a.color}` : `${listing(odd(m => m.color, a.color))} in ${s.name} ${odd(m => m.color, a.color).length > 1 ? 'are' : 'is'} not ${a.color}`]);
+        if (a.shape && a.shape !== 'any') checks.push([all(m => m.shape, a.shape), `${all(m => m.shape, a.shape) ? 'every' : 'not every'} shape of ${s.name} is a ${a.shape}`]);
+        if (a.size) checks.push([all(m => sizeName(m.size), a.size), `${all(m => sizeName(m.size), a.size) ? 'every' : 'not every'} shape of ${s.name} is ${a.size}`]);
+      } else {
       if (a.color) checks.push([s.color === a.color, `${s.name} is ${s.color}`]);
       if (a.shape && a.shape !== 'any') checks.push([s.shape === a.shape, `${s.name} is a ${s.shape}`]);
       if (a.size) checks.push([sizeName(s.size) === a.size, `${s.name} is ${sizeName(s.size)}`]);
-      if (a.outline) checks.push([(s.outline || 'none') === a.outline, s.outline ? `${s.name} has a ${s.outline} outline` : `${s.name} has no outline`]);
+      }
+      if (a.outline && !grp) checks.push([(s.outline || 'none') === a.outline, s.outline ? `${s.name} has a ${s.outline} outline` : `${s.name} has no outline`]);
       for (const [pk, ak] of [['position', 'anchor'], ['position2', 'anchor2']]) if (a[pk] && a[ak] && !SPOTS[a[pk]]) { const anc = names(a[ak]).map(n => needAnchor(W, n)); const ok = relHolds(s, a[pk], anc); checks.push([ok, `${s.name} is ${ok ? '' : 'not '}${POS_WORDS[a[pk]]} ${listing(anc.map(x => x.name))}`]); }
       for (const sp of [a.position, a.position2, a.region]) if (sp && SPOTS[sp]) { const ok = inSpot(s, sp); checks.push([ok, `${s.name} is ${ok ? '' : 'not '}in the ${camelWords(sp)}`]); }
-      if (a.comparison && a.anchor) { const o = need(W, names(a.anchor)[0]), A = dims(s).w * dims(s).h, B = dims(o).w * dims(o).h; const ok = a.comparison === 'bigger' ? A > B : A < B; checks.push([ok, `${s.name} covers ${A} px² and ${o.name} covers ${B} px²`]); }
-      if (!checks.length) return { value: true, answer: describeShape(s) + '.', highlight: { shapes: [s.name] } };
+      if (a.comparison && a.anchor) { const o = needAnchor(W, names(a.anchor)[0]), A = dims(s).w * dims(s).h, B = dims(o).w * dims(o).h; const ok = a.comparison === 'bigger' ? A > B : A < B; checks.push([ok, `${s.name} covers ${A} px² and ${o.name} covers ${B} px²`]); }
+      if (!checks.length) return { value: true, answer: grp ? `${s.name} is a group of ${listing(grp.members)} in the ${region(s)}.` : describeShape(s) + '.', highlight: { shapes: grp ? grp.members.slice() : [s.name] } };
       const ok = checks.every(c => c[0]);
       return { value: ok, answer: `${ok ? 'Yes' : 'No'}: ${checks.map(c => c[1]).join('; ')}.`, highlight: { shapes: [s.name].concat(names(a.anchor), names(a.anchor2)) } };
     } },
@@ -1477,7 +1596,7 @@ const queriesPlugin = {
 
 /* ---------- generic logic reasoner: world → facts, question wire → Datalog query ---------- */
 const SPOT_NAMES = ['center', 'top', 'bottom', 'left', 'right', 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'];
-const REL_NAMES = ['leftOf', 'rightOf', 'above', 'below', 'near'];
+const REL_NAMES = ['leftOf', 'rightOf', 'above', 'below', 'near', 'inside', 'onTop'];
 const posLits = (v, anc) => SPOT_NAMES.includes(v) ? [['inspot', '?X', v]] : v === 'between' ? names(anc).length >= 2 ? [['between', '?X', names(anc)[0], names(anc)[1]]] : null : names(anc).map(n => ['rel', v, '?X', n]);
 /* How each legend question constrains the subject ?X. Adding a question = adding a line here. */
 const LOGIC_MAP = {
@@ -1562,7 +1681,9 @@ const logicPlugin = {
       return { value: xs, answer: `${n} ${phraseOf(a, n)}: ${xs.map(x => { const s = W.find(x); return `${x} (${s.color} ${s.shape})`; }).join(', ')}.`, lowering, highlight: hl };
     } },
     { type: 'question', when: { ask: 'check' }, run(a, ctx) {
-      const W = ctx.world, t = need(W, needTargets(a, 'check')[0]);
+      const W = ctx.world, t0 = needTargets(a, 'check')[0];
+      if (!W.find(t0) && W.findGroup && W.findGroup(t0)) return ctx.engine.fallback('question', a, ctx, this);   // a group: the query handler (its box)
+      const t = need(W, t0);
       if (a.comparison) return ctx.engine.fallback('question', a, ctx, this);
       const conds = conditions(a);
       if (!conds.length) return ctx.engine.fallback('question', a, ctx, this);
@@ -1716,7 +1837,7 @@ const helpDocs = () => (typeof HelpKit !== 'undefined' ? HelpKit : null) || optR
 const LAYER_OF = ['background', 'zone', null, null];
 function templateBox(W, a, TK) {
   const canvas = { x: FR.x, y: FR.y, w: CANVAS.W, h: CANVAS.H }, prefer = { size: a.size };
-  if (a.at) { const [x, y] = [].concat(a.at).map(Number); prefer.at = [x + FR.x, y + FR.y]; }
+  if (a.at && atXY(a.at)) { const [x, y] = atXY(a.at); prefer.at = [x + FR.x, y + FR.y]; }
   else if (a.position && SPOTS[a.position]) prefer.region = a.position;
   else if (a.region && SPOTS[a.region]) prefer.region = a.region;
   if (a.position && !SPOTS[a.position] && a.anchor) { const an = needAnchor(W, names(a.anchor)[0]), d = dims(an); prefer.rel = a.position; prefer.anchor = { x1: an.x - d.w / 2, y1: an.y - d.h / 2, x2: an.x + d.w / 2, y2: an.y + d.h / 2 }; }
@@ -1739,7 +1860,14 @@ function makeTemplatesPlugin(TK) {
         const obstacles = shapesHere.map(s => { const d = dims(s); return { x1: s.x - d.w / 2, y1: s.y - d.h / 2, x2: s.x + d.w / 2, y2: s.y + d.h / 2 }; });
         const { canvas, prefer } = templateBox(W, a, TK);
         let r = TK.place(a.template, P, canvas, obstacles, prefer); const notes = [];
-        if (!r.fits) { const c = W.newFrame(a.title || T.t); r = TK.place(a.template, P, { x: c.x, y: c.y, w: CANVAS.W, h: CANVAS.H }, [], { size: a.size }); notes.push(`no free room on this drawing, so it is in a new frame`); }
+        /* no free room (scenes_r3 engine finding 6: it used to go into a new frame, off the visible canvas): a smaller size when none was
+           asked for; else on the canvas anyway, where the request says or where the template puts it, over what is there, and the reply
+           says so and how to move it */
+        if (!r.fits && !a.size) for (const sz of ['small', 'tiny']) { const r2 = TK.place(a.template, P, canvas, obstacles, Object.assign({}, prefer, { size: sz })); if (r2.fits) { r = r2; notes.push(`drawn ${sz} to fit in the free room`); break; } }
+        if (!r.fits) {
+          r = TK.place(a.template, P, canvas, [], prefer);
+          notes.push(prefer.at || prefer.region || prefer.rel ? 'there was no free room there, so it is drawn over what is there' : 'there was no free room on the canvas, so it is drawn over the drawing; say where to put it (e.g. "move it to the top left") or make room');
+        }
         else if (r.moved) notes.push(`the place asked for was taken, so it went to the ${camelWords(r.region)}`);
         const L = r.layout;
         if (L.crowded) throw new SOPError(`${listing(P.items.length ? P.items : ['these items'])} don't fit in a ${tname(a.template)} here; try fewer items, shorter texts, or a bigger place.`);
@@ -2101,6 +2229,28 @@ function makeFormalizer(engine) {
     const groupSet = new Set(groupNames.map(g => g.toLowerCase()));
     const nameIndex = new Map((ctx.names || []).concat(groupNames).map(n => [n.toLowerCase(), n]));
     const groupAltRe = groupNames.slice().sort((a, b) => b.length - a.length).map(esc).join('|');
+    /* layers in descriptions (owner's session 2026-11-03: "delete the background boxes"): background / backdrop -> layer=background, zone /
+       panel / lane -> layer=zone (the legend's layer cues, without the vague "area" and "container"), as a word before the noun ("the
+       background boxes", "all zone panels") or as the noun ("the zones", "the background"); the engine's filterShapes reads mention layer= */
+    const LAYER_W = { background: 'background', backgrounds: 'background', backdrop: 'background', backdrops: 'background', zone: 'zone', zones: 'zone', panel: 'zone', panels: 'zone', lane: 'zone', lanes: 'zone', swimlane: 'zone', swimlanes: 'zone' };
+    const QUOTE_REF = ['delete', 'move', 'resize', 'duplicate', 'toFront', 'toBack', 'swap', 'align', 'distribute', 'disconnect', 'group', 'ungroup'];
+    const NEW_TEXT = /\b(?:put|place|stick|add|write|give|attach|type|insert|use|with|set)\s+(?:(?:a|an|the|this|that|its|their|new)\s+)*$/i;   /* "put the label "ok" on …": the new text */
+    const isLayerName = w => !!w && !!LAYER_W[w.toLowerCase()] && nameIndex.has(w.toLowerCase());
+    const AFTER_VERB = new RegExp(`(?:^|[\\s,])(?:${alt(verbCues)})(?:\\s+(?:all|every|each|the|of|me|us))*\\s*$`, 'i');
+    const LAYER_ANCHOR = /\b(?:of|below|above|under|over|beneath|near|beside|between|next\s+to|left\s+of|right\s+of|and)\s*$/i;
+    const LAYER_INTO = /\b(?:to|into|in|behind|at|towards?|onto|on|over|from|of)(?:\s+(?:the|a|its|their))?\s*$/i;
+    const layerRe = alt(Object.keys(LAYER_W)), DMOD = `(?:(?:${colorRe}|${sizeRe}|${layerRe})\\s+){0,3}`;
+    /* the texts the items show (ctx.texts: the labels on the canvas, e.g. "Order flow", passed like ctx.names): a phrase that is exactly
+       one of them, or its letters without spaces ("Orderflow"), is a reference to that item, read before any other rule (its words may be
+       COMMON or layout words: "order", "flow"); it is read as mention label="<text>", which the engine resolves (filterShapes). A one-word text that is a
+       word the Rules read anyway ("ok", "yes", "start") is left alone. */
+    const WRITE_CUE = /(?:\b(?:labell?ed|label|saying|says|titled|called|named|reading|reads|text|title|caption|heading|write|writes|written|as|to)\s+(?:the\s+)?)$/i;
+    const TEXT_REF_STOP = '(?:to|in|on|at|from|into|onto|with|and|then|under|below|above|over|near|next|beside|left|right|by|so|because|please|blue|red|green|bigger|smaller)';
+    const canvasTexts = [...new Set((ctx.texts || []).map(x => String(x)).filter(x => textWords(x).length))];
+    const textPhraseRes = canvasTexts.map(x => { const ws = textWords(x), one = ws.length === 1 ? ws[0] : null;
+      if (one && (one.length < 3 || COMMON.has(one) || STOP.has(one) || ACTION.has(one) || SHAPE.has(one) || COLOR.has(one) || SIZE.has(one) || /^(?:ok|okay|yes|no|hi|hey)$/.test(one))) return null;
+      const body = ws.map(esc).join('[^\\p{L}\\p{N}⟪⟫⟦⟧⟬⟭]{1,4}') + (ws.length > 1 ? '|' + esc(ws.join('')) : '');
+      return { text: x, re: new RegExp(`(?<![\\p{L}\\p{N}_])(?:${body})(?![\\p{L}\\p{N}_])`, 'giu') }; }).filter(Boolean).sort((a, b) => b.text.length - a.text.length);
     let lastRef = null, lastGroup = null, lastEdge = null;   // lastEdge: the arrow the last request was about ({from, to, node}: node = a connect made just before)
     if (ctx.last && ctx.last.length) { lastGroup = ctx.last.slice(); lastRef = ctx.last.length === 1 ? ctx.last[0] : null; }
 
@@ -2128,6 +2278,7 @@ function makeFormalizer(engine) {
       /* free text is never corrected: a new name, and an unquoted label ("labeled cold" stays cold, not gold) */
       const introduced = new Set((input.match(/\b(?:named|called|name\s+it|rename\s+\S+\s+(?:to|as|into)|labell?ed|titled|captioned|saying|that\s+says|which\s+says)\s+([A-Za-z_][\w-]*)/gi) || []).map(m => m.split(/\s+/).pop().toLowerCase()));
       if (/\b(?:group|together|bundle)\b/i.test(input)) for (const m of input.match(/\b(?:as|into)\s+([A-Za-z_][\w-]*)/gi) || []) introduced.add(m.split(/\s+/).pop().toLowerCase());   /* "group A and B as Pipeline" */
+      for (const x of canvasTexts) { const ws = textWords(x); ws.forEach(w => introduced.add(w)); introduced.add(ws.join('')); }   /* the words of the canvas texts are not typos */
       /* a word the Rules read is never a typo: every one-word cue of every legend key (scheme "cold", topic words ...) besides the targets */
       const verbTargets = new Set(verbCues), otherTargets = new Set([...SHAPE.keys(), ...COLOR.keys(), ...SIZE.keys()]);
       /* verbPos: the word stands where a verb stands (the start of a sentence or clause, after a connective or an opener). A word elsewhere
@@ -2413,12 +2564,45 @@ function makeFormalizer(engine) {
       return a;
     }
     function templateClause(p, isQ) { const tp = templateOf(' ' + p + ' '); if (!tp) return false; if (tp.target === ALL_SHAPES) { const id = 'm' + (++F.m); F.nodes.push({ id, type: 'mention', args: { quantifier: 'all' } }); tp.target = ref(id); } pushWire('command', tp, p); return true; }
+    /* items referred to by the text they show (owner's session 2026-11-03: "delete Order flow", "Delete Orderflow", 'delete "order
+       flow"' for the title MainTitle): t with each reference replaced by ⟬k⟭, refs[k] = {text, label}:
+         - a phrase that is exactly a canvas text (ctx.texts; canvasTexts above), or a quoted text equal to one -> {text};
+         - "the text X" / "the title X" / "the caption X" / "the heading X" / "the label X", X a quoted text, a canvas text or a capitalised
+           phrase ("delete the title Order flow") -> {text: X, label: true}.
+       Each becomes a description mention label="<text>" (the annotation's form, LABEL_CONVENTIONS.md: mention(label=order flow)).
+       Not in a request that writes a text (a create, label, rename or write verb, or right after labeled / saying / named / called ...):
+       there the words are the new text. */
+    function textRefsOut(t, refs) {
+      const vm = t.match(VERB_RE), act = vm ? ACTION.get(vm[1].toLowerCase()) : null;
+      if (['label', 'rename'].includes(act) || /^\s*(?:write|title|caption|relabel|retitle)\b/i.test(t)) return t;
+      const making = act === 'create' && !/^(?:make|put|place|turn|set|stick|park|tuck)$/i.test(vm[1]) || act === 'create' && new RegExp(`\\b${esc(vm[1])}\\s+(?:(?:me|us)\\s+)?(?:a|an|another|new|some|\\d+|one|two|three|four|five)\\b`, 'i').test(t);   /* "add a title …": a new text, not a reference */
+      const put = (text, label) => { refs.push({ text, label: !!label }); return ' ⟬' + (refs.length - 1) + '⟭ '; };
+      const same = (a, b) => normText(a) === normText(b) || (squashText(a) && squashText(a) === squashText(b));
+      t = t.replace(/⟪(\d+)⟫/g, (m, n, off, whole) => { const c = canvasTexts.find(x => same(x, quotes[+n])); return c && !WRITE_CUE.test(whole.slice(0, off)) ? put(c) : m; });
+      for (const { text, re } of textPhraseRes) t = t.replace(re, (m, off, whole) => WRITE_CUE.test(whole.slice(0, off)) && !/\b(?:the\s+)?(?:text|title|caption|heading|label)\s+$/i.test(whole.slice(0, off)) ? m : put(text));
+      if (making || !act) return t;   /* no verb ("small text "Jan" at 160,458"): a new text, not a reference */
+      for (const x of canvasTexts) { const ws = textWords(x); if (!ws.length) continue;
+        const re = new RegExp(`\\b(?:the\\s+)?(?:text|title|caption|heading|label)\\s+${ws.map(esc).join('[^\\p{L}\\p{N}⟪⟫⟦⟧⟬⟭]{1,4}')}(?![\\p{L}\\p{N}_])[?!.]?`, 'giu');
+        t = t.replace(re, (m, off, whole) => /\b(?:of|from|on)\s*$/i.test(whole.slice(0, off)) || NEW_TEXT.test(whole.slice(0, off)) ? m : put(x, true)); }
+      const NOUN_T = new RegExp(`\\b(?:the\\s+)?(?:text|title|caption|heading|label)\\s+(⟬\\d+⟭|⟪\\d+⟫|[A-Z][\\w'-]*(?:\\s+(?!${TEXT_REF_STOP}\\b)[A-Za-z0-9][\\w'-]*){0,3})(?=\\s+${TEXT_REF_STOP}\\b|\\s*[,.;:!?]|\\s*$)`, 'g');
+      t = t.replace(NOUN_T, (m, x, off, whole) => {
+        if (/\b(?:of|from|on)\s*$/i.test(whole.slice(0, off)) || NEW_TEXT.test(whole.slice(0, off))) return m;
+        if (/^⟪/.test(x) && /\blabel\s/i.test(m)) return m;   /* 'delete the label "x"': the label, not an item */
+        const k = /^⟬(\d+)⟭$/.exec(x), q = /^⟪(\d+)⟫$/.exec(x);
+        if (k) { refs[+k[1]].label = true; return ' ' + x + ' '; }
+        const text = q ? quotes[+q[1]] : x.trim();
+        if (!q && nameIndex.has(text.toLowerCase())) return m;   /* "the label Start": a shape named Start */
+        return put(text, true);
+      });
+      return t;
+    }
     function clause(raw, isQ) {
       { const h = helpOf(raw); if (h) { pushWire('question', h, raw); return; } }   // a question about the editor itself (the help world)
       let t = ' ' + raw.trim().replace(/[,\s]+$/, '') + ' ';
       t = t.replace(new RegExp(`^\\s*(?:${OPENER}\\b[\\s,]*)+`, 'i'), ' ');
       if (!t.trim()) return;
       if (!isQ) t = unquotedText(t);   // "add a big title Roadmap": the words after the text noun are the text, as if quoted
+      const textRefs = []; t = textRefsOut(t, textRefs);   // "delete Order flow", "delete the title "Order flow"": the items by the text they show
       /* the clause for the ops readers: known shape and group names masked ("group A and B as Flow": Flow is a name, not a layout word),
          and so are the new names a group / rename / create declares */
       t = t.replace(/([A-Za-z0-9_])\s*(?:->|→)\s*([A-Za-z_])/g, '$1 → $2');   /* "Process->Check": the arrow between two names */
@@ -2431,6 +2615,9 @@ function makeFormalizer(engine) {
       const C = { t, args: {}, marks: [] };
       const take = (re, fn) => { const m = C.t.match(re); if (!m) return null; C.t = C.t.slice(0, m.index) + ' ' + C.t.slice(m.index + m[0].length) + ' '; if (fn) fn(m); return m; };
       const mark = v => { C.marks.push(v); return ' ⟦' + (C.marks.length - 1) + '⟧ '; };
+      /* the text references found by textRefsOut: a description by the text, mention label="…" (the engine's filterShapes matches it
+         against the texts the items show; several matches make a delete ask first, holdDestructive) */
+      C.t = C.t.replace(/⟬(\d+)⟭/g, (m, k) => { const e = textRefs[+k]; const id = 'm' + (++F.m); F.nodes.push({ id, type: 'mention', args: { label: e.text } }); const r = ref(id); lastRef = r; return mark(r); });
       const refsIn = s => [...s.matchAll(/⟦(\d+)⟧/g)].map(m => +m[1]);
       /* the ends of a connection: "between A and B", "from A to B", "A–B", "A→B line", "from A", "into B" -> from= / to= (a name, or a
          description such as "the red circle"); a capitalised word that is not a known name still counts as a name. Then the label text
@@ -2570,6 +2757,10 @@ function makeFormalizer(engine) {
       if (C.args.label == null && ['create', 'connect', 'label', 'set'].includes(action)) take(/⟪(\d+)⟫/, m => C.args.label = quotes[+m[1]]);
       if (C.args.label == null && ['create', 'connect'].includes(action)) take(/\blabell?ed\s+([A-Za-z0-9_][\w-]*)/i, m => C.args.label = m[1]);
       if (kind === 'question' || kind === 'fact') take(/⟪(\d+)⟫/, m => C.args.label = quotes[+m[1]]);
+      /* a quoted text left in a request that acts on shapes is a reference by name or by the text an item shows ('delete "Order flow"',
+         'remove "Start"'; owner's session 2026-11-03: it was dropped and the request asked which shape); the engine resolves it */
+      if (isCmd && !textItem && QUOTE_REF.includes(action) && !refsIn(C.t).length && !(C.t.match(/[A-Za-z_][\w-]*/g) || []).some(w => nameIndex.has(w.toLowerCase()) && w !== 'a' || /^(?:it|them|this|these|those)$/i.test(w))) C.t = C.t.replace(/⟪(\d+)⟫/g, (m, n) => { const q = String(quotes[+n]).trim(); if (!q) return m; if (nameIndex.has(q.toLowerCase()) && typeof nameIndex.get(q.toLowerCase()) === 'string') return mark(nameIndex.get(q.toLowerCase()));
+        const id = 'm' + (++F.m); F.nodes.push({ id, type: 'mention', args: { label: q } }); return mark(ref(id)); });
 
       // ---- several new shapes in a layout: "in a circle (layout)", "arranged in a grid", "as a ring", "side by side", "stacked", "in a line" ----
       if (action === 'create') {
@@ -2612,12 +2803,16 @@ function makeFormalizer(engine) {
         if (rec) a.recency = /^(first|oldest|earliest)/i.test(rec) ? 'oldest' : 'newest';
         if (quant) a.quantifier = 'all';
         const sh = noun ? SHAPE.get(noun.toLowerCase()) : null; if (sh && sh !== 'any') a.shape = sh;
-        for (const w of (mods || '').toLowerCase().split(/\s+/).filter(Boolean)) { if (COLOR.has(w)) a.color = COLOR.get(w); else if (SIZE.has(w)) a.size = SIZE.get(w); }
+        for (const w of (mods || '').toLowerCase().split(/\s+/).filter(Boolean)) { if (COLOR.has(w)) a.color = COLOR.get(w); else if (SIZE.has(w)) a.size = SIZE.get(w); else if (LAYER_W[w] && !a.layer) a.layer = LAYER_W[w]; }
+        if (noun && LAYER_W[noun.toLowerCase()] && !a.layer) a.layer = LAYER_W[noun.toLowerCase()];
         const id = 'm' + (++F.m); F.nodes.push({ id, type: 'mention', args: a }); return ref(id);
       };
       if (kind !== 'rule' && lastRef != null) C.t = C.t.replace(new RegExp(`\\b(?:this|that)\\s+(?:${MOD})(?:${nounRe})\\b`, 'gi'), m => pluralNoun(m.split(/\s+/).pop().toLowerCase()) ? m : mark(lastRef));
       if (kind !== 'rule') {
-        C.t = C.t.replace(new RegExp(`\\b(the|all(?:\\s+of)?(?:\\s+the)?|every|each)\\s+((?:newest|new|last|latest|most\\s+recent|first|oldest|earliest)\\s+)?(${MOD})(${nounRe})\\b`, 'gi'), (m, art, rec, mods, noun) => {
+        C.t = C.t.replace(new RegExp(`\\b(the|all(?:\\s+of)?(?:\\s+the)?|every|each)\\s+((?:newest|new|last|latest|most\\s+recent|first|oldest|earliest)\\s+)?(${DMOD})(${nounRe}|${layerRe})\\b`, 'gi'), (m, art, rec, mods, noun, off, whole) => {
+          if (LAYER_W[noun.toLowerCase()] && LAYER_INTO.test(whole.slice(0, off))) return m;   /* "send Start to the background": a place, not a description */
+          if (isLayerName(noun) || mods.split(/\s+/).some(isLayerName)) return m;   /* "the Lane": a shape named Lane */
+          if ((LAYER_W[noun.toLowerCase()] || mods.split(/\s+/).some(w => LAYER_W[w.toLowerCase()])) && !AFTER_VERB.test(whole.slice(0, off)) && !LAYER_ANCHOR.test(whole.slice(0, off))) return m;   /* a layer only as the object ("the lane is clear" is a remark) */
           const all = !rec && (/^(all|every|each)/i.test(art) || pluralNoun(noun.toLowerCase()));
           const r = mention(all, mods, noun, rec && rec.trim()); if (!all) lastRef = r; else lastGroup = r; return mark(r);
         });
@@ -2644,7 +2839,11 @@ function makeFormalizer(engine) {
             if (next && /^[A-Z]/.test(next) && nameIndex.has(next.toLowerCase())) return m;   // "all A, B and C": the names are the targets
             return allShapes();
           });
-          C.t = C.t.replace(new RegExp(`(^|\\s)(${MOD})(${nounRe})\\b`, 'gi'), (m, pre, mods, noun) => pluralNoun(noun.toLowerCase()) && !generic.has(noun.toLowerCase()) || /^(shapes|nodes)$/i.test(noun) ? pre + mark(mention(true, mods, noun)) : m);
+          C.t = C.t.replace(new RegExp(`(^|\\s)(${DMOD})(${nounRe}|${layerRe})\\b`, 'gi'), (m, pre, mods, noun, off, whole) => {
+            const lay = LAYER_W[noun.toLowerCase()], layMod = mods.split(/\s+/).some(w => LAYER_W[w.toLowerCase()]);
+            if ((lay || layMod) && (isLayerName(noun) || mods.split(/\s+/).some(isLayerName) || !AFTER_VERB.test(whole.slice(0, off) + pre))) return lay ? m : pluralNoun(noun.toLowerCase()) && !generic.has(noun.toLowerCase()) ? pre + mods.replace(new RegExp(`\\b(?:${layerRe})\\b\\s*`, 'gi'), '') + mark(mention(true, mods.replace(new RegExp(`\\b(?:${layerRe})\\b`, 'gi'), ''), noun)) : m;   /* a layer word only right after the verb ("delete background boxes"); a name (Lane, Panel) never */
+            if (lay && !pluralNoun(noun.toLowerCase())) return pre + mark(mention(false, mods, noun));   /* "delete background": the background */
+            return pluralNoun(noun.toLowerCase()) && !generic.has(noun.toLowerCase()) || /^(shapes|nodes)$/i.test(noun) || (/\S/.test(mods) && mods.toLowerCase().split(/\s+/).some(w => LAYER_W[w]) && generic.has(noun.toLowerCase()) && pluralNoun(noun.toLowerCase())) ? pre + mark(mention(true, mods, noun)) : m; });
         } else if (kind === 'question') C.t = C.t.replace(/\beverything\b/gi, () => mark(mention(true, '', null)));
       }
 
@@ -2743,7 +2942,11 @@ function makeFormalizer(engine) {
             ['between', `\\bbetween\\s+${M}\\s+and\\s+${M}`],
             ['leftOf', `\\b(?:to\\s+the\\s+|on\\s+the\\s+|at\\s+the\\s+)?left\\s+(?:side\\s+)?of\\s+${listOf}`],
             ['rightOf', `\\b(?:to\\s+the\\s+|on\\s+the\\s+|at\\s+the\\s+)?right\\s+(?:side\\s+)?of\\s+${listOf}`],
-            ['above', `\\b(?:above|over|on\\s+top\\s+of)\\s+${listOf}`],
+            /* inside / on a shape (the drawing tools' common sense, commonSense): "two eyes inside Head", "a circle in Head" (a create), "a
+               roof on House" (a create; "on top of" stays above, as the annotation writes it) */
+            ['inside', action === 'create' ? `\\b(?:inside(?:\\s+of)?|within|into|in)\\s+${listOf}` : `\\b(?:inside(?:\\s+of)?|within)\\s+${listOf}`],
+            ['onTop', action === 'create' ? `\\b(?:onto|on)\\s+(?!top\\b)${listOf}` : `\\b(?!)x`],
+            ['above', `\\b(?:above|over|on\\s+top\\s+of|onto)\\s+${listOf}`],
             ['below', `\\b(?:below|under|underneath|beneath)\\s+${listOf}`],
             ['near', `\\b(?:next\\s+to|near|beside|close\\s+to|by|alongside|around)\\s+${listOf}`]
           ];
@@ -2757,6 +2960,10 @@ function makeFormalizer(engine) {
             if (at < at1) { C.args.position2 = C.args.position; C.args.anchor2 = C.args.anchor; C.args.position = p; C.args.anchor = v; }
             else { C.args.position2 = p; C.args.anchor2 = v; }
             break;
+          }
+          if (C.args.position === 'onTop' && (C.args.at || C.args.position2 || /\bat\s+\d/.test(C.t) || /\b(?:top|bottom|upper|lower)[\s-]+(?:left|right)\b|\b(?:in|at)\s+the\s+(?:top|bottom|left|right|middle|center|centre)\b/i.test(C.t))) {
+            /* "a boat on the sea, in the bottom left", "pillows on the bed at 160,355": "on X" only says what it lies on; the place is the other one */
+            if (C.args.position2) { C.args.position = C.args.position2; C.args.anchor = C.args.anchor2; delete C.args.position2; delete C.args.anchor2; } else { delete C.args.position; delete C.args.anchor; }
           }
           if (C.args.position) {   /* a canvas region besides a relation: "in the top left", "near the top", bare "top left" */
             const PRE = '(?:in|at|to|into|on|near|towards?|close\\s+to|along)', RG = [['topLeft', `\\b(?:${PRE}\\s+)?(?:the\\s+)?(?:top|upper)[\\s-]+left(?:\\s+corner)?\\b`], ['topRight', `\\b(?:${PRE}\\s+)?(?:the\\s+)?(?:top|upper)[\\s-]+right(?:\\s+corner)?\\b`], ['bottomLeft', `\\b(?:${PRE}\\s+)?(?:the\\s+)?(?:bottom|lower)[\\s-]+left(?:\\s+corner)?\\b`], ['bottomRight', `\\b(?:${PRE}\\s+)?(?:the\\s+)?(?:bottom|lower)[\\s-]+right(?:\\s+corner)?\\b`],
@@ -2794,6 +3001,9 @@ function makeFormalizer(engine) {
         const asNewKind = new RegExp(`\\b(?:a|an|into|to\\s+an?)\\s+(?:(?:${colorRe}|${sizeRe})\\s+){0,2}(?:${alt(cues)})\\b`, 'i').test(C.t);
         if (!(['set', 'resize'].includes(action) && !asNewKind)) C.args.shape = sh;
       }
+      if (action === 'create' && !textItem && !C.args.template) {   /* what it depicts, as the object of the verb: "draw a sun", "add two clouds" (commonSense) */
+        const OB = lx('object'), m = new RegExp(`\\b(?:${TEXT_VERBS})\\s+(?:(?:me|us|a|an|the|some|another|${NUMRE})\\s+)*(?:(?:${colorRe}|${sizeRe}|little|nice|new)\\s+){0,3}(${alt([...OB.keys()])})\\b`, 'i').exec(t);
+        if (m && !nameIndex.has(m[1].toLowerCase())) C.args.object = OB.get(m[1].toLowerCase()); }
       const co = firstOf(COLOR); if (co) C.args.color = co;
       const sz = firstOf(SIZE); if (sz && !C.args.superlative) C.args.size = sz;
       if (action === 'connect') {
@@ -2910,6 +3120,100 @@ function rulesCut(formalize, input, ctx) {
 }
 
 /* =====================================================================
+   6b. Destructive requests: cautious by design
+   ===================================================================== */
+/* The owner's first session (training/sketch/collected/SESSION_1_ANALYSIS.md, turn 15): "Delete background boxes" was read as "delete every
+   rectangle" with confidence 0.957, above the safety threshold, and deleted Backdrop, both zones and Process with its two links; "delete
+   "order flow"" was read as "forget the rules" twice at "execute all". A request that removes something is never executed by accident:
+     (a) a destructive request (delete, disconnect, forget, clear, and ungroup when it removes a group) executes only when its confidence is
+         at or above the DEFAULT safety threshold of its tab, also when the tab is set to a bolder level or to "execute all"; below it, it is
+         held with the reason "a deleting request needs the safety threshold";
+     (b) a destructive request whose target is a description (a mention: "the circles", "the background boxes"), not names, and that would
+         remove more than one item is held at every level and in every tab (the Rules too), and the reply lists the items: "Delete Start and
+         Done? Write their names, or press Do it anyway."; "everything" ("Clear the canvas", a mention whose only filter is quantifier=all)
+         is not such a description: it says exactly what goes (owner, 2026-11-03), so only (a) applies to it;
+     (c) the reply of every held destructive request says exactly what Do it anyway would remove (a dry run of the request on a copy of the
+         drawing: the shapes, the links that go with them, the groups, the rules).
+   Pure engine-side code (no DOM): ui.js calls holdDestructive on each gate; test_diagram_ops.mjs checks it. */
+const DESTRUCTIVE = ['delete', 'disconnect', 'forget', 'ungroup', 'clear'];
+const isDestructive = n => n && n.type === 'command' && DESTRUCTIVE.includes(n.args && n.args.action);
+/** a dry run of nodes on the engine's world: the world, its history and the placement frame are restored afterwards -> the run's result */
+function previewRun(engine, nodes, opts) {
+  const W = engine.world, st = W.snapshot(), u = W.undoStack.slice(), r = W.redoStack.slice(), fx = FR.x, fy = FR.y;
+  try { return engine.run(nodes, opts); } finally { W.restore(st); W.undoStack = u; W.redoStack = r; FR.x = fx; FR.y = fy; }
+}
+const refIds = v => isRef(v) ? [v.ref] : Array.isArray(v) ? v.flatMap(refIds) : [];
+/** what a request would remove: nodes = the request's wires (a command and its mentions), before = the wires executed before it in the same
+ *  message (they run first in the dry run), opts.overrides as Engine.run. -> null when it is not destructive or removes nothing, else
+ *  {action, described (its target is a description, not names), count (the items it removes: shapes for delete, links for disconnect,
+ *  groups for ungroup, rules for forget), shapes, edges, groups, rules, question ("Delete Start and Done?"), removes (the full list in
+ *  words: "Start and Done, and the links Start → Process and Check → Done")} */
+function destructiveCheck(engine, nodes, before, opts) {
+  const main = (nodes || []).filter(isDestructive); if (!main.length) return null;
+  const rulesBefore = engine.world.state.rules.length, own = new Set(nodes.map(n => n.id));
+  const res = previewRun(engine, (before || []).concat(nodes), opts);
+  const shapes = [], edges = [], groups = []; let rules = 0;
+  for (const st of res.steps) {
+    if (!own.has(st.node.id) || st.error || st.skipped) continue;
+    for (const p of st.patches) {
+      if (p.op === 'remove') shapes.push(p.name);
+      else if (p.op === 'unlink' && p.edge) edges.push(edgeEnds(p.edge));
+      else if (p.op === 'ungroup' && p.group) groups.push(p.name);
+      else if (p.op === 'forget') rules = rulesBefore;
+    }
+  }
+  if (!shapes.length && !edges.length && !groups.length && !rules) return null;
+  const mentions = new Set(nodes.filter(n => n.type === 'mention').map(n => n.id));
+  const a = main[0].args, action = a.action === 'clear' ? 'delete' : a.action;
+  const roleIds = ['target', 'from', 'to'].flatMap(k => refIds(a[k]));
+  const mentionOf = id => nodes.find(n => n.id === id && n.type === 'mention') || (before || []).find(b => b.id === id && b.type === 'mention');
+  const described = roleIds.some(id => mentions.has(id) || !!mentionOf(id));
+  // "Clear the canvas", "delete everything": a mention with no filter but quantifier=all names its scope exactly (every item on the
+  // drawing), so it is not a description that may match more than the person meant (owner, 2026-11-03: an explicit clear is allowed;
+  // it is one step that Undo brings back). Rule (a), the safety threshold, still applies to it.
+  const everything = described && roleIds.every(id => { const m = mentionOf(id); return m && m.args && m.args.quantifier === 'all' && Object.keys(m.args).every(k => k === 'quantifier'); });
+  const gs = groups.filter(g => !shapes.length || action === 'ungroup');   // a group that goes with its shapes is not listed apart
+  const count = action === 'delete' ? shapes.length : action === 'disconnect' ? edges.length : action === 'ungroup' ? gs.length : action === 'forget' ? rules : shapes.length + edges.length;
+  const linkWords = es => `the link${es.length === 1 ? '' : 's'} ${listing(es)}`;
+  const parts = [];
+  if (shapes.length) parts.push(listing(shapes));
+  if (edges.length) parts.push(linkWords(edges));
+  if (gs.length) parts.push(`the group${gs.length === 1 ? '' : 's'} ${listing(gs)}`);
+  if (rules) parts.push(`${rules === 1 ? 'the rule' : `all ${rules} rules`}`);
+  const removes = parts.length > 1 ? parts.slice(0, -1).join(', ') + ', and ' + parts[parts.length - 1] : parts[0];
+  const question = action === 'delete' ? `Delete ${listing(shapes)}?` : action === 'disconnect' ? `Remove ${linkWords(edges)}?` : action === 'ungroup' ? `Ungroup ${listing(gs)}?` : action === 'forget' ? `Forget ${rules === 1 ? 'the rule' : `all ${rules} rules`}?` : `Remove ${removes}?`;
+  return { action, described, everything, count, shapes, edges, groups: gs, rules, question, removes, verb: action === 'ungroup' ? 'ungroup' : action === 'forget' ? 'forget' : action === 'disconnect' ? 'remove' : 'delete' };
+}
+const DESTRUCTIVE_REASON = 'a deleting request needs the safety threshold';
+/** the policy above on a gate (ui.js GATES; vss-confidence.js gate): units [{nodes, conf, execute, reasons, dependsOn?}] in message order.
+ *  opts.safe = the confidence a destructive request needs (the tab's safety threshold; NaN or undefined when unknown, which holds it unless
+ *  opts.gated is false: the Rules have no confidence and no gate level, only rule (b) applies to them); opts.overrides as Engine.run.
+ *  Each destructive unit gets u.destructive = destructiveCheck(...) (held or not, for the reply's "Do it anyway would delete ..."); a unit
+ *  newly held gets u.reasons = [{group: 'destructive', text}], and the units that use its wires are held too. -> the number of units newly held */
+function holdDestructive(engine, units, opts) {
+  opts = opts || {};
+  const gated = opts.gated !== false, before = [];
+  let n = 0;
+  const off = new Set();
+  for (const u of units) {
+    const usesHeld = u.execute && u.nodes.some(x => Object.values(x.args || {}).flatMap(refIds).some(id => units.some(o => o !== u && off.has(o) && o.nodes.some(y => y.id === id))));
+    if (usesHeld) { const d = units.find(o => off.has(o) && o.nodes.some(y => u.nodes.some(x => Object.values(x.args || {}).flatMap(refIds).includes(y.id)))); u.execute = false; u.reasons = [{ group: 'depends', text: `it uses what “${d.src}” would have made, which was not done` }]; off.add(u); n++; continue; }
+    let chk = null; try { chk = destructiveCheck(engine, u.nodes, before, { overrides: opts.overrides }); } catch (e) { chk = null; }
+    if (chk) u.destructive = chk;
+    if (u.execute && chk) {
+      const low = gated && !(u.conf >= opts.safe), many = chk.described && !chk.everything && chk.count > 1;
+      if (low || many) {
+        u.execute = false; off.add(u); n++;
+        u.reasons = [{ group: 'destructive', text: low ? DESTRUCTIVE_REASON : `it would ${chk.verb} ${chk.count} items that the request describes but does not name` }].concat(low && many ? [{ group: 'destructive', text: `it would ${chk.verb} ${chk.count} items that the request describes but does not name` }] : []);
+        continue;
+      }
+    }
+    if (u.execute) before.push(...u.nodes);
+  }
+  return n;
+}
+
+/* =====================================================================
    7. Assembly
    ===================================================================== */
 /** the world written back as SOP wires (shapes, edges, rules, groups): what a backend receives after lowering; the World view shows it */
@@ -2935,7 +3239,7 @@ function createSystem(opts = {}) {
   return { world, engine, formalize, cut: (input, ctx) => rulesCut(formalize, input, ctx) };
 }
 
-return { createSystem, CELL, cellOf, parse, serialize, fmtValue, isRef, names, SOPError, Clarify, CANVAS, COLOR_HEX, PALETTE, PALETTE_ARROW, PALETTE_TINT, SIZE_PX, FONT_PX, fontOf, dims, sizeName, region, edgeText, groupBox, groupLabels, tagBox, edgeRoutes, worldNodes, worldSOP };
+return { createSystem, CELL, cellOf, parse, serialize, fmtValue, isRef, names, SOPError, Clarify, CANVAS, COLOR_HEX, PALETTE, PALETTE_ARROW, PALETTE_TINT, SIZE_PX, FONT_PX, fontOf, dims, sizeName, region, edgeText, groupBox, groupLabels, tagBox, edgeRoutes, worldNodes, worldSOP, DESTRUCTIVE, DESTRUCTIVE_REASON, previewRun, destructiveCheck, holdDestructive };
 })();
 if (typeof module !== 'undefined') module.exports = SOPKit;
 /*LOGIC-END*/

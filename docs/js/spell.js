@@ -14,6 +14,9 @@
 // Never touched: known words, words of 1-2 letters, numbers and words with digits or apostrophes, quoted text ("label it "teh""), the
 // word after named / called / titled / labeled, and capitalised words inside a sentence (names): those are only corrected toward a
 // name on the canvas ("Strat" -> "Start"), never toward an ordinary word ("named Gree" keeps Gree).
+// A name the message itself introduces (declaredNames: the word after named / called / titled, "name it X", "call it X", "name X",
+// "Name: X") is a known name for the rest of that message, like a canvas name: "... named RoboHand. Connect RoboBody to RoboHand" keeps
+// RoboHand (it was once "corrected" to RoboHead, a canvas name), and a later typo of it is corrected toward it.
 // Works in the browser (window.SpellKit) and in node (require).
 (function (root) {
   'use strict';
@@ -34,6 +37,17 @@
     const s = '^' + word + '$', out = [];
     for (const n of ns) for (let i = 0; i + n <= s.length; i++) out.push(s.slice(i, i + n));
     return out;
+  }
+
+  /** the names a message introduces, in order -> [{name, at (where the declaration ends: the name counts from there on)}] */
+  function declaredNames(text) {
+    const out = [], t = String(text);
+    const RE = [/\b(?:named|called|titled)\s+([A-Za-z][A-Za-z0-9_]*)/gi,                                   // named RoboHand, called Nose
+      /\b(?:name|call)\s+(?:that one|this one|it|that|this)\s+([A-Za-z][A-Za-z0-9_]*)/gi,             // name it Core, call it Nose
+      /\bname\s*:\s*([A-Za-z][A-Za-z0-9_]*)/gi,                                                        // Name: Kitchen
+      /\b[Nn]ame\s+([A-Z][A-Za-z0-9_]*)/g];                                                             // name Sheet (a capitalised word)
+    for (const re of RE) for (const m of t.matchAll(re)) if (!/^(?:it|that|this)$/i.test(m[1])) out.push({ name: m[1], at: m.index + m[0].length });
+    return out.sort((a, b) => a.at - b.at);
   }
 
   function create(opts) {
@@ -101,11 +115,12 @@
       const t0 = (typeof performance !== 'undefined' ? performance : Date).now();
       const thr = o.threshold != null ? o.threshold : P.threshold, mar = o.margin != null ? o.margin : P.margin, minLen = o.minLen || P.minLen;
       const names = new Map(); for (const n of o.names || []) { const s = String(n); if (!names.has(s.toLowerCase())) names.set(s.toLowerCase(), s); }
-      const fixes = [], parts = [];
-      let last = 0, prevWord = null, sentenceStart = true;
+      const fixes = [], parts = [], decl = declaredNames(text), declAt = new Set(decl.map(d => d.at - d.name.length));
+      let last = 0, prevWord = null, sentenceStart = true, di = 0;
       const TOK = /"[^"]*"|“[^”]*”|(?<![A-Za-z0-9])'[^']+'(?![A-Za-z0-9])|[A-Za-z0-9_]+(?:['’][A-Za-z]+)*|[.!?]/g;
       for (const m of String(text).matchAll(TOK)) {
         const tok = m[0];
+        for (; di < decl.length && decl[di].at <= m.index; di++) { const l = decl[di].name.toLowerCase(); if (!names.has(l)) names.set(l, decl[di].name); }   // names the message declared before this word
         if (tok === '.' || tok === '!' || tok === '?') { sentenceStart = true; continue; }
         if (/^["“']/.test(tok)) { prevWord = null; sentenceStart = false; continue; }   // quoted text: never touched
         const atStart = sentenceStart; sentenceStart = false;
@@ -114,6 +129,7 @@
         if (!/^[A-Za-z]+$/.test(tok) || tok.length < minLen) continue;   // numbers, ids (rectangle1), contractions, short words
         if (index.has(low) || keep.has(low) || names.has(low)) continue;   // known and kept words, canvas names
         if (prev && NAMING.has(prev)) continue;                             // "named Gree": a new name
+        if (declAt.has(m.index)) continue;                                  // "name it Gree", "Name: Gree": a new name
         const capital = /^[A-Z]/.test(tok), allCaps = tok.length > 1 && tok === tok.toUpperCase();
         const nameLike = allCaps || (capital && !atStart);
         if (nameLike && !names.size) continue;                              // a capitalised word is a name: only a canvas name can correct it
@@ -154,7 +170,7 @@
     } catch (e) { console.warn('spell checker not loaded:', e); return null; }
   }
 
-  const API = { create, legendWords, load, ngramsOf, DEFAULTS };
+  const API = { create, legendWords, load, ngramsOf, declaredNames, DEFAULTS };
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
   else root.SpellKit = API;
 })(typeof self !== 'undefined' ? self : this);

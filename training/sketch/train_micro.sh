@@ -47,6 +47,12 @@ export LEGEND_EXT="${LEGEND_EXT:-}"   # LEGEND_EXT=1: the forms of 2026-11-02 (h
 #   VAL_GUARD=1|mask|keep: a value n-gram never takes in its trigger; a trigger rule keeps a value token only when it is gold (front.py);
 #   NEW_DISTINCT=1: several `$new` in one wire become distinct created names (llm_to_world.py; VSS_FROM_TO.md section 1).
 export FRONT_NEG="${FRONT_NEG:-}" VAL_GUARD="${VAL_GUARD:-}" NEW_DISTINCT="${NEW_DISTINCT:-}"
+# round 3 (TRAIN_PLAN_R3.md), recorded in BUILD.json only when set:
+#   VSA_CORR=phase: sop train fits the world's correction phase vector after the route book (tool/sop/train.py fit_corr) and calibrates
+#   through it; the export carries it (routebook.bin array "corr", manifest vss-web-4). Unset: the build is byte for byte as before.
+export VSA_CORR="${VSA_CORR:-}"
+#   GAP_ROLE=1: a gap written with a relation ("6 px above Pot") fills the role amount (llm_to_world.py; scenes_r3/ROOT_CAUSES.md F1).
+export GAP_ROLE="${GAP_ROLE:-}"
 KINDMAP="${KINDMAP-diagnosis_kinds/kinds_comb1.json}"; if [ -n "$KINDMAP" ]; then export KINDMAP; else unset KINDMAP; fi
 FRAC="${FRAC:-1.0}"; D="${D:-1024}"; EPOCHS="${EPOCHS:-10}"; SEED="${SEED:-0}"
 if [ "${DRY:-0}" = "1" ]; then
@@ -65,7 +71,7 @@ rm -rf "$OUT"
 cp "$W/front.json" "$OUT/front.json"
 cat > "$OUT/BUILD.json" <<JSON
 {"world": "$WORLD", "events": "$EVENTS", "command": "training/sketch/train_micro.sh $WORLD $EVENTS", "DATA": "$DATA", "FRAC": "$FRAC", "QCOLOR": "$QCOLOR",
- "MARKER": "$MARKER", "ROW_SHAPE": "${ROW_SHAPE:-}", "FRONT_ROWS": "$FRONT_ROWS", "KINDMAP": "${KINDMAP:-}", "CAL_FALLBACK": "$CAL_FALLBACK", "D": $D, "EPOCHS": $EPOCHS, "SEED": $SEED, "N_EVAL": $N_EVAL, "EVAL_MODES": "$EVAL_MODES", "DEVICE": "$DEVICE", "HOLDOUT": "${HOLDOUT:-}", "CREATE_COLOR": "${CREATE_COLOR:-}", "N_CAL": "${N_CAL:-}", "VAL_PREC": "$VAL_PREC", "VAL_SUB": "$VAL_SUB", "SHORT": "$SHORT", "OPS": "$OPS", "DIAGRAM_OPS": "$DIAGRAM_OPS",${LEGEND_EXT:+ \"LEGEND_EXT\": \"$LEGEND_EXT\",}${VAL_PICK:+ \"VAL_PICK\": \"$VAL_PICK\",}${FRONT_NEG:+ \"FRONT_NEG\": \"$FRONT_NEG\",}${VAL_GUARD:+ \"VAL_GUARD\": \"$VAL_GUARD\",}${NEW_DISTINCT:+ \"NEW_DISTINCT\": \"$NEW_DISTINCT\",} "EXTRA_DIRS": "$EXTRA_DIRS", "rows": $(grep -c . "$W/raw/sentences.txt"),
+ "MARKER": "$MARKER", "ROW_SHAPE": "${ROW_SHAPE:-}", "FRONT_ROWS": "$FRONT_ROWS", "KINDMAP": "${KINDMAP:-}", "CAL_FALLBACK": "$CAL_FALLBACK", "D": $D, "EPOCHS": $EPOCHS, "SEED": $SEED, "N_EVAL": $N_EVAL, "EVAL_MODES": "$EVAL_MODES", "DEVICE": "$DEVICE", "HOLDOUT": "${HOLDOUT:-}", "CREATE_COLOR": "${CREATE_COLOR:-}", "N_CAL": "${N_CAL:-}", "VAL_PREC": "$VAL_PREC", "VAL_SUB": "$VAL_SUB", "SHORT": "$SHORT", "OPS": "$OPS", "DIAGRAM_OPS": "$DIAGRAM_OPS",${LEGEND_EXT:+ \"LEGEND_EXT\": \"$LEGEND_EXT\",}${VAL_PICK:+ \"VAL_PICK\": \"$VAL_PICK\",}${FRONT_NEG:+ \"FRONT_NEG\": \"$FRONT_NEG\",}${VAL_GUARD:+ \"VAL_GUARD\": \"$VAL_GUARD\",}${NEW_DISTINCT:+ \"NEW_DISTINCT\": \"$NEW_DISTINCT\",}${VSA_CORR:+ \"VSA_CORR\": \"$VSA_CORR\",}${GAP_ROLE:+ \"GAP_ROLE\": \"$GAP_ROLE\",} "EXTRA_DIRS": "$EXTRA_DIRS", "rows": $(grep -c . "$W/raw/sentences.txt"),
  "run_log": "training/sketch/runs/$RUN.log"}
 JSON
 echo "world $WORLD [$EVENTS] -> docs/model/micro/$WORLD ($(grep -c . "$W/raw/sentences.txt") rows); registry line:"

@@ -80,6 +80,14 @@ with sync_playwright() as p:
     clear(pg); scenario(pg, "traffic"); fitted(pg, "1 traffic light")
     clear(pg); scenario(pg, "house"); fitted(pg, "2 little house")
     clear(pg); quick(pg, "Add three tiny red circles in a row below Process"); fitted(pg, "3 three tiny circles")
+    # owner's bug report 2026-11-03: after an example played over the opening drawing, zoom did nothing. Cause: a reader wrote at="400, 182"
+    # (one string), the shape got x, y = NaN and the view's viewBox became NaN. The example over a drawing (no clear), then that wire typed as SOP:
+    scenario(pg, "house"); say(pg, '@r command action=create shape=triangle name=RoofX at="400, 182"')
+    vb0 = pg.evaluate(VB); pg.click("#zoom-in"); vb1 = pg.evaluate(VB)
+    pg.mouse.move(300, 300); pg.keyboard.down("Control"); pg.mouse.wheel(0, -240); pg.keyboard.up("Control"); pg.wait_for_timeout(200); vb2 = pg.evaluate(VB)
+    finite = all(x not in (vb0 + vb1 + vb2) for x in ("NaN", "Infinity"))
+    check("5 an example over the drawing, then at=\"400, 182\": the shape is placed at 400,182, the view is finite, zoom in and Ctrl+wheel change it", finite and vb1 != vb0 and vb2 != vb1, f"{vb0} | {vb1} | {vb2}")
+    pg.click("#zoom-fit"); pg.screenshot(path=f"{OUT}/5_example_over_drawing.png")
     pg.set_viewport_size({"width": 390, "height": 844}); pg.wait_for_timeout(400)
     clear(pg); scenario(pg, "login"); fitted(pg, "4 phone login flowchart")
     bad = [e for e in errors if "Failed to fetch" not in e]

@@ -388,8 +388,11 @@ export async function loadComposer(registry, cutter, loadModel, opts = {}) {
   if (registry.event_hint && !registry.event_cutter) throw new Error("composer: the registry's event_hint needs an event_cutter");
   if (registry.event_cutter && !opts.eventCutter) throw new Error(`composer: the registry names the event cutter ${registry.event_cutter}; pass it parsed as opts.eventCutter`);
   const router = opts.router || registry.router || "cutter";
+  // every world is requested at once (loadModel may fetch in parallel), in the registry's order; the worlds keep that order
+  const pending = (registry.worlds || []).map((e) => loadModel(e.model));
+  pending.forEach((p) => p.catch(() => {}));                 // a failure is thrown below, once, by the await of its world
   const worlds = [];
-  for (const e of registry.worlds || []) { const m = await loadModel(e.model); worlds.push(makeWorld(e.world, e.events, m.vss, m.F)); }
+  for (const [i, e] of (registry.worlds || []).entries()) { const m = await pending[i]; worlds.push(makeWorld(e.world, e.events, m.vss, m.F)); }
   const hint = registry.event_cutter ? { eventCutter: opts.eventCutter, eventHint: registry.event_hint || "H1" } : {};
   return new Composer(Object.assign({ cutter, worlds, router, context: opts.context, k: opts.k || ROUTER_K, needRead: opts.needRead ?? registry.need_read ?? false }, hint));
 }

@@ -25,10 +25,33 @@ let models = null, queue = Promise.resolve();
 const VSS_OPTS = { composer: true };
 let view = 'auto';
 let hl = { shapes: new Set(), edges: new Set() }, hlTimer = null, drag = null;
+let selItem = null;   // the item selected by a click on the drawing: {shape: name} | {edge: id} | null (see "Direct editing")
 const history = []; let turnSeq = 0;               // every message with what each reader made of it; a bubble's "details" shows one
 let sub = 'drawing';                                // the active reader's subtab: 'drawing' | 'sop' | 'settings' (the same for every reader)
 // browser storage is a convenience only: every access is guarded and the page works without it
 const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { } } };
+/* Name tags (owner, 2026-11-03): every shape shows its name above it, which suits a diagram and covers a picture (the faces of the Cartoon
+   and of the scenes under "RoboEye"). The footer's "names" switch shows or hides them; the user's choice is kept in this browser (default on).
+   A scenario with names: false (scenarios.js: the Cartoon and every scene of scenes-extra.js) turns them off when it starts, without
+   changing the kept choice; any other scenario puts the kept choice back. Hidden tags still show on hover (the shape's <title>), and the
+   view's fit and the arrow labels stop leaving room for them. Also, always: a small shape that lies on a bigger one (its body's box inside
+   the other's, at most half its area; a panel does not count) shows no tag (tuckedNames), because it would sit on the bigger shape's body
+   (an eye on a head, a window on a house); its name is on hover and in the details. */
+const NAMES_KEY = 'sop.names.off';
+let namesPref = store.get(NAMES_KEY) !== '1', showNames = namesPref, tucked = new Set();
+/** the names of the shapes that lie on a bigger shape (see "Name tags") */
+function tuckedNames(shapes) {
+  const box = s => { const d = K.dims(s); return { x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2, a: d.w * d.h }; };
+  const solid = shapes.filter(s => !s.layer && s.shape !== 'text' && Number.isFinite(s.x) && Number.isFinite(s.y)).map(s => [s, box(s)]), out = new Set();
+  for (const [s, b] of solid) if (solid.some(([o, c]) => o !== s && b.a * 2 <= c.a && b.x1 >= c.x1 - 1 && b.x2 <= c.x2 + 1 && b.y1 >= c.y1 - 1 && b.y2 <= c.y2 + 1)) out.add(s.name);
+  return out;
+}
+/** does s show its name tag now */
+const tagShown = s => !s.layer && s.shape !== 'text' && !s.quiet && showNames && !tucked.has(s.name);
+function setShowNames(on, keep) {
+  showNames = !!on; if (keep) { namesPref = showNames; store.set(NAMES_KEY, showNames ? null : '1'); }
+  const b = document.getElementById('names-btn'); if (b) { b.setAttribute('aria-pressed', String(showNames)); b.title = showNames ? 'Hide the names above the shapes' : 'Show the names above the shapes'; }
+}
 const clock = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 // Collected requests (owner, 2026-11-03; docs/js/collect.js, training/sketch/COLLECT_FORMAT.md): every message the user sends (typed, spoken,
 // an example or a reply's button; not the opening message, not SOP Lang or the toolbar) is kept in this browser with the model versions and
@@ -96,7 +119,8 @@ const neuralLevel = (NC, spec) => neuralGate && (!spec || neuralGate === 'all' |
 async function neuralOwnGate(n) {
   const NC = await ncP; if (!NC || !n || !n.joint) return null;
   let spec = null; try { spec = await neuralSpec(); } catch (e) { console.error(e); }
-  return NC.gate(spec, n, neuralLevel(NC, spec));
+  const g = NC.gate(spec, n, neuralLevel(NC, spec)); if (g) g.safe = spec ? NC.threshold(spec, 'cost') : NaN;
+  return g;
 }
 // VSS-BERT (READERS id 'combined'; owner, 2026-11-02 21:57 and 22:08): the combined reader of VSS and SOP-BERT (docs/js/combined-confidence.js;
 // model docs/model/confidence/combined.json, versioned; training/sketch/combine/COMBINED_READER.md). Both readers read the units of the BERT
@@ -178,7 +202,8 @@ async function combinedRead(rd, text, rec, ctx) {
   }
   const all = units.flatMap(u => u.nodes), run = new Set(units.filter(u => u.execute).flatMap(u => u.nodes));
   const t = res ? res.threshold : combGate === 'all' ? -Infinity : Infinity;
-  const gate = { level: combGate, effective: combGate, threshold: t, units, executed: all.filter(x => run.has(x)), held: units.filter(u => !u.execute) };
+  const gate = { level: combGate, effective: combGate, threshold: t, units, executed: all.filter(x => run.has(x)), held: units.filter(u => !u.execute),
+    safe: res && spec && CC ? CC.threshold(spec, res.cut, 'cost') : NaN };   // what a destructive request needs (holdDestructive)
   const notes = [];
   if (n.cutBy !== 'model') notes.push('The SOP-BERT model has no cut head (the BERT cutter), so the whole message was read as one request.');
   const combineMs = performance.now() - tc;
@@ -304,7 +329,7 @@ function columnGate(base, items, list, level, levels, whyOf) {
   }
   const run = new Set(base.units.filter(g => g.execute).flatMap(g => g.nodes));
   const thresholds = { command: VT.thresholdOf(levels, level, 'command:'), question: VT.thresholdOf(levels, level, 'question:') };
-  return Object.assign(base, { level, effective: level, label: gateLabel(level), threshold: thresholds.command, thresholds, method: 'votes', executed: base.executed.filter(n => !n.unit || run.has(n)), held: base.units.filter(g => !g.execute) });
+  return Object.assign(base, { level, effective: level, label: gateLabel(level), threshold: thresholds.command, thresholds, method: 'votes', safe: VT.thresholdOf(levels, 'cost', 'command:'), executed: base.executed.filter(n => !n.unit || run.has(n)), held: base.units.filter(g => !g.execute) });
 }
 /** the plain-words reasons of a held request of a column: who reads it the same, then what the reader itself was unsure of (its own signals
  *  under the column's weights, the sentences of vss-confidence.js / neural-confidence.js) */
@@ -337,7 +362,8 @@ GATES.vss = async (v, rec, r) => {
   const VT = await vtP; let spec = null; try { spec = await voteSpec(); } catch (e) { console.error(e); }
   const votes = rec ? await votesOf(rec, 'vss') : null;   // column vss: the VSS cut
   const why = !VT || !spec ? 'the model of the votes (confidence/vote3.json) could not be loaded' : noVoteWhy(votes, 'SOP-BERT', RD.neural);
-  if (why) { const g = aloneReasons(await window.VSSFormalizer.gate(v, vssGate), why, 'VSS'); if (g) g.fallback = `${why}, so VSS used its own confidence alone (confidence/vss.json)`; return g; }
+  if (why) { const g = aloneReasons(await window.VSSFormalizer.gate(v, vssGate), why, 'VSS'); if (g) { g.fallback = `${why}, so VSS used its own confidence alone (confidence/vss.json)`;
+    const VCm = await vcP; let vm = null; try { vm = await window.VSSFormalizer.loadConfidence(); } catch (e) { console.error(e); } g.safe = VCm && vm ? VCm.threshold(vm, 'cost') : NaN; } return g; }
   const VCm = await vcP, C = spec.columns.vss, m = voteMsg(votes, RD.vss), items = VT.columnVss(spec, m, vssGate, VOTE_OPTS);
   const own = VCm ? VT.ownSpec(C.model) : null;
   return Object.assign(columnGate(await window.VSSFormalizer.gate(v, 'all'), items, m.vss, vssGate, C.levels, held => held.length ? columnWhy('VSS', m.vss[held[0].j], [
@@ -464,6 +490,7 @@ function drawShape(g, s) {
   const { w, h } = K.dims(s), tint = K.PALETTE_TINT[s.fill];   /* fill=light / faint / none: the body's fill opacity (logic.js PALETTE_TINT) */
   if (s.shape === 'text') {   /* a free text: no body, no name tag; its colour is the text's */
     if (hl.shapes.has(s.name)) el('rect', { class: 'halo', x: -w / 2 - 5, y: -h / 2 - 4, width: w + 10, height: h + 8, rx: 8 }, grp);
+    if (selItem && selItem.shape === s.name) el('rect', { class: 'selbox', x: -w / 2 - 5, y: -h / 2 - 4, width: w + 10, height: h + 8, rx: 8 }, grp);
     const t = el('text', { class: 'ftext', x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': K.fontOf(s), style: `fill: ${pc(s.color || 'black', 'line')}` }, grp); t.textContent = s.label || '';
     return;
   }
@@ -475,11 +502,12 @@ function drawShape(g, s) {
   else if (pts) el('polygon', Object.assign({ points: pts.map(p => p.map(v => v.toFixed(1)).join(',')).join(' '), 'stroke-linejoin': 'round' }, attrs), grp);
   else el('rect', Object.assign({ x: -w / 2, y: -h / 2, width: w, height: h, rx: 6 }, attrs), grp);
   if (hl.shapes.has(s.name)) el('rect', { class: 'halo', x: -w / 2 - 7, y: -h / 2 - 7, width: w + 14, height: h + 14, rx: 10 }, grp);
+  if (selItem && selItem.shape === s.name) el('rect', { class: 'selbox', x: -w / 2 - 5, y: -h / 2 - 5, width: w + 10, height: h + 10, rx: 8 }, grp);
   /* the name above the shape; a template's own shapes do not show it (their texts say what they are; the details list the names), nor does
      a panel (a background or a zone: its group's frame, its caption and the details name it, and its name shows on hover), so that no
      shape laid out on a zone sits under the zone's name */
-  if (s.layer === 'background' || s.layer === 'zone') el('title', {}, grp).textContent = s.name;
-  else if (!s.quiet) { const tag = el('text', { class: 'tag', x: 0, y: -h / 2 - (hl.shapes.has(s.name) ? 12 : 7), 'text-anchor': 'middle' }, grp); tag.textContent = s.name; }
+  if (s.layer === 'background' || s.layer === 'zone' || !tagShown(s)) el('title', {}, grp).textContent = s.name;
+  if (tagShown(s)) { const tag = el('text', { class: 'tag', x: 0, y: -h / 2 - (hl.shapes.has(s.name) ? 12 : 7), 'text-anchor': 'middle' }, grp); tag.textContent = s.name; }
   if (s.label) {
     const room = s.shape === 'rectangle' || s.shape === 'square' || s.shape === 'ellipse' || s.shape === 'circle' ? w * 0.84 : w * 0.56;
     let fs = s.w ? Math.max(10, Math.min(15, s.h / 2.8)) : Math.max(9, Math.min(14, s.size / 4.4)), txt = s.label;   // a box of its own size: the font follows its height
@@ -489,13 +517,34 @@ function drawShape(g, s) {
     t.textContent = txt;
   }
 }
-function drawEdge(g, e, a, b, offset, taken) {
+/* an arrow that bends round the shapes in its way (logic.js edgeRoutes: the bends, and a free place for its label) */
+function drawRoutedEdge(g, e, a, b, bends, lab) {
+  const P = [{ x: a.x, y: a.y }].concat(bends, [{ x: b.x, y: b.y }]);
+  const unit = (p, q) => { const dx = q.x - p.x, dy = q.y - p.y, L = Math.hypot(dx, dy) || 1; return [dx / L, dy / L]; };
+  const [ux0, uy0] = unit(P[0], P[1]), [ux1, uy1] = unit(P[P.length - 2], P[P.length - 1]);
+  const x1 = a.x + ux0 * (rayDist(a, ux0, uy0) + 3), y1 = a.y + uy0 * (rayDist(a, ux0, uy0) + 3), x2 = b.x - ux1 * (rayDist(b, -ux1, -uy1) + 3), y2 = b.y - uy1 * (rayDist(b, -ux1, -uy1) + 3);
+  const grp = el('g', { class: 'edge' + (hl.edges.has(e.id) ? ' hl' : '') + (selItem && selItem.edge === e.id ? ' sel' : ''), 'data-edge': e.id }, g);
+  const col = e.color ? pc(e.color, 'line') : null;
+  const head = (tx, ty, vx, vy) => { const bx = tx - vx * 11, by = ty - vy * 11; el('polygon', { class: 'hd', points: `${tx},${ty} ${bx - vy * 5},${by + vx * 5} ${bx + vy * 5},${by - vx * 5}`, style: col ? `fill:${col}` : '' }, grp); };
+  const sx = e.arrow === 'both' ? x1 + ux0 * 9 : x1, sy = e.arrow === 'both' ? y1 + uy0 * 9 : y1;
+  const ex = e.arrow === 'none' ? x2 : x2 - ux1 * 9, ey = e.arrow === 'none' ? y2 : y2 - uy1 * 9;
+  const pts = [[sx, sy]].concat(bends.map(p => [p.x, p.y]), [[ex, ey]]);
+  const ln = el('polyline', { class: 'ln', points: pts.map(p => p.map(v => (+v).toFixed(1)).join(',')).join(' '), 'stroke-linejoin': 'round', style: col ? `stroke:${col}` : '' }, grp);
+  if (e.style === 'dashed') ln.setAttribute('stroke-dasharray', '8 6');
+  if (e.style === 'dotted') { ln.setAttribute('stroke-dasharray', '0.5 6'); ln.setAttribute('stroke-linecap', 'round'); ln.setAttribute('stroke-width', '2.6'); }
+  if (e.width) ln.setAttribute('stroke-width', String(e.style === 'dotted' ? Math.max(2.6, e.width + 0.6) : e.width));
+  if (e.arrow !== 'none') head(x2, y2, ux1, uy1);
+  if (e.arrow === 'both') head(x1, y1, -ux0, -uy0);
+  if (e.label && lab) { const t = el('text', { class: 'elbl', x: lab.x, y: lab.y, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, grp); t.textContent = e.label; }
+}
+function drawEdge(g, e, a, b, offset, taken, via) {
+  if (via && via.points && via.points.length) return drawRoutedEdge(g, e, a, b, via.points, via.label);
   let dx = b.x - a.x, dy = b.y - a.y; const L = Math.hypot(dx, dy) || 1; const ux = dx / L, uy = dy / L;
   const ox = -uy * offset, oy = ux * offset;
   const ra = rayDist(a, ux, uy) + 3, rb = rayDist(b, -ux, -uy) + 3;
   if (ra + rb >= L - 4) return;
   const x1 = a.x + ux * ra + ox, y1 = a.y + uy * ra + oy, x2 = b.x - ux * rb + ox, y2 = b.y - uy * rb + oy;
-  const grp = el('g', { class: 'edge' + (hl.edges.has(e.id) ? ' hl' : '') }, g);
+  const grp = el('g', { class: 'edge' + (hl.edges.has(e.id) ? ' hl' : '') + (selItem && selItem.edge === e.id ? ' sel' : ''), 'data-edge': e.id }, g);
   const col = e.color ? pc(e.color, 'line') : null;
   const head = (tx, ty, vx, vy) => { const bx = tx - vx * 11, by = ty - vy * 11; el('polygon', { class: 'hd', points: `${tx},${ty} ${bx - vy * 5},${by + vx * 5} ${bx + vy * 5},${by - vx * 5}`, style: col ? `fill:${col}` : '' }, grp); };
   const sx = e.arrow === 'both' ? x1 + ux * 9 : x1, sy = e.arrow === 'both' ? y1 + uy * 9 : y1;
@@ -510,7 +559,7 @@ function drawEdge(g, e, a, b, offset, taken) {
     /* beside the arrow, at its middle; when a shape, a name tag or a text is there, the first free spot further along it or on its other side */
     const lw = String(e.label).length * 6.8 + 4, free = (cx, cy) => !(taken || []).some(o => Math.min(o.x2, cx + lw / 2) - Math.max(o.x1, cx - lw / 2) > 0.5 && Math.min(o.y2, cy + 8) - Math.max(o.y1, cy - 8) > 0.5);
     const spots = []; for (const f of [0.5, 0.38, 0.62, 0.26, 0.74]) for (const side of [1, -1]) { const off = side * (12 + Math.abs(uy) * lw / 2); spots.push([x1 + (x2 - x1) * f - uy * off, y1 + (y2 - y1) * f + ux * off]); }
-    const [lx, ly] = spots.find(([cx, cy]) => free(cx, cy)) || spots[0];
+    const [lx, ly] = via && via.label ? [via.label.x, via.label.y] : spots.find(([cx, cy]) => free(cx, cy)) || spots[0];
     const t = el('text', { class: 'elbl', x: lx, y: ly, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, grp); t.textContent = e.label;
   }
 }
@@ -544,9 +593,10 @@ let stagePanel = null;
 const FIT_MIN = { w: 560, h: 350 }, FIT_PAD = 24;
 /** the drawing's own extent: its shapes' bodies and name tags, a margin, at least FIT_MIN, centred on them -> {x1, y1, x2, y2} | null */
 function contentExtent(shapes) {
+  shapes = shapes.filter(s => Number.isFinite(s.x) && Number.isFinite(s.y));
   if (!shapes.length) return null;
   const boxes = shapes.map(s => { const d = K.dims(s); return { x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2 }; })
-    .concat(shapes.filter(s => !s.layer && s.shape !== 'text' && !s.quiet).map(s => K.tagBox(s)));
+    .concat(shapes.filter(tagShown).map(s => K.tagBox(s)));
   let x1 = Math.min(...boxes.map(b => b.x1)) - FIT_PAD, x2 = Math.max(...boxes.map(b => b.x2)) + FIT_PAD, y1 = Math.min(...boxes.map(b => b.y1)) - FIT_PAD, y2 = Math.max(...boxes.map(b => b.y2)) + FIT_PAD;
   if (x2 - x1 < FIT_MIN.w) { const m = (x1 + x2) / 2; x1 = m - FIT_MIN.w / 2; x2 = m + FIT_MIN.w / 2; }
   if (y2 - y1 < FIT_MIN.h) { const m = (y1 + y2) / 2; y1 = m - FIT_MIN.h / 2; y2 = m + FIT_MIN.h / 2; }
@@ -557,7 +607,7 @@ function stageExtent(shapes) {
   if (!panels.length) return null;
   const panel = panels.reduce((a, b) => (K.dims(b).w * K.dims(b).h > K.dims(a).w * K.dims(a).h ? b : a));
   const boxes = shapes.map(s => { const d = K.dims(s); return { x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2 }; })
-    .concat(shapes.filter(s => !s.layer && s.shape !== 'text' && !s.quiet).map(s => K.tagBox(s)));
+    .concat(shapes.filter(tagShown).map(s => K.tagBox(s)));
   const e = { x1: Math.min(...boxes.map(b => b.x1)), y1: Math.min(...boxes.map(b => b.y1)), x2: Math.max(...boxes.map(b => b.x2)), y2: Math.max(...boxes.map(b => b.y2)) };
   return Object.assign(e, { panel });
 }
@@ -567,9 +617,12 @@ function washOutside(p) {
   const hole = `M${x + r} ${y}H${x + w - r}A${r} ${r} 0 0 1 ${x + w} ${y + r}V${y + h - r}A${r} ${r} 0 0 1 ${x + w - r} ${y + h}H${x + r}A${r} ${r} 0 0 1 ${x} ${y + h - r}V${y + r}A${r} ${r} 0 0 1 ${x + r} ${y}Z`;
   el('path', { class: 'wash', d: `M-5000 -5000H15000V15000H-5000Z${hole}`, 'fill-rule': 'evenodd', style: `fill: ${pc(p.color, 'fill')}; pointer-events: none`, 'fill-opacity': tint != null ? tint : 1 }, framesG);
 }
+let dockNames = null;   // the dictation dock's name chips (voice.js setNames), set once the dock is mounted
 function renderCanvas() {
   layer.textContent = ''; framesG.textContent = '';
+  if (dockNames) dockNames(world.state.shapes.map(s => s.name).concat((world.state.groups || []).map(g => g.name)));
   const S = world.state, by = new Map(S.shapes.map(s => [s.name, s])), cells = cellsInUse();
+  tucked = tuckedNames(S.shapes);
   const narrow = svg.clientWidth > 0 && svg.clientWidth < 640;
   const focus = view === 'focus' || (view === 'auto' && narrow);
   if (focus) {
@@ -601,15 +654,17 @@ function renderCanvas() {
     if (f && f.title) { const t = el('text', { class: 'ftitle', x: c.x + 14, y: c.y - 9 }, framesG); t.textContent = f.title; }
   }
   if (!S.shapes.length) { const f = S.frame || { x: 0, y: 0 }, t = el('text', { class: 'empty-note', x: f.x + 400, y: f.y + 250, 'text-anchor': 'middle' }, layer); t.textContent = 'Nothing here yet. Write what to draw.'; }
-  const gg = el('g', {}, layer), eg = el('g', {}, layer), sg = el('g', {}, layer);
+  const gg = el('g', {}, layer), pg = el('g', {}, layer), eg = el('g', {}, layer), sg = el('g', {}, layer);   // panels (background, zones) behind the arrows, so an arrow and its label are never under a zone
   drawGroups(gg, S);
   const taken = [];   /* what an arrow's label must not cover: the shapes' bodies, their name tags and the free texts */
-  for (const s of S.shapes) { if (s.layer) continue; const d = K.dims(s); taken.push({ x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2 }); if (s.shape !== 'text' && !s.quiet) taken.push(K.tagBox(s)); }
+  for (const s of S.shapes) { if (s.layer) continue; const d = K.dims(s); taken.push({ x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2 }); if (tagShown(s)) taken.push(K.tagBox(s)); }
+  const routes = K.edgeRoutes ? K.edgeRoutes(S) : {};   /* bends round the shapes in the way, and label places (logic.js edgeRoutes) */
   for (const e of S.edges) {
     const a = by.get(e.from), b = by.get(e.to); if (!a || !b) continue;
-    drawEdge(eg, e, a, b, S.edges.some(o => o !== e && o.from === e.to && o.to === e.from) ? 6 : 0, taken);
+    const pair = S.edges.some(o => o !== e && o.from === e.to && o.to === e.from);
+    drawEdge(eg, e, a, b, pair ? 6 : 0, taken, pair ? null : routes[e.id]);
   }
-  for (const s of S.shapes) drawShape(sg, s);
+  for (const s of S.shapes) drawShape(s.layer === 'background' || s.layer === 'zone' ? pg : sg, s);
   fitIfNew(); applyZoom();   // the automatic fit above, then the view's zoom and pan (see "Zoom and pan")
   const n = S.shapes.length, m = S.edges.length;
   $('#readout').textContent = `${n} shape${n === 1 ? '' : 's'} · ${m} link${m === 1 ? '' : 's'}`;
@@ -637,8 +692,77 @@ svg.addEventListener('pointermove', ev => {
 const endDrag = () => {
   if (!drag) return; const d = drag; drag = null;
   if (d.moved) { world.commit(d.before); cur.last = [d.name]; updateTabs(); }
+  else {   // a click without a move selects the shape; a second click on it within 450 ms is a double-click (Direct editing; the first
+    // click re-renders the drawing, so the browser's own dblclick does not always reach the new element)
+    const now = Date.now(), dbl = lastShapeClick && lastShapeClick.name === d.name && now - lastShapeClick.t < 450;
+    lastShapeClick = dbl ? null : { name: d.name, t: now };
+    if (dbl) editInline({ shape: d.name }); else select({ shape: d.name });
+  }
 };
 svg.addEventListener('pointerup', endDrag); svg.addEventListener('pointercancel', endDrag);
+
+/* Direct editing (owner, 2026-11-03): a click selects a shape, a free text or an arrow (a dashed frame or a highlighted line; a click on the
+   empty canvas or Escape clears it); Delete or Backspace, with the focus outside any text field, deletes the selected item; a double-click
+   on a shape, a free text or an arrow opens a small input over its text (a shape with no label gets one), Enter saves and Escape cancels.
+   Each change goes through the engine as a SOP Lang message, like the toolbar's buttons: it shows in the chat ("Delete Check" → "Deleted
+   Check."), is read by every tab, and undo takes it back in one step. */
+let lastShapeClick = null;
+function select(it) { if (JSON.stringify(it) === JSON.stringify(selItem)) return; selItem = it; renderCanvas(); }
+svg.addEventListener('click', ev => {
+  const eg = ev.target.closest && ev.target.closest('.edge');
+  if (eg && eg.dataset.edge) {   // a second click within 450 ms: the inline editor of its label (as for shapes, endDrag)
+    const now = Date.now(), id = eg.dataset.edge, dbl = lastShapeClick && lastShapeClick.name === 'edge:' + id && now - lastShapeClick.t < 450;
+    lastShapeClick = dbl ? null : { name: 'edge:' + id, t: now };
+    if (dbl) editInline({ edge: id }); else select({ edge: id }); return; }
+  if (ev.detail > 1) return;
+  if (!(ev.target.closest && ev.target.closest('.shp')) && !svg.classList.contains('panned') && selItem) select(null);
+});
+const sopText = t => String(t).replace(/["\n\r]+/g, ' ').trim();   // a label in a SOP Lang wire (quotes inside are dropped)
+const edgeById = id => world.state.edges.find(e => e.id === id);
+function deleteSelected() {
+  const it = selItem; if (!it) return false;
+  if (it.shape) { const s = world.find(it.shape); if (!s) { select(null); return false; } selItem = null; submit(`Delete ${s.name}`, `@d command action=delete target=${s.name}`); return true; }
+  const e = edgeById(it.edge); if (!e) { select(null); return false; } selItem = null;
+  submit(`Disconnect ${e.from} from ${e.to}`, `@d command action=disconnect from=${e.from} to=${e.to}`); return true;
+}
+document.addEventListener('keydown', ev => {
+  if (!selItem || ev.defaultPrevented) return;
+  const t = ev.target, typing = t && (t.isContentEditable || /^(?:INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+  if (typing || sub !== 'drawing') return;
+  if (ev.key === 'Delete' || ev.key === 'Backspace') { ev.preventDefault(); deleteSelected(); }
+  else if (ev.key === 'Escape') select(null);
+});
+/** the inline editor over a text: target {shape: name} | {edge: id}; Enter saves through the engine, Escape (or leaving it) cancels */
+function editInline(target) {
+  const old = document.querySelector('.inl-edit'); if (old) old.remove();
+  let anchorEl, value = '', label;
+  if (target.shape) {
+    const s = world.find(target.shape); if (!s || s.layer === 'background') return;
+    const g = layer.querySelector(`.shp[data-name="${CSS.escape(s.name)}"]`); if (!g) return;
+    anchorEl = g.querySelector('.lbl, .ftext') || g; value = s.label || ''; label = s.shape === 'text' ? `the text of ${s.name}` : `the label of ${s.name}`;
+  } else {
+    const e = edgeById(target.edge); if (!e) return;
+    const g = layer.querySelector(`.edge[data-edge="${CSS.escape(e.id)}"]`); if (!g) return;
+    anchorEl = g.querySelector('.elbl') || g; value = e.label || ''; label = `the label of the arrow ${e.from} → ${e.to}`;
+  }
+  const board = document.querySelector('.board'), br = board.getBoundingClientRect(), r = anchorEl.getBoundingClientRect();
+  const inp = document.createElement('input'); inp.type = 'text'; inp.className = 'inl-edit'; inp.value = value; inp.setAttribute('aria-label', `Edit ${label}`); inp.placeholder = 'label';
+  const w = Math.max(90, Math.min(br.width - 16, r.width + 40));
+  inp.style.left = Math.max(4, Math.min(br.width - w - 4, r.left - br.left + r.width / 2 - w / 2)) + 'px'; inp.style.top = Math.max(4, r.top - br.top + r.height / 2 - 15) + 'px'; inp.style.width = w + 'px';
+  board.appendChild(inp); inp.focus(); inp.select();
+  let done = false;
+  const close = () => { done = true; inp.remove(); };
+  inp.addEventListener('keydown', ev => {
+    if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); close(); return; }
+    if (ev.key !== 'Enter') return;
+    ev.preventDefault(); const v = sopText(inp.value); close();
+    if (v === sopText(value)) return;
+    if (target.shape) { const s = world.find(target.shape); if (s) submit(v ? `Label ${s.name} "${v}"` : `Remove the label of ${s.name}`, `@l command action=label target=${s.name} label="${v}"`); }
+    else { const e = edgeById(target.edge); if (e) submit(v ? `Label the arrow from ${e.from} to ${e.to} "${v}"` : `Remove the label of the arrow from ${e.from} to ${e.to}`, `@l command action=label from=${e.from} to=${e.to} label="${v}"`); }
+  });
+  inp.addEventListener('blur', () => { if (!done) close(); });
+}
+svg.addEventListener('dblclick', ev => ev.preventDefault());   // no text selection; shapes: endDrag, arrows: the click handler above
 
 /* Zoom and pan (owner, 2026-11-03 afternoon): a pure view transform, the svg's viewBox around the automatic fit that renderCanvas computes
    (the edge-to-edge panel view); nothing in the engine changes. zv: the zoom factor k (1 = the fit) and the pan (dx, dy, world units from
@@ -650,7 +774,7 @@ const zv = { k: 1, dx: 0, dy: 0 }, ZMIN = 0.25, ZMAX = 8, ZSTEP = 1.25;
 let vbBase = { x: 0, y: 0, w: 800, h: 500 }, vbNow = vbBase;
 const fitKeys = new Map();   // per tab: its frame and whether it is empty, to see a new drawing
 const zoomedNow = () => zv.k !== 1 || zv.dx !== 0 || zv.dy !== 0;
-function setBase(s) { const [x, y, w, h] = String(s).split(/\s+/).map(Number); vbBase = { x, y, w, h }; }
+function setBase(s) { const [x, y, w, h] = String(s).split(/\s+/).map(Number); if ([x, y, w, h].every(Number.isFinite) && w > 0 && h > 0) vbBase = { x, y, w, h }; }   // never a NaN view (a shape at NaN once broke zoom and fit)
 function applyZoom() {
   const b = vbBase, w = b.w / zv.k, h = b.h / zv.k, cx = b.x + b.w / 2 + zv.dx, cy = b.y + b.h / 2 + zv.dy;
   vbNow = { x: cx - w / 2, y: cy - h / 2, w, h };
@@ -705,7 +829,7 @@ svg.addEventListener('pointermove', ev => {
   if (!pan.moved) { pan.moved = true; try { svg.setPointerCapture(ev.pointerId); } catch (e) { /* gone */ } svg.classList.add('panning'); }
   zv.dx = pan.dx0 - mx * pan.upp; zv.dy = pan.dy0 - my * pan.upp; applyZoom();
 });
-const endPan = ev => { ptrs.delete(ev.pointerId); if (ptrs.size < 2) pinch = null; if (pan && pan.id === ev.pointerId) { pan = null; svg.classList.remove('panning'); } };
+const endPan = ev => { ptrs.delete(ev.pointerId); if (ptrs.size < 2) pinch = null; if (pan && pan.id === ev.pointerId) { svg.classList.toggle('panned', pan.moved); pan = null; svg.classList.remove('panning'); setTimeout(() => svg.classList.remove('panned'), 0); } };
 svg.addEventListener('pointerup', endPan); svg.addEventListener('pointercancel', endPan);
 svg.addEventListener('wheel', ev => { if (!ev.ctrlKey && !ev.metaKey) return; ev.preventDefault(); zoomBy(Math.exp(-ev.deltaY * 0.0025), svgPt(ev)); }, { passive: false });
 svg.addEventListener('keydown', ev => {
@@ -718,6 +842,8 @@ svg.addEventListener('keydown', ev => {
 $('#zoom-in').addEventListener('click', () => zoomBy(ZSTEP));
 $('#zoom-out').addEventListener('click', () => zoomBy(1 / ZSTEP));
 $('#zoom-fit').addEventListener('click', () => zoomFit());
+$('#names-btn').addEventListener('click', () => { setShowNames(!showNames, true); renderCanvas(); });
+setShowNames(showNames);
 
 /* ---------------- chat ---------------- */
 const scrollDown = () => { msgs.scrollTop = msgs.scrollHeight; };
@@ -1087,10 +1213,46 @@ function trackHeld(rd, rec, r) {
   supersedeHeld(rd, doneOf(r.result, r.allNodes || r.nodes));
   if (r.gate) for (const h of r.gate.held) if (h.clar) (rd.held || (rd.held = [])).push({ turn: rec.id, index: h.index, reading: h.clar.input.reading, input: h.clar.input, opts: h.clar.opts, state: 'held' });
 }
+// Destructive requests: cautious by design (owner's session 2026-11-03, training/sketch/collected/SESSION_1_ANALYSIS.md: at "execute all" a
+// delete of "the background boxes" removed Process with its links, and a delete of a quoted title forgot the rules twice; the one request
+// the default level let through was the confident delete of four shapes). logic.js holdDestructive: (a) delete, disconnect, forget, clear and
+// an ungroup that removes a group execute only at or above the tab's DEFAULT safety threshold (gate.safe), whatever level is chosen,
+// "execute all" included; (b) such a request whose target is a description that would remove more than one item is held in every tab, the
+// Rules too, and the reply lists the items; (c) every held destructive request says exactly what Do it anyway would remove.
+/** the policy on one reader's part of a message: its gate (a learned reader) or, for the Rules, a gate made only when the policy holds
+ *  something (one unit per command with the descriptions it uses; the Rules have no confidence, so only rule (b) applies) */
+function holdDestructiveIn(rd, r, text) {
+  if (!K.holdDestructive || r.error) return;
+  let g = r.gate;
+  if (!g) {
+    if (rd.id !== 'rules' || !r.nodes.some(n => n.type === 'command' && K.DESTRUCTIVE.includes(n.args && n.args.action))) return;
+    const main = r.nodes.filter(n => n.type !== 'mention'), segs = (r.rulesRes && r.rulesRes.segments) || [];
+    const units = main.map((n, index) => { const own = new Set(refsIn(Object.values(n.args)));
+      const seg = segs.find(x => x.id === n.id);
+      return { index, src: main.length === 1 ? text.trim() : (seg && seg.src) || n.src || K.serialize(n), conf: NaN, execute: true, reasons: [], dependsOn: [], nodes: r.nodes.filter(m => m === n || (m.type === 'mention' && own.has(m.id))) }; });
+    g = { level: 'rules', effective: 'rules', label: 'no confidence (the Rules execute what they read; a request that would remove several described items asks first)', threshold: -Infinity, units, executed: r.nodes.slice(), held: [] };
+    if (!K.holdDestructive(rd.engine, units, { gated: false, overrides: r.overrides })) { units.forEach(u => { if (u.destructive) delete u.destructive; }); return; }
+    r.gate = g; r.allNodes = r.nodes;
+  } else K.holdDestructive(rd.engine, g.units, { safe: g.safe, overrides: r.overrides });
+  const run = new Set(g.units.filter(u => u.execute).flatMap(u => u.nodes)), unitOf = new Set(g.units.flatMap(u => u.nodes));
+  g.executed = (r.allNodes || r.nodes).filter(n => run.has(n) || (!unitOf.has(n) && g.executed.includes(n)));
+  g.held = g.units.filter(u => !u.execute); r.nodes = g.executed;
+}
+/** the chat's block of a held destructive request: the policy's reason first, the items when it listed them ("Delete Start and Done? Write
+ *  their names, or press Do it anyway."), and exactly what Do it anyway would remove (also when it was held for another reason) */
+function destructiveView(view, h) {
+  const d = h.destructive, own = (h.reasons || []).filter(x => x.group === 'destructive').map(x => x.text);
+  view.reasons = [...new Set(own.concat(view.reasons || []))].slice(0, 3);
+  if (d.described && d.count > 1) view.line = `${d.question} Write their names, or press Do it anyway.`;
+  view.runs = `Do it anyway would ${d.verb === 'delete' ? 'delete' : d.verb === 'forget' ? 'forget' : 'remove'} ${d.removes}.`;
+  if (d.action === 'delete' && d.shapes.length) view.edit = `delete ${d.shapes.join(', ')}`;
+  view.canAnyway = view.canAnyway !== false;
+}
 /** one reader reads (formalizes) one message, nothing is executed yet: fills rec.readers[rd.id]; returns null, or the reply's line when it failed */
 async function readPart(rd, text, rec, pk) {
   const r = { nodes: [], notes: [], overrides: {} }; rec.readers[rd.id] = r;
-  const ctx = { names: rd.world.state.shapes.map(s => s.name).concat((rd.world.state.groups || []).map(g => g.name)), last: rd.last };   // group names are names too (VSS reads a name only if it is listed)
+  const ctx = { names: rd.world.state.shapes.map(s => s.name).concat((rd.world.state.groups || []).map(g => g.name)), last: rd.last,   // group names are names too (VSS reads a name only if it is listed)
+    texts: rd.world.state.shapes.filter(s => s.label != null && String(s.label).trim() !== '').map(s => String(s.label)) };   // the texts the items show: the Rules read "delete Order flow" as the item showing it (logic.js textRefsOut)
   r.names = ctx.names; r.ctx = ctx;
   // the time is the formalizing only (text -> SOP wires), not the engine or the drawing; VSS and Neural are loaded before they read
   const t0 = performance.now();
@@ -1120,6 +1282,7 @@ async function doPart0(rd, text, rec, pk, pend) {
     // then the name rule (holdNamed)
     const gf = !pk && !rec.raw ? GATES[rd.id] : null, gsrc = rd.id === 'vss' ? r.vss : rd.id === 'combined' ? r.combined : r.neural;
     if (gf && gsrc) { const g = await gf(gsrc, rec, r); if (g) { holdNamed(g, r.names); r.gate = g; r.allNodes = r.nodes; r.nodes = g.executed; } }
+    if (!pk && !rec.raw) holdDestructiveIn(rd, r, text);   // destructive requests: cautious by design (logic.js holdDestructive)
   } catch (e) { r.error = e; return { text: `The ${rd.label} reader failed: ${e.message}`, err: true, ms: r.ms }; }
   const ms = r.ms, nodes = r.nodes, notes = r.notes, world = rd.world, engine = rd.engine;
   rd.reads++; rd.lastRead = { turn: rec.id, nodes };
@@ -1130,6 +1293,7 @@ async function doPart0(rd, text, rec, pk, pend) {
   const opts = clarifyOpts(r);
   const held = r.gate ? r.gate.held.map(h => {
     const input = clarifyInput(r, h), view = CLm ? CLm.heldView(input, opts) : { src: h.src, reasons: h.reasons.map(x => x.text), line: null, runs: null, anyway: null, canAnyway: true, edit: null };
+    if (h.destructive) destructiveView(view, h);
     h.clar = { input, opts, view };
     return { reader: rd.id, turn: rec.id, index: h.index, view };
   }) : [];
@@ -1235,7 +1399,7 @@ function hlValue(raw) {
 }
 function hlNode(n) {
   const line = K.serialize(n); const head = `<span class="wid">@${escH(n.id)}</span> <span class="wt">${escH(n.type)}</span>`;
-  const keys = line.split(' ').slice(2).map(t => t.split('=')[0]);
+  const order = (line.match(/ ([A-Za-z_]\w*)=/g) || []).map(t => t.trim().slice(0, -1)), keys = Object.keys(n.args).filter(k => n.args[k] != null && !(Array.isArray(n.args[k]) && !n.args[k].length)).sort((a, b) => order.indexOf(a) - order.indexOf(b));   // a quoted value may hold spaces ("Order flow")
   const body = keys.map(k => { const q = engine.legend.get(k); return ` <span class="k"${q && q.ask ? ` title="${escH(q.ask)}"` : ''}>${escH(k)}</span><span class="cm">=</span>${hlValue(n.args[k])}`; }).join('');
   return `<span class="${n.type === 'mention' ? 'ln-mention' : ''}">${head}${body}</span>`;
 }
@@ -1358,13 +1522,18 @@ const QUICK = [
   'Describe the diagram',
   '@g1 command action=create shape=star color=gold name=Gem position=center'
 ];
+/** one scenario's card in the + menu (a scene marked test: llm_bench/scenes_test, shown here, never trained on) */
+const scCard = sc => `<article class="sc"><header><h4>${escH(sc.title)}${sc.test ? ' <span class="tst" title="A scene of the test set (training/sketch/llm_bench/scenes_test): shown in the demo, never trained on">test</span>' : ''}</h4><span class="len">${sc.size} · ${sc.turns.length} message${sc.turns.length === 1 ? '' : 's'}</span></header><p>${escH(sc.blurb)}</p><div class="row2"><button type="button" class="btn solid" data-sc="${sc.id}" data-how="play">Play</button><button type="button" class="btn" data-sc="${sc.id}" data-how="step">Step through</button><button type="button" class="btn" data-sc="${sc.id}" data-how="edit">Edit a copy</button></div></article>`;
 function renderExamples() {
   return `<h3 class="sub">Send one sentence</h3>
   <div class="quick">${QUICK.map(q => `<button type="button" data-quick="${escH(q)}">${escH(q.startsWith('@') ? 'SOP Lang: ' + q : q)}</button>`).join('')}</div>
   <h3 class="sub">Play a scenario</h3>
   <p class="intro">A scenario is a script of messages. It is drawn in a new area next to what is already on the canvas; nothing is erased.</p>
   <div class="opts"><label for="sc-delay">Pause between messages</label><select id="sc-delay"><option value="0">none</option><option value="400" selected>0.4 s</option><option value="1000">1 s</option><option value="2000">2 s</option></select></div>
-  <div class="sc-list">${SCENARIOS.map(sc => `<article class="sc"><header><h4>${escH(sc.title)}</h4><span class="len">${sc.size} · ${sc.turns.length} message${sc.turns.length === 1 ? '' : 's'}</span></header><p>${escH(sc.blurb)}</p><div class="row2"><button type="button" class="btn solid" data-sc="${sc.id}" data-how="play">Play</button><button type="button" class="btn" data-sc="${sc.id}" data-how="step">Step through</button><button type="button" class="btn" data-sc="${sc.id}" data-how="edit">Edit a copy</button></div></article>`).join('')}</div>
+  <div class="sc-list">${SCENARIOS.filter(sc => sc.kind !== 'scene').map(scCard).join('')}</div>
+  <h3 class="sub" id="scenes-head">Scenes</h3>
+  <p class="intro">Pictures drawn step by step, one plain English message at a time (scenes-extra.js): landscapes, technical drawings, plans, a chart, a poster, cards. Each starts with “Clear the canvas”; the names above the shapes are hidden while they play (the footer’s <b>names</b> shows them). The four marked <i>test</i> are the scenes’ test set: shown here, never trained on.</p>
+  <div class="sc-list scenes">${SCENARIOS.filter(sc => sc.kind === 'scene').map(scCard).join('')}</div>
   <h3 class="sub">Your own script</h3>
   <p class="intro">One message per line. Lines starting with <code>#</code> are comments; lines starting with <code>@</code> are SOP Lang, sent to the engine as they are.</p>
   <textarea id="sc-text" rows="7" spellcheck="false" placeholder="# My diagram&#10;Draw a blue circle named Hub in the center.&#10;Add a red square named Node1 left of Hub and connect Hub to it.&#10;What is connected to Hub?"></textarea>
@@ -1396,7 +1565,10 @@ async function playRest() {
   while (player.i < player.turns.length && !player.stop) { const t = player.turns[player.i++]; renderPlayer(); await submit(t, undefined, { via: 'script' }); await sleep(player.delay); }
   player.playing = false; renderPlayer();
 }
-async function startScript(name, turns, how) {
+/** play a script in a new area of every tab's drawing. opts.names: false hides the name tags (a scenario's names: false; see "Name tags"),
+ *  otherwise the user's kept choice comes back. The view switches to the scenario's own area (the 'focus' view, fitted to what it draws, the
+ *  zoom and pan reset), on desktop too, where the default view shows every area small; the view button still shows them all. */
+async function startScript(name, turns, how, opts) {
   if (!turns.length) return;
   player.delay = +(($('#sc-delay') || {}).value || 400);
   player.stop = true; await queue; player.playing = false;
@@ -1408,6 +1580,8 @@ async function startScript(name, turns, how) {
     else { w.state.frame = { x: 0, y: 0 }; w.state.frames = [{ x: 0, y: 0, title: name }]; }
     rd.focusCell = Object.assign({}, w.state.frame);
   }
+  setShowNames(opts && opts.names === false ? false : namesPref);
+  view = 'focus'; zv.k = 1; zv.dx = 0; zv.dy = 0;
   const ren = Object.entries(fixed.map).map(([a, b]) => `${a} → ${b}`);
   sysNote(`Scenario: ${name}` + (ren.length ? ` · renamed ${ren.join(', ')} to avoid clashes` : ''));
   renderCanvas();
@@ -1541,7 +1715,7 @@ const loErr = e => `<div class="lo-err">${escH(String(e && e.message || e || 'un
 /** the overlay's rows, from the readers' states */
 function loadRowsHTML() {
   const vb = vssInfo && vssInfo.bytes ? mb(vssInfo.bytes) : `about ${mb0(VSS_HINT)}`;
-  const vss = vssState === 'ready' ? loRow('VSS', `9 worlds, ${vb}`, 'ready', `<div class="lo-s">loaded in ${((vssInfo && vssInfo.loadMs || 0) / 1000).toFixed(1)} s</div>`)
+  const vss = vssState === 'ready' ? loRow('VSS', `9 worlds, ${vb}`, 'ready', `<div class="lo-s">loaded in ${((vssInfo && vssInfo.loadMs || 0) / 1000).toFixed(1)} s${vssInfo && vssInfo.cache && vssInfo.cache.state === 'hit' ? ' from this browser’s cache' : ''}</div>`)
     : vssState === 'failed' ? loRow('VSS', `9 worlds, ${vb}`, 'failed', loErr(vssError))
       : loRow('VSS', `9 worlds, ${vb}`, 'loading', '<div class="prog lo-ind"><div></div></div>');
   const nb = nProg.T ? mb(nProg.T) : (() => { try { return 'about ' + mb0(nBytesHint()); } catch (e) { return ''; } })();
@@ -1690,19 +1864,41 @@ subbar.addEventListener('click', ev => { const b = ev.target.closest('[data-sub]
 rpanel.addEventListener('change', ev => {   // SOP-BERT › Settings: the level of the neural gate (GATES.neural)
   if (ev.target.name !== 'neural-gate') return;
   const l = NON_DEFAULT.includes(ev.target.value) ? ev.target.value : 'cost'; neuralGate = l === 'cost' ? null : l; store.set(NGATE_KEY, neuralGate);
-  sysNote(`SOP-BERT now ${gateDoes(l)}.`);
+  sysNote(`SOP-BERT now ${gateDoes(l)}.`); renderGateBadges();
   if (sub === 'settings') renderSub();
 });
 rpanel.addEventListener('change', ev => {   // VSS-BERT › Settings: a cost level or execute all
   if (ev.target.name !== 'comb-gate') return;
   combGate = NON_DEFAULT.includes(ev.target.value) ? ev.target.value : 'cost'; store.set(CGATE_KEY, combGate === 'cost' ? null : combGate);
-  sysNote(`VSS-BERT now ${gateDoes(combGate)}.`);
+  sysNote(`VSS-BERT now ${gateDoes(combGate)}.`); renderGateBadges();
   if (sub === 'settings') renderSub();
 });
 rpanel.addEventListener('change', ev => {
-  if (ev.target.name === 'vss-gate' && GATE_LEVELS.includes(ev.target.value)) { vssGate = ev.target.value; store.set(GATE_KEY, vssGate === GATE_DEFAULT ? null : vssGate); sysNote(`VSS now ${gateDoes(vssGate)}.`); if (sub === 'settings') renderSub(); }
+  if (ev.target.name === 'vss-gate' && GATE_LEVELS.includes(ev.target.value)) { vssGate = ev.target.value; store.set(GATE_KEY, vssGate === GATE_DEFAULT ? null : vssGate); sysNote(`VSS now ${gateDoes(vssGate)}.`); renderGateBadges(); if (sub === 'settings') renderSub(); }
 });
 rpanel.addEventListener('click', ev => { const h = ev.target.closest('[data-help]'); if (h) { openHelp(h.dataset.help); return; } const b = ev.target.closest('[data-open]'); if (b) openSheet('settings', b.dataset.open); });
+/* A tab that is not at its safety threshold says so all the time (owner's session 2026-11-03: VSS-BERT had been left on "execute all" in that
+   browser and nothing on the screen showed it): an amber badge per such tab in the chat's header, "VSS-BERT: execute all", which opens that
+   tab's Settings, and "Back to the safety threshold", which sets every tab back to its default level in one click. */
+const gateTabs = () => [['combined', combGate], ['vss', vssGate], ['neural', neuralGate || 'cost']];
+function renderGateBadges() {
+  const box = $('#gate-badges'); if (!box) return;
+  const off = gateTabs().filter(([id, l]) => l !== GATE_DEFAULT && RD[id]);
+  box.hidden = !off.length;
+  box.innerHTML = off.map(([id, l]) => `<button type="button" class="gbadge" data-gtab="${id}" title="${escH(`${RD[id].label} ${gateDoes(l)}. Click to open its Settings.`)}">${escH(RD[id].label)}: ${escH(gateLabel(l))}</button>`).join('')
+    + (off.length ? `<button type="button" class="gback" id="gate-reset" title="${escH(off.length > 1 ? 'Set every tab back to its safety threshold' : `Set ${RD[off[0][0]].label} back to its safety threshold`)}">Back to the safety threshold</button>` : '');
+}
+$('#gate-badges').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-gtab]');
+  if (b) { setActive(b.dataset.gtab); if (sub === 'settings') renderSub(); else setSub('settings'); return; }
+  if (ev.target.closest('#gate-reset')) {
+    const was = gateTabs().filter(([, l]) => l !== GATE_DEFAULT).map(([id]) => RD[id].label);
+    combGate = 'cost'; store.set(CGATE_KEY, null); vssGate = GATE_DEFAULT; store.set(GATE_KEY, null); neuralGate = null; store.set(NGATE_KEY, null);
+    sysNote(`${listing(was)} ${was.length > 1 ? 'are' : 'is'} back at the safety threshold: ${gateDoes('cost')}.`);
+    renderGateBadges(); if (sub === 'settings') renderSub();
+  }
+});
+renderGateBadges();
 function vssStatusHTML() {
   return escH(vssState === 'ready' ? (vssInfo.composer ? `Ready: ${vssInfo.worlds.length} micro-worlds, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`
     : `Ready: D ${vssInfo.D}, ${vssInfo.bits || 8}-bit route book, ${mb(vssInfo.bytes)}, loaded in ${(vssInfo.loadMs / 1000).toFixed(1)} s.`) : vssState === 'failed' ? 'Failed: ' + (vssError && vssError.message || vssError) : `Loading (about ${mb0(VSS_HINT)} from this site)…`);
@@ -1774,7 +1970,7 @@ sbody.addEventListener('click', async ev => {
   if (b) {
     const sc = SCENARIOS.find(x => x.id === b.dataset.sc);
     if (b.dataset.how === 'edit') { const t = $('#sc-text'); t.value = `# ${sc.title}\n` + sc.turns.join('\n'); t.focus(); t.scrollIntoView({ block: 'center' }); return; }
-    startScript(sc.title, sc.turns.slice(), b.dataset.how); return;
+    startScript(sc.title, sc.turns.slice(), b.dataset.how, { names: sc.names !== false }); return;
   }
   const o = ev.target.closest('[data-own]');
   if (o) { const v = $('#sc-text').value, turns = parseScript(v); if (!turns.length) { $('#sc-status').textContent = 'Write at least one line first.'; return; } startScript((v.match(/^\s*#\s*(.+)$/m) || [])[1] || 'Your script', turns, o.dataset.own); return; }
@@ -1821,7 +2017,7 @@ function chatSettingsHTML() {
 /** the spell checker's switch, in ⋮ › Settings (it acts before every reader, so it is not one reader's setting) */
 function spellHelpHTML() {
   const P = speller && speller.params;
-  const about = P ? `A word that no reader knows is replaced by the most similar known word when the similarity of their letter groups (VSA character n-grams, D ${P.D}) is at least ${P.threshold} and ${P.margin} above the next word. Known words: ${speller.size()} (the VSS worlds’ words, the legend’s values and cue words) and the names on the canvas; ${speller.keepSize()} more words of the training messages are left alone. Never changed: quoted text, numbers, words of one or two letters, the word after “named” or “called”, and capitalised names that are not on the canvas.`
+  const about = P ? `A word that no reader knows is replaced by the most similar known word when the similarity of their letter groups (VSA character n-grams, D ${P.D}) is at least ${P.threshold} and ${P.margin} above the next word. Known words: ${speller.size()} (the VSS worlds’ words, the legend’s values and cue words) and the names on the canvas; ${speller.keepSize()} more words of the training messages are left alone. Never changed: quoted text, numbers, words of one or two letters, the word after “named” or “called”, and capitalised names that are not on the canvas. A name the message introduces (“named RoboHand”, “call it Nose”, “Name: Kitchen”) counts as a canvas name for the rest of that message.`
     : 'The spell checker’s vocabulary is not loaded (yet).';
   return `<div class="help"><h3 class="sub">Spelling</h3>
   <label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 6px;cursor:pointer"><input type="checkbox" id="spell-on" ${spellEnabled ? 'checked' : ''}> <span>Correct typos before the readers read a message (“gree circle” → “green circle”). Every reader reads the corrected text; your message shows what was changed, and <b>details</b> shows the typed and the corrected text.</span></label>
@@ -1908,7 +2104,9 @@ sendBtn.addEventListener('click', () => { sendTyped(); ta.focus({ preventScroll:
 // meta). Its spoken commands press the last "Do it anyway" or "Edit" of the chat, as a click would.
 const clickLast = sel => { const bs = [...msgs.querySelectorAll(sel)].filter(b => !b.disabled); const b = bs[bs.length - 1]; if (!b) return false; b.click(); return true; };
 const voice = window.VoiceKit && $('#dock') ? VoiceKit.mount({ dock: $('#dock'), composer: ta, send: m => sendTyped(m),
-  actions: { anyway: () => clickLast('.held button.anyway'), edit: () => clickLast('.held button.edit') } }) : null;
+  actions: { anyway: () => clickLast('.held button.anyway'), edit: () => clickLast('.held button.edit') },
+  names: () => world.state.shapes.map(s => s.name).concat((world.state.groups || []).map(g => g.name)) }) : null;
+if (voice && voice.setNames) dockNames = voice.setNames;
 
 /* Fit the app to the visible area, so the composer stays above the on-screen keyboard. */
 const appEl = document.querySelector('.app');
@@ -1943,4 +2141,30 @@ queue.then(() => { READERS.forEach(rd => { rd.world.undoStack = []; }); renderSo
 DocsKit.init({ env: helpEnv, say: t => submit(t, undefined, { via: 'help' }), onPlug: (name, on) => { setPlug(name, on); if (!sheet.hidden && sheetTab === 'plugins') sbody.innerHTML = renderPlugins(); } });
 ensureVSS();              // same site: no button, no question
 checkNeural();            // our neural model loads by itself (from the browser cache when it is there)
+/* a read-only summary for the browser tests and the console (training/sketch/test_scenes_menu.py): nothing here changes the page.
+   turn(): the number of messages so far; view(): 'auto' | 'focus' | 'all'; steps(after): per tab, the messages after turn `after` that it
+   did fully (executed every request it read, no engine error, nothing held), partly (executed something, held or failed something else) or
+   not at all; area(id): the shapes of that tab's current area (its focus cell) and those whose body leaves the area's 800 x 500 canvas */
+window.SketchpadInfo = Object.freeze({
+  turn: () => turnSeq, view: () => view, names: () => showNames,
+  steps(after) {
+    const out = {};
+    for (const rd of READERS) {
+      let done = 0, partly = 0, none = 0;
+      for (const rec of history.filter(x => x.id > after)) {
+        const r = rec.readers[rd.id], steps = r && r.result ? r.result.steps.filter(st => st.node.type !== 'mention') : [];
+        const ok = steps.filter(st => !st.error && !st.skipped).length, bad = steps.length - ok, held = r && r.gate ? r.gate.held.length : 0;
+        if (ok && !bad && !held) done++; else if (ok) partly++; else none++;
+      }
+      out[rd.id] = { done, partly, none };
+    }
+    return out;
+  },
+  area(id) {
+    const rd = RD[id], S = rd.world.state, f = rd.focusCell || S.frame || { x: 0, y: 0 };
+    const mine = S.shapes.filter(s => { const c = K.cellOf(s.x, s.y); return c.x === f.x && c.y === f.y; });
+    const off = mine.filter(s => { const d = K.dims(s); return s.x - d.w / 2 < f.x - 0.5 || s.y - d.h / 2 < f.y - 0.5 || s.x + d.w / 2 > f.x + 800.5 || s.y + d.h / 2 > f.y + 500.5; }).map(s => s.name);
+    return { cell: f, shapes: mine.length, edges: S.edges.length, off };
+  }
+});
 })();

@@ -14,12 +14,30 @@ export class Routebook {
     this.rel = g("rel"); this.relMask = g("rel_mask"); this.takerMask = g("taker_mask"); this.pos = g("pos"); this.pc = g("pc");
     this.vo = g("vo"); this.verbMask = g("verb_mask"); this.cueMask = g("cue_mask"); this.voNmax = header.vo_nmax === undefined || header.vo_nmax === null ? null : header.vo_nmax;
     this.C = this.cats.length;
+    // VSA_CORR=phase (manifest format vss-web-4; tool/sop/train.py fit_corr): the world's correction, a phase array "corr" [D]; corr =
+    // exp(i phase) as {re, im}, applied by reader.js read to the normalized chart before every cleanup. Absent: null, no correction
+    const cph = g("corr");
+    this.corr = null;
+    if (cph) { const ph = cph.data, re = new Float64Array(this.D), im = new Float64Array(this.D); for (let i = 0; i < this.D; i++) { re[i] = Math.cos(ph[i]); im[i] = Math.sin(ph[i]); } this.corr = { re, im }; }
     // the centre reader (legend reader.centres; infer.Routebook.centre_addresses): phases cthR, cthL, cthC, cbgL, cbgR; floats cA, cDist, cbeta, cN
     this.centreKinds = header.centre_kinds || null;
     this.centreTokens = header.centre_tokens || null;     // run 2 (sop train --centre_key event): phase rows keyed by the centre's token, last row '*' shared
     for (const n of ["cthR", "cthL", "cthC", "cbgL", "cbgR", "cA", "cDist", "cbeta", "cN"]) this[n] = g(n);
     // cos / sin tables of the arrays used only through exp(i phase) (Float32Array: half the memory, error ~1e-7, far below the 1e-4 parity bound)
-    const tab = (x) => { if (!x) return null; const n = x.data.length, c = new Float32Array(n), s = new Float32Array(n); for (let i = 0; i < n; i++) { c[i] = Math.cos(x.data[i]); s[i] = Math.sin(x.data[i]); } return { c, s }; };
+    // The tables {q, lc, ls}: value i of the array has cos lc[q[i]] and sin ls[q[i]] (Float32). A quantized array (loader.js: codes + deq,
+    // its 2**bits levels) keeps its codes as q and the cos / sin of its levels: the same Float32 values as Math.cos / Math.sin of every
+    // dequantized value (the same doubles in), without one evaluation and 8 bytes per value; a float array gets q = 0..n-1
+    const tab = (x) => {
+      if (!x) return null;
+      if (x.codes && x.deq) {
+        const L = x.deq.length, lc = new Float32Array(L), ls = new Float32Array(L);
+        for (let k = 0; k < L; k++) { lc[k] = Math.cos(x.deq[k]); ls[k] = Math.sin(x.deq[k]); }
+        return { q: x.codes, lc, ls };
+      }
+      const n = x.data.length, q = new Uint32Array(n), lc = new Float32Array(n), ls = new Float32Array(n);
+      for (let i = 0; i < n; i++) { q[i] = i; lc[i] = Math.cos(x.data[i]); ls[i] = Math.sin(x.data[i]); }
+      return { q, lc, ls };
+    };
     this.tBg0 = tab(this.bg0); this.tBg = tab(this.bg); this.tA = tab(this.A); this.tL = tab(this.L); this.tRel = tab(this.rel);
     // a sparse route book (export_web --sparse; tool/sop/infer.py Routebook.pair_rows): bg / A / L hold only their trained rows; rowOf maps a
     // kind pair i * C + j to its stored row, -1 = absent (never trained), and an absent row contributes nothing. null = dense
@@ -104,7 +122,7 @@ export class Routebook {
         const t = terms[k], r = k === 0 ? c[0] : this.row(this.rowBg, c[k - 1] * C + c[k]), tb = k === 0 ? this.tBg0 : this.tBg;
         if (r < 0) continue;                              // an absent bigram row: no term
         const o = r * D;
-        for (let d = 0; d < D; d++) { t.re[d] += tb.c[o + d]; t.im[d] += tb.s[o + d]; }
+        for (let d = 0; d < D; d++) { const q = tb.q[o + d]; t.re[d] += tb.lc[q]; t.im[d] += tb.ls[q]; }
       }
     }
     if (this.has("pos") && this.pos) {
@@ -128,7 +146,7 @@ export class Routebook {
           if (r < 0) continue;                            // an absent A row: that chain term is left out
           const p = g[j] * Math.exp(Sx[k] - Sx[j + 1]), o = r * D, a = addr[j];
           for (let d = 0; d < D; d++) {
-            const er = tA.c[o + d], ei = tA.s[o + d];
+            const q = tA.q[o + d], er = tA.lc[q], ei = tA.ls[q];
             re[d] += p * (a.re[d] * er - a.im[d] * ei); im[d] += p * (a.re[d] * ei + a.im[d] * er);
           }
         }
@@ -145,7 +163,7 @@ export class Routebook {
             if (r < 0) continue;                          // an absent L row: that chain term is left out
             const p = g[q] * Math.exp(Sx[q] - Sx[k + 1]), o = r * D, b = addr[q];
             for (let d = 0; d < D; d++) {
-              const er = tL.c[o + d], ei = tL.s[o + d];
+              const q = tL.q[o + d], er = tL.lc[q], ei = tL.ls[q];
               re[d] += p * (b.re[d] * er - b.im[d] * ei); im[d] += p * (b.re[d] * ei + b.im[d] * er);
             }
           }
@@ -178,7 +196,7 @@ export class Routebook {
         if (sel === 0) continue;
         const t = terms[k], o = c[k - 1] * D;
         for (let d = 0; d < D; d++) {
-          const er = tR.c[o + d], ei = tR.s[o + d], r0 = t.re[d], i0 = t.im[d];
+          const q = tR.q[o + d], er = tR.lc[q], ei = tR.ls[q], r0 = t.re[d], i0 = t.im[d];
           t.re[d] = r0 + sel * (r0 * er - i0 * ei); t.im[d] = i0 + sel * (r0 * ei + i0 * er);
         }
       }

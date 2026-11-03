@@ -107,6 +107,9 @@ export function toNodes(reading, info, ctx, seq) {
     if (!rels.length) { if (reg) args.position = reg; return; }
     const set = (pk, ak, r) => { args[pk] = r.p; const anc = r.anc.filter((x) => x !== undefined); if (anc.length) args[ak] = anc.length === 1 ? anc[0] : anc; };
     set("position", "anchor", rels[0]);
+    // the gap of a relation ("6 px above Pot"): the role amount, in worlds built with GAP_ROLE=1 (training/sketch/llm_to_world.py,
+    // scenes_r3/ROOT_CAUSES.md); a world without the role never fills it, so this reads nothing there
+    if (R.amount != null && /^\d+$/.test(String(R.amount)) && args.distance === undefined) args.distance = +R.amount;
     if (rels[1]) set("position2", "anchor2", rels[1]);
     if (reg) args.region = reg;
   };

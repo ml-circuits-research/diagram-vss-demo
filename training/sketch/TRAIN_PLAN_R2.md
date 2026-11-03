@@ -240,3 +240,17 @@ New: `training/sketch/world_choice_oracle.mjs`, `data_repetition.py`, `synth/gen
 `synth/synth_short_r2_check.json`, `llm_train/opus_short_r2/` (README, texts/, annot/, msg_01..04, CHECK.json), `llm_train/synth_short_r2/`
 (README, msg_01..02), `llm_train/{synth_rules,synth_rules_ops,synth_rules_ext,synth_combo}_dd/` (README, msg_*, DEDUP.json),
 `training/laptop/jobs_draft/{073_vss_round2,074_bert_round2,075_measure_round2}.sh`, this file.
+
+## Result (2026-11-03, jobs 074, 078, 079; results/079_measure_round2 on gpu-runs): not adopted
+
+Test parts, cost score with each reader's own fitted threshold, paired intervals (R2 - shipped arm ALL):
+
+| situation | VSS | SOP-BERT | VSS-BERT |
+|---|---|---|---|
+| fresh2 (1313 requests) | 15.2 -> 3.0, -12.1 [-15.9, -8.0] (loss) | 35.9 -> 33.1, -2.8 [-12.4, 7.1] | 42.4 -> 36.4, -6.0 [-12.4, -0.2] (loss) |
+| short3 (432 requests) | 0.0 -> 0.7, +0.7 [0.0, 1.6] | 4.2 -> 0.0, -4.2 [-8.4, 1.4] | 13.9 -> 15.7, +1.9 [-13.0, 16.9] |
+
+Executing everything, the readings barely moved (fresh2 VSS right 66.6% -> 66.2%, SOP-BERT 80.8% -> 81.2%); the losses come mostly from
+the confidences fitted on the R2 readers (VSS R2's threshold executes 39 requests on calibration). The conversion ceiling rose (short3
+61.0 -> 63.8%, fresh2 74.2 -> 76.5%), but the readers did not use it on these sets. The shipped readers (arm ALL) stay in the demo.
+Next round: the scenes (scenes_r3, scenes_r3b) and the forms they expose (ROOT_CAUSES.md P1-P3), GAP_ROLE, and job 080 (VSA_CORR).

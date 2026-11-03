@@ -1,0 +1,22 @@
+{"id": "sc3b-23-001", "domain": "bus stop street scene", "text": "Street scene. A faint gray rectangle background, 780 by 480, at 400, 250, called Street."}
+{"id": "sc3b-23-002", "domain": "bus stop street scene", "text": "The road: a black rectangle zone named Road, 780 wide and 110 tall, at 400, 435."}
+{"id": "sc3b-23-003", "domain": "bus stop street scene", "text": "Draw a blue rectangle named Bus, 200 wide and 70 tall, at 300, 330."}
+{"id": "sc3b-23-004", "domain": "bus stop street scene", "text": "Wheel1, a tiny black circle at 240, 372, and Wheel2, a tiny black circle at 360, 372."}
+{"id": "sc3b-23-005", "domain": "bus stop street scene", "text": "group Bus, Wheel1 and Wheel2 as Coach"}
+{"id": "sc3b-23-006", "domain": "bus stop street scene", "text": "Bus stop sign: a small red circle named Sign at 520, 240."}
+{"id": "sc3b-23-007", "domain": "bus stop street scene", "text": "its pole: a gray rectangle 8 wide and 80 tall named Pole, two px below Sign"}
+{"id": "sc3b-23-008", "domain": "bus stop street scene", "text": "Group Sign and Pole as Stop."}
+{"id": "sc3b-23-009", "domain": "bus stop street scene", "text": "Three small yellow squares in a row above Bus."}
+{"id": "sc3b-23-010", "domain": "bus stop street scene", "text": "how many yellow squares are there on the street?"}
+{"id": "sc3b-23-011", "domain": "bus stop street scene", "text": "Add a large white ellipse named Cloud in the top left."}
+{"id": "sc3b-23-012", "domain": "bus stop street scene", "text": "and a medium white ellipse Cloud2 right of Cloud, thirty px away"}
+{"id": "sc3b-23-013", "domain": "bus stop street scene", "text": "Sun: a medium yellow circle in the top right, named Sun."}
+{"id": "sc3b-23-014", "domain": "bus stop street scene", "text": "Is Cloud2 left of Sun?"}
+{"id": "sc3b-23-015", "domain": "bus stop street scene", "text": "a person waiting: a small orange circle named Head at 640, 270"}
+{"id": "sc3b-23-016", "domain": "bus stop street scene", "text": "Body: an orange rectangle 20 wide and 50 tall named Body 2 px below Head"}
+{"id": "sc3b-23-017", "domain": "bus stop street scene", "text": "group Head and Body as Rider"}
+{"id": "sc3b-23-018", "domain": "bus stop street scene", "text": "Make Cloud2 gray, it's going to rain."}
+{"id": "sc3b-23-019", "domain": "bus stop street scene", "text": "which shape sits highest on the street?"}
+{"id": "sc3b-23-020", "domain": "bus stop street scene", "text": "Connect Head to Sign with a dotted line."}
+{"id": "sc3b-23-021", "domain": "bus stop street scene", "text": "Write \"Route 7\" above Coach, small."}
+{"id": "sc3b-23-022", "domain": "bus stop street scene", "text": "Thanks!"}

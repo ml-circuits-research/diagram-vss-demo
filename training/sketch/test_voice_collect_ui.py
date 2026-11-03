@@ -70,7 +70,7 @@ def cdn(route):
 MOCKS = r"""
 (() => {
   try { if (!sessionStorage.getItem('t0')) { localStorage.clear(); sessionStorage.setItem('t0', '1'); } } catch (e) {}
-  const DICT = { 'fă Done roșu': 'make Done red', 'șterge Start': 'delete Start', 'fă Start albastru': 'make Start blue', 'fă Start albastru verde': 'make Start blue green' };
+  const DICT = { 'Într-un editor de diagrame:': 'In a diagram editor:', 'Într-un editor de diagrame: fă Done roșu': 'In a diagram editor: make Done red', 'fă Done roșu': 'make Done red', 'șterge Start': 'delete Start', 'fă Start albastru': 'make Start blue', 'fă Start albastru verde': 'make Start blue green' };
   window.__tr = [];
   window.Translator = {
     availability: async ({ sourceLanguage: s, targetLanguage: t }) => ((s === 'ro' && t === 'en') || (s === 'en' && t === 'ro')) ? 'available' : 'unavailable',
@@ -175,8 +175,13 @@ with sync_playwright() as p:
     check("1. the dock is under the drawing, as wide as its column", near(dock["l"], stage["l"]) and near(dock["r"], stage["r"]) and near(dock["t"], stage["b"]), f"{dock} {stage}")
     check("1. the dock is level with the message box", near(dock["t"], comp["t"]) and near(dock["b"], comp["b"]), f"{dock} {comp}")
     rows = pg.evaluate("() => [...document.querySelectorAll('#dock .vd-row')].map(r => r.getBoundingClientRect().height)")
-    check("1. one row, slim: the mic, the language code and the transcript", len(rows) == 1 and all(h <= 32 for h in rows) and dock["h"] <= 70
+    names = pg.evaluate("() => { const n = document.querySelector('#dock .vd-names'); return n && !n.hidden ? { h: n.getBoundingClientRect().height, names: [...n.querySelectorAll('.vd-name')].map(b => b.textContent), wrap: getComputedStyle(n).flexWrap } : null; }")
+    check("1. one row, slim: the mic, the language code and the transcript (and one line of name chips under it)", len(rows) == 1 and all(h <= 32 for h in rows) and dock["h"] <= 82
           and pg.locator("#dock .vd-row .vd-lang + #vd-src").count() == 1, f"{rows} {dock['h']}")
+    check("1. the names on the drawing are chips on one line (scrolled sideways), under the row", names is not None and names["h"] <= 24 and names["wrap"] == "nowrap" and "Start" in names["names"] and "Process" in names["names"], str(names))
+    pg.click("#dock .vd-name[data-name=Process]"); pg.wait_for_timeout(200)
+    check("1. a tap on a chip puts the name into what was said", pg.input_value("#vd-src").strip() == "Process", pg.input_value("#vd-src"))
+    pg.fill("#vd-src", ""); pg.dispatch_event("#vd-src", "input"); pg.fill("#say", ""); pg.wait_for_timeout(600)
     check("1. the language code says RO", pg.inner_text(".vd-lang").strip() == "RO" and pg.get_attribute(".vd-lang", "aria-haspopup") == "dialog")
     bd = pg.evaluate(RECT, "[data-name=Backdrop] .body")
     check("1. the drawing fills its column: the background panel's edges are the board's (no padding)", near(bd["l"], board["l"], 2) and near(bd["r"], board["r"], 2), f"panel {bd}, board {board}")
@@ -191,10 +196,14 @@ with sync_playwright() as p:
     info = pg.evaluate("() => { const d = document.querySelector('#vd-pop'); return { expanded: document.querySelector('.vd-lang').getAttribute('aria-expanded'), opts: [...d.querySelectorAll('#vd-lang option')].map(o => o.value),"
                        " prefs: [...d.querySelectorAll('[data-pref]')].map(c => c.dataset.pref), support: [...d.querySelectorAll('.vd-support li')].map(l => l.textContent), note: d.querySelector('.vd-note').textContent, cmds: d.querySelector('.vd-cmds').textContent }; }")
     check("2. Romanian and English first, a free BCP-47 field last", info["opts"][:2] == ["ro-RO", "en-US"] and info["opts"][-1] == "other" and len(info["opts"]) > 30, str(info["opts"][:5]))
-    check("2. the switches: send after a pause, read replies aloud, online translation", info["prefs"] == ["autoSend", "tts", "online"] and info["expanded"] == "true", str(info))
+    check("2. the switches: I speak English, send after a pause, read replies aloud, online translation", info["prefs"] == ["speakEnglish", "autoSend", "tts", "online"] and info["expanded"] == "true", str(info))
     sup = " | ".join(info["support"])
     check("2. what the browser supports: recognition, translation on this device, voices", "Speech recognition: yes" in sup and "Translation Romanian → English: yes, on this device" in sup and "Speech synthesis: 1 voice for Romanian" in sup, sup)
     check("2. the note about the browser vendor's servers; the commands", "vendor’s servers" in info["note"] and "trimite" in info["cmds"] and "oprește" in info["cmds"], info["note"] + " | " + info["cmds"])
+    pg.check("#vd-pop [data-pref=speakEnglish]"); pg.wait_for_timeout(200)
+    check("2. 'I speak English': the code says EN and the language list is disabled", pg.inner_text(".vd-lang").strip() == "EN" and pg.is_disabled("#vd-lang"), pg.inner_text(".vd-lang"))
+    pg.uncheck("#vd-pop [data-pref=speakEnglish]"); pg.wait_for_timeout(200)
+    check("2. ... turned off: back to RO", pg.inner_text(".vd-lang").strip() == "RO" and not pg.is_disabled("#vd-lang"))
     pg.check("#vd-pop [data-pref=tts]")
     shot(pg, "02_desktop_popover")
     pg.mouse.click(300, 300)
@@ -212,6 +221,7 @@ with sync_playwright() as p:
     shot(pg, "03_desktop_listening")
     say(pg, "fă Done roșu")
     pg.wait_for_function("() => document.querySelector('#say').value === 'make Done red'", timeout=10000)
+    check("3. translated with the domain context ('Într-un editor de diagrame: ' before it, taken off after)", pg.evaluate("() => window.__tr.some(x => x[2] === 'Într-un editor de diagrame: fă Done roșu')"), str(pg.evaluate("() => window.__tr.slice(-4)")))
     check("3. a final transcript: the message box gets the English at once; no note on the dock", pg.evaluate(ROWS)["note"] == "", str(pg.evaluate(ROWS)))
     shot(pg, "04_desktop_translated")
     n0, nm = pg.evaluate(NBOT), pg.evaluate(NME)
