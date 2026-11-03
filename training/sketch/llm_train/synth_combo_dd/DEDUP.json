@@ -1,0 +1,46 @@
+{
+ "source": "llm_train/synth_combo",
+ "rule": "span-frame dedup, K=2: a message is dropped when every one of its request spans has a frame that 2 kept messages already carry (training/sketch/data_repetition.py)",
+ "messages": 1497,
+ "kept": 1483,
+ "dropped_ids": [
+  "sc-00158",
+  "sc-00272",
+  "sc-00550",
+  "sc-00589",
+  "sc-00635",
+  "sc-00638",
+  "sc-00654",
+  "sc-00687",
+  "sc-00728",
+  "sc-00837",
+  "sc-00931",
+  "sc-01055",
+  "sc-01202",
+  "sc-01219"
+ ],
+ "before": {
+  "messages": 1497,
+  "requests": 4521,
+  "distinct_frames": 1.0,
+  "top_frame": "my manager asked for this . could you make N a bit bigger ? next , make the same",
+  "top_frame_n": 1,
+  "share_in_frames_over_2": 0.0,
+  "distinct_span_frames": 0.761,
+  "top_span_start": "what color is",
+  "top_span_start_n": 54,
+  "top_span_start_share": 0.012
+ },
+ "after": {
+  "messages": 1483,
+  "requests": 4489,
+  "distinct_frames": 1.0,
+  "top_frame": "my manager asked for this . could you make N a bit bigger ? next , make the same",
+  "top_frame_n": 1,
+  "share_in_frames_over_2": 0.0,
+  "distinct_span_frames": 0.766,
+  "top_span_start": "what color is",
+  "top_span_start_n": 54,
+  "top_span_start_share": 0.012
+ }
+}

@@ -32,9 +32,9 @@ from llm_to_world import convert, Skip, QUESTION_EVENT
 
 SHIPPED = {"shapes": "shapes7c", "links": "links7", "position": "position7", "graphq": "graphq7", "questions": "questions7", "manage": "manage7", "history": "history7"}
 KEYS = ["DATA", "FRAC", "QCOLOR", "MARKER", "ROW_SHAPE", "FRONT_ROWS", "KINDMAP", "CAL_FALLBACK", "D", "EPOCHS", "SEED", "N_EVAL", "EVAL_MODES", "HOLDOUT",
-        "CREATE_COLOR", "N_CAL", "VAL_PREC", "VAL_SUB", "VAL_PICK", "SHORT", "OPS", "DIAGRAM_OPS"]
+        "CREATE_COLOR", "N_CAL", "VAL_PREC", "VAL_SUB", "VAL_PICK", "SHORT", "OPS", "DIAGRAM_OPS", "FRONT_NEG", "VAL_GUARD", "NEW_DISTINCT", "SET_CAL"]
 COMMON = "DATA=spans FRAC=1.0 QCOLOR=1 MARKER=0 FRONT_ROWS=world KINDMAP=diagnosis_kinds/kinds_comb1.json CAL_FALLBACK=train D=1024 EPOCHS=10 SEED=0 N_EVAL=150 EVAL_MODES=primary"
-PER_WORLD = ("CREATE_COLOR", "QCOLOR", "VAL_PREC", "VAL_SUB", "VAL_PICK", "FRONT_ROWS", "ROW_SHAPE")   # read at call time: may differ per world
+PER_WORLD = ("CREATE_COLOR", "QCOLOR", "VAL_PREC", "VAL_SUB", "VAL_PICK", "FRONT_ROWS", "ROW_SHAPE", "FRONT_NEG", "VAL_GUARD", "NEW_DISTINCT")   # read at call time: may differ per world
 GLOBAL = ("LEGEND_EXT", "DIAGRAM_OPS", "DATA", "SHORT", "OPS")                                     # read at import or by load_msgs: one value for all
 
 
@@ -58,7 +58,7 @@ def settings_table(groups, tsv):
             b = json.load(open(os.path.join(REPO, f"docs/model/micro/{SHIPPED[w]}/BUILD.json")))
             out[w] = {k: str(b[k]) for k in KEYS if k in b and str(b[k]) != ""}
         else: out[w] = dict(x.split("=", 1) for x in COMMON.split())
-        for k in ("VAL_PICK", "LEGEND_EXT", "DIAGRAM_OPS"):   # the environment's switches apply to every world (as 070 passes them)
+        for k in ("VAL_PICK", "LEGEND_EXT", "DIAGRAM_OPS", "FRONT_NEG", "VAL_GUARD", "NEW_DISTINCT"):   # the environment's switches apply to every world (as 070 / 073 pass them)
             if os.environ.get(k): out[w][k] = os.environ[k]
     return out
 
@@ -82,7 +82,7 @@ def learn_fronts(groups, table, msgs):
     P = json.load(open(os.path.join(HERE, "front_params.json"))); F = {}
     for w, evs in groups.items():
         st = table[w]; old = with_env(st); wev = set(evs)
-        if (st.get("FRONT_ROWS") or "all") == "world": F[w] = FR.learn(msgs, P, keep=lambda x: ev_of(x) in wev)
+        if (st.get("FRONT_ROWS") or "all") == "world": F[w] = FR.learn(msgs, P, keep=lambda x: ev_of(x) in wev, neg=FR.neg_labels(wev, ev_of))
         else: F[w] = FR.learn(msgs, P)
         restore(old)
         print(f"  front {w}: {len(F[w]['values'])} value n-grams ({sum(1 for v in F[w]['values'].values() if v == 'all')} -> all), {len(F[w]['triggers'])} trigger rules", file=sys.stderr, flush=True)
@@ -192,6 +192,8 @@ def main():
         for f in os.listdir(tmp): os.remove(os.path.join(tmp, f))
         os.rmdir(tmp)
     sw = " ".join(f"{k}={os.environ.get(k)}" for k in ("LEGEND_EXT", "DIAGRAM_OPS", "VAL_PICK") if os.environ.get(k)) or "no switch"
+    r2 = sorted({f"{k}={st[k]}" for st in table.values() for k in ("FRONT_NEG", "VAL_GUARD", "NEW_DISTINCT") if st.get(k)})   # round 2, per world
+    if r2: sw += " " + " ".join(r2)
     print(f"\nconvert_check ({sw}; groups {os.path.basename(a.groups)}): share of the requests whose world row ...")
     print("| folder | requests | round trip | every shape | no world | no event token | differs | no node / no span | keys that differ most |")
     print("|---|---|---|---|---|---|---|---|---|")

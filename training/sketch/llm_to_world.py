@@ -81,8 +81,18 @@ def convert(row, lexicon=None, soft=False, lost=None, table=None, norm=None):
     def need_text(lbl):   # a quoted label is a t_ token; an unquoted one ("labeled Rocks") is read as a name token (LABEL_AS_NAME=0 turns it off)
         if os.environ.get("LABEL_AS_NAME", "1") != "1": return need("t_" + slug(lbl))
         return "t_" + slug(lbl) if "t_" + slug(lbl) in T else "n_" + slug(lbl) if "n_" + slug(lbl) in T else need("t_" + slug(lbl))
+    # NEW_DISTINCT=1 (round 2, off by default; VSS_FROM_TO.md section 1): a wire with several `$new` (shapes made earlier in the message,
+    # e.g. "Arrows from Dad and Mom to Me": from=$new,$new to=$new) gives each `$new` its own created name: the created names written in
+    # the clause (not named elsewhere in the wire), in text order, one per `$new` in the order the roles are converted. Before, every `$new`
+    # became the LAST created name in the clause (members = {Me, Me}, target = Me). A wire with one `$new` is converted as before.
+    new_q = None
+    if os.environ.get("NEW_DISTINCT") == "1" and sum(str(x).strip() == "$new" for v in a.values() for x in str(v).split(",")) >= 2:
+        named = {"n_" + slug(x.strip()) for v in a.values() for x in str(v).split(",") if x.strip() and x.strip() != "$new" and not str(v).startswith("mention(")}
+        cr = {"n_" + slug(nm) for nm in row.get("created") or []}
+        new_q = [t for i, t in enumerate(toks) if t in cr and t not in named and t not in toks[:i]]
     def ent(v):
         v = str(v)
+        if v == "$new" and new_q: return {"head": new_q.pop(0)}, None
         if v == "$new":
             for nm in reversed(row.get("created") or []):
                 if "n_" + slug(nm) in T: return {"head": "n_" + slug(nm)}, None

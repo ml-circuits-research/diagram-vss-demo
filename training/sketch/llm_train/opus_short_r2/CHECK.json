@@ -1,0 +1,63 @@
+{
+ "folder": "llm_train/opus_short_r2",
+ "batches": {
+  "01": {
+   "texts": 79,
+   "excluded": {
+    "or2-0073": "\"Vision instead of Idea\": Vision is already a shape on this canvas, so neither rename nor any other reading is certain"
+   },
+   "kept": 77,
+   "requests": 96,
+   "removed": {
+    "overlap (exact) with llm_short": 1
+   },
+   "paraphrases": 89,
+   "paraphrases_read_as_gold": 89,
+   "paraphrase_mismatches": {}
+  },
+  "02": {
+   "texts": 76,
+   "excluded": {
+    "or2-0136": "\"how many shapes have a border?\": counting by outline is not a filter of the legend's count question",
+    "or2-0137": "\"Rb behind Qb\": behind may mean below or the drawing order (to back); not certain"
+   },
+   "kept": 73,
+   "requests": 97,
+   "removed": {
+    "overlap (exact) with short3_texts": 1
+   },
+   "paraphrases": 91,
+   "paraphrases_read_as_gold": 90,
+   "paraphrase_mismatches": {
+    "or2-0155#131": "command:set: rules miss shape; target: gold start,done, rules start,done,mention(quantifier=all,shape=circle)"
+   }
+  },
+  "03": {
+   "texts": 70,
+   "excluded": {
+    "or2-0233": "\"start gets a dashed border\": a border style is not a value of the legend (outline takes a colour or none)",
+    "or2-0241": "\"every arrow dashed except Api to Db\": an exception is not expressible as one wire of the legend",
+    "or2-0247": "\"Hr, Sales and Legal under Ceo in a row\": a move under Ceo and a row layout in one clause; the convention for the pair is not settled",
+    "or2-0248": "\"make it an org chart: Ceo on top, then Cfo, Cto\": template with an implied order; the convention is not settled"
+   },
+   "kept": 65,
+   "requests": 72,
+   "removed": {
+    "overlap (exact) with short3_texts": 1
+   },
+   "paraphrases": 73,
+   "paraphrases_read_as_gold": 73,
+   "paraphrase_mismatches": {}
+  },
+  "04": {
+   "texts": 40,
+   "excluded": {},
+   "kept": 40,
+   "requests": 80,
+   "removed": {},
+   "paraphrases": 77,
+   "paraphrases_read_as_gold": 77,
+   "paraphrase_mismatches": {}
+  }
+ }
+}

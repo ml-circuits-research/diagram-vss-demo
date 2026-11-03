@@ -1,0 +1,144 @@
+# annotation of texts/texts_03.jsonl (same format as annot_01.txt)
+@or2-0201
+undo pls, like three times | undo | c undo count=3 | undo three times
+@or2-0202
+put it back like before | put it back | c undo | undo
+@or2-0203
+bring back what I just undid | bring back | c redo | redo
+@or2-0204
+re-arrange so they dont cross | re-arrange | c untangle | untangle the arrows
+@or2-0205
+make it look neater | neater | c improve | tidy up
+@or2-0206
+write "todo" inside Process | write | c label target=Process; label=todo | label Process "todo"
+@or2-0207
+put the text "v1" on start | put | c label target=Start; label=v1 | label Start "v1"
+@or2-0208
+change the name of Process to Build | change the name | c rename target=Process; name=Build | rename Process to Build
+@or2-0209
+the process box needs a new name: Review | new name | c rename target=Process; name=Review | rename Process to Review
+@or2-0210
+make a timeline with Start Process Check Done | make | c arrange template=timeline; target=Start,Process,Check,Done | arrange Start, Process, Check and Done as a timeline
+@or2-0211
+turn these four into a cycle | turn | c arrange template=cycle; target=Start,Process,Check,Done | arrange Start, Process, Check and Done as a cycle
+@or2-0212
+a funnel of Leads, Calls, Deals | funnel | c create template=funnel; items=Leads,Calls,Deals | make a funnel of Leads, Calls and Deals
+@or2-0213
+add a big heading that says Release flow | add | c create shape=text; label=Release flow; size=large | add a big heading "Release flow"
+@or2-0214
+how do I change the arrow style? | how do I | q help aspect=how; topic=connections | how do I change the arrow style?
+@or2-0215
+is it possible to group shapes? | is it possible | q help aspect=can; topic=group | is it possible to group shapes?
+@or2-0216
+what can this thing do | what can | q help | what can you do
+@or2-0217
+spread them out a bit more | spread | c respace comparison=bigger; target=mention(quantifier=all) | spread them out a bit more
+@or2-0218
+everything a bit closer together | closer together | c respace comparison=smaller; target=mention(quantifier=all) | move everything closer together
+@or2-0219
+make all of them the same colour | same colour | c equalize property=color; target=mention(quantifier=all) | make all shapes the same color
+@or2-0220
+snap to grid | snap | c snap | snap everything to the grid
+@or2-0221
+sort them by name | sort | c sort property=name; target=mention(quantifier=all) | sort the shapes by name
+@or2-0222
+flip it upside down | flip | c flip axis=vertical; target=mention(quantifier=all) | flip it upside down
+@or2-0223
+the arrow between check and done should be dotted, and red | should be | c set from=Check; to=Done; style=dotted; color=red | make the arrow from Check to Done dotted and red
+@or2-0224
+make every arrow two-way, I mean both directions | make | c set kind=edge; quantifier=all; arrow=both | make every arrow two-way
+@or2-0225
+turn the arrow around, the one from process to check | turn the arrow around | c reverse from=Process; to=Check | reverse the arrow from Process to Check
+@or2-0226
+delete the label on the start to process arrow | delete the label | c label from=Start; to=Process; label= | remove the label from the arrow from Start to Process
+@or2-0227
+the small ones, delete them | delete | c delete target=mention(quantifier=all,size=small) | delete the small shapes
+@or2-0228
+the big circles should be green | should be | c set target=mention(quantifier=all,shape=circle,size=large); color=green | make the big circles green
+@or2-0229
+number of shapes? | number of | q count | how many shapes are there
+@or2-0230
+how many things are blue right now | how many | q count color=blue | how many blue shapes are there
+@or2-0231
+who is start linked to | linked to | q neighbors target=Start | what is connected to Start
+@or2-0232
+which one is on the far left | far left | q extreme superlative=leftmost | which shape is the leftmost
+@or2-0233 EXCLUDE "start gets a dashed border": a border style is not a value of the legend (outline takes a colour or none)
+@or2-0234
+give everything a black outline | give | c set target=mention(quantifier=all); outline=black | give all shapes a black outline
+@or2-0235
+done: no outline, green fill | no outline | c set target=Done; outline=none; color=green | make Done green with no outline
+@or2-0236
+put a thin red edge around check | put | c set target=Check; outline=red | give Check a red outline
+@or2-0237
+Cache between Api and Db | between | c move target=Cache; position=between; anchor=Api,Db | put Cache between Api and Db
+cache should be yellow | should be | c set target=Cache; color=yellow | make Cache yellow
+@or2-0238
+Worker reads from Queue — draw that. dotted | draw | c connect from=Worker; to=Queue; style=dotted | connect Worker to Queue with a dotted arrow
+@or2-0239
+delete it | delete | c delete target=Cdn | delete Cdn
+@or2-0240
+Api and Worker in a column | in a column | c arrange target=Api,Worker; layout=column | arrange Api and Worker in a column
+Db and Cache in another column | in another column | c arrange target=Db,Cache; layout=column | arrange Db and Cache in a column
+@or2-0241 EXCLUDE "every arrow dashed except Api to Db": an exception is not expressible as one wire of the legend
+@or2-0242
+Firewall must be red | must be | c set target=Firewall; color=red | make Firewall red
+and big | big | c set target=Firewall; size=large | make Firewall big
+@or2-0243
+undo it | undo | c undo | undo
+@or2-0244
+Wan → Firewall → Router → Switch1 → Lan, one chain | → | c connect from=Wan,Firewall,Router,Switch1,Lan; pairing=chain | connect Wan, Firewall, Router, Switch1 and Lan in a chain
+@or2-0245
+make it blue though | make | c set target=Switch1; color=blue | make Switch1 blue
+@or2-0246
+is Firewall connected to Lan directly? | connected to | q connected target=Firewall; anchor=Lan | is Firewall connected to Lan
+@or2-0247 EXCLUDE "Hr, Sales and Legal under Ceo in a row": a move under Ceo and a row layout in one clause; the convention for the pair is not settled
+@or2-0248 EXCLUDE "make it an org chart: Ceo on top, then Cfo, Cto": template with an implied order; the convention is not settled
+@or2-0249
+Legal's border purple | border | c set target=Legal; outline=purple | make Legal's border purple
+Hr's border purple | border | c set target=Hr; outline=purple | make Hr's border purple
+@or2-0250
+connect Cfo to Sales | connect | c connect from=Cfo; to=Sales | connect Cfo to Sales
+@or2-0251
+Alice and Bob, both small and yellow | small | c set target=Alice,Bob; size=small; color=yellow | make Alice and Bob small and yellow
+@or2-0252
+Mom to Alice, Mom to Bob, Dad to Alice, Dad to Bob | to | c connect from=Mom,Dad; to=Alice,Bob | connect Mom and Dad to Alice and Bob
+@or2-0253
+a plain line between Mom and Dad | line | c connect from=Mom; to=Dad; arrow=none | draw a plain line between Mom and Dad
+@or2-0254
+Grandpa purple. no wait thats grandma's colour. Grandpa brown | purple | c set target=Grandpa; color=brown | make Grandpa brown
+@or2-0255
+Running ↔ Paused | ↔ | c connect from=Running; to=Paused; arrow=both | connect Running to Paused with a two-way arrow
+@or2-0256
+every state to Error, dashed | to | c connect from=Idle,Running,Paused,Stopped; to=Error; style=dashed | connect Idle, Running, Paused and Stopped to Error with dashed arrows
+@or2-0257
+Error should say "fatal" on it | should say | c label target=Error; label=fatal | label Error "fatal"
+@or2-0258
+what's the colour of Stopped | what's | q property target=Stopped; property=color | what color is Stopped
+@or2-0259
+Backlog Todo Doing Testing Deployed left to right | left to right | c arrange target=Backlog,Todo,Doing,Testing,Deployed; layout=row | arrange Backlog, Todo, Doing, Testing and Deployed in a row
+@or2-0260
+make the columns all the same size | same size | c equalize property=size; target=mention(quantifier=all) | make all shapes the same size
+@or2-0261
+Blocked: red, with a thick black border | red | c set target=Blocked; color=red; outline=black | make Blocked red with a black outline
+@or2-0262
+delete Testing and Deployed | delete | c delete target=Testing,Deployed | delete Testing and Deployed
+@or2-0263
+Idea in the centre and the rest around it | around it | c arrange target=mention(quantifier=all); layout=circle; anchor=Idea | arrange everything in a circle around Idea
+@or2-0264
+Budget green | green | c set target=Budget; color=green | make Budget green
+Team blue | blue | c set target=Team; color=blue | make Team blue
+Risks... orange | orange | c set target=Risks; color=orange | make Risks orange
+@or2-0265
+two copies of Risks | copies | c duplicate target=Risks; count=2 | make two copies of Risks
+@or2-0266
+where is Vision | where is | q property target=Vision; property=position | where is Vision
+@or2-0267
+Bake 2x bigger | bigger | c resize target=Bake; scale=2 | make Bake twice as big
+@or2-0268
+Eggs a circle, white | circle | c set target=Eggs; shape=circle; color=white | make Eggs a white circle
+@or2-0269
+the Cool step should be last, at the far right | should be | c move target=Cool; position=right | put Cool on the right
+@or2-0270
+undo | undo | c undo | undo
+undo | undo | c undo | undo
