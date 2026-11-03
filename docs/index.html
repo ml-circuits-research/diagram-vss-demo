@@ -68,7 +68,9 @@ button, input, textarea, select { font: inherit; color: inherit; }
 svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
 /* ---------- app grid ---------- */
-.app { height: var(--app-h, 100%); display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, 420px); grid-template-rows: auto minmax(0, 1fr) auto auto; grid-template-areas: "stage head" "stage msgs" "stage player" "stage comp"; padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+/* the dictation dock (docs/js/voice.js, docs/voice.css) sits under the drawing, level with the message box (desktop), or just above the
+   message box (phone) */
+.app { height: var(--app-h, 100%); display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, 420px); grid-template-rows: auto minmax(0, 1fr) auto auto; grid-template-areas: "stage head" "stage msgs" "stage player" "dock comp"; padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
 .head { grid-area: head; background: var(--head); display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 16px; border-left: 1px solid var(--line); min-width: 0; }
 .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-family: var(--mono); font-weight: 600; font-size: 19px; flex: none; }
 .who { flex: 1; min-width: 0; }
@@ -126,6 +128,7 @@ svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-widt
 .shp .ftext { font-family: var(--font); font-weight: 650; }
 .shp.background { cursor: default; }
 .shp.background .body, .shp.zone .body { stroke-dasharray: 0; stroke-width: 1.25; stroke-opacity: .45; }
+.shp.stage .body { stroke: none !important; }   /* the background panel that fills the board (ui.js stageExtent): its edge is the board's edge */
 .shp.hl .halo { stroke: var(--hl); stroke-width: 2.5; fill: none; stroke-dasharray: 5 4; animation: march 1.2s linear infinite; }
 .shp.hl .tag { fill: var(--hl); font-weight: 600; }
 .edge .ln { stroke: var(--pc-arrow); stroke-width: 1.75; fill: none; }   /* an arrow without a colour (logic.js PALETTE_ARROW) */
@@ -444,10 +447,10 @@ html.docs-open, html.docs-open body { overflow: hidden; }
 
 /* ---------- phone ---------- */
 /* phone keyboard open: shrink the drawing so the conversation stays usable */
-.app.kb { grid-template-rows: auto minmax(0, 24%) minmax(0, 1fr) auto auto; }
+.app.kb { grid-template-rows: auto minmax(0, 24%) minmax(0, 1fr) auto auto auto; }
 .app.kb .readout, .app.kb .sopbar, .app.kb .subbar { display: none; }
 @media (max-width: 860px) {
-  .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(180px, 46%) minmax(0, 1fr) auto auto; grid-template-areas: "head" "stage" "msgs" "player" "comp"; }
+  .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(180px, 46%) minmax(0, 1fr) auto auto auto; grid-template-areas: "head" "stage" "msgs" "player" "dock" "comp"; }
   .head { border-left: 0; padding-top: max(10px, env(safe-area-inset-top, 0px)); padding-left: max(12px, env(safe-area-inset-left, 0px)); }
   .msgs, .player, .comp { border-left: 0; }
   .msgs { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
@@ -503,10 +506,11 @@ html.docs-open, html.docs-open body { overflow: hidden; }
 
   <div class="player" id="player" hidden></div>
 
+  <section class="dock" id="dock" aria-label="Dictation: speak or type in your language"></section>
+
   <div class="comp" id="composer">
     <button class="ib" type="button" id="open-examples" aria-label="Examples" title="Examples"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
     <div class="field"><textarea id="say" rows="1" placeholder="Message" aria-label="Message" enterkeyhint="send" autocomplete="off" autocapitalize="sentences"></textarea></div>
-    <button class="mic" type="button" id="mic-btn" aria-label="Speak or type in your language" title="Speak or type in your language" aria-haspopup="dialog"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg></button>
     <button class="send" type="button" id="send-btn" aria-label="Send"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h13"/><path d="m12 5 7 7-7 7"/></svg></button>
   </div>
 </div>

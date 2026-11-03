@@ -11,8 +11,11 @@ Writes, in the fresh2 / short3 layout (training/sketch/llm_bench/fresh2/README.m
   batch_01.jsonl            {id, domain, names, text, wires: []}: the gold is empty, to be annotated (wires as in short3: span, trigger,
                             type, args)
   context/context_01.jsonl  {id, collected: {...}}: everything else of the entry (time, source with the original words and their language,
-                            what the readers read, what VSS-BERT executed or held, the user's later actions). Kept apart so the annotation
-                            can be blind to the readers: an annotator opens only texts/ and batch_01.jsonl.
+                            the model versions, what VSS-BERT executed or held, the user's later actions; for format 1 entries also every
+                            reader's reading). Kept apart so the annotation can be blind to the readers: an annotator opens only texts/
+                            and batch_01.jsonl.
+Reads format 2 (sop-collect/2: VSS-BERT's decision and the model versions; the readings are recomputed, not stored) and format 1
+(sop-collect/1: every reader's reading stored), also mixed in one file.
   README.md                 where the messages come from, the counts, and how to annotate.
 
 Options: --via keeps only the entries whose source.via is listed (default: every entry); --dedupe keeps the first of entries with the same
@@ -22,8 +25,7 @@ Exit code 0 on success, 1 when nothing could be written.
 """
 import argparse, collections, json, os, sys
 
-FORMAT = "sop-collect/1"
-READERS = ("rules", "vss", "neural", "combined")
+FORMATS = ("sop-collect/1", "sop-collect/2")
 
 
 def read_entries(paths):
@@ -50,8 +52,8 @@ def check_entry(e):
     """the reason an object is not a collected entry, or None"""
     if not isinstance(e, dict):
         return "not an object"
-    if e.get("format") != FORMAT:
-        return f"format is {e.get('format')!r}, not {FORMAT!r}"
+    if e.get("format") not in FORMATS:
+        return f"format is {e.get('format')!r}, not one of {', '.join(FORMATS)}"
     if not isinstance(e.get("text"), str) or not e["text"].strip():
         return "no text"
     if not isinstance(e.get("names", []), list):
@@ -77,15 +79,24 @@ def convert(entries, prefix="col", via=None, dedupe=False):
         domain = e.get("domain") or "collected from the demo"
         text_row = {"id": rid, "domain": domain, "names": names, "text": e["text"]}
         batch_row = dict(text_row, wires=[])
-        ctx = {k: e[k] for k in ("id", "time", "session", "turn", "source", "read", "spell", "cut", "tab", "reply", "readings", "events") if k in e}
+        ctx = {k: e[k] for k in ("format", "id", "time", "session", "turn", "source", "models", "decision", "read", "spell", "cut", "tab", "reply", "readings", "events") if k in e}
         rows.append((text_row, batch_row, {"id": rid, "collected": ctx}))
         stats["kept"] += 1
+        stats[f"format {e['format']}"] += 1
         stats[f"via {v}"] += 1
         if src.get("original"):
             stats[f"original in {src.get('lang') or '?'}"] += 1
         for ev in e.get("events") or []:
             stats[f"event {ev.get('kind')}"] += 1
     return rows, stats
+
+
+def held_units(ctx):
+    """the requests VSS-BERT held in a context row: format 2 `decision.units` with execute false, format 1 `readings.combined.held`"""
+    d = ctx.get("decision")
+    if isinstance(d, dict):
+        return [u for u in d.get("units") or [] if not u.get("execute")]
+    return ((ctx.get("readings") or {}).get("combined") or {}).get("held") or []
 
 
 def write(out, rows, stats, sources, bad):
@@ -95,7 +106,7 @@ def write(out, rows, stats, sources, bad):
     dump(os.path.join(out, "texts", "texts_01.jsonl"), [r[0] for r in rows])
     dump(os.path.join(out, "batch_01.jsonl"), [r[1] for r in rows])
     dump(os.path.join(out, "context", "context_01.jsonl"), [r[2] for r in rows])
-    n_held = sum(1 for r in rows if ((r[2]["collected"].get("readings") or {}).get("combined") or {}).get("held"))
+    n_held = sum(1 for r in rows if held_units(r[2]["collected"]))
     lines = [
         f"# {os.path.basename(os.path.normpath(out))}: requests collected from the demo (un-annotated)",
         "",
@@ -108,8 +119,9 @@ def write(out, rows, stats, sources, bad):
         "- `batch_01.jsonl`: the same rows with `wires: []`. Write the gold here, as in `../short3/README.md` (span, trigger, type, args; names as",
         "  in `names`, `$new`, `mention(...)`; `pending` with an intent where the SOP Lang form does not exist).",
         "- `context/context_01.jsonl`: per id, the rest of the collected entry: time, source (via, the original words and their language, how",
-        "  they were translated), what Rules, VSS, SOP-BERT and VSS-BERT read (SOP Lang and wires), what VSS-BERT executed or held with its",
-        "  confidence, and what the user did next (Do it anyway, Edit, superseded, undo right after). **For a blind annotation do not open it**",
+        "  they were translated), the model versions (format 2: the readings are recomputed from text, names and models; format 1 entries also",
+        "  have every reader's reading), what VSS-BERT executed or held with its confidence, and what the user did next (Do it anyway, Edit,",
+        "  superseded, undo right after). **For a blind annotation do not open it**",
         "  before the gold is written; afterwards it is the place to look for the readings that were wrong (a held request done anyway, an",
         "  executed one undone right after).",
         "",
@@ -120,8 +132,7 @@ def write(out, rows, stats, sources, bad):
     lines += [f"- messages where VSS-BERT held at least one request: {n_held}"]
     if bad:
         lines += ["", f"Skipped lines ({len(bad)}): " + "; ".join(f"{os.path.basename(p)}:{i} {why}" for p, i, why in bad[:20]) + (" ..." if len(bad) > 20 else "")]
-    lines += ["", "`names` is the drawing of the VSS-BERT tab before the message (the chat speaks for that tab); a reader whose drawing differed",
-              "has its own `names` in the context file."]
+    lines += ["", "`names` is the drawing of the VSS-BERT tab before the message (the chat speaks for that tab)."]
     open(os.path.join(out, "README.md"), "w", encoding="utf-8").write("\n".join(lines) + "\n")
 
 

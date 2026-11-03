@@ -1,30 +1,34 @@
 #!/usr/bin/env python3
-"""test_voice_collect_ui.py: voice input with translation (docs/js/voice.js) and the collected requests (docs/js/collect.js) in a real
+"""test_voice_collect_ui.py: the dictation dock (docs/js/voice.js) and the collected requests (docs/js/collect.js, format 2) in a real
 browser (Playwright, Chromium), with the browser's speech and translation APIs mocked by an init script.
 
 Run:  python3 training/sketch/test_voice_collect_ui.py [screenshot dir]      (PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers in this sandbox)
 It serves docs/ on a free local port and loads VSS and SOP-BERT (as test_clarify_ui.py: transformers.js 3.8.1 from training/laptop/node_modules
-in place of cdn.jsdelivr.net). The init script replaces SpeechRecognition (a fake that the test drives with window.__say), Translator (Chrome's
-on-device API: ro <-> en available, fr -> en unavailable, a small dictionary) and speechSynthesis.speak (records what would be read). Checks:
-  1. the microphone button beside the message box opens the popup (a dialog, focus inside); the language list starts with Romanian and English
-     and has a free BCP-47 field; the support lines say: speech recognition yes, translation Romanian -> English yes on this device, the voices;
-     the note about the browser vendor's servers is there;
-  2. a spoken Romanian phrase: the interim transcript is shown live, the final one fills the box, Stop translates it on the device into the
-     English box; Send puts the English text in the chat as a normal message with the Romanian original under it in small text, and VSS-BERT
-     replies; with "read aloud" on, the reply is read in Romanian (translated back by the same Translator);
-  3. the collected entry of that message: the English text, the Romanian original, its language, via voice, translated on the device, the
-     names on the drawing, the four readers' readings (SOP Lang and wires), VSS-BERT's units with their confidences and executed / held;
-  4. typing in a language this browser cannot translate (French): the popup says plainly that there is no built-in translation, the text
-     is kept as it is, and nothing is sent anywhere (the online fallback is off; no request leaves the page); an invalid BCP-47 tag is refused;
-     Escape closes the popup and gives the focus back to the microphone button; the choices are kept after a reload;
-  5. the events: Undo (toolbar) right after a message -> "undo-next"; Do it anyway on a held request -> "anyway"; Edit -> "edit", the sent
-     rewrite -> "edit-sent" and "superseded" (when the shipped models hold a request of the tried messages);
-  6. ⋮ › Settings › Collected requests: the count, the preview of the last ones (with the original), Download as JSONL (a file name with
-     the date; every line valid JSON; as many lines as the count; the converter collect_to_bench.py turns it into texts / batch with an empty
-     gold / context), Clear with a confirmation inside the page (Cancel keeps them, Delete empties them; never a browser dialog), the switch
-     off keeps nothing new;
-  7. phone width (390 x 844): the popup fits the screen without a horizontal scroll;
-  8. no page error.
+in place of cdn.jsdelivr.net). The init script replaces SpeechRecognition (a fake that the test drives: window.__say(text, final), __end()
+(the browser ends a session after a pause), __err(code) (an error, then the end)), Translator (Chrome's on-device API: ro <-> en available,
+fr -> en unavailable, a small dictionary) and speechSynthesis (records what would be read; speaking until window.__endSpeech()). Checks:
+  1. layout (owner, 12:22): the drawing fills its column edge to edge (the background panel's left and right edges are the board's, its wash
+     covers the rest, no padding); the dock sits under it, level with the message box, two rows; the language code "RO"; no popup left;
+  2. the settings popover: opens from the language code above the dock without moving anything, has the language list, the switches and
+     what the browser supports; closes on a click outside and on Escape (the focus back on the code); a choice is kept;
+  3. speech: the mic starts continuous recognition in ro-RO; the interim transcript shows live in row 1; "fă Done roșu trimite" sends
+     "make Done red" (the command word is not sent), the chat shows the Romanian original under it, the dock empties and keeps listening;
+     with "read replies aloud" on, the reply is read in Romanian and recognition pauses while it is spoken, then resumes;
+  4. the collected entry (format 2): the English text, the Romanian original, via voice, translated on the device, the names, the model
+     versions, VSS-BERT's decision per request with its confidence, the reply; no reader's readings;
+  5. staying on: the browser ends a session after a pause -> a new one starts by itself and the text is kept; a no-speech error -> a new
+     session; the listening indicator stays on; "șterge" clears the dock and the message box; "not-allowed" stops listening and says why;
+     "oprește" stops listening and nothing restarts;
+  6. no translation (French): the dock says so, puts nothing in the message box, and sends nothing (Enter, the send button, a spoken
+     "send"); English written in row 2 goes to the message box and is sent (translation by "user"); nothing goes online; an invalid tag is
+     refused; a non-English message typed straight into the message box is sent, with a one-time hint;
+  7. the events: Undo (toolbar) right after a message -> "undo-next"; "fă-o oricum" presses the last Do it anyway -> "anyway"; "editează"
+     presses the last Edit, then a spoken "trimite" sends the message box -> "edit-sent" (when the shipped models hold a request);
+  8. ⋮ › Settings › Collected requests: the count, the preview, Download as JSONL (format 2; the converter reads it), Clear with an in-page
+     confirmation, the switch;
+  9. after a reload: the choices are kept, and since the mic was on, "Resume listening" starts it again in one tap;
+ 10. phone width (390 x 844): the dock just above the message box, two rows, the popover inside the screen, no horizontal scroll;
+ 11. no page error.
 Screenshots go to the directory (default: a temporary folder). Exit code 0 when everything passes.
 """
 import functools, http.server, json, mimetypes, os, re, socketserver, subprocess, sys, tempfile, threading
@@ -63,7 +67,7 @@ def cdn(route):
 MOCKS = r"""
 (() => {
   try { if (!sessionStorage.getItem('t0')) { localStorage.clear(); sessionStorage.setItem('t0', '1'); } } catch (e) {}
-  const DICT = { 'fă Done roșu': 'make Done red', 'șterge Start': 'delete Start' };
+  const DICT = { 'fă Done roșu': 'make Done red', 'șterge Start': 'delete Start', 'fă Start albastru': 'make Start blue', 'fă Start albastru verde': 'make Start blue green' };
   window.__tr = [];
   window.Translator = {
     availability: async ({ sourceLanguage: s, targetLanguage: t }) => ((s === 'ro' && t === 'en') || (s === 'en' && t === 'ro')) ? 'available' : 'unavailable',
@@ -81,22 +85,32 @@ MOCKS = r"""
   }
   window.SpeechRecognition = FakeSR; window.webkitSpeechRecognition = FakeSR;
   window.__say = (text, final) => { const r = window.__srActive, res = [{ transcript: text }]; res.isFinal = !!final; r.onresult({ resultIndex: 0, results: [res] }); };
-  window.__spoken = [];
+  // the browser ends the session by itself (silence, a minute gone): no stop() was called
+  window.__end = () => { const r = window.__srActive; r.started = false; r.onend && r.onend(); };
+  window.__err = code => { const r = window.__srActive; r.onerror && r.onerror({ error: code }); r.started = false; setTimeout(() => r.onend && r.onend(), 0); };
+  window.__live = () => window.__sr.filter(r => r.started).length;
+  window.__spoken = []; window.__speaking = false; window.__utt = null;
   try {
     const voices = [{ name: 'Ioana', lang: 'ro-RO', default: false }, { name: 'Samantha', lang: 'en-US', default: true }];
     window.SpeechSynthesisUtterance = class { constructor(t) { this.text = t; this.lang = ''; this.voice = null; } };   // a voice of the mock is not a real SpeechSynthesisVoice
     speechSynthesis.getVoices = () => voices;
-    speechSynthesis.speak = u => { window.__spoken.push({ text: u.text, lang: u.lang, voice: u.voice && u.voice.name }); };
+    Object.defineProperty(speechSynthesis, 'speaking', { configurable: true, get: () => window.__speaking });
+    speechSynthesis.speak = u => { window.__spoken.push({ text: u.text, lang: u.lang, voice: u.voice && u.voice.name }); window.__speaking = true; window.__utt = u; };
     speechSynthesis.cancel = () => {};
+    window.__endSpeech = () => { window.__speaking = false; const u = window.__utt; window.__utt = null; if (u && u.onend) u.onend(); };
   } catch (e) {}
-  window.__dialogs = 0;
 })();
 """
 NBOT = "() => document.querySelectorAll('#msgs .b.bot').length"
+NME = "() => document.querySelectorAll('#msgs .b.me').length"
 ENTRIES = "() => { try { return JSON.parse(localStorage.getItem('sop.collect.v1') || '[]'); } catch (e) { return null; } }"
 LINE = """() => { const bs = [...document.querySelectorAll('#msgs .b.bot')], b = bs[bs.length - 1]; const rl = b && b.querySelector('.rl[data-reader=combined]');
   return rl ? { text: rl.querySelector('.t').textContent, held: [...rl.querySelectorAll('.held > li')].map(li => ({ key: li.dataset.held,
     anyway: !!li.querySelector('button.anyway') && !li.querySelector('button.anyway').disabled, edit: li.querySelector('button.edit') ? li.querySelector('button.edit').dataset.text : null })) } : null; }"""
+ROWS = "() => ({ src: document.querySelector('#vd-src').value, en: document.querySelector('#vd-en').value, enPh: document.querySelector('#vd-en').placeholder, box: document.querySelector('#say').value })"
+MIC = "() => { const m = document.querySelector('.vd-mic'); return { on: m.getAttribute('aria-pressed') === 'true', paused: m.classList.contains('paused'), listening: document.querySelector('#dock').classList.contains('listening'), n: window.__sr.length, live: window.__live(), active: window.__srActive ? { lang: window.__srActive.lang, cont: window.__srActive.continuous, interim: window.__srActive.interimResults, started: !!window.__srActive.started } : null }; }"
+TOAST = "() => document.querySelector('.vd-toast').textContent"
+RECT = "s => { const r = document.querySelector(s).getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom, w: r.width, h: r.height }; }"
 
 def wait_reply(pg, n):
     pg.wait_for_function("n => document.querySelectorAll('#msgs .b.bot').length > n && !document.querySelector('#msgs .typing')", arg=n, timeout=240000)
@@ -106,11 +120,31 @@ def send(pg, text):
     n = pg.evaluate(NBOT); pg.fill("#say", text); pg.click("#send-btn"); wait_reply(pg, n)
     return pg.evaluate(LINE)
 
+def say(pg, text, final=True): pg.evaluate("([t, f]) => window.__say(t, f)", [text, final])
+
 def shot(pg, name): pg.screenshot(path=f"{OUT}/{name}.png")
 
 def ready(pg):
     pg.wait_for_function("() => { const t = document.querySelector('[data-rtab=combined]'); return t && !t.classList.contains('off'); }", timeout=900000)
     pg.wait_for_function("() => document.querySelectorAll('#msgs .b.bot').length >= 1 + (window.StartDiagram ? StartDiagram.MESSAGES.length : 3) && !document.querySelector('#msgs .typing')", timeout=180000)
+
+def mic_on(pg):
+    if not pg.evaluate(MIC)["on"]: pg.click(".vd-mic")
+    pg.wait_for_function("() => window.__srActive && window.__srActive.started", timeout=5000)
+
+def near(a, b, tol=1.5): return abs(a - b) <= tol
+
+def end_speech(pg):
+    """the mock's reading aloud ends; wait until listening has resumed (a new session: results never reach an aborted one)"""
+    n = pg.evaluate("() => window.__sr.length")
+    pg.evaluate("() => window.__endSpeech()")
+    pg.wait_for_function("n => window.__sr.length > n && window.__srActive.started", arg=n, timeout=5000)
+
+def wait_box(pg, text, timeout=10000):
+    """wait until the message box holds text; on a timeout say what the dock and the mic were doing"""
+    try: pg.wait_for_function("t => document.querySelector('#say').value === t", arg=text, timeout=timeout)
+    except Exception:
+        print(f"     waited for the message box to hold {text!r}: rows {pg.evaluate(ROWS)}, mic {pg.evaluate(MIC)}"); raise
 
 TRY = ["Make Check red and put Done below it", "Make Process green and put Start below it", "Make Done orange and move Check next to it",
        "Make Start teal and move Process next to it"]
@@ -130,100 +164,175 @@ with sync_playwright() as p:
     ready(pg)
     check("0. nothing collected from the opening message the page sends by itself", pg.evaluate(ENTRIES) == [], str(pg.evaluate(ENTRIES))[:200])
 
-    # 1. the popup
-    check("1. a microphone button beside the message box", pg.locator("#composer #mic-btn").count() == 1 and pg.get_attribute("#mic-btn", "aria-label") is not None)
-    pg.click("#mic-btn"); pg.wait_for_selector(".vx:not([hidden])")
-    dlg = pg.evaluate("() => { const d = document.querySelector('.vx'); return { role: d.getAttribute('role'), modal: d.getAttribute('aria-modal'), focusInside: d.contains(document.activeElement),"
-                      " opts: [...d.querySelectorAll('#vx-lang option')].map(o => o.value), support: [...d.querySelectorAll('.vx-support li')].map(l => l.textContent), note: d.querySelector('.vx-note').textContent }; }")
-    check("1. a modal dialog with the focus inside", dlg["role"] == "dialog" and dlg["modal"] == "true" and dlg["focusInside"], str(dlg)[:300])
-    check("1. Romanian and English first, a free BCP-47 field last", dlg["opts"][:2] == ["ro-RO", "en-US"] and dlg["opts"][-1] == "other" and len(dlg["opts"]) > 30, str(dlg["opts"][:5]))
-    sup = " | ".join(dlg["support"])
-    check("1. support: speech recognition yes", "Speech recognition: yes" in sup, sup)
-    check("1. support: translation Romanian -> English on this device", "Translation Romanian → English: yes, on this device" in sup, sup)
-    check("1. support: the voices for Romanian", "Speech synthesis: 1 voice for Romanian" in sup, sup)
-    check("1. the note: the API is the browser's, audio may go to the vendor's servers", "browser’s" in dlg["note"] and "vendor’s servers" in dlg["note"], dlg["note"])
+    # 1. layout
+    check("1. no popup and no microphone button in the message row any more", pg.locator(".vx, #mic-btn, .vx-scrim").count() == 0)
+    stage, board, dock, comp = (pg.evaluate(RECT, s) for s in (".stage", ".board", "#dock", "#composer"))
+    check("1. the dock is under the drawing, as wide as its column", near(dock["l"], stage["l"]) and near(dock["r"], stage["r"]) and near(dock["t"], stage["b"]), f"{dock} {stage}")
+    check("1. the dock is level with the message box", near(dock["t"], comp["t"]) and near(dock["b"], comp["b"]), f"{dock} {comp}")
+    rows = pg.evaluate("() => [...document.querySelectorAll('#dock .vd-row')].map(r => r.getBoundingClientRect().height)")
+    check("1. two rows, slim", len(rows) == 2 and all(h <= 30 for h in rows) and dock["h"] <= 70, f"{rows} {dock['h']}")
+    check("1. the language code says RO", pg.inner_text(".vd-lang").strip() == "RO" and pg.get_attribute(".vd-lang", "aria-haspopup") == "dialog")
+    bd = pg.evaluate(RECT, "[data-name=Backdrop] .body")
+    check("1. the drawing fills its column: the background panel's edges are the board's (no padding)", near(bd["l"], board["l"], 2) and near(bd["r"], board["r"], 2), f"panel {bd}, board {board}")
+    check("1. the panel's wash covers the rest of the board, the panel has no outline", pg.locator("#frames path.wash").count() == 1
+          and pg.evaluate("() => getComputedStyle(document.querySelector('[data-name=Backdrop] .body')).stroke") == "none")
+    shot(pg, "01_desktop_dock_empty")
 
-    # 2. speak Romanian, translate, send
-    pg.click(".vx-opts summary")   # the options are folded by default
-    pg.check(".vx [data-pref=tts]")
-    pg.click(".vx [data-vx=rec]")
-    rec = pg.evaluate("() => { const r = window.__srActive; return r && { lang: r.lang, interim: r.interimResults, cont: r.continuous, started: r.started }; }")
-    check("2. recognition started in ro-RO with interim results, not continuous", rec == {"lang": "ro-RO", "interim": True, "cont": False, "started": True}, str(rec))
-    check("2. the button says Stop while listening", pg.get_attribute(".vx [data-vx=rec]", "aria-pressed") == "true" and "Stop" in pg.inner_text(".vx [data-vx=rec]"))
-    pg.evaluate("() => window.__say('fă Done', false)")
-    interim = pg.inner_text(".vx-interim")
-    check("2. the interim transcript is shown live", interim == "fă Done" and pg.is_visible(".vx-interim"), interim)
-    shot(pg, "1_listening")
-    pg.evaluate("() => window.__say('fă Done roșu', true)")
-    check("2. the final transcript fills the box", pg.input_value("#vx-orig") == "fă Done roșu", pg.input_value("#vx-orig"))
-    pg.click(".vx [data-vx=rec]")
-    pg.wait_for_function("() => document.querySelector('#vx-en').value === 'make Done red'", timeout=10000)
-    trs = pg.inner_text(".vx-trstate")
-    check("2. Stop translates on the device into the English box", "Translated on this device" in trs, trs)
-    shot(pg, "2_translated")
-    n0 = pg.evaluate(NBOT)
-    pg.click(".vx [data-vx=send]")
-    check("2. Send closes the popup", pg.is_hidden(".vx"))
+    # 2. the settings popover
+    pg.click(".vd-lang"); pg.wait_for_selector("#vd-pop:not([hidden])")
+    pop = pg.evaluate(RECT, "#vd-pop"); dock2 = pg.evaluate(RECT, "#dock")
+    check("2. the popover opens above the dock and moves nothing", pop["b"] <= dock2["t"] + 0.5 and dock2 == dock and pop["w"] <= 320, f"{pop} {dock2}")
+    info = pg.evaluate("() => { const d = document.querySelector('#vd-pop'); return { expanded: document.querySelector('.vd-lang').getAttribute('aria-expanded'), opts: [...d.querySelectorAll('#vd-lang option')].map(o => o.value),"
+                       " prefs: [...d.querySelectorAll('[data-pref]')].map(c => c.dataset.pref), support: [...d.querySelectorAll('.vd-support li')].map(l => l.textContent), note: d.querySelector('.vd-note').textContent, cmds: d.querySelector('.vd-cmds').textContent }; }")
+    check("2. Romanian and English first, a free BCP-47 field last", info["opts"][:2] == ["ro-RO", "en-US"] and info["opts"][-1] == "other" and len(info["opts"]) > 30, str(info["opts"][:5]))
+    check("2. the switches: send after a pause, read replies aloud, online translation", info["prefs"] == ["autoSend", "tts", "online"] and info["expanded"] == "true", str(info))
+    sup = " | ".join(info["support"])
+    check("2. what the browser supports: recognition, translation on this device, voices", "Speech recognition: yes" in sup and "Translation Romanian → English: yes, on this device" in sup and "Speech synthesis: 1 voice for Romanian" in sup, sup)
+    check("2. the note about the browser vendor's servers; the commands", "vendor’s servers" in info["note"] and "trimite" in info["cmds"] and "oprește" in info["cmds"], info["note"] + " | " + info["cmds"])
+    pg.check("#vd-pop [data-pref=tts]")
+    shot(pg, "02_desktop_popover")
+    pg.mouse.click(300, 300)
+    check("2. a click outside closes it", pg.is_hidden("#vd-pop") and pg.get_attribute(".vd-lang", "aria-expanded") == "false")
+    pg.click(".vd-lang"); pg.wait_for_selector("#vd-pop:not([hidden])"); pg.keyboard.press("Escape")
+    check("2. Escape closes it, the focus back on the language code", pg.is_hidden("#vd-pop") and pg.evaluate("() => document.activeElement.classList.contains('vd-lang')"))
+    check("2. the choice is kept", pg.evaluate("() => JSON.parse(localStorage.getItem('sop.voice')).tts") is True)
+
+    # 3. speech
+    pg.click(".vd-mic")
+    m = pg.evaluate(MIC)
+    check("3. the mic starts continuous recognition in ro-RO with interim results", m["on"] and m["listening"] and m["active"] == {"lang": "ro-RO", "cont": True, "interim": True, "started": True}, str(m))
+    say(pg, "fă Done", False)
+    check("3. the interim transcript shows live in row 1", pg.input_value("#vd-src") == "fă Done", pg.input_value("#vd-src"))
+    shot(pg, "03_desktop_listening")
+    say(pg, "fă Done roșu")
+    pg.wait_for_function("() => document.querySelector('#vd-en').value === 'make Done red' && document.querySelector('#say').value === 'make Done red'", timeout=10000)
+    check("3. a final transcript: row 2 and the message box get the English at once", True)
+    shot(pg, "04_desktop_translated")
+    n0, nm = pg.evaluate(NBOT), pg.evaluate(NME)
+    say(pg, "trimite")
     wait_reply(pg, n0)
     me = pg.evaluate("() => { const m = [...document.querySelectorAll('#msgs .b.me')].pop(); return { txt: m.querySelector('.txt').textContent, orig: (m.querySelector('.orig') || {}).textContent || '', lang: (m.querySelector('.orig') || { getAttribute: () => null }).getAttribute('lang') }; }")
-    check("2. the chat shows the English text as the message", me["txt"] == "make Done red", str(me))
-    check("2. the Romanian original under it, in small text", "fă Done roșu" in me["orig"] and "Romanian" in me["orig"] and me["lang"] == "ro-RO", str(me))
-    reply = pg.evaluate(LINE)
-    check("2. VSS-BERT replied to the English text", bool(reply) and bool(reply["text"]), str(reply))
+    check("3. 'trimite' sends the English text, the command word is not sent", me["txt"] == "make Done red" and pg.evaluate(NME) == nm + 1, str(me))
+    check("3. the Romanian original under it, in small text", "fă Done roșu" in me["orig"] and "Romanian" in me["orig"] and me["lang"] == "ro-RO", str(me))
+    r = pg.evaluate(ROWS)
+    check("3. the dock and the message box are empty after sending", r["src"] == "" and r["en"] == "" and r["box"] == "", str(r))
+    check("3. a toast confirms it", pg.evaluate(TOAST) == "Sent", pg.evaluate(TOAST))
     pg.wait_for_function("() => window.__spoken.length > 0", timeout=10000)
     spoken = pg.evaluate("() => window.__spoken")
-    check("2. the reply is read aloud in Romanian (translated back on the device)", spoken[-1]["lang"] == "ro-RO" and spoken[-1]["text"].startswith("RO: ") and spoken[-1]["voice"] == "Ioana", str(spoken))
-    shot(pg, "3_chat_original")
+    check("3. the reply is read aloud in Romanian (translated back on the device)", spoken[-1]["lang"] == "ro-RO" and spoken[-1]["text"].startswith("RO: ") and spoken[-1]["voice"] == "Ioana", str(spoken))
+    pg.wait_for_timeout(200)
+    m = pg.evaluate(MIC)
+    check("3. recognition pauses while the reply is spoken (no session listens), the mic stays on", m["on"] and m["paused"] and m["live"] == 0, str(m))
+    n_before = m["n"]
+    pg.evaluate("() => window.__endSpeech()")
+    pg.wait_for_function("n => window.__sr.length > n && window.__srActive.started", arg=n_before, timeout=5000)
+    m = pg.evaluate(MIC)
+    check("3. after the reply, listening resumes by itself", m["on"] and not m["paused"] and m["live"] == 1, str(m))
+    # a trailing command in one utterance
+    n0 = pg.evaluate(NBOT)
+    say(pg, "fă Done roșu trimite"); wait_reply(pg, n0)
+    me = pg.evaluate("() => [...document.querySelectorAll('#msgs .b.me')].pop().querySelector('.txt').textContent")
+    check("3. 'fă Done roșu trimite' sends 'make Done red'", me == "make Done red", me)
+    pg.wait_for_function("() => window.__speaking", timeout=10000); end_speech(pg)
+    shot(pg, "05_desktop_chat_original")
 
-    # 3. the collected entry
+    # 4. the collected entry (format 2)
     es = pg.evaluate(ENTRIES)
-    e = es[-1] if es else {}
-    check("3. one entry per message sent", len(es) == 1, f"{len(es)} entries")
-    check("3. the English text and the Romanian original, with its language", e.get("text") == "make Done red" and e.get("source", {}).get("original") == "fă Done roșu" and e["source"].get("lang") == "ro-RO", str(e.get("source")))
-    check("3. via voice, translated on the device, not edited", e.get("source", {}).get("via") == "voice" and e["source"].get("translation") == {"by": "builtin", "edited": False}, str(e.get("source")))
-    check("3. format, id, time, gold empty", e.get("format") == "sop-collect/1" and str(e.get("id", "")).startswith("c-") and re.match(r"\d{4}-\d\d-\d\dT", e.get("time", "")) and e.get("wires") == [], str({k: e.get(k) for k in ("format", "id", "time", "wires")}))
-    check("3. the names on the drawing", "Done" in e.get("names", []) and "Start" in e.get("names", []), str(e.get("names")))
-    R = e.get("readings", {})
-    check("3. all four readers' readings", set(R) == {"rules", "vss", "neural", "combined"} and all(R[k]["status"] == "read" for k in R), str({k: R[k].get("status") for k in R}))
-    check("3. each reading has SOP Lang and fresh2-style wires", all(R[k]["sop"] and R[k]["wires"] and all("type" in w and "args" in w for w in R[k]["wires"]) for k in R), json.dumps(R.get("combined", {}))[:400])
-    c = R.get("combined", {})
-    check("3. VSS-BERT: units with confidences, executed / held", bool(c.get("units")) and all(isinstance(u.get("conf"), (int, float)) for u in c["units"]) and sorted(c.get("executed", []) + c.get("held", [])) == [u["index"] for u in c["units"]], json.dumps(c.get("units"))[:400])
-    check("3. VSS-BERT read 'set Done red'", any(w["args"].get("action") == "set" and w["args"].get("color") == "red" for w in c.get("wires", [])), json.dumps(c.get("wires")))
-    check("3. the reply text is kept", bool(e.get("reply")), str(e.get("reply")))
+    e = es[0] if es else {}
+    check("4. one entry per message sent", len(es) == 2, f"{len(es)} entries")
+    check("4. format 2, id, time, gold empty", e.get("format") == "sop-collect/2" and str(e.get("id", "")).startswith("c-") and re.match(r"\d{4}-\d\d-\d\dT", e.get("time", "")) and e.get("wires") == [], str({k: e.get(k) for k in ("format", "id", "time", "wires")}))
+    check("4. the English text, the Romanian original, via voice, translated on the device", e.get("text") == "make Done red" and e.get("source") == {"via": "voice", "lang": "ro-RO", "original": "fă Done roșu", "translation": {"by": "builtin", "edited": False}}, str(e.get("source")))
+    check("4. the names on the drawing", "Done" in e.get("names", []) and "Start" in e.get("names", []), str(e.get("names")))
+    mv = e.get("models") or {}
+    check("4. the model versions (SOP-BERT, VSS-BERT's confidence model, digests)", bool(mv.get("neural")) and bool(mv.get("combined")) and re.fullmatch(r"[0-9a-f]{8}", mv.get("all", "")) and re.fullmatch(r"[0-9a-f]{8}", mv.get("micro", "")), str(mv))
+    d = e.get("decision") or {}
+    check("4. VSS-BERT's decision per request: words, executed or held, confidence", d.get("status") == "read" and d.get("units") and all(isinstance(u.get("conf"), (int, float)) and isinstance(u.get("execute"), bool) and u.get("src") for u in d["units"]), json.dumps(d)[:300])
+    check("4. no reader's readings are stored", not any(k in e for k in ("readings", "cut", "spell", "read")) and len(json.dumps(e)) < 1500, f"{sorted(e)} {len(json.dumps(e))} bytes")
+    check("4. the reply text is kept", bool(e.get("reply")), str(e.get("reply")))
 
-    # 4. typing in a language this browser cannot translate; an invalid tag; Escape; the choices kept
-    pg.click("#mic-btn"); pg.wait_for_selector(".vx:not([hidden])")
-    check("4. the popup remembers Romanian and read aloud", pg.input_value("#vx-lang") == "ro-RO" and pg.is_checked(".vx [data-pref=tts]"))
-    pg.select_option("#vx-lang", "other")
-    pg.fill("#vx-tag", "not a tag"); pg.press("#vx-tag", "Enter")
-    err = pg.inner_text(".vx-tagerr")
-    check("4. an invalid BCP-47 tag is refused", "is not a BCP-47 language tag" in err, err)
-    pg.fill("#vx-tag", "fr-fr"); pg.press("#vx-tag", "Enter")
-    check("4. a valid tag is taken, canonical", pg.input_value("#vx-lang") == "fr-FR", pg.input_value("#vx-lang"))
-    pg.wait_for_function("() => /Translation French → English: no/.test(document.querySelector('.vx-support').textContent)", timeout=10000)
-    pg.fill("#vx-orig", "bonjour, mets Done en bleu")
-    pg.wait_for_function("() => /no built-in translation/.test(document.querySelector('.vx-trstate').textContent)", timeout=10000)
-    trs = pg.inner_text(".vx-trstate")
-    check("4. no translation for French: said plainly, the text kept as it is", "This browser has no built-in translation from French to English" in trs and pg.input_value("#vx-en") == "bonjour, mets Done en bleu", trs)
-    check("4. nothing sent to the online service (off by default)", not outside and not pg.is_checked(".vx [data-pref=online]"), str(outside))
-    shot(pg, "4_no_translation")
+    # 5. staying on (read aloud off from here: the mock's speech lasts until __endSpeech)
+    pg.click(".vd-lang"); pg.uncheck("#vd-pop [data-pref=tts]"); pg.keyboard.press("Escape")
+    say(pg, "fă Start albastru")
+    wait_box(pg, "make Start blue")
+    n_before = pg.evaluate("() => window.__sr.length")
+    pg.evaluate("() => window.__end()")
+    m = pg.evaluate(MIC)
+    check("5. the browser ends the session: the indicator stays on (no flicker)", m["on"] and m["listening"] and not m["paused"], str(m))
+    pg.wait_for_function("n => window.__sr.length > n && window.__srActive.started", arg=n_before, timeout=5000)
+    check("5. a new session starts by itself, the text is kept", pg.input_value("#vd-src") == "fă Start albastru" and pg.evaluate("() => window.__live()") == 1, pg.input_value("#vd-src"))
+    say(pg, "verde")
+    check("5. what is said next is added to the kept text", pg.input_value("#vd-src") == "fă Start albastru verde", pg.input_value("#vd-src"))
+    n_before = pg.evaluate("() => window.__sr.length")
+    pg.evaluate("() => window.__err('no-speech')")
+    pg.wait_for_function("n => window.__sr.length > n && window.__srActive.started", arg=n_before, timeout=5000)
+    m = pg.evaluate(MIC)
+    check("5. a no-speech error: a new session, still on, no error shown", m["on"] and m["live"] == 1 and "allow" not in pg.evaluate(ROWS)["enPh"], str(m))
+    say(pg, "șterge")
+    r = pg.evaluate(ROWS)
+    check("5. 'șterge' clears the dock and the message box", r["src"] == "" and r["en"] == "" and r["box"] == "" and "cleared" in pg.evaluate(TOAST), str(r) + " " + pg.evaluate(TOAST))
+    n_before = pg.evaluate("() => window.__sr.length")
+    pg.evaluate("() => window.__err('not-allowed')")
+    pg.wait_for_timeout(900)
+    m = pg.evaluate(MIC)
+    check("5. 'not-allowed' stops listening for real, no restart", not m["on"] and not m["listening"] and m["n"] == n_before and m["live"] == 0, str(m))
+    check("5. ... and says why", "did not allow the microphone" in pg.evaluate(ROWS)["enPh"], pg.evaluate(ROWS)["enPh"])
+    shot(pg, "06_desktop_not_allowed")
+    mic_on(pg)
+    check("5. the mic can be turned on again; the message is gone", "allow" not in pg.evaluate(ROWS)["enPh"])
+    n_before = pg.evaluate("() => window.__sr.length")
+    say(pg, "oprește")
+    pg.wait_for_timeout(900)
+    m = pg.evaluate(MIC)
+    check("5. 'oprește' stops listening, nothing restarts", not m["on"] and m["live"] == 0 and m["n"] == n_before and "stopped listening" in pg.evaluate(TOAST), str(m) + " " + pg.evaluate(TOAST))
+
+    # 6. no translation: French
+    pg.click(".vd-lang"); pg.select_option("#vd-lang", "other")
+    pg.fill("#vd-tag", "not a tag"); pg.press("#vd-tag", "Enter")
+    err = pg.inner_text(".vd-tagerr")
+    check("6. an invalid BCP-47 tag is refused", "is not a BCP-47 language tag" in err, err)
+    pg.fill("#vd-tag", "fr-fr"); pg.press("#vd-tag", "Enter")
+    check("6. a valid tag is taken, canonical; the code says FR", pg.input_value("#vd-lang") == "fr-FR" and pg.inner_text(".vd-lang").strip() == "FR", pg.input_value("#vd-lang"))
+    pg.locator("#vd-pop details").evaluate("d => d.open = true")
+    pg.wait_for_function("() => /Translation French → English: no/.test(document.querySelector('.vd-support').textContent)", timeout=10000)
     pg.keyboard.press("Escape")
-    check("4. Escape closes the popup, the focus goes back to the microphone button", pg.is_hidden(".vx") and pg.evaluate("() => document.activeElement && document.activeElement.id") == "mic-btn")
-    prefs = pg.evaluate("() => JSON.parse(localStorage.getItem('sop.voice'))")
-    check("4. the choices are kept in localStorage", prefs.get("lang") == "fr-FR" and prefs.get("tts") is True and prefs.get("online") is False and prefs.get("continuous") is False, str(prefs))
-    # back to Romanian for the rest; typed Romanian (not spoken): via typed
-    pg.click("#mic-btn"); pg.select_option("#vx-lang", "ro-RO"); pg.evaluate("() => { document.querySelector('.vx-opts').open = true; }"); pg.uncheck(".vx [data-pref=tts]")
-    pg.fill("#vx-orig", "șterge Start")
-    pg.wait_for_function("() => document.querySelector('#vx-en').value === 'delete Start'", timeout=10000)
-    n0 = pg.evaluate(NBOT); pg.keyboard.press("Control+Enter"); wait_reply(pg, n0)
+    pg.fill("#vd-src", "mets Done en bleu")
+    pg.wait_for_function("() => /No translation on this device for French → English/.test(document.querySelector('#vd-en').placeholder)", timeout=10000)
+    r = pg.evaluate(ROWS)
+    check("6. no translation: said plainly, the text kept, nothing put in the message box", r["src"] == "mets Done en bleu" and r["en"] == "" and r["box"] == ""
+          and "write it in English, or turn on online translation in the dock settings" in r["enPh"], str(r))
+    shot(pg, "07_desktop_no_translation")
+    nm = pg.evaluate(NME)
+    pg.press("#vd-src", "Enter"); pg.wait_for_timeout(500)
+    check("6. Enter in the dock sends nothing", pg.evaluate(NME) == nm and "Not sent" in pg.evaluate(TOAST), pg.evaluate(TOAST))
+    pg.click("#send-btn"); pg.wait_for_timeout(400)
+    check("6. the send button sends nothing either", pg.evaluate(NME) == nm and pg.input_value("#vd-src") == "mets Done en bleu")
+    mic_on(pg); say(pg, "send"); pg.wait_for_timeout(600)
+    check("6. a spoken 'send' sends nothing, the text stays", pg.evaluate(NME) == nm and pg.input_value("#vd-src") == "mets Done en bleu", f"{pg.evaluate(NME)} vs {nm}, {pg.evaluate(ROWS)}, {pg.evaluate(TOAST)}")
+    pg.click(".vd-mic")
+    pg.fill("#vd-en", "make Done blue")
+    check("6. English written in row 2 goes to the message box", pg.input_value("#say") == "make Done blue")
+    n0 = pg.evaluate(NBOT); pg.click("#send-btn"); wait_reply(pg, n0)
     es = pg.evaluate(ENTRIES)
-    check("4. typed Romanian: translated, sent with Ctrl+Enter, collected as typed with the original", es[-1]["text"] == "delete Start" and es[-1]["source"] == {"via": "typed", "lang": "ro-RO", "original": "șterge Start", "translation": {"by": "builtin", "edited": False}}, str(es[-1].get("source")))
+    check("6. ... and is sent, collected with translation by the user", es[-1]["text"] == "make Done blue" and es[-1]["source"] == {"via": "typed", "lang": "fr-FR", "original": "mets Done en bleu", "translation": {"by": "user", "edited": True}}, str(es[-1].get("source")))
+    check("6. nothing sent to the online service (off by default)", not outside, str(outside))
+    # back to Romanian; a non-English message typed straight into the message box
+    pg.click(".vd-lang"); pg.select_option("#vd-lang", "ro-RO"); pg.keyboard.press("Escape")
+    nsys = pg.evaluate("() => document.querySelectorAll('#msgs .sys').length")
+    n0 = pg.evaluate(NBOT); pg.fill("#say", "Fă mi un box galben"); pg.click("#send-btn"); wait_reply(pg, n0)
+    notes = pg.evaluate("() => [...document.querySelectorAll('#msgs .sys')].map(x => x.textContent)")
+    check("6. Romanian typed straight into the message box: sent, with a hint about the dictation bar", pg.evaluate("() => [...document.querySelectorAll('#msgs .b.me')].pop().querySelector('.txt').textContent") == "Fă mi un box galben"
+          and len(notes) == nsys + 1 and "does not look like English" in notes[-1], str(notes[-2:]))
+    n0 = pg.evaluate(NBOT); pg.fill("#say", "fă Start mare și verde acum"); pg.click("#send-btn"); wait_reply(pg, n0)
+    check("6. the hint is given once", pg.evaluate("() => document.querySelectorAll('#msgs .sys').length") == nsys + 1)
+    n0 = pg.evaluate("() => document.querySelectorAll('#msgs .sys').length"); send(pg, "make Start green and move it left")
+    check("6. English typed in the box: no hint", pg.evaluate("() => document.querySelectorAll('#msgs .sys').length") == n0)
 
-    # 5. events: undo right after; Do it anyway; Edit, the rewrite sent, superseded
+    # 7. events: undo right after; Do it anyway and Edit by voice
+    nst = len(pg.evaluate(ENTRIES))
     n0 = pg.evaluate(NBOT); pg.click("[data-say=Undo]"); wait_reply(pg, n0)
     es = pg.evaluate(ENTRIES)
-    check("5. the toolbar Undo is not collected as a message", len(es) == 2, f"{len(es)} entries")
-    check("5. Undo right after -> 'undo-next' on the message before it", [x["kind"] for x in es[-1]["events"]] == ["undo-next"] and es[-1]["events"][0].get("by") == "button", str(es[-1]["events"]))
+    check("7. the toolbar Undo is not collected as a message", len(es) == nst, f"{len(es)} entries")
+    check("7. Undo right after -> 'undo-next' on the message before it", [x["kind"] for x in es[-1]["events"]] == ["undo-next"] and es[-1]["events"][0].get("by") == "button", str(es[-1]["events"]))
     held = []
     for msg in TRY:
         r = send(pg, msg)
@@ -231,87 +340,99 @@ with sync_playwright() as p:
         if r and r["held"]: held.append(r["held"][0])
         if len(held) >= 2: break
     if not held:
-        check("5. a held request among the tried messages (needed for the event checks)", False, "the shipped models executed every tried message")
+        check("7. a held request among the tried messages (needed for the event checks)", False, "the shipped models executed every tried message")
     else:
+        mic_on(pg)
         h = next((x for x in held if x["anyway"]), None)
-        if h:
-            n0 = pg.evaluate(NBOT); pg.locator(f'#msgs [data-held="{h["key"]}"] button.anyway').click(); wait_reply(pg, n0)
-            rid, turn, idx = h["key"].split(":")
+        last_anyway = pg.evaluate("() => { const bs = [...document.querySelectorAll('#msgs .held button.anyway')].filter(b => !b.disabled); const b = bs.pop(); return b ? b.closest('[data-held]').dataset.held : null; }")
+        if last_anyway:
+            n0 = pg.evaluate(NBOT); say(pg, "fă-o oricum"); wait_reply(pg, n0)
+            rid, turn, idx = last_anyway.split(":")
             e = next((x for x in pg.evaluate(ENTRIES) if x["turn"] == int(turn)), {})
-            check("5. Do it anyway -> 'anyway' with the reader and the request", any(x["kind"] == "anyway" and x["reader"] == rid and x["index"] == int(idx) for x in e.get("events", [])), str(e.get("events")))
-        h2 = next((x for x in held if x["edit"] and x is not h), None) or next((x for x in held if x["edit"]), None)
-        if h2 and h2 is not h:
-            pg.locator(f'#msgs [data-held="{h2["key"]}"] button.edit').click(); pg.wait_for_timeout(300)
+            check("7. 'fă-o oricum' presses the last Do it anyway -> 'anyway'", any(x["kind"] == "anyway" and x["reader"] == rid and x["index"] == int(idx) for x in e.get("events", [])) and "doing it anyway" in pg.evaluate(TOAST), str(e.get("events")))
+        last_edit = pg.evaluate("() => { const bs = [...document.querySelectorAll('#msgs .held button.edit')].filter(b => !b.disabled); const b = bs.pop(); return b ? { key: b.closest('[data-held]').dataset.held, text: b.dataset.text } : null; }")
+        if last_edit:
+            say(pg, "editează"); pg.wait_for_timeout(300)
             box = pg.input_value("#say")
-            n0 = pg.evaluate(NBOT); pg.click("#send-btn"); wait_reply(pg, n0)
-            rid, turn, idx = h2["key"].split(":")
+            check("7. 'editează' presses the last Edit: the clearer command is in the message box", box == last_edit["text"] and box != "", f"{box!r} vs {last_edit['text']!r}")
+            n0 = pg.evaluate(NBOT); say(pg, "trimite"); wait_reply(pg, n0)
+            rid, turn, idx = last_edit["key"].split(":")
             es = pg.evaluate(ENTRIES)
             e = next((x for x in es if x["turn"] == int(turn)), {})
-            kinds = [x["kind"] for x in e.get("events", [])]
-            check("5. Edit -> 'edit' with the suggested command", any(x["kind"] == "edit" and x.get("suggested") == box for x in e.get("events", [])), str(e.get("events")))
-            check("5. the rewrite sent -> 'edit-sent', the same text", any(x["kind"] == "edit-sent" and x.get("sent") == box and x.get("same") is True for x in e.get("events", [])), str(e.get("events")))
-            check("5. the rewrite executed -> 'superseded' by the next turn", "superseded" in kinds and any(x["kind"] == "superseded" and x.get("by") == es[-1]["turn"] for x in e["events"]), str(e.get("events")))
+            check("7. a spoken 'trimite' sends the message box -> 'edit' and 'edit-sent' (same text)", any(x["kind"] == "edit" for x in e.get("events", [])) and any(x["kind"] == "edit-sent" and x.get("sent") == box and x.get("same") is True for x in e.get("events", [])), str(e.get("events")))
         else:
-            print("     (only one held request with the needed buttons: the Edit events were not reached)")
+            print("     (no Edit button among the held requests: the Edit events were not reached)")
+        pg.click(".vd-mic")
 
-    # 6. Settings › Collected requests
+    # 8. Settings › Collected requests
     pg.click("#open-settings"); pg.wait_for_selector("#collect-box")
     pg.locator("#collect-box").scroll_into_view_if_needed()
     nst = len(pg.evaluate(ENTRIES))
     box = pg.inner_text("#collect-box")
-    check("6. the section: the count", pg.inner_text("[data-collect-count]") == str(nst), f"{pg.inner_text('[data-collect-count]')} vs {nst}")
-    check("6. the section: says nothing leaves the browser unless downloaded", "Nothing leaves your browser unless you download the file" in box, box[:300])
-    check("6. the section: a preview of the last ones, with the original", "make Done red" in box and "ro-RO: fă Done roșu" in box, box)
-    check("6. the switch is on", pg.is_checked("[data-collect=toggle]"))
-    shot(pg, "5_settings_collected")
+    check("8. the section: the count", pg.inner_text("[data-collect-count]") == str(nst), f"{pg.inner_text('[data-collect-count]')} vs {nst}")
+    check("8. the section: nothing leaves the browser unless downloaded; the readings are recomputed, not stored", "Nothing leaves your browser unless you download the file" in box and "versions of the models" in box, box[:400])
+    check("8. the section: a preview of the last ones, with VSS-BERT's decision", "make Start green and move it left" in box and "VSS-BERT executed" in box, box)
+    shot(pg, "08_settings_collected")
     with pg.expect_download() as dl:
         pg.click("[data-collect=download]")
-    d = dl.value
-    path = os.path.join(OUT, d.suggested_filename); d.save_as(path)
-    check("6. Download: the file name has the date", bool(re.fullmatch(r"sop-requests-\d{4}-\d\d-\d\d-\d{4}\.jsonl", d.suggested_filename)), d.suggested_filename)
+    dlf = dl.value
+    path = os.path.join(OUT, dlf.suggested_filename); dlf.save_as(path)
+    check("8. Download: the file name has the date", bool(re.fullmatch(r"sop-requests-\d{4}-\d\d-\d\d-\d{4}\.jsonl", dlf.suggested_filename)), dlf.suggested_filename)
     lines = open(path, encoding="utf-8").read().splitlines()
     ok = True
     try: objs = [json.loads(l) for l in lines]
     except json.JSONDecodeError: ok, objs = False, []
-    check("6. Download: valid JSONL, one entry per line, as many as the count", ok and len(objs) == nst and all(o["format"] == "sop-collect/1" for o in objs), f"{len(lines)} lines, count {nst}")
+    check("8. Download: valid JSONL, format 2, as many lines as the count", ok and len(objs) == nst and all(o["format"] == "sop-collect/2" for o in objs), f"{len(lines)} lines, count {nst}")
     out = os.path.join(tempfile.mkdtemp(prefix="collect-bench-"), "collected_test")
     r = subprocess.run([sys.executable, os.path.join(HERE, "collect_to_bench.py"), path, "--out", out], capture_output=True, text=True)
     batch = [json.loads(l) for l in open(os.path.join(out, "batch_01.jsonl"), encoding="utf-8")] if r.returncode == 0 else []
-    check("6. the converter makes an un-annotated llm_bench folder from the download", r.returncode == 0 and len(batch) == nst and all(x["wires"] == [] for x in batch) and batch[0]["text"] == "make Done red"
+    check("8. the converter makes an un-annotated llm_bench folder from the download", r.returncode == 0 and len(batch) == nst and all(x["wires"] == [] for x in batch) and batch[0]["text"] == "make Done red"
           and os.path.isfile(os.path.join(out, "texts", "texts_01.jsonl")) and os.path.isfile(os.path.join(out, "context", "context_01.jsonl")), r.stdout + r.stderr)
     pg.click("[data-collect=clear]")
-    check("6. Clear asks inside the page", pg.is_visible(".collect-confirm") and "Delete all" in pg.inner_text(".collect-confirm"))
-    shot(pg, "6_clear_confirm")
+    check("8. Clear asks inside the page", pg.is_visible(".collect-confirm") and "Delete all" in pg.inner_text(".collect-confirm"))
     pg.click("[data-collect=clear-no]")
-    check("6. Cancel keeps them", not pg.locator(".collect-confirm").count() and len(pg.evaluate(ENTRIES)) == nst)
+    check("8. Cancel keeps them", not pg.locator(".collect-confirm").count() and len(pg.evaluate(ENTRIES)) == nst)
     pg.click("[data-collect=clear]"); pg.click("[data-collect=clear-yes]")
-    check("6. Delete empties them (the page and the storage)", pg.inner_text("[data-collect-count]") == "0" and pg.evaluate("() => localStorage.getItem('sop.collect.v1')") is None)
+    check("8. Delete empties them (the page and the storage)", pg.inner_text("[data-collect-count]") == "0" and pg.evaluate("() => localStorage.getItem('sop.collect.v1')") is None)
     pg.uncheck("[data-collect=toggle]")
-    check("6. the switch off is kept", pg.evaluate("() => localStorage.getItem('sop.collect.off')") == "1")
+    check("8. the switch off is kept", pg.evaluate("() => localStorage.getItem('sop.collect.off')") == "1")
     pg.keyboard.press("Escape")
     send(pg, "make Start blue")
-    check("6. off: nothing new is kept", pg.evaluate(ENTRIES) == [], str(pg.evaluate(ENTRIES))[:200])
+    check("8. off: nothing new is kept", pg.evaluate(ENTRIES) == [], str(pg.evaluate(ENTRIES))[:200])
     pg.click("#open-settings"); pg.wait_for_selector("#collect-box"); pg.check("[data-collect=toggle]"); pg.keyboard.press("Escape")
     send(pg, "make Start green")
-    check("6. on again: kept", len(pg.evaluate(ENTRIES)) == 1)
+    check("8. on again: kept", len(pg.evaluate(ENTRIES)) == 1)
 
-    # 7. phone width
-    pg.set_viewport_size({"width": 390, "height": 844}); pg.wait_for_timeout(300)
-    pg.click("#mic-btn"); pg.wait_for_selector(".vx:not([hidden])")
-    pg.click(".vx [data-vx=rec]"); pg.evaluate("() => window.__say('fă Done roșu', true)"); pg.click(".vx [data-vx=rec]")
-    pg.wait_for_function("() => document.querySelector('#vx-en').value === 'make Done red'", timeout=10000)
-    geo = pg.evaluate("() => { const r = document.querySelector('.vx').getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom, w: innerWidth, h: innerHeight, sw: document.documentElement.scrollWidth }; }")
-    check("7. phone: the popup fits the screen, no horizontal scroll", geo["l"] >= 0 and geo["r"] <= geo["w"] + 0.5 and geo["t"] >= 0 and geo["b"] <= geo["h"] + 0.5 and geo["sw"] <= geo["w"], str(geo))
-    shot(pg, "7_phone_popup")
-    pg.keyboard.press("Escape")
+    # 9. reload: choices kept; the mic was on -> one tap to resume
+    mic_on(pg)
     pg.reload(wait_until="domcontentloaded"); ready(pg)
-    pg.click("#mic-btn"); pg.wait_for_selector(".vx:not([hidden])")
-    check("4. after a reload the language is still Romanian", pg.input_value("#vx-lang") == "ro-RO")
+    prefs = pg.evaluate("() => JSON.parse(localStorage.getItem('sop.voice'))")
+    check("9. the choices are kept (Romanian, read aloud off again, the mic was on)", prefs.get("lang") == "ro-RO" and prefs.get("tts") is False and prefs.get("micOn") is True and prefs.get("online") is False, str(prefs))
+    m = pg.evaluate(MIC)
+    check("9. after a reload the mic does not start by itself; 'Resume listening' shows", not m["on"] and m["n"] == 0 and pg.is_visible("[data-vd=resume]"), str(m))
+    shot(pg, "09_desktop_resume")
+    pg.click("[data-vd=resume]")
+    m = pg.evaluate(MIC)
+    check("9. one tap: listening again", m["on"] and m["live"] == 1 and pg.is_hidden("[data-vd=resume]"), str(m))
+    pg.click(".vd-mic")
+    check("9. after a reload the collected entries are still there", len(pg.evaluate(ENTRIES)) == 1)
+
+    # 10. phone width
+    pg.set_viewport_size({"width": 390, "height": 844}); pg.wait_for_timeout(400)
+    dock, comp = pg.evaluate(RECT, "#dock"), pg.evaluate(RECT, "#composer")
+    rows = pg.evaluate("() => [...document.querySelectorAll('#dock .vd-row')].map(r => r.getBoundingClientRect().height)")
+    check("10. phone: the dock just above the message box, full width, two rows", near(dock["b"], comp["t"]) and near(dock["l"], 0) and near(dock["r"], 390) and len(rows) == 2 and all(h <= 30 for h in rows), f"{dock} {comp} {rows}")
+    mic_on(pg); say(pg, "fă Done roșu")
+    wait_box(pg, "make Done red")
+    shot(pg, "10_phone_dock")
+    pg.click(".vd-lang"); pg.wait_for_selector("#vd-pop:not([hidden])")
+    pop = pg.evaluate(RECT, "#vd-pop")
+    check("10. phone: the popover inside the screen", pop["l"] >= 0 and pop["r"] <= 390 and pop["t"] >= 0, str(pop))
+    shot(pg, "11_phone_popover")
     pg.keyboard.press("Escape")
-    pg.click("#open-settings"); pg.wait_for_selector("#collect-box"); pg.locator("#collect-box").scroll_into_view_if_needed()
-    check("6. after a reload the entries are still there", pg.inner_text("[data-collect-count]") == "1")
-    shot(pg, "8_phone_settings")
-    check("8. no page error and no browser dialog", not errors, "\n     ".join(errors[:5]))
+    check("10. phone: no horizontal scroll", pg.evaluate("() => document.documentElement.scrollWidth") <= 390)
+    pg.click(".vd-mic")
+    check("11. no page error and no browser dialog", not errors, "\n     ".join(errors[:5]))
     b.close()
 
 httpd.shutdown()

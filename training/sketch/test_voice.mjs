@@ -2,13 +2,17 @@
 //   node training/sketch/test_voice.mjs
 // 1. languages: tags canonical, invalid tags refused, the list starts with Romanian and English, then the browser's languages and the voices'
 //    languages, no tag twice; names in English;
-// 2. preferences: defaults (Romanian, continuous off, read aloud off, online off), kept and read back, bad values ignored, a storage that
-//    throws is harmless;
+// 2. preferences: defaults (Romanian, send after a pause off, read aloud off, online off, mic not on), kept and read back, bad values
+//    ignored, a storage that throws is harmless;
 // 3. the translation flow with mocked browser APIs: no API -> "none" and the text unchanged; Translator available -> translated on the device;
 //    downloadable -> created with a download monitor whose progress is reported; unavailable pair -> "none"; the legacy `translation` and
 //    `ai.translator` APIs; English -> not needed; the instance is cached per pair; the online fallback is used only when opted in, with the
 //    MyMemory URL, and its failure falls back to the text as it is;
-// 4. speech: the recognition constructor (standard and webkit), the errors in plain words, the voice for a language, the support lines.
+// 4. speech: the recognition constructor (standard and webkit), the errors in plain words, the voice for a language, the support lines;
+//    staying on: which errors stop listening for real, the restart backoff;
+// 5. spoken commands: the whole utterance or its end, in the dictation language and in English, never in the middle; the command words are
+//    not part of the message; a joining "and" / "și" and punctuation dropped; diacritics optional; one table per language, a new language
+//    is one more table.
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const V = require("../../docs/js/voice.js");
@@ -35,10 +39,10 @@ eq("1. primary and English", [V.primary("ro-RO"), V.isEnglish("en-GB"), V.isEngl
 const mem = () => { const m = new Map(); return { getItem: k => m.has(k) ? m.get(k) : null, setItem: (k, v) => m.set(k, String(v)), m }; };
 {
   const s = mem();
-  eq("2. defaults", V.loadPrefs(s), { lang: "ro-RO", continuous: false, pauseMs: 2000, tts: false, online: false });
-  V.savePrefs({ lang: "fr-FR", continuous: true, pauseMs: 2000, tts: true, online: false }, s);
-  eq("2. kept", V.loadPrefs(s), { lang: "fr-FR", continuous: true, pauseMs: 2000, tts: true, online: false });
-  s.setItem(V.PREFS_KEY, JSON.stringify({ lang: "??", continuous: "yes", online: 1, pauseMs: 5 }));
+  eq("2. defaults", V.loadPrefs(s), { lang: "ro-RO", autoSend: false, pauseMs: 2000, tts: false, online: false, micOn: false });
+  V.savePrefs({ lang: "fr-FR", autoSend: true, pauseMs: 2000, tts: true, online: false, micOn: true }, s);
+  eq("2. kept", V.loadPrefs(s), { lang: "fr-FR", autoSend: true, pauseMs: 2000, tts: true, online: false, micOn: true });
+  s.setItem(V.PREFS_KEY, JSON.stringify({ lang: "??", autoSend: "yes", online: 1, pauseMs: 5, micOn: "on" }));
   eq("2. bad values ignored", V.loadPrefs(s), V.DEFAULT_PREFS);
   s.setItem(V.PREFS_KEY, "{broken");
   eq("2. broken JSON -> defaults", V.loadPrefs(s), V.DEFAULT_PREFS);
@@ -145,6 +149,37 @@ const run = async () => {
   check("4. support lines: nothing", /no: this browser has no Web Speech API/.test(N.sr) && /no: this browser has no built-in translation/.test(N.tr) && /no voice for Romanian; replies would be read in English/.test(N.tts), JSON.stringify(N));
   check("4. support lines: unavailable pair, English", /does not translate Romanian/.test(V.supportLines({ lang: "ro", sr: true, tr: { state: "unavailable" }, total: 0 }).tr) && /not needed/.test(V.supportLines({ lang: "en-US", sr: true, tr: { state: "not-needed" }, total: 0 }).tr));
   check("4. support lines: downloadable", /one-time download/.test(V.supportLines({ lang: "ro", sr: true, tr: { state: "downloadable" }, total: 0 }).tr));
+
+  check("4. stop for real: permission refused, no microphone, language not supported", ["not-allowed", "service-not-allowed", "audio-capture", "language-not-supported"].every(c => V.FATAL.has(c)));
+  check("4. keep listening: silence, network, aborted end a session only", ["no-speech", "network", "aborted"].every(c => !V.FATAL.has(c)));
+  eq("4. restart backoff: short after a session that heard something, doubling up to 5 s", [0, 1, 2, 3, 4, 5, 6, 20].map(V.restartDelay), [150, 300, 600, 1200, 2400, 4800, 5000, 5000]);
+
+  // 5. spoken commands
+  const P = (u, l = "ro-RO") => { const r = V.parseCommand(u, l); return [r.command, r.text]; };
+  eq("5. the whole utterance: trimite", P("trimite"), ["send", ""]);
+  eq("5. the whole utterance, capitalised, with punctuation", P("Trimite."), ["send", ""]);
+  eq("5. a trailing command (Romanian)", P("fă Done roșu trimite"), ["send", "fă Done roșu"]);
+  eq("5. a trailing command (English) while dictating Romanian", P("fă Done roșu send"), ["send", "fă Done roșu"]);
+  eq("5. a trailing command (English)", P("make Done red send", "en-US"), ["send", "make Done red"]);
+  eq("5. 'send' in the middle is a message, not a command", P("send Start to the back", "en-US"), [null, "send Start to the back"]);
+  eq("5. 'trimite' in the middle is a message", P("trimite Start în spate"), [null, "trimite Start în spate"]);
+  eq("5. a joining 'and' / 'și' and a comma dropped", [P("make Done red and send it", "en-US"), P("fă Done roșu și trimite"), P("make Done red, send.", "en-US")],
+    [["send", "make Done red"], ["send", "fă Done roșu"], ["send", "make Done red"]]);
+  eq("5. clear: șterge, anulează, clear", [P("șterge"), P("Anulează!"), P("clear")], [["clear", ""], ["clear", ""], ["clear", ""]]);
+  eq("5. 'șterge Start' is a message (delete Start)", P("șterge Start"), [null, "șterge Start"]);
+  eq("5. stop listening: oprește, stop listening", [P("oprește"), P("Stop listening.")], [["stop", ""], ["stop", ""]]);
+  eq("5. 'stop' alone is not 'stop listening' in English", P("stop", "en-US"), [null, "stop"]);
+  eq("5. do it anyway: fă-o oricum (with or without the hyphen), do it anyway", [P("fă-o oricum"), P("fa o oricum"), P("do it anyway")], [["anyway", ""], ["anyway", ""], ["anyway", ""]]);
+  eq("5. edit: editează, edit", [P("editează"), P("edit")], [["edit", ""], ["edit", ""]]);
+  eq("5. diacritics optional (recognisers often drop them)", [P("sterge"), P("opreste"), P("editeaza"), P("anuleaza")], [["clear", ""], ["stop", ""], ["edit", ""], ["clear", ""]]);
+  eq("5. undo is a message, sent as text", [P("undo", "en-US"), P("anulează ultima schimbare")], [[null, "undo"], [null, "anulează ultima schimbare"]]);
+  eq("5. the longest phrase wins ('send it' over 'send')", V.parseCommand("make Done red send it", "en-US").phrase, "send it");
+  eq("5. a language without a table: only the English commands", [P("mets Done en rouge send", "fr-FR"), P("trimite", "fr-FR")], [["send", "mets Done en rouge"], [null, "trimite"]]);
+  V.COMMANDS.fr = { send: ["envoie"], tail: ["et"] };
+  eq("5. a new language is one more table", [P("mets Done en rouge et envoie", "fr-FR"), P("mets Done en rouge send", "fr-FR")], [["send", "mets Done en rouge"], ["send", "mets Done en rouge"]]);
+  delete V.COMMANDS.fr;
+  eq("5. the commands said in the popover, in the dictation language", V.commandHelp("ro-RO").map(h => h.say), ["trimite", "șterge", "oprește", "fă-o oricum", "editează"]);
+  check("5. every language table has only known keys", Object.values(V.COMMANDS).every(t => Object.keys(t).every(k => k === "tail" || V.COMMAND_KEYS.includes(k))));
 
   console.log(`\n${n - fails}/${n} passed`);
   process.exit(fails ? 1 : 0);

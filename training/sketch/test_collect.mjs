@@ -4,9 +4,11 @@
 //    oldest tenth until the write fits (and counts what was dropped); a storage that throws on every access keeps the entries in memory;
 //    the on/off switch persists; clear empties it; events attach to the entry of (session, turn);
 // 2. JSONL: one valid JSON object per line, a final newline, the file name has the local date;
-// 3. buildEntry on a turn shaped like docs/js/ui.js's `rec`: the fresh2 wire format (mentions folded, $new, names as written), spans from the
-//    gate's units, the confidences, executed / held, the source with the original words, an empty gold;
-// 4. the converter: texts / batch (gold empty) / context files, --via and --dedupe, bad lines skipped, the texts identical to the entries'.
+// 3. buildEntry (format 2) on a turn shaped like docs/js/ui.js's `rec`: VSS-BERT's decision per request (words, executed or held, confidence),
+//    the model versions, the source with the original words, a short reply, an empty gold, and none of the readers' readings; the
+//    Settings preview reads format 1 and format 2 entries;
+// 4. the converter: texts / batch (gold empty) / context files, format 1 and format 2 mixed, --via and --dedupe, bad lines skipped, the
+//    texts identical to the entries'.
 import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, writeFileSync, readFileSync, existsSync, rmSync } from "node:fs";
@@ -118,7 +120,7 @@ const mk = (i, extra = {}) => Object.assign({ session: "s1", turn: i, text: `mes
   eq("2. file name with the local date", C.fileName(new Date(2026, 10, 3, 9, 5)), "sop-requests-2026-11-03-0905.jsonl");
 }
 
-// 3. buildEntry
+// 3. buildEntry (format 2)
 {
   const nodes = K.parse(`@m1 mention shape=circle color=red
 @t1 command action=create shape=square name=Api color=blue
@@ -135,48 +137,54 @@ const mk = (i, extra = {}) => Object.assign({ session: "s1", turn: i, text: `mes
       combined: { allNodes: nodes, nodes: [t1, t2], ms: 30, names: ["Start", "Done"],
         gate: { level: "cost", threshold: { command: 0.71234567, question: 0.5 }, units: [
           { index: 0, src: "add a blue square Api", conf: 0.93, execute: true, nodes: [t1] },
-          { index: 1, src: "connect it to Start", conf: 0.88, execute: true, nodes: [t2] },
+          { index: 1, src: "connect it to Start", conf: 0.88123456, execute: true, nodes: [t2] },
           { index: 2, src: "make the red circle green", conf: 0.41, execute: false, nodes: [m1, t3], reasons: [{ text: "the two readers read different colours" }] }] } }
     },
     off: { neural: "still loading, did not read this" }
   };
-  const e = C.buildEntry(rec, { session: "s9", serialize: K.serialize, names: ["Start", "Done"], source: { via: "voice", lang: "ro-RO", original: "adaugă un pătrat albastru Api", translation: { by: "builtin", edited: false } }, reply: "Drew Api.", tab: "combined" });
-  eq("3. text as sent (before spelling), read = after", [e.text, e.read], [rec.typed, rec.text]);
-  eq("3. spelling fixes", e.spell, [{ from: "sqare", to: "square" }]);
-  eq("3. source with the original and the language", e.source, { via: "voice", lang: "ro-RO", original: "adaugă un pătrat albastru Api", translation: { by: "builtin", edited: false } });
+  const files = { "micro/links8": "a06e092204", "micro/shapes8": "52dac7648e", "neural/sop-bert": "fd69a08c3b", "confidence/combined.json": "579b1dfc36", "spell/vocab.json": "34accc6565" };
+  const models = C.modelVersions(files);
+  check("3. model versions: SOP-BERT, VSS-BERT's confidence model, digests of micro/ and of everything", models.neural === "fd69a08c3b" && models.combined === "579b1dfc36" && /^[0-9a-f]{8}$/.test(models.micro) && /^[0-9a-f]{8}$/.test(models.all), JSON.stringify(models));
+  check("3. model versions: the digest does not depend on the key order, and changes with any stamp",
+    C.modelVersions(Object.fromEntries(Object.entries(files).reverse())).all === models.all && C.modelVersions(Object.assign({}, files, { "spell/vocab.json": "x" })).all !== models.all
+    && C.modelVersions(Object.assign({}, files, { "spell/vocab.json": "x" })).micro === models.micro);
+  check("3. no versions -> null", C.modelVersions(null) === null);
+  const longReply = "Drew Api. " + "x".repeat(400);
+  const e = C.buildEntry(rec, { session: "s9", names: ["Start", "Done"], source: { via: "voice", lang: "ro-RO", original: "adaugă un pătrat albastru Api", translation: { by: "builtin", edited: false }, speak: true }, models, reply: longReply, tab: "combined" });
+  eq("3. format 2", e.format, "sop-collect/2");
+  eq("3. text as sent (before spelling)", e.text, rec.typed);
+  eq("3. source: via, lang, original, translation by / edited (nothing else)", e.source, { via: "voice", lang: "ro-RO", original: "adaugă un pătrat albastru Api", translation: { by: "builtin", edited: false } });
   eq("3. names, domain, gold empty", [e.names, e.domain, e.wires], [["Start", "Done"], "collected from the demo", []]);
   eq("3. session and turn", [e.session, e.turn], ["s9", 7]);
-  const c = e.readings.combined;
-  eq("3. combined wires: fresh2 format, mention folded, $new, case kept", c.wires.map(w => [w.type, w.args]), [
-    ["command", { action: "create", shape: "square", name: "Api", color: "blue" }],
-    ["command", { action: "connect", from: "$new", to: "Start" }],
-    ["command", { action: "set", target: "mention(color=red,shape=circle)", color: "green" }]]);
-  eq("3. spans from the gate's units", c.wires.map(w => w.span), ["add a blue square Api", "connect it to Start", "make the red circle green"]);
-  eq("3. confidences, executed, held", [c.units.map(u => u.conf), c.executed, c.held], [[0.93, 0.88, 0.41], [0, 1], [2]]);
-  eq("3. reasons only on held units", c.units.map(u => u.reasons || null), [null, null, ["the two readers read different colours"]]);
-  eq("3. gate level and threshold (rounded)", c.gate, { level: "cost", threshold: { command: 0.7123, question: 0.5 } });
-  check("3. SOP Lang of every wire the reader read (also the held)", c.sop.split("\n").length === 4 && /action=set/.test(c.sop) && /@m1 mention/.test(c.sop), c.sop);
-  check("3. Rules: read, no gate, rounded ms", e.readings.rules.status === "read" && !e.readings.rules.units && e.readings.rules.ms === 1.2346);
-  eq("3. a reader that did not read it", e.readings.neural, { status: "off", note: "still loading, did not read this" });
-  eq("3. the cut", e.cut, { by: "bert", units: ["add a blue square Api", "connect it to Start", "make the red circle green"] });
-  check("3. reply and tab", e.reply === "Drew Api." && e.tab === "combined");
-  check("3. a reader's names only when they differ", !("names" in c) && C.buildEntry(rec, { names: ["Start"] }).readings.combined.names.length === 2);
+  eq("3. the model versions", e.models, models);
+  eq("3. VSS-BERT's decision per request: words, executed or held, confidence (rounded)", e.decision, { status: "read", units: [
+    { index: 0, src: "add a blue square Api", execute: true, conf: 0.93 }, { index: 1, src: "connect it to Start", execute: true, conf: 0.8812 },
+    { index: 2, src: "make the red circle green", execute: false, conf: 0.41 }] });
+  check("3. the readings are not stored (recomputed from text, names, models)", !("readings" in e) && !("cut" in e) && !("spell" in e) && !("read" in e) && !JSON.stringify(e).includes("@t1"), Object.keys(e).join(","));
+  check("3. the reply is kept short", e.reply.length === C.REPLY_MAX && e.reply.startsWith("Drew Api.") && e.reply.endsWith("…") && e.tab === "combined");
+  check("3. an entry is small", JSON.stringify(e).length < 1200, String(JSON.stringify(e).length));
   check("3. the entry round-trips through JSON", JSON.stringify(JSON.parse(JSON.stringify(e))) === JSON.stringify(e));
   const t = C.buildEntry({ id: 1, text: "hi", typed: "hi", readers: {} }, {});
-  check("3. a typed message: via typed, no read, no original", t.source.via === "typed" && !("read" in t) && !("original" in t.source));
-  const er = C.buildEntry({ id: 2, text: "x", typed: "x", readers: { rules: { nodes: [], error: new Error("No wires.") }, vss: { nodes: [], error: new Error("boom") } } }, {});
-  check("3. 'No wires.' is a reading with no wires, another error is an error", er.readings.rules.status === "read" && er.readings.rules.wires.length === 0 && er.readings.vss.status === "error" && er.readings.vss.error === "boom");
+  check("3. a typed message: via typed, no original, VSS-BERT off, models null", t.source.via === "typed" && !("original" in t.source) && t.decision.status === "off" && t.models === null);
+  const er = C.buildEntry({ id: 2, text: "x", typed: "x", readers: { combined: { nodes: [], error: new Error("boom") } } }, {});
+  const nw = C.buildEntry({ id: 3, text: "x", typed: "x", readers: { combined: { nodes: [], error: new Error("No wires.") } } }, {});
+  check("3. an error is an error; 'No wires.' is a reading with no requests", er.decision.status === "error" && er.decision.error === "boom" && nw.decision.status === "read" && nw.decision.units.length === 0);
+  const v1 = { format: "sop-collect/1", text: "make Start red", readings: { combined: { status: "read", units: [{ execute: true }, { execute: false }], executed: [0], held: [1] } } };
+  eq("3. the Settings preview reads format 2 and format 1", [C.decisionWords(e), C.decisionWords(v1), C.decisionWords(t)], ["VSS-BERT executed 2, held 1", "VSS-BERT executed 1, held 1", "VSS-BERT did not read it"]);
+  check("3. the Settings section shows a format 2 entry", (() => { const S = C.createStore({ storage: null }); S.add(e); const h = C.sectionHTML(S, false, ""); return h.includes("VSS-BERT executed 2, held 1") && h.includes("ro-RO: adaugă"); })());
 }
 
 // 4. the converter
 {
   const dir = mkdtempSync(join(tmpdir(), "collect-test-"));
   const S = C.createStore({ storage: fakeStorage() });
-  const ent = (i, text, extra = {}) => S.add(Object.assign({ format: C.FORMAT, session: "s", turn: i, domain: "collected from the demo", names: ["Start", "Process"], text, source: { via: "typed" }, readings: { combined: { status: "read", sop: "", wires: [], units: [{ index: 0, src: text, conf: 0.4, execute: false }], executed: [], held: [0] } }, events: [], wires: [] }, extra));
+  const ent = (i, text, extra = {}) => S.add(Object.assign({ format: "sop-collect/1", session: "s", turn: i, domain: "collected from the demo", names: ["Start", "Process"], text, source: { via: "typed" }, readings: { combined: { status: "read", sop: "", wires: [], units: [{ index: 0, src: text, conf: 0.4, execute: false }], executed: [], held: [0] } }, events: [], wires: [] }, extra));
   ent(1, "make Start red");
   ent(2, "fă Start roșu → make Start red", { source: { via: "voice", lang: "ro-RO", original: "fă Start roșu", translation: { by: "builtin", edited: false } } });
   ent(3, "make Start red");
   ent(4, "undo");
+  S.add({ format: C.FORMAT, session: "s", turn: 5, domain: "collected from the demo", names: ["Start"], text: "make Process blue", source: { via: "voice", lang: "ro-RO", original: "fă Process albastru", translation: { by: "builtin", edited: false } },
+    models: { all: "0badc0de", neural: "fd69a08c3b" }, decision: { status: "read", units: [{ index: 0, src: "make Process blue", execute: false, conf: 0.3 }] }, events: [], wires: [] });
   S.event("s", 1, { kind: "undo-next", by: "button" });
   const file = join(dir, "collected.jsonl");
   writeFileSync(file, S.jsonl() + "this is not json\n" + JSON.stringify({ format: "other", text: "x" }) + "\n");
@@ -184,24 +192,26 @@ const mk = (i, extra = {}) => Object.assign({ session: "s1", turn: i, text: `mes
   const py = join(HERE, "collect_to_bench.py");
   const run = args => execFileSync("python3", [py, ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
   const msg = run([file, "--out", out]);
-  check("4. converter runs", /wrote 4 messages/.test(msg) && /skipped 2 lines/.test(msg), msg);
+  check("4. converter runs on format 1 and format 2 mixed", /wrote 5 messages/.test(msg) && /skipped 2 lines/.test(msg), msg);
   const rd = p => readFileSync(join(out, p), "utf8").trim().split("\n").map(l => JSON.parse(l));
   const texts = rd("texts/texts_01.jsonl"), batch = rd("batch_01.jsonl"), ctx = rd("context/context_01.jsonl");
-  eq("4. ids", texts.map(x => x.id), ["col-0001", "col-0002", "col-0003", "col-0004"]);
+  eq("4. ids", texts.map(x => x.id), ["col-0001", "col-0002", "col-0003", "col-0004", "col-0005"]);
   eq("4. texts row: id, domain, names, text (as fresh2 texts)", Object.keys(texts[0]), ["id", "domain", "names", "text"]);
   check("4. texts identical to the entries", texts.map(x => x.text).join("|") === S.list().map(x => x.text).join("|"));
   check("4. batch = texts + empty wires", batch.every((b, i) => b.wires.length === 0 && JSON.stringify(Object.assign({}, b, { wires: undefined })) === JSON.stringify(Object.assign({}, texts[i], { wires: undefined }))));
   eq("4. context keeps the original and the events", [ctx[1].collected.source.original, ctx[0].collected.events[0].kind], ["fă Start roșu", "undo-next"]);
-  check("4. context has the readings, batch has none", ctx[0].collected.readings.combined.held[0] === 0 && !("readings" in batch[0]));
-  check("4. README written", existsSync(join(out, "README.md")) && /4 messages/.test(readFileSync(join(out, "README.md"), "utf8")));
+  check("4. context has the readings (format 1), batch has none", ctx[0].collected.readings.combined.held[0] === 0 && !("readings" in batch[0]));
+  check("4. context of a format 2 entry: the decision and the model versions", ctx[4].collected.format === "sop-collect/2" && ctx[4].collected.decision.units[0].execute === false && ctx[4].collected.models.neural === "fd69a08c3b" && !("decision" in batch[4]));
+  check("4. README: 5 messages, both formats counted, 5 with a held request", /5 messages/.test(readFileSync(join(out, "README.md"), "utf8")) && /format sop-collect\/1: 4/.test(readFileSync(join(out, "README.md"), "utf8")) && /format sop-collect\/2: 1/.test(readFileSync(join(out, "README.md"), "utf8")) && /held at least one request: 5/.test(readFileSync(join(out, "README.md"), "utf8")), readFileSync(join(out, "README.md"), "utf8"));
+  check("4. README written", existsSync(join(out, "README.md")) && /5 messages/.test(readFileSync(join(out, "README.md"), "utf8")));
   let refused = false; try { run([file, "--out", out]); } catch (e) { refused = e.status === 1; }
   check("4. an existing batch is not overwritten without --force", refused);
   const out2 = join(dir, "b2");
   run([file, "--out", out2, "--via", "voice"]);
-  eq("4. --via voice", rd2(out2).map(x => x.text), ["fă Start roșu → make Start red"]);
+  eq("4. --via voice", rd2(out2).map(x => x.text), ["fă Start roșu → make Start red", "make Process blue"]);
   const out3 = join(dir, "b3");
   run([file, "--out", out3, "--dedupe", "--prefix", "x"]);
-  eq("4. --dedupe and --prefix", rd2(out3).map(x => x.id + " " + x.text), ["x-0001 make Start red", "x-0002 fă Start roșu → make Start red", "x-0003 undo"]);
+  eq("4. --dedupe and --prefix", rd2(out3).map(x => x.id + " " + x.text), ["x-0001 make Start red", "x-0002 fă Start roșu → make Start red", "x-0003 undo", "x-0004 make Process blue"]);
   function rd2(o) { return readFileSync(join(o, "batch_01.jsonl"), "utf8").trim().split("\n").map(l => JSON.parse(l)); }
   rmSync(dir, { recursive: true, force: true });
 }

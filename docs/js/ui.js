@@ -31,13 +31,18 @@ let sub = 'drawing';                                // the active reader's subta
 const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { } } };
 const clock = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 // Collected requests (owner, 2026-11-03; docs/js/collect.js, training/sketch/COLLECT_FORMAT.md): every message the user sends (typed, spoken,
-// an example or a reply's button; not the opening message, not SOP Lang or the toolbar) is kept in this browser with what each reader read and
+// an example or a reply's button; not the opening message, not SOP Lang or the toolbar) is kept in this browser with the model versions and
 // what VSS-BERT did, and the user's later actions on it (Do it anyway, Edit, superseded, undo right after) are added as events. Nothing leaves
 // the browser unless the user downloads the file (⋮ › Settings › Collected requests). SESSION tells the turns of this page load apart.
 const SESSION = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const collector = window.CollectKit ? CollectKit.createStore() : null;
 const collectUI = collector ? CollectKit.mountSettings(collector) : null;
 const collectEvent = (turn, ev) => { if (collector) try { collector.event(SESSION, turn, ev); } catch (e) { console.error(e); } };
+// the model versions of every collected entry (docs/model/versions.json, fetched once, revalidated): with the text and the names on the
+// drawing they reproduce every reader's reading, which is therefore not stored (collect.js format 2)
+let modelStamps = null;
+if (collector) fetch(new URL('model/versions.json', document.baseURI).href, { cache: 'no-cache' }).then(r => r.ok ? r.json() : null)
+  .then(j => { modelStamps = j && j.files ? CollectKit.modelVersions(j.files) : null; }).catch(() => { /* the entries then have models: null */ });
 let pendingEdit = null;   // the held request whose Edit put a command into the message box: the next typed message is its "edit-sent"
 // The gate (owner's main metric, 2026-11-02: do only what you are sure of, ask about the rest; training/sketch/PRECISION.md): a learned reader
 // executes a request only when its own confidence clears the threshold of the chosen precision level; below it the request is not executed,
@@ -439,7 +444,7 @@ function rayDist(s, ux, uy) {
   }
 }
 function drawShape(g, s) {
-  const grp = el('g', { class: 'shp' + (hl.shapes.has(s.name) ? ' hl' : '') + (s.layer ? ' ' + s.layer : '') + (s.shape === 'text' ? ' txt' : ''), 'data-name': s.name, transform: `translate(${s.x} ${s.y})` }, g);
+  const grp = el('g', { class: 'shp' + (hl.shapes.has(s.name) ? ' hl' : '') + (s.layer ? ' ' + s.layer : '') + (s.shape === 'text' ? ' txt' : '') + (s === stagePanel ? ' stage' : ''), 'data-name': s.name, transform: `translate(${s.x} ${s.y})` }, g);
   const { w, h } = K.dims(s), tint = K.PALETTE_TINT[s.fill];   /* fill=light / faint / none: the body's fill opacity (logic.js PALETTE_TINT) */
   if (s.shape === 'text') {   /* a free text: no body, no name tag; its colour is the text's */
     if (hl.shapes.has(s.name)) el('rect', { class: 'halo', x: -w / 2 - 5, y: -h / 2 - 4, width: w + 10, height: h + 8, rx: 8 }, grp);
@@ -512,6 +517,26 @@ function cellsInUse() {
   add(S.frame || { x: 0, y: 0 });
   return [...cells.values()];
 }
+/* The drawing fills its column edge to edge (owner, 2026-11-03 12:22: "make only the gray zone visible, remove the paddings"). When the
+   drawing has a background panel (layer=background, a rectangle: the opening drawing's Backdrop), the view is the panel and whatever lies
+   outside it, with no padding, and the panel's wash continues to the edges of the board where its shape does not match the board's, so the
+   whole board reads as the panel; its own outline is not drawn then. Without a panel the view is the cell (800 x 500), with no padding. */
+let stagePanel = null;
+function stageExtent(shapes) {
+  const panels = shapes.filter(s => s.layer === 'background' && (s.shape === 'rectangle' || s.shape === 'square'));
+  if (!panels.length) return null;
+  const panel = panels.reduce((a, b) => (K.dims(b).w * K.dims(b).h > K.dims(a).w * K.dims(a).h ? b : a));
+  const boxes = shapes.map(s => { const d = K.dims(s); return { x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2 }; })
+    .concat(shapes.filter(s => !s.layer && s.shape !== 'text' && !s.quiet).map(s => K.tagBox(s)));
+  const e = { x1: Math.min(...boxes.map(b => b.x1)), y1: Math.min(...boxes.map(b => b.y1)), x2: Math.max(...boxes.map(b => b.x2)), y2: Math.max(...boxes.map(b => b.y2)) };
+  return Object.assign(e, { panel });
+}
+/** the panel's wash on the board outside the panel (a rounded hole the size of the panel's body), behind everything */
+function washOutside(p) {
+  const d = K.dims(p), x = p.x - d.w / 2, y = p.y - d.h / 2, w = d.w, h = d.h, r = 6, tint = K.PALETTE_TINT[p.fill];
+  const hole = `M${x + r} ${y}H${x + w - r}A${r} ${r} 0 0 1 ${x + w} ${y + r}V${y + h - r}A${r} ${r} 0 0 1 ${x + w - r} ${y + h}H${x + r}A${r} ${r} 0 0 1 ${x} ${y + h - r}V${y + r}A${r} ${r} 0 0 1 ${x + r} ${y}Z`;
+  el('path', { class: 'wash', d: `M-5000 -5000H15000V15000H-5000Z${hole}`, 'fill-rule': 'evenodd', style: `fill: ${pc(p.color, 'fill')}; pointer-events: none`, 'fill-opacity': tint != null ? tint : 1 }, framesG);
+}
 function renderCanvas() {
   layer.textContent = ''; framesG.textContent = '';
   const S = world.state, by = new Map(S.shapes.map(s => [s.name, s])), cells = cellsInUse();
@@ -521,7 +546,9 @@ function renderCanvas() {
     const fc = cur.focusCell || S.frame || { x: 0, y: 0 };
     const inside = S.shapes.filter(s => { const c = K.cellOf(s.x, s.y); return c.x === fc.x && c.y === fc.y; });
     let bx1 = fc.x, by1 = fc.y, bx2 = fc.x + 800, by2 = fc.y + 500;
-    if (inside.length) {
+    const st = stageExtent(inside);
+    if (st) ({ x1: bx1, y1: by1, x2: bx2, y2: by2 } = st);
+    else if (inside.length) {
       bx1 = Math.min(...inside.map(s => s.x - K.dims(s).w / 2)) - 40; bx2 = Math.max(...inside.map(s => s.x + K.dims(s).w / 2)) + 40;
       by1 = Math.min(...inside.map(s => s.y - K.dims(s).h / 2)) - 44; by2 = Math.max(...inside.map(s => s.y + K.dims(s).h / 2)) + 30;
       const minW = 380, minH = 240;
@@ -532,8 +559,15 @@ function renderCanvas() {
   } else {
     const x1 = Math.min(...cells.map(c => c.x)), y1 = Math.min(...cells.map(c => c.y));
     const x2 = Math.max(...cells.map(c => c.x + 800)), y2 = Math.max(...cells.map(c => c.y + 500));
-    svg.setAttribute('viewBox', `${x1 - 14} ${y1 - (cells.length > 1 ? 30 : 8)} ${x2 - x1 + 28} ${y2 - y1 + (cells.length > 1 ? 44 : 16)}`);
+    const st = cells.length === 1 ? stageExtent(S.shapes) : null;
+    // one cell: its drawing edge to edge (the background panel, else the cell), no padding; several cells: their frames and titles
+    if (st) svg.setAttribute('viewBox', `${st.x1} ${st.y1} ${st.x2 - st.x1} ${st.y2 - st.y1}`);
+    else if (cells.length === 1) svg.setAttribute('viewBox', `${x1} ${y1} 800 500`);
+    else svg.setAttribute('viewBox', `${x1 - 14} ${y1 - 30} ${x2 - x1 + 28} ${y2 - y1 + 44}`);
   }
+  stagePanel = (focus ? stageExtent(S.shapes.filter(s => { const c = K.cellOf(s.x, s.y), fc = cur.focusCell || S.frame || { x: 0, y: 0 }; return c.x === fc.x && c.y === fc.y; })) : cells.length === 1 ? stageExtent(S.shapes) : null);
+  stagePanel = stagePanel && stagePanel.panel;
+  if (stagePanel) washOutside(stagePanel);
   const vb = $('#view-btn'); if (vb) { vb.setAttribute('aria-pressed', String(!focus)); vb.title = focus ? 'Show the whole canvas' : 'Zoom to the current drawing'; vb.setAttribute('aria-label', vb.title); }
   if (cells.length > 1) for (const c of cells) {
     el('rect', { class: 'frame', x: c.x, y: c.y, width: 800, height: 500, rx: 14 }, framesG);
@@ -740,7 +774,7 @@ function afterTurn(rec, parts, shown, meta, namesBefore) {
     const via = (meta && meta.via) || 'other';
     const vb = parts.find(p => p.rd.id === 'combined'), reply = replyWords(vb && !vb.off ? vb : shown.lines[0]);
     if (collector && !rec.raw && via !== 'start')
-      collector.add(CollectKit.buildEntry(rec, { session: SESSION, serialize: K.serialize, names: namesBefore, source: Object.assign({ via }, meta || {}), reply, tab: cur.id }));
+      collector.add(CollectKit.buildEntry(rec, { session: SESSION, names: namesBefore, source: Object.assign({ via }, meta || {}), models: modelStamps, reply, tab: cur.id }));
     // an undo right after a message: the toolbar button, or an undo that VSS-BERT executed
     const vr = rec.readers.combined, undid = rec.raw ? (rec.button && /\baction=undo\b/.test(rec.sop) ? 'button' : null)
       : vr && (vr.nodes || []).some(n => n.type === 'command' && n.args && n.args.action === 'undo') ? 'message' : null;
@@ -1692,12 +1726,38 @@ ta.addEventListener('input', grow);
 // message can be edited; the edit is kept while walking the history, until a message is sent.
 const sent = [], edits = new Map();
 let histPos = 0, draft = '';
-function sendTyped() {
-  const v = ta.value; if (!v.trim()) return;
+/** send the message box. metaIn: from the dictation dock (a spoken "send"); else the dock is asked whether the box holds its text
+ *  (voice.consume: its meta, or {block} when the dock has text in another language that could not be translated: nothing is sent) */
+function sendTyped(metaIn) {
+  const v = ta.value; if (!v.trim()) return false;
+  let meta = metaIn && metaIn.via ? metaIn : null;
+  if (!meta && voice) { const m = voice.consume(v); if (m && m.block) return false; meta = m; }
+  if (!meta) { meta = { via: 'typed' }; warnNotEnglish(v); }
   if (sent[sent.length - 1] !== v) sent.push(v);
   histPos = sent.length; draft = ''; edits.clear();
   if (pendingEdit) { const pe = pendingEdit; pendingEdit = null; collectEvent(pe.turn, { kind: 'edit-sent', reader: pe.reader, index: pe.index, sent: v, same: v.trim() === pe.suggested.trim() }); }
-  ta.value = ''; grow(); submit(v, undefined, { via: 'typed' });
+  ta.value = ''; grow(); submit(v, undefined, meta);
+  return true;
+}
+/* A message typed straight into the box that is likely not English (the readers read English only): a cheap check, with no word list of
+   any other language: of its words of two letters or more that are not names on the canvas, how many the spell checker's vocabulary knows
+   (the readers' words and the training messages' words). Under half, with at least 3 such words: the chat says once how to dictate or
+   translate. It never blocks the message. */
+let warnedLang = false;
+function notEnglishShare(text) {
+  if (!speller) return null;
+  const names = new Set(canvasNames(cur).map(n => String(n).toLowerCase()));
+  const ws = (String(text).match(/[\p{L}]+/gu) || []).filter(w => w.length >= 2 && !names.has(w.toLowerCase()));
+  if (ws.length < 3) return null;
+  const known = ws.filter(w => /^[a-z]+$/i.test(w) && (speller.has(w) || speller.kept(w))).length;
+  return 1 - known / ws.length;
+}
+function warnNotEnglish(text) {
+  if (warnedLang) return;
+  const share = notEnglishShare(text);
+  if (share == null || share <= 0.5) return;
+  warnedLang = true;
+  sysNote('This message does not look like English, and the readers read English only. To write or speak in another language, use the dictation bar under the drawing: its language code opens its settings, and it translates to English on this device before sending.');
 }
 function recall(to) {
   if (to < 0 || to > sent.length || to === histPos) return false;
@@ -1723,8 +1783,11 @@ ta.addEventListener('keydown', ev => {
 const sendBtn = $('#send-btn');
 sendBtn.addEventListener('pointerdown', ev => ev.preventDefault()); // keep the keyboard open
 sendBtn.addEventListener('click', () => { sendTyped(); ta.focus({ preventScroll: true }); });
-// the microphone button: speak or type in another language, sent in English (docs/js/voice.js; the original goes along as meta)
-const voice = window.VoiceKit && $('#mic-btn') ? VoiceKit.mount({ button: $('#mic-btn'), composer: ta, send: (t, m) => submit(t, undefined, m) }) : null;
+// the dictation dock under the drawing: speak or type in another language, sent in English (docs/js/voice.js; the original goes along as
+// meta). Its spoken commands press the last "Do it anyway" or "Edit" of the chat, as a click would.
+const clickLast = sel => { const bs = [...msgs.querySelectorAll(sel)].filter(b => !b.disabled); const b = bs[bs.length - 1]; if (!b) return false; b.click(); return true; };
+const voice = window.VoiceKit && $('#dock') ? VoiceKit.mount({ dock: $('#dock'), composer: ta, send: m => sendTyped(m),
+  actions: { anyway: () => clickLast('.held button.anyway'), edit: () => clickLast('.held button.edit') } }) : null;
 
 /* Fit the app to the visible area, so the composer stays above the on-screen keyboard. */
 const appEl = document.querySelector('.app');
