@@ -1,0 +1,2 @@
+test part: cost score 35.4, confidently wrong 1.9% of executed, done right 44.0%; held by the name rule: none
+test part: 1745 gold, executed 782 (767 right, 15 wrong or extra), done right 44.0% (combined.json test: executed 761, done right 42.8%)

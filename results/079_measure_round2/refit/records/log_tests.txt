@@ -1,0 +1,89 @@
+composer: cutter /home/claude/vss-box/diagram-vss-demo/docs/model/arms/R2/cutter_worlds8s.json · worlds shapes [create,set,resize,fact,rule], links [connect,disconnect,reverse], position [move,swap,arrange,align,distribute,toFront,toBack], layout [improve,respace,snap,fit,flip,sort,groupBy,equalize,straighten,untangle], graphq [check,connected,path,reachable,cycle,exists], questions [count,list,extreme,nearest,describe,neighbors,degree,property,members,groupOf], manage [delete,duplicate,rename,label,group,ungroup], history [undo,redo,forget], help [help]
+composer v2: router cutter (top 3 of 9 cutter worlds) · fewest words not understood · ties and gaps: context filler /home/claude/vss-box/diagram-vss-demo/docs/model/arms/R2/context/weights.json margin 0
+event hint: mode H1 · event cutter /home/claude/vss-box/diagram-vss-demo/docs/model/arms/R2/cutter_events8.json
+collect: sample vss: 63 messages, 323 gold · right 81.1 · wrong 5.3 · not done 13.6 · extra 26 (checked against tally)
+model files: the confidence of docs/model/confidence/vss.json (weights, intercept, tables, world prior) used by both sides; thresholds: cost (vss.json default) 0.8751, 95% (vss.json) 0.8746, 97% (vss.json) 0.8751
+messages 63 (browser path 63) · produced requests compared 305 · messages with a different request count 0
+requests with a raw signal that differs 0 · world differs 0 · records without a found unit 0
+confidence: max abs difference 0.00e+0
+execute / ask decisions that differ: cost (vss.json default) 0 of 305 · 95% (vss.json) 0 of 305 · 97% (vss.json) 0 of 305
+gated cost (vss.json default) on these 323 gold requests: scripts precision 100.0 · right 11.8 · asked 74.6 · executed wrong 0.0 · extras executed 0 | browser precision 100.0 · right 11.8 · asked 74.6 · executed wrong 0.0 · extras executed 0
+gated 95% (vss.json) on these 323 gold requests: scripts precision 100.0 · right 11.8 · asked 74.6 · executed wrong 0.0 · extras executed 0 | browser precision 100.0 · right 11.8 · asked 74.6 · executed wrong 0.0 · extras executed 0
+gated 97% (vss.json) on these 323 gold requests: scripts precision 100.0 · right 11.8 · asked 74.6 · executed wrong 0.0 · extras executed 0 | browser precision 100.0 · right 11.8 · asked 74.6 · executed wrong 0.0 · extras executed 0
+PASS
+ok   bert cut: the file's threshold (0.9212832224630187) = the fixture's
+ok   bert cut: the same combined requests on 49 of 49 messages
+ok   bert cut: the same pairs, agree, agree_share and other_conf (max difference 0.00e+0)
+ok   bert cut: max |confidence, browser code − script| = 0.00e+0 over 201 requests
+ok   bert cut: execute / ask decisions the same on 201 of 201 requests
+ok   bert cut, level cost1 (threshold 0.4650808015566845): decisions the same on 201 of 201 requests, threshold from the file
+ok   bert cut, level cost2 (threshold 0.6657014873855915): decisions the same on 201 of 201 requests, threshold from the file
+ok   bert cut, level cost5 (threshold 0.9127268309368488): decisions the same on 201 of 201 requests, threshold from the file
+ok   bert cut, level cost20 (threshold 0.9529228646657459): decisions the same on 201 of 201 requests, threshold from the file
+ok   bert cut, level all (threshold -Infinity): decisions the same on 201 of 201 requests, threshold from the file
+ok   vss cut: the file's threshold (0.9138672345312131) = the fixture's
+ok   vss cut: the same combined requests on 52 of 52 messages
+ok   vss cut: the same pairs, agree, agree_share and other_conf (max difference 0.00e+0)
+ok   vss cut: max |confidence, browser code − script| = 0.00e+0 over 200 requests
+ok   vss cut: execute / ask decisions the same on 200 of 200 requests
+ok   vss cut, level cost1 (threshold 0.4913080539623793): decisions the same on 200 of 200 requests, threshold from the file
+ok   vss cut, level cost2 (threshold 0.6370625064779983): decisions the same on 200 of 200 requests, threshold from the file
+ok   vss cut, level cost5 (threshold 0.8941071768011585): decisions the same on 200 of 200 requests, threshold from the file
+ok   vss cut, level cost20 (threshold 0.9442649373343096): decisions the same on 200 of 200 requests, threshold from the file
+ok   vss cut, level all (threshold -Infinity): decisions the same on 200 of 200 requests, threshold from the file
+ok   bertEdges: start = P(B) of the first word, end = 1 − P(I) of the next word, 1 at the end, null without the cut head
+ok   new forms: help with about=undefined, improve with an empty target list, a restyle without quantifier pair and agree
+ok   new forms: another help topic, one shape instead of the whole drawing, another style pair and disagree
+
+all passed
+ok   vss: the same requests (and whose reading) on 60 of 60 messages
+ok   vss: the same vote count n_agree on 188 of 188 requests
+ok   vss: max |confidence, browser code − script| = 0.00e+0 over 188 requests
+ok   sop: the same requests (and whose reading) on 60 of 60 messages
+ok   sop: the same vote count n_agree on 211 of 211 requests
+ok   sop: max |confidence, browser code − script| = 0.00e+0 over 211 requests
+ok   vote3: the same requests (and whose reading) on 60 of 60 messages
+ok   vote3: the same vote count n_agree on 231 of 231 requests
+ok   vote3: max |confidence, browser code − script| = 0.00e+0 over 231 requests
+ok   vote3_rule: the same requests (and whose reading) on 60 of 60 messages
+ok   vote3_rule: the same vote count n_agree on 231 of 231 requests
+ok   thresholdOf: per-type thresholds of the file
+ok   engineNorm: no target = mention(quantifier=all) = every canvas name; order-free for arrange; align and filtered mentions unchanged
+ok   engine agreement on the fixture: 0 of 399 execute decisions of the VSS and SOP-BERT columns differ from the file's agreement (reported)
+ok   engine agreement: “arrange all in a circle” as a list of every name, mention(all) and no target: 3/3 for the rule (the file says engine) and for columnSop with opts (the file's canon: 1/3)
+ok   columnVss: the partners of the votes are returned (for the reasons)
+ok   engineTargets: every canvas name and the groups = every shape; four items stay four; align and a list of panels only unchanged
+ok   new forms: 12 of 12 engine-equal pairs agree
+ok   new forms: 10 of 10 pairs the engine does differently disagree
+ok   scorer: "tidy up" (gold: no target) read with one shape is not right; read with mention(quantifier=all) is right
+ok   scorer: help gold aspect=overview read without an aspect is right; gold about=images without a topic read without about is not
+ok   agreementWords: “the Rules and VSS agree, SOP-BERT reads … instead …”
+ok   agreementWords: no two agree, one differs and one did not find it
+ok   agreementWords: the other two agree with each other, not with this reader
+ok   otherAct: the Rules' reading of another act over the same words is said (not "did not find")
+ok   agreementWords: only one found it / all three agree / another action
+ok   ownSpec: the own signals only (no vote inputs), and their reasons are sentences (VSS 66/66, SOP-BERT 72/72)
+
+all passed
+collect: precision_bert_collect.mjs on 9 sample folders, LIMIT=8 -> /tmp/nc-T8vFMa/collect.jsonl
+sample: 72 messages, 322 produced requests; max |min over recorded heads (rounded logits) - confSop| = 1.55e-4
+composer: cutter /home/claude/vss-box/diagram-vss-demo/docs/model/arms/R2/cutter_worlds8s.json · worlds shapes [create,set,resize,fact,rule], links [connect,disconnect,reverse], position [move,swap,arrange,align,distribute,toFront,toBack], layout [improve,respace,snap,fit,flip,sort,groupBy,equalize,straighten,untangle], graphq [check,connected,path,reachable,cycle,exists], questions [count,list,extreme,nearest,describe,neighbors,degree,property,members,groupOf], manage [delete,duplicate,rename,label,group,ungroup], history [undo,redo,forget], help [help]
+composer v2: router cutter (top 3 of 9 cutter worlds) · fewest words not understood · ties and gaps: context filler /home/claude/vss-box/diagram-vss-demo/docs/model/arms/R2/context/weights.json margin 0
+event hint: mode H1 · event cutter /home/claude/vss-box/diagram-vss-demo/docs/model/arms/R2/cutter_events8.json
+ok   same number of produced requests (scripts 322, browser code 322)
+ok   at least 200 produced requests compared (200 of 72 messages' 322)
+ok   act equal on 200 / 200
+ok   max |signal difference| = 0
+ok   max |confidence difference| (scripts vs browser code) = 0.00e+0
+ok   decisions agree at cost1 (threshold 0.4737): 200 / 200 (executed 189)
+ok   decisions agree at cost2 (threshold 0.6722): 200 / 200 (executed 183)
+ok   decisions agree at cost5 (threshold 0.8168): 200 / 200 (executed 166)
+ok   decisions agree at cost (threshold 0.9098): 200 / 200 (executed 132)
+ok   decisions agree at cost20 (threshold 0.9503): 200 / 200 (executed 99)
+ok   decisions agree at 95 (threshold 0.9098): 200 / 200 (executed 132)
+ok   decisions agree at 97 (threshold 0.9662): 200 / 200 (executed 70)
+ok   BERT cutter path (units given, cut head output reused): max |confidence difference| = 0.00e+0, one model call per message
+ok   units from another cut with opts.signals: the cut head runs once more and its output is read
+ok   every request not executed has its reasons in words (60 / 60)
+model: docs/model/neural/sop-bert (versions.json fd69a08c3b); confidence: docs/model/confidence/sop-bert.json
+PASS

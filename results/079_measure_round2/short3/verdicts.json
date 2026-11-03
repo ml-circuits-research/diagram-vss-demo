@@ -1,0 +1,93 @@
+{
+ "data": [
+  "results/079_measure_round2/data/short3"
+ ],
+ "boot": 1000,
+ "seed": 1,
+ "cost": 10,
+ "test_messages": 340,
+ "test_requests": 432,
+ "cal_messages": 173,
+ "arms": {
+  "VSS-G": {
+   "records": "results/079_measure_round2/short3/ALL/records/vss_arm.jsonl",
+   "threshold": "asks everything",
+   "score": 0,
+   "ci": [
+    0,
+    0
+   ],
+   "done_right": 0,
+   "conf_wrong": null,
+   "executed": 0,
+   "extras_executed": 0,
+   "all_right": 0.5092592592592593,
+   "all_wrong": 0.1875,
+   "done_right_at_3pct": 0.02546296296296296
+  },
+  "VSS-T": {
+   "records": "results/079_measure_round2/short3/R2/records/vss_arm.jsonl",
+   "threshold": 0.9311451292832199,
+   "score": 0.6944444444444444,
+   "ci": [
+    0,
+    1.6055045871559634
+   ],
+   "done_right": 0.006944444444444444,
+   "conf_wrong": 0,
+   "executed": 3,
+   "extras_executed": 0,
+   "all_right": 0.5254629629629629,
+   "all_wrong": 0.18518518518518517,
+   "done_right_at_3pct": 0.10185185185185185
+  },
+  "BERT-G": {
+   "records": "results/079_measure_round2/short3/ALL/records/sop_arm_own.jsonl",
+   "threshold": 0.9423886500627533,
+   "score": 4.166666666666666,
+   "ci": [
+    -1.3574660633484164,
+    8.466819221967963
+   ],
+   "done_right": 0.06481481481481481,
+   "conf_wrong": 0.034482758620689655,
+   "executed": 29,
+   "extras_executed": 0,
+   "all_right": 0.6851851851851852,
+   "all_wrong": 0.21064814814814814,
+   "done_right_at_3pct": 0.08101851851851852
+  },
+  "BERT-T": {
+   "records": "results/079_measure_round2/short3/R2/records/sop_arm_own.jsonl",
+   "threshold": 0.9933021221368886,
+   "score": 0,
+   "ci": [
+    0,
+    0
+   ],
+   "done_right": 0,
+   "conf_wrong": null,
+   "executed": 0,
+   "extras_executed": 0,
+   "all_right": 0.7175925925925926,
+   "all_wrong": 0.19444444444444445,
+   "done_right_at_3pct": 0.018518518518518517
+  }
+ },
+ "diff": {
+  "vss": {
+   "point": 0.6944444444444444,
+   "ci": [
+    0,
+    1.6055045871559634
+   ]
+  },
+  "bert": {
+   "point": -4.166666666666666,
+   "ci": [
+    -8.428246013667426,
+    1.411764705882353
+   ]
+  }
+ }
+}

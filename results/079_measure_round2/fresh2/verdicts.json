@@ -1,0 +1,96 @@
+{
+ "data": [
+  "training/sketch/llm_bench/fresh2/opus_a",
+  "training/sketch/llm_bench/fresh2/opus_b",
+  "training/sketch/llm_bench/fresh2/opus_c",
+  "training/sketch/llm_bench/fresh2/opus_d"
+ ],
+ "boot": 1000,
+ "seed": 1,
+ "cost": 10,
+ "test_messages": 405,
+ "test_requests": 1313,
+ "cal_messages": 195,
+ "arms": {
+  "VSS-G": {
+   "records": "results/079_measure_round2/fresh2/ALL/records/vss_arm.jsonl",
+   "threshold": 0.888537249310821,
+   "score": 15.156130997715156,
+   "ci": [
+    10.658082975679543,
+    19.41135248773651
+   ],
+   "done_right": 0.2048743335872049,
+   "conf_wrong": 0.025362318840579712,
+   "executed": 276,
+   "extras_executed": 2,
+   "all_right": 0.6656511805026657,
+   "all_wrong": 0.1408987052551409,
+   "done_right_at_3pct": 0.22239146991622238
+  },
+  "VSS-T": {
+   "records": "results/079_measure_round2/fresh2/R2/records/vss_arm.jsonl",
+   "threshold": 0.9419356286314196,
+   "score": 3.0464584920030466,
+   "ci": [
+    0.4003202562049639,
+    5.149253731343284
+   ],
+   "done_right": 0.0456968773800457,
+   "conf_wrong": 0.03225806451612903,
+   "executed": 62,
+   "extras_executed": 0,
+   "all_right": 0.6618431073876618,
+   "all_wrong": 0.1507996953541508,
+   "done_right_at_3pct": 0.07768469154607768
+  },
+  "BERT-G": {
+   "records": "results/079_measure_round2/fresh2/ALL/records/sop_arm_own.jsonl",
+   "threshold": 0.8073860766267541,
+   "score": 35.94821020563595,
+   "ci": [
+    27.58881330309902,
+    44.36781609195402
+   ],
+   "done_right": 0.5727341964965728,
+   "conf_wrong": 0.035897435897435895,
+   "executed": 780,
+   "extras_executed": 7,
+   "all_right": 0.8080731150038081,
+   "all_wrong": 0.15917745620715917,
+   "done_right_at_3pct": 0.5613099771515613
+  },
+  "BERT-T": {
+   "records": "results/079_measure_round2/fresh2/R2/records/sop_arm_own.jsonl",
+   "threshold": 0.8486542187325293,
+   "score": 33.130236100533125,
+   "ci": [
+    24.050632911392405,
+    41.17647058823529
+   ],
+   "done_right": 0.5217060167555218,
+   "conf_wrong": 0.035211267605633804,
+   "executed": 710,
+   "extras_executed": 5,
+   "all_right": 0.8118811881188119,
+   "all_wrong": 0.16222391469916222,
+   "done_right_at_3pct": 0.4546839299314547
+  }
+ },
+ "diff": {
+  "vss": {
+   "point": -12.109672505712108,
+   "ci": [
+    -15.864246250986584,
+    -7.979120059656973
+   ]
+  },
+  "bert": {
+   "point": -2.8179741051028273,
+   "ci": [
+    -12.412723041117143,
+    7.1315372424722625
+   ]
+  }
+ }
+}

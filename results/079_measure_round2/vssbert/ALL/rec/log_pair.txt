@@ -1,0 +1,52 @@
+composer: cutter /home/claude/vss-box/diagram-vss-demo/docs/model/micro/cutter_worlds8s.json · worlds shapes [create,set,resize,fact,rule], links [connect,disconnect,reverse], position [move,swap,arrange,align,distribute,toFront,toBack], layout [improve,respace,snap,fit,flip,sort,groupBy,equalize,straighten,untangle], graphq [check,connected,path,reachable,cycle,exists], questions [count,list,extreme,nearest,describe,neighbors,degree,property,members,groupOf], manage [delete,duplicate,rename,label,group,ungroup], history [undo,redo,forget], help [help]
+composer v2: router cutter (top 3 of 9 cutter worlds) · fewest words not understood · ties and gaps: context filler /home/claude/vss-box/diagram-vss-demo/docs/model/context/weights.json margin 0
+event hint: mode H1 · event cutter /home/claude/vss-box/diagram-vss-demo/docs/model/micro/cutter_events8.json
+25 / 1113 messages, 3 s
+50 / 1113 messages, 6 s
+75 / 1113 messages, 8 s
+100 / 1113 messages, 11 s
+125 / 1113 messages, 14 s
+150 / 1113 messages, 17 s
+175 / 1113 messages, 20 s
+200 / 1113 messages, 23 s
+225 / 1113 messages, 26 s
+250 / 1113 messages, 29 s
+275 / 1113 messages, 31 s
+300 / 1113 messages, 34 s
+325 / 1113 messages, 37 s
+350 / 1113 messages, 40 s
+375 / 1113 messages, 43 s
+400 / 1113 messages, 45 s
+425 / 1113 messages, 47 s
+450 / 1113 messages, 50 s
+475 / 1113 messages, 53 s
+500 / 1113 messages, 56 s
+525 / 1113 messages, 58 s
+550 / 1113 messages, 61 s
+575 / 1113 messages, 64 s
+600 / 1113 messages, 66 s
+625 / 1113 messages, 67 s
+650 / 1113 messages, 68 s
+675 / 1113 messages, 69 s
+700 / 1113 messages, 69 s
+725 / 1113 messages, 70 s
+750 / 1113 messages, 71 s
+775 / 1113 messages, 72 s
+800 / 1113 messages, 72 s
+825 / 1113 messages, 73 s
+850 / 1113 messages, 74 s
+875 / 1113 messages, 75 s
+900 / 1113 messages, 75 s
+925 / 1113 messages, 76 s
+950 / 1113 messages, 77 s
+975 / 1113 messages, 78 s
+1000 / 1113 messages, 78 s
+1025 / 1113 messages, 79 s
+1050 / 1113 messages, 80 s
+1075 / 1113 messages, 81 s
+1100 / 1113 messages, 82 s
+refit vss_own: 1113 messages, 2553 gold · right 63.1 · wrong 14.6 · not done 22.2 · extra 329 (checked against tally)
+refit vss_bert: 1113 messages, 2553 gold · right 66.1 · wrong 14.6 · not done 19.3 · extra 323 (checked against tally)
+refit sop_own: 1113 messages, 2553 gold · right 77.8 · wrong 17.1 · not done 5.1 · extra 212 (checked against tally)
+refit sop_vss: 1113 messages, 2553 gold · right 74.1 · wrong 16.3 · not done 9.6 · extra 184 (checked against tally)
+SOP-BERT sop-bert: 5129 produced requests; max |min over recorded heads - confSop| = 2.42e-4; 82 s

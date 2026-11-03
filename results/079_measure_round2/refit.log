@@ -1,0 +1,119 @@
+data: training/sketch/llm_bench/fresh2/opus_a training/sketch/llm_bench/fresh2/opus_b training/sketch/llm_bench/fresh2/opus_c training/sketch/llm_bench/fresh2/opus_d results/079_measure_round2/data/short3
+records: results/079_measure_round2/refit/records
+[15:20:30] 1. SOP-BERT + VSS records
+refit vss_own: 1113 messages, 2553 gold · right 63.4 · wrong 15.0 · not done 21.5 · extra 323 (checked against tally)
+refit vss_bert: 1113 messages, 2553 gold · right 66.7 · wrong 15.2 · not done 18.0 · extra 328 (checked against tally)
+refit sop_own: 1113 messages, 2553 gold · right 78.9 · wrong 17.0 · not done 4.1 · extra 206 (checked against tally)
+refit sop_vss: 1113 messages, 2553 gold · right 74.7 · wrong 16.4 · not done 8.9 · extra 191 (checked against tally)
+SOP-BERT sop-bert-R2: 5171 produced requests; max |min over recorded heads - confSop| = 2.20e-4; 84 s
+[15:21:55] 2. Rules records
+composer: cutter /home/claude/vss-box/diagram-vss-demo/docs/model/arms/R2/cutter_worlds8s.json · worlds shapes [create,set,resize,fact,rule], links [connect,disconnect,reverse], position [move,swap,arrange,align,distribute,toFront,toBack], layout [improve,respace,snap,fit,flip,sort,groupBy,equalize,straighten,untangle], graphq [check,connected,path,reachable,cycle,exists], questions [count,list,extreme,nearest,describe,neighbors,degree,property,members,groupOf], manage [delete,duplicate,rename,label,group,ungroup], history [undo,redo,forget], help [help]
+composer v2: router cutter (top 3 of 9 cutter worlds) · fewest words not understood · ties and gaps: context filler /home/claude/vss-box/diagram-vss-demo/docs/model/arms/R2/context/weights.json margin 0
+event hint: mode H1 · event cutter /home/claude/vss-box/diagram-vss-demo/docs/model/arms/R2/cutter_events8.json
+rules refit cut own (logic.js 1c33da63d25c): 1113 messages, 2553 gold · right 58.1 · wrong 16.6 · extra 467
+rules refit cut bert (logic.js 1c33da63d25c): 1113 messages, 2553 gold · right 61.4 · wrong 15.4 · extra 293
+rules refit cut vss (logic.js 1c33da63d25c): 1113 messages, 2553 gold · right 59.4 · wrong 15.3 · extra 321
+[15:22:03] 3. VSS and SOP-BERT alone (fit_report + export_confidence)
+wrote docs/model/confidence/vss.json and docs/model/confidence/sop-bert.json
+VSS refit (docs/js/vss-confidence.js confidence): max |confidence from the JSON - fit's confidence| = 0.00e+0 over 2326 produced requests; test-part decisions the same 1584/1584; test cost score 3.21 (fit 3.21; executed 89, right 86, wrong+extras 3, requested 1745)
+SOP-BERT refit (precision_confidence_bert.mjs bertConfidence): max |confidence from the JSON - fit's confidence| = 0.00e+0 over 2655 produced requests; test-part decisions the same 1801/1801; test cost score 29.11 (fit 29.11; executed 673, right 658, wrong+extras 15, requested 1745)
+CHECK OK
+[15:22:04] 4. VSS-BERT (combined_report)
+check: outcomes recomputed for 9918 produced requests (4 record files) = the recorded ones
+check: vss.json's recipe refitted on all of the calibration part vs the shipped vss.json, max |confidence difference| over 2326 requests = 0.00e+0
+Variant of the combined reader: (a) + d2 no prior (both parts without their prior input; confidence3/PLAN.md d2).
+Records: results/079_measure_round2/refit/records (combine/collect_pair.mjs, four passes). Calibration part 368 messages / 808 requested actions; test part 745 messages / 1745 requested actions.
+Cost score = (right − 10 × (executed wrong + extras executed)) per 100 requested actions. "cal (oof)" = calibration part, out-of-fold confidences (everything fitted and chosen there). "test (already read; exploratory)" = the test part, scored once, never used to choose.
+Checks: outcomes recomputed from the records = the recorded ones; vss.json's recipe refitted on the whole calibration part vs the shipped file: max |confidence difference| 0.00e+0.
+
+## The recommended cut
+
+Combined reader, calibration out-of-fold cost score: BERT cut 34.5 [22.4, 45.6], VSS cut 27.8 [14.6, 38.9] → recommended: **the BERT cutter** (difference BERT − VSS 6.7 [-3.7, 16.3]).
+
+## The combined reader against each reader alone
+
+| situation | combined (BERT cut) | combined (VSS cut) | SOP-BERT alone (own cut) | VSS alone (own cut) | SOP-BERT alone (VSS cut) | VSS alone (BERT cut) |
+|---|---|---|---|---|---|---|
+| produced requests (cal / test) | 954 / 1984 | 905 / 1867 | 854 / 1801 | 742 / 1584 | 816 / 1700 | 766 / 1655 |
+| L2 · AUROC (cal, oof) | SOP-BERT part 1 · 0.897; VSS part 0.01 · 0.708; all 0.925 | SOP-BERT part 1 · 0.870; VSS part 0.01 · 0.989; all 0.908 | 1 · 0.845 | 10 · 0.768 | 0.1 · 0.822 | 10 · 0.798 |
+| AUROC (test, already read; exploratory) | 0.922 | 0.901 | 0.865 | 0.809 | 0.837 | 0.819 |
+| cost-score threshold (chosen on cal, oof) | 0.9213 | 0.9139 | 0.9098 | 0.8751 | 0.8878 | 0.8630 |
+| execute all: right / wrong / not done % + extras (cal) | 79.3% / 17.5% / 3.2% + 172 | 76.7% / 17.1% / 6.2% + 147 | 79.0% / 17.1% / 4.0% + 78 | 64.7% / 13.1% / 22.2% + 113 | 76.5% / 16.6% / 6.9% + 64 | 66.5% / 13.2% / 20.3% + 122 |
+| cost score (cal (oof)) | 34.5 [22.4, 45.6] | 27.8 [14.6, 38.9] | 19.4 [6.8, 30.7] | 5.1 [1.9, 7.7] | 16.7 [2.9, 29.6] | 10.0 [7.9, 12.4] |
+| done right % of requested (cal (oof)) | 49.4% | 43.9% | 39.2% | 6.3% | 42.7% | 10.0% |
+| confidently wrong % of executed (cal (oof)) | 2.9% (12 of 411) | 3.5% (13 of 368) | 4.8% (16 of 333) | 1.9% (1 of 52) | 5.7% (21 of 366) | 0.0% (0 of 81) |
+| asked % (cal (oof)) | 46.4% | 48.8% | 55.4% | 71.4% | 48.6% | 69.7% |
+| extras executed (cal (oof)) | 4 | 4 | 5 | 0 | 7 | 0 |
+| execute all: right / wrong / not done % + extras (test (already read; exploratory)) | 79.4% / 17.5% / 3.1% + 293 | 74.3% / 17.0% / 8.7% + 273 | 78.9% / 17.0% / 4.1% + 128 | 62.8% / 15.9% / 21.3% + 210 | 73.8% / 16.3% / 9.9% + 127 | 66.9% / 16.2% / 17.0% + 206 |
+| cost score (test (already read; exploratory)) | 31.3 [23.7, 37.5] | 26.4 [19.2, 32.5] | 29.1 [24.0, 33.9] | 3.2 [0.7, 5.1] | 23.7 [16.7, 30.6] | 7.6 [4.1, 10.7] |
+| done right % of requested (test (already read; exploratory)) | 47.9% | 43.6% | 37.7% | 4.9% | 41.4% | 11.1% |
+| confidently wrong % of executed (test (already read; exploratory)) | 3.4% (29 of 865) | 3.8% (30 of 790) | 2.2% (15 of 673) | 3.4% (3 of 89) | 4.1% (31 of 754) | 3.0% (6 of 199) |
+| asked % (test (already read; exploratory)) | 47.7% | 46.4% | 57.5% | 73.6% | 47.2% | 71.6% |
+| extras executed (test (already read; exploratory)) | 7 | 5 | 3 | 0 | 4 | 0 |
+
+### Paired differences (95% bootstrap over messages, 1000 resamples, seed 1, each at its own threshold)
+
+- combined (BERT cut) − SOP-BERT alone (own cut): cal (oof) 15.1 [4.2, 26.2] (interval above 0); test (already read; exploratory) 2.2 [-4.2, 8.0]
+- combined (BERT cut) − VSS alone (own cut): cal (oof) 29.5 [16.6, 40.7] (interval above 0); test (already read; exploratory) 28.1 [20.6, 35.0]
+- combined (VSS cut) − SOP-BERT alone (own cut): cal (oof) 8.4 [-5.1, 21.7] (interval contains 0); test (already read; exploratory) -2.8 [-9.4, 3.5]
+- combined (VSS cut) − VSS alone (own cut): cal (oof) 22.8 [9.4, 33.6] (interval above 0); test (already read; exploratory) 23.2 [16.0, 29.6]
+
+Verdict line (COMBINED_READER.md 6): the combined reader (combined (BERT cut)) is better than SOP-BERT alone on the calibration part: yes, the interval lies above 0.
+
+## What the combined reader executes, by kind (at its threshold)
+
+| situation | combined (BERT cut), cal (oof) | combined (VSS cut), cal (oof) | combined (BERT cut), test (already read; exploratory) | combined (VSS cut), test (already read; exploratory) |
+|---|---|---|---|---|
+| paired, agree | 529 produced (94.3% right) · 411 executed, 12 of them wrong or extra | 524 produced (92.6% right) · 368 executed, 13 of them wrong or extra | 1135 produced (93.4% right) · 865 executed, 29 of them wrong or extra | 1114 produced (90.4% right) · 790 executed, 30 of them wrong or extra |
+| paired, do not agree | 137 produced (46.0% right) · 0 executed, 0 of them wrong or extra | 129 produced (51.9% right) · 0 executed, 0 of them wrong or extra | 337 produced (50.1% right) · 0 executed, 0 of them wrong or extra | 303 produced (49.2% right) · 0 executed, 0 of them wrong or extra |
+| SOP-BERT only | 188 produced (40.4% right) · 0 executed, 0 of them wrong or extra | 163 produced (40.5% right) · 0 executed, 0 of them wrong or extra | 329 produced (44.7% right) · 0 executed, 0 of them wrong or extra | 283 produced (46.6% right) · 0 executed, 0 of them wrong or extra |
+| VSS only | 100 produced (3.0% right) · 0 executed, 0 of them wrong or extra | 89 produced (2.2% right) · 0 executed, 0 of them wrong or extra | 183 produced (4.9% right) · 0 executed, 0 of them wrong or extra | 167 produced (5.4% right) · 0 executed, 0 of them wrong or extra |
+
+Weights of the added inputs in the final SOP-BERT part (percentile scale): BERT cut: agree 2.25, agree_share -0.04, other_conf 0.45; VSS cut: agree 1.94, agree_share 0.06, other_conf 0.47.
+
+## The balance: requests done right at the same confidently-wrong rate
+
+Each cell: the largest share of the requested actions done right over the thresholds whose confidently-wrong rate (wrong + extras executed, of executed) is at most the rate; read off the calibration out-of-fold confidences, and off the test part (already read; exploratory) with the final models. These are best-case readings of each curve (the threshold is picked after seeing the outcomes), the same for every reader; the operating threshold of the demo is the cost-score one above. "-" = no threshold reaches the rate.
+
+| confidently wrong at most (cal (oof)) | combined (BERT cut) | SOP-BERT alone (own cut) | combined (VSS cut) | VSS alone (own cut) |
+|---|---|---|---|---|
+| 1.0% | 7.1% (57 executed, 0.0% wrong) | 3.5% (28 executed, 0.0% wrong) | 1.1% (9 executed, 0.0% wrong) | 4.7% (38 executed, 0.0% wrong) |
+| 2.0% | 37.5% (308 executed, 1.6% wrong) | 3.5% (28 executed, 0.0% wrong) | 1.1% (9 executed, 0.0% wrong) | 6.3% (52 executed, 1.9% wrong) |
+| 3.0% | 49.4% (411 executed, 2.9% wrong) | 12.5% (104 executed, 2.9% wrong) | 37.5% (312 executed, 2.9% wrong) | 6.3% (52 executed, 1.9% wrong) |
+| 5.0% | 54.5% (463 executed, 5.0% wrong) | 39.2% (333 executed, 4.8% wrong) | 49.5% (421 executed, 5.0% wrong) | 6.3% (52 executed, 1.9% wrong) |
+| 4.8% (SOP-BERT alone at its threshold, cal) | 54.3% (460 executed, 4.6% wrong) | 39.2% (333 executed, 4.8% wrong) | 49.4% (419 executed, 4.8% wrong) | 6.3% (52 executed, 1.9% wrong) |
+| 2.2% (SOP-BERT alone at its threshold, test) | 39.4% (325 executed, 2.2% wrong) | 3.5% (28 executed, 0.0% wrong) | 33.0% (273 executed, 2.2% wrong) | 6.3% (52 executed, 1.9% wrong) |
+
+| confidently wrong at most (test (already read; exploratory)) | combined (BERT cut) | SOP-BERT alone (own cut) | combined (VSS cut) | VSS alone (own cut) |
+|---|---|---|---|---|
+| 1.0% | - | - | - | 1.8% (31 executed, 0.0% wrong) |
+| 2.0% | 40.3% (718 executed, 1.9% wrong) | 33.9% (603 executed, 2.0% wrong) | 17.4% (310 executed, 1.9% wrong) | 4.0% (71 executed, 1.4% wrong) |
+| 3.0% | 46.9% (843 executed, 3.0% wrong) | 42.8% (770 executed, 3.0% wrong) | 41.8% (752 executed, 2.9% wrong) | 8.0% (143 executed, 2.8% wrong) |
+| 5.0% | 59.5% (1092 executed, 4.9% wrong) | 52.3% (961 executed, 5.0% wrong) | 51.7% (950 executed, 4.9% wrong) | 10.4% (190 executed, 4.2% wrong) |
+| 4.8% (SOP-BERT alone at its threshold, cal) | 58.2% (1067 executed, 4.8% wrong) | 51.6% (945 executed, 4.8% wrong) | 47.6% (872 executed, 4.7% wrong) | 10.4% (190 executed, 4.2% wrong) |
+| 2.2% (SOP-BERT alone at its threshold, test) | 42.8% (764 executed, 2.2% wrong) | 37.8% (674 executed, 2.2% wrong) | 33.1% (591 executed, 2.2% wrong) | 4.0% (71 executed, 1.4% wrong) |
+
+## The cost score's weight: the operating point at cost 1, 2, 5, 10, 20 (threshold chosen on cal oof at that cost; the demo's default is cost 10)
+
+| situation | combined (BERT cut), cost 1 | combined (BERT cut), cost 2 | combined (BERT cut), cost 5 | combined (BERT cut), cost 10 | combined (BERT cut), cost 20 | SOP-BERT alone (own cut), cost 1 | SOP-BERT alone (own cut), cost 2 | SOP-BERT alone (own cut), cost 5 | SOP-BERT alone (own cut), cost 10 | SOP-BERT alone (own cut), cost 20 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| threshold | 0.4651 | 0.6657 | 0.9127 | 0.9213 | 0.9529 | 0.4737 | 0.6722 | 0.8168 | 0.9098 | 0.9503 |
+| done right % (cal (oof)) | 74.1% | 68.4% | 51.1% | 49.4% | 37.5% | 73.6% | 66.8% | 54.5% | 39.2% | 21.7% |
+| confidently wrong % of executed (cal (oof)) | 11.0% (74 of 673) | 8.1% (49 of 602) | 3.3% (14 of 427) | 2.9% (12 of 411) | 1.6% (5 of 308) | 15.8% (112 of 707) | 10.3% (62 of 602) | 7.0% (33 of 473) | 4.8% (16 of 333) | 3.3% (6 of 181) |
+| asked % (cal (oof)) | 16.6% | 24.4% | 44.6% | 46.4% | 58.9% | 12.1% | 23.6% | 38.6% | 55.4% | 73.8% |
+| done right % (test (already read; exploratory)) | 73.3% | 67.3% | 49.9% | 47.9% | 38.5% | 73.5% | 66.2% | 54.4% | 37.7% | 21.9% |
+| confidently wrong % of executed (test (already read; exploratory)) | 10.7% (153 of 1432) | 7.1% (90 of 1264) | 3.3% (30 of 900) | 3.4% (29 of 865) | 1.8% (12 of 683) | 15.4% (233 of 1516) | 9.7% (124 of 1279) | 5.9% (60 of 1010) | 2.2% (15 of 673) | 1.3% (5 of 388) |
+| asked % (test (already read; exploratory)) | 17.3% | 25.9% | 45.8% | 47.7% | 57.9% | 12.4% | 24.2% | 38.8% | 57.5% | 73.6% |
+EXPORT: wrote docs/model/confidence/combined.json and training/sketch/combine/combined_parity.json
+[15:22:06] 5. three readers (fit3)
+check: outcomes recomputed for 16774 produced requests = the recorded ones
+check: vss.json's recipe refitted on the calibration part vs the shipped vss.json: max |confidence difference| 0.00e+0
+fitted 78 variants
+wrote results/079_measure_round2/refit/records/confidence3_report.md
+EXPORT: wrote docs/model/confidence/vote3.json and training/sketch/confidence3/vote3_parity.json (60 messages)
+[15:22:18] 6. parity tests
+test_vss_confidence: ok
+test_combined_confidence: ok
+test_vote_confidence: ok
+test_neural_confidence: ok
+[15:22:34] done: docs/model/confidence/{vss,sop-bert,combined,vote3}.json; reports in results/079_measure_round2/refit/records

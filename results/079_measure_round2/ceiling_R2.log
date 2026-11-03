@@ -1,0 +1,6 @@
+
+convert_check (LEGEND_EXT=1 DIAGRAM_OPS=1 NEW_DISTINCT=1; groups registry_R2.json): share of the requests whose world row ...
+| folder | requests | round trip | every shape | no world | no event token | differs | no node / no span | keys that differ most |
+|---|---|---|---|---|---|---|---|---|
+| llm_bench/short3 (no pending) | 644 | 63.8% | 0.0% | 0.0% | 13.5% | 22.7% | 0.0% | target 26 shape 19 label 15 position 14 topic 12 count 11 |
+| llm_bench/fresh2 (opus_a..d) | 1909 | 76.5% | 0.3% | 0.0% | 7.8% | 15.5% | 0.0% | target 157 anchor 49 position 39 shape 29 to 21 from 19 |

@@ -1,0 +1,51 @@
+In all: 18716 variants; false agreements 3, false disagreements 211 (vote, engine mode); VSS-BERT: 1 / 1030; scorer: false right 1310, false wrong 721.
+short3: 530 messages, 17 left out (a pending wire), 513 kept with 644 gold requests
+ceiling ALL:
+| folder | requests | round trip | every shape | no world | no event token | differs | no node / no span | keys that differ most |
+|---|---|---|---|---|---|---|---|---|
+| llm_bench/short3 (no pending) | 644 | 61.0% | 0.0% | 0.0% | 15.5% | 23.4% | 0.0% | target 28 shape 19 label 15 position 14 count 12 from 11 |
+| llm_bench/fresh2 (opus_a..d) | 1909 | 74.2% | 0.3% | 0.0% | 10.0% | 15.6% | 0.0% | target 157 anchor 49 position 39 shape 29 from 21 to 21 |
+ceiling R2:
+| folder | requests | round trip | every shape | no world | no event token | differs | no node / no span | keys that differ most |
+|---|---|---|---|---|---|---|---|---|
+| llm_bench/short3 (no pending) | 644 | 63.8% | 0.0% | 0.0% | 13.5% | 22.7% | 0.0% | target 26 shape 19 label 15 position 14 topic 12 count 11 |
+| llm_bench/fresh2 (opus_a..d) | 1909 | 76.5% | 0.3% | 0.0% | 7.8% | 15.5% | 0.0% | target 157 anchor 49 position 39 shape 29 to 21 from 19 |
+[15:18:04 +32s] fresh2: collectors
+fresh2 vss: 600 messages, 1909 gold · right 68.0 · wrong 13.8 · not done 18.1 · extra 237 (checked against tally)
+fresh2 vss: 600 messages, 1909 gold · right 67.9 · wrong 14.2 · not done 17.9 · extra 235 (checked against tally)
+[15:18:50 +78s] fresh2: reports written (results/079_measure_round2/fresh2/{ALL,R2}/report.md, verdicts.md, verdicts.json)
+[15:18:50 +78s] short3: collectors
+short3 vss: 513 messages, 644 gold · right 48.6 · wrong 17.1 · not done 34.3 · extra 92 (checked against tally)
+short3 vss: 513 messages, 644 gold · right 50.2 · wrong 17.4 · not done 32.5 · extra 88 (checked against tally)
+[15:19:06 +94s] short3: reports written (results/079_measure_round2/short3/{ALL,R2}/report.md, verdicts.md, verdicts.json)
+[15:19:06 +94s] VSS-BERT shipped: collect_pair
+test part: cost score 35.4, confidently wrong 1.9% of executed, done right 44.0%; held by the name rule: none
+test part: 1745 gold, executed 782 (767 right, 15 wrong or extra), done right 44.0% (combined.json test: executed 761, done right 42.8%)
+[15:20:30 +178s] refit.sh on the R2 readers
+VSS refit (docs/js/vss-confidence.js confidence): max |confidence from the JSON - fit's confidence| = 0.00e+0 over 2326 produced requests; test-part decisions the same 1584/1584; test cost score 3.21 (fit 3.21; executed 89, right 86, wrong+extras 3, requested 1745)
+SOP-BERT refit (precision_confidence_bert.mjs bertConfidence): max |confidence from the JSON - fit's confidence| = 0.00e+0 over 2655 produced requests; test-part decisions the same 1801/1801; test cost score 29.11 (fit 29.11; executed 673, right 658, wrong+extras 15, requested 1745)
+Combined reader, calibration out-of-fold cost score: BERT cut 34.5 [22.4, 45.6], VSS cut 27.8 [14.6, 38.9] → recommended: **the BERT cutter** (difference BERT − VSS 6.7 [-3.7, 16.3]).
+| cost-score threshold (chosen on cal, oof) | 0.9213 | 0.9139 | 0.9098 | 0.8751 | 0.8878 | 0.8630 |
+| cost score (cal (oof)) | 34.5 [22.4, 45.6] | 27.8 [14.6, 38.9] | 19.4 [6.8, 30.7] | 5.1 [1.9, 7.7] | 16.7 [2.9, 29.6] | 10.0 [7.9, 12.4] |
+| cost score (test (already read; exploratory)) | 31.3 [23.7, 37.5] | 26.4 [19.2, 32.5] | 29.1 [24.0, 33.9] | 3.2 [0.7, 5.1] | 23.7 [16.7, 30.6] | 7.6 [4.1, 10.7] |
+Each cell: the largest share of the requested actions done right over the thresholds whose confidently-wrong rate (wrong + extras executed, of executed) is at most the rate; read off the calibration out-of-fold confidences, and off the test part (already read; exploratory) with the final models. These are best-case readings of each curve (the threshold is picked after seeing the outcomes), the same for every reader; the operating threshold of the demo is the cost-score one above. "-" = no threshold reaches the rate.
+## The cost score's weight: the operating point at cost 1, 2, 5, 10, 20 (threshold chosen on cal oof at that cost; the demo's default is cost 10)
+| situation | combined (BERT cut), cost 1 | combined (BERT cut), cost 2 | combined (BERT cut), cost 5 | combined (BERT cut), cost 10 | combined (BERT cut), cost 20 | SOP-BERT alone (own cut), cost 1 | SOP-BERT alone (own cut), cost 2 | SOP-BERT alone (own cut), cost 5 | SOP-BERT alone (own cut), cost 10 | SOP-BERT alone (own cut), cost 20 |
+test_vss_confidence: ok
+test_combined_confidence: ok
+test_vote_confidence: ok
+test_neural_confidence: ok
+[15:22:34] done: docs/model/confidence/{vss,sop-bert,combined,vote3}.json; reports in results/079_measure_round2/refit/records
+test part: cost score 31.3, confidently wrong 3.4% of executed, done right 47.9%; held by the name rule: none
+test part: 1745 gold, executed 865 (836 right, 29 wrong or extra), done right 47.9% (combined.json test: executed 865, done right 47.9%)
+total 1632
+drwxr-xr-x. 1 claude claude    162 Nov  3 15:22 .
+drwxr-xr-x. 1 claude claude    174 Nov  3 15:07 ..
+-rw-r--r--. 1 claude claude 237950 Nov  3 15:22 combined.json
+-rw-r--r--. 1 claude claude 440167 Nov  3 15:22 combined_parity.json
+-rw-r--r--. 1 claude claude 169537 Nov  3 15:22 sop-bert.json
+-rw-r--r--. 1 claude claude 263743 Nov  3 15:22 vote3.json
+-rw-r--r--. 1 claude claude 450892 Nov  3 15:22 vote3_parity.json
+-rw-r--r--. 1 claude claude  93525 Nov  3 15:22 vss.json
+[15:22:35 +303s] COMPARE.md written
+[15:22:35 +303s] done
