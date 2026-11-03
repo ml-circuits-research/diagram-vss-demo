@@ -84,6 +84,7 @@ MOCKS = r"""
   window.__spoken = [];
   try {
     const voices = [{ name: 'Ioana', lang: 'ro-RO', default: false }, { name: 'Samantha', lang: 'en-US', default: true }];
+    window.SpeechSynthesisUtterance = class { constructor(t) { this.text = t; this.lang = ''; this.voice = null; } };   // a voice of the mock is not a real SpeechSynthesisVoice
     speechSynthesis.getVoices = () => voices;
     speechSynthesis.speak = u => { window.__spoken.push({ text: u.text, lang: u.lang, voice: u.voice && u.voice.name }); };
     speechSynthesis.cancel = () => {};
@@ -143,6 +144,7 @@ with sync_playwright() as p:
     check("1. the note: the API is the browser's, audio may go to the vendor's servers", "browser’s" in dlg["note"] and "vendor’s servers" in dlg["note"], dlg["note"])
 
     # 2. speak Romanian, translate, send
+    pg.click(".vx-opts summary")   # the options are folded by default
     pg.check(".vx [data-pref=tts]")
     pg.click(".vx [data-vx=rec]")
     rec = pg.evaluate("() => { const r = window.__srActive; return r && { lang: r.lang, interim: r.interimResults, cont: r.continuous, started: r.started }; }")
@@ -210,7 +212,7 @@ with sync_playwright() as p:
     prefs = pg.evaluate("() => JSON.parse(localStorage.getItem('sop.voice'))")
     check("4. the choices are kept in localStorage", prefs.get("lang") == "fr-FR" and prefs.get("tts") is True and prefs.get("online") is False and prefs.get("continuous") is False, str(prefs))
     # back to Romanian for the rest; typed Romanian (not spoken): via typed
-    pg.click("#mic-btn"); pg.select_option("#vx-lang", "ro-RO"); pg.uncheck(".vx [data-pref=tts]")
+    pg.click("#mic-btn"); pg.select_option("#vx-lang", "ro-RO"); pg.evaluate("() => { document.querySelector('.vx-opts').open = true; }"); pg.uncheck(".vx [data-pref=tts]")
     pg.fill("#vx-orig", "șterge Start")
     pg.wait_for_function("() => document.querySelector('#vx-en').value === 'delete Start'", timeout=10000)
     n0 = pg.evaluate(NBOT); pg.keyboard.press("Control+Enter"); wait_reply(pg, n0)

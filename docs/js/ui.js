@@ -30,6 +30,15 @@ let sub = 'drawing';                                // the active reader's subta
 // browser storage is a convenience only: every access is guarded and the page works without it
 const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { } } };
 const clock = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+// Collected requests (owner, 2026-11-03; docs/js/collect.js, training/sketch/COLLECT_FORMAT.md): every message the user sends (typed, spoken,
+// an example or a reply's button; not the opening message, not SOP Lang or the toolbar) is kept in this browser with what each reader read and
+// what VSS-BERT did, and the user's later actions on it (Do it anyway, Edit, superseded, undo right after) are added as events. Nothing leaves
+// the browser unless the user downloads the file (⋮ › Settings › Collected requests). SESSION tells the turns of this page load apart.
+const SESSION = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const collector = window.CollectKit ? CollectKit.createStore() : null;
+const collectUI = collector ? CollectKit.mountSettings(collector) : null;
+const collectEvent = (turn, ev) => { if (collector) try { collector.event(SESSION, turn, ev); } catch (e) { console.error(e); } };
+let pendingEdit = null;   // the held request whose Edit put a command into the message box: the next typed message is its "edit-sent"
 // The gate (owner's main metric, 2026-11-02: do only what you are sure of, ask about the rest; training/sketch/PRECISION.md): a learned reader
 // executes a request only when its own confidence clears the threshold of the chosen precision level; below it the request is not executed,
 // the reply says why the reader is not sure (vss-confidence.js reasons) and offers "Do it anyway" (that one reading, as one undoable turn).
@@ -572,10 +581,12 @@ svg.addEventListener('pointerup', endDrag); svg.addEventListener('pointercancel'
 
 /* ---------------- chat ---------------- */
 const scrollDown = () => { msgs.scrollTop = msgs.scrollHeight; };
-function meBubble(text, sp) {
+function meBubble(text, sp, meta) {
   const d = document.createElement('div'); d.className = 'b me';
   const fix = sp && sp.fixes.length ? `<div class="fix" title="${escH('Every reader read: ' + sp.text)}">spelling: ${sp.fixes.map(f => `<s>${escH(f.from)}</s> → ${escH(f.to)}`).join(', ')}</div>` : '';
-  d.innerHTML = `<div class="txt">${escH(text)}</div>${fix}<div class="meta"><time>${clock()}</time></div>`;
+  // a message spoken or typed in another language (docs/js/voice.js): the English text is the message, the original is shown under it
+  const orig = meta && meta.original ? `<div class="orig" lang="${escH(meta.lang || '')}"><b>${escH(window.VoiceKit ? VoiceKit.shortName(meta.lang) : meta.lang || '')}</b>${meta.via === 'voice' ? ', spoken' : ''}: ${escH(meta.original)}${meta.translation && meta.translation.by === 'none' ? ' (not translated)' : ''}</div>` : '';
+  d.innerHTML = `<div class="txt">${escH(text)}</div>${orig}${fix}<div class="meta"><time>${clock()}</time></div>`;
   msgs.appendChild(d); scrollDown();
 }
 // Which tabs' replies the chat shows (owner, 2026-11-03 09:30): ⋮ › Settings › Replies in the chat, default VSS-BERT only, so that the
@@ -619,12 +630,13 @@ function offText(rd) {
 }
 const idleStatus = () => 'reads with ' + listing(READERS.filter(isReady).map(r => r.label));
 msgs.addEventListener('click', ev => {
-  const p = ev.target.closest('[data-pick]'); if (p) { submit(p.dataset.pick); return; }
+  const p = ev.target.closest('[data-pick]'); if (p) { submit(p.dataset.pick, undefined, { via: 'chip' }); return; }
   const a = ev.target.closest('[data-anyway]');
   if (a) { const [rid, turn, idx] = a.dataset.anyway.split(':'); a.disabled = true; queue = queue.then(() => doAnyway(rid, +turn, +idx)).catch(e => { console.error(e); botBubble({ text: 'Something went wrong: ' + e.message, err: true }); }); return; }
   // Edit: the clearer command into the message box, not sent; the first ‹placeholder› is selected, so typing replaces it
   const ed = ev.target.closest('[data-edit]');
-  if (ed) { ta.value = ed.dataset.text || ''; grow(); ta.focus({ preventScroll: true }); const i = ta.value.indexOf('‹'), j = i < 0 ? -1 : ta.value.indexOf('›', i); if (j > i) ta.setSelectionRange(i, j + 1); else ta.setSelectionRange(ta.value.length, ta.value.length); return; }
+  if (ed) { { const [r0, t0, i0] = ed.dataset.edit.split(':'); pendingEdit = { turn: +t0, reader: r0, index: +i0, suggested: ed.dataset.text || '' }; collectEvent(+t0, { kind: 'edit', reader: r0, index: +i0, suggested: ed.dataset.text || '' }); }
+    ta.value = ed.dataset.text || ''; grow(); ta.focus({ preventScroll: true }); const i = ta.value.indexOf('‹'), j = i < 0 ? -1 : ta.value.indexOf('›', i); if (j > i) ta.setSelectionRange(i, j + 1); else ta.setSelectionRange(ta.value.length, ta.value.length); return; }
   const t = ev.target.closest('[data-turn]'); if (t) openSheet('turn', null, +t.dataset.turn);
 });
 
@@ -670,14 +682,17 @@ function summarize(result) {
 }
 
 /* ---------------- running a turn ---------------- */
-function submit(text, sop) { if (typeof sop !== 'string') sop = undefined; queue = queue.then(() => run(text, sop)).catch(e => { console.error(e); botBubble({ text: 'Something went wrong: ' + e.message, err: true }); }); return queue; }
-async function run(text, sop) {
+/** meta (optional): where the message came from, for the collected requests and the chat: {via: 'typed' | 'voice' | 'chip' | 'example' |
+ *  'script' | 'help' | 'start', lang, original, translation, speak} (docs/js/voice.js sends the English text with the original in meta) */
+function submit(text, sop, meta) { if (typeof sop !== 'string') sop = undefined; queue = queue.then(() => run(text, sop, meta)).catch(e => { console.error(e); botBubble({ text: 'Something went wrong: ' + e.message, err: true }); }); return queue; }
+async function run(text, sop, meta) {
   text = String(text).trim(); if (!text) return;
   // the spell checker runs before every reader (not on SOP and toolbar buttons): they all read the corrected text
   const typed = text, raw = !!sop || text.startsWith('@');
   let sp = null;
   if (!raw && spellEnabled) { const sc = await spellP; if (sc) { sp = sc.check(text, { names: canvasNames(cur) }); text = sp.text; } }
-  meBubble(typed, sp);
+  meBubble(typed, sp, meta);
+  const namesBefore = canvasNames(RD.combined);   // the drawing the chat speaks for, before the message (the collected entry's `names`)
   const id = ++turnSeq, rec = { id, time: clock(), text, typed, spell: sp, spellOff: !raw && !spellEnabled, raw, sop: sop || text, button: !!sop, readers: {}, off: {}, ran: [] }; history.push(rec);
   if (rec.raw) { try { K.parse(rec.sop); } catch (e) { rec.error = e; botBubble({ text: e.message, err: true, turn: id, tag: 'SOP Lang' }); return; } }
   // the readers that read this message are fixed now: one that finishes loading meanwhile starts from the Rules drawing instead
@@ -711,6 +726,27 @@ async function run(text, sop) {
   const mine = parts.find(p => p.rd === cur);
   if (mine && mine.highlight) flash(mine.highlight); else renderCanvas();
   updateTabs(); renderSopBar();
+  afterTurn(rec, parts, shown, meta, namesBefore);
+}
+/** the words of a reader's line of the reply (its text, then the requests it did not do): read aloud and kept with the collected entry */
+function replyWords(p) {
+  if (!p) return '';
+  const held = p.held && p.held.length ? [CL ? CL.heldHeader(p.held.length) : 'Not done:', ...p.held.map(h => h.view && h.view.src ? `“${h.view.src}”` : '')].filter(Boolean).join(' ') : '';
+  return [p.off || p.text || '', held, p.sub || ''].filter(Boolean).join(' ').trim();
+}
+/** after a message: keep it in the collected requests, mark an undo right after the previous message, read the reply aloud (voice.js) */
+function afterTurn(rec, parts, shown, meta, namesBefore) {
+  try {
+    const via = (meta && meta.via) || 'other';
+    const vb = parts.find(p => p.rd.id === 'combined'), reply = replyWords(vb && !vb.off ? vb : shown.lines[0]);
+    if (collector && !rec.raw && via !== 'start')
+      collector.add(CollectKit.buildEntry(rec, { session: SESSION, serialize: K.serialize, names: namesBefore, source: Object.assign({ via }, meta || {}), reply, tab: cur.id }));
+    // an undo right after a message: the toolbar button, or an undo that VSS-BERT executed
+    const vr = rec.readers.combined, undid = rec.raw ? (rec.button && /\baction=undo\b/.test(rec.sop) ? 'button' : null)
+      : vr && (vr.nodes || []).some(n => n.type === 'command' && n.args && n.args.action === 'undo') ? 'message' : null;
+    if (undid) collectEvent(rec.id - 1, { kind: 'undo-next', by: undid });
+    if (voice && meta && meta.speak) voice.onReply(meta, reply).catch(e => console.error(e));
+  } catch (e) { console.error(e); }
 }
 /** a question of the engine ("which Hub?") -> the reader's pending choice: the wire asked about, its dependents, the wires they refer to
  *  (with the values they had), so a reply with a name runs them again */
@@ -743,6 +779,7 @@ async function doAnyway(rid, turn, idx) {
   const result = rd.engine.run(list, { overrides });
   Object.assign(env, result.env); h.doneAnyway = true; (r.anyway || (r.anyway = [])).push({ index: idx, src: h.src, nodes: list, result });
   mark(); if (pend) pend.state = 'done anyway';
+  collectEvent(turn, { kind: 'anyway', reader: rid, index: idx, src: h.src });
   supersedeHeld(rd, doneOf(result, list));
   const clarE = (result.errors || []).find(er => er.error instanceof K.Clarify);
   if (clarE) rd.pending = pendingOf(clarE, list, result, overrides);
@@ -896,7 +933,8 @@ function supersedeHeld(rd, done) {
   const before = rd.held; rd.held = CL.updatePending(before, done);
   rd.held.forEach((p, i) => { if (p.state === before[i].state) return;
     const x = history.find(t => t.id === p.turn), u = x && x.readers[rd.id] && x.readers[rd.id].gate && x.readers[rd.id].gate.units.find(y => y.index === p.index);
-    if (u) u.superseded = true; markHeld(`${rd.id}:${p.turn}:${p.index}`, p.state); });
+    if (u) u.superseded = true; markHeld(`${rd.id}:${p.turn}:${p.index}`, p.state);
+    if (p.state === 'superseded') collectEvent(p.turn, { kind: 'superseded', reader: rd.id, index: p.index, by: turnSeq }); });
 }
 /** the canonical readings of the wires a run executed (no error, not skipped) */
 const doneOf = (result, nodes) => result ? result.steps.filter(st => st.node.type !== 'mention' && !st.error && !st.skipped).map(st => { try { return BenchCanon.canon(st.node, nodes); } catch (e) { return null; } }).filter(Boolean) : [];
@@ -1205,7 +1243,7 @@ function renderPlayer() {
 }
 async function playRest() {
   if (player.playing) return; player.playing = true; player.stop = false; renderPlayer();
-  while (player.i < player.turns.length && !player.stop) { const t = player.turns[player.i++]; renderPlayer(); await submit(t); await sleep(player.delay); }
+  while (player.i < player.turns.length && !player.stop) { const t = player.turns[player.i++]; renderPlayer(); await submit(t, undefined, { via: 'script' }); await sleep(player.delay); }
   player.playing = false; renderPlayer();
 }
 async function startScript(name, turns, how) {
@@ -1230,7 +1268,7 @@ async function startScript(name, turns, how) {
 $('#player').addEventListener('click', async ev => {
   const b = ev.target.closest('[data-pl]'); if (!b) return;
   const a = b.dataset.pl;
-  if (a === 'next' && player.i < player.turns.length && !player.playing) { const t = player.turns[player.i++]; renderPlayer(); await submit(t); renderPlayer(); }
+  if (a === 'next' && player.i < player.turns.length && !player.playing) { const t = player.turns[player.i++]; renderPlayer(); await submit(t, undefined, { via: 'script' }); renderPlayer(); }
   if (a === 'play') playRest();
   if (a === 'pause') player.stop = true;
   if (a === 'close') { player.stop = true; player.turns = []; renderPlayer(); }
@@ -1495,7 +1533,7 @@ function neuralGateSettingsHTML() {
   ${columnLevelsHTML('neural-gate', 'sop', neuralGate || 'cost', 'SOP-BERT uses its confidence without the votes (sop-bert.json)')}`;
 }
 sbody.addEventListener('click', async ev => {
-  const q = ev.target.closest('[data-quick]'); if (q) { closeSheet(); submit(q.dataset.quick); return; }
+  const q = ev.target.closest('[data-quick]'); if (q) { closeSheet(); submit(q.dataset.quick, undefined, { via: 'example' }); return; }
   const op = ev.target.closest('[data-open]'); if (op) { openSheet('settings', op.dataset.open); return; }
   const hp = ev.target.closest('[data-help]'); if (hp) { openHelp(hp.dataset.help); return; }
   const b = ev.target.closest('[data-sc]');
@@ -1608,7 +1646,7 @@ function setPlug(name, on) {
   const p = engine.plugin(name); sysNote(`${(HelpKit.CAPS[p.name] || p).t || p.title} switched ${p.enabled ? 'on' : 'off'} for every reader`);
 }
 /** ⋮ › Settings: the two steps that act before every reader */
-const renderSettings = () => chatSettingsHTML() + `<h3 class="sub">Before every reader</h3><p class="intro">These act before every reader: the spell checker, then the cut into requests. What each one is: <button type="button" class="btn" data-help="spelling">Spell checker</button> <button type="button" class="btn" data-help="cutting">One cut for all readers</button></p>` + cutHelpHTML() + spellHelpHTML()
+const renderSettings = () => chatSettingsHTML() + (collectUI ? collectUI.settingsHTML() : '') + `<h3 class="sub">Before every reader</h3><p class="intro">These act before every reader: the spell checker, then the cut into requests. What each one is: <button type="button" class="btn" data-help="spelling">Spell checker</button> <button type="button" class="btn" data-help="cutting">One cut for all readers</button></p>` + cutHelpHTML() + spellHelpHTML()
   + `<div class="help"><h3 class="sub">Help</h3><p class="note">How to use the editor, SOP Lang, the concepts and the architecture are in Help: the <b>?</b> button above the drawing. <button type="button" class="btn" data-help="start">Open Help</button></p></div>`;
 /** ⋮ › Settings › Replies in the chat: which tabs' replies the chat shows (see CHAT_KEY) */
 function chatSettingsHTML() {
@@ -1658,7 +1696,8 @@ function sendTyped() {
   const v = ta.value; if (!v.trim()) return;
   if (sent[sent.length - 1] !== v) sent.push(v);
   histPos = sent.length; draft = ''; edits.clear();
-  ta.value = ''; grow(); submit(v);
+  if (pendingEdit) { const pe = pendingEdit; pendingEdit = null; collectEvent(pe.turn, { kind: 'edit-sent', reader: pe.reader, index: pe.index, sent: v, same: v.trim() === pe.suggested.trim() }); }
+  ta.value = ''; grow(); submit(v, undefined, { via: 'typed' });
 }
 function recall(to) {
   if (to < 0 || to > sent.length || to === histPos) return false;
@@ -1684,6 +1723,8 @@ ta.addEventListener('keydown', ev => {
 const sendBtn = $('#send-btn');
 sendBtn.addEventListener('pointerdown', ev => ev.preventDefault()); // keep the keyboard open
 sendBtn.addEventListener('click', () => { sendTyped(); ta.focus({ preventScroll: true }); });
+// the microphone button: speak or type in another language, sent in English (docs/js/voice.js; the original goes along as meta)
+const voice = window.VoiceKit && $('#mic-btn') ? VoiceKit.mount({ button: $('#mic-btn'), composer: ta, send: (t, m) => submit(t, undefined, m) }) : null;
 
 /* Fit the app to the visible area, so the composer stays above the on-screen keyboard. */
 const appEl = document.querySelector('.app');
@@ -1712,10 +1753,10 @@ updateTabs(); renderCanvas(); setStatus(idleStatus());
 const START = [StartDiagram.SOP];
 for (const rd of READERS) rd.engine.run(K.parse(StartDiagram.SOP));
 renderCanvas(); updateTabs();
-StartDiagram.MESSAGES.forEach(t => submit(t));
+StartDiagram.MESSAGES.forEach(t => submit(t, undefined, { via: 'start' }));
 queue.then(() => { READERS.forEach(rd => { rd.world.undoStack = []; }); renderSopBar(); });
 // the Help overlay: opened by the ? button, by a data-help button, or by a link #help/<page> (also on reload)
-DocsKit.init({ env: helpEnv, say: t => submit(t), onPlug: (name, on) => { setPlug(name, on); if (!sheet.hidden && sheetTab === 'plugins') sbody.innerHTML = renderPlugins(); } });
+DocsKit.init({ env: helpEnv, say: t => submit(t, undefined, { via: 'help' }), onPlug: (name, on) => { setPlug(name, on); if (!sheet.hidden && sheetTab === 'plugins') sbody.innerHTML = renderPlugins(); } });
 ensureVSS();              // same site: no button, no question
 checkNeural();            // our neural model loads by itself (from the browser cache when it is there)
 })();

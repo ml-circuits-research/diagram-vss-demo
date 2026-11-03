@@ -23,7 +23,8 @@ const ICON = {
   clear: '<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/>',
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.5"/><path d="M12 16.8v.2"/>',
   more: '<circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>'
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/>'
 };
 const icon = k => `<svg class="i inl" viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
 
@@ -276,7 +277,7 @@ function using(env) {
     <li><b>Reading.</b> Each reader turns each request into one wire of SOP Lang, with a confidence.</li>
     <li><b>Doing or asking.</b> The engine carries out the wires the reader is sure of on that reader’s drawing; the others are held back with a reason. A wire the engine cannot carry out gets a reason too (“There is already a shape named Hub”).</li>
   </ol>
-  <p>Nothing you type leaves your browser: every reader runs in this page. The drawings are not saved: reloading the page starts again from the example drawing.</p>
+  <p>Nothing you type leaves your browser: every reader runs in this page (the one exception is speech, see ${go('using/voice', 'Voice, languages and collected requests')}). The drawings are not saved: reloading the page starts again from the example drawing.</p>
 
   <h2 id="replies">Reading the replies</h2>
   <p>A reply is VSS-BERT’s, with its time beside it. To <q>Make Check red and put Done below it</q> it answers:</p>
@@ -297,10 +298,19 @@ function using(env) {
     <li><b>Under each tab</b>: <i>Drawing</i>; <i>SOP Lang</i>, that drawing written as SOP Lang wires; and <i>Settings</i>, the reader’s models, sizes and state, and for the learned readers how bold it is (from more careful to the boldest level, or execute all).</li>
     <li>${icon('copy')} <b>Copy</b> appears when the drawings differ. It copies the drawing on screen, with its undo history, to the other tabs, so every reader starts the next message from the same drawing.</li>
     <li>${icon('view')} <b>Whole canvas / zoom</b>, ${icon('undo')} <b>Undo</b>, ${icon('redo')} <b>Redo</b>, ${icon('clear')} <b>Clear</b> act on every reader’s drawing. ${icon('help')} opens this help.</li>
-    <li>${icon('plus')} next to the message box: example sentences and scripted scenarios. ↑ and ↓ in the box bring back earlier messages.</li>
+    <li>${icon('plus')} next to the message box: example sentences and scripted scenarios. ↑ and ↓ in the box bring back earlier messages. ${icon('mic')} speaks or types in your own language (below).</li>
     <li>${icon('more')} at the top: <b>Settings</b>: whose replies the chat shows, how messages are cut, the spell checker, the capability switches and the benchmark, which runs every reader on the same test sentences.</li>
     <li>A message that starts with <code>@</code> is not read by any reader: it is SOP Lang, sent straight to the engine (${go('sop-lang', 'SOP Lang')}).</li>
   </ul>
+
+  <h2 id="voice">Voice, languages and collected requests</h2>
+  <p>${icon('mic')} <b>The microphone button</b> next to the message box opens a small window where you can speak or type in your own language. Choose the language (Romanian and English first; any other as a tag such as <code>pt-BR</code>), press <b>Start speaking</b>, check the words, and send. The text is translated to English first, because every reader reads English: the chat shows the English message with your original words under it in small text.</p>
+  <ul>
+    <li><b>Speech to text</b> is your browser’s own (the Web Speech API), not ours. Chrome may send the audio to its vendor’s servers (Google) to recognise it. Browsers without it (Firefox, for example) let you type in the window instead.</li>
+    <li><b>Translation</b> uses the browser’s built-in translator, which runs on your device (Chrome; the language model downloads once). Where there is none, the window says so and sends your text as it is, unless you write the English yourself. An online translator (MyMemory, free) is used only if you turn it on in the window’s Options; then your text is sent to it.</li>
+    <li><b>Reading the reply aloud</b> (off by default, in Options) reads VSS-BERT’s reply in your language when the browser can translate it on the device, else in English. Your choices are remembered in this browser.</li>
+  </ul>
+  <p><b>Collected requests.</b> Every message you send is kept in this browser, with what each reader read, what VSS-BERT did or held back and how sure it was, and what you did next (Do it anyway, Edit, a later command that replaced it, undo right after). These are the best signals of where a reading was wrong, and they become test data once someone writes the right answer for them. <b>Nothing leaves your browser unless you download the file:</b> ${icon('more')} Settings › Collected requests shows how many there are and the last few, and has <b>Download as JSONL</b>, <b>Clear</b> and a switch to stop collecting (on by default; at most the last 5000 are kept).</p>
 
   <h2 id="next">Where to go next</h2>
   <div class="cards">

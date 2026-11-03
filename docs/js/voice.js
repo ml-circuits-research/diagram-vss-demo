@@ -419,7 +419,7 @@
       } else if (meta.lang) sayLang = meta.lang;
       try {
         const u = new g.SpeechSynthesisUtterance(say); u.lang = sayLang;
-        const v = pickVoice(voices(), sayLang); if (v) u.voice = v;
+        const v = pickVoice(voices(), sayLang); if (v) try { u.voice = v; } catch (e) { /* the language alone picks a voice */ }
         synth.cancel(); synth.speak(u);
         return { text: say, lang: sayLang };
       } catch (e) { return null; }
