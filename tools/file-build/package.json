@@ -1,0 +1,7 @@
+{
+  "name": "sop-sketchpad-file-build",
+  "private": true,
+  "type": "module",
+  "scripts": { "build": "node build.mjs", "test": "node test.mjs", "test:help": "node test-help.mjs" },
+  "devDependencies": { "esbuild": "0.25.12", "playwright": "1.56.1" }
+}

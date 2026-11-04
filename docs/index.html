@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script src="js/file-bootstrap.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Talk to a diagram editor in English. Rules, a VSS reader and transformer readers formalize each message into SOP Lang wires that one engine runs.">
 <title>SOP Sketchpad</title>
@@ -109,6 +110,12 @@ svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-widt
 .subbar .of { margin-left: auto; font-size: 11.5px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .rpanel { position: absolute; inset: 0; z-index: 3; overflow-y: auto; overflow-x: hidden; background: var(--canvas); padding: 12px 16px 20px; font-size: 14px; overscroll-behavior: contain; }
 .rpanel .sop { max-width: 100%; }
+.subbar { overflow-x: auto; }
+.subbar .subtab { flex: none; }
+.expected-panel { padding: 0 0 46px; overflow: hidden; }
+.expected-canvas { display: block; width: 100%; height: 100%; min-height: 0; touch-action: none; background: var(--canvas); }
+.expected-canvas .shp { cursor: default; }
+.expected-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; line-height: 1.6; }
 .rpanel h3.sub:first-child { margin-top: 2px; }
 /* the Settings and SOP Lang subtabs: the explanations flow over the panel's width (up to a readable line), justified and hyphenated from
    421 px up as on the help pages (docs/help/docs.css), left-aligned on phones; the panel is the only scroll box (owner, 2026-11-03) */
@@ -541,7 +548,7 @@ html.docs-open, html.docs-open body { overflow: hidden; }
 
   <section class="stage" aria-label="Drawing">
     <div class="rbar">
-      <div class="rtabs" id="rtabs" role="tablist" aria-label="Readers"></div>
+      <div class="rtabs" id="rtabs" role="tablist" aria-label="Readers and expected drawing"></div>
       <div class="tools" id="tools">
         <button class="ib" type="button" id="align-btn" hidden aria-label="Copy this drawing to the other tabs" title="Copy this drawing to the other tabs"><svg class="i" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>
         <button class="ib" type="button" id="view-btn" aria-label="Show the whole canvas" title="Show the whole canvas"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
@@ -615,15 +622,15 @@ html.docs-open, html.docs-open body { overflow: hidden; }
 <script src="js/spell.js"></script>
 <script src="js/scenes-extra.js"></script>
 <script src="js/scenarios.js"></script>
+<script src="js/example-reference.js"></script>
 <script src="js/help.js"></script>
 <script src="js/docs-concepts.js"></script>
 <script src="js/docs-arch.js"></script>
 <script src="js/docs.js"></script>
 <script src="js/neural.js"></script>
-<script type="module" src="js/bench-canon.js"></script>
 <script src="js/collect.js"></script>
 <script src="js/voice.js"></script>
-<script src="js/ui.js"></script>
+<script src="js/reader-entry.js"></script>
 
 </body>
 </html>

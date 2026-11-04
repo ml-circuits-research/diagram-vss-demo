@@ -27,7 +27,9 @@ let view = 'auto';
 let hl = { shapes: new Set(), edges: new Set() }, hlTimer = null, drag = null;
 let selItem = null;   // the item selected by a click on the drawing: {shape: name} | {edge: id} | null (see "Direct editing")
 const history = []; let turnSeq = 0;               // every message with what each reader made of it; a bubble's "details" shows one
-let sub = 'drawing';                                // the active reader's subtab: 'drawing' | 'sop' | 'settings' (the same for every reader)
+let sub = 'drawing';                                // Drawing / SOP Lang / reader Settings
+let expectedActive = false;                         // separate display-only main tab
+let exampleView = null, exampleCatalog = null, exampleSeq = 0;
 // browser storage is a convenience only: every access is guarded and the page works without it
 const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { } } };
 /* Name tags (owner, 2026-11-03): every shape shows its name above it, which suits a diagram and covers a picture (the faces of the Cartoon
@@ -619,6 +621,7 @@ function washOutside(p) {
 }
 let dockNames = null;   // the dictation dock's name chips (voice.js setNames), set once the dock is mounted
 function renderCanvas() {
+  if (expectedActive && sub === 'drawing') { drawExpected(); return; }
   layer.textContent = ''; framesG.textContent = '';
   if (dockNames) dockNames(world.state.shapes.map(s => s.name).concat((world.state.groups || []).map(g => g.name)));
   const S = world.state, by = new Map(S.shapes.map(s => [s.name, s])), cells = cellsInUse();
@@ -676,7 +679,7 @@ function flash(h) {
 }
 
 /* drag shapes by hand */
-function svgPt(ev) { const p = svg.createSVGPoint(); p.x = ev.clientX; p.y = ev.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); }
+function svgPt(ev, surface = svg) { const p = surface.createSVGPoint(); p.x = ev.clientX; p.y = ev.clientY; return p.matrixTransform(surface.getScreenCTM().inverse()); }
 svg.addEventListener('pointerdown', ev => {
   const g = ev.target.closest && ev.target.closest('.shp'); if (!g) return;
   const s = world.find(g.dataset.name); if (!s || s.layer === 'background') return;   // the background stays put
@@ -778,7 +781,7 @@ function setBase(s) { const [x, y, w, h] = String(s).split(/\s+/).map(Number); i
 function applyZoom() {
   const b = vbBase, w = b.w / zv.k, h = b.h / zv.k, cx = b.x + b.w / 2 + zv.dx, cy = b.y + b.h / 2 + zv.dy;
   vbNow = { x: cx - w / 2, y: cy - h / 2, w, h };
-  svg.setAttribute('viewBox', `${+vbNow.x.toFixed(2)} ${+vbNow.y.toFixed(2)} ${+vbNow.w.toFixed(2)} ${+vbNow.h.toFixed(2)}`);
+  (expectedActive && sub === 'drawing' ? $('#expected-canvas') || svg : svg).setAttribute('viewBox', `${+vbNow.x.toFixed(2)} ${+vbNow.y.toFixed(2)} ${+vbNow.w.toFixed(2)} ${+vbNow.h.toFixed(2)}`);
   const p = $('#zoom-pct'); if (p) p.textContent = Math.round(zv.k * 100) + '%';
   const f = $('#zoom-fit'); if (f) { f.setAttribute('aria-pressed', String(!zoomedNow())); if (!zoomedNow()) f.classList.remove('hint'); }
   const zi = $('#zoom-in'), zo = $('#zoom-out'); if (zi) zi.disabled = zv.k >= ZMAX - 1e-9; if (zo) zo.disabled = zv.k <= ZMIN + 1e-9;
@@ -809,36 +812,42 @@ function fitHint() {
   f.classList.toggle('hint', out); f.title = out ? 'Some shapes are outside the view: fit the drawing to the view' : 'Fit the drawing to the view';
 }
 // pan by dragging the empty canvas, pinch with two fingers (the shape drag above starts first and wins on a shape)
+const boundViewCanvases = new WeakSet();
+function bindViewControls(surface) {
+  if (boundViewCanvases.has(surface)) return;
+  boundViewCanvases.add(surface);
 const ptrs = new Map(); let pan = null, pinch = null;
-svg.addEventListener('pointerdown', ev => {
+surface.addEventListener('pointerdown', ev => {
   ptrs.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
   if (drag) return;
   if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = { d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, k0: zv.k }; pan = null; return; }
   if (ev.button !== 0 && ev.pointerType === 'mouse') return;
-  pan = { id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, dx0: zv.dx, dy0: zv.dy, upp: unitsPerPx(), moved: false };
+  pan = { id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, dx0: zv.dx, dy0: zv.dy, upp: (surface.getScreenCTM()?.a ? 1 / surface.getScreenCTM().a : 1), moved: false };
 });
-svg.addEventListener('pointermove', ev => {
+surface.addEventListener('pointermove', ev => {
   if (!ptrs.has(ev.pointerId)) return; ptrs.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
   if (pinch && ptrs.size >= 2) {
-    const [a, b] = [...ptrs.values()], d = Math.hypot(a.x - b.x, a.y - b.y), p = svgPt({ clientX: (a.x + b.x) / 2, clientY: (a.y + b.y) / 2 });
+    const [a, b] = [...ptrs.values()], d = Math.hypot(a.x - b.x, a.y - b.y), p = svgPt({ clientX: (a.x + b.x) / 2, clientY: (a.y + b.y) / 2 }, surface);
     zoomBy(pinch.k0 * d / pinch.d0 / zv.k, p); return;
   }
   if (!pan || pan.id !== ev.pointerId || drag) return;
   const mx = ev.clientX - pan.x0, my = ev.clientY - pan.y0;
   if (!pan.moved && Math.hypot(mx, my) < 4) return;   // a click stays a click
-  if (!pan.moved) { pan.moved = true; try { svg.setPointerCapture(ev.pointerId); } catch (e) { /* gone */ } svg.classList.add('panning'); }
+  if (!pan.moved) { pan.moved = true; try { surface.setPointerCapture(ev.pointerId); } catch (e) { /* gone */ } surface.classList.add('panning'); }
   zv.dx = pan.dx0 - mx * pan.upp; zv.dy = pan.dy0 - my * pan.upp; applyZoom();
 });
-const endPan = ev => { ptrs.delete(ev.pointerId); if (ptrs.size < 2) pinch = null; if (pan && pan.id === ev.pointerId) { svg.classList.toggle('panned', pan.moved); pan = null; svg.classList.remove('panning'); setTimeout(() => svg.classList.remove('panned'), 0); } };
-svg.addEventListener('pointerup', endPan); svg.addEventListener('pointercancel', endPan);
-svg.addEventListener('wheel', ev => { if (!ev.ctrlKey && !ev.metaKey) return; ev.preventDefault(); zoomBy(Math.exp(-ev.deltaY * 0.0025), svgPt(ev)); }, { passive: false });
-svg.addEventListener('keydown', ev => {
+const endPan = ev => { ptrs.delete(ev.pointerId); if (ptrs.size < 2) pinch = null; if (pan && pan.id === ev.pointerId) { surface.classList.toggle('panned', pan.moved); pan = null; surface.classList.remove('panning'); setTimeout(() => surface.classList.remove('panned'), 0); } };
+surface.addEventListener('pointerup', endPan); surface.addEventListener('pointercancel', endPan);
+surface.addEventListener('wheel', ev => { if (!ev.ctrlKey && !ev.metaKey) return; ev.preventDefault(); zoomBy(Math.exp(-ev.deltaY * 0.0025), svgPt(ev, surface)); }, { passive: false });
+surface.addEventListener('keydown', ev => {
   const step = 0.1, K2 = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[ev.key];
   if (K2) { ev.preventDefault(); panBy(K2[0] * vbNow.w, K2[1] * vbNow.h); return; }
   if (ev.key === '+' || ev.key === '=') { ev.preventDefault(); zoomBy(ZSTEP); }
   else if (ev.key === '-' || ev.key === '_') { ev.preventDefault(); zoomBy(1 / ZSTEP); }
   else if (ev.key === '0') { ev.preventDefault(); zoomFit(); }
 });
+}
+bindViewControls(svg);
 $('#zoom-in').addEventListener('click', () => zoomBy(ZSTEP));
 $('#zoom-out').addEventListener('click', () => zoomBy(1 / ZSTEP));
 $('#zoom-fit').addEventListener('click', () => zoomFit());
@@ -953,6 +962,16 @@ function summarize(result) {
 function submit(text, sop, meta) { if (typeof sop !== 'string') sop = undefined; queue = queue.then(() => run(text, sop, meta)).catch(e => { console.error(e); botBubble({ text: 'Something went wrong: ' + e.message, err: true }); }); return queue; }
 async function run(text, sop, meta) {
   text = String(text).trim(); if (!text) return;
+  if (meta && ['example', 'help'].includes(meta.via)) {
+    startExampleReference({ name: 'Example', turns: [text], initial: cur.world.snapshot(), undo: cur.world.undoStack, redo: cur.world.redoStack, basis: `the ${cur.label} drawing before this request` });
+    exampleView.sent = 0;
+  } else if (meta && meta.via === 'script') {
+    if (exampleView && meta.exampleRun === exampleView.run) {
+      exampleView.sent = meta.exampleStep;
+      if (exampleView.follow) exampleView.index = meta.exampleStep;
+      if (expectedActive) renderSub();
+    }
+  } else if (!meta || meta.via !== 'start') closeExampleReference();
   // the spell checker runs before every reader (not on SOP and toolbar buttons): they all read the corrected text
   const typed = text, raw = !!sop || text.startsWith('@');
   let sp = null;
@@ -1507,6 +1526,72 @@ function renderSheet(focus) {
 }
 
 /* ---------------- examples ---------------- */
+function closeExampleReference() {
+  if (!exampleView) return;
+  exampleView = null;
+  expectedActive = false; sub = 'drawing';
+  renderCanvas(); updateTabs(); renderCard(); renderSopBar();
+}
+function startExampleReference(opts) {
+  const current = exampleView = { ...opts, run: ++exampleSeq, index: 0, sent: -1, follow: true, session: null, error: null };
+  // Load once, lazily; a failed request can be retried by running the example again.
+  if (!exampleCatalog) exampleCatalog = fetch(new URL('examples/reference.json', document.baseURI).href, { cache: 'no-cache' })
+    .then(r => { if (!r.ok) throw new Error(`Reference file could not be loaded (${r.status}).`); return r.json(); })
+    .catch(error => { exampleCatalog = null; throw error; });
+  exampleCatalog.then(catalog => {
+    if (exampleView !== current) return;
+    current.session = ExampleReference.create(catalog, opts);
+    if (expectedActive) renderSub();
+  }).catch(error => { if (exampleView === current) { current.error = error.message; if (expectedActive) renderSub(); } });
+  updateTabs();
+}
+function expectedFrame() {
+  return exampleView?.session?.at(exampleView.turns.length - 1);
+}
+function renderExpected() {
+  const v = exampleView;
+  if (!v) return '';
+  if (sub === 'text') return `<pre class="expected-text">${escH(v.turns.join('\n\n'))}</pre>`;
+  if (v.error) return `<p role="status">${escH(v.error)}</p>`;
+  const frame = expectedFrame();
+  if (!frame) return '<p role="status">Loading the expected drawing…</p>';
+  if (frame.blocked) return '<p role="status">No complete saved result is available for this example.</p>';
+  const limit = frame.incomplete ? '<p class="note">The saved annotation is incomplete; this drawing contains only its recorded actions.</p>' : '';
+  return sub === 'sop' ? `${limit}<pre class="sop">${escH(frame.sop || '# Empty drawing')}</pre>` :
+    `${limit}<svg id="expected-canvas" class="expected-canvas" role="img" tabindex="0" aria-label="Expected drawing" viewBox="0 0 800 500"></svg>`;
+}
+function drawExpected() {
+  const target = $('#expected-canvas'), v = exampleView;
+  if (!target || !v || !v.session) return;
+  target.replaceChildren();
+  bindViewControls(target);
+  const S = expectedFrame().state;
+  const n = S.shapes.length, m = S.edges.length;
+  $('#readout').textContent = `${n} shape${n === 1 ? '' : 's'} · ${m} link${m === 1 ? '' : 's'}`;
+  // Reuse the drawing primitives without changing the canvas, its selected object or its highlights.
+  const saved = { hl, selItem, tucked, showNames, stagePanel };
+  try {
+    hl = { shapes: new Set(), edges: new Set() }; selItem = null; stagePanel = null;
+    tucked = tuckedNames(S.shapes);
+    const ext = contentExtent(S.shapes);
+    if (ext && view !== 'all') setBase(`${ext.x1} ${ext.y1} ${ext.x2 - ext.x1} ${ext.y2 - ext.y1}`);
+    else setBase('0 0 800 500');
+    applyZoom();
+    if (!S.shapes.length) { el('text', { x: 400, y: 250, 'text-anchor': 'middle', class: 'empty-note' }, target).textContent = 'Empty drawing'; return; }
+    const groups = el('g', {}, target), panels = el('g', {}, target), edges = el('g', {}, target), shapes = el('g', {}, target);
+    drawGroups(groups, S);
+    const by = new Map(S.shapes.map(s => [s.name, s])), routes = K.edgeRoutes(S), taken = S.shapes.filter(s => !s.layer).flatMap(s => {
+      const d = K.dims(s), box = { x1: s.x - d.w / 2, x2: s.x + d.w / 2, y1: s.y - d.h / 2, y2: s.y + d.h / 2 };
+      return tagShown(s) ? [box, K.tagBox(s)] : [box];
+    });
+    for (const edge of S.edges) {
+      const a = by.get(edge.from), b = by.get(edge.to); if (!a || !b) continue;
+      const pair = S.edges.some(e => e !== edge && e.from === edge.to && e.to === edge.from);
+      drawEdge(edges, edge, a, b, pair ? 6 : 0, taken, pair ? null : routes[edge.id]);
+    }
+    for (const shape of S.shapes) drawShape(shape.layer ? panels : shapes, shape);
+  } finally { ({ hl, selItem, tucked, showNames, stagePanel } = saved); }
+}
 const QUICK = [
   'Draw a small pink star next to Done',
   'Make the green circle bigger',
@@ -1562,7 +1647,7 @@ function renderPlayer() {
 }
 async function playRest() {
   if (player.playing) return; player.playing = true; player.stop = false; renderPlayer();
-  while (player.i < player.turns.length && !player.stop) { const t = player.turns[player.i++]; renderPlayer(); await submit(t, undefined, { via: 'script' }); await sleep(player.delay); }
+  while (player.i < player.turns.length && !player.stop) { const i = player.i++, t = player.turns[i]; renderPlayer(); await submit(t, undefined, { via: 'script', exampleStep: i, exampleRun: player.exampleRun }); await sleep(player.delay); }
   player.playing = false; renderPlayer();
 }
 /** play a script in a new area of every tab's drawing. opts.names: false hides the name tags (a scenario's names: false; see "Name tags"),
@@ -1586,16 +1671,18 @@ async function startScript(name, turns, how, opts) {
   sysNote(`Scenario: ${name}` + (ren.length ? ` · renamed ${ren.join(', ')} to avoid clashes` : ''));
   renderCanvas();
   Object.assign(player, { name, turns: fixed.turns, i: 0 });
+  startExampleReference({ name, id: opts && opts.id, turns: fixed.turns, map: fixed.map, names: opts && opts.names });
+  player.exampleRun = exampleView.run;
   renderPlayer();
   if (how === 'play') playRest();
 }
 $('#player').addEventListener('click', async ev => {
   const b = ev.target.closest('[data-pl]'); if (!b) return;
   const a = b.dataset.pl;
-  if (a === 'next' && player.i < player.turns.length && !player.playing) { const t = player.turns[player.i++]; renderPlayer(); await submit(t, undefined, { via: 'script' }); renderPlayer(); }
+  if (a === 'next' && player.i < player.turns.length && !player.playing) { const i = player.i++, t = player.turns[i]; renderPlayer(); await submit(t, undefined, { via: 'script', exampleStep: i, exampleRun: player.exampleRun }); renderPlayer(); }
   if (a === 'play') playRest();
   if (a === 'pause') player.stop = true;
-  if (a === 'close') { player.stop = true; player.turns = []; renderPlayer(); }
+  if (a === 'close') { player.stop = true; player.turns = []; closeExampleReference(); renderPlayer(); }
 });
 
 /* ---------------- formalizers: rules, VSS, neural ---------------- */
@@ -1640,7 +1727,8 @@ function tabTitle(rd) {
 function updateTabs() {
   renderSub();
   const keep = rtabs.scrollLeft;
-  rtabs.innerHTML = READERS.map(rd => `<button type="button" role="tab" class="rtab${isReady(rd) ? '' : ' off'}" data-rtab="${rd.id}" aria-selected="${rd === cur}" title="${escH(tabTitle(rd))}">${escH(rd.label)}${differs(rd) ? `<i class="dot" aria-label="differs from ${escH(cur.label)}"></i>` : ''}${!isReady(rd) && ((rd.id !== 'neural' && vssState === 'loading') || (rd.id !== 'vss' && (nState === 'loading' || nState === 'checking'))) ? '<i class="spin" aria-hidden="true"></i>' : ''}</button>`).join('');
+  rtabs.innerHTML = READERS.map(rd => `<button type="button" role="tab" class="rtab${isReady(rd) ? '' : ' off'}" data-rtab="${rd.id}" aria-selected="${rd === cur && !expectedActive}" title="${escH(tabTitle(rd))}">${escH(rd.label)}${differs(rd) ? `<i class="dot" aria-label="differs from ${escH(cur.label)}"></i>` : ''}${!isReady(rd) && ((rd.id !== 'neural' && vssState === 'loading') || (rd.id !== 'vss' && (nState === 'loading' || nState === 'checking'))) ? '<i class="spin" aria-hidden="true"></i>' : ''}</button>`).join('');
+  if (exampleView) rtabs.insertAdjacentHTML('beforeend', `<button type="button" role="tab" class="rtab" data-rtab="expected" aria-selected="${expectedActive}">Expected</button>`);
   rtabs.scrollLeft = keep; activeTabInView();
 }
 /** on a narrow screen the tab strip scrolls sideways: the active tab is scrolled into view (after a render and a resize) */
@@ -1649,15 +1737,20 @@ function activeTabInView() {
   if (sel && rtabs.scrollWidth > rtabs.clientWidth) { const a = rtabs.getBoundingClientRect(), b = sel.getBoundingClientRect(); if (b.left < a.left) rtabs.scrollLeft -= a.left - b.left; else if (b.right > a.right) rtabs.scrollLeft += b.right - a.right; }
 }
 function setActive(id) {
-  if (!RD[id] || drag) return;
+  if (drag) return;
+  if (id === 'expected' && exampleView) { expectedActive = true; if (sub === 'settings') sub = 'drawing'; updateTabs(); renderCard(); renderSopBar(); return; }
+  if (!RD[id]) return;
+  expectedActive = false; if (sub === 'text') sub = 'drawing';
   cur = RD[id]; world = cur.world; hl = { shapes: new Set(), edges: new Set() }; clearTimeout(hlTimer);
   renderCanvas(); updateTabs(); renderCard(); renderSopBar();
 }
 rtabs.addEventListener('click', ev => { const b = ev.target.closest('[data-rtab]'); if (b) setActive(b.dataset.rtab); });
 rtabs.addEventListener('keydown', ev => {
   if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return;
-  const i = READERS.indexOf(cur), n = READERS[(i + (ev.key === 'ArrowRight' ? 1 : READERS.length - 1)) % READERS.length];
-  setActive(n.id); const b = rtabs.querySelector(`[data-rtab="${n.id}"]`); if (b) b.focus();
+  ev.preventDefault();
+  const ids = READERS.map(r => r.id).concat(exampleView ? ['expected'] : []);
+  const i = ids.indexOf(expectedActive ? 'expected' : cur.id), id = ids[(i + (ev.key === 'ArrowRight' ? 1 : ids.length - 1)) % ids.length];
+  setActive(id); const b = rtabs.querySelector(`[data-rtab="${id}"]`); if (b) b.focus();
 });
 /* the align tool: shown when another loaded reader's drawing differs from the one on screen; copies this drawing to them */
 function renderSopBar() {
@@ -1736,7 +1829,7 @@ function loadRowsHTML() {
 }
 function renderCard() {
   const c = $('#loadov'); if (!c) return;
-  const show = !lo.dismissed && sub === 'drawing' && (cur.id === 'combined' ? !lo.done : cur.id !== 'rules' && !isReady(cur));
+  const show = !expectedActive && !lo.dismissed && sub === 'drawing' && (cur.id === 'combined' ? !lo.done : cur.id !== 'rules' && !isReady(cur));
   if (!show) {
     if (c.hidden || c.classList.contains('out')) return;
     if (lo.done && cur.id === 'combined') {   // a short fade, then gone
@@ -1848,18 +1941,22 @@ document.addEventListener('click', ev => {
 
 /* ---------------- reader subtabs: Drawing | SOP | Settings ---------------- */
 const SUBS = [['drawing', 'Drawing'], ['sop', 'SOP Lang'], ['settings', 'Settings']];
+const availableSubs = () => expectedActive ? [...SUBS.slice(0, 2), ['text', 'Text']] : SUBS;
 const subbar = $('#subtabs'), rpanel = $('#rpanel');
 function renderSub() {
-  subbar.innerHTML = SUBS.map(([k, l]) => `<button type="button" role="tab" class="subtab" data-sub="${k}" aria-selected="${k === sub}">${l}</button>`).join('') + `<span class="of">${escH(cur.label)} reader</span>`;
+  subbar.innerHTML = availableSubs().map(([k, l]) => `<button type="button" role="tab" class="subtab" data-sub="${k}" aria-selected="${k === sub}">${l}</button>`).join('') + `<span class="of">${expectedActive ? 'Expected' : `${escH(cur.label)} reader`}</span>`;
   const draw = sub === 'drawing';
+  $('#cfoot').style.zIndex = expectedActive ? '4' : '';
+  rpanel.classList.toggle('expected-panel', expectedActive && draw);
   $('#view-btn').hidden = !draw; $('#cfoot').hidden = !draw;
-  if (draw) { rpanel.hidden = true; rpanel.innerHTML = ''; return; }
+  if (draw && !expectedActive) { rpanel.hidden = true; rpanel.innerHTML = ''; return; }
   const top = rpanel.hidden ? 0 : rpanel.scrollTop;
   rpanel.hidden = false;
-  rpanel.innerHTML = sub === 'sop' ? renderWorld(cur) : renderReaderSettings(cur);
+  rpanel.innerHTML = expectedActive ? renderExpected() : sub === 'sop' ? renderWorld(cur) : renderReaderSettings(cur);
+  if (expectedActive && sub === 'drawing') drawExpected();
   rpanel.scrollTop = top;
 }
-function setSub(k) { if (k === sub || !SUBS.some(x => x[0] === k)) return; sub = k; renderSub(); renderCard(); if (k === 'drawing') renderCanvas(); }
+function setSub(k) { if (k === sub || !availableSubs().some(x => x[0] === k)) return; sub = k; renderSub(); renderCard(); if (k === 'drawing') renderCanvas(); }
 subbar.addEventListener('click', ev => { const b = ev.target.closest('[data-sub]'); if (b) setSub(b.dataset.sub); });
 rpanel.addEventListener('change', ev => {   // SOP-BERT › Settings: the level of the neural gate (GATES.neural)
   if (ev.target.name !== 'neural-gate') return;
@@ -1970,7 +2067,7 @@ sbody.addEventListener('click', async ev => {
   if (b) {
     const sc = SCENARIOS.find(x => x.id === b.dataset.sc);
     if (b.dataset.how === 'edit') { const t = $('#sc-text'); t.value = `# ${sc.title}\n` + sc.turns.join('\n'); t.focus(); t.scrollIntoView({ block: 'center' }); return; }
-    startScript(sc.title, sc.turns.slice(), b.dataset.how, { names: sc.names !== false }); return;
+    startScript(sc.title, sc.turns.slice(), b.dataset.how, { id: sc.id, names: sc.names !== false }); return;
   }
   const o = ev.target.closest('[data-own]');
   if (o) { const v = $('#sc-text').value, turns = parseScript(v); if (!turns.length) { $('#sc-status').textContent = 'Write at least one line first.'; return; } startScript((v.match(/^\s*#\s*(.+)$/m) || [])[1] || 'Your script', turns, o.dataset.own); return; }

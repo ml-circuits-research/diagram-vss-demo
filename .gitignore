@@ -18,3 +18,7 @@ node_modules/
 research/attention/**/*.pt
 # agent worktrees
 .claude/worktrees/
+
+# Retained local builds and verification work; regenerate with tools/file-build.
+tmp/
+docs/file/

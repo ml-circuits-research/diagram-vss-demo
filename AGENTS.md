@@ -2,6 +2,15 @@
 
 Read this first. These rules come from mistakes already made here; each says what to do and why.
 
+## Workspace boundary
+
+- Stay inside `/home/salboaie/work/diagram-vss-demo` for this session's work. This includes file reads, searches, writes,
+  and temporary files. Do not inspect sibling repositories, global skill directories, or files belonging to other sessions.
+- Do not follow paths or symbolic links outside this directory unless the owner explicitly requests access to that location.
+  A missing file or skill is not permission to search outside the repository. Report what is missing instead.
+- This boundary also applies to the other-repository guidance below: copying from another repository requires explicit
+  authorization to access it first.
+
 ## Language and repository policy
 
 - Everything written to disk, commits and code comments are in English. Talk to the owner in the language they write in (Romanian).

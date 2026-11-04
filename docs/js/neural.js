@@ -684,6 +684,12 @@ function makeCache() {
     async match(key) {
       const r = real(key);
       try {
+        // File snapshots provide bytes without the HTTP-only persistent Cache API.
+        if (r && r.url.startsWith('file:')) {
+          const res = await fetch(r.url);
+          if (!res.ok) { cache.lastError = `${r.url}: HTTP ${res.status}`; return undefined; }
+          return res;
+        }
         const c = await open(), k = r ? r.url : key, hit = await c.match(k);
         if (hit || !r) return hit;
         const res = await fetch(r.url);
@@ -727,7 +733,7 @@ async function load(onProgress) {
      a request to Hugging Face; local models must then be on (transformers.js refuses both off): on such a miss it tries the local path
      <localModelPath><id>/<file> once, on this site (a 404), then throws. */
   T.env.allowRemoteModels = false; T.env.allowLocalModels = true; T.env.localModelPath = MODEL_ROOT + 'neural/';
-  if (typeof caches === 'undefined') throw new Error('This browser has no Cache API (needed to load the neural model from this site).');
+  if (typeof caches === 'undefined' && !MODEL_ROOT.startsWith('file:')) throw new Error('This browser has no Cache API (needed to load the neural model from this site).');
   const cache = makeCache(); T.env.useBrowserCache = false; T.env.useCustomCache = true; T.env.customCache = cache;
   const open = new Set();   // files asked for and not finished: transformers.js loads them in parallel, so a failure names no single file
   const track = e => { if (e && e.name && e.file) { const u = OURS[e.name] ? urlOf(e.name, e.file) : keyOf(e.name, e.file); if (e.status === 'initiate') open.add(u); else if (e.status === 'done') open.delete(u); } if (onProgress) onProgress(e); };

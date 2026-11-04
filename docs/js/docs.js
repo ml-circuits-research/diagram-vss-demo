@@ -47,7 +47,9 @@ function parse(hash) {
 /* ---------------- state ---------------- */
 let opts = { env: () => ({}), say: () => {}, onPlug: () => {} };
 let el = null, isOpen = false, closing = false, current = null, before = null, titleBefore = '';
-const base = () => location.pathname + location.search;
+// History must stay on the current document even when <base> points to the asset directory.
+const documentURL = (hash = '') => { const url = new URL(location.href); url.hash = hash; return url.href; };
+const base = () => documentURL();
 const hist = () => history.state || {};
 
 function els() {
@@ -59,7 +61,8 @@ function els() {
 const CREDIT = (root.HelpKit && root.HelpKit.CREDIT) || '';
 function navHTML(cur) {
   return GROUPS.map(g => `<div class="dn-group"><p class="dn-title">${esc(g.title)}</p><ul>${g.pages.map(p => `<li><a href="#help/${p.id}"${p.id === cur ? ' aria-current="page"' : ''}>${esc(p.title)}</a></li>`).join('')}</ul></div>`).join('')
-    + (CREDIT ? `<p class="dn-credit" style="margin:18px 10px 0;font-size:12.5px;line-height:1.45;color:var(--muted)">${CREDIT.replace(/<a /g, '<a style="display:inline;padding:0;font-size:inherit;color:var(--link);text-decoration:underline;white-space:nowrap" ')}</p>` : '');
+    + (CREDIT ? `<p class="dn-credit" style="margin:18px 10px 0;font-size:12.5px;line-height:1.45;color:var(--muted)">${CREDIT.replace(/<a /g, '<a style="display:inline;padding:0;font-size:inherit;color:var(--link);text-decoration:underline;white-space:nowrap" ')}</p>` : '')
+    + '<p style="margin:14px 10px;font-size:12.5px"><a href="review/index.html" style="display:inline;padding:0;font-size:inherit;color:var(--muted)">Current review</a></p>';
 }
 function pageHTML(p, missing) {
   let body;
@@ -112,9 +115,9 @@ function navigate(hash) {
   if (isOpen && st.help) {
     history.replaceState(Object.assign({}, st, { y: els().main.scrollTop }), '');
     // browsers keep about 50 entries; past 40 help pages the newest entry is replaced, so the entry the overlay was opened from stays reachable
-    if (st.help >= 40) history.replaceState({ help: st.help, deep: !!st.deep }, '', hash);
-    else history.pushState({ help: st.help + 1, deep: !!st.deep }, '', hash);
-  } else history.pushState({ help: 1 }, '', hash);
+    if (st.help >= 40) history.replaceState({ help: st.help, deep: !!st.deep }, '', documentURL(hash));
+    else history.pushState({ help: st.help + 1, deep: !!st.deep }, '', documentURL(hash));
+  } else history.pushState({ help: 1 }, '', documentURL(hash));
   show(r, 0);
 }
 function open(id, anchor) { navigate('#help/' + (id && (BY[id] || ALIASES[id]) ? id : 'start') + (anchor ? '/' + anchor : '')); }
